@@ -163,6 +163,18 @@ class TestHelpLoads(unittest.TestCase):
         # delete temporary directory to be used for temp files.
         shutil.rmtree(self._tempdirName)
         self.helps.clear()
+        # Invalidate help cache to prevent test data from polluting production cache
+        from azure.cli.core._session import EXTENSION_HELP_INDEX, HELP_INDEX, INDEX
+        if 'helpIndex' in EXTENSION_HELP_INDEX:
+            del EXTENSION_HELP_INDEX['helpIndex']
+        if 'version' in EXTENSION_HELP_INDEX:
+            del EXTENSION_HELP_INDEX['version']
+        if 'cloudProfile' in EXTENSION_HELP_INDEX:
+            del EXTENSION_HELP_INDEX['cloudProfile']
+        if 'helpIndex' in HELP_INDEX:
+            del HELP_INDEX['helpIndex']
+        if 'helpIndex' in INDEX:
+            del INDEX['helpIndex']
 
     def set_help_py(self):
         self.helps['test'] = """
@@ -497,6 +509,264 @@ class TestHelpLoads(unittest.TestCase):
                                                                                 "title": "foo"})
         self.assertEqual(obj_param_dict["--arg2 -b"].value_sources[2]['link'], {"command": "az test show",
                                                                                 "title": "Show test details"})
+
+    def test_help_cache_extraction(self):
+        """Test that help data is correctly extracted for caching."""
+        from azure.cli.core._help import extract_help_index_data
+        from unittest.mock import Mock
+
+        mock_help_file = Mock()
+        mock_child_group = Mock()
+        mock_child_group.name = 'compute'
+        mock_child_group.type = 'group'
+        mock_child_group.short_summary = 'Manage compute resources'
+        mock_child_group.group_name = 'compute'
+        mock_child_group._is_command = Mock(return_value=False)
+        # Mock the tag info attributes to return None (no tags)
+        mock_child_group.deprecate_info = None
+        mock_child_group.preview_info = None
+        mock_child_group.experimental_info = None
+
+        mock_child_command = Mock()
+        mock_child_command.name = 'login'
+        mock_child_command.type = 'command'
+        mock_child_command.short_summary = 'Log in to Azure'
+        mock_child_command.group_name = None
+        mock_child_command._is_command = Mock(return_value=True)
+        mock_child_command.deprecate_info = None
+        mock_child_command.preview_info = None
+        mock_child_command.experimental_info = None
+
+        mock_help_file.children = [mock_child_group, mock_child_command]
+
+        groups, commands = extract_help_index_data(mock_help_file)
+
+        self.assertIsInstance(groups, dict)
+        self.assertIsInstance(commands, dict)
+        self.assertIn('compute', groups)
+        self.assertIn('login', commands)
+        self.assertEqual(groups['compute']['summary'], 'Manage compute resources')
+        self.assertEqual(commands['login']['summary'], 'Log in to Azure')
+
+    def test_help_cache_storage_and_retrieval(self):
+        """Test non-latest help cache remains local and retrievable."""
+        from azure.cli.core import CommandIndex, __version__
+        from azure.cli.core._session import HELP_INDEX
+
+        test_help_data = {
+            'groups': {
+                'test-group': {'summary': 'Test group summary', 'tags': '[Preview]'}
+            },
+            'commands': {
+                'test-cmd': {'summary': 'Test command summary', 'tags': ''}
+            }
+        }
+
+        with mock.patch.object(self.test_cli.cloud, 'profile', '2019-03-01-hybrid'):
+            command_index = CommandIndex(self.test_cli)
+            command_index.version = __version__
+            command_index.cloud_profile = '2019-03-01-hybrid'
+            command_index.set_help_index(test_help_data)
+
+        retrieved = HELP_INDEX.get('helpIndex')
+
+        self.assertIsNotNone(retrieved)
+        self.assertIn('groups', retrieved)
+        self.assertIn('commands', retrieved)
+        self.assertEqual(retrieved['groups']['test-group']['summary'], 'Test group summary')
+        self.assertEqual(retrieved['commands']['test-cmd']['summary'], 'Test command summary')
+
+    def test_help_cache_invalidation(self):
+        """Test that cache is invalidated correctly."""
+        from azure.cli.core import CommandIndex
+        from azure.cli.core._session import EXTENSION_HELP_INDEX, HELP_INDEX
+
+        test_help_data = {'root': {'groups': {}, 'commands': {}}}
+        command_index = CommandIndex(self.test_cli)
+        command_index.set_help_index(test_help_data)
+
+        self.assertIn('helpIndex', HELP_INDEX)
+
+        command_index.invalidate()
+
+        self.assertEqual(HELP_INDEX.get('helpIndex'), {})
+        self.assertEqual(EXTENSION_HELP_INDEX.get('helpIndex'), {})
+
+    def test_help_cache_legacy_command_index_is_ignored(self):
+        """Test legacy helpIndex payload in commandIndex.json is not migrated for non-latest."""
+        from azure.cli.core import CommandIndex, __version__
+        from azure.cli.core._session import HELP_INDEX, INDEX
+
+        test_help_data = {
+            'groups': {'legacy-group': {'summary': 'Legacy summary', 'tags': ''}},
+            'commands': {'legacy-cmd': {'summary': 'Legacy command', 'tags': ''}}
+        }
+
+        with mock.patch.object(self.test_cli.cloud, 'profile', '2019-03-01-hybrid'):
+            command_index = CommandIndex(self.test_cli)
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+            INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = '2019-03-01-hybrid'
+            INDEX['helpIndex'] = test_help_data
+
+            cached_help = command_index.get_help_index()
+
+        self.assertIsNone(cached_help)
+        self.assertNotEqual(HELP_INDEX.get('helpIndex'), test_help_data)
+        self.assertEqual(INDEX.get('helpIndex'), test_help_data)
+
+    def test_packaged_help_index_file_schema(self):
+        """Test packaged helpIndex.latest.json schema and metadata."""
+        from azure.cli.core import CommandIndex, __version__
+
+        command_index = CommandIndex(self.test_cli)
+        packaged_help_index = command_index._load_packaged_help_index()  # pylint: disable=protected-access
+
+        self.assertIsNotNone(packaged_help_index)
+        self.assertIsInstance(packaged_help_index, dict)
+        self.assertIn('groups', packaged_help_index)
+        self.assertIn('commands', packaged_help_index)
+        self.assertEqual(command_index.version, __version__)
+
+    def test_help_index_uses_packaged_latest_without_local_index(self):
+        """Test latest profile uses packaged help index when local command/help index is invalid."""
+        from azure.cli.core import CommandIndex
+        from azure.cli.core._session import HELP_INDEX, INDEX
+
+        command_index = CommandIndex(self.test_cli)
+
+        # Simulate missing local command/help cache metadata.
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+        HELP_INDEX[CommandIndex._HELP_INDEX] = {}
+
+        packaged_help_data = {
+            'groups': {'vm': {'summary': 'Manage VMs.', 'tags': ''}},
+            'commands': {'version': {'summary': 'Show version.', 'tags': ''}}
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_help_index', return_value=packaged_help_data), \
+                mock.patch.object(CommandIndex, '_has_non_always_loaded_extensions', return_value=False):
+            help_index = command_index.get_help_index()
+
+        self.assertEqual(help_index, packaged_help_data)
+
+    def test_help_index_latest_missing_overlay_with_extensions_triggers_refresh(self):
+        """Test latest profile returns None to force refresh when extension help overlay is unavailable."""
+        from azure.cli.core import CommandIndex
+        from azure.cli.core._session import EXTENSION_HELP_INDEX, HELP_INDEX, INDEX
+
+        command_index = CommandIndex(self.test_cli)
+
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+        HELP_INDEX[CommandIndex._HELP_INDEX] = {}
+        EXTENSION_HELP_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        EXTENSION_HELP_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        EXTENSION_HELP_INDEX[CommandIndex._HELP_INDEX] = {}
+
+        packaged_help_data = {
+            'groups': {'vm': {'summary': 'Manage VMs.', 'tags': ''}},
+            'commands': {'version': {'summary': 'Show version.', 'tags': ''}}
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_help_index', return_value=packaged_help_data), \
+                mock.patch.object(CommandIndex, '_has_non_always_loaded_extensions', return_value=True):
+            help_index = command_index.get_help_index()
+
+        self.assertIsNone(help_index)
+
+    def test_help_index_latest_blends_packaged_with_extension_overlay(self):
+        """Test latest profile blends packaged help with extension help overlay."""
+        from azure.cli.core import CommandIndex, __version__
+        from azure.cli.core._session import EXTENSION_HELP_INDEX
+
+        command_index = CommandIndex(self.test_cli)
+
+        EXTENSION_HELP_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+        EXTENSION_HELP_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = self.test_cli.cloud.profile
+        EXTENSION_HELP_INDEX[CommandIndex._HELP_INDEX] = {
+            'groups': {'ext-group': {'summary': 'Extension group summary.', 'tags': ''}},
+            'commands': {'ext-cmd': {'summary': 'Extension command summary.', 'tags': ''}}
+        }
+
+        packaged_help_data = {
+            'groups': {'vm': {'summary': 'Manage VMs.', 'tags': ''}},
+            'commands': {'version': {'summary': 'Show version.', 'tags': ''}}
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_help_index', return_value=packaged_help_data):
+            help_index = command_index.get_help_index()
+
+        self.assertIn('vm', help_index['groups'])
+        self.assertIn('ext-group', help_index['groups'])
+        self.assertIn('version', help_index['commands'])
+        self.assertIn('ext-cmd', help_index['commands'])
+
+    def test_show_cached_help_output(self):
+        """Test that cached help is displayed correctly."""
+        from azure.cli.core._help import AzCliHelp
+        from azure.cli.core.mock import DummyCli
+        from io import StringIO
+        import sys
+
+        test_help_data = {
+            'groups': {
+                'network': {'summary': 'Manage Azure Network resources.', 'tags': ''},
+                'vm': {'summary': 'Manage Linux or Windows virtual machines.', 'tags': '[Preview]'}
+            },
+            'commands': {
+                'login': {'summary': 'Log in to Azure.', 'tags': ''},
+                'version': {'summary': 'Show the versions of Azure CLI modules.', 'tags': ''}
+            }
+        }
+
+        cli = DummyCli()
+        help_obj = AzCliHelp(cli)
+
+        captured_output = StringIO()
+        sys.stdout = captured_output
+
+        try:
+            help_obj.show_cached_help(test_help_data)
+            output = captured_output.getvalue()
+
+            self.assertIn('Subgroups:', output)
+            self.assertIn('Commands:', output)
+            self.assertIn('network', output)
+            self.assertIn('Manage Azure Network resources', output)
+            self.assertIn('vm', output)
+            self.assertIn('login', output)
+            self.assertIn('version', output)
+        finally:
+            sys.stdout = sys.__stdout__
+
+    def test_try_show_cached_help_refreshes_latest_extension_overlay(self):
+        """Test top-level cached help retries after refreshing latest extension help overlay."""
+        from azure.cli.core import CommandIndex, REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL
+
+        invoker = self.test_cli.invocation_cls(
+            cli_ctx=self.test_cli,
+            commands_loader_cls=self.test_cli.commands_loader_cls,
+            parser_cls=self.test_cli.parser_cls,
+            help_cls=self.test_cli.help_cls)
+        self.test_cli.invocation = invoker
+
+        refreshed_help_data = {
+            'groups': {'vm': {'summary': 'Manage VMs.', 'tags': ''}},
+            'commands': {'version': {'summary': 'Show version.', 'tags': ''}}
+        }
+
+        with mock.patch.object(CommandIndex, 'get_help_index', side_effect=[None, refreshed_help_data]), \
+                mock.patch.object(CommandIndex, 'needs_latest_extension_help_overlay_refresh', return_value=True), \
+                mock.patch.object(invoker.commands_loader, 'load_command_table') as mock_load_cmd_table, \
+                mock.patch.object(invoker.help, 'show_cached_help') as mock_show_cached_help:
+            result = invoker._try_show_cached_help(['--help', '--debug'])
+
+        self.assertIsNotNone(result)
+        mock_load_cmd_table.assert_called_once_with([REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL])
+        mock_show_cached_help.assert_called_once_with(refreshed_help_data, ['--help', '--debug'])
 
     # create a temporary file in the temp dir. Return the path of the file.
     def _create_new_temp_file(self, data, suffix=""):

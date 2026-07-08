@@ -29,7 +29,7 @@ def acr_replication_create(cmd,
                            registry_name,
                            resource_group_name=None,
                            replication_name=None,
-                           region_endpoint_enabled=None,
+                           global_endpoint_routing=None,
                            zone_redundancy=None,
                            tags=None):
     registry, resource_group_name = validate_premium_registry(
@@ -45,7 +45,7 @@ def acr_replication_create(cmd,
     replication_name = replication_name or normalized_location
     replication_properties = ReplicationType(
         location=location,
-        region_endpoint_enabled=region_endpoint_enabled,
+        region_endpoint_enabled=global_endpoint_routing,
         zone_redundancy=zone_redundancy,
         tags=tags)
 
@@ -80,12 +80,12 @@ def acr_replication_show(cmd,
     return client.get(resource_group_name, registry_name, replication_name)
 
 
-def acr_replication_update_custom(instance, region_endpoint_enabled=None, tags=None):
+def acr_replication_update_custom(instance, global_endpoint_routing=None, tags=None):
     if tags is not None:
         instance.tags = tags
 
-    if region_endpoint_enabled is not None:
-        instance.region_endpoint_enabled = region_endpoint_enabled
+    if global_endpoint_routing is not None:
+        instance.region_endpoint_enabled = global_endpoint_routing
 
     return instance
 

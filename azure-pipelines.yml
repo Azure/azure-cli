@@ -16,10 +16,16 @@ pr:
 
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - group: 'AME ESRP Variable Group'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+
+# macOS Cask parameters
+- name: macos_cask_python_version
+  value: '3.14'
 
 parameters:
 - name: architectures
@@ -131,9 +137,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -146,9 +152,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -161,9 +167,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: BatchScript@1
     inputs:
@@ -178,9 +184,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -433,9 +439,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -470,8 +476,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -510,8 +516,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -527,8 +533,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -547,14 +553,14 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel "setuptools<81"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -568,14 +574,14 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel "setuptools<81"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
@@ -613,7 +619,7 @@ jobs:
                  -e CLI_VERSION=$CLI_VERSION \
                  -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                  --name azurecli \
-                 mcr.microsoft.com/azurelinux/base/python:3 \
+                 mcr.microsoft.com/azurelinux/base/python:3.12 \
                  /mnt/scripts/run.sh
       
       # clean up
@@ -661,7 +667,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.13
+      python_version=3.14
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -673,6 +679,16 @@ jobs:
       git config --global user.name "Your Name"
       brew tap-new dev/azure-cli
       cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
+      # `no_autobump!` is carried over from the upstream homebrew-core formula but is only
+      # allowed in official Homebrew taps. Remove it so the formula can be installed from
+      # this local dev tap. It must remain in the released formula, so we only strip it here.
+      sed -i '' '/no_autobump!/d' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      # TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
+      # The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
+      # Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
+      # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
+      # form for the local test install only; the generated/submitted formula stays upstream-faithful.
+      sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
@@ -711,6 +727,43 @@ jobs:
 
     displayName: 'Test Homebrew Package'
 
+# ============================================================================
+# HOMEBREW CASK JOBS (Pre-built, signed, notarized binaries)
+# Phase 1 runs in all projects; Phases 2-3 require the release project
+# because ESRP resources are not available elsewhere.
+# ============================================================================
+
+# Phase 1: Build unsigned tarballs (ARM64 + Intel)
+- template: .azure-pipelines/templates/macos/macos-build-jobs.yml
+  parameters:
+    PythonVersion: $(macos_cask_python_version)
+    MacosArm64Image: ${{ variables.macos_arm64_pool }}
+    MacosIntelImage: ${{ variables.macos_intel_pool }}
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+    dependsOn: ['ExtractMetadata']
+
+# Phase 2: Sign and notarize via ESRP
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      BundleId: 'com.microsoft.azure.cli'
+      PythonVersion: $(macos_cask_python_version)
+      ESRPServiceConnection: 'ame_esrp_connection'
+      UseCurrentPipelineArtifacts: true
+      dependsOn: ['VerifyMacOSCli']
+
+# Phase 3: Generate cask and test via temp tap
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: $(macos_cask_python_version)
+      GitHubRepo: $(Build.Repository.Name)
+      Debug: false
+      dependsOn: ['CreateFinalTarball']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
@@ -1037,6 +1090,23 @@ jobs:
         docker pull ${DISTRO_BASE_IMAGE}
         docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
+- job: VerifyLatestIndices
+  displayName: "Verify latest index assets"
+  timeoutInMinutes: 20
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.14'
+    inputs:
+      versionSpec: '3.14'
+  - template: .azure-pipelines/templates/azdev_setup.yml
+  - bash: |
+      set -ev
+      . env/bin/activate
+      azdev latest-index verify --repo .
+    displayName: 'Verify generated latest indices'
+
 - job: CheckStyle
   displayName: "Check CLI Style"
   timeoutInMinutes: 120
@@ -1044,9 +1114,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1060,9 +1130,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1077,8 +1147,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1099,6 +1169,24 @@ jobs:
   #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
   #   displayName: "Execution Performance"
 
+- job: CheckExternalUrls
+  displayName: "Check External Source URLs"
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.14'
+      inputs:
+        versionSpec: '3.14'
+    - bash: |
+        #!/usr/bin/env bash
+        set -ev
+        # External URL exclusions are maintained in scripts/ci/external_url_exclusions.json.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      displayName: 'Validate External Source URLs'
+
 - job: CheckLinter
   displayName: "Check CLI Linter"
 
@@ -1106,9 +1194,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1129,9 +1217,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -1164,7 +1252,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.11
+      versionSpec: '3.11'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1173,7 +1261,6 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
-      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.

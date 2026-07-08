@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.83.0"
+__version__ = "2.88.0"
 
 import os
 import sys
-import timeit
+import json
+import time
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -28,12 +29,26 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Marker used by CommandIndex.get() to signal top-level tab completion optimization
 TOP_LEVEL_COMPLETION_MARKER = '__top_level_completion__'
+# Internal sentinel used to trigger latest-profile extension help overlay refresh path.
+REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL = '__refresh_extension_help_overlay__'
 
 # [Reserved, in case of future usage]
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
+
+
+def _get_top_level_command(args):
+    """Return normalized top-level command token or None when unavailable."""
+    if not args:
+        return None
+
+    top_command = args[0]
+    if not top_command or top_command.startswith('-'):
+        return None
+
+    return top_command.lower()
 
 
 def _configure_knack():
@@ -66,7 +81,7 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument, register_global_policy_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, EXTENSION_INDEX, HELP_INDEX, EXTENSION_HELP_INDEX, VERSIONS
         from azure.cli.core.util import handle_version_update
 
         from knack.util import ensure_dir
@@ -83,6 +98,9 @@ class AzCli(CLI):
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        EXTENSION_INDEX.load(os.path.join(azure_folder, 'extensionIndex.json'))
+        HELP_INDEX.load(os.path.join(azure_folder, 'helpIndex.json'))
+        EXTENSION_HELP_INDEX.load(os.path.join(azure_folder, 'extensionHelpIndex.json'))
         VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
         handle_version_update()
 
@@ -197,6 +215,17 @@ class AzCli(CLI):
         format_styled_text.theme = theme
 
 
+class ModuleLoadResult:  # pylint: disable=too-few-public-methods
+    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None, traceback_str=None, command_loader=None):
+        self.module_name = module_name
+        self.command_table = command_table
+        self.group_table = group_table
+        self.elapsed_time = elapsed_time
+        self.error = error
+        self.traceback_str = traceback_str
+        self.command_loader = command_loader
+
+
 class MainCommandsLoader(CLICommandsLoader):
 
     # Format string for pretty-print the command module table
@@ -235,17 +264,31 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.command_table = self.command_table
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
-    # pylint: disable=too-many-statements, too-many-locals
+    @staticmethod
+    def _should_update_extension_index(index_extensions, command_index):
+        """Return True when latest-profile extension overlays should be refreshed."""
+        return (index_extensions is None and
+                command_index is not None and
+                command_index.cloud_profile == 'latest')
+
+    def _is_latest_non_completion_invocation(self, command_index, args):
+        """Return True for real latest-profile invocations (not shell completion)."""
+        return (command_index is not None and
+                command_index.cloud_profile == 'latest' and
+                bool(args) and
+                not self.cli_ctx.data['completer_active'])
+
+    # pylint: disable=too-many-statements, too-many-locals, too-many-return-statements
     def load_command_table(self, args):
         from importlib import import_module
         import pkgutil
         import traceback
         from azure.cli.core.commands import (
-            _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
+            _load_extension_command_loader, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
         from azure.cli.core.breaking_change import (
-            import_core_breaking_changes, import_module_breaking_changes, import_extension_breaking_changes)
+            import_core_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -273,41 +316,18 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
-            count = 0
-            cumulative_elapsed_time = 0
-            cumulative_group_count = 0
-            cumulative_command_count = 0
-            logger.debug("Loading command modules:")
+            start_time = time.perf_counter()
+            logger.debug("Loading command modules...")
             logger.debug(self.header_mod)
+            results = self._load_modules(args, command_modules)
 
-            for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
-                try:
-                    start_time = timeit.default_timer()
-                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
-                    import_module_breaking_changes(mod)
-                    for cmd in module_command_table.values():
-                        cmd.command_source = mod
-                    self.command_table.update(module_command_table)
-                    self.command_group_table.update(module_group_table)
+            count, cumulative_group_count, cumulative_command_count = \
+                self._process_results_with_timing(results)
 
-                    elapsed_time = timeit.default_timer() - start_time
-                    logger.debug(self.item_format_string, mod, elapsed_time,
-                                 len(module_group_table), len(module_command_table))
-                    count += 1
-                    cumulative_elapsed_time += elapsed_time
-                    cumulative_group_count += len(module_group_table)
-                    cumulative_command_count += len(module_command_table)
-                except Exception as ex:  # pylint: disable=broad-except
-                    # Changing this error message requires updating CI script that checks for failed
-                    # module loading.
-                    from azure.cli.core import telemetry
-                    logger.error("Error loading command module '%s': %s", mod, ex)
-                    telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
-                                            summary='Error loading module: {}'.format(mod))
-                    logger.debug(traceback.format_exc())
+            total_elapsed_time = time.perf_counter() - start_time
             # Summary line
             logger.debug(self.item_format_string,
-                         "Total ({})".format(count), cumulative_elapsed_time,
+                         "Total ({})".format(count), total_elapsed_time,
                          cumulative_group_count, cumulative_command_count)
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
@@ -345,70 +365,80 @@ class MainCommandsLoader(CLICommandsLoader):
                 return filtered_extensions
 
             extensions = get_extensions()
-            if extensions:
-                if extension_modname is not None:
-                    extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
-                    extensions = _filter_modname(extensions)
-                allowed_extensions = _handle_extension_suppressions(extensions)
-                module_commands = set(self.command_table.keys())
+            if not extensions:
+                return
 
-                count = 0
-                cumulative_elapsed_time = 0
-                cumulative_group_count = 0
-                cumulative_command_count = 0
-                logger.debug("Loading extensions:")
-                logger.debug(self.header_ext)
+            if extension_modname is not None:
+                extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
+                extensions = _filter_modname(extensions)
+            allowed_extensions = _handle_extension_suppressions(extensions)
+            module_commands = set(self.command_table.keys())
 
-                for ext in allowed_extensions:
-                    try:
-                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
-                        # don't need to import `check_version_compatibility` at all.
-                        from azure.cli.core.extension.operations import check_version_compatibility
-                        check_version_compatibility(ext.get_metadata())
-                    except CLIError as ex:
-                        # issue warning and skip loading extensions that aren't compatible with the CLI core
-                        logger.warning(ex)
-                        continue
-                    ext_name = ext.name
-                    ext_dir = ext.path or get_extension_path(ext_name)
-                    sys.path.append(ext_dir)
-                    try:
-                        ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
-                        # Add to the map. This needs to happen before we load commands as registering a command
-                        # from an extension requires this map to be up-to-date.
-                        # self._mod_to_ext_map[ext_mod] = ext_name
-                        start_time = timeit.default_timer()
-                        extension_command_table, extension_group_table = \
-                            _load_extension_command_loader(self, args, ext_mod)
-                        import_extension_breaking_changes(ext_mod)
+            count = 0
+            cumulative_elapsed_time = 0
+            cumulative_group_count = 0
+            cumulative_command_count = 0
+            logger.debug("Loading extensions:")
+            logger.debug(self.header_ext)
 
-                        for cmd_name, cmd in extension_command_table.items():
-                            cmd.command_source = ExtensionCommandSource(
-                                extension_name=ext_name,
-                                overrides_command=cmd_name in module_commands,
-                                preview=ext.preview,
-                                experimental=ext.experimental)
+            for ext in allowed_extensions:
+                try:
+                    # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                    # don't need to import `check_version_compatibility` at all.
+                    from azure.cli.core.extension.operations import check_version_compatibility
+                    check_version_compatibility(ext.get_metadata())
+                except CLIError as ex:
+                    # issue warning and skip loading extensions that aren't compatible with the CLI core
+                    logger.warning(ex)
+                    continue
+                ext_name = ext.name
+                ext_dir = ext.path or get_extension_path(ext_name)
+                sys.path.append(ext_dir)
+                try:
+                    ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                    # Add to the map. This needs to happen before we load commands as registering a command
+                    # from an extension requires this map to be up-to-date.
+                    # self._mod_to_ext_map[ext_mod] = ext_name
+                    start_time = time.perf_counter()
+                    extension_command_table, extension_group_table, extension_command_loader = \
+                        _load_extension_command_loader(self, args, ext_mod)
+                    import_extension_breaking_changes(ext_mod)
 
-                        self.command_table.update(extension_command_table)
-                        self.command_group_table.update(extension_group_table)
+                    for cmd_name, cmd in extension_command_table.items():
+                        cmd.command_source = ExtensionCommandSource(
+                            extension_name=ext_name,
+                            overrides_command=cmd_name in module_commands,
+                            preview=ext.preview,
+                            experimental=ext.experimental)
 
-                        elapsed_time = timeit.default_timer() - start_time
-                        logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
-                                     len(extension_group_table), len(extension_command_table),
-                                     ext_dir)
-                        count += 1
-                        cumulative_elapsed_time += elapsed_time
-                        cumulative_group_count += len(extension_group_table)
-                        cumulative_command_count += len(extension_command_table)
-                    except Exception as ex:  # pylint: disable=broad-except
-                        self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
-                        logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
-                                       ext_name, ex)
-                        logger.debug(traceback.format_exc())
-                # Summary line
-                logger.debug(self.item_ext_format_string,
-                             "Total ({})".format(count), cumulative_elapsed_time,
-                             cumulative_group_count, cumulative_command_count, "")
+                    # Populate cmd_to_loader_map for extension commands
+                    if extension_command_loader:
+                        self.loaders.append(extension_command_loader)
+                        for cmd_name in extension_command_table:
+                            if cmd_name not in self.cmd_to_loader_map:
+                                self.cmd_to_loader_map[cmd_name] = []
+                            self.cmd_to_loader_map[cmd_name].append(extension_command_loader)
+
+                    self.command_table.update(extension_command_table)
+                    self.command_group_table.update(extension_group_table)
+
+                    elapsed_time = time.perf_counter() - start_time
+                    logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
+                                 len(extension_group_table), len(extension_command_table),
+                                 ext_dir)
+                    count += 1
+                    cumulative_elapsed_time += elapsed_time
+                    cumulative_group_count += len(extension_group_table)
+                    cumulative_command_count += len(extension_command_table)
+                except Exception as ex:  # pylint: disable=broad-except
+                    self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
+                    logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
+                                   ext_name, ex)
+                    logger.debug(traceback.format_exc())
+            # Summary line
+            logger.debug(self.item_ext_format_string,
+                         "Total ({})".format(count), cumulative_elapsed_time,
+                         cumulative_group_count, cumulative_command_count, "")
 
         def _wrap_suppress_extension_func(func, ext):
             """ Wrapper method to handle centralization of log messages for extension filters """
@@ -449,6 +479,7 @@ class MainCommandsLoader(CLICommandsLoader):
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -466,6 +497,10 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 # The index won't contain suppressed extensions
                 _update_command_table_from_extensions([], index_extensions)
+
+                if self._should_update_extension_index(index_extensions, command_index):
+                    command_index.update_extension_index(self.command_table)
+                    self._cache_help_index(command_index)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
                 from azure.cli.core.util import roughly_parse_command
@@ -508,6 +543,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 logger.debug("Could not find a match in the command or command group table for '%s'. "
                              "The index may be outdated.", raw_cmd)
+
+                if self._is_latest_non_completion_invocation(command_index, args):
+                    top_command = _get_top_level_command(args)
+                    packaged_core_index = command_index.get_packaged_core_index() or {}
+                    if top_command and top_command != 'help' and top_command not in packaged_core_index:
+                        logger.debug("Top-level command '%s' is not in packaged core index. "
+                                     "Skipping full core module reload.", top_command)
+                        return self.command_table
             else:
                 logger.debug("No module found from index for '%s'", args)
 
@@ -522,8 +565,38 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index.update(self.command_table)
+            self._cache_help_index(command_index)
 
         return self.command_table
+
+    def _display_cached_help(self, help_data, command_path='root'):
+        """Display help from cached help index without loading modules."""
+        # Delegate to the help system for consistent formatting
+        self.cli_ctx.invocation.help.show_cached_help(help_data, command_path)
+
+    def _cache_help_index(self, command_index):
+        """Cache help summary for top-level (root) help only."""
+        try:
+            from azure.cli.core.parser import AzCliCommandParser
+            from azure.cli.core._help import CliGroupHelpFile, extract_help_index_data
+
+            parser = AzCliCommandParser(self.cli_ctx)
+            parser.load_command_table(self)
+
+            subparser = parser.subparsers.get(tuple())
+            if subparser:
+                help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
+                help_file.load(subparser)
+
+                groups, commands = extract_help_index_data(help_file)
+
+                if groups or commands:
+                    help_index_data = {'groups': groups, 'commands': commands}
+                    command_index.set_help_index(help_index_data)
+                    logger.debug("Cached top-level help with %d groups and %d commands", len(groups), len(commands))
+
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Failed to cache help data: %s", ex)
 
     @staticmethod
     def _sort_command_loaders(command_loaders):
@@ -587,26 +660,142 @@ class MainCommandsLoader(CLICommandsLoader):
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
+    def _load_modules(self, args, command_modules):
+        """Load command modules sequentially."""
+        from azure.cli.core.commands import BLOCKED_MODS
+
+        results = []
+        for mod in command_modules:
+            if mod in BLOCKED_MODS:
+                continue
+            results.append(self._load_single_module(mod, args))
+
+        return results
+
+    def _load_single_module(self, mod, args):
+        from azure.cli.core.breaking_change import import_module_breaking_changes
+        from azure.cli.core.commands import _load_module_command_loader
+        import traceback
+        try:
+            start_time = time.perf_counter()
+            module_command_table, module_group_table, command_loader = _load_module_command_loader(self, args, mod)
+            import_module_breaking_changes(mod)
+            elapsed_time = time.perf_counter() - start_time
+            logger.debug(self.item_format_string, mod, elapsed_time,
+                         len(module_group_table), len(module_command_table))
+            return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time, command_loader=command_loader)
+        except Exception as ex:  # pylint: disable=broad-except
+            tb_str = traceback.format_exc()
+            return ModuleLoadResult(mod, {}, {}, 0, ex, tb_str)
+
+    def _handle_module_load_error(self, result):
+        """Handle errors that occurred during module loading."""
+        from azure.cli.core import telemetry
+
+        logger.error("Error loading command module '%s': %s", result.module_name, result.error)
+        telemetry.set_exception(exception=result.error,
+                                fault_type='module-load-error-' + result.module_name,
+                                summary='Error loading module: {}'.format(result.module_name))
+        if result.traceback_str:
+            logger.debug(result.traceback_str)
+
+    def _process_successful_load(self, result):
+        """Process successfully loaded module results."""
+        if result.command_loader:
+            self.loaders.append(result.command_loader)
+
+            for cmd in result.command_table:
+                if cmd not in self.cmd_to_loader_map:
+                    self.cmd_to_loader_map[cmd] = []
+                self.cmd_to_loader_map[cmd].append(result.command_loader)
+
+        for cmd in result.command_table.values():
+            cmd.command_source = result.module_name
+
+        self.command_table.update(result.command_table)
+        self.command_group_table.update(result.group_table)
+
+    def _process_results_with_timing(self, results):
+        """Process pre-loaded module results with timing and progress reporting."""
+        logger.debug("Loaded command modules:")
+
+        count = 0
+        cumulative_group_count = 0
+        cumulative_command_count = 0
+
+        for result in results:
+            if result.error:
+                self._handle_module_load_error(result)
+            else:
+                self._process_successful_load(result)
+                count += 1
+                cumulative_group_count += len(result.group_table)
+                cumulative_command_count += len(result.command_table)
+
+        return count, cumulative_group_count, cumulative_command_count
+
 
 class CommandIndex:
 
     _COMMAND_INDEX = 'commandIndex'
     _COMMAND_INDEX_VERSION = 'version'
     _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
+    _HELP_INDEX = 'helpIndex'
+    _PACKAGED_COMMAND_INDEX_LATEST = 'commandIndex.latest.json'
+    _PACKAGED_HELP_INDEX_LATEST = 'helpIndex.latest.json'
 
     def __init__(self, cli_ctx=None):
         """Class to manage command index.
 
         :param cli_ctx: Only needed when `get` or `update` is called.
         """
-        from azure.cli.core._session import INDEX
+        from azure.cli.core._session import INDEX, EXTENSION_INDEX, HELP_INDEX, EXTENSION_HELP_INDEX
         self.INDEX = INDEX
+        self.EXTENSION_INDEX = EXTENSION_INDEX
+        self.HELP_INDEX = HELP_INDEX
+        self.EXTENSION_HELP_INDEX = EXTENSION_HELP_INDEX
         if cli_ctx:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
         self.cli_ctx = cli_ctx
 
-    def _get_top_level_completion_commands(self):
+    def _is_index_valid(self):
+        """Check if the command index version and cloud profile are valid.
+
+        :return: True if index is valid, False otherwise
+        """
+        index_version = self.INDEX.get(self._COMMAND_INDEX_VERSION)
+        cloud_profile = self.INDEX.get(self._COMMAND_INDEX_CLOUD_PROFILE)
+        return (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile)
+
+    def _is_extension_index_valid(self):
+        """Check if the extension index version and cloud profile are valid."""
+        index_version = self.EXTENSION_INDEX.get(self._COMMAND_INDEX_VERSION)
+        cloud_profile = self.EXTENSION_INDEX.get(self._COMMAND_INDEX_CLOUD_PROFILE)
+        return (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile)
+
+    def _is_extension_help_index_valid(self):
+        """Check if the extension help index version and cloud profile are valid."""
+        index_version = self.EXTENSION_HELP_INDEX.get(self._COMMAND_INDEX_VERSION)
+        cloud_profile = self.EXTENSION_HELP_INDEX.get(self._COMMAND_INDEX_CLOUD_PROFILE)
+        return (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile)
+
+    def _clear_extension_index_cache(self):
+        """Clear extension command index cache metadata and payload."""
+        self.EXTENSION_INDEX[self._COMMAND_INDEX_VERSION] = ""
+        self.EXTENSION_INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        self.EXTENSION_INDEX[self._COMMAND_INDEX] = {}
+
+    def _clear_extension_help_overlay_cache(self):
+        """Clear extension help overlay cache metadata and payload."""
+        self.EXTENSION_HELP_INDEX[self._COMMAND_INDEX_VERSION] = ""
+        self.EXTENSION_HELP_INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        self.EXTENSION_HELP_INDEX[self._HELP_INDEX] = {}
+
+    def _get_top_level_completion_commands(self, index=None):
         """Get top-level command names for tab completion optimization.
 
         Returns marker and list of top-level commands (e.g., 'network', 'vm') for creating
@@ -615,7 +804,7 @@ class CommandIndex:
 
         :return: tuple of (TOP_LEVEL_COMPLETION_MARKER, list of top-level command names) or None
         """
-        index = self.INDEX.get(self._COMMAND_INDEX) or {}
+        index = index or self.INDEX.get(self._COMMAND_INDEX) or {}
         if not index:
             logger.debug("Command index is empty, will fall back to loading all modules")
             return None
@@ -623,33 +812,258 @@ class CommandIndex:
         logger.debug("Top-level completion: %d commands available", len(top_level_commands))
         return TOP_LEVEL_COMPLETION_MARKER, top_level_commands
 
+    def _can_use_packaged_command_index(self, ignore_extensions=False):
+        """Whether packaged command index can be used safely for this invocation."""
+        if self.cloud_profile != 'latest':
+            return False
+
+        if ignore_extensions:
+            return True
+
+        # If non-always-loaded extensions are installed, we need a full rebuild to include overrides/extensions.
+        if self._has_non_always_loaded_extensions():
+            return False
+
+        return True
+
+    def _load_packaged_command_index(self):
+        """Load packaged command index for latest profile if present."""
+        file_path = os.path.join(os.path.dirname(__file__), self._PACKAGED_COMMAND_INDEX_LATEST)
+        if not os.path.isfile(file_path):
+            return None
+
+        try:
+            with open(file_path, 'r', encoding='utf-8-sig') as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError) as ex:
+            logger.debug("Failed to load packaged command index file '%s': %s", file_path, ex)
+            return None
+
+        if not isinstance(data, dict):
+            logger.debug("Packaged command index file '%s' has invalid schema.", file_path)
+            return None
+
+        return data
+
+    def _load_packaged_help_index(self):
+        """Load packaged help index for latest profile if present."""
+        file_path = os.path.join(os.path.dirname(__file__), self._PACKAGED_HELP_INDEX_LATEST)
+        if not os.path.isfile(file_path):
+            return None
+
+        try:
+            with open(file_path, 'r', encoding='utf-8-sig') as f:
+                data = json.load(f)
+        except (OSError, json.JSONDecodeError) as ex:
+            logger.debug("Failed to load packaged help index file '%s': %s", file_path, ex)
+            return None
+
+        if not isinstance(data, dict):
+            logger.debug("Packaged help index file '%s' has invalid schema.", file_path)
+            return None
+
+        version_matches = data.get(self._COMMAND_INDEX_VERSION) == self.version
+        profile_matches = data.get(self._COMMAND_INDEX_CLOUD_PROFILE) == self.cloud_profile
+        if not version_matches or not profile_matches:
+            if not version_matches:
+                logger.debug("Packaged help index version doesn't match current CLI version.")
+            if not profile_matches:
+                logger.debug("Packaged help index cloud profile doesn't match current cloud profile.")
+            return None
+
+        help_index = data.get(self._HELP_INDEX)
+        if not isinstance(help_index, dict) or not help_index:
+            logger.debug("Packaged help index mapping is missing or empty.")
+            return None
+
+        return help_index
+
+    @staticmethod
+    def _has_non_always_loaded_extensions():
+        """Return True if a non-always-loaded extension is installed."""
+        from azure.cli.core.extension import get_extensions, get_extension_modname
+
+        try:
+            for ext in get_extensions() or []:
+                ext_mod = get_extension_modname(ext.name, ext.path)
+                if ext_mod not in ALWAYS_LOADED_EXTENSIONS:
+                    logger.debug("Found installed extension '%s' (%s).", ext.name, ext_mod)
+                    return True
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Failed to evaluate installed extensions: %s", ex)
+            return True
+
+        return False
+
+    def _get_packaged_command_index(self, ignore_extensions=False):
+        """Get packaged command index mapping if valid for current profile/version."""
+        if not self._can_use_packaged_command_index(ignore_extensions=ignore_extensions):
+            return None
+
+        packaged_index = self._load_packaged_command_index()
+        if not packaged_index:
+            return None
+
+        if packaged_index.get(self._COMMAND_INDEX_VERSION) != self.version:
+            logger.debug("Packaged command index version doesn't match current CLI version.")
+            return None
+
+        if packaged_index.get(self._COMMAND_INDEX_CLOUD_PROFILE) != self.cloud_profile:
+            logger.debug("Packaged command index cloud profile doesn't match current cloud profile.")
+            return None
+
+        index = packaged_index.get(self._COMMAND_INDEX)
+        if not isinstance(index, dict) or not index:
+            logger.debug("Packaged command index mapping is missing or empty.")
+            return None
+
+        logger.debug("Using packaged command index for profile '%s'.", self.cloud_profile)
+        return index
+
+    def get_packaged_core_index(self):
+        """Get packaged core command index mapping, ignoring extension presence checks."""
+        return self._get_packaged_command_index(ignore_extensions=True)
+
+    @staticmethod
+    def _blend_command_indices(core_index, extension_index):
+        """Blend packaged core index with local extension overlay index."""
+        blended = {cmd: list(mods) for cmd, mods in (core_index or {}).items()}
+        for cmd, mods in (extension_index or {}).items():
+            if cmd not in blended:
+                blended[cmd] = []
+            for mod in mods:
+                if mod not in blended[cmd]:
+                    blended[cmd].append(mod)
+        return blended
+
+    @staticmethod
+    def _blend_help_indices(base_help_index, extension_help_index):
+        """Blend packaged core help with extension-only help overlay."""
+        blended = {
+            'groups': dict((base_help_index or {}).get('groups') or {}),
+            'commands': dict((base_help_index or {}).get('commands') or {})
+        }
+        ext_help_index = extension_help_index or {}
+        for section in ('groups', 'commands'):
+            blended_section = blended[section]
+            for key, value in (ext_help_index.get(section) or {}).items():
+                blended_section[key] = value
+        return blended
+
+    @staticmethod
+    def _build_extension_help_overlay(base_help_index, full_help_index):
+        """Build extension-only help overlay by diffing full help against packaged core help."""
+        overlay = {'groups': {}, 'commands': {}}
+        base_help_index = base_help_index or {}
+        full_help_index = full_help_index or {}
+        for section in ('groups', 'commands'):
+            base_section = base_help_index.get(section) or {}
+            full_section = full_help_index.get(section) or {}
+            for key, value in full_section.items():
+                if key not in base_section or base_section[key] != value:
+                    overlay[section][key] = value
+        return overlay
+
+    def _get_blended_latest_index(self):
+        """Get effective index for latest profile by blending core and extension indices."""
+        if self.cloud_profile != 'latest':
+            return None, False, False
+
+        core_index = self._get_packaged_command_index(ignore_extensions=True)
+        if not core_index:
+            return None, False, False
+
+        extension_index = {}
+        extension_index_available = False
+        has_non_always_loaded_extensions = self._has_non_always_loaded_extensions()
+        if self._is_extension_index_valid():
+            extension_index = self.EXTENSION_INDEX.get(self._COMMAND_INDEX) or {}
+            extension_index_available = True
+        else:
+            if self.EXTENSION_INDEX.get(self._COMMAND_INDEX):
+                logger.debug("Extension index version or cloud profile is invalid, clearing local extension index.")
+                self._clear_extension_index_cache()
+
+        if extension_index:
+            logger.debug("Blending packaged core index with local extension index.")
+        return self._blend_command_indices(core_index, extension_index), extension_index_available, has_non_always_loaded_extensions
+
+    def _resolve_latest_index_lookup(self, args, top_command):
+        """Resolve command lookup for latest profile using blended packaged and extension indices."""
+        force_packaged_for_version = bool(top_command == 'version')
+        index, extension_index_available, has_non_always_loaded_extensions = self._get_blended_latest_index()
+        if index is None:
+            return None
+
+        force_load_all_extensions = (has_non_always_loaded_extensions and
+                                     not extension_index_available and
+                                     not force_packaged_for_version)
+        result = self._lookup_command_in_index(index, args,
+                                               force_load_all_extensions=force_load_all_extensions)
+        if result:
+            return result
+
+        if (args and not args[0].startswith('-') and
+                not self.cli_ctx.data['completer_active'] and
+                not force_packaged_for_version and
+                top_command != 'help'):
+            # Unknown top-level command on latest should prefer extension-only retry and avoid
+            # full core module rebuild to preserve packaged-index startup benefit.
+            if has_non_always_loaded_extensions:
+                logger.debug("No match found in blended latest index for '%s'. Loading all extensions.",
+                             args[0])
+                return [], None
+
+            logger.debug("No match found in latest index for '%s' and no dynamic extensions are installed. "
+                         "Skipping core module rebuild.", args[0])
+            return [], []
+
+        logger.debug("No match found in blended latest index. Falling back to local command index.")
+        return None
+
     def get(self, args):
         """Get the corresponding module and extension list of a command.
 
         :param args: command arguments, like ['network', 'vnet', 'create', '-h']
         :return: a tuple containing a list of modules and a list of extensions.
         """
-        # If the command index version or cloud profile doesn't match those of the current command,
-        # invalidate the command index.
-        index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
-        cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
-        if not (index_version and index_version == self.version and
-                cloud_profile and cloud_profile == self.cloud_profile):
-            logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
-            self.invalidate()
-            return None
+
+        top_command = _get_top_level_command(args)
+
+        if self.cloud_profile == 'latest':
+            latest_result = self._resolve_latest_index_lookup(args, top_command)
+            if latest_result is not None:
+                return latest_result
+
+        # For non-latest, use local command index and fallback logic.
+        index = None
+        if self._is_index_valid():
+            index = self.INDEX.get(self._COMMAND_INDEX) or {}
+        else:
+            # `az version` should stay fast even when extensions are installed.
+            force_packaged_for_version = bool(top_command == 'version' and self.cloud_profile == 'latest')
+            index = self._get_packaged_command_index(ignore_extensions=force_packaged_for_version)
+            if index is None:
+                logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
+                self.invalidate()
+                return None
+
+        return self._lookup_command_in_index(index, args)
+
+    def _lookup_command_in_index(self, index, args, force_load_all_extensions=False):
+        """Lookup command modules/extensions from a resolved index mapping."""
 
         # Make sure the top-level command is provided, like `az version`.
         # Skip command index for `az` or `az --help`.
-        if not args or args[0].startswith('-'):
+        top_command = _get_top_level_command(args)
+        if not top_command:
             # For top-level completion (az [tab])
             if not args and self.cli_ctx.data.get('completer_active'):
-                return self._get_top_level_completion_commands()
+                return self._get_top_level_completion_commands(index=index)
             return None
 
-        # Get the top-level command, like `network` in `network vnet create -h`
-        top_command = args[0]
-        index = self.INDEX[self._COMMAND_INDEX]
+        index = index or {}
+
         # Check the command index for (command: [module]) mapping, like
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
@@ -677,16 +1091,110 @@ class CommandIndex:
                     index_extensions.append(m)
                 else:
                     logger.warning("Unrecognized module: %s", m)
+
+            if force_load_all_extensions:
+                logger.debug("Extension index is unavailable. Loading all installed extensions for safety.")
+                index_extensions = None
             return index_builtin_modules, index_extensions
 
+        if force_load_all_extensions and not self.cli_ctx.data['completer_active']:
+            logger.debug("Top-level command '%s' not found in blended index. Loading all extensions.", top_command)
+            return [], None
+
         return None
+
+    def _get_help_index_cached_local(self, latest_fallback=False):
+        """Return cached local help index when available and index metadata is valid."""
+        if not self._is_index_valid():
+            return None
+
+        help_index = self.HELP_INDEX.get(self._HELP_INDEX, {})
+        if not help_index:
+            return None
+
+        if latest_fallback:
+            logger.debug("Using cached local help index with %d entries", len(help_index))
+        else:
+            logger.debug("Using cached help index with %d entries", len(help_index))
+        return help_index
+
+    def _get_help_index_latest(self):
+        """Return help index for latest profile using packaged help and extension overlay."""
+        # Packaged help is the base for latest profile.
+        packaged_help_index = self._load_packaged_help_index()
+        if not packaged_help_index:
+            # Defensive fallback to local cache if packaged asset is unavailable.
+            return self._get_help_index_cached_local(latest_fallback=True)
+
+        if self._is_extension_help_index_valid():
+            extension_help_index = self.EXTENSION_HELP_INDEX.get(self._HELP_INDEX, {})
+            if extension_help_index:
+                logger.debug("Blending packaged help index with extension help overlay (%d groups, %d commands).",
+                             len(extension_help_index.get('groups') or {}),
+                             len(extension_help_index.get('commands') or {}))
+            return self._blend_help_indices(packaged_help_index, extension_help_index)
+
+        # Clear stale overlay cache if schema exists but metadata is invalid.
+        if self.EXTENSION_HELP_INDEX.get(self._HELP_INDEX):
+            self._clear_extension_help_overlay_cache()
+
+        if self._has_non_always_loaded_extensions():
+            logger.debug("Extension help overlay unavailable on latest profile. Help index will be refreshed when overlay becomes available.")
+            return None
+
+        logger.debug("Using packaged help index with %d entries", len(packaged_help_index))
+        return packaged_help_index
+
+    def get_help_index(self):
+        """Get the help index for top-level help display.
+
+        :return: Dictionary mapping top-level commands to their short summaries, or None if not available
+        """
+        if self.cloud_profile == 'latest':
+            return self._get_help_index_latest()
+
+        return self._get_help_index_cached_local()
+
+    def needs_latest_extension_help_overlay_refresh(self):
+        """Return True when latest-profile top-level help should refresh extension help overlay."""
+        if self.cloud_profile != 'latest':
+            return False
+
+        if self._is_extension_help_index_valid():
+            return False
+
+        return self._has_non_always_loaded_extensions()
+
+    def set_help_index(self, help_data):
+        """Set the help index data.
+
+        :param help_data: Help index data structure containing groups and commands
+        """
+        if self.cloud_profile == 'latest':
+            packaged_help_index = self._load_packaged_help_index() or {'groups': {}, 'commands': {}}
+            extension_help_overlay = self._build_extension_help_overlay(packaged_help_index, help_data)
+
+            self.EXTENSION_HELP_INDEX[self._COMMAND_INDEX_VERSION] = __version__
+            self.EXTENSION_HELP_INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
+            self.EXTENSION_HELP_INDEX[self._HELP_INDEX] = extension_help_overlay
+
+            # Keep local full help cache empty for latest; packaged base + extension overlay are authoritative.
+            self.HELP_INDEX[self._HELP_INDEX] = {}
+            if self.INDEX.get(self._HELP_INDEX):
+                self.INDEX[self._HELP_INDEX] = {}
+            return
+
+        self.HELP_INDEX[self._HELP_INDEX] = help_data
+        # Clear legacy key if it exists in commandIndex.json.
+        if self.INDEX.get(self._HELP_INDEX):
+            self.INDEX[self._HELP_INDEX] = {}
 
     def update(self, command_table):
         """Update the command index according to the given command table.
 
         :param command_table: The command table built by azure.cli.core.MainCommandsLoader.load_command_table
         """
-        start_time = timeit.default_timer()
+        start_time = time.perf_counter()
         self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
         from collections import defaultdict
@@ -700,9 +1208,30 @@ class CommandIndex:
             module_name = command.loader.__module__
             if module_name not in index[top_command]:
                 index[top_command].append(module_name)
-        elapsed_time = timeit.default_timer() - start_time
+
+        elapsed_time = time.perf_counter() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
+
+        self.update_extension_index(command_table)
+
         logger.debug("Updated command index in %.3f seconds.", elapsed_time)
+
+    def update_extension_index(self, command_table):
+        """Update extension-only overlay index from a command table (latest profile only)."""
+        if self.cloud_profile != 'latest':
+            return
+
+        from collections import defaultdict
+        extension_index = defaultdict(list)
+        for command_name, command in command_table.items():
+            top_command = command_name.split()[0]
+            module_name = command.loader.__module__
+            if module_name.startswith('azext_') and module_name not in extension_index[top_command]:
+                extension_index[top_command].append(module_name)
+
+        self.EXTENSION_INDEX[self._COMMAND_INDEX_VERSION] = __version__
+        self.EXTENSION_INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
+        self.EXTENSION_INDEX[self._COMMAND_INDEX] = extension_index
 
     def invalidate(self):
         """Invalidate the command index.
@@ -718,6 +1247,12 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX_VERSION] = ""
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
         self.INDEX[self._COMMAND_INDEX] = {}
+        self._clear_extension_index_cache()
+        self._clear_extension_help_overlay_cache()
+        self.HELP_INDEX[self._HELP_INDEX] = {}
+        # Clear legacy key if it exists in commandIndex.json.
+        if self.INDEX.get(self._HELP_INDEX):
+            self.INDEX[self._HELP_INDEX] = {}
         logger.debug("Command index has been invalidated.")
 
 

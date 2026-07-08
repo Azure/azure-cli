@@ -12,6 +12,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
+                                       ArgumentUsageError,
                                        AzureResponseError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
@@ -32,7 +33,11 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          create_managed_ssl_cert,
                                                          add_github_actions,
                                                          update_app_settings,
-                                                         update_application_settings_polling)
+                                                         update_application_settings_polling,
+                                                         update_webapp,
+                                                         list_startup_logs,
+                                                         show_startup_log,
+                                                         create_webapp)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -98,8 +103,8 @@ class TestWebappMocked(unittest.TestCase):
         client = mock.Mock()
         client_factory_mock.return_value = client
         cmd_mock = _get_test_cmd()
-        SourceControl = cmd_mock.get_models('SourceControl')
-        sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
+        SourceControl, SourceControlProperties = cmd_mock.get_models('SourceControl', 'SourceControlProperties')
+        sc = SourceControl(properties=SourceControlProperties(token='veryNiceToken'))
         client.update_source_control.return_value = sc
 
         # action
@@ -121,8 +126,7 @@ class TestWebappMocked(unittest.TestCase):
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        binding = HostNameBinding(location=webapp.location,
-                                  domain_id=domain,
+        binding = HostNameBinding(domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         client.web_apps.create_or_update_host_name_binding.return_value = binding
@@ -212,7 +216,7 @@ class TestWebappMocked(unittest.TestCase):
 
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
-        site_config = SiteConfig(name='antarctica')
+        site_config = SiteConfig()
         site_op_mock.return_value = site_config
 
         is_centauri_functionapp_mock.return_value = False
@@ -435,10 +439,41 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_no_runtime_raises_error(self, get_site_avail_mock,
+                                                         stack_helper_mock, web_client_mock):
+        cmd_mock = _get_test_cmd()
+        SiteConfig, SkuDescription, NameValuePair = cmd_mock.get_models(
+            'SiteConfig', 'SkuDescription', 'NameValuePair')
+        cmd_mock.get_models = mock.MagicMock(return_value=(SiteConfig, SkuDescription, NameValuePair))
+
+        # Mock a Linux plan (reserved=True)
+        plan_info = mock.MagicMock()
+        plan_info.reserved = True
+        plan_info.location = 'eastus'
+        plan_info.id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        plan_info.sku = SkuDescription(name='F1')
+        web_client_mock.return_value.app_service_plans.get.return_value = plan_info
+
+        # Mock site availability (new app name)
+        name_validation = mock.MagicMock()
+        name_validation.name_available = True
+        get_site_avail_mock.return_value = name_validation
+
+        with self.assertRaises(ArgumentUsageError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan')
+
+        self.assertIn('Creating a Linux webapp requires one of the following', str(context.exception))
+        self.assertIn('--runtime', str(context.exception))
+        self.assertIn('--os-type linux', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock, is_flex_mock):
         webapp_name = 'someWebAppName'
         rg_name = 'someRgName'
         farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
@@ -454,6 +489,7 @@ class TestWebappMocked(unittest.TestCase):
         site = Site(name=webapp_name, location='westeurope')
         site.server_farm_id = farm_id
         generic_site_op_mock.return_value = site
+        is_flex_mock.return_value = False
 
         verify_binding_mock.return_value = False
         with self.assertRaises(CLIError):
@@ -603,9 +639,970 @@ class TestWebappMocked(unittest.TestCase):
         mock_build.assert_called_once()
 
 
+class TestUpdateWebapp(unittest.TestCase):
+
+    def _create_site_instance(self, cmd):
+        Site = cmd.get_models('Site')
+        SiteConfig = cmd.get_models('SiteConfig')
+        site_config = SiteConfig(number_of_workers=1)
+        instance = Site(location='eastus', site_config=site_config)
+        instance.kind = 'app,linux'
+        return instance
+
+    def test_update_webapp_platform_release_channel_extended(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Extended')
+
+        self.assertEqual(result.properties["platformReleaseChannel"], "Extended")
+
+    def test_update_webapp_platform_release_channel_standard(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Standard')
+
+        self.assertEqual(result.properties["platformReleaseChannel"], "Standard")
+
+    def test_update_webapp_platform_release_channel_latest(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
+
+        self.assertEqual(result.properties["platformReleaseChannel"], "Latest")
+
+
+class TestStartupLogsMocked(unittest.TestCase):
+    """Tests for az webapp log startup list/show commands."""
+
+    def setUp(self):
+        # Default: pretend the app is Linux so existing tests exercise the happy path.
+        # Individual tests can re-patch these when they need different behavior.
+        is_linux_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.is_linux_webapp',
+            return_value=True)
+        client_factory_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.web_client_factory')
+        is_linux_patch.start()
+        client_factory_patch.start()
+        self.addCleanup(is_linux_patch.stop)
+        self.addCleanup(client_factory_patch.stop)
+
+    def _make_response(self, status_code=200, json_data=None, text='', headers=None, reason=''):
+        resp = mock.MagicMock()
+        resp.status_code = status_code
+        resp.reason = reason
+        resp.text = text
+        resp.headers = headers or {}
+        resp.json.return_value = json_data
+        return resp
+
+    # ---- list_startup_logs ----
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_success(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        files = [
+            {'Filename': '2026_04_13_lw0sdlwk000002_success.log', 'Href': '/api/startuplogs/...'},
+            {'Filename': '2026_04_13_lw0sdlwk000003_failure.log', 'Href': '/api/startuplogs/...'},
+        ]
+        requests_get_mock.return_value = self._make_response(200, json_data={'files': files})
+
+        result = list_startup_logs(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result, files)
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs',
+            headers={'Authorization': 'Bearer token'},
+            params={}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_with_filters(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(200, json_data={'files': []})
+
+        list_startup_logs(_get_test_cmd(), 'myRG', 'myApp', outcome='failure', instance='lw0sdlwk000002')
+
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs',
+            headers={'Authorization': 'Bearer token'},
+            params={'type': 'failure', 'instance': 'lw0sdlwk000002'}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_404_graceful(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(404)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = list_startup_logs(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result, [])
+        logger_mock.warning.assert_called_once()
+        self.assertIn('platform version', logger_mock.warning.call_args[0][0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_500_raises(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(500, reason='Internal Server Error')
+
+        with self.assertRaises(CLIError) as cm:
+            list_startup_logs(_get_test_cmd(), 'myRG', 'myApp')
+        self.assertIn('500', str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_with_slot(self, requests_get_mock, scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(200, json_data={'files': []})
+
+        list_startup_logs(_get_test_cmd(), 'myRG', 'myApp', slot='staging')
+
+        scm_url_mock.assert_called_once_with(mock.ANY, 'myRG', 'myApp', 'staging')
+
+    # ---- show_startup_log ----
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_latest(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        log_text = 'Container started successfully.\nListening on port 8080.'
+        requests_get_mock.return_value = self._make_response(
+            200, text=log_text,
+            headers={
+                'Content-Type': 'text/plain',
+                'X-StartupLog-Filename': '2026_04_13_lw0_success.log',
+                'X-StartupLog-Date': '2026-04-13T10:00:00Z',
+                'X-StartupLog-Instance': 'lw0sdlwk000002',
+                'X-StartupLog-Outcome': 'success',
+            }
+        )
+
+        result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['content'], log_text)
+        self.assertEqual(result['filename'], '2026_04_13_lw0_success.log')
+        self.assertEqual(result['instance'], 'lw0sdlwk000002')
+        self.assertEqual(result['outcome'], 'success')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs?latest=true',
+            headers={'Authorization': 'Bearer token'}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_specific_filename(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(
+            200, text='log content',
+            headers={'Content-Type': 'text/plain'}
+        )
+
+        show_startup_log(_get_test_cmd(), 'myRG', 'myApp', filename='2026_04_13_lw0_success.log')
+
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/2026_04_13_lw0_success.log',
+            headers={'Authorization': 'Bearer token'}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_with_instance(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(
+            200, text='instance log content',
+            headers={
+                'Content-Type': 'text/plain',
+                'X-StartupLog-Filename': '2026_04_13_lw0sdlwk000002_failure.log',
+                'X-StartupLog-Instance': 'lw0sdlwk000002',
+                'X-StartupLog-Outcome': 'failure',
+            }
+        )
+
+        result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp', instance='lw0sdlwk000002')
+
+        self.assertEqual(result['content'], 'instance log content')
+        self.assertEqual(result['instance'], 'lw0sdlwk000002')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs?latest=true&instance=lw0sdlwk000002',
+            headers={'Authorization': 'Bearer token'}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_404_no_filename(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(404)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNone(result)
+        self.assertIn('platform version', logger_mock.warning.call_args[0][0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_404_with_filename(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(404)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp', filename='nonexistent.log')
+
+        self.assertIsNone(result)
+        self.assertIn('nonexistent.log', logger_mock.warning.call_args[0][1])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_500_raises(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(500, reason='Internal Server Error')
+
+        with self.assertRaises(CLIError) as cm:
+            show_startup_log(_get_test_cmd(), 'myRG', 'myApp')
+        self.assertIn('500', str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_json_response(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        json_data = {'filename': 'test.log', 'content': 'data'}
+        requests_get_mock.return_value = self._make_response(
+            200, json_data=json_data,
+            headers={'Content-Type': 'application/json'}
+        )
+
+        result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result, json_data)
+
+    # ---- Linux-only gating ----
+
+    def test_list_startup_logs_raises_on_windows(self):
+        with mock.patch('azure.cli.command_modules.appservice.custom.is_linux_webapp',
+                        return_value=False):
+            with self.assertRaises(ArgumentUsageError) as cm:
+                list_startup_logs(_get_test_cmd(), 'myRG', 'myWindowsApp')
+        self.assertIn('Linux', str(cm.exception))
+
+    def test_show_startup_log_raises_on_windows(self):
+        with mock.patch('azure.cli.command_modules.appservice.custom.is_linux_webapp',
+                        return_value=False):
+            with self.assertRaises(ArgumentUsageError) as cm:
+                show_startup_log(_get_test_cmd(), 'myRG', 'myWindowsApp')
+        self.assertIn('Linux', str(cm.exception))
+
+    # ---- --filename / --instance mutual exclusion ----
+
+    def test_show_startup_log_filename_and_instance_mutually_exclusive(self):
+        with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
+            show_startup_log(_get_test_cmd(), 'myRG', 'myApp',
+                             filename='2026_04_13_lw0_success.log',
+                             instance='lw0sdlwk000002')
+        self.assertIn('--filename', str(cm.exception))
+        self.assertIn('--instance', str(cm.exception))
+
+    # ---- 404 disambiguation when --instance is set ----
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_list_startup_logs_404_with_instance(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(404)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = list_startup_logs(_get_test_cmd(), 'myRG', 'myApp', instance='lw0sdlwk000002')
+
+        self.assertEqual(result, [])
+        logger_mock.warning.assert_called_once()
+        self.assertIn('instance', logger_mock.warning.call_args[0][0])
+        self.assertEqual(logger_mock.warning.call_args[0][1], 'lw0sdlwk000002')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_show_startup_log_404_with_instance(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(404)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp', instance='lw0sdlwk000002')
+
+        self.assertIsNone(result)
+        logger_mock.warning.assert_called_once()
+        self.assertIn('instance', logger_mock.warning.call_args[0][0])
+        self.assertEqual(logger_mock.warning.call_args[0][1], 'lw0sdlwk000002')
+
+
+class TestRuntimeFailedHintMocked(unittest.TestCase):
+    """Tests that the TIP hint appears in RuntimeFailed and timeout errors."""
+
+    def _make_deployment_response(self, status, num_in_progress=0, num_successful=0,
+                                  num_failed=1, errors=None, failure_logs=None):
+        return {
+            'properties': {
+                'status': status,
+                'numberOfInstancesInProgress': str(num_in_progress),
+                'numberOfInstancesSuccessful': str(num_successful),
+                'numberOfInstancesFailed': str(num_failed),
+                'errors': errors or [],
+                'failedInstancesLogs': failure_logs,
+            }
+        }
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.time')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_runtime_failed_includes_startup_log_hint(self, send_raw_mock, time_mock,
+                                                      sleep_mock, _scm_url_mock):
+        from azure.cli.command_modules.appservice.custom import _poll_deployment_runtime_status
+
+        time_mock.return_value = 10  # constant — never times out, RuntimeFailed triggers on first iteration
+        resp_mock = mock.MagicMock()
+        resp_mock.json.return_value = self._make_deployment_response('RuntimeFailed')
+        send_raw_mock.return_value = resp_mock
+
+        with self.assertRaises(CLIError) as cm:
+            _poll_deployment_runtime_status(
+                _get_test_cmd(), 'myRG', 'myApp', None,
+                'https://management.azure.com/deploymentstatus', 'deploy-id-1'
+            )
+
+        error_msg = str(cm.exception)
+        self.assertIn('az webapp log startup show -n myApp -g myRG', error_msg)
+        self.assertIn('failed to start', error_msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.time')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_timeout_includes_startup_log_hint(self, send_raw_mock, time_mock,
+                                               sleep_mock, _scm_url_mock):
+        from azure.cli.command_modules.appservice.custom import _poll_deployment_runtime_status
+        import itertools
+
+        # Advancing counter: each call returns 0, 1, 2, ... — exceeds timeout=1 after first loop
+        time_mock.side_effect = itertools.count(0)
+        resp_mock = mock.MagicMock()
+        resp_mock.json.return_value = self._make_deployment_response('RuntimeStarting')
+        send_raw_mock.return_value = resp_mock
+
+        with self.assertRaises(CLIError) as cm:
+            _poll_deployment_runtime_status(
+                _get_test_cmd(), 'myRG', 'myApp', None,
+                'https://management.azure.com/deploymentstatus', 'deploy-id-1',
+                timeout=1
+            )
+
+        error_msg = str(cm.exception)
+        self.assertIn('az webapp log startup show -n myApp -g myRG', error_msg)
+        self.assertIn('Timeout', error_msg)
+
+
 class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
         self.status_code = status_code
+
+
+class TestCreateAppServicePlanDefaults(unittest.TestCase):
+    """Tests for create_app_service_plan default SKU behavior"""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_default_sku_is_p0v3_when_not_specified(self, mock_location, mock_client_factory):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        # Call without sku parameter — should default to P0V3
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False)
+        except Exception:
+            pass  # We don't care about downstream errors, just checking the SKU
+
+        # Verify SkuDescription was called with P0V3 tier/name
+        sku_description_cls = mock_cmd.get_models.return_value[1]
+        sku_description_cls.assert_called()
+        call_kwargs = sku_description_cls.call_args
+        # The sku name should be normalized P0V3
+        self.assertIn('P0V3', str(call_kwargs))
+
+
+class TestOneDeployScmCache(unittest.TestCase):
+    """Tests for the per-invocation SCM URL / SCM headers cache on OneDeployParams.
+
+    The cache avoids duplicate `_get_scm_url` and `get_scm_site_headers` round
+    trips between the publish leg and the status-poll leg of a single
+    `az webapp deploy` invocation. See _perform_onedeploy_internal +
+    _check_zip_deployment_status in custom.py.
+    """
+
+    def _make_params(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params.cmd = mock.MagicMock()
+        params.cmd.cli_ctx = mock.MagicMock()
+        params.cmd.cli_ctx.data = {'headers': {'x-ms-client-request-id': 'req-1'}}
+        params.resource_group_name = 'myRG'
+        params.webapp_name = 'myApp'
+        params.slot = None
+        return params
+
+    def test_get_or_fetch_scm_url_derives_from_cached_site(self):
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_scm_url
+        from azure.mgmt.web.models import HostType
+        params = self._make_params()
+        # Simulate a cached Site with a repository host
+        repo_host = mock.MagicMock()
+        repo_host.host_type = HostType.repository
+        repo_host.name = 'myapp.scm.azurewebsites.net'
+        std_host = mock.MagicMock()
+        std_host.host_type = HostType.standard
+        std_host.name = 'myapp.azurewebsites.net'
+        params._cached_site = mock.MagicMock()
+        params._cached_site.host_name_ssl_states = [std_host, repo_host]
+
+        first = _get_or_fetch_scm_url(params)
+        second = _get_or_fetch_scm_url(params)
+
+        self.assertEqual(first, 'https://myapp.scm.azurewebsites.net')
+        self.assertEqual(second, first)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    def test_get_or_fetch_scm_url_falls_back_when_no_cached_site(self, get_scm_url_mock):
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_scm_url
+        params = self._make_params()
+        params._cached_site = None
+
+        result = _get_or_fetch_scm_url(params)
+
+        self.assertEqual(result, 'https://myapp.scm.azurewebsites.net')
+        get_scm_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
+
+    def test_populate_cached_scm_headers_basic_auth_lowercase_key(self):
+        # The basic-auth branch of get_scm_site_headers builds headers via
+        # urllib3.util.make_headers(basic_auth=...), which uses a lowercase
+        # 'authorization' key (verified with urllib3 in CI). The cache must
+        # match case-insensitively so the customer's actual Windows + basic
+        # auth code path is covered.
+        from azure.cli.command_modules.appservice.custom import _populate_cached_scm_headers
+        params = self._make_params()
+        headers = {
+            'authorization': 'Basic ****',
+            'User-Agent': 'AzureCLI/2.86.0',
+            'x-ms-client-request-id': 'req-1',
+            'Content-Type': 'application/octet-stream',
+            'Cache-Control': 'no-cache',
+        }
+
+        _populate_cached_scm_headers(params, headers)
+
+        # Lowercase key preserved (byte-equivalent to a fresh fetch on this
+        # path). User-Agent included. Request id and content-type excluded.
+        self.assertEqual(set(params._cached_scm_headers.keys()), {'authorization', 'User-Agent'})
+        self.assertEqual(params._cached_scm_headers['authorization'], 'Basic ****')
+
+    def test_populate_cached_scm_headers_aad_capitalized_key(self):
+        # The AAD branch of get_scm_site_headers sets headers["Authorization"]
+        # (capitalized) for the Bearer token.
+        from azure.cli.command_modules.appservice.custom import _populate_cached_scm_headers
+        params = self._make_params()
+        headers = {
+            'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJ...',
+            'User-Agent': 'AzureCLI/2.86.0',
+            'x-ms-client-request-id': 'req-1',
+        }
+
+        _populate_cached_scm_headers(params, headers)
+
+        self.assertEqual(set(params._cached_scm_headers.keys()), {'Authorization', 'User-Agent'})
+        self.assertEqual(params._cached_scm_headers['Authorization'], 'Bearer eyJ0eXAiOiJKV1QiLCJ...')
+
+    def test_populate_cached_scm_headers_noop_without_authorization(self):
+        from azure.cli.command_modules.appservice.custom import _populate_cached_scm_headers
+        params = self._make_params()
+
+        _populate_cached_scm_headers(params, {'Content-Type': 'application/octet-stream'})
+
+        self.assertIsNone(params._cached_scm_headers)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('requests.get')
+    def test_check_zip_deployment_status_reuses_cached_headers(
+            self, requests_get_mock, _sleep_mock, get_scm_site_headers_mock):
+        from azure.cli.command_modules.appservice.custom import _check_zip_deployment_status
+        params = self._make_params()
+        params._cached_scm_headers = {
+            'Authorization': 'Basic ****',
+            'User-Agent': 'AzureCLI/test',
+        }
+        # If the cache is honored, get_scm_site_headers must not be called.
+        get_scm_site_headers_mock.side_effect = AssertionError(
+            'get_scm_site_headers must not be called when cache is populated')
+
+        resp = mock.MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = {'status': 4}
+        requests_get_mock.return_value = resp
+
+        result = _check_zip_deployment_status(
+            params.cmd, 'myRG', 'myApp',
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            None, timeout=10, deploy_params=params)
+
+        self.assertEqual(result.get('status'), 4)
+        # Auth + UA reused from cache; request id refreshed from cmd.
+        sent_headers = requests_get_mock.call_args.kwargs['headers']
+        self.assertEqual(sent_headers['Authorization'], 'Basic ****')
+        self.assertEqual(sent_headers['User-Agent'], 'AzureCLI/test')
+        self.assertEqual(sent_headers['x-ms-client-request-id'], 'req-1')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('requests.get')
+    def test_check_zip_deployment_status_reuses_cached_headers_basic_auth(
+            self, requests_get_mock, _sleep_mock, get_scm_site_headers_mock):
+        # Integration-style test: feed the cache via _populate_cached_scm_headers
+        # using the exact dict shape urllib3 produces on the basic-auth path
+        # (lowercase 'authorization'), then verify the status poller forwards
+        # the credential correctly. This is the customer's actual code path.
+        from azure.cli.command_modules.appservice.custom import (
+            _populate_cached_scm_headers, _check_zip_deployment_status)
+        params = self._make_params()
+        _populate_cached_scm_headers(params, {
+            'authorization': 'Basic ****',  # lowercase from urllib3
+            'User-Agent': 'AzureCLI/test',
+            'x-ms-client-request-id': 'publish-leg-id',
+            'Content-Type': 'application/octet-stream',
+        })
+        get_scm_site_headers_mock.side_effect = AssertionError(
+            'get_scm_site_headers must not be called when cache is populated')
+
+        resp = mock.MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = {'status': 4}
+        requests_get_mock.return_value = resp
+
+        _check_zip_deployment_status(
+            params.cmd, 'myRG', 'myApp',
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            None, timeout=10, deploy_params=params)
+
+        sent_headers = requests_get_mock.call_args.kwargs['headers']
+        # Lowercase key faithfully forwarded — HTTP is case-insensitive so the
+        # server treats this the same as 'Authorization'.
+        self.assertEqual(sent_headers['authorization'], 'Basic ****')
+        self.assertEqual(sent_headers['User-Agent'], 'AzureCLI/test')
+        # Fresh request id, not the one from the publish leg.
+        self.assertEqual(sent_headers['x-ms-client-request-id'], 'req-1')
+        self.assertNotIn('Content-Type', sent_headers)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer fresh', 'User-Agent': 'AzureCLI/test'})
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('requests.get')
+    def test_check_zip_deployment_status_falls_back_when_no_cache(
+            self, requests_get_mock, _sleep_mock, get_scm_site_headers_mock):
+        from azure.cli.command_modules.appservice.custom import _check_zip_deployment_status
+
+        resp = mock.MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = {'status': 4}
+        requests_get_mock.return_value = resp
+
+        # No deploy_params at all — legacy enable_zip_deploy call shape.
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = mock.MagicMock()
+        _check_zip_deployment_status(
+            cmd, 'myRG', 'myApp',
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            None, timeout=10)
+
+        get_scm_site_headers_mock.assert_called_once_with(cmd.cli_ctx, 'myApp', 'myRG', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Basic ****', 'User-Agent': 'AzureCLI/test'})
+    @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
+    @mock.patch('requests.get')
+    def test_check_zip_deployment_status_refreshes_on_401(
+            self, requests_get_mock, _sleep_mock, get_scm_site_headers_mock):
+        from azure.cli.command_modules.appservice.custom import _check_zip_deployment_status
+        params = self._make_params()
+        params._cached_scm_headers = {
+            'Authorization': 'Basic ****',
+            'User-Agent': 'AzureCLI/test',
+        }
+
+        resp_401 = mock.MagicMock()
+        resp_401.status_code = 401
+        resp_ok = mock.MagicMock()
+        resp_ok.status_code = 200
+        resp_ok.json.return_value = {'status': 4}
+        requests_get_mock.side_effect = [resp_401, resp_ok]
+
+        result = _check_zip_deployment_status(
+            params.cmd, 'myRG', 'myApp',
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            None, timeout=10, deploy_params=params)
+
+        self.assertEqual(result.get('status'), 4)
+        # After 401 we refetched once and replaced the cached headers. The
+        # is_flex_hint defaults to None when params.is_functionapp is None
+        # (test setup); the refresh respects whatever the hint helper returns.
+        get_scm_site_headers_mock.assert_called_once_with(
+            params.cmd.cli_ctx, 'myApp', 'myRG', None, is_flex_hint=None)
+        self.assertEqual(params._cached_scm_headers['Authorization'], 'Basic ****')
+        # Second request used the fresh credentials.
+        second_call_headers = requests_get_mock.call_args_list[1].kwargs['headers']
+        self.assertEqual(second_call_headers['Authorization'], 'Basic ****')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_perform_onedeploy_internal_clears_cache_on_success(
+            self, _update_type_mock, make_request_mock):
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params()
+        params.enriched_errors = False
+        params.is_linux_webapp = False
+        params.is_functionapp = False
+
+        def _populate_and_succeed(_params):
+            _params._cached_scm_headers = {'Authorization': 'Basic ****'}
+            _params._cached_site = mock.MagicMock(name='site')
+            return {'status': 'ok'}
+        make_request_mock.side_effect = _populate_and_succeed
+
+        result = _perform_onedeploy_internal(params)
+
+        self.assertEqual(result, {'status': 'ok'})
+        # finally block must drop all caches even on the happy path.
+        self.assertIsNone(params._cached_scm_headers)
+        self.assertIsNone(params._cached_site)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_perform_onedeploy_internal_clears_cache_on_exception(
+            self, _update_type_mock, make_request_mock):
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params()
+        params.enriched_errors = False
+        params.is_linux_webapp = False
+        params.is_functionapp = False
+
+        def _populate_and_raise(_params):
+            _params._cached_scm_headers = {'Authorization': 'Basic ****'}
+            _params._cached_site = mock.MagicMock(name='site')
+            raise RuntimeError('boom')
+        make_request_mock.side_effect = _populate_and_raise
+
+        with self.assertRaises(RuntimeError):
+            _perform_onedeploy_internal(params)
+
+        # finally block must drop all caches before the exception propagates,
+        # so telemetry / outer handlers cannot see the credential.
+        self.assertIsNone(params._cached_scm_headers)
+        self.assertIsNone(params._cached_site)
+
+    def test_one_deploy_params_repr_does_not_leak_credentials(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params._cached_scm_headers = {'Authorization': 'Basic ****'}
+        # The default repr is the object id; it must not contain attribute
+        # values. If a future change adds a __repr__/__str__ that serializes
+        # the cache, this test fails so the reviewer is forced to think about
+        # the credential exposure.
+        self.assertNotIn('Basic', repr(params))
+        self.assertNotIn('c2VjcmV0', repr(params))
+        self.assertNotIn('Basic', str(params))
+
+    def test_known_is_flex_hint_web_app(self):
+        # Web apps (is_functionapp=False) can never be FlexConsumption, so the
+        # hint short-circuits the is_flex_functionapp ARM call.
+        from azure.cli.command_modules.appservice.custom import _known_is_flex_hint
+        params = self._make_params()
+        params.is_functionapp = False
+        self.assertEqual(_known_is_flex_hint(params), False)
+
+    def test_known_is_flex_hint_function_app(self):
+        # When the cached site has a sku, derive the answer directly.
+        from azure.cli.command_modules.appservice.custom import _known_is_flex_hint
+        params = self._make_params()
+        params.is_functionapp = True
+        # No cached site → cannot determine, return None
+        params._cached_site = None
+        self.assertIsNone(_known_is_flex_hint(params))
+        # Cached site with FlexConsumption SKU → True
+        params._cached_site = mock.MagicMock(sku='FlexConsumption')
+        self.assertTrue(_known_is_flex_hint(params))
+        # Cached site with different SKU → False
+        params._cached_site = mock.MagicMock(sku='Dynamic')
+        self.assertFalse(_known_is_flex_hint(params))
+
+    def test_known_is_flex_hint_unknown(self):
+        # Defensive: if is_functionapp hasn't been populated and no cached site,
+        # don't pretend to know.
+        from azure.cli.command_modules.appservice.custom import _known_is_flex_hint
+        params = self._make_params()
+        params.is_functionapp = None
+        params._cached_site = None
+        self.assertIsNone(_known_is_flex_hint(params))
+        self.assertIsNone(_known_is_flex_hint(None))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom.basic_auth_supported', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential',
+                return_value=('user', 'pass'))
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_az_user_agent', return_value='AzureCLI/test')
+    def test_get_scm_site_headers_skips_is_flex_when_hint_provided(
+            self, _ua_mock, _cred_mock, _basic_auth_mock, is_flex_mock):
+        # When the caller passes is_flex_hint=False, is_flex_functionapp must
+        # not be invoked — saves one ARM call (GET /sites api 2023-12-01).
+        from azure.cli.command_modules.appservice.custom import get_scm_site_headers
+        cli_ctx = mock.MagicMock()
+        cli_ctx.data = {'headers': {'x-ms-client-request-id': 'req-1'}}
+        is_flex_mock.side_effect = AssertionError(
+            'is_flex_functionapp must not be called when is_flex_hint is provided')
+
+        headers = get_scm_site_headers(cli_ctx, 'myApp', 'myRG', None, is_flex_hint=False)
+
+        # Basic-auth branch was selected because is_flex=False (from hint).
+        is_flex_mock.assert_not_called()
+        self.assertIn('authorization', headers)  # lowercase from urllib3
+        self.assertTrue(headers['authorization'].startswith('Basic '))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.basic_auth_supported', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential',
+                return_value=('user', 'pass'))
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_az_user_agent', return_value='AzureCLI/test')
+    def test_get_scm_site_headers_calls_is_flex_when_no_hint(
+            self, _ua_mock, _cred_mock, _basic_auth_mock, is_flex_mock):
+        # Backward-compat: when no hint is provided (existing callers),
+        # is_flex_functionapp is invoked exactly as before.
+        from azure.cli.command_modules.appservice.custom import get_scm_site_headers
+        cli_ctx = mock.MagicMock()
+        cli_ctx.data = {'headers': {'x-ms-client-request-id': 'req-1'}}
+
+        get_scm_site_headers(cli_ctx, 'myApp', 'myRG', None)
+
+        is_flex_mock.assert_called_once_with(cli_ctx, 'myRG', 'myApp')
+
+
+class TestOneDeploySiteCache(unittest.TestCase):
+    """Tests for the per-invocation Site cache on OneDeployParams.
+
+    The Site cache dedupes GET /sites calls between perform_onedeploy_webapp,
+    _get_onedeploy_request_body (is_linux check),
+    _check_runtimestatus_with_deploymentstatusapi (is_linux check), and the
+    success-log URL builder. See _get_or_fetch_site / _get_or_fetch_is_linux_webapp
+    / _get_visit_url / _url_from_site in custom.py.
+    """
+
+    def _make_params(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params.cmd = mock.MagicMock()
+        params.cmd.cli_ctx = mock.MagicMock()
+        params.resource_group_name = 'myRG'
+        params.webapp_name = 'myApp'
+        params.slot = None
+        return params
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_or_fetch_site_caches_result(self, generic_op_mock):
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_site
+        params = self._make_params()
+        sentinel_site = mock.MagicMock(name='site')
+        generic_op_mock.return_value = sentinel_site
+
+        first = _get_or_fetch_site(params)
+        second = _get_or_fetch_site(params)
+        third = _get_or_fetch_site(params)
+
+        self.assertIs(first, sentinel_site)
+        self.assertIs(second, sentinel_site)
+        self.assertIs(third, sentinel_site)
+        generic_op_mock.assert_called_once_with(
+            params.cmd.cli_ctx, 'myRG', 'myApp', 'get', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_or_fetch_site_uses_slot_when_set(self, generic_op_mock):
+        # When params.slot is set, the cached Site must be the slot's Site
+        # (via get_slot under the hood), not the production Site. Slots have
+        # their own host_name_ssl_states and enabled_host_names, so
+        # _get_visit_url would otherwise show the wrong URL.
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_site
+        params = self._make_params()
+        params.slot = 'staging'
+        slot_site = mock.MagicMock(name='slotSite')
+        generic_op_mock.return_value = slot_site
+
+        result = _get_or_fetch_site(params)
+
+        self.assertIs(result, slot_site)
+        generic_op_mock.assert_called_once_with(
+            params.cmd.cli_ctx, 'myRG', 'myApp', 'get', 'staging')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_or_fetch_is_linux_webapp_uses_cached_value(self, generic_op_mock):
+        # perform_onedeploy_webapp populates is_linux_webapp eagerly; the
+        # helper must not re-fetch when the answer is already known.
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_is_linux_webapp
+        params = self._make_params()
+        params.is_linux_webapp = True
+
+        self.assertTrue(_get_or_fetch_is_linux_webapp(params))
+        generic_op_mock.assert_not_called()
+
+        params.is_linux_webapp = False
+        self.assertFalse(_get_or_fetch_is_linux_webapp(params))
+        generic_op_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_linux_webapp', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_or_fetch_is_linux_webapp_lazy_fetch_for_functionapp(
+            self, generic_op_mock, is_linux_mock):
+        # perform_onedeploy_functionapp does NOT pre-populate is_linux_webapp,
+        # so the first consumer must lazily fetch + cache the Site.
+        from azure.cli.command_modules.appservice.custom import _get_or_fetch_is_linux_webapp
+        params = self._make_params()
+        params.is_linux_webapp = None
+        site = mock.MagicMock(name='site')
+        generic_op_mock.return_value = site
+
+        first = _get_or_fetch_is_linux_webapp(params)
+        second = _get_or_fetch_is_linux_webapp(params)
+
+        self.assertTrue(first)
+        self.assertTrue(second)
+        # Site fetched exactly once even across multiple lookups.
+        generic_op_mock.assert_called_once()
+        is_linux_mock.assert_called_once_with(site)
+        # Result is memoized on params for subsequent helpers (e.g. the
+        # status poller).
+        self.assertTrue(params.is_linux_webapp)
+        self.assertIs(params._cached_site, site)
+
+    def test_url_from_site_picks_https_when_ssl_enabled(self):
+        from azure.cli.command_modules.appservice.custom import _url_from_site
+        SslState = mock.MagicMock()
+        SslState.disabled = 'Disabled'
+        cmd = mock.MagicMock()
+        cmd.get_models.return_value = SslState
+        site = mock.MagicMock()
+        site.enabled_host_names = ['custom.contoso.com', 'myapp.azurewebsites.net']
+        site.host_name_ssl_states = [
+            mock.MagicMock(ssl_state='SniEnabled'),
+        ]
+
+        self.assertEqual(
+            _url_from_site(cmd, site), 'https://custom.contoso.com')
+
+    def test_url_from_site_picks_http_when_no_ssl(self):
+        from azure.cli.command_modules.appservice.custom import _url_from_site
+        SslState = mock.MagicMock()
+        SslState.disabled = 'Disabled'
+        cmd = mock.MagicMock()
+        cmd.get_models.return_value = SslState
+        site = mock.MagicMock()
+        site.enabled_host_names = ['myapp.azurewebsites.net']
+        site.host_name_ssl_states = [
+            mock.MagicMock(ssl_state='Disabled'),
+            mock.MagicMock(ssl_state='Disabled'),
+        ]
+
+        self.assertEqual(
+            _url_from_site(cmd, site), 'http://myapp.azurewebsites.net')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._url_from_site',
+                return_value='https://myapp.azurewebsites.net')
+    def test_get_visit_url_uses_cached_site(self, url_from_site_mock, get_url_mock):
+        # When the Site is already cached (the common case after
+        # perform_onedeploy_webapp), no fallback ARM call should be made.
+        from azure.cli.command_modules.appservice.custom import _get_visit_url
+        params = self._make_params()
+        params._cached_site = mock.MagicMock(name='site')
+
+        result = _get_visit_url(params)
+
+        self.assertEqual(result, 'https://myapp.azurewebsites.net')
+        url_from_site_mock.assert_called_once_with(params.cmd, params._cached_site)
+        get_url_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._url_from_site',
+                return_value='https://myapp-staging.azurewebsites.net')
+    def test_get_visit_url_uses_cached_slot_site(self, url_from_site_mock, get_url_mock):
+        # For slot deployments, perform_onedeploy_webapp fetches the slot's
+        # Site, so _get_visit_url can still serve the URL from the cache.
+        from azure.cli.command_modules.appservice.custom import _get_visit_url
+        params = self._make_params()
+        params.slot = 'staging'
+        params._cached_site = mock.MagicMock(name='slotSite')
+
+        result = _get_visit_url(params)
+
+        self.assertEqual(result, 'https://myapp-staging.azurewebsites.net')
+        url_from_site_mock.assert_called_once_with(params.cmd, params._cached_site)
+        get_url_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url',
+                return_value='https://myapp.azurewebsites.net')
+    def test_get_visit_url_falls_back_when_no_cache(self, get_url_mock):
+        # perform_onedeploy_functionapp does not populate _cached_site; in
+        # that path we must still produce a URL via the standard helper.
+        from azure.cli.command_modules.appservice.custom import _get_visit_url
+        params = self._make_params()
+        params._cached_site = None
+        params.slot = None
+
+        result = _get_visit_url(params)
+
+        self.assertEqual(result, 'https://myapp.azurewebsites.net')
+        get_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
 
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
-from .actions import AppendBaselines, AppendBaseline, GetExtension
+from .actions import GetExtension
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -41,19 +41,6 @@ suppression_rule_scope_any_of_arg_type = CLIArgumentType(options_list=('--any-of
 # Atp
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing Storage account.')
 cosmos_db_account_arg_type = CLIArgumentType(options_list=('--cosmosdb-account'), metavar='NAME', help='Name of an existing Cosmos DB account.')
-
-# Sql Vulnerability Assessment
-va_sql_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
-va_sql_workspace_id_arg_type = CLIArgumentType(options_list=('--workspace-id'), metavar='WORKSPACEID', help='The ID of the workspace connected to the scanned machine')
-va_sql_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), metavar='SERVERNAME', help='The name of the scanned server')
-va_sql_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='The name of the scanned database')
-va_sql_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='The ID of the scan')
-va_sql_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='The ID of the scanned rule. Format: "VAXXXX", where XXXX indicates the number of the rule')
-va_sql_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline with two records: --baseline line1_w1 line1_w2 line1_w3 --baseline line2_w1 line2_w2 line2_w3', action=AppendBaseline, nargs='+')
-va_sql_baseline_multiple_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline for two rules: --baseline rule=VA1111 line1_w1 line1_w2 --baseline rule=VA2222 line1_w1 line1_w2 line1_w3 --baseline rule=VA1111 line2_w1 line2_w2', action=AppendBaselines, nargs='+')
-va_sql_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='Provide the name of the machine, for On-Premise resources only')
-va_sql_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='Provide the ID of the agent on the scanned machine, for On-Premise resources only')
-va_sql_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='VMUUID', help='Provide the UUID of the scanned machine, for On-Premise resources only')
 
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
@@ -131,7 +118,6 @@ def load_arguments(self, _):
     for scope in ['alert',
                   'alerts-suppression-rule',
                   'atp',
-                  'va sql',
                   'task',
                   'auto-provisioning-setting',
                   'discovered-security-solution',
@@ -172,27 +158,6 @@ def load_arguments(self, _):
             c.argument(
                 'location',
                 arg_type=location_arg_type)
-            c.argument(
-                'vm_resource_id',
-                arg_type=va_sql_vm_resource_id_arg_type)
-            c.argument(
-                'workspace_id',
-                arg_type=va_sql_workspace_id_arg_type)
-            c.argument(
-                'server_name',
-                arg_type=va_sql_server_name_arg_type)
-            c.argument(
-                'database_name',
-                arg_type=va_sql_database_name_arg_type)
-            c.argument(
-                'vm_name',
-                arg_type=va_sql_vm_name_arg_type)
-            c.argument(
-                'agent_id',
-                arg_type=va_sql_agent_id_arg_type)
-            c.argument(
-                'vm_uuid',
-                arg_type=va_sql_vm_uuid_arg_type)
 
     with self.argument_context('security atp storage') as c:
         c.argument(
@@ -293,31 +258,6 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage or Cosmos DB account.', arg_type=get_three_state_flag())
 
-    for scope in ['va sql scans show',
-                  'va sql results']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('scan_id', arg_type=va_sql_scan_id_arg_type)
-
-    for scope in ['va sql results show',
-                  'va sql baseline show',
-                  'va sql baseline delete',
-                  'va sql baseline update']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('rule_id', arg_type=va_sql_rule_id_arg_type)
-
-    for scope in ['va sql baseline update']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('baseline', arg_type=va_sql_baseline_single_arg_type)
-
-    for scope in ['va sql baseline set']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('baseline', arg_type=va_sql_baseline_multiple_arg_type)
-
-    for scope in ['va sql baseline update',
-                  'va sql baseline set']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('baseline_latest', options_list=('--latest'), metavar='BASELINE', help='Use this argument without parameters to set baseline upon latest scan results', arg_type=get_three_state_flag())
-
     for scope in ['pricing create']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
@@ -328,8 +268,6 @@ def load_arguments(self, _):
             c.argument(
                 'subplan',
                 arg_type=pricing_tier_subplan_arg_type)
-
-            c.argument('baseline', arg_type=va_sql_baseline_multiple_arg_type)
 
             c.argument(
                 'extensions',

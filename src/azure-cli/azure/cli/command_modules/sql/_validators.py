@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 # Important note: if cmd validator exists, then individual param validators will not be
 # executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
@@ -138,3 +139,20 @@ def validate_managed_instance_storage_size(namespace):
         pass
     else:
         raise CLIError('incorrect usage: --storage must be specified in increments of 32 GB')
+
+
+###############################################
+#                sql server                   #
+###############################################
+
+
+def validate_soft_delete_retention_days(namespace):
+    '''
+    Validates that soft_delete_retention_days is within the allowed range of 0-7 days.
+    '''
+    if namespace.soft_delete_retention_days is not None:
+        value = namespace.soft_delete_retention_days
+        if not isinstance(value, int) or value < 0 or value > 7:
+            raise InvalidArgumentValueError(
+                'The value for --soft-delete-retention-days must be an integer between 0 and 7.',
+                'Specify 0 to disable soft delete, or 1-7 to set the retention period in days.')

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Azure CLI Launcher (Homebrew Cask & Offline/Tarball)
+#
+# Install Mode:
+#   - Cask path detected: use Homebrew Python
+#   - Other paths: treat as tarball and require AZ_PYTHON
+
+PY_VER="{PYTHON_MAJOR_MINOR}"
+PY_BIN="{PYTHON_BIN}"
+
+# Resolve script location (follow symlinks without requiring python3)
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+    SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+    LINK_TARGET="$(readlink "$SCRIPT_PATH")"
+    if [[ "$LINK_TARGET" != /* ]]; then
+        SCRIPT_PATH="$SCRIPT_DIR/$LINK_TARGET"
+    else
+        SCRIPT_PATH="$LINK_TARGET"
+    fi
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+
+# Go up 2 levels: libexec/bin -> libexec -> root
+INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+AZURE_CLI_SITE_PACKAGES="$INSTALL_DIR/libexec/lib/python${PY_VER}/site-packages"
+
+if [[ "$SCRIPT_PATH" == /opt/homebrew/Caskroom/* ]] || [[ "$SCRIPT_PATH" == /usr/local/Caskroom/* ]]; then
+    INSTALLER="HOMEBREW_CASK"
+else
+    INSTALLER="TARBALL"
+fi
+
+if [[ "$INSTALLER" == "HOMEBREW_CASK" ]]; then
+    if [[ -x "/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
+        PYTHON="/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
+    elif [[ -x "/usr/local/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
+        PYTHON="/usr/local/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
+    elif [[ -x "/opt/homebrew/bin/python${PY_VER}" ]]; then
+        PYTHON="/opt/homebrew/bin/python${PY_VER}"
+    elif [[ -x "/usr/local/bin/python${PY_VER}" ]]; then
+        PYTHON="/usr/local/bin/python${PY_VER}"
+    else
+        echo "Error: Python ${PY_VER} not found." >&2
+        echo "Install via Homebrew: brew install python@${PY_VER}" >&2
+        exit 1
+    fi
+else
+    if [[ -z "${AZ_PYTHON:-}" ]]; then
+        echo "Error: AZ_PYTHON not set." >&2
+        echo "For offline/tarball installs, set AZ_PYTHON to a Python ${PY_VER} path." >&2
+        exit 1
+    fi
+    PYTHON="$AZ_PYTHON"
+fi
+
+[[ -x "$PYTHON" ]] || { echo "Error: Python not found at $PYTHON" >&2; exit 1; }
+[[ -d "$AZURE_CLI_SITE_PACKAGES" ]] || { echo "Error: Azure CLI packages not found at $AZURE_CLI_SITE_PACKAGES" >&2; exit 1; }
+
+export PYTHONPATH="$AZURE_CLI_SITE_PACKAGES"
+export AZ_INSTALLER="$INSTALLER"
+exec "$PYTHON" -sm azure.cli "$@"

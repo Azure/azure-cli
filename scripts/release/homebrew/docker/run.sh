@@ -2,7 +2,13 @@
 
 root=$(cd $(dirname $0); pwd)
 
-tdnf install -y ca-certificates
+if command -v tdnf &> /dev/null; then
+    # Azure Linux
+    tdnf install -y ca-certificates
+elif command -v apt-get &> /dev/null; then
+    # Debian/Ubuntu
+    apt-get update && apt-get install -y ca-certificates
+fi
 
 pip install wheel
 pip install -U pip

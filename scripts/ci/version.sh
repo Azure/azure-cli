@@ -40,3 +40,12 @@ for each in $(find src -name setup.py); do
     fi
 done
 
+for each in src/azure-cli-core/azure/cli/core/commandIndex.latest.json src/azure-cli-core/azure/cli/core/helpIndex.latest.json; do
+    if [ -f "$each" ]; then
+        if [ "$platform" == "Darwin" ]; then
+            sed -i "" "s/^  \"version\": \"\(.*\)\",/  \"version\": \"\1.$version\",/" $each
+        else
+            sed -i "s/^  \"version\": \"\(.*\)\",/  \"version\": \"\1.$version\",/" $each
+        fi
+    fi
+done

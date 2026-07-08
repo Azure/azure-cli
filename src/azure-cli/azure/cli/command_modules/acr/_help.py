@@ -71,6 +71,7 @@ type: group
 short-summary: Configure policies for Azure Container Registries.
 """
 
+# To be deprecated
 helps['acr config content-trust'] = """
 type: group
 short-summary: Manage content-trust policy for Azure Container Registries.
@@ -102,6 +103,7 @@ examples:
         az acr config authentication-as-arm update -r myregistry --status Enabled
 """
 
+# To be deprecated
 helps['acr config content-trust show'] = """
 type: command
 short-summary: Show the configured content-trust policy for an Azure Container Registry.
@@ -111,6 +113,7 @@ examples:
         az acr config content-trust show -r myregistry
 """
 
+# To be deprecated
 helps['acr config content-trust update'] = """
 type: command
 short-summary: Update content-trust policy for an Azure Container Registry.
@@ -179,6 +182,12 @@ examples:
   - name: Create a registry with ABAC-based Repository Permission enabled.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Standard --role-assignment-mode rbac-abac
+  - name: Create a managed container registry with the Premium SKU and regional endpoints enabled.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Premium --regional-endpoints enabled
+  - name: Create a managed container registry with the Premium SKU and dual-stack (IPv4 and IPv6) endpoint protocol.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Premium --data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr credential'] = """
@@ -325,6 +334,9 @@ examples:
   - name: Import an image without waiting for successful completion. Failures during import will not be reflected. Run `az acr repository show-tags` to confirm that import succeeded.
     text: >
         az acr import -n myregistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
+  - name: Import an image using a regional endpoint URI as the source.
+    text: >
+        az acr import -n myregistry --source sourceregistry.eastus.geo.azurecr.io/sourcerepository:sourcetag
 """
 
 helps['acr list'] = """
@@ -350,6 +362,9 @@ examples:
   - name: Get an Azure Container Registry access token
     text: >
         az acr login -n myregistry --expose-token
+  - name: Log in to a specific regional endpoint of an Azure Container Registry. Requires regional endpoints to be enabled on the registry.
+    text: >
+        az acr login -n myregistry --endpoint eastus
 """
 
 helps['acr network-rule'] = """
@@ -364,6 +379,9 @@ examples:
   - name: Add a rule to allow access for a specific IP address-range.
     text: >
         az acr network-rule add -n myregistry --ip-address 23.45.1.0/24
+  - name: Add a rule to allow access for a specific virtual network.
+    text: >
+        az acr network-rule add -n myregistry --subnet $subnetId
 """
 
 helps['acr network-rule list'] = """
@@ -1511,6 +1529,12 @@ examples:
   - name: Turn on ABAC-based Repository Permission on an existing registry.
     text: >
         az acr update -n myregistry --role-assignment-mode rbac-abac
+  - name: Enable regional endpoints on an existing registry.
+    text: >
+        az acr update -n myregistry --regional-endpoints enabled
+  - name: Update the endpoint protocol for an Azure Container Registry.
+    text: >
+        az acr update -n myregistry --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr webhook'] = """
@@ -1775,6 +1799,16 @@ examples:
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """
+
+helps['acr connected-registry resync'] = """
+type: command
+short-summary: Trigger a manual resync between the connected registry and its parent.
+long-summary: The connected registry agent must be online for the sync to execute. The returned syncState is typically 'Pending'; use 'az acr connected-registry show' to track progress.
+examples:
+  - name: Resync a connected registry 'myconnectedregistry'.
+    text: >
+        az acr connected-registry resync -r mycloudregistry -n myconnectedregistry
+"""
 # endregion
 
 # region private-endpoint-connection
@@ -1870,6 +1904,10 @@ short-summary: Show the container registry's identity details
 
 helps['acr show-endpoints'] = """
 type: command
-short-summary: Display registry endpoints
+short-summary: Display registry endpoints including data endpoints and regional endpoints if configured.
+examples:
+  - name: Show the endpoints for a registry.
+    text: >
+        az acr show-endpoints -n myregistry
 """
 # endregion

@@ -308,6 +308,11 @@ def validate_key(namespace):
         raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
+def validate_snapshot_reference(namespace):
+    if not namespace.snapshot_name or str(namespace.snapshot_name).isspace():
+        raise RequiredArgumentMissingError("--snapshot-name is required and cannot be empty.")
+
+
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)
@@ -441,6 +446,14 @@ def validate_snapshot_import(namespace):
             raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
         if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
             raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
+
+
+def validate_public_network_args(namespace):
+    if namespace.enable_public_network is not None and namespace.public_network_access is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+    if namespace.public_network_access is not None and namespace.public_network_access.lower() == 'securedbyperimeter':
+        logger.warning("The 'SecuredByPerimeter' value is currently in preview.")
 
 
 def validate_sku(namespace):

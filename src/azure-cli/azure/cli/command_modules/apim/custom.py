@@ -27,7 +27,7 @@ from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.util import get_logger
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError, CLIError)
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties,
                                              ApiManagementServiceBackupRestoreParameters,
@@ -38,7 +38,8 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
+                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract,
+                                             BackendContract)
 
 logger = get_logger(__name__)
 
@@ -554,11 +555,13 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
 
     # Obtain link from the response
     response_dict = api_export_result_to_dict(response)
+    link = None
     try:
         # Extract the link from the response where results are stored
         link = response_dict['additional_properties']['properties']['value']['link']
     except KeyError:
         logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
+        raise CLIError("Failed to export API: link not found in response")
 
     # Determine the file extension based on the mappedFormat
     if mappedFormat in ['swagger-link', 'openapi+json-link']:
@@ -576,12 +579,15 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
     full_path = os.path.join(file_path, file_name)
 
     # Get the results from the link where the API Export Results are stored
+    exportedResults = None
     try:
         exportedResults = requests.get(link, timeout=30)
         if not exportedResults.ok:
-            logger.warning("Got bad status from APIManagement during API Export:%s, {exportedResults.status_code}")
+            logger.warning("Got bad status from APIManagement during API Export: %s", exportedResults.status_code)
+            raise CLIError(f"Failed to export API: Got status code {exportedResults.status_code}")
     except requests.exceptions.ReadTimeout:
         logger.warning("Timed out while exporting api from APIManagement.")
+        raise CLIError("Failed to export API: Request timed out")
 
     try:
         # Try to parse as JSON
@@ -1165,3 +1171,62 @@ def apim_graphql_resolver_policy_delete(
                        resolver_id=resolver_id,
                        policy_id="policy",
                        if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_create(
+        client, resource_group_name, service_name, backend_id, url, protocol, description=None,
+        no_wait=False, if_match=None):
+
+    parameters = BackendContract(
+        url=url,
+        protocol=protocol,
+        description=description
+    )
+
+    return sdk_no_wait(no_wait, client.backend.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       backend_id=backend_id,
+                       parameters=parameters,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_delete(
+        client, resource_group_name, service_name, backend_id, if_match=None, no_wait=False):
+
+    return sdk_no_wait(no_wait,
+                       client.backend.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       backend_id=backend_id,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_show(client, resource_group_name, service_name, backend_id):
+
+    return client.backend.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        backend_id=backend_id)
+
+
+def apim_backend_list(client, resource_group_name, service_name):
+
+    return client.backend.list_by_service(
+        resource_group_name=resource_group_name,
+        service_name=service_name)
+
+
+def apim_backend_update(
+        instance, url=None, protocol=None, description=None):
+
+    if url is not None:
+        instance.url = url
+
+    if protocol is not None:
+        instance.protocol = protocol
+
+    if description is not None:
+        instance.description = description
+
+    return instance

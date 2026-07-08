@@ -4,18 +4,12 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-import base64
-import binascii
-import getpass
 import json
-import yaml
 import logging
 import os
 import platform
 import re
-import ssl
 import sys
-from urllib.request import urlopen
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -569,6 +563,7 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
 
 
 def get_file_yaml(file_path, throw_on_empty=True):
+    import yaml  # Lazy-load: only needed when parsing YAML files
     content = read_file_content(file_path)
     if not content:
         if throw_on_empty:
@@ -581,11 +576,10 @@ def get_file_yaml(file_path, throw_on_empty=True):
 
 
 def read_file_content(file_path, allow_binary=False):
-    from codecs import open as codecs_open
     # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
         try:
-            with codecs_open(file_path, encoding=encoding) as f:
+            with open(file_path, mode='r', encoding=encoding) as f:
                 logger.debug("attempting to read file %s as %s", file_path, encoding)
                 return f.read()
         except (UnicodeError, UnicodeDecodeError):
@@ -593,6 +587,7 @@ def read_file_content(file_path, allow_binary=False):
 
     if allow_binary:
         try:
+            import base64
             with open(file_path, 'rb') as input_file:
                 logger.debug("attempting to read file %s as binary", file_path)
                 return base64.b64encode(input_file.read()).decode("utf-8")
@@ -643,6 +638,7 @@ def b64encode(s):
     :return: base64 encoded string
     :rtype: str
     """
+    import base64
     encoded = base64.b64encode(s.encode("latin-1"))
     return encoded.decode('latin-1')
 
@@ -654,6 +650,7 @@ def b64decode(s):
     :return: decoded string
     :rtype: str
     """
+    import base64
     encoded = base64.b64decode(s.encode("latin-1"))
     return encoded.decode('latin-1')
 
@@ -665,6 +662,8 @@ def b64_to_hex(s):
     :return: uppercase hex string
     :rtype: str
     """
+    import base64
+    import binascii
     decoded = base64.b64decode(s)
     hex_data = binascii.hexlify(decoded).upper()
     if isinstance(hex_data, bytes):
@@ -803,8 +802,9 @@ def open_page_in_browser(url):
         try:
             # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
             # Ampersand (&) should be quoted
+            safe_url = url.replace("'", "''")
             return subprocess.Popen(
-                ['powershell.exe', '-NoProfile', '-Command', 'Start-Process "{}"'.format(url)]).wait()
+                ['powershell.exe', '-NoProfile', '-Command', f"Start-Process '{safe_url}'"]).wait()
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -882,6 +882,7 @@ def reload_module(module):
 
 def get_default_admin_username():
     try:
+        import getpass
         username = getpass.getuser()
     except KeyError:
         username = None
@@ -1040,21 +1041,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and url.lower().startswith('https://'):
         # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # If url's origin matches the ARM endpoint, like `https://management.azure.com/`,
             # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
             # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 resource = endpoints.active_directory_resource_id
             else:
-                from azure.cli.core.cloud import CloudEndpointNotSetException
-                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                    try:
-                        value = getattr(endpoints, p)
-                    except CloudEndpointNotSetException:
-                        continue
-                    if isinstance(value, str) and url.lower().startswith(value.lower()):
-                        resource = value
-                        break
+                resource = match_cloud_endpoint(url, cli_ctx)
         if resource:
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
@@ -1062,7 +1055,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 token_subscription = _extract_subscription_id(url)
             if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
@@ -1199,12 +1192,100 @@ ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
+    import ssl
     return ssl.create_default_context()
 
 
 def urlretrieve(url):
+    from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def is_same_origin(url, endpoint):
+    """Check whether ``url`` and ``endpoint`` share the same origin (scheme + host + port).
+
+    This performs an exact origin comparison rather than substring or prefix matching, so a
+    malicious host such as ``https://management.azure.com.attacker`` is not mistaken for
+    the trusted endpoint ``https://management.azure.com``. It is intended for validating that a
+    URL points to a trusted endpoint before sensitive data (e.g., an Azure access token) is sent
+    to it.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param endpoint: The trusted endpoint to validate against, e.g., ``https://management.azure.com/``.
+    :return: ``True`` if both share the same origin, otherwise ``False``.
+    :rtype: bool
+    """
+    from urllib.parse import urlparse
+
+    if not isinstance(url, str) or not isinstance(endpoint, str):
+        return False
+
+    try:
+        url_parts = urlparse(url)
+        endpoint_parts = urlparse(endpoint)
+
+    except (TypeError, ValueError):
+        return False
+
+    # Require a real host on both sides to avoid false positives against non-URL endpoint values.
+    # `hostname` (rather than `netloc`) is used so that userinfo tricks like
+    # `https://management.azure.com@attacker` resolve to the actual host `attacker`.
+    if not url_parts.hostname or not endpoint_parts.hostname:
+        return False
+
+    def _effective_port(parts):
+        # Treat a missing port as the scheme's default port so that, e.g.,
+        # `https://management.azure.com:443/` and `https://management.azure.com/` are equivalent.
+        if parts.port is not None:
+            return parts.port
+
+        return {'http': 80, 'https': 443}.get(parts.scheme.lower())
+
+    try:
+        if _effective_port(url_parts) != _effective_port(endpoint_parts):
+            return False
+
+    except ValueError:
+        return False
+
+    return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
+            url_parts.hostname.lower() == endpoint_parts.hostname.lower())
+
+
+def match_cloud_endpoint(url, cli_ctx):
+    """Return the active cloud endpoint that shares the same origin as ``url``.
+
+    :param url: The URL to match, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: The matching endpoint value, or ``None`` if no endpoint shares ``url``'s origin.
+    :rtype: str or None
+    """
+    from azure.cli.core.cloud import CloudEndpointNotSetException
+
+    endpoints = cli_ctx.cloud.endpoints
+    for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+        try:
+            value = getattr(endpoints, p)
+
+        except CloudEndpointNotSetException:
+            continue
+
+        if isinstance(value, str) and is_same_origin(url, value):
+            return value
+
+    return None
+
+
+def is_trusted_cloud_endpoint(url, cli_ctx):
+    """Check whether ``url`` shares the same origin as any endpoint of the active cloud.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: ``True`` if ``url`` shares the same origin as any cloud endpoint, otherwise ``False``.
+    :rtype: bool
+    """
+    return match_cloud_endpoint(url, cli_ctx) is not None
 
 
 def parse_proxy_resource_id(rid):
@@ -1316,19 +1397,6 @@ def roughly_parse_command(args):
     return ' '.join(nouns).lower()
 
 
-def roughly_parse_command_with_casing(args):
-    # Roughly parse the command part: <az VM create> --name vm1
-    # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but preserves original casing
-    # and we don't need to bother with positional args
-    nouns = []
-    for arg in args:
-        if arg and arg[0] != '-':
-            nouns.append(arg)
-        else:
-            break
-    return ' '.join(nouns)
-
-
 def is_guid(guid):
     import uuid
     try:
@@ -1344,17 +1412,19 @@ def handle_version_update():
     """
     try:
         from azure.cli.core._session import VERSIONS
-        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
             get_cached_latest_versions()
-        elif parse(VERSIONS['versions']['core']['local']) != parse(__version__):
-            logger.debug("Azure CLI has been updated.")
-            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
-            VERSIONS['versions'] = {}
-            VERSIONS['update_time'] = ''
-            from azure.cli.core.cloud import refresh_known_clouds
-            refresh_known_clouds()
+        elif VERSIONS['versions']['core']['local'] != __version__:
+            # Lazy import packaging.version
+            from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
+            if parse(VERSIONS['versions']['core']['local']) != parse(__version__):
+                logger.debug("Azure CLI has been updated.")
+                logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
+                VERSIONS['versions'] = {}
+                VERSIONS['update_time'] = ''
+                from azure.cli.core.cloud import refresh_known_clouds
+                refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
 

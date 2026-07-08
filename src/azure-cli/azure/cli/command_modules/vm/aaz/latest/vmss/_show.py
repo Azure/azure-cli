@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-11-01"],
         ]
     }
 
@@ -122,7 +122,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -256,6 +256,9 @@ class Show(AAZCommand):
             properties.do_not_run_extensions_on_overprovisioned_v_ms = AAZBoolType(
                 serialized_name="doNotRunExtensionsOnOverprovisionedVMs",
             )
+            properties.external_health_policy = AAZObjectType(
+                serialized_name="externalHealthPolicy",
+            )
             properties.high_speed_interconnect_placement = AAZStrType(
                 serialized_name="highSpeedInterconnectPlacement",
             )
@@ -263,6 +266,9 @@ class Show(AAZCommand):
                 serialized_name="hostGroup",
             )
             _ShowHelper._build_schema_sub_resource_read(properties.host_group)
+            properties.lifecycle_hooks_profile = AAZObjectType(
+                serialized_name="lifecycleHooksProfile",
+            )
             properties.orchestration_mode = AAZStrType(
                 serialized_name="orchestrationMode",
             )
@@ -340,6 +346,32 @@ class Show(AAZCommand):
                 serialized_name="repairAction",
             )
 
+            external_health_policy = cls._schema_on_200.properties.external_health_policy
+            external_health_policy.enabled = AAZBoolType()
+            external_health_policy.expiry_duration = AAZStrType(
+                serialized_name="expiryDuration",
+            )
+            external_health_policy.grace_period = AAZStrType(
+                serialized_name="gracePeriod",
+            )
+
+            lifecycle_hooks_profile = cls._schema_on_200.properties.lifecycle_hooks_profile
+            lifecycle_hooks_profile.lifecycle_hooks = AAZListType(
+                serialized_name="lifecycleHooks",
+            )
+
+            lifecycle_hooks = cls._schema_on_200.properties.lifecycle_hooks_profile.lifecycle_hooks
+            lifecycle_hooks.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.lifecycle_hooks_profile.lifecycle_hooks.Element
+            _element.default_action = AAZStrType(
+                serialized_name="defaultAction",
+            )
+            _element.type = AAZStrType()
+            _element.wait_duration = AAZStrType(
+                serialized_name="waitDuration",
+            )
+
             priority_mix_policy = cls._schema_on_200.properties.priority_mix_policy
             priority_mix_policy.base_regular_priority_count = AAZIntType(
                 serialized_name="baseRegularPriorityCount",
@@ -351,6 +383,9 @@ class Show(AAZCommand):
             resiliency_policy = cls._schema_on_200.properties.resiliency_policy
             resiliency_policy.automatic_zone_rebalancing_policy = AAZObjectType(
                 serialized_name="automaticZoneRebalancingPolicy",
+            )
+            resiliency_policy.operation_recovery_settings = AAZObjectType(
+                serialized_name="operationRecoverySettings",
             )
             resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
                 serialized_name="resilientVMCreationPolicy",
@@ -370,6 +405,26 @@ class Show(AAZCommand):
             automatic_zone_rebalancing_policy.rebalance_strategy = AAZStrType(
                 serialized_name="rebalanceStrategy",
             )
+
+            operation_recovery_settings = cls._schema_on_200.properties.resiliency_policy.operation_recovery_settings
+            operation_recovery_settings.reimage_recovery_policy = AAZObjectType(
+                serialized_name="reimageRecoveryPolicy",
+            )
+            operation_recovery_settings.restart_recovery_policy = AAZObjectType(
+                serialized_name="restartRecoveryPolicy",
+            )
+            operation_recovery_settings.start_recovery_policy = AAZObjectType(
+                serialized_name="startRecoveryPolicy",
+            )
+
+            reimage_recovery_policy = cls._schema_on_200.properties.resiliency_policy.operation_recovery_settings.reimage_recovery_policy
+            reimage_recovery_policy.enabled = AAZBoolType()
+
+            restart_recovery_policy = cls._schema_on_200.properties.resiliency_policy.operation_recovery_settings.restart_recovery_policy
+            restart_recovery_policy.enabled = AAZBoolType()
+
+            start_recovery_policy = cls._schema_on_200.properties.resiliency_policy.operation_recovery_settings.start_recovery_policy
+            start_recovery_policy.enabled = AAZBoolType()
 
             resilient_vm_creation_policy = cls._schema_on_200.properties.resiliency_policy.resilient_vm_creation_policy
             resilient_vm_creation_policy.enabled = AAZBoolType()
@@ -1168,6 +1223,9 @@ class Show(AAZCommand):
             )
             _ShowHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
+            _element.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             _element.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -1213,6 +1271,9 @@ class Show(AAZCommand):
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
+            os_disk.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             os_disk.vhd_containers = AAZListType(
                 serialized_name="vhdContainers",
             )
@@ -1221,6 +1282,9 @@ class Show(AAZCommand):
             )
 
             diff_disk_settings = cls._schema_on_200.properties.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings
+            diff_disk_settings.enable_full_caching = AAZBoolType(
+                serialized_name="enableFullCaching",
+            )
             diff_disk_settings.option = AAZStrType()
             diff_disk_settings.placement = AAZStrType()
 

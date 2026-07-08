@@ -45,12 +45,15 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('status', "enabled"),
                          self.check('days', 30)])
 
-        # test content-trust
-        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+        # test content-trust - 'enabled' is no longer a valid value for --status due to DCT deprecation
+        with self.assertRaises(SystemExit):
+            self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name))
+
+        self.cmd('acr config content-trust update -n {} --status disabled --yes'.format(registry_name),
+                 checks=[self.check('status', "disabled")])
 
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+                 checks=[self.check('status', "disabled")])
 
         # test soft-delete
         self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
@@ -275,6 +278,58 @@ class AcrCommandsTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
+    def test_acr_cache_managed_identity(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Standard',
+            'cr_name': 'test-mi',
+            'source_repo': 'upstreamregistry.azurecr.io/hello-world',
+            'target_repo': 'hello-world-mi',
+            'identity_name': self.create_random_name('cache-identity', 20),
+            'identity_name2': self.create_random_name('cache-identity2', 20)
+        })
+
+        # Create registry
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('sku.name', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Create user-assigned managed identities
+        result = self.cmd('identity create --name {identity_name} -g {rg}')
+        self.kwargs['identity_id'] = result.get_output_in_json()['id']
+
+        result = self.cmd('identity create --name {identity_name2} -g {rg}')
+        self.kwargs['identity_id2'] = result.get_output_in_json()['id']
+
+        # Test cache create with managed identity
+        self.cmd('acr cache create -n {cr_name} -r {registry_name} -s {source_repo} -t {target_repo} --identity {identity_id}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Test cache show includes identity
+        self.cmd('acr cache show -n {cr_name} -r {registry_name} -g {rg}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Test cache update with different managed identity
+        self.cmd('acr cache update -n {cr_name} -r {registry_name} --identity {identity_id2}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Clean up
+        self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
         # replication location should be different from registry location
@@ -315,7 +370,7 @@ class AcrCommandsTests(ScenarioTest):
                          ])
 
         # update replication
-        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --region-endpoint-enabled false',
+        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('regionEndpointEnabled', False),
@@ -325,7 +380,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
 
         # test create replication disable on home region
-        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --region-endpoint-enabled false',
+        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('location', '{replication_loc}'),
                          self.check('provisioningState', 'Succeeded'),
@@ -742,6 +797,48 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', True)])
         self.cmd('acr update --name {registry_name} --resource-group {rg} --anonymous-pull-enabled false',
                  checks=[self.check('anonymousPullEnabled', False)])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_with_dual_stack_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_create_with_dual_stack_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus '
+                 '--data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6'),
+                         self.check('dataEndpointEnabled', True)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6')])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_create_with_data_endpoint(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus '
+                 '--data-endpoint-enabled true',
+                 checks=[self.check('dataEndpointEnabled', True)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled false',
+                 checks=[self.check('dataEndpointEnabled', False)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled true',
+                 checks=[self.check('dataEndpointEnabled', True)])
 
     @ResourceGroupPreparer()
     @live_only()

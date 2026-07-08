@@ -5,6 +5,7 @@
 
 import json
 import os
+import argparse
 import pytest
 import tempfile
 import time
@@ -17,7 +18,7 @@ from ipaddress import ip_network
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
-from azure.cli.testsdk import ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, ScenarioTest, live_only
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from knack.util import CLIError
 from azure.cli.command_modules.keyvault.custom import copy_secret
@@ -105,6 +106,353 @@ class DateTimeParseTest(unittest.TestCase):
                             second=20,
                             tzinfo=tz.tzutc())
         self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
+
+
+class CreateVaultSoftDeleteTest(unittest.TestCase):
+    """Verify that create_vault explicitly sets enable_soft_delete=True in the request body
+    so that Azure Policy checks requiring the property to be present are satisfied."""
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom._create_network_rule_set', return_value=None)
+    @mock.patch('azure.cli.core._profile.Profile')
+    @mock.patch('azure.cli.core.util.sdk_no_wait')
+    def test_create_vault_sets_enable_soft_delete_true(self, mock_sdk_no_wait, mock_profile, _mock_network):
+        from azure.cli.command_modules.keyvault.custom import create_vault
+
+        mock_profile.return_value.get_subscription.return_value = {
+            'tenantId': '00000000-0000-0000-0000-000000000000'
+        }
+
+        # Build a minimal cmd mock that returns simple model classes
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.data = {}
+
+        # get_models returns a simple class that records its kwargs
+        def fake_get_models(name, **kwargs):
+            return type(name, (), {'__init__': lambda self, **kw: self.__dict__.update(kw)})
+
+        cmd.get_models.side_effect = fake_get_models
+
+        # Client whose get() raises so vault-already-exists check is skipped
+        client = mock.MagicMock()
+        client.get.side_effect = HttpResponseError()
+
+        create_vault(
+            cmd, client,
+            resource_group_name='rg',
+            vault_name='testvault',
+            location='eastus',
+            retention_days='90',
+            no_self_perms=True,
+        )
+
+        # sdk_no_wait is called with the VaultCreateOrUpdateParameters as 'parameters'
+        mock_sdk_no_wait.assert_called_once()
+        call_kwargs = mock_sdk_no_wait.call_args
+        parameters = call_kwargs.kwargs.get('parameters') or call_kwargs[1].get('parameters')
+        vault_properties = parameters.properties
+
+        self.assertIs(vault_properties.enable_soft_delete, True,
+                      "create_vault must explicitly set enable_soft_delete=True in the request body "
+                      "to satisfy Azure Policy checks")
+
+
+class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
+    def test_validate_external_key_id_valid(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='test-aes-key')
+        validate_external_key_id(ns)
+
+    def test_validate_external_key_id_invalid_chars(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='bad_id')
+        with self.assertRaises(CLIError):
+            validate_external_key_id(ns)
+
+    def test_validate_external_key_id_too_long(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='a' * 65)
+        with self.assertRaises(CLIError):
+            validate_external_key_id(ns)
+
+    def test_validate_external_key_id_max_length(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='a' * 64)
+        validate_external_key_id(ns)
+
+    def test_validate_ekm_path_prefix_rules(self):
+        from azure.cli.command_modules.keyvault._validators import _validate_ekm_path_prefix
+
+        _validate_ekm_path_prefix('/api/v1')
+        with self.assertRaises(CLIError):
+            _validate_ekm_path_prefix('api/v1')
+        with self.assertRaises(CLIError):
+            _validate_ekm_path_prefix('/api/v1/')
+
+    def test_normalize_ekm_host_rules(self):
+        from azure.cli.command_modules.keyvault._validators import _normalize_ekm_host
+
+        self.assertEqual(_normalize_ekm_host('example.com'), 'example.com:443')
+        self.assertEqual(_normalize_ekm_host('example.com:443'), 'example.com:443')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('https://example.com')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('example.com/path')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('example.com:abc')
+
+    def test_load_certificates_as_der_bytes_from_pem(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        certs = _load_certificates_as_der_bytes([pem_path])
+        self.assertTrue(certs)
+        self.assertIsInstance(certs[0], (bytes, bytearray))
+
+    def test_load_certificates_single_file_with_multiple_pem_blocks(self):
+        # Scenario 1: one file containing a PEM "chain" (multiple BEGIN/END CERTIFICATE blocks).
+        # The validator must split it and return each certificate as a separate DER blob.
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_paths = [os.path.join(TEST_DIR, 'certs', name) for name in ('cert_0.cer', 'cert_1.cer', 'cert_2.cer')]
+        chain = b'\n'.join(open(p, 'rb').read() for p in cert_paths)
+        with tempfile.NamedTemporaryFile(suffix='.pem', delete=False) as tmp:
+            tmp.write(chain)
+            chain_path = tmp.name
+        try:
+            certs = _load_certificates_as_der_bytes([chain_path])
+        finally:
+            os.remove(chain_path)
+        self.assertEqual(len(certs), 3)
+        for der in certs:
+            self.assertIsInstance(der, (bytes, bytearray))
+        # Each split block must match the DER of the individual source certificate.
+        individual = [_load_certificates_as_der_bytes([p])[0] for p in cert_paths]
+        self.assertEqual(certs, individual)
+
+    def test_load_certificates_multiple_files_space_separated(self):
+        # Scenario 2: multiple file paths passed to the same flag (nargs='+', space-separated).
+        # Each file contributes its certificate(s); order is preserved.
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_paths = [os.path.join(TEST_DIR, 'certs', name) for name in ('cert_0.cer', 'cert_1.cer', 'cert_2.cer')]
+        certs = _load_certificates_as_der_bytes(cert_paths)
+        self.assertEqual(len(certs), 3)
+        individual = [_load_certificates_as_der_bytes([p])[0] for p in cert_paths]
+        self.assertEqual(certs, individual)
+
+    def test_load_certificates_multiple_files_with_chain_and_der(self):
+        # Mixed: one file is a multi-cert PEM chain, another is single-cert DER.
+        # Total certs returned must equal the sum across all files.
+        import ssl
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_0 = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        cert_1 = os.path.join(TEST_DIR, 'certs', 'cert_1.cer')
+        cert_2 = os.path.join(TEST_DIR, 'certs', 'cert_2.cer')
+
+        # Build a 2-cert PEM chain file.
+        chain = open(cert_0, 'rb').read() + b'\n' + open(cert_1, 'rb').read()
+        # Build a DER-encoded file from cert_2 (no PEM headers).
+        der_2 = ssl.PEM_cert_to_DER_cert(open(cert_2, 'r', encoding='utf-8').read())
+
+        with tempfile.NamedTemporaryFile(suffix='.pem', delete=False) as tmp_pem:
+            tmp_pem.write(chain)
+            chain_path = tmp_pem.name
+        with tempfile.NamedTemporaryFile(suffix='.der', delete=False) as tmp_der:
+            tmp_der.write(der_2)
+            der_path = tmp_der.name
+        try:
+            certs = _load_certificates_as_der_bytes([chain_path, der_path])
+        finally:
+            os.remove(chain_path)
+            os.remove(der_path)
+        self.assertEqual(len(certs), 3)
+        # The DER file must round-trip unchanged as the last entry.
+        self.assertEqual(certs[-1], der_2)
+
+    def test_validate_ekm_connection_create_requires_certificate(self):
+        # Chandan's feedback: --server-ca-certificate is mandatory for create.
+        # Even if the param-level required check is bypassed, the validator must reject empty certs.
+        from azure.cli.command_modules.keyvault._validators import validate_ekm_connection_create
+
+        ns = argparse.Namespace(
+            hsm_name=None, identifier='https://example.managedhsm.azure.net',
+            host='example.com:443', path_prefix='/api/v1', server_ca_certificates=None)
+        with mock.patch('azure.cli.command_modules.keyvault._validators.set_vault_base_url'):
+            with self.assertRaises(CLIError):
+                validate_ekm_connection_create(None, ns)
+
+
+class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
+    def test_get_ekm_certificate_serializes_der_bytes(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return der_bytes
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
+        # PEM is best-effort; if present, it should be a string with header.
+        if result.get('pem') is not None:
+            self.assertIsInstance(result.get('pem'), str)
+            self.assertIn('BEGIN CERTIFICATE', result.get('pem'))
+
+    def test_get_ekm_certificate_serializes_model_value_bytes(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class CertModel:
+            def __init__(self, value):
+                self.value = value
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return CertModel(der_bytes)
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
+
+    def test_get_ekm_certificate_handles_subject_cn_and_ca_list(self):
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        class SdkModel:
+            def __init__(self, subject_common_name, ca_certificates):
+                self.subject_common_name = subject_common_name
+                self.ca_certificates = ca_certificates
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return SdkModel('*.managedhsm-int.azure-int.net', [b'\x01\x02'])
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertEqual(result.get('subjectCommonName'), '*.managedhsm-int.azure-int.net')
+        self.assertEqual(result.get('caCertificates'), ['AQI='])
+
+    def test_get_ekm_certificate_fallback_json_safe_dict(self):
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return {'someField': b'\x01\x02\x03'}
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertIsInstance(result.get('someField'), str)
+
+    def test_get_ekm_certificate_finds_bytes_in_unknown_field(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class WeirdModel:
+            def __init__(self):
+                self.notCer = der_bytes
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return WeirdModel()
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
+
+
+@live_only()
+class KeyVaultEkmScenarioTest(ScenarioTest):
+    """Live EKM scenario test.
+
+    EKM (External Key Manager) requires a Managed HSM that is already wired to an external
+    key-manager proxy. That infrastructure cannot be provisioned by a preparer or captured in a
+    recording, so this test is live-only and reads the target from environment variables. It is
+    skipped unless the required ones are set:
+
+      AZURE_CLI_TEST_EKM_MHSM_URL        - Managed HSM URL (https://<name>.managedhsm.azure.net)
+      AZURE_CLI_TEST_EKM_HOST            - EKM proxy host (FQDN or FQDN:port)
+      AZURE_CLI_TEST_EKM_CA_CERT         - path to the EKM proxy server CA certificate (PEM/DER)
+      AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID - id of a key that already exists in the EKM proxy
+      AZURE_CLI_TEST_EKM_PATH_PREFIX     - optional proxy path prefix (e.g. /api/v1); some
+                                           proxies require it for the connection check to succeed
+
+    NOTE: this test creates AND deletes the EKM connection on the target MHSM, so run it against a
+    dedicated/disposable Managed HSM, not a shared pool with a connection you need to keep.
+    """
+
+    def test_keyvault_ekm_connection_and_external_key(self):
+        mhsm_url = os.environ.get('AZURE_CLI_TEST_EKM_MHSM_URL')
+        ekm_host = os.environ.get('AZURE_CLI_TEST_EKM_HOST')
+        ca_cert = os.environ.get('AZURE_CLI_TEST_EKM_CA_CERT')
+        ext_key_id = os.environ.get('AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID')
+        path_prefix = os.environ.get('AZURE_CLI_TEST_EKM_PATH_PREFIX')
+        if not all([mhsm_url, ekm_host, ca_cert, ext_key_id]):
+            self.skipTest('Set AZURE_CLI_TEST_EKM_MHSM_URL / _HOST / _CA_CERT / _EXTERNAL_KEY_ID '
+                          'to run the EKM live scenario test.')
+
+        self.kwargs.update({
+            'mhsm': mhsm_url,
+            'host': ekm_host,
+            'ca_cert': ca_cert,
+            'ext_key_id': ext_key_id,
+            'key_name': self.create_random_name('cli-ekm-key-', 24),
+            'normal_key': self.create_random_name('cli-norm-key-', 24),
+        })
+
+        # --- EKM connection lifecycle ---
+        # The service rejects 'create' when a connection already exists, so start from a clean
+        # slate (best-effort delete; ignored if there is no pre-existing connection).
+        try:
+            self.cmd('keyvault ekm-connection delete --id {mhsm}')
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        create_cmd = ('keyvault ekm-connection create --id {mhsm} --host {host} '
+                      '--server-ca-certificate "{ca_cert}"')
+        if path_prefix:
+            self.kwargs['path_prefix'] = path_prefix
+            create_cmd += ' --path-prefix {path_prefix}'
+        self.cmd(create_cmd)
+        show = self.cmd('keyvault ekm-connection show --id {mhsm}').get_output_in_json()
+        self.assertIn('host', show)
+        self.cmd('keyvault ekm-connection check --id {mhsm}')
+        cert = self.cmd('keyvault ekm-connection certificate show --id {mhsm}').get_output_in_json()
+        self.assertIsInstance(cert, dict)
+
+        # --- External (EKM-backed) key create/show/list-versions/delete ---
+        created = self.cmd('keyvault key create --id {mhsm}/keys/{key_name} '
+                           '--external-key-id {ext_key_id}').get_output_in_json()
+        self.assertEqual(created.get('externalKeyId'), ext_key_id)
+        self.cmd('keyvault key show --id {mhsm}/keys/{key_name}')
+        self.cmd('keyvault key list-versions --id {mhsm}/keys/{key_name}')
+        self.cmd('keyvault key delete --id {mhsm}/keys/{key_name}')
+
+        # --- Fail fast: key-shape args are incompatible with --external-key-id ---
+        self.cmd('keyvault key create --id {mhsm}/keys/{key_name} '
+                 '--external-key-id {ext_key_id} --size 2048', expect_failure=True)
+
+        # --- Regression: a normal HSM key still works ---
+        self.cmd('keyvault key create --id {mhsm}/keys/{normal_key} --kty RSA --size 2048 --protection hsm')
+        self.cmd('keyvault key delete --id {mhsm}/keys/{normal_key}')
+
+        # --- Clean up the connection ---
+        self.cmd('keyvault ekm-connection delete --id {mhsm}')
 
 
 class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):

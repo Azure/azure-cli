@@ -27,11 +27,11 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.authorization/policysetdefinitions", "2024-05-01"],
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.authorization/policysetdefinitions", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions", "2025-11-01"],
         ]
     }
 
@@ -128,7 +128,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -164,7 +164,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -192,7 +194,7 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.parameters = AAZDictType()
             properties.policy_definition_groups = AAZListType(
                 serialized_name="policyDefinitionGroups",
@@ -207,9 +209,6 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
-
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
 
@@ -221,14 +220,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
 
             policy_definition_groups = cls._schema_on_200.value.Element.properties.policy_definition_groups
             policy_definition_groups.Element = AAZObjectType()
@@ -353,7 +349,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -389,7 +385,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -417,7 +415,7 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.parameters = AAZDictType()
             properties.policy_definition_groups = AAZListType(
                 serialized_name="policyDefinitionGroups",
@@ -432,9 +430,6 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
-
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
 
@@ -446,14 +441,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
 
             policy_definition_groups = cls._schema_on_200.value.Element.properties.policy_definition_groups
             policy_definition_groups.Element = AAZObjectType()
@@ -578,7 +570,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -614,7 +606,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -642,7 +636,7 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.parameters = AAZDictType()
             properties.policy_definition_groups = AAZListType(
                 serialized_name="policyDefinitionGroups",
@@ -657,9 +651,6 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
-
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
 
@@ -671,14 +662,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
 
             policy_definition_groups = cls._schema_on_200.value.Element.properties.policy_definition_groups
             policy_definition_groups.Element = AAZObjectType()

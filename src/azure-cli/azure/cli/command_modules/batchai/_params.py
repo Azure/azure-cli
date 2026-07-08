@@ -10,10 +10,10 @@ from azure.cli.core.decorators import Completer
 
 
 def get_vm_sizes(cli_ctx, location):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    client_factory = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
-    return list(client_factory.virtual_machine_sizes.list(location))
+    from ..vm.operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cli_ctx)(command_args={
+        'location': location
+    })
 
 
 @Completer
@@ -23,7 +23,7 @@ def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
     except AttributeError:
         location = get_one_of_subscription_locations(cmd.cli_ctx)
     result = get_vm_sizes(cmd.cli_ctx, location)
-    return [r.name for r in result]
+    return [r.get('name') for r in result]
 
 
 # pylint: disable=line-too-long, too-many-statements

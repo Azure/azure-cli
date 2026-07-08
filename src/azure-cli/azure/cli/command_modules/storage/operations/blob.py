@@ -13,6 +13,7 @@ from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
                                                     normalize_blob_file_path, check_precondition_success)
+from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
 from knack.log import get_logger
@@ -46,7 +47,8 @@ def create_or_update_immutability_policy(cmd, client, container_name, account_na
                                              allow_protected_append_writes=allow_protected_append_writes,
                                              allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
-                                                       if_match, immutability_policy)
+                                                       immutability_policy, etag=if_match,
+                                                       match_condition=MatchConditions.IfNotModified)
 
 
 def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
@@ -58,7 +60,25 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
                                              allow_protected_append_writes=allow_protected_append_writes,
                                              allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.extend_immutability_policy(resource_group_name, account_name, container_name,
-                                             if_match, immutability_policy)
+                                             immutability_policy, etag=if_match,
+                                             match_condition=MatchConditions.IfNotModified)
+
+
+def delete_immutability_policy(client, container_name, account_name, if_match,
+                               resource_group_name=None):
+    return client.delete_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
+                                             match_condition=MatchConditions.IfNotModified)
+
+
+def lock_immutability_policy(client, container_name, account_name, if_match,
+                             resource_group_name=None):
+    return client.lock_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
+                                           match_condition=MatchConditions.IfNotModified)
+
+
+def get_immutability_policy(client, container_name, account_name, if_match=None, resource_group_name=None):
+    return client.get_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
+                                          match_condition=MatchConditions.IfNotModified)
 
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
@@ -839,7 +859,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False, snapshot=None, user_delegation_oid=None,
-                          **kwargs):
+                          user_delegation_tid=None, **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
@@ -850,7 +870,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 
@@ -889,7 +910,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
-                                               content_type=None, user_delegation_oid=None, as_user=False, **kwargs):
+                                               content_type=None, user_delegation_oid=None, user_delegation_tid=None,
+                                               as_user=False, **kwargs):
     t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                        '_shared_access_signature#generate_container_sas')
 
@@ -898,7 +920,8 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 

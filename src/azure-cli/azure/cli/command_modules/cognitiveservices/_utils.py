@@ -35,7 +35,7 @@ def snake_to_camel(name):
     return re.sub(r"(?:^|_)([a-z])", lambda x: x.group(1).upper(), name)
 
 
-def get_auth_model_connection_properties(connection_category: str, auth_type: str | None, auth_params: Dict[str, Any]):
+def get_auth_model_connection_properties(connection_category: str, auth_type: str | None, auth_params: Dict[str, Any]):  # pylint: disable=too-many-locals
     from azure.mgmt.cognitiveservices.models import (
         PATAuthTypeConnectionProperties,
         SASAuthTypeConnectionProperties,
@@ -60,32 +60,38 @@ def get_auth_model_connection_properties(connection_category: str, auth_type: st
     )
     # These categories were using None auth type with AzCLI ML connections
     CAN_USE_NONE_AUTH = [ConnectionCategory.GIT, ConnectionCategory.PYTHON_FEED]
+    # SDK 15.x renamed some credential params; remap old names from YAML/JSON files
+    _CREDENTIAL_PARAM_RENAMES = {
+        'account_key': 'key',
+        'sas_token': 'sas',
+    }
+    mapped_params = {_CREDENTIAL_PARAM_RENAMES.get(k, k): v for k, v in auth_params.items()}
     auth_model = None
     match snake_to_camel(auth_type):
         case "PersonalAccessToken" | "Pat":
             auth_model = PATAuthTypeConnectionProperties(
-                credentials=ConnectionPersonalAccessToken(**auth_params))
+                credentials=ConnectionPersonalAccessToken(**mapped_params))
         case "SasToken" | "Sas":
             auth_model = SASAuthTypeConnectionProperties(
-                credentials=ConnectionSharedAccessSignature(**auth_params))
+                credentials=ConnectionSharedAccessSignature(**mapped_params))
         case "UsernamePassword":
             auth_model = UsernamePasswordAuthTypeConnectionProperties(
-                credentials=ConnectionUsernamePassword(**auth_params))
+                credentials=ConnectionUsernamePassword(**mapped_params))
         case "ManagedIdentity":
             auth_model = ManagedIdentityAuthTypeConnectionProperties(
-                credentials=ConnectionManagedIdentity(**auth_params))
+                credentials=ConnectionManagedIdentity(**mapped_params))
         case "ServicePrincipal":
             auth_model = ServicePrincipalAuthTypeConnectionProperties(
-                credentials=ConnectionServicePrincipal(**auth_params))
+                credentials=ConnectionServicePrincipal(**mapped_params))
         case "AccessKey":
             auth_model = AccessKeyAuthTypeConnectionProperties(
-                credentials=ConnectionAccessKey(**auth_params))
+                credentials=ConnectionAccessKey(**mapped_params))
         case "ApiKey":
             auth_model = ApiKeyAuthConnectionProperties(
-                credentials=ConnectionApiKey(**auth_params))
+                credentials=ConnectionApiKey(**mapped_params))
         case "OAuth2":
             auth_model = OAuth2AuthTypeConnectionProperties(
-                credentials=ConnectionOAuth2(**auth_params))
+                credentials=ConnectionOAuth2(**mapped_params))
         case "None":
             if connection_category in CAN_USE_NONE_AUTH:
                 auth_model = NoneAuthTypeConnectionProperties()
@@ -93,7 +99,7 @@ def get_auth_model_connection_properties(connection_category: str, auth_type: st
                 auth_model = AADAuthTypeConnectionProperties()
         case "AccountKey":
             auth_model = AccountKeyAuthTypeConnectionProperties(
-                credentials=ConnectionAccountKey(**auth_params))
+                credentials=ConnectionAccountKey(**mapped_params))
         case "Aad":
             auth_model = AADAuthTypeConnectionProperties()
 

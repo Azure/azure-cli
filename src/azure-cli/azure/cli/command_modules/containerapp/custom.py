@@ -82,13 +82,14 @@ from ._utils import (_validate_subscription_registered,
                      ensure_workload_profile_supported, _generate_secret_volume_name,
                      trigger_workflow, AppType,
                      format_location, certificate_location_matches, generate_randomized_managed_cert_name,
-                     check_managed_cert_name_availability, prepare_managed_certificate_envelop)
+                     check_managed_cert_name_availability, prepare_managed_certificate_envelop,
+                     is_acr_url)
 from ._validators import validate_revision_suffix
 from ._ssh_utils import (SSH_DEFAULT_ENCODING, WebSocketConnection, read_ssh, get_stdin_writer, SSH_CTRL_C_MSG,
                          SSH_BACKUP_ENCODING)
 from ._constants import (MICROSOFT_SECRET_SETTING_NAME, FACEBOOK_SECRET_SETTING_NAME, GITHUB_SECRET_SETTING_NAME,
                          GOOGLE_SECRET_SETTING_NAME, TWITTER_SECRET_SETTING_NAME, APPLE_SECRET_SETTING_NAME, CONTAINER_APPS_RP,
-                         NAME_INVALID, NAME_ALREADY_EXISTS, ACR_IMAGE_SUFFIX, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
+                         NAME_INVALID, NAME_ALREADY_EXISTS, HELLO_WORLD_IMAGE, LOG_TYPE_SYSTEM, LOG_TYPE_CONSOLE,
                          MANAGED_CERTIFICATE_RT, PRIVATE_CERTIFICATE_RT, PENDING_STATUS, SUCCEEDED_STATUS, CONTAINER_APPS_SDK_MODELS,
                          BLOB_STORAGE_TOKEN_STORE_SECRET_SETTING_NAME, DEFAULT_PORT)
 
@@ -665,7 +666,7 @@ def update_containerapp_logic(cmd,
 
         if registry_server:
             if not registry_pass or not registry_user:
-                if ACR_IMAGE_SUFFIX not in registry_server:
+                if not is_acr_url(registry_server):
                     raise RequiredArgumentMissingError('Registry url is required if using Azure Container Registry, otherwise Registry username and password are required if using Dockerhub')
                 logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
                 parsed = urlparse(registry_server)
@@ -1401,7 +1402,7 @@ def update_containerappsjob_logic(cmd,
 
         if registry_server:
             if not registry_pass or not registry_user:
-                if ACR_IMAGE_SUFFIX not in registry_server:
+                if not is_acr_url(registry_server):
                     raise RequiredArgumentMissingError('Registry url is required if using Azure Container Registry, otherwise Registry username and password are required if using Dockerhub')
                 logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
                 parsed = urlparse(registry_server)
@@ -1555,7 +1556,12 @@ def start_containerappsjob(cmd,
 
     template_def = None
 
-    if image is not None:
+    # Check if any container override parameters are provided
+    has_container_overrides = (image is not None or container_name is not None or
+                               env_vars is not None or startup_command is not None or
+                               args is not None or cpu is not None or memory is not None)
+
+    if has_container_overrides:
         template_def = JobExecutionTemplateModel
         container_def = ContainerModel
         resources_def = None
@@ -1565,7 +1571,11 @@ def start_containerappsjob(cmd,
             resources_def["memory"] = memory
 
         container_def["name"] = container_name if container_name else name
-        container_def["image"] = image if not is_registry_msi_system(registry_identity) else HELLO_WORLD_IMAGE
+
+        # If no image is provided, fetch the existing job's image
+        if image is not None:
+            container_def["image"] = image if not is_registry_msi_system(registry_identity) else HELLO_WORLD_IMAGE
+
         if env_vars is not None:
             container_def["env"] = parse_env_var_flags(env_vars)
         if startup_command is not None:
@@ -2001,7 +2011,7 @@ def create_or_update_github_action(cmd,
     # Registry
     if registry_username is None or registry_password is None:
         # If registry is Azure Container Registry, we can try inferring credentials
-        if not registry_url or ACR_IMAGE_SUFFIX not in registry_url:
+        if not registry_url or not is_acr_url(registry_url):
             raise RequiredArgumentMissingError('Registry url is required if using Azure Container Registry, otherwise Registry username and password are required if using Dockerhub')
         logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
         parsed = urlparse(registry_url)
@@ -2944,7 +2954,7 @@ def set_registry(cmd, name, resource_group_name, server, username=None, password
 
     if (not username or not password) and not identity:
         # If registry is Azure Container Registry, we can try inferring credentials
-        if ACR_IMAGE_SUFFIX not in server:
+        if not is_acr_url(server):
             raise RequiredArgumentMissingError('Registry username and password are required if you are not using Azure Container Registry.')
         not disable_warnings and logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
         parsed = urlparse(server)
@@ -5026,7 +5036,7 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
-def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name=None, workload_profile_type=None, min_nodes=None, max_nodes=None):
     r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
@@ -5041,7 +5051,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
     workload_profiles_lower = [p["name"].lower() for p in workload_profiles]
 
-    if workload_profile_name.lower() in workload_profiles_lower:
+    if workload_profile_name and workload_profile_name.lower() in workload_profiles_lower:
         raise ValidationError(f"Cannot add workload profile with name {workload_profile_name} because it already exists in this environment")
 
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)

@@ -17,11 +17,21 @@ from azure.cli.command_modules.acs._consts import (
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
+)
+from azure.cli.command_modules.acs.addonconfiguration import (
+    ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_agentpool_get_rollback_versions,
+    aks_agentpool_rollback,
+    aks_agentpool_upgrade,
+    aks_enable_addons,
     aks_stop,
+    aks_upgrade,
+    is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -42,6 +52,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
 )
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
@@ -477,6 +488,41 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
+    @unittest.skipIf(os.name == 'nt', 'Symlink test not applicable on Windows')
+    def test_merge_credentials_rejects_symlink(self):
+        # Create a real kubeconfig file and a symlink pointing to it
+        target = tempfile.NamedTemporaryFile(delete=False, suffix='.kubeconfig')
+        target.close()
+        with open(target.name, 'w') as f:
+            yaml.safe_dump({'clusters': [], 'contexts': [], 'users': [],
+                            'current-context': '', 'kind': 'Config'}, f)
+        self.addCleanup(os.remove, target.name)
+
+        symlink_path = target.name + '.link'
+        os.symlink(target.name, symlink_path)
+        self.addCleanup(lambda: os.remove(symlink_path) if os.path.islink(symlink_path) else None)
+
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj = {
+            'clusters': [{'cluster': {'server': 'https://test'}, 'name': 'c1'}],
+            'contexts': [{'context': {'cluster': 'c1', 'user': 'u1'}, 'name': 'ctx1'}],
+            'users': [{'name': 'u1', 'user': {'token': 'tok'}}],
+            'current-context': 'ctx1',
+        }
+        with open(addition.name, 'w') as f:
+            yaml.safe_dump(obj, f)
+        self.addCleanup(os.remove, addition.name)
+
+        # Should raise CLIError when existing_file is a symlink
+        with self.assertRaises(CLIError):
+            merge_kubernetes_configurations(symlink_path, addition.name, False)
+
+        # Verify the symlink target was not modified
+        with open(target.name, 'r') as f:
+            content = yaml.safe_load(f)
+        self.assertEqual(content['clusters'], [])
+
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
@@ -608,6 +654,78 @@ class AcsCustomCommandTest(unittest.TestCase):
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
+
+        # monitoring enable with camelCase addon key does NOT preserve enableRetinaNetworkFlags
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(
+                enabled=False,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config.get('enableRetinaNetworkFlags'))
+
+        # monitoring disable sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
+
+        # monitoring disable without CNL also sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
+
+        # monitoring disable with camelCase key (omsAgent) sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        # The addon key normalization in _update_addons remaps camelCase to lowercase
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -854,6 +972,51 @@ class TestAKSCommand(unittest.TestCase):
         )
         self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
 
+    def test_aks_upgrade_node_image_only_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during --node-image-only to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+
+        self.client.get = mock.Mock(return_value=mc)
+
+        with mock.patch("azure.cli.command_modules.acs.custom.cf_agent_pools") as mock_cf, \
+             mock.patch("azure.cli.command_modules.acs.custom._upgrade_single_nodepool_image_version") as mock_upgrade:
+            mock_cf.return_value = mock.Mock()
+
+            aks_upgrade(self.cmd, self.client, "rg", "name", node_image_only=True, yes=True)
+
+            # Only the VMSS pool should be upgraded; the Machines mode pool must be skipped.
+            upgraded_pools = [call.args[4] for call in mock_upgrade.call_args_list]
+            self.assertNotIn("machinespool", upgraded_pools)
+            self.assertIn("nodepool1", upgraded_pools)
+
+    def test_aks_upgrade_kubernetes_version_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during Kubernetes version upgrade to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+        mc.service_principal_profile = None
+
+        self.client.get = mock.Mock(return_value=mc)
+        self.client.begin_create_or_update = mock.Mock(return_value=None)
+
+        aks_upgrade(self.cmd, self.client, "rg", "name", kubernetes_version="1.25.0", yes=True)
+
+        # Machines mode pool must not have orchestrator_version set; VMSS pool must be upgraded.
+        self.assertIsNone(machines_pool.orchestrator_version)
+        self.assertEqual(vmss_pool.orchestrator_version, "1.25.0")
+
 
 class TestRunCommand(unittest.TestCase):
     def test_get_command_context_invalid_file(self):
@@ -877,6 +1040,585 @@ class TestRunCommand(unittest.TestCase):
         context = _get_command_context(
             [get_test_data_file_path("ns.yaml"), get_test_data_file_path("dummy.json")])
         self.assertNotEqual(context, '')
+
+
+class TestAddonConfigurationAzureBleuCloud(unittest.TestCase):
+    """Test cases for AzureBleu Cloud region mapping in addon configuration."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        # Set cloud name to AzureBleuCloud
+        self.cmd.cli_ctx.cloud.name = 'AzureBleuCloud'
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_bleufrancecentral_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that bleufrancecentral region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'bleufrancecentral'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUC',
+            {'location': 'bleufrancecentral'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-BLEUC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUC', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_bleufrancesouth_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that bleufrancesouth region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'bleufrancesouth'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUS'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUS',
+            {'location': 'bleufrancesouth'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-BLEUS', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUS', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_unknown_bleu_region_defaults_to_bleufrancecentral(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that unknown regions in AzureBleu cloud default to bleufrancecentral."""
+        # Arrange
+        mock_get_rg_location.return_value = 'unknownregion'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with default region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUC',
+            {'location': 'bleufrancecentral'}
+        )
+        
+        # Verify the workspace resource ID contains the default region code
+        self.assertIn('DefaultResourceGroup-BLEUC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUC', result)
+
+
+class TestAddonConfigurationAzureDelosCloud(unittest.TestCase):
+    """Test cases for AzureDelos Cloud region mapping in addon configuration."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        # Set cloud name to AzureDelosCloud
+        self.cmd.cli_ctx.cloud.name = 'AzureDelosCloud'
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_deloscloudgermanycentral_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that deloscloudgermanycentral region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'deloscloudgermanycentral'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSC',
+            {'location': 'deloscloudgermanycentral'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-DELOSC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_deloscloudgermanynorth_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that deloscloudgermanynorth region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'deloscloudgermanynorth'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSN/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSN'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSN',
+            {'location': 'deloscloudgermanynorth'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-DELOSN', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSN', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_unknown_delos_region_defaults_to_deloscloudgermanycentral(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that unknown regions in AzureDelos cloud default to deloscloudgermanycentral."""
+        # Arrange
+        mock_get_rg_location.return_value = 'unknownregion'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with default region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSC',
+            {'location': 'deloscloudgermanycentral'}
+        )
+        
+        # Verify the workspace resource ID contains the default region code
+        self.assertIn('DefaultResourceGroup-DELOSC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
+
+
+class TestIsMonitoringAddonEnabled(unittest.TestCase):
+    """Tests for the is_monitoring_addon_enabled helper in custom.py."""
+
+    def test_monitoring_enabled_with_lowercase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_enabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_disabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(enabled=False, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_no_monitoring_addon_at_all(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {}
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_non_monitoring_addon(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("http_application_routing", instance))
+
+
+class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
+    """Tests for auto-detection of HLSM when CNL is active in aks_enable_addons."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    def _build_instance(self, cnl_flag=None, addon_key=CONST_MONITORING_ADDON_NAME):
+        """Build a mock cluster instance with monitoring addon."""
+        config = {
+            'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+            CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+        }
+        if cnl_flag is not None:
+            config['enableRetinaNetworkFlags'] = cnl_flag
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            addon_key: ManagedClusterAddonProfile(enabled=True, config=config),
+        }
+        instance.service_principal_profile.client_id = "msi"
+        instance.api_server_access_profile = None
+        instance.location = "eastus"
+        return instance
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_auto_enabled_when_cnl_active(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL is active and HLSM not set, HLSM should auto-enable."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_not_auto_enabled_when_cnl_inactive(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL is not active and HLSM not set, HLSM should remain None."""
+        instance = self._build_instance(cnl_flag=None)
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_explicit_true_not_overridden(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When HLSM is explicitly True, auto-detection should not change it."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring",
+                          enable_high_log_scale_mode=True)
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_explicit_false_not_overridden_by_cnl(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When HLSM is explicitly False, auto-detection should not override even with CNL active."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring",
+                          enable_high_log_scale_mode=False)
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertFalse(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_auto_enabled_with_cnl_lowercase_true(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """CNL flag value 'true' (lowercase) should also trigger auto-HLSM."""
+        instance = self._build_instance(cnl_flag="true")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_not_auto_enabled_when_cnl_false(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL flag is 'false', HLSM should not auto-enable."""
+        instance = self._build_instance(cnl_flag="false")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+
+class AksAgentpoolUpgradeTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_upgrade_sets_max_unavailable(self, mock_sdk_no_wait):
+        """Test that max_unavailable is set on upgrade_settings during agentpool upgrade."""
+        AgentPoolUpgradeSettings = self.cmd.get_models(
+            "AgentPoolUpgradeSettings",
+            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+            operation_group="managed_clusters",
+        )
+        instance = mock.Mock()
+        instance.orchestrator_version = "1.32.0"
+        instance.provisioning_state = "Succeeded"
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
+
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_agentpool_upgrade(
+            self.cmd,
+            client,
+            resource_group_name="rg",
+            cluster_name="cluster",
+            nodepool_name="nodepool1",
+            kubernetes_version="1.33.0",
+            max_unavailable="5",
+            yes=True,
+        )
+
+        self.assertEqual(instance.upgrade_settings.max_unavailable, "5")
+        mock_sdk_no_wait.assert_called_once()
+
+
+class AksAgentpoolRollbackTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    def test_aks_agentpool_get_rollback_versions_returns_recently_used_versions(self):
+        versions = [
+            mock.Mock(
+                orchestrator_version="1.32.1",
+                node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
+                timestamp=datetime.datetime(2026, 5, 1),
+            )
+        ]
+        upgrade_profile = mock.Mock(recently_used_versions=versions)
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+
+        result = aks_agentpool_get_rollback_versions(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        self.assertEqual(result, versions)
+        client.get_upgrade_profile.assert_called_once_with("rg", "cluster", "nodepool1")
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_uses_most_recent_version(self, mock_sdk_no_wait, mock_cf_managed_clusters):
+        older_version = mock.Mock(
+            orchestrator_version="1.31.9",
+            node_image_version="AKSUbuntu-2204gen2containerd-202604.10.0",
+            timestamp=datetime.datetime(2026, 4, 1),
+        )
+        most_recent_version = mock.Mock(
+            orchestrator_version="1.32.1",
+            node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
+            timestamp=datetime.datetime(2026, 5, 1),
+        )
+        upgrade_profile = mock.Mock(recently_used_versions=[older_version, most_recent_version])
+        agentpool = mock.Mock()
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+        client.get.return_value = agentpool
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(auto_upgrade_profile=None)
+        mock_sdk_no_wait.return_value = "rollback-result"
+
+        result = aks_agentpool_rollback(
+            self.cmd,
+            client,
+            resource_group_name="rg",
+            cluster_name="cluster",
+            nodepool_name="nodepool1",
+            aks_custom_headers="Header=Value",
+            if_match="etag",
+            no_wait=True,
+        )
+
+        self.assertEqual(result, "rollback-result")
+        self.assertEqual(agentpool.orchestrator_version, "1.32.1")
+        self.assertEqual(agentpool.node_image_version, "AKSUbuntu-2204gen2containerd-202605.12.0")
+        mock_sdk_no_wait.assert_called_once()
+        args, kwargs = mock_sdk_no_wait.call_args
+        self.assertEqual(
+            args[:6],
+            (True, client.begin_create_or_update, "rg", "cluster", "nodepool1", agentpool),
+        )
+        self.assertEqual(kwargs["headers"], {"Header": "Value"})
+        self.assertEqual(kwargs["etag"], "etag")
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_raises_when_no_recent_versions(self, mock_sdk_no_wait, mock_cf_managed_clusters):
+        upgrade_profile = mock.Mock(recently_used_versions=[])
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(auto_upgrade_profile=None)
+
+        with self.assertRaises(CLIError):
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_sdk_no_wait.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -93,12 +93,28 @@ def cf_account_connections(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).account_connections
 
 
+def cf_managed_network_settings(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).managed_network_settings
+
+
+def cf_managed_network_provisions(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).managed_network_provisions
+
+
+def cf_outbound_rule(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).outbound_rule
+
+
 def cf_account_capability_hosts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).account_capability_hosts
 
 
 def cf_project_capability_hosts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).project_capability_hosts
+
+
+def cf_managed_compute_deployments(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).managed_compute_deployments
 
 
 def cf_project_connections(cli_ctx, *_):

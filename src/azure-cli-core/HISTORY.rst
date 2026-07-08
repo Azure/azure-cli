@@ -3,6 +3,38 @@
 Release History
 ===============
 
+2.88.0
+++++++
+* Resolve CVE-2026-48526 (#33562)
+* Update global policy argument `--acquire-policy-token` to pick up new api-version and propagate correlation-id (#33661)
+
+2.87.0
+++++++
+* Resolve CVE-2026-44431 (#33351)
+* Resolve CVE-2026-44432 (#33351)
+* `az login`: Support Entra agentic session differentiation for Copilot agent requests (#33309)
+* Resolve CVE-2026-45409 (#33401)
+
+2.86.0
+++++++
+* Resolve CVE-2025-15467 (#33201)
+* Resolve CVE-2025-69419 (#33201)
+* Resolve CVE-2026-39892 (#33154)
+
+2.85.0
+++++++
+* Resolve CVE-2026-26007 (#32879)
+* `az *`: Make `--acquire-policy-token` and `--change-reference` global arguments available by default, removing the need for `core.enable_policy_token` configuration (#32883)
+* Resolve CVE-2026-27448 (#33035)
+* Resolve CVE-2026-27459 (#33035)
+* Resolve CVE-2026-32597 (#33034)
+* Resolve CVE-2026-25645 (#33081)
+* Resolve CVE-2026-34073 (#33099)
+
+2.84.0
+++++++
+* Minor fixes
+
 2.83.0
 ++++++
 * Resolve CVE-2025-69277 (#32610)

@@ -16,10 +16,12 @@ from ._create import *
 from ._deallocate import *
 from ._delete import *
 from ._generalize import *
+from ._install_patches import *
 from ._list import *
 from ._list_all import *
 from ._list_sizes import *
 from ._list_skus import *
+from ._list_usage import *
 from ._list_vm_resize_options import *
 from ._migrate_to_vmss import *
 from ._patch import *
@@ -30,5 +32,7 @@ from ._reimage import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
+from ._stop import *
 from ._update import *
 from ._wait import *
+from ._restart import *

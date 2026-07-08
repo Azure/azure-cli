@@ -72,11 +72,14 @@ def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name=
 
 
 def get_network_watcher_from_vm(cmd):
+    from ...vm.operations.vm import VMShow
     args = cmd.ctx.args
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(args.vm.to_serialized_data())["name"]
-    vm = compute_client.get(args.resource_group_name, vm_name)
-    args.location = vm.location
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': args.resource_group_name,
+        'vm_name': vm_name
+    })
+    args.location = vm.get('location')
     get_network_watcher_from_location(cmd)
 
 
@@ -88,11 +91,14 @@ def get_network_watcher_from_resource(cmd):
 
 
 def get_network_watcher_from_vmss(cmd):
+    from ...vm.operations.vmss import VMSSShow
     args = cmd.ctx.args
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
     vmss_name = parse_resource_id(args.target.to_serialized_data())["name"]
-    vmss = compute_client.get(args.resource_group_name, vmss_name)
-    args.location = vmss.location
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': args.resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
+    args.location = vmss.get('location')
     get_network_watcher_from_location(cmd)
 
 
@@ -387,16 +393,19 @@ class TestConnectivity(_TestConnectivity):
         return args_schema
 
     def pre_operations(self):
+        from ...vm.operations.vm import VMShow
         args = self.ctx.args
-        compute_client = get_mgmt_service_client(self.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
         id_parts = parse_resource_id(args.source_resource.to_serialized_data())
         vm_name = id_parts["name"]
         rg = args.resource_group_name or id_parts.get("resource_group", None)
         if not rg:
             raise ValidationError("usage error: --source-resource ID | --source-resource NAME --resource-group NAME")
 
-        vm = compute_client.get(rg, vm_name)
-        args.location = vm.location
+        vm = VMShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': rg,
+            'vm_name': vm_name
+        })
+        args.location = vm.get('location')
         get_network_watcher_from_location(self)
 
         if has_value(args.source_resource) and not is_valid_resource_id(args.source_resource.to_serialized_data()):
@@ -570,7 +579,6 @@ def process_nw_cm_v2_create_namespace(cmd):
     validate_tags(args)
     if not has_value(args.location):  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = args.endpoint_source_resource_id.to_serialized_data()
-        from azure.mgmt.resource import ResourceManagementClient
         # parse and verify endpoint_source_resource_id
         if not has_value(args.endpoint_source_resource_id):
             raise ValidationError('usage error: --location/--endpoint-source-resource-id '
@@ -579,7 +587,7 @@ def process_nw_cm_v2_create_namespace(cmd):
             raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
 
         resource = parse_resource_id(endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
         resource_api_version = _resolve_api_version(resource_client,
                                                     resource['namespace'],
                                                     resource['resource_parent'],

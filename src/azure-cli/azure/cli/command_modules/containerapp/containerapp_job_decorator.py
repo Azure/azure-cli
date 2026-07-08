@@ -267,15 +267,15 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
         if self.get_argument_trigger_type() is not None and self.get_argument_trigger_type().lower() == "manual":
             manualTriggerConfig_def = ManualTriggerModel
             manualTriggerConfig_def[
-                "replicaCompletionCount"] = 0 if self.get_argument_replica_completion_count() is None else self.get_argument_replica_completion_count()
-            manualTriggerConfig_def["parallelism"] = 0 if self.get_argument_parallelism() is None else self.get_argument_parallelism()
+                "replicaCompletionCount"] = self.get_argument_replica_completion_count()
+            manualTriggerConfig_def["parallelism"] = self.get_argument_parallelism()
 
         scheduleTriggerConfig_def = None
         if self.get_argument_trigger_type() is not None and self.get_argument_trigger_type().lower() == "schedule":
             scheduleTriggerConfig_def = ScheduleTriggerModel
             scheduleTriggerConfig_def[
-                "replicaCompletionCount"] = 0 if self.get_argument_replica_completion_count() is None else self.get_argument_replica_completion_count()
-            scheduleTriggerConfig_def["parallelism"] = 0 if self.get_argument_parallelism() is None else self.get_argument_parallelism()
+                "replicaCompletionCount"] = self.get_argument_replica_completion_count()
+            scheduleTriggerConfig_def["parallelism"] = self.get_argument_parallelism()
             scheduleTriggerConfig_def["cronExpression"] = self.get_argument_cron_expression()
 
         eventTriggerConfig_def = None

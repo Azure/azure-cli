@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-04-01"],
         ]
     }
 
@@ -134,6 +134,24 @@ class Update(AAZCommand):
             arg_group="CMK Encryption",
             help="The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.",
             nullable=True,
+        )
+
+        # define Arg Group "DataProtection"
+
+        _args_schema = cls._args_schema
+        _args_schema.ransomware_protection = AAZObjectArg(
+            options=["--ransomware-protection"],
+            arg_group="DataProtection",
+            help="Advanced Ransomware Protection settings",
+            nullable=True,
+        )
+
+        ransomware_protection = cls._args_schema.ransomware_protection
+        ransomware_protection.desired_ransomware_protection_state = AAZStrArg(
+            options=["desired-ransomware-protection-state"],
+            help="The desired value of the Advanced Ransomware Protection feature state available to the volume",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "ExportPolicy"
@@ -268,18 +286,6 @@ class Update(AAZCommand):
                 minimum=2,
             ),
         )
-        _args_schema.default_group_quota_in_ki_bs = AAZIntArg(
-            options=["--default-group-quota", "--default-group-quota-in-ki-bs"],
-            arg_group="Properties",
-            help="Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.",
-            nullable=True,
-        )
-        _args_schema.default_user_quota_in_ki_bs = AAZIntArg(
-            options=["--default-user-quota", "--default-user-quota-in-ki-bs"],
-            arg_group="Properties",
-            help="Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies .",
-            nullable=True,
-        )
         _args_schema.delete_base_snapshot = AAZBoolArg(
             options=["--delete-base-snapshot"],
             arg_group="Properties",
@@ -292,12 +298,6 @@ class Update(AAZCommand):
             help="Flag indicating whether subvolume operations are enabled on the volume",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        _args_schema.is_default_quota_enabled = AAZBoolArg(
-            options=["--is-def-quota-enabled", "--default-quota-enabled", "--is-default-quota-enabled"],
-            arg_group="Properties",
-            help="Specifies if default quota is enabled for the volume.",
-            nullable=True,
         )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
@@ -537,7 +537,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -644,7 +644,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -713,13 +713,10 @@ class Update(AAZCommand):
                 properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("dataProtection", AAZObjectType)
-                properties.set_prop("defaultGroupQuotaInKiBs", AAZIntType, ".default_group_quota_in_ki_bs")
-                properties.set_prop("defaultUserQuotaInKiBs", AAZIntType, ".default_user_quota_in_ki_bs")
                 properties.set_prop("deleteBaseSnapshot", AAZBoolType, ".delete_base_snapshot")
                 properties.set_prop("enableSubvolumes", AAZStrType, ".enable_subvolumes")
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType)
-                properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
@@ -739,6 +736,7 @@ class Update(AAZCommand):
             data_protection = _builder.get(".properties.dataProtection")
             if data_protection is not None:
                 data_protection.set_prop("backup", AAZObjectType)
+                data_protection.set_prop("ransomwareProtection", AAZObjectType, ".ransomware_protection")
                 data_protection.set_prop("replication", AAZObjectType)
                 data_protection.set_prop("snapshot", AAZObjectType)
                 data_protection.set_prop("volumeRelocation", AAZObjectType)
@@ -748,6 +746,10 @@ class Update(AAZCommand):
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
+
+            ransomware_protection = _builder.get(".properties.dataProtection.ransomwareProtection")
+            if ransomware_protection is not None:
+                ransomware_protection.set_prop("desiredRansomwareProtectionState", AAZStrType, ".desired_ransomware_protection_state")
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
@@ -1071,6 +1073,9 @@ class _UpdateHelper:
 
         data_protection = _schema_volume_read.properties.data_protection
         data_protection.backup = AAZObjectType()
+        data_protection.ransomware_protection = AAZObjectType(
+            serialized_name="ransomwareProtection",
+        )
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
@@ -1088,6 +1093,15 @@ class _UpdateHelper:
             serialized_name="policyEnforced",
         )
 
+        ransomware_protection = _schema_volume_read.properties.data_protection.ransomware_protection
+        ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+            serialized_name="actualRansomwareProtectionState",
+            flags={"read_only": True},
+        )
+        ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+            serialized_name="desiredRansomwareProtectionState",
+        )
+
         replication = _schema_volume_read.properties.data_protection.replication
         replication.destination_replications = AAZListType(
             serialized_name="destinationReplications",
@@ -1095,6 +1109,22 @@ class _UpdateHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_info = AAZStrType(
+            serialized_name="externalReplicationSetupInfo",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_status = AAZStrType(
+            serialized_name="externalReplicationSetupStatus",
+            flags={"read_only": True},
+        )
+        replication.mirror_state = AAZStrType(
+            serialized_name="mirrorState",
+            flags={"read_only": True},
+        )
+        replication.relationship_status = AAZStrType(
+            serialized_name="relationshipStatus",
             flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(

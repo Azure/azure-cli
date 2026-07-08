@@ -1090,7 +1090,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
             'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
@@ -1106,7 +1106,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
@@ -5099,6 +5099,155 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         print("creation succeeded!")
 
 
+class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
+    def test_private_link_resource_horizondb_cluster(self, resource_group):
+        self.kwargs.update({
+            'cluster_name': self.create_random_name(prefix='clitest', length=15),
+            'sub': self.get_subscription_id(),
+            'location': 'uksouth',
+            'api_version': '2026-01-20-preview',
+            'resource_type': 'Microsoft.HorizonDB/clusters',
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}',
+            'body': self._get_horizondb_cluster_body()
+        })
+
+        self.cmd('az rest --method "PUT" --headers "{headers}" '
+                 '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                 'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}" '
+                 '--body "{body}"')
+        self.check_provisioning_state_for_horizondb_cluster()
+
+        self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} '
+                 '--type {resource_type}',
+                 checks=[self.check('length(@)', 1)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
+    def test_private_endpoint_connection_horizondb_cluster(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+
+        namespace = 'Microsoft.HorizonDB'
+        instance_type = 'clusters'
+        resource_name = self.create_random_name(prefix='clitest', length=15)
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        self.kwargs.update({
+            'cluster_name': resource_name,
+            'target_resource_id': target_resource_id,
+            'location': 'uksouth',
+            'resource_type': 'Microsoft.HorizonDB/clusters',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sub': self.get_subscription_id(),
+            'api_version': '2026-01-20-preview',
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}',
+            'body': self._get_horizondb_cluster_body()
+        })
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        self.cmd('az rest --method "PUT" --headers "{headers}" '
+                 '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                 'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}" '
+                 '--body "{body}"')
+        self.check_provisioning_state_for_horizondb_cluster()
+
+        target_private_link_resource = self.cmd(
+            'az network private-link-resource list --id {target_resource_id}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        list_private_endpoint_conn = self.cmd(
+            'az network private-endpoint-connection list --id {target_resource_id}').get_output_in_json()
+        self.kwargs.update({
+            'pec_id': list_private_endpoint_conn[0]['id'],
+            'pec_name': list_private_endpoint_conn[0]['name']
+        })
+
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} '
+                 '-g {rg} --type {resource_type}',
+                 checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending'))
+
+        self.kwargs.update({
+            'approval_desc': 'Approved.',
+            'rejection_desc': 'Rejected.'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {cluster_name} --resource-group {rg} '
+            '--name {pec_name} --type {resource_type} --description "{approval_desc}"',
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+        self.cmd('az network private-endpoint-connection list --id {target_resource_id}',
+                 checks=[self.check('length(@)', 1)])
+
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+    def _get_horizondb_cluster_body(self):
+        return ('{\\"location\\": \\"uksouth\\", '
+                '\\"properties\\": {'
+                '\\"createMode\\": \\"Default\\", '
+                '\\"version\\": \\"17\\", '
+                '\\"administratorLogin\\": \\"admin123\\", '
+                '\\"administratorLoginPassword\\": \\"aBcD1234!@#$\\", '
+                '\\"vCores\\": 2, '
+                '\\"replicaCount\\": 1, '
+                '\\"network\\": {\\"publicNetworkAccess\\": \\"Enabled\\"}, '
+                '\\"highAvailability\\": {\\"mode\\": \\"Disabled\\"}, '
+                '\\"aiModelManagement\\": 1'
+                '}}')
+
+    def get_provisioning_state_for_horizondb_cluster(self):
+        response = self.cmd('az rest --method "GET" '
+                            '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                            'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}"'
+                            ).get_output_in_json()
+
+        properties = response.get('properties') or {}
+        return properties.get('provisioningState') or properties.get('state') or response.get('status')
+
+    def check_provisioning_state_for_horizondb_cluster(self):
+        time.sleep(10)
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_horizondb_cluster()
+        print(state)
+        while state not in ["Succeeded", "Ready"]:
+            if state in ["Failed", "Canceled"]:
+                print("creation failed!")
+                self.assertTrue(False)
+            if count == 15:
+                print("TimeOut after waiting for 15 mins!")
+                self.assertTrue(False)
+            print("instance not yet created. waiting for 1 more min...")
+            time.sleep(60)
+            count += 1
+            state = self.get_provisioning_state_for_horizondb_cluster()
+        print("Cluster creation succeeded!")
+
+
 class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_fspg', random_name_length=18, location='eastus2euap')
@@ -5448,3 +5597,140 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             self.assertEqual(len(connections), 0)
         else:
             self.fail("Created private endpoint connection not found, could not proceed with further tests")
+
+
+class NetworkPrivateLinkDurableTaskScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_durable_task_plr', location='centraluseuap')
+    def test_private_link_resource_durable_task(self, resource_group):
+        self.kwargs.update({
+            'scheduler_name': self.create_random_name(prefix='cli', length=20),
+            'location': 'centraluseuap',
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\": \\"centraluseuap\\", \\"properties\\": {\\"ipAllowlist\\": [], \\"publicNetworkAccess\\": \\"Disabled\\", \\"sku\\": {\\"name\\": \\"Consumption\\"}}}',
+        })
+
+        self.cmd(
+            'rest --method "PUT" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01" '
+            '--body "{body}"')
+
+        scheduler_id = self.cmd(
+            'rest --method "GET" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01"',
+            checks=[
+                self.check('name', self.kwargs['scheduler_name']),
+                self.check('properties.provisioningState', 'Succeeded'),
+                self.check('properties.publicNetworkAccess', 'Disabled')
+            ]).get_output_in_json()['id']
+        self.kwargs.update({
+            'scheduler_id': scheduler_id
+        })
+
+        self.cmd(
+            'network private-link-resource list --id {scheduler_id}',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].properties.groupId', 'scheduler')
+            ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_durable_task_pec', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_durable_task_pec', parameter_name='resource_group_2', location='centraluseuap')
+    def test_private_endpoint_connection_durable_task_scheduler(self, resource_group, resource_group_2):
+        self.kwargs.update({
+            'resource_group_net': resource_group_2,
+            'vnet_name': self.create_random_name(prefix='cli', length=20),
+            'subnet_name': self.create_random_name(prefix='cli', length=20),
+            'private_endpoint_name': self.create_random_name(prefix='cli', length=20),
+            'connection_name': self.create_random_name(prefix='cli', length=20),
+            'scheduler_name': self.create_random_name(prefix='cli', length=20),
+            'location': 'centraluseuap',
+            'approval_description': 'You are approved!',
+            'rejection_description': 'You are rejected!',
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\": \\"centraluseuap\\", \\"properties\\": {\\"ipAllowlist\\": [], \\"publicNetworkAccess\\": \\"Disabled\\", \\"sku\\": {\\"name\\": \\"Consumption\\"}}}',
+        })
+
+        self.cmd('network vnet create --resource-group {resource_group_net} --location {location} --name {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
+        self.cmd('network vnet subnet update --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        self.cmd(
+            'rest --method "PUT" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01" '
+            '--body "{body}"')
+
+        scope = self.cmd(
+            'rest --method "GET" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01"',
+            checks=[
+                self.check('name', self.kwargs['scheduler_name']),
+                self.check('properties.provisioningState', 'Succeeded'),
+                self.check('properties.publicNetworkAccess', 'Disabled')
+            ]).get_output_in_json()['id']
+
+        self.kwargs.update({
+            'scope': scope,
+        })
+
+        # Create private endpoint
+        self.cmd(
+            'network private-endpoint create --resource-group {resource_group_net} --name {private_endpoint_name} '
+            '--vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {scope} '
+            '--location {location} --group-ids scheduler --connection-name {connection_name}')
+
+        server_pec_id = self.cmd(
+            'rest --method "GET" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01"'
+        ).get_output_in_json()['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+        self.kwargs.update({
+            'server_pec_name': server_pec_name,
+        })
+
+        self.cmd(
+            'network private-endpoint-connection list --resource-group {rg} --name {scheduler_name} '
+            '--type Microsoft.DurableTask/schedulers',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        self.cmd(
+            'network private-endpoint-connection show --resource-group {rg} --resource-name {scheduler_name} '
+            '--name {server_pec_name} --type Microsoft.DurableTask/schedulers')
+
+        self.cmd(
+            'network private-endpoint-connection approve --resource-group {rg} --resource-name {scheduler_name} '
+            '--name {server_pec_name} --type Microsoft.DurableTask/schedulers --description "{approval_description}"',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{approval_description}')
+            ])
+
+        self.cmd(
+            'network private-endpoint-connection reject --resource-group {rg} --resource-name {scheduler_name} '
+            '--name {server_pec_name} --type Microsoft.DurableTask/schedulers --description "{rejection_description}"',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{rejection_description}')
+            ])
+
+        self.cmd(
+            'network private-endpoint-connection delete --resource-group {rg} --resource-name {scheduler_name} '
+            '--name {server_pec_name} --type Microsoft.DurableTask/schedulers -y')
+
+        self.cmd('network private-endpoint delete --resource-group {resource_group_net} --name {private_endpoint_name}')
+        self.cmd('network vnet subnet delete --resource-group {resource_group_net} --vnet-name {vnet_name} --name {subnet_name}')
+        self.cmd('network vnet delete --resource-group {resource_group_net} --name {vnet_name}')
+        self.cmd(
+            'rest --method "DELETE" '
+            '--url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}'
+            '/providers/Microsoft.DurableTask/schedulers/{scheduler_name}?api-version=2026-02-01"')

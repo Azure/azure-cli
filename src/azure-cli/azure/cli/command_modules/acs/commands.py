@@ -15,6 +15,7 @@ from azure.cli.command_modules.acs._client_factory import (
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
+    aks_agentpool_rollback_versions_table_format,
     aks_namespace_list_table_format,
     aks_agentpool_show_table_format,
     aks_list_nodepool_snapshot_table_format,
@@ -39,7 +40,7 @@ def load_command_table(self, _):
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_clusters_operations#ManagedClustersOperations.{}',
+                        '_operations#ManagedClustersOperations.{}',
         operation_group='managed_clusters',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
@@ -47,7 +48,7 @@ def load_command_table(self, _):
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_agent_pools_operations#AgentPoolsOperations.{}',
+                        '_operations#AgentPoolsOperations.{}',
         operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
@@ -60,8 +61,8 @@ def load_command_table(self, _):
     )
 
     maintenance_configuration_sdk = CliCommandType(
-        operations_tmpl='aazure.mgmt.containerservice.operations.'
-                        '_maintenance_configurations_operations#MaintenanceConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_operations#MaintenanceConfigurationsOperations.{}',
         operation_group='maintenance_configurations',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_maintenance_configurations
@@ -69,7 +70,7 @@ def load_command_table(self, _):
 
     managed_namespaces_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_namespaces_operations#ManagedNamespacesOperations.{}',
+                        '_operations#ManagedNamespacesOperations.{}',
         operation_group='managed_namespaces',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_namespaces,
@@ -77,7 +78,7 @@ def load_command_table(self, _):
 
     snapshot_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_snapshots_operations#SnapshotsOperations.{}',
+                        '_operations#SnapshotsOperations.{}',
         operation_group='snapshots',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
@@ -85,7 +86,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+                        '_operations#TrustedAccessRolesOperations.{}',
         operation_group='trustedaccess_role',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role
@@ -93,7 +94,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_binding_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+                        '_operations#TrustedAccessRoleBindingsOperations.{}',
         operation_group='trustedaccess_role_binding',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role_binding
@@ -109,8 +110,8 @@ def load_command_table(self, _):
                   table_transformer=aks_upgrades_table_format)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True)
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
-        g.command('delete', 'begin_delete',
-                  supports_no_wait=True, confirmation=True)
+        g.custom_command('delete', 'aks_delete',
+                         supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'aks_show',
                               table_transformer=aks_show_table_format)
         g.custom_command('list', 'aks_list',
@@ -176,6 +177,10 @@ def load_command_table(self, _):
         g.custom_command('update', 'aks_agentpool_update',
                          supports_no_wait=True)
         g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
+        g.custom_command('get-rollback-versions', 'aks_agentpool_get_rollback_versions',
+                         table_transformer=aks_agentpool_rollback_versions_table_format)
+        g.custom_command('rollback', 'aks_agentpool_rollback',
+                         supports_no_wait=True)
         g.custom_command('upgrade', 'aks_agentpool_upgrade',
                          supports_no_wait=True)
         g.custom_command('scale', 'aks_agentpool_scale', supports_no_wait=True)
@@ -299,6 +304,11 @@ def load_command_table(self, _):
             'get-upgrades',
             'aks_mesh_get_upgrades',
             table_transformer=aks_mesh_upgrades_table_format)
+        g.custom_command(
+            "proxy-redirection-mechanism",
+            "aks_mesh_proxy_redirection_mechanism",
+            supports_no_wait=True,
+        )
 
     # AKS mesh upgrade commands
     with self.command_group('aks mesh upgrade', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
@@ -329,6 +339,11 @@ def load_command_table(self, _):
             'delete', 'aks_approuting_zone_delete', confirmation=True)
         g.custom_command('update', 'aks_approuting_zone_update')
         g.custom_command('list', 'aks_approuting_zone_list')
+
+    # AKS approuting gateway istio commands
+    with self.command_group('aks approuting gateway istio', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_gateway_istio_enable')
+        g.custom_command('disable', 'aks_approuting_gateway_istio_disable', confirmation=True)
 
     with self.command_group('aks safeguards'):
         from .custom import AKSSafeguardsShowCustom as Show
