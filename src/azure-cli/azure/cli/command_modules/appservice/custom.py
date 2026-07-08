@@ -6625,41 +6625,114 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot)
 
     # ---- 1. Built-in checks from KuduLite ----
+    #
+    # KuduLite reads the config snapshot from ``/appsvctmp/config_check_{siteName}.json``
+    # on the worker where the request lands. On multi-worker plans only the
+    # instance that most recently ran the site's startup pipeline has the
+    # file, so ARR-affinity routing to any other worker returns 404. Retry
+    # per-instance until one worker responds with data.
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
     config_url = '{}/api/troubleshoot/config'.format(scm_url)
 
-    built_in = {'siteName': None, 'instanceId': None, 'writtenAt': None, 'settings': []}
-    try:
-        config_response = requests.get(config_url, headers=headers, timeout=30)
-    except requests.RequestException as ex:
-        logger.warning("Failed to call '%s': %s", config_url, ex)
-        config_response = None
+    config_check = None
+    last_status = None
+    last_body_text = ''
+    tried_instances = []
 
-    if config_response is not None:
-        if config_response.status_code == 200:
+    def _try_config(cookies=None):
+        try:
+            return requests.get(config_url, headers=headers, cookies=cookies,
+                                timeout=30, allow_redirects=False)
+        except requests.RequestException as ex:
+            logger.warning("Failed to call '%s': %s", config_url, ex)
+            return None
+
+    def _consume(resp):
+        nonlocal config_check, last_status, last_body_text
+        if resp is None:
+            return False
+        last_status = resp.status_code
+        last_body_text = (resp.text or '').strip()
+        if last_status == 200:
             try:
-                body = config_response.json()
+                body = resp.json()
             except ValueError:
                 body = None
             if isinstance(body, dict):
-                built_in['siteName'] = body.get('SiteName') or body.get('siteName')
-                built_in['instanceId'] = body.get('InstanceId') or body.get('instanceId')
-                built_in['writtenAt'] = body.get('WrittenAt') or body.get('writtenAt')
-                settings = body.get('Settings') or body.get('settings') or []
-                if isinstance(settings, list):
-                    built_in['settings'] = [s for s in settings if isinstance(s, dict)]
-        elif config_response.status_code == 404:
-            # Endpoint not rolled out yet or app has never written a config snapshot.
+                config_check = body
+                return True
+            snippet = last_body_text[:200]
             logger.warning(
-                'Built-in configuration checks are not available for this app. '
-                "This feature requires a platform version that may not have rolled "
-                "out to your app's region yet.")
-        else:
+                "Built-in configuration checks endpoint '%s' returned 200 but the body "
+                "wasn't the expected JSON object. First 200 chars: %r",
+                config_url, snippet)
+        return False
+
+    # First attempt: whichever worker ARR picks.
+    if not _consume(_try_config()):
+        # On 404, walk instances and retry with ARR affinity pinned to each.
+        if last_status == 404:
+            try:
+                client = web_client_factory(cmd.cli_ctx)
+                # pylint: disable=protected-access
+                api_version = client._config.api_version
+                # pylint: enable=protected-access
+                subscription_id = get_subscription_id(cmd.cli_ctx)
+                slot_segment = '/slots/{}'.format(slot) if slot else ''
+                instances_url = (
+                    '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+                    '/sites/{name}{slot_seg}/instances?api-version={ver}'
+                ).format(
+                    rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+                    sub=subscription_id, rg=resource_group_name, name=name,
+                    slot_seg=slot_segment, ver=api_version)
+                instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
+                instance_ids = [e.get('name') for e in (instances_payload.get('value') or [])
+                                if isinstance(e, dict) and e.get('name')]
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning('Failed to enumerate site instances for retry: %s', ex)
+                instance_ids = []
+
+            for instance_id in instance_ids:
+                tried_instances.append(instance_id)
+                cookies = {'ARRAffinity': instance_id, 'ARRAffinitySameSite': instance_id}
+                if _consume(_try_config(cookies=cookies)):
+                    break
+
+    if config_check is None:
+        status = last_status
+        if status == 404:
+            if last_body_text:
+                logger.warning(
+                    "Built-in configuration checks endpoint returned 404 on all "
+                    "workers (tried %d instance(s)). Response body: %s "
+                    "This usually means the site container has not started "
+                    "successfully yet, so no configuration snapshot was written. "
+                    "See the runtime-error section below or run 'az webapp log tail' "
+                    "for startup details.",
+                    max(1, len(tried_instances)), last_body_text)
+            else:
+                logger.warning(
+                    "Built-in configuration checks are not available for this app "
+                    "(SCM returned 404 for %s). This feature requires a platform "
+                    "version that may not have rolled out to your app's region yet.",
+                    config_url)
+        elif status in (401, 403):
+            logger.warning(
+                "Access to built-in configuration checks was denied by the SCM "
+                "endpoint (status %s). Make sure basic auth is enabled for SCM on "
+                "this site, or that your credentials have SCM access.", status)
+        elif status in (301, 302, 303, 307, 308):
+            logger.warning(
+                "Built-in configuration checks endpoint '%s' returned a redirect "
+                "(status %s). This usually means SCM authentication is "
+                "misconfigured for this app.", config_url, status)
+        elif status is not None:
             logger.warning(
                 "Failed to retrieve built-in configuration checks from '%s' "
-                "(status %s %s).",
-                config_url, config_response.status_code, config_response.reason)
+                "(status %s).",
+                config_url, status)
 
     # ---- 2. Site runtime status from ARM /siteStatus ----
     client = web_client_factory(cmd.cli_ctx)
@@ -6688,10 +6761,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     payload = {
         'name': name,
         'resourceGroup': resource_group_name,
-        'siteName': built_in['siteName'],
-        'instanceId': built_in['instanceId'],
-        'writtenAt': built_in['writtenAt'],
-        'settings': built_in['settings'],
+        'configCheck': config_check,
         'runtimeError': runtime_error,
     }
     if report:
@@ -6711,8 +6781,49 @@ def _render_troubleshoot_config(payload):
     def _row(*objs):
         _out(list(objs))
 
-    settings = payload.get('settings') or []
+    config_check = payload.get('configCheck') or {}
+    settings = config_check.get('Settings') or config_check.get('settings') or []
+    if not isinstance(settings, list):
+        settings = []
+    settings = [s for s in settings if isinstance(s, dict)]
     runtime_error = payload.get('runtimeError')
+
+    def _issue_detected(setting):
+        # KuduLite emits IssueDetected as a JSON string ("True"/"False") today,
+        # but tolerate a real bool too in case the contract firms up later.
+        raw = setting.get('IssueDetected')
+        if raw is None:
+            raw = setting.get('issueDetected')
+        if isinstance(raw, bool):
+            return raw
+        if isinstance(raw, str):
+            return raw.strip().lower() == 'true'
+        return False
+
+    any_issue = any(_issue_detected(s) for s in settings)
+
+    def _last_error_within(minutes):
+        # Runtime error is considered "fresh" if its timestamp is within the
+        # last N minutes (UTC). ARM emits lastErrorTimestamp as an ISO 8601
+        # string; tolerate a trailing 'Z' and missing tzinfo (treated as UTC).
+        if not runtime_error:
+            return False
+        raw = runtime_error.get('lastErrorTimestamp')
+        if not raw:
+            return False
+        from datetime import datetime, timezone, timedelta
+        try:
+            ts = str(raw).strip()
+            if ts.endswith('Z'):
+                ts = ts[:-1] + '+00:00'
+            parsed = datetime.fromisoformat(ts)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            return False
+        return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
+
+    show_runtime = any_issue or _last_error_within(15)
 
     # ---- Section 1: Built-in checks ----
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
@@ -6736,33 +6847,37 @@ def _render_troubleshoot_config(payload):
             details_v = str(setting.get('Details') or '')
             line = '{s:<{sw}}{v:<{vw}}{d}'.format(
                 s=name_v, sw=setting_w, v=value_v, vw=value_w, d=details_v)
-            # Highlight problem findings (anything other than "No issues detected").
-            is_ok = details_v.strip().lower().startswith('no issues')
-            style = Style.SUCCESS if is_ok else Style.WARNING
+            style = Style.WARNING if _issue_detected(setting) else Style.SUCCESS
             _row((style, line))
 
     _out()
 
     # ---- Section 2: Site runtime error recommendation ----
+    # Rendered when the built-in checks flagged at least one setting with
+    # IssueDetected == true, OR when the ARM lastErrorTimestamp is within the
+    # last 15 minutes (fresh failures are worth surfacing even if the SCM
+    # checks look clean).
+    if not show_runtime:
+        return
+
     _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
     _out()
     if runtime_error is None:
         _row((Style.SUCCESS, 'No runtime error reported.'))
     else:
         state = str(runtime_error.get('state') or '')
-        action = str(runtime_error.get('lastErrorAction') or runtime_error.get('action') or '')
         last_error = str(runtime_error.get('lastError') or '')
         details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
+        timestamp = str(runtime_error.get('lastErrorTimestamp') or '')
 
-        _row((Style.PRIMARY, 'Last runtime error'))
         if state:
-            _row((Style.PRIMARY, '  State:    '), (Style.WARNING, state))
-        if action:
-            _row((Style.PRIMARY, '  Action:   '), (Style.WARNING, action))
+            _row((Style.PRIMARY, '  State:                '), (Style.WARNING, state))
         if last_error:
-            _row((Style.PRIMARY, '  Error:    '), (Style.ERROR, last_error))
+            _row((Style.PRIMARY, '  Last Error:           '), (Style.ERROR, last_error))
         if details:
-            _row((Style.PRIMARY, '  Details:  '), (Style.WARNING, details))
+            _row((Style.PRIMARY, '  Last Error Details:   '), (Style.WARNING, details))
+        if timestamp:
+            _row((Style.PRIMARY, '  Last Error Timestamp: '), (Style.WARNING, timestamp))
 
     _out()
     _row((Style.PRIMARY, '─' * 75))

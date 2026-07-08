@@ -51,13 +51,17 @@ def transform_runtime_list_output(result):
 def transform_troubleshoot_config_output(result):
     """Flatten the troubleshoot config payload into a per-setting table.
 
-    Falls back gracefully for non-dict / empty payloads (e.g. --report was
-    passed and the command returned ``None``).
+    Reads Settings out of the nested ``configCheck`` field (the verbatim SCM
+    body). Falls back gracefully for non-dict / empty payloads (e.g. --report
+    was passed and the command returned ``None``).
     """
     from collections import OrderedDict
     if not isinstance(result, dict):
         return []
-    settings = result.get('settings') or []
+    config_check = result.get('configCheck') or {}
+    settings = config_check.get('Settings') or config_check.get('settings') or []
+    if not isinstance(settings, list):
+        return []
     return [OrderedDict([
         ('Setting', s.get('Setting') or s.get('setting') or ''),
         ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
