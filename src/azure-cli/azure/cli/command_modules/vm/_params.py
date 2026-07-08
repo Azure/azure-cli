@@ -1172,15 +1172,23 @@ def load_arguments(self, _):
                    help='Space-separated list of target resources to act on. For Uniform scale sets use decimal '
                         'instance ids (e.g. 0 1 2); for Flexible scale sets use VM names. When omitted, the action '
                         'is applied to all target resources of the event.')
-        c.argument('wait_until',
-                   help='Specifies the exact UTC timestamp in ISO 8601 format till which the event would remain in '
-                        'the current lifecycle state waiting for an action from the customer. Beyond this timestamp, '
-                        'the platform will apply the defaultAction for the event.')
+        c.ignore('target_resource_ids')
 
     with self.argument_context('vmss lifecycle-hook-event update') as c:
         c.argument('action_state', arg_type=get_enum_type(LifecycleHookActionState),
                    help="State of the lifecycle hook for the target resource. The customer can patch this property to "
                         "move the lifecycle hook to a terminal state.")
+        c.argument('wait_until',
+                   help='Specifies the exact UTC timestamp in ISO 8601 format till which the event would remain in '
+                        'the current lifecycle state waiting for an action from the customer. Beyond this timestamp, '
+                        'the platform will apply the defaultAction for the event.')
+
+    for scope in ['vmss lifecycle-hook-event approve', 'vmss lifecycle-hook-event reject']:
+        with self.argument_context(scope) as c:
+            c.ignore('target_resource_ids')
+
+    with self.argument_context('vmss lifecycle-hook-event list') as c:
+        c.ignore('lifecycle_hook_event_name')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

@@ -5136,7 +5136,7 @@ def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_dura
     lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
 
     for h in lifecycle_hooks:
-        if h.get("type" == type):
+        if h.get("type") == type:
             raise ArgumentUsageError(
                 "A lifecycle hook of type '{}' already exists. Use 'update' to modify it.".format(type))
 
@@ -5171,7 +5171,7 @@ def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_d
     if default_action is not None:
         target_hook["default_action"] = default_action
 
-    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, target_hook, no_wait)
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
 
 
 def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, remove_all=False,
@@ -5184,7 +5184,7 @@ def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, r
     hooks = []
 
     for h in lifecycle_hooks:
-        if h.get("type" == type):
+        if h.get("type") == type:
             target_hook = h
         else:
             hooks.append(h)
@@ -5197,7 +5197,7 @@ def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, r
 
 
 def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
-                                     action_state=None, wait_until=None, target_resource_ids=None):
+                                     action_state=None, wait_until=None, target_resource_ids=None, instance_ids=None):
     from .aaz.latest.vmss.lifecycle_hook_event import Update as _lifecycleHookEventUpdate
 
     command_args = {
@@ -5219,16 +5219,16 @@ def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecy
 
 
 def vmss_lifecycle_hook_event_approve(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
-                                      wait_until=None, target_resource_ids=None):
+                                      target_resource_ids=None, instance_ids=None):
     return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
-                                            action_state="Approved", wait_until=wait_until,
+                                            action_state="Approved", wait_until=None,
                                             target_resource_ids=target_resource_ids)
 
 
 def vmss_lifecycle_hook_event_reject(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
-                                     wait_until=None, target_resource_ids=None):
+                                     target_resource_ids=None, instance_ids=None):
     return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
-                                            action_state="Rejected", wait_until=wait_until,
+                                            action_state="Rejected", wait_until=None,
                                             target_resource_ids=target_resource_ids)
 # endregion
 
