@@ -6,7 +6,8 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, AzureConnectionError, CLIInternalError
+from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, AzureConnectionError,
+                                       AzureResponseError, CLIInternalError)
 
 from ._appservice_utils import _generic_site_operation
 from .custom import _get_scm_url, get_scm_site_headers, list_instances
@@ -51,7 +52,7 @@ def webapp_exec(cmd,
                 resource_group_name,
                 name,
                 exec_command=None,
-                args=None,
+                shell_command=None,
                 mode='shell',
                 working_directory=None,
                 instance=None,
@@ -67,26 +68,32 @@ def webapp_exec(cmd,
         raise ValidationError("Site is not a Linux web app. 'az webapp exec' is only supported for Linux web apps.")
 
     # Validate parameters
+    if shell:
+        if not shell.startswith('/'):
+            raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
+        if len(shell) > _MAX_SHELL_PATH_LENGTH:
+            raise ValidationError(
+                "--shell path is too long (max {} characters).".format(_MAX_SHELL_PATH_LENGTH))
+
     if mode.lower() == 'execute':
-        if not exec_command:
-            raise ValidationError("Command is required for 'execute' mode.")
-        if shell:
-            raise ValidationError("--shell is only supported in 'shell' mode.")
+        if exec_command and shell_command:
+            raise ValidationError("Specify either --command or --shell-command, not both.")
+        if not exec_command and not shell_command:
+            raise ValidationError("Either --command or --shell-command is required for 'execute' mode.")
+        if shell_command is not None and not shell_command.strip():
+            raise ValidationError("--shell-command must not be empty.")
+        if shell and not shell_command:
+            raise ValidationError("--shell is only valid together with --shell-command in 'execute' mode.")
     elif mode.lower() == 'shell':
         if exec_command:
             raise ValidationError("--command is only supported in 'execute' mode.")
-        if args:
-            raise ValidationError("--args is only supported in 'execute' mode.")
+        if shell_command:
+            raise ValidationError("--shell-command is only supported in 'execute' mode.")
         if working_directory:
             raise ValidationError("--working-directory is only supported in 'execute' mode.")
         if instance and (instance.lower() == 'all' or ',' in instance):
             raise ValidationError(
                 "Shell mode supports a single instance. Specify one instance, or omit to use a random one.")
-        if shell and not shell.startswith('/'):
-            raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
-        if shell and len(shell) > _MAX_SHELL_PATH_LENGTH:
-            raise ValidationError(
-                "--shell path is too long (max {} characters).".format(_MAX_SHELL_PATH_LENGTH))
     else:
         raise ValidationError("Invalid mode '{}'. Supported modes: execute, shell.".format(mode))
 
@@ -107,8 +114,21 @@ def webapp_exec(cmd,
         return None
 
     # Execute mode - run the command on each resolved instance in parallel.
-    args_list = [(target, scm_url, headers, exec_command, args, working_directory) for target in target_instances]
+    command, command_args = _build_execute_invocation(exec_command, shell_command, shell)
+    logger.warning(
+        "Execute mode is fire-and-forget: a 'succeeded' result means the command was accepted, "
+        "not that it ran or finished. No output is returned - it is best for background or "
+        "long-running work; for immediate output, use '--mode shell'. "
+        "See 'az webapp exec --help' for how to capture output.")
+    args_list = [(target, scm_url, headers, command, command_args, working_directory)
+                 for target in target_instances]
     results = _execute_in_parallel(_run_execute_on_instance, args_list)
+
+    failed = [r for r in results if r.get('status') == 'failed']
+    if failed:
+        raise AzureResponseError(
+            "Command execution failed on {} of {} instance(s). See the messages above for details."
+            .format(len(failed), len(results)))
 
     return results
 
@@ -131,6 +151,25 @@ def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
             "The following instances are not valid for this web app: {}. Valid instances: {}".format(
                 ', '.join(invalid), ', '.join(sorted(instance_names))))
     return requested
+
+
+def _build_execute_invocation(exec_command, shell_command, shell):
+    # Parse the user's input into the (command, args) argv pair.
+    if shell_command:
+        shell_path = shell or '/bin/bash'
+        logger.warning("Running shell command with %s: %s", shell_path, shell_command)
+        return shell_path, ['-c', shell_command]
+
+    import shlex
+    try:
+        tokens = shlex.split(exec_command)
+    except ValueError as ex:
+        raise ValidationError(
+            "Could not parse --command: {}. Check for unbalanced quotes.".format(ex))
+    if not tokens:
+        raise ValidationError("--command must not be empty.")
+    logger.warning("Running command: %s | arguments: %s", tokens[0], tokens[1:])
+    return tokens[0], tokens[1:]
 
 
 def _run_execute_on_instance(target, scm_url, headers, command, args, working_directory):

@@ -15,6 +15,7 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
     AzureConnectionError,
+    AzureResponseError,
     CLIInternalError,
 )
 from azure.cli.core.profiles import ResourceType
@@ -22,6 +23,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.appservice.webapp_exec import (
     webapp_exec,
     _resolve_target_instances,
+    _build_execute_invocation,
     _execute_command_on_instance,
     _parse_server_message,
     _friendly_exec_error_message,
@@ -76,20 +78,28 @@ class WebappExecValidationTest(unittest.TestCase):
             webapp_exec(self.cmd, 'rg', 'app')
 
     def test_execute_mode_requires_command(self):
-        with self.assertRaisesRegex(ValidationError, "Command is required"):
+        with self.assertRaisesRegex(ValidationError, "Either --command or --shell-command is required"):
             webapp_exec(self.cmd, 'rg', 'app', mode='execute')
 
-    def test_execute_mode_rejects_shell(self):
-        with self.assertRaisesRegex(ValidationError, r"--shell is only supported in 'shell' mode"):
+    def test_execute_mode_rejects_blank_shell_command(self):
+        with self.assertRaisesRegex(ValidationError, "--shell-command must not be empty"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='execute', shell_command='   ')
+
+    def test_execute_mode_rejects_command_and_shell_command_together(self):
+        with self.assertRaisesRegex(ValidationError, "either --command or --shell-command, not both"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls', shell_command='ls')
+
+    def test_execute_mode_rejects_shell_without_shell_command(self):
+        with self.assertRaisesRegex(ValidationError, "--shell is only valid together with --shell-command"):
             webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls', shell='/bin/sh')
 
     def test_shell_mode_rejects_command(self):
         with self.assertRaisesRegex(ValidationError, r"--command is only supported in 'execute' mode"):
             webapp_exec(self.cmd, 'rg', 'app', mode='shell', exec_command='ls')
 
-    def test_shell_mode_rejects_args(self):
-        with self.assertRaisesRegex(ValidationError, r"--args is only supported in 'execute' mode"):
-            webapp_exec(self.cmd, 'rg', 'app', mode='shell', args=['-l'])
+    def test_shell_mode_rejects_shell_command(self):
+        with self.assertRaisesRegex(ValidationError, r"--shell-command is only supported in 'execute' mode"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='shell', shell_command='ls')
 
     def test_shell_mode_rejects_working_directory(self):
         with self.assertRaisesRegex(ValidationError, r"--working-directory is only supported in 'execute' mode"):
@@ -132,6 +142,72 @@ class WebappExecValidationTest(unittest.TestCase):
         result = webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls')
         self.assertEqual(result, [{'status': 'success'}])
         run_parallel.assert_called_once()
+
+    @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'success'}])
+    @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
+    @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
+    @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
+    def test_execute_mode_shell_command_happy_path(self, _scm, _headers, _resolve, run_parallel):
+        result = webapp_exec(self.cmd, 'rg', 'app', mode='execute',
+                             shell_command='echo hi > /home/LogFiles/out.txt')
+        self.assertEqual(result, [{'status': 'success'}])
+        run_parallel.assert_called_once()
+
+    @mock.patch(_MODULE + '._execute_in_parallel',
+                return_value=[{'instance': 'default', 'status': 'failed', 'error': 'boom'}])
+    @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
+    @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
+    @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
+    def test_execute_mode_failed_instance_raises(self, _scm, _headers, _resolve, _run_parallel):
+        with self.assertRaisesRegex(AzureResponseError, "failed on 1 of 1 instance"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls')
+
+
+class BuildExecuteInvocationTest(unittest.TestCase):
+    """Validate how --command / --shell-command map to the backend (command, args) argv pair."""
+
+    def test_command_is_split_into_executable_and_args(self):
+        command, args = _build_execute_invocation('python /home/app.py --port 8080', None, None)
+        self.assertEqual(command, 'python')
+        self.assertEqual(args, ['/home/app.py', '--port', '8080'])
+
+    def test_command_respects_quoting(self):
+        command, args = _build_execute_invocation('touch "my file.txt"', None, None)
+        self.assertEqual(command, 'touch')
+        self.assertEqual(args, ['my file.txt'])
+
+    def test_shell_command_wraps_in_default_shell(self):
+        command, args = _build_execute_invocation(None, 'echo hi | grep h', None)
+        self.assertEqual(command, '/bin/bash')
+        self.assertEqual(args, ['-c', 'echo hi | grep h'])
+
+    def test_shell_command_honors_custom_shell(self):
+        command, args = _build_execute_invocation(None, 'echo hi', '/bin/sh')
+        self.assertEqual(command, '/bin/sh')
+        self.assertEqual(args, ['-c', 'echo hi'])
+
+    def test_empty_command_raises(self):
+        with self.assertRaisesRegex(ValidationError, "must not be empty"):
+            _build_execute_invocation('   ', None, None)
+
+    def test_unbalanced_quotes_raises(self):
+        with self.assertRaisesRegex(ValidationError, "Could not parse --command"):
+            _build_execute_invocation('echo "unterminated', None, None)
+
+    def test_single_token_command_has_no_args(self):
+        command, args = _build_execute_invocation('nginx', None, None)
+        self.assertEqual(command, 'nginx')
+        self.assertEqual(args, [])
+
+    def test_shell_operators_pass_through_as_literal_args(self):
+        command, args = _build_execute_invocation('myprog >&>>&&&&>', None, None)
+        self.assertEqual(command, 'myprog')
+        self.assertEqual(args, ['>&>>&&&&>'])
+
+    def test_shell_command_empty_shell_falls_back_to_default(self):
+        command, args = _build_execute_invocation(None, 'echo hi', '')
+        self.assertEqual(command, '/bin/bash')
+        self.assertEqual(args, ['-c', 'echo hi'])
 
 
 class ResolveTargetInstancesTest(unittest.TestCase):
