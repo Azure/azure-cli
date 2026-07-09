@@ -6508,7 +6508,6 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
 
             # Resolve flatten conflict
             # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-            print(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions)
             if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
                 for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
                     if has_value(extension.type):
