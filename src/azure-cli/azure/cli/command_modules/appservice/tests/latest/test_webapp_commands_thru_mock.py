@@ -5,6 +5,8 @@
 import unittest
 from unittest import mock
 import os
+import types
+from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
 
@@ -1603,6 +1605,195 @@ class TestOneDeploySiteCache(unittest.TestCase):
 
         self.assertEqual(result, 'https://myapp.azurewebsites.net')
         get_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
+
+
+class _TypespecContainerSettings(Mapping):
+    """Mimics an azure-mgmt-web typespec/DPG container settings model.
+
+    The current SDK returns models that behave like a read-only ``Mapping`` keyed
+    by the raw camelCase API field names (e.g. ``runtimes``, ``isAutoUpdate``,
+    ``java25Runtime``). They also expose the few fields the SDK explicitly models
+    as snake_case attributes (``java8_runtime``/``java11_runtime``). Crucially,
+    unknown fields are NOT surfaced via the old msrest ``additional_properties``
+    dict -- that attribute stays empty. The list-runtimes regression came from
+    reading only the typed attributes / ``additional_properties`` (which together
+    cover at most Java 8/11) instead of the Mapping data, silently dropping
+    Java 17/21/25.
+    """
+
+    def __init__(self, data, *, java8=None, java11=None, is_auto_update=False,
+                 end_of_life_date=None):
+        self._data = dict(data)
+        self.java8_runtime = java8
+        self.java11_runtime = java11
+        self.is_auto_update = is_auto_update
+        self.end_of_life_date = end_of_life_date
+        self.is_hidden = False
+        self.is_deprecated = False
+        # Typespec models leave additional_properties empty (msrest-only concept).
+        self.additional_properties = []
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+
+class TestStackRuntimeJavaSELinux(unittest.TestCase):
+    """Regression tests for `az webapp list-runtimes` Linux Java SE parsing.
+
+    The displayed Linux Java SE runtimes come from a single aggregate auto-update
+    container whose ``runtimes`` array enumerates every available Java major
+    version (8/11/17/21/25). The azure-mgmt-web SDK now returns typespec models
+    that preserve those fields via the Mapping interface rather than the typed
+    java8/java11 attributes or msrest ``additional_properties``. These tests guard
+    against the regression where newer Java versions were dropped because only the
+    typed attributes / ``additional_properties`` were consulted, and against the
+    aggregate container's position in the response mattering.
+    """
+
+    EXPECTED = {
+        'JAVA|25-java25', 'JAVA|21-java21', 'JAVA|17-java17', 'JAVA|11-java11', 'JAVA|8-jre8',
+    }
+
+    FULL_RUNTIMES = [
+        {'runtimeVersion': '8', 'runtime': 'JAVA|8-jre8'},
+        {'runtimeVersion': '11', 'runtime': 'JAVA|11-java11'},
+        {'runtimeVersion': '17', 'runtime': 'JAVA|17-java17'},
+        {'runtimeVersion': '21', 'runtime': 'JAVA|21-java21'},
+        {'runtimeVersion': '25', 'runtime': 'JAVA|25-java25'},
+    ]
+
+    @staticmethod
+    def _minor(value, container_settings):
+        stack_settings = types.SimpleNamespace(
+            linux_container_settings=container_settings,
+            linux_runtime_settings=None,
+            windows_container_settings=None,
+            windows_runtime_settings=None,
+        )
+        return types.SimpleNamespace(value=value, stack_settings=stack_settings)
+
+    def _patch_minors(self):
+        # Per-patch Java SE minors are always present in the API response, one per
+        # build. They are NOT auto-update and must never drive the displayed output.
+        return [
+            self._minor('25.0.1', _TypespecContainerSettings(
+                {'runtimes': [{'runtimeVersion': '25', 'runtime': 'JAVA|25.0.1'}]})),
+            self._minor('21.0.9', _TypespecContainerSettings(
+                {'runtimes': [{'runtimeVersion': '21', 'runtime': 'JAVA|21.0.9'}]})),
+            self._minor('17.0.17', _TypespecContainerSettings(
+                {'runtimes': [{'runtimeVersion': '17', 'runtime': 'JAVA|17.0.17'}]})),
+            self._minor('11.0.29', _TypespecContainerSettings(
+                {'runtimes': [{'runtimeVersion': '11', 'runtime': 'JAVA|11.0.29'}]})),
+            self._minor('1.8.472', _TypespecContainerSettings(
+                {'runtimes': [{'runtimeVersion': '8', 'runtime': 'JAVA|1.8.472'}]})),
+        ]
+
+    @staticmethod
+    def _java_se_stack(minors):
+        major = types.SimpleNamespace(
+            display_text='Java SE (Embedded Web Server)',
+            minor_versions=minors,
+        )
+        return types.SimpleNamespace(display_text='Java Containers', major_versions=[major])
+
+    @staticmethod
+    def _new_helper():
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._linux = True
+        helper._windows = False
+        helper._include_eol = False
+        helper._stacks = []
+        helper.windows_config_mappings = {'node': None}
+        return helper
+
+    def _java_se_configs(self, stack):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([stack])
+        rows = helper.get_stacks_as_table(runtime_filter='java', support_filter=None)
+        return {r['config'] for r in rows if r['runtime'] == 'Java'}
+
+    def test_aggregate_runtimes_array_complete(self):
+        # Primary path: the aggregate auto-update container carries the full
+        # 'runtimes' array via the typespec Mapping interface.
+        aggregate = self._minor('SE', _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
+        stack = self._java_se_stack([aggregate] + self._patch_minors())
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+
+    def test_aggregate_javaNNRuntime_keys(self):
+        # Fallback path: no 'runtimes' array, but the Mapping exposes individual
+        # javaNNRuntime camelCase keys for every available major version.
+        aggregate = self._minor('SE', _TypespecContainerSettings(
+            {
+                'isAutoUpdate': True,
+                'java8Runtime': 'JAVA|8-jre8',
+                'java11Runtime': 'JAVA|11-java11',
+                'java17Runtime': 'JAVA|17-java17',
+                'java21Runtime': 'JAVA|21-java21',
+                'java25Runtime': 'JAVA|25-java25',
+            },
+            is_auto_update=True))
+        stack = self._java_se_stack([aggregate] + self._patch_minors())
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+
+    def test_aggregate_not_first_selected_by_auto_update(self):
+        # The aggregate auto-update container must be chosen by its is_auto_update
+        # flag, not its position -- here it is returned last, after the per-patch minors.
+        aggregate = self._minor('SE', _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
+        stack = self._java_se_stack(self._patch_minors() + [aggregate])
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+
+    def test_typed_attrs_only_expose_java_8_11_but_mapping_has_all(self):
+        # Reproduces the exact regression: the SDK types only java8_runtime /
+        # java11_runtime, and additional_properties is empty, but the full data is
+        # available through the Mapping. The fix must read the Mapping, not just the
+        # typed attributes, otherwise Java 17/21/25 are silently dropped.
+        aggregate = self._minor('SE', _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES},
+            java8='JAVA|8-jre8', java11='JAVA|11-java11', is_auto_update=True))
+        # Sanity-check the model: typed attrs cover only 8/11, additional_properties empty.
+        self.assertEqual(aggregate.stack_settings.linux_container_settings.additional_properties, [])
+        stack = self._java_se_stack([aggregate] + self._patch_minors())
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+
+    def test_runtimes_array_entries_flagged_auto_update(self):
+        # Entries derived from the aggregate must be flagged auto-update so they
+        # survive the table filter that drops non-auto-update java rows.
+        aggregate = self._minor('SE', _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
+        stack = self._java_se_stack([aggregate] + self._patch_minors())
+        helper = self._new_helper()
+        helper._parse_raw_stacks([stack])
+        java_runtimes = [s for s in helper._stacks if s.display_name in self.EXPECTED]
+        self.assertEqual({s.display_name for s in java_runtimes}, self.EXPECTED)
+        self.assertTrue(all(s.is_auto_update for s in java_runtimes))
+
+    def test_get_container_settings_data_reads_mapping(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        settings = _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'java25Runtime': 'JAVA|25-java25', 'runtimes': self.FULL_RUNTIMES},
+            java8='JAVA|8-jre8', java11='JAVA|11-java11', is_auto_update=True)
+        data = _StackRuntimeHelper._get_container_settings_data(settings)
+        self.assertTrue(data.get('isAutoUpdate'))
+        self.assertEqual(data.get('java25Runtime'), 'JAVA|25-java25')
+        self.assertEqual(len(data.get('runtimes')), 5)
+
+    def test_get_java_runtimes_from_container_settings_reads_mapping(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        settings = _TypespecContainerSettings(
+            {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES},
+            java8='JAVA|8-jre8', java11='JAVA|11-java11', is_auto_update=True)
+        runtimes = _StackRuntimeHelper._get_java_runtimes_from_container_settings(settings)
+        self.assertEqual({name for name, _, _ in runtimes}, self.EXPECTED)
+        self.assertTrue(all(is_auto for _, _, is_auto in runtimes))
 
 
 if __name__ == '__main__':
