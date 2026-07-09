@@ -6474,11 +6474,11 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
             args.no_wait = no_wait
 
         def pre_instance_update(self, instance):
-            instance.properties.virtualMachineProfile.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
+            instance.properties.virtual_machine_profile.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
             if order_applications:
                 index = 1
-                for app in instance.properties.virtualMachineProfile.application_profile.gallery_applications:
+                for app in instance.properties.virtual_machine_profile.application_profile.gallery_applications:
                     app["order"] = index
                     index += 1
 
