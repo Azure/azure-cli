@@ -2468,6 +2468,44 @@ examples:
     text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
 """
 
+helps['webapp troubleshoot status'] = """
+type: command
+short-summary: Show site runtime status and recent startup summary for a Linux web app.
+long-summary: |
+    Aggregates two data sources:
+
+      - Site Runtime Status: ARM /siteStatus[/{instanceId}] (per-instance state,
+        action, last error, details).
+      - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
+        successful and failed startup attempts in the last 24h, plus the
+        most recent success and failure timestamps).
+
+    Use --instance to scope both to a single worker. By default returns the
+    structured payload (works with -o json, -o yaml, and -o table). Pass
+    --report to print a human-readable, color-coded report instead.
+examples:
+  - name: Show status for all instances of a web app (JSON by default)
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Show status scoped to a single worker instance
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --instance 7c2d9
+parameters:
+  - name: --instance
+    short-summary: Scope the report to a single worker instance.
+    long-summary: >
+        Accepts either the hex instanceId (from `az webapp list-instances`) or the
+        machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of
+        every instance seen in the last 24 hours.
+  - name: --report
+    short-summary: Print a human-readable, color-coded report instead of returning structured data.
+    long-summary: >
+        When set, the command writes a formatted report (overview table plus
+        per-instance Last runtime status and Startup summary) to stdout and
+        returns no machine-readable output. Omit --report to keep the default
+        structured payload that works with `-o json`, `-o yaml`, and `-o table`.
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
