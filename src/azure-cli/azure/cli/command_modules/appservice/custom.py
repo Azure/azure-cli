@@ -6885,13 +6885,11 @@ def _render_troubleshoot_config(payload):
             return False
         return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
 
-    # Show the runtime error section when:
-    #   * the ARM lastErrorTimestamp is within the last 15 minutes (fresh
-    #     failures matter even when the config checks look clean), OR
-    #   * the built-in config checks couldn't be retrieved at all (all SCM
-    #     retry attempts failed), in which case the ARM runtime error is
-    #     the only signal we have to surface.
-    show_runtime = _last_error_within(15) or config_check_failed
+    # Show the runtime error section only when the ARM lastErrorTimestamp is
+    # within the last 15 minutes. This gate is applied consistently whether or
+    # not the built-in config checks are available -- a stale runtime error
+    # should not be surfaced just because the SCM fetch failed.
+    show_runtime = _last_error_within(15)
 
     # ---- Section 1: Built-in checks ----
     _out()
@@ -6933,9 +6931,9 @@ def _render_troubleshoot_config(payload):
                 _row((Style.PRIMARY, cont_indent), (details_style, cont))
 
     # ---- Section 2: Site runtime error recommendation ----
-    # Rendered when the ARM lastErrorTimestamp is within the last 15 minutes
-    # (fresh failures are worth surfacing) or when the built-in check fetch
-    # failed and this is the only signal we have.
+    # Rendered only when the ARM lastErrorTimestamp is within the last 15
+    # minutes. Applied consistently regardless of whether the built-in
+    # checks succeeded, failed, or reported no issues.
     if show_runtime:
         _out()
         _out()
