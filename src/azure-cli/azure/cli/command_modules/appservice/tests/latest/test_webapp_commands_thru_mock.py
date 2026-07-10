@@ -2212,6 +2212,53 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 return_value={'Authorization': '******'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_scm_transient_5xx_retries_then_succeeds(
+            self, requests_get_mock, _sleep_mock, _scm_url_mock, _headers_mock,
+            send_raw_request_mock):
+        requests_get_mock.side_effect = [
+            self._scm_response(503),
+            self._scm_response(503),
+            self._scm_response(200, json_data={
+                'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+                'Settings': [{'Setting': 'alwaysOn', 'Value': 'true',
+                              'Details': 'No issues detected'}],
+            }),
+        ]
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNotNone(result['configCheck'])
+        self.assertEqual(len(result['configCheck']['Settings']), 1)
+        self.assertEqual(requests_get_mock.call_count, 3)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_scm_persistent_5xx_gives_up_after_max_attempts(
+            self, requests_get_mock, _sleep_mock, _scm_url_mock, _headers_mock,
+            send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNone(result['configCheck'])
+        self.assertEqual(requests_get_mock.call_count, 3)
+        logger_mock.warning.assert_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('requests.get')
     def test_troubleshoot_config_no_runtime_error(self, requests_get_mock, _scm_url_mock,
                                                   _headers_mock, send_raw_request_mock):
@@ -2239,8 +2286,11 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     def test_troubleshoot_config_report_prints_and_returns_none(self, requests_get_mock,
                                                                 _scm_url_mock, _headers_mock,
                                                                 send_raw_request_mock):
-        # At least one setting has IssueDetected: True so the runtime-error
-        # section will render.
+        # The runtime-error section now renders only when the ARM
+        # lastErrorTimestamp is within the last 15 minutes (or the built-in
+        # check fetch failed). Use a fresh timestamp so the section renders.
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         requests_get_mock.return_value = self._scm_response(200, json_data={
             'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
             'Settings': [
@@ -2254,7 +2304,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         send_raw_request_mock.return_value = self._arm_response({'properties': [
             {'state': 'Stopped', 'lastError': 'ImagePullUnauthorizedFailure',
              'lastErrorDetails': 'forbidden', 'lastErrorAction': 'StartingSiteContainers',
-             'lastErrorTimestamp': '2026-07-07T18:00:00Z'},
+             'lastErrorTimestamp': fresh_ts},
         ]})
 
         with mock.patch(
@@ -2274,9 +2324,9 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('BUILT-IN CHECKS', printed_text)
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ImagePullUnauthorizedFailure', printed_text)
-        self.assertIn('Last Error:', printed_text)
-        self.assertIn('Last Error Details:', printed_text)
-        self.assertIn('Last Error Timestamp:', printed_text)
+        self.assertIn('Last Error', printed_text)
+        self.assertIn('Last Error Details', printed_text)
+        self.assertIn('Last Error Timestamp', printed_text)
         # Removed labels should NOT appear.
         self.assertNotIn('Last runtime error', printed_text)
         self.assertNotIn('Action:', printed_text)
@@ -2366,6 +2416,42 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ContainerTimeout', printed_text)
         self.assertIn('fresh error', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_runtime_when_config_check_failed(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # All SCM retries fail (persistent 503) -> configCheck is None. Even
+        # though the ARM runtime error is stale, the section should still
+        # render so the user has SOMETHING to act on.
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'stale error', 'lastErrorAction': 'None',
+             'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+        ]})
+
+        with mock.patch(
+                'azure.cli.core.style.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = ''
+        for call in print_mock.call_args_list:
+            for arg in call.args:
+                if isinstance(arg, list):
+                    for tup in arg:
+                        if isinstance(tup, tuple) and len(tup) > 1:
+                            printed_text += str(tup[1])
+                elif isinstance(arg, tuple) and len(arg) > 1:
+                    printed_text += str(arg[1])
+        self.assertIn('Failed to retrieve built-in configuration checks', printed_text)
+        self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+        self.assertIn('ContainerTimeout', printed_text)
+        self.assertIn('stale error', printed_text)
 
     def test_troubleshoot_config_raises_on_windows(self):
         with mock.patch(

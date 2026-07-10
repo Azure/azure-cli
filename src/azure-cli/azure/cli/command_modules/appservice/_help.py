@@ -2448,19 +2448,18 @@ short-summary: Validate configuration for a Linux web app and surface the last r
 long-summary: >
     Aggregates two data sources into a single report:
 
-    (1) Built-in configuration checks from KuduLite — a set of common
+    (1) Built-in configuration checks — a set of common
     Linux App Service settings (linuxFxVersion, port binding, startup
     command, alwaysOn, health check path, ...) evaluated against the
     running site's configuration snapshot.
 
-    (2) The most recent runtime error reported by Azure Resource Manager
-    (`/siteStatus`) — echoed verbatim from the platform.
+    (2) The most recent site runtime status error reported by App Service
 
     By default the command returns a structured payload so the standard
-    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    `-o json/yaml/table` formatters handle output. Pass `--report` to
     print a human-readable two-section report to stdout instead.
 examples:
-  - name: Run the built-in configuration checks and show the runtime error, if any
+  - name: Run the built-in configuration checks and show the runtime error, if any (JSON by default)
     text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
   - name: Print the human-readable report
     text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
@@ -2474,15 +2473,15 @@ short-summary: Show site runtime status and recent startup summary for a Linux w
 long-summary: |
     Aggregates two data sources:
 
-      - Site Runtime Status: ARM /siteStatus[/{instanceId}] (per-instance state,
-        action, last error, details).
+      - Site Runtime Status
       - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
         successful and failed startup attempts in the last 24h, plus the
         most recent success and failure timestamps).
 
-    Use --instance to scope both to a single worker. By default returns the
-    structured payload (works with -o json, -o yaml, and -o table). Pass
-    --report to print a human-readable, color-coded report instead.
+    Use --instance to scope both to a single worker. By default the command
+    returns a structured payload so the standard `-o json/yaml/table` formatters
+    handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
 examples:
   - name: Show status for all instances of a web app (JSON by default)
     text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup

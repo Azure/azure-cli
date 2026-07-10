@@ -6671,6 +6671,16 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     last_body_text = ''
     tried_instances = []
 
+    # SCM (Kudu) is occasionally slow to respond — especially when the app has
+    # alwaysOn=false (so Kudu itself cold-starts) or the container is thrashing
+    # during startup. Transient 5xx / timeouts / connection errors resolve after
+    # a short wait, so retry a few times with backoff before treating the
+    # failure as terminal. 404 is NOT transient — that's handled separately by
+    # the per-instance ARR walk below.
+    _TRANSIENT_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+    _MAX_ATTEMPTS = 3
+    _BACKOFF_SECONDS = 1.5
+
     def _try_config(cookies=None):
         try:
             return requests.get(config_url, headers=headers, cookies=cookies,
@@ -6678,6 +6688,18 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         except requests.RequestException as ex:
             logger.warning("Failed to call '%s': %s", config_url, ex)
             return None
+
+    def _try_config_with_retry(cookies=None):
+        import time
+        resp = None
+        for attempt in range(1, _MAX_ATTEMPTS + 1):
+            resp = _try_config(cookies=cookies)
+            transient = (resp is None) or (resp.status_code in _TRANSIENT_STATUSES)
+            if not transient:
+                return resp
+            if attempt < _MAX_ATTEMPTS:
+                time.sleep(_BACKOFF_SECONDS * attempt)
+        return resp
 
     def _consume(resp):
         nonlocal config_check, last_status, last_body_text
@@ -6700,8 +6722,8 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 config_url, snippet)
         return False
 
-    # First attempt: whichever worker ARR picks.
-    if not _consume(_try_config()):
+    # First attempt: whichever worker ARR picks (with transient-failure retry).
+    if not _consume(_try_config_with_retry()):
         # On 404, walk instances and retry with ARR affinity pinned to each.
         if last_status == 404:
             try:
@@ -6728,7 +6750,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
             for instance_id in instance_ids:
                 tried_instances.append(instance_id)
                 cookies = {'ARRAffinity': instance_id, 'ARRAffinitySameSite': instance_id}
-                if _consume(_try_config(cookies=cookies)):
+                if _consume(_try_config_with_retry(cookies=cookies)):
                     break
 
     if config_check is None and not report:
@@ -6812,6 +6834,20 @@ def _render_troubleshoot_config(payload):
     def _row(*objs):
         _out(list(objs))
 
+    def _labeled(label, value):
+        """Emit '<label><value>' with hanging indent so wrapped continuation
+        lines align under the value column."""
+        import shutil
+        import textwrap
+        text = '' if value is None else str(value)
+        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
+        indent = ' ' * len(label)
+        body_w = max(20, term_w - len(label))
+        lines = textwrap.wrap(text, width=body_w) or [text]
+        _row((Style.PRIMARY, label), (Style.PRIMARY, lines[0]))
+        for cont in lines[1:]:
+            _row((Style.PRIMARY, indent), (Style.PRIMARY, cont))
+
     config_check = payload.get('configCheck') or {}
     config_check_failed = payload.get('configCheck') is None
     settings = config_check.get('Settings') or config_check.get('settings') or []
@@ -6820,19 +6856,37 @@ def _render_troubleshoot_config(payload):
     settings = [s for s in settings if isinstance(s, dict)]
     runtime_error = payload.get('runtimeError')
 
-    def _issue_detected(setting):
-        # KuduLite emits IssueDetected as a JSON string ("True"/"False") today,
-        # but tolerate a real bool too in case the contract firms up later.
-        raw = setting.get('IssueDetected')
+    def _details_level(setting):
+        # KuduLite tags each check with DetailsLevel: 'info' | 'warning' | 'error'.
+        # Fall back to legacy IssueDetected (bool or "True"/"False" string) if
+        # the new field is absent, mapping True → 'warning' and False → 'info'.
+        raw = setting.get('DetailsLevel')
         if raw is None:
-            raw = setting.get('issueDetected')
-        if isinstance(raw, bool):
-            return raw
+            raw = setting.get('detailsLevel')
         if isinstance(raw, str):
-            return raw.strip().lower() == 'true'
-        return False
+            level = raw.strip().lower()
+            if level in ('info', 'warning', 'error'):
+                return level
+        legacy = setting.get('IssueDetected')
+        if legacy is None:
+            legacy = setting.get('issueDetected')
+        if isinstance(legacy, bool):
+            return 'warning' if legacy else 'info'
+        if isinstance(legacy, str):
+            return 'warning' if legacy.strip().lower() == 'true' else 'info'
+        return 'info'
 
-    any_issue = any(_issue_detected(s) for s in settings)
+    def _style_for_level(level):
+        if level == 'error':
+            return Style.ERROR
+        if level == 'warning':
+            return Style.WARNING
+        return Style.SUCCESS
+
+    def _is_issue(level):
+        return level in ('warning', 'error')
+
+    any_issue = any(_is_issue(_details_level(s)) for s in settings)
 
     def _last_error_within(minutes):
         # Runtime error is considered "fresh" if its timestamp is within the
@@ -6855,9 +6909,16 @@ def _render_troubleshoot_config(payload):
             return False
         return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
 
-    show_runtime = any_issue or _last_error_within(15)
+    # Show the runtime error section when:
+    #   * the ARM lastErrorTimestamp is within the last 15 minutes (fresh
+    #     failures matter even when the config checks look clean), OR
+    #   * the built-in config checks couldn't be retrieved at all (all SCM
+    #     retry attempts failed), in which case the ARM runtime error is
+    #     the only signal we have to surface.
+    show_runtime = _last_error_within(15) or config_check_failed
 
     # ---- Section 1: Built-in checks ----
+    _out()
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
     if config_check_failed:
@@ -6868,13 +6929,16 @@ def _render_troubleshoot_config(payload):
     elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
+        import shutil
+        import textwrap
+        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
         setting_w = max(20, min(40, max(len(str(s.get('Setting') or '')) for s in settings) + 2))
         value_w = max(15, min(30, max(len(str(s.get('Value') or '')) for s in settings) + 2))
 
         header = '{sname:<{sw}}{vname:<{vw}}{dname}'.format(
             sname='Setting', sw=setting_w, vname='Value', vw=value_w, dname='Details')
-        _row((Style.PRIMARY, header))
-        _row((Style.PRIMARY, '{s}{v}{d}'.format(
+        _row((Style.HIGHLIGHT, header))
+        _row((Style.SECONDARY, '{s}{v}{d}'.format(
             s=('─' * (setting_w - 2)).ljust(setting_w),
             v=('─' * (value_w - 2)).ljust(value_w),
             d='─' * 40)))
@@ -6882,41 +6946,65 @@ def _render_troubleshoot_config(payload):
             name_v = str(setting.get('Setting') or '')
             value_v = str(setting.get('Value') if setting.get('Value') is not None else '')
             details_v = str(setting.get('Details') or '')
-            line = '{s:<{sw}}{v:<{vw}}{d}'.format(
-                s=name_v, sw=setting_w, v=value_v, vw=value_w, d=details_v)
-            style = Style.WARNING if _issue_detected(setting) else Style.SUCCESS
-            _row((style, line))
+            details_style = _style_for_level(_details_level(setting))
+            prefix = '{s:<{sw}}{v:<{vw}}'.format(
+                s=name_v, sw=setting_w, v=value_v, vw=value_w)
+            details_w = max(20, term_w - len(prefix))
+            detail_lines = textwrap.wrap(details_v, width=details_w) or [details_v]
+            _row((Style.PRIMARY, prefix), (details_style, detail_lines[0]))
+            cont_indent = ' ' * len(prefix)
+            for cont in detail_lines[1:]:
+                _row((Style.PRIMARY, cont_indent), (details_style, cont))
 
     # ---- Section 2: Site runtime error recommendation ----
     # Rendered when the built-in checks flagged at least one setting with
     # IssueDetected == true, OR when the ARM lastErrorTimestamp is within the
     # last 15 minutes (fresh failures are worth surfacing even if the SCM
     # checks look clean).
-    if not show_runtime:
-        return
+    if show_runtime:
+        _out()
+        _out()
+        _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
+        _out()
+        if runtime_error is None:
+            _row((Style.PRIMARY, 'No runtime error reported.'))
+        else:
+            state = str(runtime_error.get('state') or '')
+            last_error = str(runtime_error.get('lastError') or '')
+            details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
+            timestamp_raw = runtime_error.get('lastErrorTimestamp')
+            timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
+            if timestamp:
+                age = _relative_age(timestamp_raw if isinstance(timestamp_raw, str) else None)
+                if age:
+                    timestamp = '{} ({})'.format(timestamp, age)
 
-    _out()
-    _out()
-    _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
-    _out()
-    if runtime_error is None:
-        _row((Style.PRIMARY, 'No runtime error reported.'))
-    else:
-        state = str(runtime_error.get('state') or '')
-        last_error = str(runtime_error.get('lastError') or '')
-        details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
-        timestamp = str(runtime_error.get('lastErrorTimestamp') or '')
+            if state:
+                _labeled('State                  ', state)
+            if last_error:
+                _labeled('Last Error             ', last_error)
+            if details:
+                _labeled('Last Error Details     ', details)
+            if timestamp:
+                _labeled('Last Error Timestamp   ', timestamp)
 
-        if state:
-            _row((Style.PRIMARY, '  State:                '), (Style.WARNING, state))
-        if last_error:
-            _row((Style.PRIMARY, '  Last Error:           '), (Style.ERROR, last_error))
-        if details:
-            _row((Style.PRIMARY, '  Last Error Details:   '), (Style.WARNING, details))
-        if timestamp:
-            _row((Style.PRIMARY, '  Last Error Timestamp: '), (Style.WARNING, timestamp))
+        _out()
 
-    _out()
+    # ---- Section 3: Suggested next steps ----
+    # When any built-in check flagged a warning/error, point the user at the
+    # az commands they'll actually need to remediate: update the app setting
+    # and check application logs. Rendered in the same "Hint:" style used by
+    # the status command's failure footer.
+    if any_issue:
+        rg = payload.get('resourceGroup') or '<resource-group>'
+        site_name = payload.get('name') or '<site-name>'
+        _out()
+        _out((Style.WARNING, '▶ Hint:'))
+        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, rg))
+        _out('  Update flagged config:       az webapp config set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, rg))
+        _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(site_name, rg))
 
 
 # ---------------------------------------------------------------------------
@@ -7091,16 +7179,44 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
                 "version that may not have rolled out to your app's region yet."
             ).format(detail, summary_url)
 
+    # Correlate SCM startup summaries with ARM runtime items. In practice the
+    # two systems don't always agree on instance IDs: ARM's machineName is the
+    # worker-slot identity (e.g. "ln0sdlwk0001I1"), while KuduLite's InstanceId
+    # is a per-container identity (e.g. "ln0sdlwk0001XB" or a docker short-id
+    # like "cee9a66e57b2"). Match by machineName first, then fall back to
+    # cardinality pairing when there is exactly one unmatched item on each
+    # side (the common single-instance case). Anything still unmatched surfaces
+    # under an "orphan_startups" bucket that the renderer prints as its own
+    # section below the ARM cards.
+    remaining_keys = set(startup_by_machine.keys())
+    unmatched_items = []
     for item in runtime_items:
         machine = item.get('machineName')
-        # Without machineName we can't correlate this runtime entry to a KuduLite
-        # entry (KuduLite keys its summaries by machine name).
         per_instance = startup_by_machine.get(machine) if machine else None
-        if per_instance is None and app_wide_fetch_status:
-            # Synthesize a SummaryFetchStatus entry so the existing renderer /
-            # table transformer surface the app-wide message per instance.
-            per_instance = {'SummaryFetchStatus': app_wide_fetch_status}
-        item['startup'] = per_instance
+        if per_instance is not None and machine in remaining_keys:
+            remaining_keys.discard(machine)
+        if per_instance is None:
+            unmatched_items.append(item)
+        else:
+            item['startup'] = per_instance
+
+    if len(unmatched_items) == 1 and len(remaining_keys) == 1:
+        only_key = next(iter(remaining_keys))
+        unmatched_items[0]['startup'] = startup_by_machine[only_key]
+        unmatched_items[0]['startupInstanceId'] = only_key
+        remaining_keys.discard(only_key)
+        unmatched_items = []
+
+    for item in unmatched_items:
+        if app_wide_fetch_status:
+            item['startup'] = {'SummaryFetchStatus': app_wide_fetch_status}
+        else:
+            item['startup'] = None
+
+    orphan_startups = [
+        {'InstanceId': k, 'Startup': startup_by_machine[k]}
+        for k in sorted(remaining_keys)
+    ]
 
     # --- 3. Assemble payload ---
     payload = {
@@ -7108,6 +7224,8 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         'resourceGroup': resource_group,
         'instances': runtime_items,
     }
+    if orphan_startups:
+        payload['orphanStartups'] = orphan_startups
     if report:
         _render_troubleshoot_status(payload)
         return None
@@ -7126,6 +7244,9 @@ def _render_troubleshoot_status(payload):
     def _out(*objs):
         print_styled_text(*objs, file=sys.stdout)
 
+    def _row(*objs):
+        _out(list(objs))
+
     if not instances:
         _out("No runtime status reported for '{}'.".format(app_name))
         return
@@ -7140,8 +7261,8 @@ def _render_troubleshoot_status(payload):
         header = "{:<{w0}}{:<{w1}}{:<{w2}}{}".format(
             'INSTANCE', 'MACHINE', 'STATE', 'UPDATED',
             w0=col_widths[0], w1=col_widths[1], w2=col_widths[2])
-        _out((Style.HIGHLIGHT, header))
-        _out('-' * sum(col_widths))
+        _out((Style.PRIMARY, header))
+        _out((Style.PRIMARY, '-' * sum(col_widths)))
         for inst in instances:
             startup = inst.get('startup') or {}
             updated = _format_dt(_most_recent_startup(startup)) or '-'
@@ -7161,21 +7282,44 @@ def _render_troubleshoot_status(payload):
     for inst in instances:
         machine = inst.get('machineName')
         label = machine if machine else _short_id(inst.get('instanceId'))
-        sep = '-' * 66
-        _out(sep)
-        _out((Style.HIGHLIGHT, 'Instance {} Full Status Report'.format(label)))
-        _out(sep)
+        scm_id = inst.get('startupInstanceId')
+        # When ARM's machineName and SCM's InstanceId disagree (common on
+        # Linux App Service — ARM tracks the worker slot, KuduLite tracks the
+        # container) surface both so users can correlate with SCM logs.
+        _out("-" * 76)
+        if scm_id and scm_id != machine:
+            header = 'Instance {} Full Status Report (SCM: {}) '.format(label, scm_id)
+        else:
+            header = 'Instance {} Full Status Report '.format(label)
+        _out(header)
+        _out("-" * 76)
+        #_row((Style.PRIMARY, '═══ ' + header + '══' * 30))
         _out((Style.HIGHLIGHT, 'Last runtime status'))
         _print_runtime_block(inst, _out)
         _out('')
         _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
-        if not machine:
+        if not machine and not inst.get('startup'):
             # Without machineName we couldn't query KuduLite for this instance, so
             # distinguish the "couldn't ask" case from "asked, nothing recorded".
             _out('  Startup summary unavailable: machine name could not be determined for this instance.')
             _out('')
         else:
             _print_startup_block(inst.get('startup'), _out)
+        _out()
+        _out()
+
+
+    # Orphan startups — SCM entries with no matching ARM instance. These
+    # commonly show up when a container has been recycled: SCM still has the
+    # last container's logs, but ARM has already replaced the worker-slot ID.
+    orphan_startups = payload.get('orphanStartups') or []
+    for orphan in orphan_startups:
+        scm_id = orphan.get('InstanceId') or '<unknown>'
+        _out((Style.HIGHLIGHT, 'Instance {} Startup Summary (no matching ARM instance)'.format(scm_id)))
+        _row((Style.HIGHLIGHT, '─' * 76))
+        _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
+        _print_startup_block(orphan.get('Startup'), _out)
+        _out()
 
     # Hint footer — surfaced only when at least one instance has a real
     # failure in the report's window (Failed > 0 + lastError set).
@@ -7185,7 +7329,7 @@ def _render_troubleshoot_status(payload):
     )
     if has_error:
         rg = resource_group or '<resource-group>'
-        _out((Style.WARNING, 'Hint:'))
+        _out((Style.WARNING, '▶ Hint:'))
         _out('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
         _out('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
 
@@ -7326,6 +7470,38 @@ def _failed_count(startup):
         return int(m.group(0)) if m else 0
 
 
+def _emit_labeled(emit, label, value, value_style=None):
+    """Emit '<label><value>' with hanging indent: if the value wraps at the
+    terminal width, continuation lines are aligned under the value column.
+
+    ``label`` is a pre-padded string (all rows in the same block should use the
+    same width so their values line up). ``emit`` is the same callable the
+    rest of the renderer uses (accepts either a string or a list of styled
+    tuples).
+    """
+    import shutil
+    import textwrap
+    from azure.cli.core.style import Style
+
+    text = value if value is not None else ''
+    if not isinstance(text, str):
+        text = str(text)
+
+    term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
+    indent = ' ' * len(label)
+    body_w = max(20, term_w - len(label))
+    lines = textwrap.wrap(text, width=body_w) or [text]
+
+    if value_style is not None:
+        emit([(Style.PRIMARY, label), (value_style, lines[0])])
+        for cont in lines[1:]:
+            emit([(Style.PRIMARY, indent), (value_style, cont)])
+    else:
+        emit('{}{}'.format(label, lines[0]))
+        for cont in lines[1:]:
+            emit('{}{}'.format(indent, cont))
+
+
 def _print_runtime_block(inst, emit):
     """Print one Site Runtime Status block from an ARM /siteStatus item."""
     from azure.cli.core.style import Style
@@ -7334,8 +7510,8 @@ def _print_runtime_block(inst, emit):
         return
     state = inst.get('state') or '-'
     details = inst.get('details') or '-'
-    emit([(Style.PRIMARY, '  State                '), (_state_style(state), state)])
-    emit('  Details              {}'.format(details))
+    emit([(Style.PRIMARY, '  State                 '), (_state_style(state), state)])
+    _emit_labeled(emit, '  Details               ', details)
     # LastError may be stale after a recovery, so only surface it when this
     # worker has actually had failed startup attempts in the report's window.
     has_visible_error = bool(inst.get('lastError')) and _failed_count(inst.get('startup')) > 0
@@ -7350,9 +7526,9 @@ def _print_runtime_block(inst, emit):
         age = _relative_age(last_error_ts_raw) if last_error_ts_raw else None
         if age:
             last_error_ts = '{} ({})'.format(last_error_ts, age)
-        emit('  Last Error           {}'.format(last_error))
-        emit('  Last Error Details   {}'.format(last_error_details))
-        emit('  Last Error Timestamp {}'.format(last_error_ts))
+        _emit_labeled(emit, '  Last Error            ', last_error)
+        _emit_labeled(emit, '  Last Error Details    ', last_error_details)
+        _emit_labeled(emit, '  Last Error Timestamp  ', last_error_ts)
 
 
 def _most_recent_startup(startup):
