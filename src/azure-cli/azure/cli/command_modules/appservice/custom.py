@@ -7028,12 +7028,12 @@ def _print_startup_block(s, emit):
     emit([(Style.PRIMARY, '  Failed                 '), _count_style(failed, 'failed')])
     most_recent_success = _format_dt(s.get('MostRecentSuccess'))
     most_recent_failure = _format_dt(s.get('MostRecentFailure'))
-    if most_recent_success:
-        emit([(Style.PRIMARY, '  Most recent success    '),
-              (_outcome_style('STARTED'), most_recent_success)])
-    if most_recent_failure:
-        emit([(Style.PRIMARY, '  Most recent failure    '),
-              (_outcome_style('FAILED'), most_recent_failure)])
+    emit([(Style.PRIMARY, '  Most recent success    '),
+          (_outcome_style('STARTED') if most_recent_success else Style.PRIMARY,
+           most_recent_success or '-')])
+    emit([(Style.PRIMARY, '  Most recent failure    '),
+          (_outcome_style('FAILED') if most_recent_failure else Style.PRIMARY,
+           most_recent_failure or '-')])
     emit('')
 
 
