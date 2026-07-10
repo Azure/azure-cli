@@ -6858,8 +6858,6 @@ def _render_troubleshoot_config(payload):
 
     def _details_level(setting):
         # KuduLite tags each check with DetailsLevel: 'info' | 'warning' | 'error'.
-        # Fall back to legacy IssueDetected (bool or "True"/"False" string) if
-        # the new field is absent, mapping True → 'warning' and False → 'info'.
         raw = setting.get('DetailsLevel')
         if raw is None:
             raw = setting.get('detailsLevel')
@@ -6867,13 +6865,6 @@ def _render_troubleshoot_config(payload):
             level = raw.strip().lower()
             if level in ('info', 'warning', 'error'):
                 return level
-        legacy = setting.get('IssueDetected')
-        if legacy is None:
-            legacy = setting.get('issueDetected')
-        if isinstance(legacy, bool):
-            return 'warning' if legacy else 'info'
-        if isinstance(legacy, str):
-            return 'warning' if legacy.strip().lower() == 'true' else 'info'
         return 'info'
 
     def _style_for_level(level):
@@ -6957,10 +6948,9 @@ def _render_troubleshoot_config(payload):
                 _row((Style.PRIMARY, cont_indent), (details_style, cont))
 
     # ---- Section 2: Site runtime error recommendation ----
-    # Rendered when the built-in checks flagged at least one setting with
-    # IssueDetected == true, OR when the ARM lastErrorTimestamp is within the
-    # last 15 minutes (fresh failures are worth surfacing even if the SCM
-    # checks look clean).
+    # Rendered when the ARM lastErrorTimestamp is within the last 15 minutes
+    # (fresh failures are worth surfacing) or when the built-in check fetch
+    # failed and this is the only signal we have.
     if show_runtime:
         _out()
         _out()

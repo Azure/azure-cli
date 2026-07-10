@@ -2295,10 +2295,10 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
             'Settings': [
                 {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
-                 'Details': 'No issues detected', 'IssueDetected': 'False'},
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
                 {'Setting': 'websitesPort', 'Value': '',
                  'Details': "App doesn't respond on expected port",
-                 'IssueDetected': 'True'},
+                 'DetailsLevel': 'warning'},
             ],
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
@@ -2339,14 +2339,15 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     @mock.patch('requests.get')
     def test_troubleshoot_config_report_suppresses_runtime_when_no_issues(
             self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
-        # Every setting has IssueDetected == "False" -> runtime section suppressed.
+        # Every setting has DetailsLevel == 'info' and the ARM timestamp is
+        # stale -> runtime section suppressed.
         requests_get_mock.return_value = self._scm_response(200, json_data={
             'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
             'Settings': [
                 {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
-                 'Details': 'No issues detected', 'IssueDetected': 'False'},
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
                 {'Setting': 'alwaysOn', 'Value': 'true',
-                 'Details': 'No issues detected', 'IssueDetected': 'False'},
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
             ],
         })
         # Even if ARM reports a stale runtime error, we should not render the
@@ -2391,7 +2392,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
             'Settings': [
                 {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
-                 'Details': 'No issues detected', 'IssueDetected': 'False'},
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
             ],
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
