@@ -6887,8 +6887,6 @@ def _render_troubleshoot_config(payload):
             style = Style.WARNING if _issue_detected(setting) else Style.SUCCESS
             _row((style, line))
 
-    _out()
-
     # ---- Section 2: Site runtime error recommendation ----
     # Rendered when the built-in checks flagged at least one setting with
     # IssueDetected == true, OR when the ARM lastErrorTimestamp is within the
@@ -6897,6 +6895,7 @@ def _render_troubleshoot_config(payload):
     if not show_runtime:
         return
 
+    _out()
     _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
     _out()
     if runtime_error is None:
