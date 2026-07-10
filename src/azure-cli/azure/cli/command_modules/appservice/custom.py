@@ -6731,7 +6731,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 if _consume(_try_config(cookies=cookies)):
                     break
 
-    if config_check is None:
+    if config_check is None and not report:
         status = last_status
         if status == 404:
             if last_body_text:
@@ -6813,6 +6813,7 @@ def _render_troubleshoot_config(payload):
         _out(list(objs))
 
     config_check = payload.get('configCheck') or {}
+    config_check_failed = payload.get('configCheck') is None
     settings = config_check.get('Settings') or config_check.get('settings') or []
     if not isinstance(settings, list):
         settings = []
@@ -6859,7 +6860,14 @@ def _render_troubleshoot_config(payload):
     # ---- Section 1: Built-in checks ----
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
-    if not settings:
+    if config_check_failed:
+        _row((Style.WARNING,
+              'Failed to retrieve built-in configuration checks. Restart the '
+              'application (\'az webapp restart\') and try again. If the issue '
+              'persists, confirm the app is running and reachable, verify you '
+              'have permission to call the SCM (Kudu) endpoint, and check for '
+              'an ongoing App Service incident in this region.'))
+    elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
         setting_w = max(20, min(40, max(len(str(s.get('Setting') or '')) for s in settings) + 2))
@@ -7396,12 +7404,12 @@ def _print_startup_block(s, emit):
     emit([(Style.PRIMARY, '  Failed                 '), _count_style(failed, 'failed')])
     most_recent_success = _format_dt(s.get('MostRecentSuccess'))
     most_recent_failure = _format_dt(s.get('MostRecentFailure'))
-    if most_recent_success:
-        emit([(Style.PRIMARY, '  Most recent success    '),
-              (_outcome_style('STARTED'), most_recent_success)])
-    if most_recent_failure:
-        emit([(Style.PRIMARY, '  Most recent failure    '),
-              (_outcome_style('FAILED'), most_recent_failure)])
+    emit([(Style.PRIMARY, '  Most recent success    '),
+          (_outcome_style('STARTED') if most_recent_success else Style.PRIMARY,
+           most_recent_success or '-')])
+    emit([(Style.PRIMARY, '  Most recent failure    '),
+          (_outcome_style('FAILED') if most_recent_failure else Style.PRIMARY,
+           most_recent_failure or '-')])
     emit('')
 
 
