@@ -2205,7 +2205,38 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
 
         self.assertIsNone(result['configCheck'])
         self.assertIsNone(result['runtimeError'])
-        logger_mock.warning.assert_called()
+        # Exactly one warning: the 404 -> "Feature is currently unavailable." message.
+        logger_mock.warning.assert_any_call('Feature is currently unavailable.')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_feature_unavailable_on_404(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # SCM returns 404 -> BUILT-IN CHECKS section prints the compact
+        # "Feature is currently unavailable." message instead of the generic
+        # retry-and-restart guidance.
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch(
+                'azure.cli.core.style.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = ''
+        for call in print_mock.call_args_list:
+            for arg in call.args:
+                if isinstance(arg, list):
+                    for tup in arg:
+                        if isinstance(tup, tuple) and len(tup) > 1:
+                            printed_text += str(tup[1])
+                elif isinstance(arg, tuple) and len(arg) > 1:
+                    printed_text += str(arg[1])
+        self.assertIn('Feature is currently unavailable.', printed_text)
+        self.assertNotIn('Failed to retrieve built-in configuration checks', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',

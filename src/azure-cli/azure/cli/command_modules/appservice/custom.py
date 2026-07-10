@@ -6756,21 +6756,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     if config_check is None and not report:
         status = last_status
         if status == 404:
-            if last_body_text:
-                logger.warning(
-                    "Built-in configuration checks endpoint returned 404 on all "
-                    "workers (tried %d instance(s)). Response body: %s "
-                    "This usually means the site container has not started "
-                    "successfully yet, so no configuration snapshot was written. "
-                    "See the runtime-error section below or run 'az webapp log tail' "
-                    "for startup details.",
-                    max(1, len(tried_instances)), last_body_text)
-            else:
-                logger.warning(
-                    "Built-in configuration checks are not available for this app "
-                    "(SCM returned 404 for %s). This feature requires a platform "
-                    "version that may not have rolled out to your app's region yet.",
-                    config_url)
+            logger.warning('Feature is currently unavailable.')
         elif status in (401, 403):
             logger.warning(
                 "Access to built-in configuration checks was denied by the SCM "
@@ -6815,6 +6801,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         'name': name,
         'resourceGroup': resource_group_name,
         'configCheck': config_check,
+        'configCheckStatus': last_status,
         'runtimeError': runtime_error,
     }
     if report:
@@ -6850,6 +6837,7 @@ def _render_troubleshoot_config(payload):
 
     config_check = payload.get('configCheck') or {}
     config_check_failed = payload.get('configCheck') is None
+    config_check_status = payload.get('configCheckStatus')
     settings = config_check.get('Settings') or config_check.get('settings') or []
     if not isinstance(settings, list):
         settings = []
@@ -6911,10 +6899,13 @@ def _render_troubleshoot_config(payload):
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
     if config_check_failed:
-        _row((Style.WARNING,
-              'Failed to retrieve built-in configuration checks. Please try again. '
-              'If the issue persists, restart the application (\'az webapp restart\') and confirm the SCM (Kudu) '
-              'is running and reachable.'))
+        if config_check_status == 404:
+            _row((Style.WARNING, 'Feature is currently unavailable.'))
+        else:
+            _row((Style.WARNING,
+                  'Failed to retrieve built-in configuration checks. Please try again. '
+                  'If the issue persists, restart the application (\'az webapp restart\') and confirm the SCM (Kudu) '
+                  'is running and reachable.'))
     elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
