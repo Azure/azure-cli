@@ -6596,6 +6596,16 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     last_body_text = ''
     tried_instances = []
 
+    # SCM (Kudu) is occasionally slow to respond — especially when the app has
+    # alwaysOn=false (so Kudu itself cold-starts) or the container is thrashing
+    # during startup. Transient 5xx / timeouts / connection errors resolve after
+    # a short wait, so retry a few times with backoff before treating the
+    # failure as terminal. 404 is NOT transient — that's handled separately by
+    # the per-instance ARR walk below.
+    _TRANSIENT_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+    _MAX_ATTEMPTS = 3
+    _BACKOFF_SECONDS = 1.5
+
     def _try_config(cookies=None):
         try:
             return requests.get(config_url, headers=headers, cookies=cookies,
@@ -6603,6 +6613,18 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         except requests.RequestException as ex:
             logger.warning("Failed to call '%s': %s", config_url, ex)
             return None
+
+    def _try_config_with_retry(cookies=None):
+        import time
+        resp = None
+        for attempt in range(1, _MAX_ATTEMPTS + 1):
+            resp = _try_config(cookies=cookies)
+            transient = (resp is None) or (resp.status_code in _TRANSIENT_STATUSES)
+            if not transient:
+                return resp
+            if attempt < _MAX_ATTEMPTS:
+                time.sleep(_BACKOFF_SECONDS * attempt)
+        return resp
 
     def _consume(resp):
         nonlocal config_check, last_status, last_body_text
@@ -6625,8 +6647,8 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 config_url, snippet)
         return False
 
-    # First attempt: whichever worker ARR picks.
-    if not _consume(_try_config()):
+    # First attempt: whichever worker ARR picks (with transient-failure retry).
+    if not _consume(_try_config_with_retry()):
         # On 404, walk instances and retry with ARR affinity pinned to each.
         if last_status == 404:
             try:
@@ -6653,7 +6675,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
             for instance_id in instance_ids:
                 tried_instances.append(instance_id)
                 cookies = {'ARRAffinity': instance_id, 'ARRAffinitySameSite': instance_id}
-                if _consume(_try_config(cookies=cookies)):
+                if _consume(_try_config_with_retry(cookies=cookies)):
                     break
 
     if config_check is None and not report:
@@ -6726,6 +6748,66 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     return payload
 
 
+def _troubleshoot_format_dt(value):
+    """Human-readable timestamp: 'YYYY-MM-DD HH:MM:SS UTC' (or best-effort)."""
+    if not value:
+        return None
+    if isinstance(value, str):
+        v = value.replace('T', ' ')
+        is_utc = v.endswith('Z')
+        if '.' in v:
+            v = v.split('.', 1)[0]
+        if is_utc:
+            if v.endswith('Z'):
+                v = v[:-1]
+            v = v + ' UTC'
+        elif '+' in v:
+            v = v.split('+', 1)[0]
+        return v
+    return str(value)
+
+
+def _troubleshoot_relative_age(iso_value):
+    """Return a short 'Nh Mm ago' / 'Nm ago' / 'just now' / 'in the future' string
+    for an ISO-8601 UTC timestamp, or None if the input is unparseable/missing."""
+    if not iso_value or not isinstance(iso_value, str):
+        return None
+    from datetime import datetime, timezone
+    v = iso_value
+    if '.' in v:
+        head, _, tail = v.partition('.')
+        tz = ''
+        for suffix in ('Z', '+', '-'):
+            if suffix in tail:
+                idx = tail.find(suffix)
+                tz = tail[idx:]
+                break
+        v = head + tz
+    v = v.replace('Z', '+00:00')
+    try:
+        dt = datetime.fromisoformat(v)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    delta = datetime.now(timezone.utc) - dt
+    total_seconds = int(delta.total_seconds())
+    if total_seconds < 0:
+        return 'in the future'
+    if total_seconds < 60:
+        return 'just now'
+    minutes = total_seconds // 60
+    if minutes < 60:
+        return '{}m ago'.format(minutes)
+    hours = minutes // 60
+    rem_min = minutes % 60
+    if hours < 24:
+        return '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
+    days = hours // 24
+    rem_hours = hours % 24
+    return '{}d {}h ago'.format(days, rem_hours) if rem_hours else '{}d ago'.format(days)
+
+
 def _render_troubleshoot_config(payload):
     """Print the human-readable report: BUILT-IN CHECKS + SITE RUNTIME ERROR
     RECOMMENDATION. Invoked when ``--report`` is passed."""
@@ -6737,6 +6819,20 @@ def _render_troubleshoot_config(payload):
     def _row(*objs):
         _out(list(objs))
 
+    def _labeled(label, value):
+        """Emit '<label><value>' with hanging indent so wrapped continuation
+        lines align under the value column."""
+        import shutil
+        import textwrap
+        text = '' if value is None else str(value)
+        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
+        indent = ' ' * len(label)
+        body_w = max(20, term_w - len(label))
+        lines = textwrap.wrap(text, width=body_w) or [text]
+        _row((Style.PRIMARY, label), (Style.PRIMARY, lines[0]))
+        for cont in lines[1:]:
+            _row((Style.PRIMARY, indent), (Style.PRIMARY, cont))
+
     config_check = payload.get('configCheck') or {}
     config_check_failed = payload.get('configCheck') is None
     settings = config_check.get('Settings') or config_check.get('settings') or []
@@ -6745,19 +6841,37 @@ def _render_troubleshoot_config(payload):
     settings = [s for s in settings if isinstance(s, dict)]
     runtime_error = payload.get('runtimeError')
 
-    def _issue_detected(setting):
-        # KuduLite emits IssueDetected as a JSON string ("True"/"False") today,
-        # but tolerate a real bool too in case the contract firms up later.
-        raw = setting.get('IssueDetected')
+    def _details_level(setting):
+        # KuduLite tags each check with DetailsLevel: 'info' | 'warning' | 'error'.
+        # Fall back to legacy IssueDetected (bool or "True"/"False" string) if
+        # the new field is absent, mapping True → 'warning' and False → 'info'.
+        raw = setting.get('DetailsLevel')
         if raw is None:
-            raw = setting.get('issueDetected')
-        if isinstance(raw, bool):
-            return raw
+            raw = setting.get('detailsLevel')
         if isinstance(raw, str):
-            return raw.strip().lower() == 'true'
-        return False
+            level = raw.strip().lower()
+            if level in ('info', 'warning', 'error'):
+                return level
+        legacy = setting.get('IssueDetected')
+        if legacy is None:
+            legacy = setting.get('issueDetected')
+        if isinstance(legacy, bool):
+            return 'warning' if legacy else 'info'
+        if isinstance(legacy, str):
+            return 'warning' if legacy.strip().lower() == 'true' else 'info'
+        return 'info'
 
-    any_issue = any(_issue_detected(s) for s in settings)
+    def _style_for_level(level):
+        if level == 'error':
+            return Style.ERROR
+        if level == 'warning':
+            return Style.WARNING
+        return Style.SUCCESS
+
+    def _is_issue(level):
+        return level in ('warning', 'error')
+
+    any_issue = any(_is_issue(_details_level(s)) for s in settings)
 
     def _last_error_within(minutes):
         # Runtime error is considered "fresh" if its timestamp is within the
@@ -6780,9 +6894,16 @@ def _render_troubleshoot_config(payload):
             return False
         return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
 
-    show_runtime = any_issue or _last_error_within(15)
+    # Show the runtime error section when:
+    #   * the ARM lastErrorTimestamp is within the last 15 minutes (fresh
+    #     failures matter even when the config checks look clean), OR
+    #   * the built-in config checks couldn't be retrieved at all (all SCM
+    #     retry attempts failed), in which case the ARM runtime error is
+    #     the only signal we have to surface.
+    show_runtime = _last_error_within(15) or config_check_failed
 
     # ---- Section 1: Built-in checks ----
+    _out()
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
     if config_check_failed:
@@ -6793,13 +6914,16 @@ def _render_troubleshoot_config(payload):
     elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
+        import shutil
+        import textwrap
+        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
         setting_w = max(20, min(40, max(len(str(s.get('Setting') or '')) for s in settings) + 2))
         value_w = max(15, min(30, max(len(str(s.get('Value') or '')) for s in settings) + 2))
 
         header = '{sname:<{sw}}{vname:<{vw}}{dname}'.format(
             sname='Setting', sw=setting_w, vname='Value', vw=value_w, dname='Details')
-        _row((Style.PRIMARY, header))
-        _row((Style.PRIMARY, '{s}{v}{d}'.format(
+        _row((Style.HIGHLIGHT, header))
+        _row((Style.SECONDARY, '{s}{v}{d}'.format(
             s=('─' * (setting_w - 2)).ljust(setting_w),
             v=('─' * (value_w - 2)).ljust(value_w),
             d='─' * 40)))
@@ -6807,41 +6931,65 @@ def _render_troubleshoot_config(payload):
             name_v = str(setting.get('Setting') or '')
             value_v = str(setting.get('Value') if setting.get('Value') is not None else '')
             details_v = str(setting.get('Details') or '')
-            line = '{s:<{sw}}{v:<{vw}}{d}'.format(
-                s=name_v, sw=setting_w, v=value_v, vw=value_w, d=details_v)
-            style = Style.WARNING if _issue_detected(setting) else Style.SUCCESS
-            _row((style, line))
+            details_style = _style_for_level(_details_level(setting))
+            prefix = '{s:<{sw}}{v:<{vw}}'.format(
+                s=name_v, sw=setting_w, v=value_v, vw=value_w)
+            details_w = max(20, term_w - len(prefix))
+            detail_lines = textwrap.wrap(details_v, width=details_w) or [details_v]
+            _row((Style.PRIMARY, prefix), (details_style, detail_lines[0]))
+            cont_indent = ' ' * len(prefix)
+            for cont in detail_lines[1:]:
+                _row((Style.PRIMARY, cont_indent), (details_style, cont))
 
     # ---- Section 2: Site runtime error recommendation ----
     # Rendered when the built-in checks flagged at least one setting with
     # IssueDetected == true, OR when the ARM lastErrorTimestamp is within the
     # last 15 minutes (fresh failures are worth surfacing even if the SCM
     # checks look clean).
-    if not show_runtime:
-        return
+    if show_runtime:
+        _out()
+        _out()
+        _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
+        _out()
+        if runtime_error is None:
+            _row((Style.PRIMARY, 'No runtime error reported.'))
+        else:
+            state = str(runtime_error.get('state') or '')
+            last_error = str(runtime_error.get('lastError') or '')
+            details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
+            timestamp_raw = runtime_error.get('lastErrorTimestamp')
+            timestamp = _troubleshoot_format_dt(timestamp_raw) or str(timestamp_raw or '')
+            if timestamp:
+                age = _troubleshoot_relative_age(timestamp_raw if isinstance(timestamp_raw, str) else None)
+                if age:
+                    timestamp = '{} ({})'.format(timestamp, age)
 
-    _out()
-    _out()
-    _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
-    _out()
-    if runtime_error is None:
-        _row((Style.PRIMARY, 'No runtime error reported.'))
-    else:
-        state = str(runtime_error.get('state') or '')
-        last_error = str(runtime_error.get('lastError') or '')
-        details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
-        timestamp = str(runtime_error.get('lastErrorTimestamp') or '')
+            if state:
+                _labeled('State                  ', state)
+            if last_error:
+                _labeled('Last Error             ', last_error)
+            if details:
+                _labeled('Last Error Details     ', details)
+            if timestamp:
+                _labeled('Last Error Timestamp   ', timestamp)
 
-        if state:
-            _row((Style.PRIMARY, '  State:                '), (Style.WARNING, state))
-        if last_error:
-            _row((Style.PRIMARY, '  Last Error:           '), (Style.ERROR, last_error))
-        if details:
-            _row((Style.PRIMARY, '  Last Error Details:   '), (Style.WARNING, details))
-        if timestamp:
-            _row((Style.PRIMARY, '  Last Error Timestamp: '), (Style.WARNING, timestamp))
+        _out()
 
-    _out()
+    # ---- Section 3: Suggested next steps ----
+    # When any built-in check flagged a warning/error, point the user at the
+    # az commands they'll actually need to remediate: update the app setting
+    # and check application logs. Rendered in the same "Hint:" style used by
+    # the status command's failure footer.
+    if any_issue:
+        rg = payload.get('resourceGroup') or '<resource-group>'
+        site_name = payload.get('name') or '<site-name>'
+        _out()
+        _out((Style.WARNING, '▶ Hint:'))
+        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, rg))
+        _out('  Update flagged config:       az webapp config set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, rg))
+        _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(site_name, rg))
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
