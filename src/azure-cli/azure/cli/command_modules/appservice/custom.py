@@ -6863,10 +6863,8 @@ def _render_troubleshoot_config(payload):
     if config_check_failed:
         _row((Style.WARNING,
               'Failed to retrieve built-in configuration checks. Restart the '
-              'application (\'az webapp restart\') and try again. If the issue '
-              'persists, confirm the app is running and reachable, verify you '
-              'have permission to call the SCM (Kudu) endpoint, and check for '
-              'an ongoing App Service incident in this region.'))
+              'application (\'az webapp restart\') and confirm the SCM (Kudu) '
+              'is running and reachable.'))
     elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
