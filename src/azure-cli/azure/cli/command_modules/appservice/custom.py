@@ -6787,8 +6787,8 @@ def _render_troubleshoot_config(payload):
     _out()
     if config_check_failed:
         _row((Style.WARNING,
-              'Failed to retrieve built-in configuration checks. Restart the '
-              'application (\'az webapp restart\') and confirm the SCM (Kudu) '
+              'Failed to retrieve built-in configuration checks. Please try again. '
+              'If the issue persists, restart the application (\'az webapp restart\') and confirm the SCM (Kudu) '
               'is running and reachable.'))
     elif not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
@@ -6821,10 +6821,11 @@ def _render_troubleshoot_config(payload):
         return
 
     _out()
+    _out()
     _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
     _out()
     if runtime_error is None:
-        _row((Style.SUCCESS, 'No runtime error reported.'))
+        _row((Style.PRIMARY, 'No runtime error reported.'))
     else:
         state = str(runtime_error.get('state') or '')
         last_error = str(runtime_error.get('lastError') or '')
@@ -6841,7 +6842,6 @@ def _render_troubleshoot_config(payload):
             _row((Style.PRIMARY, '  Last Error Timestamp: '), (Style.WARNING, timestamp))
 
     _out()
-    _row((Style.PRIMARY, '─' * 75))
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
