@@ -177,6 +177,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'apim_graphql_resolver_delete', confirmation=True)
         g.custom_show_command('show', 'apim_graphql_resolver_show')
         g.custom_command('list', 'apim_graphql_resolver_list')
+        g.generic_update_command('update', custom_func_name='apim_graphql_resolver_update')
 
     with self.command_group('apim graphql resolver policy', graphql_api_resolver_policy) as g:
         g.custom_command('create', 'apim_graphql_resolver_policy_create')

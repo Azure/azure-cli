@@ -719,6 +719,15 @@ examples:
         az apim graphql resolver list --service-name MyApim -g MyResourceGroup --api-id MyApi
 """
 
+helps['apim graphql resolver update'] = """
+type: command
+short-summary: Update a resolver in the GraphQL API.
+examples:
+  - name: Update the display name and description of a resolver.
+    text: |
+        az apim graphql resolver update --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --display-name "Query-allFamilies" --description "An updated GraphQL Resolver example"
+"""
+
 helps['apim graphql resolver policy create'] = """
 type: command
 short-summary: Create or updates policy configuration for the GraphQL API Resolver level.
