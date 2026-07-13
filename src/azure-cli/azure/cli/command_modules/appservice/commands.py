@@ -71,9 +71,13 @@ def transform_troubleshoot_config_output(result):
 
 def transform_troubleshoot_status_output(result):
     """Flatten the nested `instances` payload into one row per worker for `-o table`.
-    Column layout: InstanceId / State / (LastError / LastErrorTimestamp /
-    LastErrorDetails only when any row has an error) / Successful / Failed /
-    Updated.
+    Column layout: InstanceId / State / Details / (LastError /
+    LastErrorTimestamp / LastErrorDetails only when any row has an error) /
+    Successful / Failed / Updated.
+
+    Also queues a post-output hint trailer (via ``atexit``) when at least one
+    instance has a visible error, so users see the recommended follow-up
+    ``az webapp log`` commands under the table.
 
     The framework's default table renderer would only surface top-level scalars
     (name, resourceGroup) and drop every meaningful field."""
@@ -83,6 +87,8 @@ def transform_troubleshoot_status_output(result):
     )
 
     items = (result or {}).get('instances') or []
+    app_name = (result or {}).get('name') or '<webapp>'
+    resource_group = (result or {}).get('resourceGroup') or '<resource-group>'
 
     # LastError is nullable on the backend SiteRuntimeStatusOnWorker contract.
     # A 'Started' instance is healthy, so any LastError it still carries is stale
@@ -114,6 +120,7 @@ def transform_troubleshoot_status_output(result):
         row = OrderedDict([
             ('InstanceId', _dash(_short_id(item.get('instanceId')))),
             ('State', _dash(item.get('state'))),
+            ('Details', _dash(item.get('details'))),
         ])
         if show_errors:
             if _has_visible_error(item):
@@ -128,6 +135,24 @@ def transform_troubleshoot_status_output(result):
         row['Failed'] = _dash(failed)
         row['Updated'] = _dash(updated)
         rows.append(row)
+
+    # Trailer is only meaningful for -o table; this transformer is only invoked
+    # by knack when the user selected table output, so guarding on show_errors
+    # is sufficient. Deferring via atexit ensures the hint prints AFTER knack
+    # has flushed the table to stdout.
+    if show_errors:
+        import atexit
+        import sys as _sys
+
+        def _print_hint(app=app_name, rg=resource_group):
+            _sys.stderr.write(
+                '\n\u25b6 Hint:\n'
+                '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
+                '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
+                .format(name=app, rg=rg))
+
+        atexit.register(_print_hint)
+
     return rows
 
 
