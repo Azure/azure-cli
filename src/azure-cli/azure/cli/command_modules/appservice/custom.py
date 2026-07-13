@@ -6773,7 +6773,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     if config_check is None and not report:
         status = last_status
         if status == 404:
-            logger.warning('Feature is currently unavailable.')
+            logger.warning('Configuration check feature is currently unavailable.')
         elif status in (401, 403):
             logger.warning(
                 "Access to built-in configuration checks was denied by the SCM "

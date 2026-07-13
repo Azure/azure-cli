@@ -152,7 +152,7 @@ def render_report(payload):
     _out()
     if config_check_failed:
         if config_check_status == 404:
-            _row((Style.WARNING, 'Feature is currently unavailable.'))
+            _row((Style.WARNING, 'Configuration check feature is currently unavailable.'))
         else:
             _row((Style.WARNING,
                   'Failed to retrieve built-in configuration checks. Please try again. '
