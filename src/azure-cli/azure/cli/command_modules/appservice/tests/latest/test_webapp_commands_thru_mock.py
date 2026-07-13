@@ -1733,7 +1733,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         send_raw_request_mock.return_value = self._arm_response({'properties': []})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -1877,7 +1877,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         self.assertIsNone(result)
@@ -1928,7 +1928,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -1971,7 +1971,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2010,7 +2010,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2046,7 +2046,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2117,3 +2117,4 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
