@@ -2443,7 +2443,11 @@ long-summary: >
     command, alwaysOn, health check path, ...) evaluated against the
     running site's configuration snapshot.
 
-    (2) The most recent site runtime status error reported by App Service
+    (2) The most recent site runtime status error reported by App Service.
+    The runtime error recommendation section is only surfaced when the
+    error occurred within the last 15 minutes; older errors are still
+    included in the structured payload (with an `isRecent` flag) but
+    hidden from the `--report` view.
 
     By default the command returns a structured payload so the standard
     `-o json/yaml/table` formatters handle output. Pass `--report` to
