@@ -6646,7 +6646,9 @@ def _extract_runtime_error(arm_response):
         return item.get('lastErrorTimestamp') or ''
 
     candidates.sort(key=_ts_key, reverse=True)
-    return candidates[0]
+    freshest = candidates[0]
+    freshest['failingInstanceCount'] = len(candidates)
+    return freshest
 
 
 def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False):

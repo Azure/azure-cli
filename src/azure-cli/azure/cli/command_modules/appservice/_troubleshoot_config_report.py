@@ -37,6 +37,15 @@ def _format_dt(value):
     return str(value)
 
 
+def _short_id(instance_id):
+    """Truncate a long hex ARM instanceId to 10 characters for display."""
+    if not instance_id:
+        return None
+    if len(instance_id) > 12:
+        return instance_id[:10]
+    return instance_id
+
+
 def _relative_age(iso_value):
     """Return a short 'Nh Mm ago' / 'Nm ago' / 'just now' / 'in the future' string
     for an ISO-8601 UTC timestamp, or None if the input is unparseable/missing."""
@@ -199,6 +208,15 @@ def render_report(payload):
                 if age:
                     timestamp = '{} ({})'.format(timestamp, age)
 
+            instance_short = _short_id(runtime_error.get('instanceId'))
+            failing_count = runtime_error.get('failingInstanceCount')
+            if instance_short:
+                if isinstance(failing_count, int) and failing_count >= 1:
+                    instance_value = '{} (1 out of {} failing instances)'.format(
+                        instance_short, failing_count)
+                else:
+                    instance_value = instance_short
+                _labeled('Instance               ', instance_value)
             if state:
                 _labeled('State                  ', state)
             if last_error:
