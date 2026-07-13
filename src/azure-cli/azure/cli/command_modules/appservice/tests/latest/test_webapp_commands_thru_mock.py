@@ -1274,6 +1274,38 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
 
+    def test_transform_troubleshoot_status_output_renders_error_columns(self):
+        # Regression: the LastError* columns exercise _format_dt only when
+        # any instance has a visible error. A missing import there surfaces
+        # as knack's opaque "Table output unavailable" message.
+        from azure.cli.command_modules.appservice.commands import (
+            transform_troubleshoot_status_output,
+        )
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [
+                {
+                    'instanceId': 'b6cc022ee0e1234567890',
+                    'state': 'Stopped',
+                    'details': 'container did not start',
+                    'lastError': 'ContainerTimeout',
+                    'lastErrorTimestamp': '2026-07-13T17:29:10Z',
+                    'lastErrorDetails': 'boom',
+                    'startup': {'Succeeded': 1, 'Failed': 2},
+                },
+            ],
+        }
+        rows = transform_troubleshoot_status_output(payload)
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row['InstanceId'], 'b6cc022ee0')
+        self.assertEqual(row['LastError'], 'ContainerTimeout')
+        self.assertIn('2026-07-13', row['LastErrorTimestamp'])
+        self.assertEqual(row['LastErrorDetails'], 'boom')
+        self.assertEqual(row['Succeeded (last 24h)'], 1)
+        self.assertEqual(row['Failed (last 24h)'], 2)
+
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
     """Tests that the TIP hint appears in RuntimeFailed and timeout errors."""
