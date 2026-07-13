@@ -251,7 +251,12 @@ examples:
   - name: >
       Create elastic cluster with node count of 5.
     text: >
-      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --node-count 5
+      az postgres flexible-server create -g testgroup -n testcluster --location testlocation --node-count 5
+
+  - name: >
+      Create elastic cluster with node count of 3 and custom database name.
+    text: >
+      az postgres flexible-server create -g testgroup -n testcluster --location testlocation --node-count 3 --database-name testdatabase
 """
 
 helps['postgres flexible-server show'] = """

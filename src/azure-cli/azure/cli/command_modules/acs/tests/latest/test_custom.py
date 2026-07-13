@@ -30,6 +30,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_agentpool_upgrade,
     aks_enable_addons,
     aks_stop,
+    aks_upgrade,
     is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
@@ -970,6 +971,51 @@ class TestAKSCommand(unittest.TestCase):
             return_value=None
         )
         self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
+
+    def test_aks_upgrade_node_image_only_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during --node-image-only to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+
+        self.client.get = mock.Mock(return_value=mc)
+
+        with mock.patch("azure.cli.command_modules.acs.custom.cf_agent_pools") as mock_cf, \
+             mock.patch("azure.cli.command_modules.acs.custom._upgrade_single_nodepool_image_version") as mock_upgrade:
+            mock_cf.return_value = mock.Mock()
+
+            aks_upgrade(self.cmd, self.client, "rg", "name", node_image_only=True, yes=True)
+
+            # Only the VMSS pool should be upgraded; the Machines mode pool must be skipped.
+            upgraded_pools = [call.args[4] for call in mock_upgrade.call_args_list]
+            self.assertNotIn("machinespool", upgraded_pools)
+            self.assertIn("nodepool1", upgraded_pools)
+
+    def test_aks_upgrade_kubernetes_version_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during Kubernetes version upgrade to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+        mc.service_principal_profile = None
+
+        self.client.get = mock.Mock(return_value=mc)
+        self.client.begin_create_or_update = mock.Mock(return_value=None)
+
+        aks_upgrade(self.cmd, self.client, "rg", "name", kubernetes_version="1.25.0", yes=True)
+
+        # Machines mode pool must not have orchestrator_version set; VMSS pool must be upgraded.
+        self.assertIsNone(machines_pool.orchestrator_version)
+        self.assertEqual(vmss_pool.orchestrator_version, "1.25.0")
 
 
 class TestRunCommand(unittest.TestCase):
