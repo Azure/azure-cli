@@ -5,6 +5,7 @@
 
 import json
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 import unittest
 import time
 import random
@@ -1901,3 +1902,48 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Test listing deleted vaults with location filter
         deleted_vaults = self.cmd('backup deleted-vault list --location {location}').get_output_in_json()
         self.assertIsInstance(deleted_vaults, list)
+
+
+class BackupJobContainerSubscriptionIdTests(unittest.TestCase):
+    """Unit tests for set_job_container_subscription_id, which surfaces containerSubscriptionId on
+    'az backup job show' by reading the 'VM Subscription ID' key from the job's extendedInfo property bag
+    (populated for Cross Subscription Backup jobs). These guard the property-bag key name/parsing without
+    requiring a live cross-subscription setup."""
+
+    @staticmethod
+    def _make_job(property_bag=None, with_extended_info=True, with_properties=True):
+        if not with_properties:
+            return SimpleNamespace()
+        extended_info = SimpleNamespace(property_bag=property_bag) if with_extended_info else None
+        properties = SimpleNamespace(extended_info=extended_info, container_subscription_id=None)
+        return SimpleNamespace(properties=properties)
+
+    def test_sets_container_subscription_id_from_property_bag(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        vm_sub = '00000000-0000-0000-0000-000000000000'
+        job = self._make_job(property_bag={'VM Subscription ID': vm_sub})
+        result = set_job_container_subscription_id(job)
+        self.assertEqual(result.properties.container_subscription_id, vm_sub)
+
+    def test_leaves_container_subscription_id_unset_when_key_absent(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        job = self._make_job(property_bag={'Some Other Key': 'value'})
+        result = set_job_container_subscription_id(job)
+        self.assertIsNone(result.properties.container_subscription_id)
+
+    def test_handles_missing_property_bag_and_extended_info(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        job_no_bag = self._make_job(property_bag=None)
+        self.assertIsNone(set_job_container_subscription_id(job_no_bag).properties.container_subscription_id)
+        job_no_ext = self._make_job(with_extended_info=False)
+        self.assertIsNone(set_job_container_subscription_id(job_no_ext).properties.container_subscription_id)
+
+    def test_handles_job_without_properties_or_none(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        self.assertIsNone(set_job_container_subscription_id(None))
+        job = self._make_job(with_properties=False)
+        self.assertIs(set_job_container_subscription_id(job), job)
+
+
+if __name__ == '__main__':
+    unittest.main()
