@@ -73,7 +73,7 @@ def transform_troubleshoot_status_output(result):
     """Flatten the nested `instances` payload into one row per worker for `-o table`.
     Column layout: InstanceId / State / Details / (LastError /
     LastErrorTimestamp / LastErrorDetails only when any row has an error) /
-    Successful / Failed / Updated.
+    Succeeded (last 24h) / Failed (last 24h) / Updated (last 24h).
 
     Also queues a post-output hint trailer (via ``atexit``) when at least one
     instance has a visible error, so users see the recommended follow-up
@@ -131,9 +131,9 @@ def transform_troubleshoot_status_output(result):
                 row['LastError'] = '-'
                 row['LastErrorTimestamp'] = '-'
                 row['LastErrorDetails'] = '-'
-        row['Succeeded'] = _dash(succeeded)
-        row['Failed'] = _dash(failed)
-        row['Updated'] = _dash(updated)
+        row['Succeeded (last 24h)'] = _dash(succeeded)
+        row['Failed (last 24h)'] = _dash(failed)
+        row['Updated (last 24h)'] = _dash(updated)
         rows.append(row)
 
     # Trailer is only meaningful for -o table; this transformer is only invoked
