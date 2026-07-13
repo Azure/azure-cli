@@ -1693,6 +1693,10 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertEqual(result['configCheck'], scm_body)
         self.assertEqual(result['configCheck']['Settings'], settings)
         self.assertEqual(result['runtimeError']['lastError'], 'ContainerTimeout')
+        # runtimeError carries the freshness signal so structured-payload
+        # consumers can apply the same 15-minute gate the --report view uses.
+        self.assertEqual(result['runtimeError']['freshnessWindowMinutes'], 15)
+        self.assertFalse(result['runtimeError']['isRecent'])
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1792,6 +1796,32 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIsNone(result['configCheck'])
         self.assertEqual(requests_get_mock.call_count, 3)
         logger_mock.warning.assert_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_payload_flags_recent_runtime_error(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # A fresh (<15 min old) ARM lastErrorTimestamp should be flagged
+        # isRecent=True in the structured payload so scripts can apply the
+        # same 15-minute gate the --report view uses.
+        from datetime import datetime, timezone, timedelta
+        recent_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat().replace('+00:00', 'Z')
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't', 'Settings': [],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorTimestamp': recent_ts},
+        ]})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertTrue(result['runtimeError']['isRecent'])
+        self.assertEqual(result['runtimeError']['freshnessWindowMinutes'], 15)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',

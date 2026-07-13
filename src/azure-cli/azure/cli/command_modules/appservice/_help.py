@@ -2432,16 +2432,6 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
-helps['webapp troubleshoot'] = """
-type: group
-short-summary: Diagnose common Linux web app problems.
-long-summary: >
-    Preview command group that pairs built-in configuration checks (from
-    KuduLite on the worker) with the most recent runtime error reported by
-    Azure Resource Manager. Use when a Linux app is failing to start, returning
-    HTTP 502/503, or exhibiting other post-deployment misbehavior.
-"""
-
 helps['webapp troubleshoot config'] = """
 type: command
 short-summary: Validate configuration for a Linux web app and surface the last runtime error.

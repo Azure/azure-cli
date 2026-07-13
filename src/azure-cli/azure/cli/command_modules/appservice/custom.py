@@ -6520,6 +6520,34 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
 # az webapp troubleshoot config
 # -----------------------------------------------------------------------------
 
+# Runtime-error freshness window. Both the structured payload and the --report
+# view surface the runtime error only when its lastErrorTimestamp is within
+# this many minutes of "now", so scripts and human readers agree.
+_RUNTIME_ERROR_FRESHNESS_MINUTES = 15
+
+
+def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES):
+    """Return True iff the runtime error's lastErrorTimestamp is within the
+    last N minutes (UTC). ARM emits lastErrorTimestamp as an ISO 8601 string;
+    tolerate a trailing 'Z' and missing tzinfo (treated as UTC)."""
+    if not runtime_error:
+        return False
+    raw = runtime_error.get('lastErrorTimestamp')
+    if not raw:
+        return False
+    from datetime import datetime, timezone, timedelta
+    try:
+        ts = str(raw).strip()
+        if ts.endswith('Z'):
+            ts = ts[:-1] + '+00:00'
+        parsed = datetime.fromisoformat(ts)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        return False
+    return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
+
+
 def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
@@ -6652,10 +6680,10 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         # On 404, walk instances and retry with ARR affinity pinned to each.
         if last_status == 404:
             try:
-                client = web_client_factory(cmd.cli_ctx)
-                # pylint: disable=protected-access
-                api_version = client._config.api_version
-                # pylint: enable=protected-access
+                # Pin api-version explicitly. Using a literal here avoids depending
+                # on client._config.api_version (a protected attribute) and pins
+                # the URL to a version known to serve /instances.
+                api_version = '2024-11-01'
                 subscription_id = get_subscription_id(cmd.cli_ctx)
                 slot_segment = '/slots/{}'.format(slot) if slot else ''
                 instances_url = (
@@ -6699,11 +6727,11 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 config_url, status)
 
     # ---- 2. Site runtime status from ARM /siteStatus ----
-    client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    # pylint: disable=protected-access
-    api_version = client._config.api_version
-    # pylint: enable=protected-access
+    # Pin api-version explicitly. Using a literal here avoids depending on
+    # client._config.api_version (a protected attribute) and pins the URL
+    # to a version known to serve /siteStatus.
+    api_version = '2024-11-01'
     slot_segment = '/slots/{}'.format(slot) if slot else ''
     arm_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
@@ -6721,6 +6749,13 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         logger.warning("Failed to retrieve site runtime status from '%s': %s", arm_url, ex)
     except ValueError as ex:
         logger.warning("Failed to parse site runtime status response: %s", ex)
+
+    # Annotate the runtime error with a freshness signal so structured-payload
+    # consumers can apply the same 15-minute gate the --report view uses.
+    if runtime_error is not None:
+        runtime_error['freshnessWindowMinutes'] = _RUNTIME_ERROR_FRESHNESS_MINUTES
+        runtime_error['isRecent'] = _runtime_error_is_recent(
+            runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES)
 
     payload = {
         'name': name,
@@ -6852,32 +6887,11 @@ def _render_troubleshoot_config(payload):
 
     any_issue = any(_is_issue(_details_level(s)) for s in settings)
 
-    def _last_error_within(minutes):
-        # Runtime error is considered "fresh" if its timestamp is within the
-        # last N minutes (UTC). ARM emits lastErrorTimestamp as an ISO 8601
-        # string; tolerate a trailing 'Z' and missing tzinfo (treated as UTC).
-        if not runtime_error:
-            return False
-        raw = runtime_error.get('lastErrorTimestamp')
-        if not raw:
-            return False
-        from datetime import datetime, timezone, timedelta
-        try:
-            ts = str(raw).strip()
-            if ts.endswith('Z'):
-                ts = ts[:-1] + '+00:00'
-            parsed = datetime.fromisoformat(ts)
-            if parsed.tzinfo is None:
-                parsed = parsed.replace(tzinfo=timezone.utc)
-        except (ValueError, TypeError):
-            return False
-        return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
-
     # Show the runtime error section only when the ARM lastErrorTimestamp is
-    # within the last 15 minutes. This gate is applied consistently whether or
-    # not the built-in config checks are available -- a stale runtime error
-    # should not be surfaced just because the SCM fetch failed.
-    show_runtime = _last_error_within(15)
+    # within the freshness window. The payload already carries the pre-computed
+    # 'isRecent' signal so structured-payload consumers can apply the same gate
+    # (see _RUNTIME_ERROR_FRESHNESS_MINUTES / _runtime_error_is_recent).
+    show_runtime = bool(runtime_error and runtime_error.get('isRecent'))
 
     # ---- Section 1: Built-in checks ----
     _out()
