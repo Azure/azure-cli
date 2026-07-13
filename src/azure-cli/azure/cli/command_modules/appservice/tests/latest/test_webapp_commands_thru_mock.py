@@ -988,8 +988,10 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.addCleanup(is_linux_patch.stop)
         self.addCleanup(client_factory_patch.stop)
         self.addCleanup(sub_id_patch.stop)
-        # Pin API version reported by the SDK config so URL assertions are stable.
-        self.client_factory_mock.return_value._config.api_version = '2025-05-01'
+        # troubleshoot_status pins to API version '2024-11-01' explicitly, so the
+        # SDK config value here just needs to be set to avoid a MagicMock leaking
+        # into unrelated call sites; it is not what shows up in the assertion URLs.
+        self.client_factory_mock.return_value._config.api_version = '2024-11-01'
 
         self.cmd = _get_test_cmd()
         self.cmd.cli_ctx.cloud.endpoints.resource_manager = 'https://management.azure.com'
@@ -1052,9 +1054,9 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         arm_urls = [call.args[2] for call in send_raw_request_mock.call_args_list]
         self.assertEqual(arm_urls, [
             'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
-            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/instances?api-version=2025-05-01',
+            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/instances?api-version=2024-11-01',
             'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
-            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/siteStatus?api-version=2025-05-01',
+            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/siteStatus?api-version=2024-11-01',
         ])
         # Single unfiltered SCM call returns every instance in one response.
         requests_get_mock.assert_called_once_with(
@@ -1092,10 +1094,10 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         arm_urls = [call.args[2] for call in send_raw_request_mock.call_args_list]
         self.assertEqual(arm_urls, [
             'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
-            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/instances?api-version=2025-05-01',
+            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/instances?api-version=2024-11-01',
             'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
             '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/siteStatus/7c2d9'
-            '?api-version=2025-05-01',
+            '?api-version=2024-11-01',
         ])
         requests_get_mock.assert_called_once_with(
             'https://myapp.scm.azurewebsites.net/api/startuplogs/summary?instance=lw0sdlwk0007AB',
