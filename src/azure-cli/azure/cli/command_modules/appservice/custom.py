@@ -5,8 +5,6 @@
 
 import ast
 import base64
-import os
-import sys
 import threading
 import time
 import re
@@ -394,7 +392,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                     multicontainer_config_type, sitecontainers_app,
                     deployment_source_url, deployment_local_git]):
             logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
-        _log_webapp_status_tip(name, resource_group_name, is_linux)
     return webapp
 
 
@@ -2464,16 +2461,6 @@ def show_app(cmd, resource_group_name, name, slot=None):
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
         _remove_list_duplicates(app)
     return app
-
-
-def _log_webapp_status_tip(name, resource_group_name, is_linux):
-    # Per-instance runtime status (siteStatus) is a Linux App Service feature,
-    # so only surface the tip for Linux webapps.
-    if not is_linux:
-        return
-    logger.warning("Tip: run 'az webapp status --name %s --resource-group %s' "
-                   "to see per-instance runtime status.",
-                   name, resource_group_name)
 
 
 def _extract_webapp_status_items(result):
@@ -7014,9 +7001,12 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
     # --- 1. Map ARM hex instanceId <-> friendly machineName via ARM /instances.
     # We fetch this first so we can accept either form on --instance and resolve
     # the right value before calling /siteStatus (ARM) and /api/startuplogs/summary (SCM).
-    client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    api_version = client._config.api_version
+    # Pin the api-version explicitly. Using a literal here avoids depending on
+    # client._config.api_version, which is a protected attribute and can shift
+    # when the SDK bumps its default. 2024-11-01 is known to serve /instances
+    # and /siteStatus.
+    api_version = '2024-11-01'
     slot_segment = '/slots/{}'.format(slot) if slot else ''
     instances_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
@@ -10969,7 +10959,6 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     time_elapsed = 0
     deployment_status = None
     response_body = None
-    status_tip_logged = False
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
@@ -10984,19 +10973,12 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
         logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
-            if not status_tip_logged:
-                _log_webapp_status_tip(webapp_name, resource_group_name, True)
-                status_tip_logged = True
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
                         deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
-            if not status_tip_logged:
-                _log_webapp_status_tip(webapp_name, resource_group_name, True)
             break
         if deployment_status == "RuntimeFailed":
-            if not status_tip_logged:
-                _log_webapp_status_tip(webapp_name, resource_group_name, True)
             error_text = ""
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
@@ -11879,8 +11861,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
-
-    _log_webapp_status_tip(name, rg_name, _is_linux)
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
