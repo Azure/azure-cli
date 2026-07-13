@@ -2434,7 +2434,12 @@ examples:
 
 helps['webapp troubleshoot'] = """
 type: group
-short-summary: Troubleshoot a web app.
+short-summary: Diagnose common Linux web app problems.
+long-summary: >
+    Preview command group that pairs built-in configuration checks (from
+    KuduLite on the worker) with per-instance runtime status and startup
+    summaries from ARM. Use when a Linux app is failing to start, returning
+    HTTP 502/503, or exhibiting other post-deployment misbehavior.
 """
 
 helps['webapp troubleshoot status'] = """
