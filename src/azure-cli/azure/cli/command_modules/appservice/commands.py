@@ -91,6 +91,13 @@ def transform_troubleshoot_status_output(result):
     def _has_visible_error(item):
         return bool(item.get('lastError')) and item.get('state') != 'Started'
 
+    def _dash(value):
+        # Render an empty cell as '-' so a missing value in a shown column is
+        # visually distinct from an accidentally blank row.
+        if value is None or value == '':
+            return '-'
+        return value
+
     show_errors = any(_has_visible_error(item) for item in items)
 
     rows = []
@@ -105,21 +112,21 @@ def transform_troubleshoot_status_output(result):
         updated = None if has_startup_error else _format_dt(_most_recent_startup(startup))
 
         row = OrderedDict([
-            ('InstanceId', _short_id(item.get('instanceId'))),
-            ('State', item.get('state')),
+            ('InstanceId', _dash(_short_id(item.get('instanceId')))),
+            ('State', _dash(item.get('state'))),
         ])
         if show_errors:
             if _has_visible_error(item):
-                row['LastError'] = item.get('lastError')
-                row['LastErrorTimestamp'] = _format_dt(item.get('lastErrorTimestamp'))
-                row['LastErrorDetails'] = item.get('lastErrorDetails')
+                row['LastError'] = _dash(item.get('lastError'))
+                row['LastErrorTimestamp'] = _dash(_format_dt(item.get('lastErrorTimestamp')))
+                row['LastErrorDetails'] = _dash(item.get('lastErrorDetails'))
             else:
-                row['LastError'] = None
-                row['LastErrorTimestamp'] = None
-                row['LastErrorDetails'] = None
-        row['Succeeded'] = succeeded
-        row['Failed'] = failed
-        row['Updated'] = updated
+                row['LastError'] = '-'
+                row['LastErrorTimestamp'] = '-'
+                row['LastErrorDetails'] = '-'
+        row['Succeeded'] = _dash(succeeded)
+        row['Failed'] = _dash(failed)
+        row['Updated'] = _dash(updated)
         rows.append(row)
     return rows
 
