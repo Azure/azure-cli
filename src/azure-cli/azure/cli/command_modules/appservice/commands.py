@@ -73,7 +73,7 @@ def transform_troubleshoot_status_output(result):
     """Flatten the nested `instances` payload into one row per worker for `-o table`.
     Column layout: InstanceId / State / Details / (LastError /
     LastErrorTimestamp / LastErrorDetails only when any row has an error) /
-    Succeeded (last 24h) / Failed (last 24h) / Updated (last 24h).
+    Succeeded (last 24h) / Failed (last 24h).
 
     Also queues a post-output hint trailer (via ``atexit``) when at least one
     instance has a visible error, so users see the recommended follow-up
@@ -82,9 +82,7 @@ def transform_troubleshoot_status_output(result):
     The framework's default table renderer would only surface top-level scalars
     (name, resourceGroup) and drop every meaningful field."""
     from collections import OrderedDict
-    from ._troubleshoot_status_report import (
-        _format_dt, _most_recent_startup, _short_id, _startup_fetch_failed,
-    )
+    from ._troubleshoot_status_report import _short_id, _startup_fetch_failed
 
     items = (result or {}).get('instances') or []
     app_name = (result or {}).get('name') or '<webapp>'
@@ -115,7 +113,6 @@ def transform_troubleshoot_status_output(result):
         has_startup_error = bool(_startup_fetch_failed(startup))
         succeeded = None if has_startup_error else startup.get('Succeeded')
         failed = None if has_startup_error else startup.get('Failed')
-        updated = None if has_startup_error else _format_dt(_most_recent_startup(startup))
 
         row = OrderedDict([
             ('InstanceId', _dash(_short_id(item.get('instanceId')))),
@@ -133,7 +130,6 @@ def transform_troubleshoot_status_output(result):
                 row['LastErrorDetails'] = '-'
         row['Succeeded (last 24h)'] = _dash(succeeded)
         row['Failed (last 24h)'] = _dash(failed)
-        row['Updated (last 24h)'] = _dash(updated)
         rows.append(row)
 
     # Trailer is only meaningful for -o table; this transformer is only invoked
