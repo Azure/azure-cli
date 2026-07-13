@@ -50,13 +50,16 @@ def transform_runtime_list_output(result):
 
 def transform_troubleshoot_status_output(result):
     """Flatten the nested `instances` payload into one row per worker for `-o table`.
-    Column layout: InstanceId / State / (LastError / LastErrorTimestamp only when
-    any row has an error) / Successful / Failed / Updated.
+    Column layout: InstanceId / State / (LastError / LastErrorTimestamp /
+    LastErrorDetails only when any row has an error) / Successful / Failed /
+    Updated.
 
     The framework's default table renderer would only surface top-level scalars
     (name, resourceGroup) and drop every meaningful field."""
     from collections import OrderedDict
-    from ._troubleshoot_status_report import _format_dt, _most_recent_startup, _startup_fetch_failed
+    from ._troubleshoot_status_report import (
+        _format_dt, _most_recent_startup, _short_id, _startup_fetch_failed,
+    )
 
     items = (result or {}).get('instances') or []
 
@@ -81,16 +84,18 @@ def transform_troubleshoot_status_output(result):
         updated = None if has_startup_error else _format_dt(_most_recent_startup(startup))
 
         row = OrderedDict([
-            ('InstanceId', item.get('instanceId')),
+            ('InstanceId', _short_id(item.get('instanceId'))),
             ('State', item.get('state')),
         ])
         if show_errors:
             if _has_visible_error(item):
                 row['LastError'] = item.get('lastError')
-                row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+                row['LastErrorTimestamp'] = _format_dt(item.get('lastErrorTimestamp'))
+                row['LastErrorDetails'] = item.get('lastErrorDetails')
             else:
                 row['LastError'] = None
                 row['LastErrorTimestamp'] = None
+                row['LastErrorDetails'] = None
         row['Succeeded'] = succeeded
         row['Failed'] = failed
         row['Updated'] = updated
