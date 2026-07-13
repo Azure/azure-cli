@@ -6752,8 +6752,10 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     except ValueError as ex:
         logger.warning("Failed to parse site runtime status response: %s", ex)
 
-    # Annotate the runtime error with a freshness signal so structured-payload
-    # consumers can apply the same 15-minute gate the --report view uses.
+    # Annotate the runtime error with a freshness signal so the --report
+    # renderer can gate the recommendation section on a 15-minute window.
+    # These fields are internal plumbing and are stripped from the payload
+    # before it's returned to the caller (see below).
     if runtime_error is not None:
         runtime_error['freshnessWindowMinutes'] = _RUNTIME_ERROR_FRESHNESS_MINUTES
         runtime_error['isRecent'] = _runtime_error_is_recent(
@@ -6770,6 +6772,12 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         from azure.cli.command_modules.appservice import _troubleshoot_config_report
         _troubleshoot_config_report.render_report(payload)
         return None
+    # Strip internal plumbing fields from the structured payload so the
+    # JSON/YAML/table output stays focused on user-visible data.
+    payload.pop('configCheckStatus', None)
+    if runtime_error is not None:
+        runtime_error.pop('freshnessWindowMinutes', None)
+        runtime_error.pop('isRecent', None)
     return payload
 
 
