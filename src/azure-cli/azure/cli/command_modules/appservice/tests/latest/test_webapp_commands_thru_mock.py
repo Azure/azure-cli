@@ -1716,8 +1716,8 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
 
         self.assertIsNone(result['configCheck'])
         self.assertIsNone(result['runtimeError'])
-        # Exactly one warning: the 404 -> "Feature is currently unavailable." message.
-        logger_mock.warning.assert_any_call('Feature is currently unavailable.')
+        # Exactly one warning: the 404 -> "Configuration check feature is currently unavailable." message.
+        logger_mock.warning.assert_any_call('Configuration check feature is currently unavailable.')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1728,7 +1728,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     def test_troubleshoot_config_report_shows_feature_unavailable_on_404(
             self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
         # SCM returns 404 -> BUILT-IN CHECKS section prints the compact
-        # "Feature is currently unavailable." message instead of the generic
+        # "Configuration check feature is currently unavailable." message instead of the generic
         # retry-and-restart guidance.
         requests_get_mock.return_value = self._scm_response(404)
         send_raw_request_mock.return_value = self._arm_response({'properties': []})
@@ -1746,7 +1746,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                             printed_text += str(tup[1])
                 elif isinstance(arg, tuple) and len(arg) > 1:
                     printed_text += str(arg[1])
-        self.assertIn('Feature is currently unavailable.', printed_text)
+        self.assertIn('Configuration check feature is currently unavailable.', printed_text)
         self.assertNotIn('Failed to retrieve built-in configuration checks', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
