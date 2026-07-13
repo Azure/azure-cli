@@ -1256,7 +1256,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
-    @mock.patch('azure.cli.command_modules.appservice.custom._render_troubleshoot_status')
+    @mock.patch('azure.cli.command_modules.appservice._troubleshoot_status_report.render_report')
     def test_troubleshoot_status_report_flag_renders_and_returns_none(
             self, render_mock, requests_get_mock, send_raw_request_mock,
             _scm_url_mock, _headers_mock):
@@ -2230,7 +2230,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         send_raw_request_mock.return_value = self._arm_response({'properties': []})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2372,7 +2372,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         self.assertIsNone(result)
@@ -2423,7 +2423,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2466,7 +2466,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2505,7 +2505,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
@@ -2541,7 +2541,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         ]})
 
         with mock.patch(
-                'azure.cli.core.style.print_styled_text') as print_mock:
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         printed_text = ''
