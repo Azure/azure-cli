@@ -82,7 +82,7 @@ def transform_troubleshoot_status_output(result):
     The framework's default table renderer would only surface top-level scalars
     (name, resourceGroup) and drop every meaningful field."""
     from collections import OrderedDict
-    from ._troubleshoot_status_report import _short_id, _startup_fetch_failed
+    from ._troubleshoot_status_report import _format_dt, _short_id, _startup_fetch_failed
 
     items = (result or {}).get('instances') or []
     app_name = (result or {}).get('name') or '<webapp>'
