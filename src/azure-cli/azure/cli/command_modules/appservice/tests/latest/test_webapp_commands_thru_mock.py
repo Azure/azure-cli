@@ -1251,7 +1251,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
-    @mock.patch('azure.cli.command_modules.appservice.custom._render_troubleshoot_status')
+    @mock.patch('azure.cli.command_modules.appservice._troubleshoot_status_report.render_report')
     def test_troubleshoot_status_report_flag_renders_and_returns_none(
             self, render_mock, requests_get_mock, send_raw_request_mock,
             _scm_url_mock, _headers_mock):
