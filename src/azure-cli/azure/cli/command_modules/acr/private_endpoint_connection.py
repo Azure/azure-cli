@@ -3,7 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
+
 from ._utils import get_resource_group_name_by_registry_name
+
+logger = get_logger(__name__)
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, registry_name,
@@ -54,8 +58,16 @@ def delete(cmd, client, registry_name, private_endpoint_connection_name, resourc
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    return client.begin_delete(resource_group_name=resource_group_name, registry_name=registry_name,
-                               private_endpoint_connection_name=private_endpoint_connection_name)
+    poller = client.begin_delete(resource_group_name=resource_group_name, registry_name=registry_name,
+                                 private_endpoint_connection_name=private_endpoint_connection_name)
+
+    # Surface server-side warning (e.g. PE connection not found, returned 204)
+    initial_response = poller.polling_method()._initial_response
+    warning = initial_response.http_response.headers.get("x-ms-warning")
+    if warning:
+        logger.warning(warning)
+
+    return poller
 
 
 # cannot redefine list as it is a builtin function
