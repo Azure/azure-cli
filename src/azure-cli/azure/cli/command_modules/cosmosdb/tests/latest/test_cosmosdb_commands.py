@@ -678,7 +678,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
-    @unittest.skip('Analytical Storage on SQL API accounts is temporarily blocked in production (service returns "Enabling Analytical Storage during account creation is no longer supported", via both create and update). Re-enable when the capability is restored.')
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container')
     def test_cosmosdb_sql_container_analytical_ttl(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -705,7 +705,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
-    @unittest.skip('Analytical Storage on SQL API accounts is temporarily blocked in production (service returns "Enabling Analytical Storage during account creation is no longer supported", via both create and update). Re-enable when the capability is restored.')
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analyticalStorageTtl')
     def test_cosmosdb_sql_container_update_analytical_ttl(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -767,7 +767,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
-    @unittest.skip('Analytical Storage on SQL API accounts is temporarily blocked in production (service returns "Enabling Analytical Storage during account creation is no longer supported", via both create and update). Re-enable when the capability is restored.')
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analytical_store_migration')
     def test_cosmosdb_sql_container_update_analytical_store_migration(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)

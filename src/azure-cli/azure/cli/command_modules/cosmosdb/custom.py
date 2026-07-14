@@ -73,6 +73,9 @@ from azure.mgmt.cosmosdb.models import (
     ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
     MongoUserDefinitionCreateUpdateParameters,
+    Privilege,
+    PrivilegeResource,
+    Role,
     RegionForOnlineOffline,
     FleetResource,
     FleetspaceResource,
@@ -409,7 +412,7 @@ def _create_database_account(client,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
-        enable_pbe=enable_pbe,
+        enable_priority_based_execution=enable_pbe,
         default_priority_level=default_priority_level
     )
 
@@ -568,7 +571,7 @@ def cli_cosmosdb_update(client,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
-        enable_pbe=enable_pbe,
+        enable_priority_based_execution=enable_pbe,
         default_priority_level=default_priority_level)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
@@ -1877,7 +1880,8 @@ def cli_cosmosdb_restore(cmd,
                          tables_to_restore=None,
                          public_network_access=None,
                          disable_ttl=None,
-                         source_backup_location=None):
+                         source_backup_location=None,
+                         disable_local_auth=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1928,7 +1932,8 @@ def cli_cosmosdb_restore(cmd,
                                     arm_location=target_restorable_account.location,
                                     public_network_access=public_network_access,
                                     disable_ttl=disable_ttl,
-                                    source_backup_location=source_backup_location)
+                                    source_backup_location=source_backup_location,
+                                    disable_local_auth=disable_local_auth)
 
 
 def _convert_to_utc_timestamp(timestamp_string):
@@ -2267,6 +2272,27 @@ def cli_cosmosdb_collection_update(client,
     return result
 
 
+def _convert_mongo_privileges(privileges):
+    """Convert privileges from the user-provided (PascalCase) body into SDK model objects."""
+    if not privileges:
+        return privileges
+    converted = []
+    for privilege in privileges:
+        resource = privilege.get('Resource')
+        privilege_resource = None
+        if resource is not None:
+            privilege_resource = PrivilegeResource(db=resource.get('Db'), collection=resource.get('Collection'))
+        converted.append(Privilege(resource=privilege_resource, actions=privilege.get('Actions')))
+    return converted
+
+
+def _convert_mongo_roles(roles):
+    """Convert roles from the user-provided (PascalCase) body into SDK model objects."""
+    if not roles:
+        return roles
+    return [Role(db=role.get('Db'), role=role.get('Role')) for role in roles]
+
+
 def cli_cosmosdb_mongo_role_definition_create(client,
                                               resource_group_name,
                                               account_name,
@@ -2276,8 +2302,8 @@ def cli_cosmosdb_mongo_role_definition_create(client,
         role_name=mongo_role_definition_body['RoleName'],
         type=mongo_role_definition_body['Type'],
         database_name=mongo_role_definition_body['DatabaseName'],
-        privileges=mongo_role_definition_body['Privileges'],
-        roles=mongo_role_definition_body['Roles'])
+        privileges=_convert_mongo_privileges(mongo_role_definition_body['Privileges']),
+        roles=_convert_mongo_roles(mongo_role_definition_body['Roles']))
 
     return client.begin_create_update_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name, mongo_role_definition_create_resource)
 
@@ -2297,8 +2323,8 @@ def cli_cosmosdb_mongo_role_definition_update(client,
         role_name=mongo_role_definition.role_name,
         type=mongo_role_definition_body['Type'],
         database_name=mongo_role_definition_body['DatabaseName'],
-        privileges=mongo_role_definition_body['Privileges'],
-        roles=mongo_role_definition_body['Roles'])
+        privileges=_convert_mongo_privileges(mongo_role_definition_body['Privileges']),
+        roles=_convert_mongo_roles(mongo_role_definition_body['Roles']))
 
     return client.begin_create_update_mongo_role_definition(mongo_role_definition_body['Id'], resource_group_name, account_name, mongo_role_definition_update_resource)
 
@@ -2327,7 +2353,7 @@ def cli_cosmosdb_mongo_user_definition_create(client,
         database_name=mongo_user_definition_body['DatabaseName'],
         custom_data=mongo_user_definition_body['CustomData'],
         mechanisms=mongo_user_definition_body['Mechanisms'],
-        roles=mongo_user_definition_body['Roles'])
+        roles=_convert_mongo_roles(mongo_user_definition_body['Roles']))
 
     return client.begin_create_update_mongo_user_definition(mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_create_resource)
 
@@ -2347,7 +2373,7 @@ def cli_cosmosdb_mongo_user_definition_update(client,
         database_name=mongo_user_definition_body['DatabaseName'],
         custom_data=mongo_user_definition_body['CustomData'],
         mechanisms=mongo_user_definition_body['Mechanisms'],
-        roles=mongo_user_definition_body['Roles'])
+        roles=_convert_mongo_roles(mongo_user_definition_body['Roles']))
 
     return sdk_no_wait(no_wait, client.begin_create_update_mongo_user_definition, mongo_user_definition_body['Id'], resource_group_name, account_name, mongo_user_definition_update_resource)
 
@@ -2984,7 +3010,7 @@ def cli_cosmosdb_sql_container_restore(cmd,
             restorable_containers = restorable_containers_client.list(
                 restorable_database_account.location,
                 restorable_database_account.name,
-                database_rid)
+                restorable_sql_database_rid=database_rid)
 
             latest_container_delete_time, latest_container_create_or_recreate_time = process_restorable_collections(restorable_containers, container_name, database_name)
 
@@ -3175,7 +3201,7 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
             restorable_collections = restorable_collections_client.list(
                 restorable_database_account.location,
                 restorable_database_account.name,
-                database_rid)
+                restorable_mongodb_database_rid=database_rid)
 
             latest_collection_delete_time, latest_collection_create_or_recreate_time = process_restorable_collections(restorable_collections, collection_name, database_name)
 
@@ -3366,7 +3392,7 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
             restorable_graphs = restorable_graphs_client.list(
                 restorable_database_account.location,
                 restorable_database_account.name,
-                database_rid)
+                restorable_gremlin_database_rid=database_rid)
 
             latest_graph_delete_time, latest_graph_create_or_recreate_time = process_restorable_collections(restorable_graphs, graph_name, database_name)
 
