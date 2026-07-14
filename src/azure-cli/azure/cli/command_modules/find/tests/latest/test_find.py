@@ -77,6 +77,16 @@ class FindCustomCommandTest(unittest.TestCase):
 
             self.assertEqual(0, len(examples))
 
+    def test_call_aladdin_service_connection_error(self):
+        with mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError('Name resolution failed')):
+            response = call_aladdin_service('vm')
+            self.assertIsNone(response)
+
+    def test_get_generated_examples_connection_error(self):
+        with mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError('Name resolution failed')):
+            examples = get_generated_examples('vm')
+            self.assertEqual(0, len(examples))
+
 
 if __name__ == '__main__':
     unittest.main()
