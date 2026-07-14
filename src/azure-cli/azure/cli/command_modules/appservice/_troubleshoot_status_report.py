@@ -34,20 +34,14 @@ def render_report(payload):
 
     if not instances:
         orphan_startups = payload.get('orphanStartups') or []
-        rg = resource_group or '<resource-group>'
         if not orphan_startups:
-            _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}'.".format(app_name)))
-            _out('  ARM /siteStatus returned no entries. This is typical for an app that is')
-            _out('  running normally without recent state transitions or startup failures.')
-            _out((Style.WARNING, '▶ Hint:'))
-            _out('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
-            _out('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+            _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}'. "
+                                 "Please visit the Azure Portal for further diagnosis.".format(app_name)))
             return
-        # ARM had nothing but SCM did — fall through so the orphan block below
-        # still renders. Give the user a heads-up first so the header makes sense.
         _out('')
-        _out((Style.PRIMARY, "ARM /siteStatus returned no entries for '{}', but startup".format(app_name)))
-        _out((Style.PRIMARY, '  summaries were available from SCM (shown below).'))
+        _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}', "
+                             "but startup summaries were available. "
+                             "Please visit the Azure Portal for further diagnosis.".format(app_name)))
         _out('')
     else:
         _out('')
@@ -112,7 +106,7 @@ def render_report(payload):
     orphan_startups = payload.get('orphanStartups') or []
     for orphan in orphan_startups:
         scm_id = orphan.get('InstanceId') or '<unknown>'
-        _out((Style.HIGHLIGHT, 'Instance {} Startup Summary (no matching ARM instance)'.format(scm_id)))
+        _out((Style.HIGHLIGHT, 'Instance {} Startup Summary'.format(scm_id)))
         _row((Style.HIGHLIGHT, '─' * 76))
         _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
         _print_startup_block(orphan.get('Startup'), _out)
