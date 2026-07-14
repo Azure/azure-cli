@@ -57,7 +57,7 @@ def _get_mock_storage_accounts_and_keys(accounts_and_keys):
             '/subscriptions/000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/{0}'.format(a),
             a, Endpoints('https://{0}.file.core.windows.net/'.format(a)))
             for a in accounts_and_keys.keys()])
-    Keys = collections.namedtuple('Keys', 'keys')
+    Keys = collections.namedtuple('Keys', 'keys_property')
     Key = collections.namedtuple('Key', 'value')
     mock_storage_client.storage_accounts.list_keys = MagicMock(
         side_effect=lambda _, account: Keys([Key(accounts_and_keys.get(account, None))]))
