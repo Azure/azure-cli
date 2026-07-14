@@ -6545,7 +6545,11 @@ def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MIN
             parsed = parsed.replace(tzinfo=timezone.utc)
     except (ValueError, TypeError):
         return False
-    return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
+    delta = datetime.now(timezone.utc) - parsed
+    # Reject future timestamps: a clock-skewed or malformed value would
+    # produce a negative delta, which still satisfies `<= 15min` and would
+    # incorrectly mark stale errors as recent.
+    return timedelta(0) <= delta <= timedelta(minutes=minutes)
 
 
 def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):

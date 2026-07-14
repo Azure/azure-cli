@@ -1826,6 +1826,20 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertNotIn('isRecent', result['runtimeError'])
         self.assertNotIn('freshnessWindowMinutes', result['runtimeError'])
 
+    def test_runtime_error_is_recent_rejects_future_timestamp(self):
+        # Regression: a clock-skewed or malformed timestamp that lands in the
+        # future would produce a negative (now - parsed) delta which still
+        # satisfies `<= 15min`, so stale/nonsense errors were being flagged
+        # as recent. The gate must require a non-negative delta.
+        from datetime import datetime, timezone, timedelta
+        from azure.cli.command_modules.appservice.custom import _runtime_error_is_recent
+        future_ts = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        past_recent_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat().replace('+00:00', 'Z')
+        past_stale_ts = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': future_ts}))
+        self.assertTrue(_runtime_error_is_recent({'lastErrorTimestamp': past_recent_ts}))
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': past_stale_ts}))
+
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': '******'})
