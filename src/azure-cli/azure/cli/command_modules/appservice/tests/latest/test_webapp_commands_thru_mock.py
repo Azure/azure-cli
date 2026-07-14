@@ -1134,8 +1134,8 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         # thinking their site had no startup attempts.
         startup = result['instances'][0]['startup']
         self.assertIsNotNone(startup)
-        self.assertIn('SCM returned 404', startup.get('SummaryFetchStatus', ''))
-        self.assertIn('not available', startup.get('SummaryFetchStatus', '').lower())
+        self.assertIn('Startup summary is not available for this app', startup.get('SummaryFetchStatus', ''))
+        self.assertIn("not rolled out to your app's region yet", startup.get('SummaryFetchStatus', ''))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': '******'})
@@ -1192,8 +1192,8 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         startup = result['instances'][0]['startup']
         self.assertIsNotNone(startup)
         msg = startup.get('SummaryFetchStatus', '')
-        self.assertIn('SCM returned 400', msg)
-        self.assertIn('Invalid startup log filename', msg)
+        self.assertIn('Startup summary is not available for this app', msg)
+        self.assertIn("not rolled out to your app's region yet", msg)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
@@ -1230,7 +1230,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         # Non-200 -> feature-not-available message, not silent drop.
         startup = result['instances'][0]['startup']
         self.assertIsNotNone(startup)
-        self.assertIn('SCM returned 500', startup.get('SummaryFetchStatus', ''))
+        self.assertIn('Startup summary is not available for this app', startup.get('SummaryFetchStatus', ''))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})

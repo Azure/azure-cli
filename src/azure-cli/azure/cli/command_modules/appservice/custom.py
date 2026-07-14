@@ -7013,20 +7013,11 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
             #     /api/startuplogs/{filename} — no /summary sub-route — so it
             #     treats 'summary' as a filename and rejects it.
             #   * 5xx / auth errors: transient or config problem.
-            # Surface the status + body so users aren't misled into thinking
-            # their site had no startup attempts.
-            body_snippet = (summary_response.text or '').strip()
-            if len(body_snippet) > 200:
-                body_snippet = body_snippet[:200] + '...'
-            reason = summary_response.reason or ''
-            detail = '{} {}'.format(summary_response.status_code, reason).strip()
-            if body_snippet:
-                detail = '{}: {}'.format(detail, body_snippet)
             app_wide_fetch_status = (
-                "Startup summary is not available for this app "
-                "(SCM returned {} for {}). This feature requires a platform "
-                "version that may not have rolled out to your app's region yet."
-            ).format(detail, summary_url)
+                "Startup summary is not available for this app. "
+                "This feature requires a platform version that has "
+                "not rolled out to your app's region yet."
+            )
 
     # Correlate SCM startup summaries with ARM runtime items. In practice the
     # two systems don't always agree on instance IDs: ARM's machineName is the
