@@ -2300,7 +2300,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Get account key
     keys = storage_mgmt_client.storage_accounts.list_keys(rg, storage_account.name)
 
-    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys[0].value)
+    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys_property[0].value)
 
     # our streamwriter not seekable, so no parallel.
     downloader = blob_client.download_blob(max_concurrency=1)
