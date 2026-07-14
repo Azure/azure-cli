@@ -275,16 +275,16 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
-    def test_cmd_to_loader_map_populated_after_parallel_loading(self):
+    def test_cmd_to_loader_map_populated_after_command_loading(self):
         """
         Validates that all commands in command_table have corresponding entries in cmd_to_loader_map.
         """
         cli = DummyCli()
         loader = cli.commands_loader
 
-        # Load all commands (triggers parallel module loading)
+        # Load all commands.
         cmd_tbl = loader.load_command_table(None)
-        
+
         # Verify EVERY command in command_table has an entry in cmd_to_loader_map
         # This is exactly what azdev does before it hits KeyError
         for cmd_name in cmd_tbl:

@@ -342,7 +342,14 @@ def load_command_table(self, _):
         g.command('logs', 'acr_taskrun_logs', client_factory=cf_acr_runs,
                   table_transformer=None)
 
-    with self.command_group('acr config content-trust', acr_policy_util) as g:
+    def _dct_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in a future release.".format(self.object_type)
+        msg += " Learn more about the transition from Docker Content Trust to the Notary Project: "
+        msg += "https://aka.ms/acr/dctdeprecation"
+        return msg
+
+    with self.command_group('acr config content-trust', acr_policy_util,
+                            deprecate_info=self.deprecate(message_func=_dct_deprecate_message, hide=False)) as g:
         g.show_command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
 
@@ -434,6 +441,7 @@ def load_command_table(self, _):
                   table_transformer=token_output_format)
         g.command('repo', 'acr_connected_registry_permissions_update',
                   deprecate_info=self.deprecate(redirect='permissions update', hide=True))
+        g.command('resync', 'acr_connected_registry_resync', is_preview=True)
 
     with self.command_group('acr connected-registry install', acr_connected_registry_util,
                             deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',

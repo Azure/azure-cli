@@ -1,19 +1,21 @@
 name: CCOA
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
     branches:
       - dev
 
-permissions:
-  pull-requests: write
+permissions: {}
 
 jobs:
   add_label_and_comment:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Check current date securely

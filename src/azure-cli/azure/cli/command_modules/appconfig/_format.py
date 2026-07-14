@@ -46,6 +46,10 @@ def configstore_snapshot_output_format(result):
     return _output_format(result, _snapshot_output_format_group)
 
 
+def configstore_nsp_output_format(result):
+    return _output_format(result, _configstore_nsp_format_group)
+
+
 def _output_format(result, format_group):
     if 'value' in result and isinstance(result['value'], list):
         result = result['value']
@@ -161,6 +165,16 @@ def _featurefilter_entry_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('PARAMETERS', _get_value(item, 'parameters'))
+    ])
+
+
+def _configstore_nsp_format_group(item):
+    return OrderedDict([
+        ('PERIMETER ID', _get_value(item, 'properties', 'networkSecurityPerimeter', 'id')),
+        ('PROFILE NAME', _get_value(item, 'properties', 'profile', 'name')),
+        ('ACCESS MODE', _get_value(item, 'properties', 'resourceAssociation', 'accessMode')),
+        ('ACCESS RULES VERSION', _get_value(item, 'properties', 'profile', 'accessRulesVersion')),
+        ('DIAGNOSTIC SETTINGS VERSION', _get_value(item, 'properties', 'profile', 'diagnosticSettingsVersion'))
     ])
 
 

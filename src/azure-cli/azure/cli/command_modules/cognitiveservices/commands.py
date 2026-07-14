@@ -7,7 +7,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
     cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections, \
-    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule
+    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule, \
+    cf_managed_compute_deployments
 
 
 def load_command_table(self, _):
@@ -197,3 +198,17 @@ def load_command_table(self, _):
             setter_name='update',
             setter_arg_name='connection',
             custom_func_name='account_connection_update')
+
+    managed_compute_deployments_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ManagedComputeDeploymentsOperations.{}',
+        client_factory=cf_managed_compute_deployments
+    )
+
+    with self.command_group(
+            'cognitiveservices account managed-compute-deployment', managed_compute_deployments_type,
+            client_factory=cf_managed_compute_deployments, is_preview=True) as g:
+        g.custom_command('create', 'managed_compute_deployment_create')
+        g.custom_show_command('show', 'managed_compute_deployment_show')
+        g.custom_command('list', 'managed_compute_deployment_list')
+        g.custom_command('update', 'managed_compute_deployment_update')
+        g.custom_command('delete', 'managed_compute_deployment_delete')

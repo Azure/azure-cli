@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from knack.util import CLIError
 from azure.cli.command_modules.storage.tests.storage_test_util import StorageScenarioMixin
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,)
@@ -136,6 +137,9 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         acl = self.cmd('storage queue policy list -q {} --connection-string {}'.format(queue, connection_string)) \
             .get_output_in_json().keys()
         self.assertSetEqual(set(acl), {'test1', 'test2', 'test3'})
+        # service slow
+        if self.is_live:
+            time.sleep(10)
         # policy show
         self.storage_cmd('storage queue policy show -n test1 -q {}', account_info, queue) \
             .assert_with_checks(JMESPathCheck('permission', 'raup'))
@@ -213,7 +217,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # get message, test `num_messages`
         import time
-        time.sleep(35)
+        if self.is_live:
+            time.sleep(35)
         result = self.storage_cmd('storage message get -q {} --num-messages 2', account_info,
                                   queue).get_output_in_json()
         self.assertEqual(len(result), 2)
@@ -240,7 +245,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         # delete message
         self.storage_cmd('storage message delete -q {} --id {} --pop-receipt {}',
                          account_info, queue, update_result.get('id'), update_result.get('popReceipt'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.storage_cmd('storage message peek -q {} --num-messages 2', account_info, queue) \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
@@ -297,14 +303,17 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
         logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         queue_sas = self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions raup '
                              '--https-only --as-user --user-delegation-oid {} '
-                             '--user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6 '
-                             '--auth-mode login'.format(storage_account, queue, expiry, logged_in_user)).output
+                             '--user-delegation-tid {} '
+                             '--auth-mode login'.format(storage_account, queue, expiry, logged_in_user,
+                                                        current_tenant)).output
 
         self.assertIn('&sig=', queue_sas)
         self.assertIn('skoid=', queue_sas)

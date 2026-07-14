@@ -7,22 +7,25 @@ import re
 
 from dateutil import parser
 from functools import cmp_to_key
+from requests import get
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_pass
 from knack.util import CLIError
-from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
+from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.core.exceptions import HttpResponseError
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from azure.mgmt.core.tools import (
     is_valid_resource_id,
     is_valid_resource_name,
     parse_resource_id,
     resource_id)
 from .._client_factory import cf_postgres_check_resource_availability, cf_postgres_flexible_servers
+from .._config_reader import get_cloud_cluster
 from ._flexible_server_location_capabilities_util import (
     get_performance_tiers,
     get_performance_tiers_for_storage,
@@ -30,11 +33,15 @@ from ._flexible_server_location_capabilities_util import (
     get_postgres_server_capability_info)
 from ._flexible_server_util import (
     _is_resource_name,
+    get_id_components,
     get_postgres_skus,
     get_postgres_storage_sizes,
-    get_postgres_tiers)
+    get_postgres_tiers,
+    get_user_confirmation,
+    parse_public_access_input)
 
 logger = get_logger(__name__)
+IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
 
 # pylint: disable=import-outside-toplevel, raise-missing-from, unbalanced-tuple-unpacking
@@ -99,9 +106,9 @@ def retention_validator(ns):
 
 
 def db_renaming_cluster_validator(ns):
-    if ns.database_name is not None and ns.create_cluster.lower() != 'elasticcluster':
+    if ns.database_name is not None and ns.cluster_size is None:
         raise ArgumentUsageError('The --database-name argument can only be used '
-                                 'when --cluster-option is set to "ElasticCluster".')
+                                 'when --node-count is present, as it only applies to elastic clusters.')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
@@ -145,12 +152,13 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 # pylint: disable=too-many-locals
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
-                           zone=None, standby_availability_zone=None, high_availability=None,
+                           zone=None, standby_availability_zone=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
+                           storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
@@ -169,7 +177,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance)
+    _cluster_validator(cluster_size, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -189,25 +197,20 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance)
+    _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance)
     pg_version_validator(version, list_location_capability_info['server_versions'])
-    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                      geo_redundant_backup, instance,
+                      federated_client_id=federated_client_id,
+                      backup_federated_client_id=backup_federated_client_id)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance):
-    if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
-       (instance and instance.cluster and instance.cluster.cluster_size > 0):
-        if instance is None and version != '17':
-            raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
-
-        if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Storage auto-grow is not supported for elastic cluster.')
-
-    if cluster_size and instance and not instance.cluster:
+def _cluster_validator(cluster_size, instance):
+    if cluster_size is not None and instance and not instance.cluster:
         raise ValidationError('Node count can only be specified for an elastic cluster.')
 
 
@@ -345,26 +348,13 @@ def pg_version_validator(version, versions):
                            'maintain security, performance, and supportability.')
 
 
-def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance):
-    high_availability_enabled = (high_availability is not None and high_availability.lower() != 'disabled')
+def _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance):
     zonal_resiliency_enabled = (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled')
-    high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
-
-    if high_availability_enabled and zonal_resiliency_enabled:
-        raise ArgumentUsageError('Setting both --high-availability and --zonal-resiliency is not allowed. '
-                                 'To proceed, set only --zonal-resiliency.')
 
     if instance:
         tier = instance.sku.tier if tier is None else tier
         zone = instance.availability_zone if zone is None else zone
-
-    if high_availability_enabled:
-        if tier.lower() == 'burstable':
-            raise ArgumentUsageError('High availability is not supported for the Burstable tier.')
-        if single_az and high_availability_zone_redundant:
-            raise ArgumentUsageError('This location has a single availability zone. '
-                                     'Zone-redundant high availability is not supported for this location.')
 
     if zonal_resiliency_enabled:
         if tier.lower() == 'burstable':
@@ -374,8 +364,8 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
                                      'To proceed, set --allow-same-zone.')
 
     if standby_availability_zone:
-        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
-            raise ArgumentUsageError('To set --standby-availability-zone, enable --zonal-resiliency.')
+        if not zonal_resiliency_enabled:
+            raise ArgumentUsageError('To set --standby-zone, enable --zonal-resiliency.')
         if zone == standby_availability_zone:
             raise ArgumentUsageError('Your server is in availability zone {}. '
                                      'The standby availability zone must be different from the server zone.'
@@ -391,7 +381,9 @@ def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported
 
 
 def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
-                      geo_redundant_backup=None, instance=None):
+                      geo_redundant_backup=None, instance=None,
+                      federated_client_id=None, backup_federated_client_id=None):
+
     if bool(byok_identity is None) ^ bool(byok_key is None):
         raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
                                  'Provide --identity and --key together.')
@@ -404,6 +396,20 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
        byok_identity.lower() == backup_byok_identity.lower():
         raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
                                  'Provide different identities for --identity and --backup-identity.')
+
+    if (federated_client_id or backup_federated_client_id) and byok_identity is None:
+        if instance is None:
+            raise ArgumentUsageError('To use --federated-client-id or --geo-backup-federated-client-id, '
+                                     'provide --identity and --key together.')
+        if not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault'):
+            logger.warning('You cannot update data encryption properties on a server '
+                           'that was not created with data encryption..')
+
+    if bool(federated_client_id is not None) and bool(backup_federated_client_id is not None) and \
+       federated_client_id.lower() == backup_federated_client_id.lower():
+        raise ArgumentUsageError('The primary federated client ID and backup federated client ID cannot be the same. '
+                                 'Provide different IDs for --federated-client-id and '
+                                 '--geo-backup-federated-client-id.')
 
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
@@ -582,7 +588,7 @@ def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_r
     id_comps = parse_resource_id(migrationInstanceResourceId)
     runtime_server_resource_resource_type = id_comps['resource_type'].lower()
     if 'flexibleservers' != runtime_server_resource_resource_type:
-        raise ValidationError('The migration runtime resource ID must reference a flexible server.')
+        raise ValidationError('The migration runtime resource identifier must reference a flexible server.')
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     target_server = server_operations_client.get(target_resource_group_name, target_server_name)
@@ -599,12 +605,175 @@ def validate_private_dns_zone(db_context, server_name, private_dns_zone, private
                               'domain name.')
 
     if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-        raise ValidationError('The suffix of the private DNS zone should be "{}".'
+        raise ValidationError("The suffix of the private DNS zone should be '{}'."
                               .format(private_dns_zone_suffix))
 
     if _is_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
             or not _is_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
-        raise ValidationError('The private DNS zone name or ID is not in a valid format.')
+        raise ValidationError('The private DNS zone name or identifier is not in a valid format.')
+
+
+# pylint: disable=too-many-branches
+def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
+    if subnet is not None and vnet is None:
+        if not is_valid_resource_id(subnet):
+            raise ValidationError('Incorrectly formed subnet identifier. If you are providing '
+                                  'only --subnet but not --vnet, the --subnet parameter '
+                                  'should be in resource identifier format.')
+        parsed_subnet = parse_resource_id(subnet)
+        if 'child_name_1' not in parsed_subnet:
+            raise ValidationError('Incorrectly formed subnet identifier. Check if the subnet '
+                                  'identifier is in the right format.')
+        return subnet
+
+    if subnet is None:
+        raise RequiredArgumentMissingError('When --vnet is provided, --subnet must also be provided '
+                                           'in the form of subnet name.')
+
+    if is_valid_resource_id(vnet):
+        if not _is_resource_name(subnet) or not is_valid_resource_name(subnet):
+            raise ValidationError('If you pass --vnet as a resource identifier, --subnet '
+                                  'must be a subnet name.')
+        vnet_subscription, vnet_resource_group, vnet_name, _ = get_id_components(vnet)
+        return resource_id(subscription=vnet_subscription,
+                           resource_group=vnet_resource_group,
+                           namespace='Microsoft.Network',
+                           type='virtualNetworks',
+                           name=vnet_name,
+                           child_type_1='subnets',
+                           child_name_1=subnet)
+
+    if _is_resource_name(vnet) and is_valid_resource_name(vnet) and \
+            _is_resource_name(subnet) and is_valid_resource_name(subnet):
+        return resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                           resource_group=resource_group_name,
+                           namespace='Microsoft.Network',
+                           type='virtualNetworks',
+                           name=vnet,
+                           child_type_1='subnets',
+                           child_name_1=subnet)
+
+    raise ValidationError('Specify either --subnet as a subnet resource identifier, '
+                          '--vnet as a vnet resource identifier with --subnet as a '
+                          'subnet name, or both --vnet and --subnet as resource names.')
+
+
+def _get_private_dns_zone_suffix(cmd, db_context, location, subscription):
+    cluster = get_cloud_cluster(cmd, re.sub(r'\s+', '', location).lower(), subscription)
+
+    if cluster is not None:
+        private_dns_zone_suffix = cluster['privateDnsZoneDomain']
+    else:
+        dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
+        private_dns_zone_suffix = dns_suffix_client.get()
+
+    if private_dns_zone_suffix[0] != '.':
+        private_dns_zone_suffix = '.' + private_dns_zone_suffix
+
+    return private_dns_zone_suffix
+
+
+def resolve_private_dns_zone_id(db_context, resource_group_name, server_name, private_dns_zone, subnet_id, location):
+    cmd = db_context.cmd
+    subscription = get_subscription_id(cmd.cli_ctx)
+    dns_resource_group = resource_group_name
+
+    if subnet_id is not None and is_valid_resource_id(subnet_id):
+        subscription, dns_resource_group, _, _ = get_id_components(subnet_id)
+
+    private_dns_zone_suffix = _get_private_dns_zone_suffix(cmd, db_context, location, subscription)
+
+    if private_dns_zone is None:
+        if 'private' in private_dns_zone_suffix:
+            private_dns_zone = server_name + private_dns_zone_suffix
+        else:
+            private_dns_zone = server_name + '.private' + private_dns_zone_suffix
+
+    validate_private_dns_zone(db_context,
+                              server_name=server_name,
+                              private_dns_zone=private_dns_zone,
+                              private_dns_zone_suffix=private_dns_zone_suffix)
+
+    if is_valid_resource_id(private_dns_zone):
+        return private_dns_zone
+
+    return resource_id(subscription=subscription,
+                       resource_group=dns_resource_group,
+                       namespace='Microsoft.Network',
+                       type='privateDnsZones',
+                       name=private_dns_zone)
+
+
+def resolve_public_access_range(public_access, yes):
+    if public_access is None:
+        try:
+            response = get(IP_ADDRESS_CHECKER, timeout=5)
+            response.raise_for_status()
+            ip_address = response.text.strip()
+            if not _validate_ranges_in_ip(ip_address):
+                raise ValueError('The detection service returned an invalid IPv4 address.')
+        except Exception as ex:
+            raise CLIError('Unable to detect your current IP address. Please provide a valid IP address or CIDR '
+                           'range for --public-access parameter or set --public-access Disabled. Error: {}'
+                           .format(ex))
+
+        logger.warning('Detected current client IP : %s', ip_address)
+        if yes:
+            return ip_address, ip_address
+
+        if get_user_confirmation('Do you want to enable access to client {0}'.format(ip_address), yes=yes):
+            return ip_address, ip_address
+
+        if get_user_confirmation('Do you want to enable access for all IPs', yes=yes):
+            return '0.0.0.0', '255.255.255.255'
+        return -1, -1
+
+    if str(public_access).lower() == 'all':
+        start_ip, end_ip = '0.0.0.0', '255.255.255.255'
+    elif str(public_access).lower() in ['none', 'disabled', 'enabled']:
+        start_ip, end_ip = -1, -1
+    else:
+        start_ip, end_ip = parse_public_access_input(public_access)
+
+    return start_ip, end_ip
+
+
+def build_network_configuration(cmd, resource_group_name, server_name,
+                                location, db_context, private_dns_zone_arguments=None, public_access=None,
+                                vnet=None, subnet=None, yes=False):
+    validate_resource_group(resource_group_name)
+
+    start_ip = -1
+    end_ip = -1
+    network = postgresql_flexibleservers.models.Network()
+
+    if subnet is not None or vnet is not None:
+        if not private_dns_zone_arguments:
+            raise RequiredArgumentMissingError('When --vnet or --subnet is provided, --private-dns-zone is required.')
+        subnet_id = resolve_private_subnet_id(cmd,
+                                              resource_group_name,
+                                              vnet=vnet,
+                                              subnet=subnet)
+        private_dns_zone_id = resolve_private_dns_zone_id(db_context,
+                                                          resource_group_name,
+                                                          server_name,
+                                                          private_dns_zone=private_dns_zone_arguments,
+                                                          subnet_id=subnet_id,
+                                                          location=location)
+        network.delegated_subnet_resource_id = subnet_id
+        if private_dns_zone_id is not None:
+            network.private_dns_zone_arm_resource_id = private_dns_zone_id
+    elif subnet is None and vnet is None and private_dns_zone_arguments is not None:
+        raise RequiredArgumentMissingError('Private DNS zone can only be used with private access network. '
+                                           'Use --vnet or/and --subnet parameters.')
+    else:
+        start_ip, end_ip = resolve_public_access_range(public_access, yes=yes)
+        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
+
+    return network, start_ip, end_ip
 
 
 def validate_vnet_location(vnet, location):
@@ -678,7 +847,7 @@ def _validate_identity(cmd, namespace, identity):
             type='userAssignedIdentities',
             name=identity)
 
-    raise ValidationError('Invalid identity name or ID.')
+    raise ValidationError('Invalid identity name or identifier.')
 
 
 def validate_identity(cmd, namespace):

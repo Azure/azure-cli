@@ -97,7 +97,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BATCHAI = ('azure.mgmt.batchai', None)
     MGMT_BILLING = ('azure.mgmt.billing', None)
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
-    MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
@@ -208,7 +207,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2024-11-30',
-        ResourceType.MGMT_APPSERVICE: '2024-11-01',
+        ResourceType.MGMT_APPSERVICE: None,
         ResourceType.MGMT_IOTHUB: None,
         ResourceType.MGMT_IOTDPS: None,
         ResourceType.MGMT_IOTCENTRAL: None,

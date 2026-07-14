@@ -23,7 +23,6 @@ from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
-from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version_by_aaz
 
 
@@ -319,24 +318,32 @@ def _parse_image_argument(cmd, namespace):
         raise CLIError(err)
 
 
+# pylint: disable=protected-access
+def _show_vm_image(cmd, namespace):
+    if hasattr(namespace, '_vm_image_info_cache'):
+        return namespace._vm_image_info_cache
+
+    from .aaz.latest.vm.image import Show as VMImageShow
+    image_version = namespace.os_version
+    if namespace.os_version.lower() == 'latest':
+        image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                         namespace.os_offer, namespace.os_sku)
+
+    command_args = {
+        'location': namespace.location,
+        'offer': namespace.os_offer,
+        'publisher': namespace.os_publisher,
+        'sku': namespace.os_sku,
+        'version': image_version,
+    }
+
+    namespace._vm_image_info_cache = VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return namespace._vm_image_info_cache
+
+
 def _get_image_plan_info_if_exists(cmd, namespace):
     try:
-        from .aaz.latest.vm.image import Show as VmImageShow
-        if namespace.os_version.lower() == 'latest':
-            image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                             namespace.os_offer, namespace.os_sku)
-        else:
-            image_version = namespace.os_version
-
-        command_args = {
-            'location': namespace.location,
-            'offer': namespace.os_offer,
-            'publisher': namespace.os_publisher,
-            'sku': namespace.os_sku,
-            'version': image_version,
-        }
-        image = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-
+        image = _show_vm_image(cmd, namespace)
         return image.get('plan')
     except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
@@ -643,7 +650,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 'when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True')
 
     if not namespace.os_type:
-        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+        image = _show_vm_image(cmd, namespace)
+
+        os_system = image.get('osDiskImage', {}).get('operatingSystem', '')
+        namespace.os_type = os_system.lower()
 
     if getattr(namespace, 'source_snapshots_or_disks', None) and \
             getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
@@ -679,6 +689,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
+                                              ephemeral_os_disk_enable_full_caching=getattr(namespace, 'ephemeral_os_disk_enable_full_caching', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None),
                                               source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
@@ -1498,20 +1509,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'urn':
-            from .aaz.latest.vm.image import Show as VmImageShow
-            os_version = namespace.os_version
-            if os_version.lower() == 'latest':
-                os_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                              namespace.os_offer, namespace.os_sku)
-
-            command_args = {
-                'location': namespace.location,
-                'offer': namespace.os_offer,
-                'publisher': namespace.os_publisher,
-                'sku': namespace.os_sku,
-                'version': os_version
-            }
-            vm_image_info = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            vm_image_info = _show_vm_image(cmd, namespace)
 
             if vm_image_info.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
                 from datetime import datetime
@@ -1583,7 +1581,7 @@ def _resolve_role_id(cli_ctx, role, scope):
         except ValueError:
             pass
         if not role_id:  # retrieve role id
-            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(client.list(scope, filter="roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
             if len(role_defs) > 1:
@@ -1845,7 +1843,7 @@ def process_vmss_create_namespace(cmd, namespace):
             if namespace.vm_sku is None:
                 from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
                 if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-                    namespace.vm_sku = 'Standard_DS1_v2'
+                    namespace.vm_sku = 'Standard_D2s_v5'
                 else:
                     namespace.vm_sku = 'Standard_D1_v2'
 
@@ -1913,7 +1911,7 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
         if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-            namespace.vm_sku = 'Standard_DS1_v2'
+            namespace.vm_sku = 'Standard_D2s_v5'
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
@@ -1937,6 +1935,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_automatic_repairs(cmd, namespace)
     _validate_vmss_create_host_group(cmd, namespace)
     _validate_vmss_create_auto_zone_placement(namespace)
+    _validate_vmss_auto_zone_placement(namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1960,6 +1959,12 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
+    _validate_vmss_auto_zone_placement(namespace)
+
+
+def _validate_vmss_auto_zone_placement(namespace):
+    if namespace.include_zones and namespace.exclude_zones:
+        raise MutuallyExclusiveArgumentError("You can only specify one of --include-zones and --exclude-zones")
 # endregion
 
 
@@ -2148,9 +2153,9 @@ def process_snapshot_create_namespace(cmd, namespace):
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     try:
-                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
-                                                                    result['resource_group'],
-                                                                    result['name'])
+                        source_info, _ = _get_disk_or_snapshot_info_by_aaz(cmd.cli_ctx,
+                                                                           result['resource_group'],
+                                                                           result['name'])
                     except Exception:  # pylint: disable=broad-except
                         # There's a chance that the source doesn't exist, eg, vmss os disk.
                         # You can get the id of vmss os disk by
@@ -2162,7 +2167,7 @@ def process_snapshot_create_namespace(cmd, namespace):
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
                 if namespace.incremental:
-                    namespace.copy_start = source_info.location != namespace.location
+                    namespace.copy_start = source_info.get('location') != namespace.location
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
 
@@ -2232,11 +2237,11 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     elif '/restorepoints/' in source.lower():
         source_restore_point = source
     else:
-        source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
+        source_info, is_snapshot = _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source)
         if is_snapshot:
-            source_snapshot = source_info.id
+            source_snapshot = source_info.get('id')
         else:
-            source_disk = source_info.id
+            source_disk = source_info.get('id')
 
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
@@ -2263,19 +2268,6 @@ def _figure_out_storage_source_by_aaz(cli_ctx, resource_group_name, source):
             source_disk = source_info.get('id')
 
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
-
-
-def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
-    compute_client = _compute_client_factory(cli_ctx)
-    is_snapshot = True
-
-    try:
-        info = compute_client.snapshots.get(resource_group_name, source)
-    except ResourceNotFoundError:
-        is_snapshot = False
-        info = compute_client.disks.get(resource_group_name, source)
-
-    return info, is_snapshot
 
 
 def _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source):
@@ -2870,14 +2862,18 @@ def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: dis
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     from ._vm_utils import is_community_gallery_image_id, parse_community_gallery_image_id
+    from .aaz.latest.sig import ShowCommunity as SigShowCommunity
     if not is_community_gallery_image_id(namespace.image) or namespace.accept_term:
         return
 
     community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
-    from ._client_factory import cf_community_gallery
     try:
-        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
-        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+        command_args = {
+            'location': namespace.location,
+            'public_gallery_name': community_gallery_name
+        }
+        community_gallery_info = SigShowCommunity(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        eula = community_gallery_info['communityMetadata']['eula']
     except Exception as err:
         raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
 

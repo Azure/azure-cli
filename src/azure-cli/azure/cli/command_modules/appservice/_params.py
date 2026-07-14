@@ -19,11 +19,11 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
-                          validate_service_tag, validate_public_cloud)
+                          validate_service_tag, validate_public_cloud, warn_linux_consumption_eol)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -94,6 +94,14 @@ def load_arguments(self, _):
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('functionapp') as c:
+        c.ignore('app_instance')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('name', arg_type=functionapp_name_arg_type, validator=warn_linux_consumption_eol)
+
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -103,7 +111,7 @@ def load_arguments(self, _):
                    help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
-        c.argument('managed_instance_enabled', action='store_true', is_preview=True,
+        c.argument('managed_instance_enabled', action='store_true',
                    help='get regions which support hosting web apps on Managed Instance workers')
         c.argument('sku', arg_type=sku_arg_type)
 
@@ -126,7 +134,9 @@ def load_arguments(self, _):
 subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
+        c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                        'Use "--is-linux false" to create a Windows plan.')
         c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
@@ -135,25 +145,28 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
-        c.argument('mi_system_assigned', is_preview=True,
+        c.argument('is_managed_instance', action='store_true', help='host web app on managed instance')
+        c.argument('mi_system_assigned',
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")
-        c.argument('mi_user_assigned', is_preview=True,
+        c.argument('mi_user_assigned',
                    nargs='+', help="Enable user-assigned managed identities for this app service plan. "
                    "Accepts space-separated list of identity resource IDs.")
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, Linux App Service plan creation failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. This flag only applies to Linux plans and has no effect on Windows or Hyper-V plans.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type,
@@ -163,17 +176,17 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan delete') as c:
@@ -339,6 +352,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
@@ -401,9 +418,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
-        c.argument('show_runtime_details', action='store_true', help="show detailed versions of runtime stacks")
+        c.argument('runtime', options_list=["--runtime"], help="limit the output to a specific runtime family", arg_type=get_enum_type(['dotnet', 'node', 'php', 'python', 'java']))
+        c.argument('support', options_list=["--support"], help="filter by support lifecycle status. Default: supported", arg_type=get_enum_type(['supported', 'active', 'near', 'eol', 'all']))
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
@@ -471,6 +488,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('platform_release_channel', options_list=['--platform-release-channel'],
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -694,6 +715,38 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('setting_names', nargs='+', help="space-separated always-ready setting names")
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
 
+    with self.argument_context('functionapp update-strategy config') as c:
+        c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
+                   help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
+
+    # Add optional 'name' parameter for functionapp SSL commands to support Flex Consumption apps
+    with self.argument_context('functionapp config ssl list') as c:
+        c.argument('name', options_list=['--name', '-n'], id_part=None, help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to show site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl delete') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to delete site-scoped certificates.')
+
+    # Add load_to_code parameter for functionapp SSL commands that create/update certificates (Flex Consumption only)
+    with self.argument_context('functionapp config ssl upload') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code.')
+
+    with self.argument_context('functionapp config ssl import') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code')
+        c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
+
+    with self.argument_context('webapp config ssl list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config ssl upload') as c:
+        c.ignore('load_to_code')
+
+    with self.argument_context('webapp config ssl import') as c:
+        c.ignore('load_to_code')
+        c.ignore('enable_using_msi')
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
@@ -785,6 +838,19 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+
+    with self.argument_context('webapp log startup') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help='Filter by worker instance name.')
+
+    with self.argument_context('webapp log startup list') as c:
+        c.argument('outcome', options_list=['--outcome'], help='Filter by startup outcome.',
+                   arg_type=get_enum_type(['success', 'failure']))
+
+    with self.argument_context('webapp log startup show') as c:
+        c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
@@ -991,8 +1057,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
-                   arg_type=get_three_state_flag())
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
+                   arg_type=get_three_state_flag(), default=True)
         c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
 
     with self.argument_context('webapp ssh') as c:
@@ -1035,8 +1101,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
-                   arg_type=get_three_state_flag())
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
+                   arg_type=get_three_state_flag(), default=True)
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')

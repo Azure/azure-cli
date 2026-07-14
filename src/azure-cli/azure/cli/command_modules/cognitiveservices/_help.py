@@ -372,6 +372,86 @@ examples:
 """
 
 helps[
+    "cognitiveservices account managed-compute-deployment"
+] = """
+type: group
+short-summary: Manage managed compute deployments for Azure Cognitive Services accounts.
+"""
+
+helps[
+    "cognitiveservices account managed-compute-deployment create"
+] = """
+type: command
+short-summary: Create a managed compute deployment for Azure Cognitive Services account.
+long-summary: Create a GPU-backed managed compute deployment associated with a Cognitive Services account.
+examples:
+  - name: Create a managed compute deployment.
+    text: >
+        az cognitiveservices account managed-compute-deployment create
+        -g myResourceGroup -n myAccount
+        --deployment-name gpt-oss-120b-gpu
+        --model "azureml://registries/azureml-openai-oss/models/gpt-oss-120b/versions/4"
+        --deployment-template "azureml://registries/azureml-openai-oss/deploymenttemplates/gpt-oss-120b-short-context/versions/1"
+        --accelerator-type H100_80GB
+        --sku-name GlobalManagedCompute
+        --sku-capacity 1
+        --tags environment=production team=nlp
+"""
+
+helps[
+    "cognitiveservices account managed-compute-deployment show"
+] = """
+type: command
+short-summary: Show a managed compute deployment for Azure Cognitive Services account.
+examples:
+  - name: Show a managed compute deployment.
+    text: >
+        az cognitiveservices account managed-compute-deployment show
+        -g myResourceGroup -n myAccount
+        --deployment-name gpt-oss-120b-gpu
+"""
+
+helps[
+    "cognitiveservices account managed-compute-deployment list"
+] = """
+type: command
+short-summary: List all managed compute deployments for Azure Cognitive Services account.
+examples:
+  - name: List all managed compute deployments.
+    text: >
+        az cognitiveservices account managed-compute-deployment list
+        -g myResourceGroup -n myAccount
+"""
+
+helps[
+    "cognitiveservices account managed-compute-deployment update"
+] = """
+type: command
+short-summary: Update a managed compute deployment for Azure Cognitive Services account.
+long-summary: Only SKU (name/capacity) and tags can be updated. Model and accelerator type are immutable after creation.
+examples:
+  - name: Update SKU capacity of a managed compute deployment.
+    text: >
+        az cognitiveservices account managed-compute-deployment update
+        -g myResourceGroup -n myAccount
+        --deployment-name gpt-oss-120b-gpu
+        --sku-capacity 2
+"""
+
+helps[
+    "cognitiveservices account managed-compute-deployment delete"
+] = """
+type: command
+short-summary: Delete a managed compute deployment from Azure Cognitive Services account.
+examples:
+  - name: Delete a managed compute deployment.
+    text: >
+        az cognitiveservices account managed-compute-deployment delete
+        -g myResourceGroup -n myAccount
+        --deployment-name gpt-oss-120b-gpu
+"""
+
+helps[
     "cognitiveservices commitment-tier"
 ] = """
 type: group
