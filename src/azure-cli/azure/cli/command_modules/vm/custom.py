@@ -204,7 +204,7 @@ def _get_disk_lun_by_aaz(data_disks):
 def _get_private_config(cli_ctx, resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client(cli_ctx)
     # pylint: disable=no-member
-    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
+    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys_property
 
     private_config = {
         'storageAccountName': storage_account,

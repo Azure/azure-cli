@@ -49,6 +49,7 @@ Release History
 
 **Compute**
 
+* `az vm boot-diagnostics get-boot-log`: Fix `TypeError: 'method' object is not subscriptable` with azure-mgmt-storage 25.0.0 (#33727)
 * `az vm create/update/show`: Support scheduled events profile via new parameters `--scheduled-events-api-version` and `--enable-all-instance-down` (#33451)
 * `az vmss create/update/show`: Support scheduled events profile via new parameters `--scheduled-events-api-version` and `--enable-all-instance-down` (#33451)
 * `az availability-set create/show`: Support scheduled events profile via new parameters `--scheduled-events-api-version` and `--enable-all-instance-down` (#33451)

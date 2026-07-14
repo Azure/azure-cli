@@ -160,7 +160,7 @@ def _get_storage_account_key(cli_ctx, account_name, account_key):
         raise CLIError('Cannot find "{0}" storage account.'.format(account_name))
     resource_group = parse_resource_id(account[0])['resource_group']
     keys_list_result = storage_client.storage_accounts.list_keys(resource_group, account_name)
-    if not keys_list_result or not keys_list_result.keys:
+    if not keys_list_result or not keys_list_result.keys_property:
         raise CLIError('Cannot find a key for "{0}" storage account.'.format(account_name))
     key_value = None
     try:
