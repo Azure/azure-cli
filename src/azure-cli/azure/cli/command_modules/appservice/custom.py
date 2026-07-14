@@ -6607,7 +6607,11 @@ def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MIN
             parsed = parsed.replace(tzinfo=timezone.utc)
     except (ValueError, TypeError):
         return False
-    return (datetime.now(timezone.utc) - parsed) <= timedelta(minutes=minutes)
+    delta = datetime.now(timezone.utc) - parsed
+    # Reject future timestamps: a clock-skewed or malformed value would
+    # produce a negative delta, which still satisfies `<= 15min` and would
+    # incorrectly mark stale errors as recent.
+    return timedelta(0) <= delta <= timedelta(minutes=minutes)
 
 
 def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):
@@ -6964,6 +6968,12 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
     except requests.RequestException as ex:
         logger.warning("Failed to call '%s': %s", summary_url, ex)
         summary_response = None
+        # Surface the transport-level failure per instance instead of
+        # rendering "No startup attempts recorded", which would falsely
+        # suggest KuduLite reported no data.
+        app_wide_fetch_status = (
+            "Failed to reach SCM startup summary endpoint ({}: {}).".format(
+                ex.__class__.__name__, ex))
 
     if summary_response is not None:
         if summary_response.status_code == 200:

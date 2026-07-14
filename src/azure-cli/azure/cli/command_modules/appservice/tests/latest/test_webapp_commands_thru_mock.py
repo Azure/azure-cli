@@ -1143,6 +1143,36 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
+    def test_troubleshoot_status_summary_request_exception_surfaces_transport_error(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        # Regression: when the SCM summary request itself raises (timeout,
+        # connection reset, DNS failure), the per-instance rendering was
+        # falling back to "no startup attempts recorded" because
+        # app_wide_fetch_status was never set. We now surface the transport
+        # failure via SummaryFetchStatus so users see the real problem.
+        import requests as _requests
+        arm_items = [{'instanceId': 'abcde', 'state': 'Started', 'action': 'SiteStarted'}]
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload(
+                {'abcde': 'lw0sdlwk0001AA'}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_items))),
+        ]
+        requests_get_mock.side_effect = _requests.ConnectionError('boom')
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        startup = result['instances'][0]['startup']
+        self.assertIsNotNone(startup)
+        status = startup.get('SummaryFetchStatus', '')
+        self.assertIn('Failed to reach SCM startup summary endpoint', status)
+        self.assertIn('ConnectionError', status)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
     def test_troubleshoot_status_summary_400_invalid_filename_surfaces_message(
             self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
         # Older KuduLite build routes /api/startuplogs/{filename} and has no
@@ -2352,6 +2382,20 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertEqual(result['runtimeError']['lastError'], 'ContainerTimeout')
         self.assertNotIn('isRecent', result['runtimeError'])
         self.assertNotIn('freshnessWindowMinutes', result['runtimeError'])
+
+    def test_runtime_error_is_recent_rejects_future_timestamp(self):
+        # Regression: a clock-skewed or malformed timestamp that lands in the
+        # future would produce a negative (now - parsed) delta which still
+        # satisfies `<= 15min`, so stale/nonsense errors were being flagged
+        # as recent. The gate must require a non-negative delta.
+        from datetime import datetime, timezone, timedelta
+        from azure.cli.command_modules.appservice.custom import _runtime_error_is_recent
+        future_ts = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        past_recent_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat().replace('+00:00', 'Z')
+        past_stale_ts = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': future_ts}))
+        self.assertTrue(_runtime_error_is_recent({'lastErrorTimestamp': past_recent_ts}))
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': past_stale_ts}))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
