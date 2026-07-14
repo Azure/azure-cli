@@ -311,11 +311,15 @@ def _read_from_server(ws, closed, decoder):
             # Stop on a close frame
             if opcode == websocket.ABNF.OPCODE_CLOSE:
                 break
-            # Text and binary is considered shell output. Do not print non-shell output (e.g. ping/pong) to stdout.
+            # Print shell output (text, binary).
             if opcode not in (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY):
                 continue
             text = decoder.decode(data)
-            sys.stdout.write(text)
+            try:
+                sys.stdout.write(text)
+            except UnicodeEncodeError:
+                enc = getattr(sys.stdout, 'encoding', None) or 'utf-8'
+                sys.stdout.write(text.encode(enc, 'replace').decode(enc, 'replace'))
             sys.stdout.flush()
     except (websocket.WebSocketConnectionClosedException, OSError):
         pass
@@ -381,7 +385,7 @@ def _send_to_server_windows(ws, closed):
                 time.sleep(0.05)
                 continue
 
-            # If key is waiting: Drain every key queued right now into one buffer and send a single frame.
+            # If key is waiting: Drain every key queued into one buffer and send a single frame.
             buf = bytearray()
             exit_session = False
             while msvcrt.kbhit():
@@ -403,7 +407,12 @@ def _send_to_server_windows(ws, closed):
                     if escape:
                         buf += escape
                 else:
-                    buf += ch.encode('utf-8')
+                    # If key is first half of a UTF-16 non-BMP char (e.g. emoji), read the
+                    # second half and fuse pair into one real character.
+                    if 0xD800 <= ord(ch) <= 0xDBFF and msvcrt.kbhit():
+                        ch += msvcrt.getwch()
+                        ch = ch.encode('utf-16-le', 'surrogatepass').decode('utf-16-le', 'replace')
+                    buf += ch.encode('utf-8', 'replace')
 
             if buf:
                 ws.send(bytes(buf), opcode=ws_module.ABNF.OPCODE_BINARY)
