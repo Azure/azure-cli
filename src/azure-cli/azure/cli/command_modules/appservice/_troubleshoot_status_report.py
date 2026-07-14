@@ -33,12 +33,26 @@ def render_report(payload):
         _out(list(objs))
 
     if not instances:
-        _out("No runtime status reported for '{}'.".format(app_name))
-        return
-
-    _out('')
-    _out((Style.HIGHLIGHT, "Application status for {}.".format(app_name)))
-    _out('')
+        orphan_startups = payload.get('orphanStartups') or []
+        rg = resource_group or '<resource-group>'
+        if not orphan_startups:
+            _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}'.".format(app_name)))
+            _out('  ARM /siteStatus returned no entries. This is typical for an app that is')
+            _out('  running normally without recent state transitions or startup failures.')
+            _out((Style.WARNING, '▶ Hint:'))
+            _out('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
+            _out('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+            return
+        # ARM had nothing but SCM did — fall through so the orphan block below
+        # still renders. Give the user a heads-up first so the header makes sense.
+        _out('')
+        _out((Style.PRIMARY, "ARM /siteStatus returned no entries for '{}', but startup".format(app_name)))
+        _out((Style.PRIMARY, '  summaries were available from SCM (shown below).'))
+        _out('')
+    else:
+        _out('')
+        _out((Style.HIGHLIGHT, "Application status for {}.".format(app_name)))
+        _out('')
 
     # Overview table (skip when only one instance is present, e.g. --instance filter).
     if len(instances) > 1:
