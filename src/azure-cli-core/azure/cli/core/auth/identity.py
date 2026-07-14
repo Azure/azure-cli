@@ -99,7 +99,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if self._use_msal_http_cache and not Identity._msal_http_cache:
             Identity._msal_http_cache = self._load_msal_http_cache()
 
-        return {
+        from ..util import should_disable_connection_verify
+        kwargs = {
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
             "http_cache": Identity._msal_http_cache,
@@ -107,6 +108,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             # CP1 means we can handle claims challenges (CAE)
             "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]
         }
+        # Honor AZURE_CLI_DISABLE_CONNECTION_VERIFICATION for MSAL requests (such as the OIDC
+        # discovery request during login), so that login works behind TLS inspection proxies.
+        if should_disable_connection_verify():
+            kwargs["verify"] = False
+        return kwargs
 
     @property
     def _msal_public_app_kwargs(self):

@@ -7,6 +7,7 @@ Release History
 ++++++
 * Resolve CVE-2026-48526 (#33562)
 * Update global policy argument `--acquire-policy-token` to pick up new api-version and propagate correlation-id (#33661)
+* `az login`: Pass `verify=False` to MSAL when `AZURE_CLI_DISABLE_CONNECTION_VERIFICATION` is set, so login works behind TLS inspection proxies (#33716)
 
 2.87.0
 ++++++
