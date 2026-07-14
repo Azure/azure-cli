@@ -1161,6 +1161,36 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertIn('Invalid startup log filename', msg)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
+    def test_troubleshoot_status_summary_request_exception_surfaces_transport_error(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        # Regression: when requests.get raises a transport-level exception
+        # (ConnectionError, timeout, TLS failure) the previous code left
+        # SummaryFetchStatus unset, so callers couldn't tell whether SCM was
+        # simply healthy-with-no-startups or unreachable. Ensure we surface a
+        # meaningful message including the exception class.
+        import requests as _requests
+        arm_items = [{'instanceId': 'abcde', 'state': 'Started', 'action': 'SiteStarted'}]
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload(
+                {'abcde': 'lw0sdlwk0001AA'}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_items))),
+        ]
+        requests_get_mock.side_effect = _requests.ConnectionError('boom')
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        startup = result['instances'][0]['startup']
+        self.assertIsNotNone(startup)
+        msg = startup.get('SummaryFetchStatus', '')
+        self.assertIn('Failed to reach SCM startup summary endpoint', msg)
+        self.assertIn('ConnectionError', msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')

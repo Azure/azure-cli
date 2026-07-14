@@ -6655,6 +6655,10 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
     except requests.RequestException as ex:
         logger.warning("Failed to call '%s': %s", summary_url, ex)
         summary_response = None
+        app_wide_fetch_status = (
+            "Failed to reach SCM startup summary endpoint ({}: {}).".format(
+                ex.__class__.__name__, ex)
+        )
 
     if summary_response is not None:
         if summary_response.status_code == 200:
