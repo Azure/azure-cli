@@ -331,8 +331,7 @@ def _print_startup_block(s, emit):
     # the log directory for this worker; other fields are meaningless then.
     fetch_error = _startup_fetch_failed(s)
     if fetch_error:
-        emit([(Style.PRIMARY, '  Startup summary unavailable: '),
-              (Style.WARNING, str(fetch_error))])
+        emit([(Style.WARNING, '  ' + str(fetch_error))])
         emit('')
         return
     succeeded = s.get('Succeeded', 0)
