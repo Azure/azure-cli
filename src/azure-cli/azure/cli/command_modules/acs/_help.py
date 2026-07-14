@@ -2832,6 +2832,71 @@ helps["aks trustedaccess rolebinding delete"] = """
           short-summary: Specify the role binding name.
 """
 
+helps["aks identity-binding"] = """
+    type: group
+    short-summary: Commands to manage identity bindings in Azure Kubernetes Service.
+"""
+
+helps["aks identity-binding list"] = """
+    type: command
+    short-summary: List all identity bindings under a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+    examples:
+        - name: List all identity bindings in a managed cluster
+          text: az aks identity-binding list -g myResourceGroup --cluster-name myCluster
+"""
+
+helps["aks identity-binding show"] = """
+    type: command
+    short-summary: Show details of a specific identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to show.
+    examples:
+        - name: Show details of an identity binding
+          text: az aks identity-binding show -g myResourceGroup --cluster-name myCluster -n myIdentityBinding
+"""
+
+helps["aks identity-binding create"] = """
+    type: command
+    short-summary: Create a new identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to create.
+        - name: --managed-identity-resource-id
+          type: string
+          short-summary: The resource ID of the managed identity to use.
+    examples:
+        - name: Create a new identity binding
+          text: az aks identity-binding create -g myResourceGroup --cluster-name myCluster -n myIdentityBinding --managed-identity-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity
+"""
+
+helps["aks identity-binding delete"] = """
+    type: command
+    short-summary: Delete a specific identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to delete.
+    examples:
+        - name: Delete an identity binding
+          text: az aks identity-binding delete -g myResourceGroup --cluster-name myCluster -n myIdentityBinding
+"""
+
 helps["aks mesh"] = """
     type: group
     short-summary: Commands to manage Azure Service Mesh.
