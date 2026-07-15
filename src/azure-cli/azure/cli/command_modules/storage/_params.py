@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from importlib import import_module
+
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type,
@@ -27,6 +29,13 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           SshPublicKeyAddAction, user_delegation_oid_validator, user_delegation_tid_validator)
 
 
+def _get_legacy_storage_data_plane_sdk(module_name, class_name):
+    try:
+        return getattr(import_module(module_name), class_name)
+    except (ImportError, AttributeError):
+        return None
+
+
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
     from argcomplete.completers import FilesCompleter
 
@@ -36,8 +45,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     from .completers import get_storage_name_completion_list
 
-    t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
-    t_file_service = self.get_sdk('file#FileService')
+    t_base_blob_service = _get_legacy_storage_data_plane_sdk('azure.storage.blob.baseblobservice', 'BaseBlobService')
+    t_file_service = _get_legacy_storage_data_plane_sdk('azure.storage.file', 'FileService')
     t_share_service = self.get_sdk('_share_service_client#ShareServiceClient',
                                    resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     t_queue_service = self.get_sdk('_queue_service_client#QueueServiceClient',
@@ -2213,7 +2222,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument()
         c.register_sas_arguments()
         c.extra('share_name', share_name_type, required=True)
-        t_file_svc = self.get_sdk('file.fileservice#FileService')
+        t_file_svc = _get_legacy_storage_data_plane_sdk('azure.storage.file.fileservice', 'FileService')
         t_file_permissions = self.get_sdk('_models#FileSasPermissions',
                                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.argument('id', options_list='--policy-name',

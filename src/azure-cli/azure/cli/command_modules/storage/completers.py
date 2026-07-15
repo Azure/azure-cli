@@ -9,6 +9,14 @@ from .util import get_storage_client
 from ._validators import validate_client_parameters
 
 
+def _get_legacy_file_service_class():
+    try:
+        from azure.storage.file import FileService
+        return FileService
+    except ImportError:
+        return None
+
+
 @Completer
 def file_path_completer(cmd, prefix, namespace):
     from azure.common import AzureMissingResourceHttpError
@@ -18,7 +26,9 @@ def file_path_completer(cmd, prefix, namespace):
 
     validate_client_parameters(cmd, namespace)
 
-    t_file_service = cmd.get_models('file#FileService')
+    t_file_service = _get_legacy_file_service_class()
+    if t_file_service is None:
+        return []
     client = get_storage_client(cmd.cli_ctx, t_file_service, namespace)
 
     share_name = namespace.share_name
@@ -50,7 +60,9 @@ def dir_path_completer(cmd, prefix, namespace):
 
     validate_client_parameters(cmd, namespace)
 
-    t_file_service = cmd.get_models('file#FileService')
+    t_file_service = _get_legacy_file_service_class()
+    if t_file_service is None:
+        return []
     client = get_storage_client(cmd.cli_ctx, t_file_service, namespace)
 
     share_name = namespace.share_name
@@ -75,6 +87,8 @@ def dir_path_completer(cmd, prefix, namespace):
 def get_storage_name_completion_list(service, func, parent=None):
     @Completer
     def completer(cmd, _, namespace):
+        if service is None:
+            return []
         validate_client_parameters(cmd, namespace)
         client = get_storage_client(cmd.cli_ctx, service, namespace)
         if parent:
@@ -91,6 +105,8 @@ def get_storage_name_completion_list(service, func, parent=None):
 def get_storage_acl_name_completion_list(service, container_param, func):
     @Completer
     def completer(cmd, _, namespace):
+        if service is None:
+            return []
         validate_client_parameters(cmd, namespace)
         client = get_storage_client(cmd.cli_ctx, service, namespace)
         container_name = getattr(namespace, container_param)
