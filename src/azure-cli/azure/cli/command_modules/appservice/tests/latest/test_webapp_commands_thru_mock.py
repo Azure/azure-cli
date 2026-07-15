@@ -72,6 +72,16 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(site['appServicePlanId'], '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
         self.assertNotIn('serverFarmId', site.keys())
 
+    def test_rename_server_farm_props_preserves_object_style_compatibility(self):
+        site = types.SimpleNamespace(
+            server_farm_id='/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+
+        _rename_server_farm_props(site)
+
+        self.assertEqual(site.app_service_plan_id,
+                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+        self.assertFalse(hasattr(site, 'server_farm_id'))
+
     @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github')
     @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n')
