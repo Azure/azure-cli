@@ -63,7 +63,7 @@ class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
-    def test_rename_server_farm_props_uses_app_service_plan_id_for_new_sdk_models(self):
+    def test_rename_server_farm_props_handles_mutable_mapping(self):
         site = Site(location='westus')
         site['serverFarmId'] = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
 
@@ -72,7 +72,7 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(site['appServicePlanId'], '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
         self.assertNotIn('serverFarmId', site.keys())
 
-    def test_rename_server_farm_props_preserves_object_style_compatibility(self):
+    def test_rename_server_farm_props_handles_object_attributes(self):
         site = types.SimpleNamespace(
             server_farm_id='/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
 
