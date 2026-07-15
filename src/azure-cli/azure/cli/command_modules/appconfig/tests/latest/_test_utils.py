@@ -35,6 +35,37 @@ def get_test_resource_group():
     # instead of an ephemeral @ResourceGroupPreparer group. Override via AZURE_CLI_APPCONFIG_TEST_RG.
     return os.environ.get("AZURE_CLI_APPCONFIG_TEST_RG", "mametcal-python")
 
+
+def _case_insensitive_query_matcher(r1, r2):
+    """ Ensure method, path, and query parameters match.
+
+    Query parameter names are case-insensitive (e.g. OData '$select' vs '$Select'),
+    so normalize the keys before comparing to avoid spurious cassette mismatches
+    caused by SDK serialization differences across versions.
+    """
+    from urllib.parse import urlparse, parse_qs
+
+    url1 = urlparse(r1.uri)
+    url2 = urlparse(r2.uri)
+
+    q1 = {k.lower(): v for k, v in parse_qs(url1.query).items()}
+    q2 = {k.lower(): v for k, v in parse_qs(url2.query).items()}
+    shared_keys = set(q1.keys()).intersection(set(q2.keys()))
+
+    if len(shared_keys) != len(q1) or len(shared_keys) != len(q2):
+        return False
+
+    for key in shared_keys:
+        if q1[key][0].lower() != q2[key][0].lower():
+            return False
+
+    return True
+
+
+def register_appconfig_query_matcher(test):
+    """ Register the App Configuration case-insensitive query matcher on the test's VCR instance. """
+    test.vcr.register_matcher('query', _case_insensitive_query_matcher)
+
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):
         if is_json_payload(response):

@@ -10,7 +10,7 @@ import json
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig._constants import SnapshotReferenceConstants
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
 
 
 class AppConfigSnapshotRefScenarioTest(ScenarioTest):
@@ -18,6 +18,7 @@ class AppConfigSnapshotRefScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
 
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the

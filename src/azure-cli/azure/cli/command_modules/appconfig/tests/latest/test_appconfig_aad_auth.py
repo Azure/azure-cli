@@ -21,7 +21,7 @@ from knack.util import CLIError
 from unittest import mock
 from azure.cli.testsdk import (ResourceGroupPreparer, live_only, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -100,6 +100,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
     
     @live_only()
     @AllowLargeResponse()

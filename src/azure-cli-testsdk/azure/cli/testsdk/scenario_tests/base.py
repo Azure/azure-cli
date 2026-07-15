@@ -225,11 +225,8 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
         url1 = urlparse(r1.uri)
         url2 = urlparse(r2.uri)
 
-        # Query parameter names are case-insensitive (e.g. OData '$select' vs '$Select'),
-        # so normalize the keys before comparing to avoid spurious cassette mismatches
-        # caused by SDK serialization differences across versions.
-        q1 = {k.lower(): v for k, v in parse_qs(url1.query).items()}
-        q2 = {k.lower(): v for k, v in parse_qs(url2.query).items()}
+        q1 = parse_qs(url1.query)
+        q2 = parse_qs(url2.query)
         shared_keys = set(q1.keys()).intersection(set(q2.keys()))
 
         if len(shared_keys) != len(q1) or len(shared_keys) != len(q2):
