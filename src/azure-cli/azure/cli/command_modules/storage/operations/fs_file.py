@@ -43,8 +43,7 @@ def download_file(client, destination_path=None, overwrite=True, timeout=None):
 
     with open(destination_path, 'wb') as stream:
         download = client.download_file(timeout=timeout)
-        download_content = download.readall()
-        stream.write(download_content)
+        download.readinto(stream)
 
 
 def exists(cmd, client, timeout=None):
