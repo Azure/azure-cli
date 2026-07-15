@@ -66,6 +66,30 @@ def register_appconfig_query_matcher(test):
     """ Register the App Configuration case-insensitive query matcher on the test's VCR instance. """
     test.vcr.register_matcher('query', _case_insensitive_query_matcher)
 
+
+class OperationLocationSanitizer(RecordingProcessor):
+    """ Scrub the store name from the 'operation-location' response header.
+
+    App Configuration snapshot long-running operations return the store endpoint in the
+    'operation-location' header, which the SDK follows to poll for completion. The base
+    GeneralNameReplacer only sanitizes the 'location' and 'azure-asyncoperation' headers,
+    so without this the real store name leaks into recordings and breaks playback (the
+    poller targets the un-sanitized host).
+    """
+
+    def __init__(self, name_replacer):
+        self._name_replacer = name_replacer
+
+    def process_response(self, response):
+        for old, new in self._name_replacer.names_name:
+            self._name_replacer.replace_header(response, 'operation-location', old, new)
+        return response
+
+
+def register_appconfig_recording_processors(test):
+    """ Register App Configuration-specific recording processors on the test. """
+    test.recording_processors.append(OperationLocationSanitizer(test.name_replacer))
+
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):
         if is_json_payload(response):
