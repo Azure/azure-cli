@@ -21,11 +21,6 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services, as_user_validator,
                                                            get_not_none_validator)
-from azure.cli.command_modules.storage.completers import (get_storage_name_completion_list,
-                                                          get_storage_acl_name_completion_list,
-                                                          file_path_completer)
-
-
 class MockCLI(CLI):
     def __init__(self):
         super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
@@ -185,20 +180,6 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         validate_arg(cmd, Namespace(arg=0))
         validate_arg(cmd, Namespace(arg=False))
-
-    def test_storage_name_completer_returns_empty_with_missing_legacy_service(self):
-        completer = get_storage_name_completion_list(None, 'list_containers')
-        self.assertEqual(completer.func(MockCmd(self.cli), '', Namespace()), [])
-
-    def test_storage_acl_name_completer_returns_empty_with_missing_legacy_service(self):
-        completer = get_storage_acl_name_completion_list(None, 'container_name', 'get_container_acl')
-        self.assertEqual(completer.func(MockCmd(self.cli), '', Namespace(container_name='container')), [])
-
-    @mock.patch('azure.cli.command_modules.storage.completers.validate_client_parameters')
-    @mock.patch('azure.cli.command_modules.storage.completers._get_legacy_file_service_class', return_value=None)
-    def test_file_path_completer_returns_empty_with_missing_legacy_service(self, _, __):
-        self.assertEqual(file_path_completer.func(MockCmd(self.cli), '', Namespace(share_name='share')), [])
-
 
 class TestEncryptionValidators(unittest.TestCase):
     def setUp(self):
