@@ -14,6 +14,11 @@ from azure.cli.core.auth.persistence import AzureCliTokenCache, SecretStore, bui
 
 class TestAzureCliTokenCache(unittest.TestCase):
 
+    def _make_persistence(self, tmp_path):
+        """Build a FilePersistence from a .json tmp file path."""
+        # build_persistence appends the .json extension, so strip it first
+        return build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+
     def test_reload_if_necessary_handles_json_decode_error(self):
         """Test that a corrupted (invalid JSON) token cache file is handled gracefully."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
@@ -22,10 +27,11 @@ class TestAzureCliTokenCache(unittest.TestCase):
             tmp_path = f.name
 
         try:
-            persistence = build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+            persistence = self._make_persistence(tmp_path)
             cache = AzureCliTokenCache(persistence)
 
-            # _reload_if_necessary should not raise, and should reset to empty cache
+            # Use float('inf') so that the condition `_last_sync < time_last_modified()` is
+            # always True, forcing a reload on every call to _reload_if_necessary.
             with mock.patch.object(type(cache._persistence), 'time_last_modified', return_value=float('inf')):
                 # Should not raise JSONDecodeError
                 cache._reload_if_necessary()
@@ -39,9 +45,11 @@ class TestAzureCliTokenCache(unittest.TestCase):
             tmp_path = f.name
 
         try:
-            persistence = build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+            persistence = self._make_persistence(tmp_path)
             cache = AzureCliTokenCache(persistence)
 
+            # Use float('inf') so that the condition `_last_sync < time_last_modified()` is
+            # always True, forcing a reload on every call to _reload_if_necessary.
             with mock.patch.object(type(cache._persistence), 'time_last_modified', return_value=float('inf')):
                 # Should not raise
                 cache._reload_if_necessary()
@@ -51,6 +59,11 @@ class TestAzureCliTokenCache(unittest.TestCase):
 
 class TestSecretStore(unittest.TestCase):
 
+    def _make_persistence(self, tmp_path):
+        """Build a FilePersistence from a .json tmp file path."""
+        # build_persistence appends the .json extension, so strip it first
+        return build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+
     def test_load_handles_json_decode_error(self):
         """Test that corrupted service principal entries are handled gracefully."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
@@ -59,7 +72,7 @@ class TestSecretStore(unittest.TestCase):
             tmp_path = f.name
 
         try:
-            persistence = build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+            persistence = self._make_persistence(tmp_path)
             store = SecretStore(persistence)
 
             # load should not raise and should return empty list
@@ -76,7 +89,7 @@ class TestSecretStore(unittest.TestCase):
             tmp_path = f.name
 
         try:
-            persistence = build_persistence(tmp_path.replace('.json', ''), encrypt=False)
+            persistence = self._make_persistence(tmp_path)
             store = SecretStore(persistence)
 
             result = store.load()
