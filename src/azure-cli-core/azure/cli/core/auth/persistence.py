@@ -23,9 +23,27 @@ logger = get_logger(__name__)
 file_extensions = {True: '.bin', False: '.json'}
 
 
+class AzureCliTokenCache(PersistedTokenCache):
+    """A token cache that gracefully handles corrupted token cache files.
+
+    When the token cache file contains invalid JSON (e.g., due to incomplete or concurrent writes),
+    the cache is reset to a fresh empty state instead of raising an exception.
+    """
+
+    def _reload_if_necessary(self):
+        try:
+            super()._reload_if_necessary()
+        except json.JSONDecodeError as ex:
+            # The token cache file may be corrupted due to incomplete or concurrent writes.
+            # Reset to a fresh empty cache so that the current operation can continue.
+            logger.warning("Failed to deserialize token cache '%s': %s. "
+                           "The cache will be reset.", self._persistence.get_location(), ex)
+            self.deserialize(None)
+
+
 def load_persisted_token_cache(location, encrypt):
     persistence = build_persistence(location, encrypt)
-    return PersistedTokenCache(persistence)
+    return AzureCliTokenCache(persistence)
 
 
 def load_secret_store(location, encrypt):
@@ -66,4 +84,8 @@ class SecretStore:
         try:
             return json.loads(self._persistence.load())
         except PersistenceNotFound:
+            return []
+        except json.JSONDecodeError as ex:
+            logger.warning("Failed to deserialize service principal entries '%s': %s. "
+                           "The entries will be reset.", self._persistence.get_location(), ex)
             return []
