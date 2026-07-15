@@ -249,7 +249,14 @@ def _list_app(cli_ctx, resource_group_name=None):
 def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
     server_farm_id = get_site_server_farm_id(webapp)
-    setattr(webapp, 'app_service_plan_id', server_farm_id)
+    try:
+        webapp["appServicePlanId"] = server_farm_id
+    except TypeError:
+        setattr(webapp, 'app_service_plan_id', server_farm_id)
+    try:
+        del webapp["serverFarmId"]
+    except (KeyError, TypeError):
+        pass
     # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
     if hasattr(webapp, 'server_farm_id'):
         try:

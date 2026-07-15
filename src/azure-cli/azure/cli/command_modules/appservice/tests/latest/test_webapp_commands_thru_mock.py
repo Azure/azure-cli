@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.web.models import Site
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
@@ -40,6 +41,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_startup_logs,
                                                          show_startup_log,
                                                          create_webapp)
+from azure.cli.command_modules.appservice.utils import _rename_server_farm_props
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -60,6 +62,15 @@ def _get_test_cmd():
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
+
+    def test_rename_server_farm_props_uses_app_service_plan_id_for_new_sdk_models(self):
+        site = Site(location='westus')
+        site['serverFarmId'] = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+
+        _rename_server_farm_props(site)
+
+        self.assertEqual(site['appServicePlanId'], '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+        self.assertNotIn('serverFarmId', site.keys())
 
     @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github')
