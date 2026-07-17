@@ -826,7 +826,31 @@ class SubscriptionFinder:
 
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
-        tenants = client.tenants.list()
+        try:
+            tenants = list(client.tenants.list())
+        except Exception as ex:  # pylint: disable=broad-except
+            from azure.core.exceptions import DecodeError, HttpResponseError
+            from azure.cli.core.azclierror import AzureResponseError
+            if isinstance(ex, DecodeError):
+                raise AzureResponseError(
+                    "Failed to retrieve tenants. The response from the server could not be parsed. "
+                    "This may be caused by a network firewall or proxy returning an unexpected response. "
+                    "Please check your network settings and try again, or use "
+                    "'az login --tenant TENANT_ID' to log in to a specific tenant."
+                ) from ex
+            if isinstance(ex, HttpResponseError):
+                status_code = ex.status_code
+                if status_code == 403:
+                    raise AzureResponseError(
+                        "Failed to retrieve tenants. The request was blocked (HTTP 403 Forbidden). "
+                        "This may be caused by a network firewall, proxy, or Conditional Access policy. "
+                        "Please check your network settings and try again, or use "
+                        "'az login --tenant TENANT_ID' to log in to a specific tenant."
+                    ) from ex
+                raise AzureResponseError(
+                    "Failed to retrieve tenants (HTTP {}): {}".format(status_code, ex)
+                ) from ex
+            raise
 
         for t in tenants:
             tenant_id = t.tenant_id
