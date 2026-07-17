@@ -10,13 +10,13 @@ import unittest
 import time
 import random
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
+from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
     StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
-    DESPreparer, KeyPreparer, RGPreparer
+    DESPreparer, KeyPreparer, ResourceGroupPreparer
 
 
 def _get_vm_version(vm_type):
