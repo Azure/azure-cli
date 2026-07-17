@@ -829,6 +829,9 @@ class SubscriptionFinder:
         from azure.core.exceptions import DecodeError, HttpResponseError
         from azure.cli.core.azclierror import AzureResponseError
         try:
+            # Eagerly materialise tenants here so any HTTP errors (e.g. firewall blocking the
+            # request with a non-JSON response) are caught below before iteration begins.
+            # Tenant counts are typically small so materialising up-front is not a concern.
             tenants = list(client.tenants.list())
         except (DecodeError, HttpResponseError) as ex:
             if isinstance(ex, DecodeError):
@@ -839,17 +842,14 @@ class SubscriptionFinder:
                     "'az login --tenant TENANT_ID' to log in to a specific tenant."
                 ) from ex
             # HttpResponseError (but not DecodeError)
-            status_code = ex.status_code
-            if status_code == 403:
+            if ex.status_code == 403:
                 raise AzureResponseError(
                     "Failed to retrieve tenants. The request was blocked (HTTP 403 Forbidden). "
                     "This may be caused by a network firewall, proxy, or Conditional Access policy. "
                     "Please check your network settings and try again, or use "
                     "'az login --tenant TENANT_ID' to log in to a specific tenant."
                 ) from ex
-            raise AzureResponseError(
-                "Failed to retrieve tenants (HTTP {}): {}".format(status_code, ex)
-            ) from ex
+            raise
 
         for t in tenants:
             tenant_id = t.tenant_id
