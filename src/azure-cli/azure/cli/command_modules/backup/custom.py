@@ -914,10 +914,6 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
                              disk_list_setting=None, exclude_all_data_disks=None):
     from ..vm.operations.vm import VMShow
     vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm)
-    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': vm_rg,
-        'vm_name': vm_name
-    })
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
@@ -928,12 +924,6 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     if policy.properties.protected_items_count >= 1000:
         raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
-    if vm.get('location', '').lower() != vault.location.lower():
-        raise CLIError(
-            """
-            The VM should be in the same location as that of the Recovery Services vault to enable protection.
-            """)
-
     if policy.properties.backup_management_type != BackupManagementType.azure_iaas_vm.value:
         raise CLIError(
             """
@@ -941,26 +931,65 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             Use the relevant get-default policy command and use it to protect the workload.
             """)
 
-    # Get protectable item.
-    protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
-    if protectable_item is None:
-        raise CLIError(
-            """
-            The specified Azure Virtual Machine Not Found. Possible causes are
-               1. VM does not exist
-               2. The VM name or the Service name needs to be case sensitive
-               3. VM is already Protected with same or other Vault.
-                  Please Unprotect VM first and then try to protect it again.
+    # Cross Subscription Backup (CSB): when the VM is specified as a full ARM id that resides in a
+    # subscription different from the vault's, discovery (RefreshContainers/ListProtectableItems) - which
+    # only operates on the vault's subscription - cannot find the VM. In this case we skip discovery and
+    # construct the container uri, protected item uri and source resource id directly from the VM ARM id.
+    # The backend derives the VM's subscription from the source resource id and validates region/existence.
+    vault_subscription_id = get_subscription_id(cmd.cli_ctx)
+    vm_subscription_id = cust_help.get_subscription_from_id(vm) if is_valid_resource_id(vm) else None
+    is_cross_subscription = (vm_subscription_id is not None and
+                             vm_subscription_id.lower() != vault_subscription_id.lower())
 
-            Please contact Microsoft for further assistance.
-            """)
+    if is_cross_subscription:
+        # Validate the cross-subscription VM exists and resides in the same region as the vault.
+        # Discovery cannot run cross-subscription, so we fetch the VM directly in its own subscription
+        # (same idiom used for cross-sub vnet/storage lookups) to fail fast on a wrong ARM id or a
+        # region mismatch before calling the backend.
+        vm_resource = _get_vm_resource(cmd.cli_ctx, vm_subscription_id, vm_rg, vm_name)
+        if vm_resource.location.lower() != vault.location.lower():
+            raise CLIError(
+                """
+                The VM should be in the same location as that of the Recovery Services vault to enable protection.
+                """)
 
-    # Construct enable protection request object
-    container_uri = cust_help.get_protection_container_uri_from_id(protectable_item.id)
-    item_uri = cust_help.get_protectable_item_uri_from_id(protectable_item.id)
-    vm_item_properties = _get_vm_item_properties_from_vm_type(vm['type'])
-    vm_item_properties.policy_id = policy.id
-    vm_item_properties.source_resource_id = protectable_item.properties.virtual_machine_id
+        container_uri = "IaasVMContainer;iaasvmcontainerv2;{};{}".format(vm_rg, vm_name)
+        item_uri = "vm;iaasvmcontainerv2;{};{}".format(vm_rg, vm_name)
+        vm_item_properties = _get_vm_item_properties_from_vm_id(vm)
+        vm_item_properties.policy_id = policy.id
+        vm_item_properties.source_resource_id = vm
+    else:
+        vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': vm_rg,
+            'vm_name': vm_name
+        })
+
+        if vm.get('location', '').lower() != vault.location.lower():
+            raise CLIError(
+                """
+                The VM should be in the same location as that of the Recovery Services vault to enable protection.
+                """)
+
+        # Get protectable item.
+        protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
+        if protectable_item is None:
+            raise CLIError(
+                """
+                The specified Azure Virtual Machine Not Found. Possible causes are
+                   1. VM does not exist
+                   2. The VM name or the Service name needs to be case sensitive
+                   3. VM is already Protected with same or other Vault.
+                      Please Unprotect VM first and then try to protect it again.
+
+                Please contact Microsoft for further assistance.
+                """)
+
+        # Construct enable protection request object
+        container_uri = cust_help.get_protection_container_uri_from_id(protectable_item.id)
+        item_uri = cust_help.get_protectable_item_uri_from_id(protectable_item.id)
+        vm_item_properties = _get_vm_item_properties_from_vm_type(vm['type'])
+        vm_item_properties.policy_id = policy.id
+        vm_item_properties.source_resource_id = protectable_item.properties.virtual_machine_id
 
     if disk_list_setting is not None and exclude_all_data_disks is not None:
         raise MutuallyExclusiveArgumentError("""
@@ -1061,6 +1090,10 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
                                        container_name, resource_group_name, vault_name,
                                        container_type)
             cust_help.validate_container(container)
+            if isinstance(container, list):
+                raise ValidationError("Multiple containers with same Friendly Name found. Please provide native "
+                                      "names instead. Native name can be obtained from the 'name' field in the "
+                                      "output of 'az backup container list'.")
             container_uri = container.name
 
         return [item for item in paged_items if
@@ -1474,6 +1507,16 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
     cust_help.validate_item(item)
 
+    if isinstance(item, list):
+        raise ValidationError("Found multiple backup items. Please provide native names instead.")
+
+    # For Original Location Recovery (OLR) of a Cross Subscription Backup protected item, the disks are
+    # restored to the VM's original subscription, which may differ from the vault's subscription. Derive
+    # the container (VM) subscription from the protected item's sourceResourceId so that the target storage
+    # account is resolved in the correct subscription. No additional input is required from the customer.
+    if (restore_mode == "OriginalLocation" and item.properties.source_resource_id is not None):
+        target_subscription = cust_help.get_subscription_from_id(item.properties.source_resource_id)
+
     recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
                                          container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
 
@@ -1724,9 +1767,9 @@ def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_r
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_job_details_cf(cmd.cli_ctx)
         response = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
-        return cust_help.replace_min_value_in_subtask(response)
+        return cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
     response = client.get(vault_name, resource_group_name, name)
-    return cust_help.replace_min_value_in_subtask(response)
+    return cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
 
 
 def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):
@@ -1837,6 +1880,18 @@ def _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, co
                                                   item_uri, rp_name, aad_result).properties
     crr_access_token.object_type = "CrrAccessToken"
     return crr_access_token
+
+
+def _get_vm_resource(cli_ctx, vm_subscription, vm_resource_group, vm_name):
+    resources_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                               subscription_id=vm_subscription).resources
+    vm_resource_namespace = 'Microsoft.Compute'
+    parent_resource_path = 'virtualMachines'
+    resource_type = ''
+    api_version = '2023-03-01'
+
+    return resources_client.get(vm_resource_group, vm_resource_namespace, parent_resource_path, resource_type,
+                                vm_name, api_version)
 
 
 def _get_vnet_object(cli_ctx, vnet_subscription, vnet_name, vnet_resource_group):
