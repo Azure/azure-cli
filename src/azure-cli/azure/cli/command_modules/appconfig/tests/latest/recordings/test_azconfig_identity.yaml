@@ -1,7 +1,8 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"dataPlaneProxy":
-      {}, "softDeleteRetentionInDays": 1, "createMode": "Default"}}'
+    body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"createMode":
+      "Default", "dataPlaneProxy": {}, "softDeleteRetentionInDays": 1, "disableLocalAuth":
+      true}}'
     headers:
       Accept:
       - application/json
@@ -12,49 +13,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '146'
+      - '172'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g -l --sku --retention-days
+      - -n -g -l --sku --retention-days --disable-local-auth
       User-Agent:
       - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
   response:
     body:
-      string: '{"error": {"code": "RequestDisallowedByPolicy", "target": "IdentityTest000002",
-        "message": "Resource ''IdentityTest000002'' was disallowed by policy. Reasons:
-        ''Local authentication must be disabled on App Configuration stores. Use Microsoft
-        Entra ID for authentication instead.''. See error details for policy resource
-        IDs.", "additionalInfo": [{"type": "PolicyViolation", "info": {"evaluationDetails":
-        {"evaluatedExpressions": [{"result": "True", "expressionKind": "Value", "expression":
-        "all", "expressionValue": "all", "targetValue": ["all"], "operator": "In"},
-        {"result": "True", "expressionKind": "Field", "expression": "type", "path":
-        "type", "expressionValue": "Microsoft.AppConfiguration/configurationStores",
-        "targetValue": "Microsoft.AppConfiguration/configurationStores", "operator":
-        "Equals"}, {"result": "True", "expressionKind": "Field", "expression": "Microsoft.AppConfiguration/configurationStores/disableLocalAuth",
-        "path": "properties.disableLocalAuth", "targetValue": "False", "operator":
-        "Exists"}], "reason": "Local authentication must be disabled on App Configuration
-        stores. Use Microsoft Entra ID for authentication instead."}, "policyDefinitionId":
-        "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/628fedbf-e261-5d9d-9880-97d5b2a0226e",
-        "policyDefinitionName": "628fedbf-e261-5d9d-9880-97d5b2a0226e", "policyDefinitionDisplayName":
-        "[AppConfig] Disable local authentication on App Configuration stores", "policyDefinitionVersion":
-        "1.0.0", "policyDefinitionEffect": "deny", "policyAssignmentId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/67dfe9ff-974c-5e6b-bbf3-2b683b13c936",
-        "policyAssignmentName": "67dfe9ff-974c-5e6b-bbf3-2b683b13c936", "policyAssignmentDisplayName":
-        "[AppConfig] Disable local authentication on App Configuration stores", "policyAssignmentScope":
-        "/subscriptions/00000000-0000-0000-0000-000000000000", "policyAssignmentParameters":
-        {"enforcedRegionsString": "all", "effect": "deny"}, "policyExemptionIds":
-        [], "policyEnrollmentIds": []}}]}}'
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "properties": {"provisioningState": "Creating", "creationDate":
+        "2026-07-17T18:32:29.4941242+00:00", "endpoint": null, "encryption": null,
+        "privateEndpointConnections": null, "disableLocalAuth": null, "softDeleteRetentionInDays":
+        null, "defaultKeyValueRevisionRetentionPeriodInSeconds": null, "enablePurgeProtection":
+        null, "dataPlaneProxy": null, "telemetry": null, "azureFrontDoor": null},
+        "sku": {"name": "Standard"}, "systemData": null, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002",
+        "name": "IdentityTest000002", "tags": {}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099496187232&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=oQd7Lw8HC7Nh1sp4OJjb_o_tv1Mcm_m2PC6ysVsRwAxkKnM899Q6AyTTEMjHDGMARP8Fd-7Kiu8d8TnHVHs6htw3UhB1Q-wIRjmRLfBdWDhbrOVT4jxCrIFO87JhdVU3BQWEH-V44OQiN-2bFDvGir-igV1WK15is7n6XOjIXXvYR1kQ50aZGpJTXQV6AfjRWlGzMdEMDHzve9TR-ZO5SCrL6q9z8MXkmxM-wiS2W7zwgVvrso8RDPcM1hudGIY6sH3-Ng3XFjTUy9azhd1otMuvxkWagYbzo6Gb2M6YQBSQaMr7xdNVlw4IPVJR6fZZhY0v-sNgNdCLrRYciLj3Yg&h=xa_3BNWEZ_LjM7al-rcGnxFUyd2Gfl_BKxRINUqxjSo
       cache-control:
       - no-cache
       content-length:
-      - '2103'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 02 Jul 2026 21:57:43 GMT
+      - Fri, 17 Jul 2026 18:32:28 GMT
       expires:
       - '-1'
       pragma:
@@ -65,11 +53,966 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus/184ff2de-dcac-42a1-8149-30c22e843ae9
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
       x-msedge-ref:
-      - 'Ref A: FEC28D593C6D4BDF96F7D820338F430F Ref B: CO6AA3150218033 Ref C: 2026-07-02T21:57:44Z'
+      - 'Ref A: B89ADDC8DCD14348BA38BE0A9FCF77A8 Ref B: MWH011020807042 Ref C: 2026-07-17T18:32:28Z'
     status:
-      code: 403
-      message: Forbidden
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --retention-days --disable-local-auth
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099496187232&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=oQd7Lw8HC7Nh1sp4OJjb_o_tv1Mcm_m2PC6ysVsRwAxkKnM899Q6AyTTEMjHDGMARP8Fd-7Kiu8d8TnHVHs6htw3UhB1Q-wIRjmRLfBdWDhbrOVT4jxCrIFO87JhdVU3BQWEH-V44OQiN-2bFDvGir-igV1WK15is7n6XOjIXXvYR1kQ50aZGpJTXQV6AfjRWlGzMdEMDHzve9TR-ZO5SCrL6q9z8MXkmxM-wiS2W7zwgVvrso8RDPcM1hudGIY6sH3-Ng3XFjTUy9azhd1otMuvxkWagYbzo6Gb2M6YQBSQaMr7xdNVlw4IPVJR6fZZhY0v-sNgNdCLrRYciLj3Yg&h=xa_3BNWEZ_LjM7al-rcGnxFUyd2Gfl_BKxRINUqxjSo
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE",
+        "name": "2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE", "status": "Creating",
+        "error": null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099506624569&c=MIIHlDCCBnygAwIBAgIQAcfN_Jd6ViGd1-EkFH97aDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQwOTA0MzUxMFoXDTI2MTAwNDEwMzUxMFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9nzXnnnT0V5cDY5fHgY6fvt0f5K67TLY5rf3kXsgNDiGJL9Ub1_cJuWgTTjGYmxaPP6HFz_YOLdMBGPkVhZavejw0qLifjw8nEBivhzrnSlLVzv8ThjIxvzYq7Pixu564lZgpE4tktNQwXrbdQ8_M_ltt8Ia4jO8Wc47QJt-BIUGY10RRyuDzAEGrQRCDbQB1Kyo6IjF95ihEDSUcGthqOIsbqMERKgZokdpO3a8ikGNKVtOb3zrePXR71iCDdkdamGIsPVfGxaBtUDO5vqdKugYbOQDFCYaQdk7x3VINyRpvZXpU4-B41mD-vXX5Rm_X9BL0jN1rjSRIFvfK3YkxAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRktXyyceQOrjzGGHfthVAJlrP3gjAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBx5I6Sofmi5yGOz0alPqrZuIh1Qv1Gc7iCefJl7OITobABfs9PqLqAUqQ0NZt02K2ag8zFQWRLn3xJESxYpGcBV7meAUTJOJhRHdvwqFTOMyPwYKbVpl-gdceRQV0J4MdXD1EG8ZfrQqJh4yTpH9fs1bJNlNwJZx_jinURgGNM3AvMcEe8RipqTE4QFDEFqJqWftJzvHLBetVu8Z6AGm5099Z3hgXzQkneb6E4dITNtuFdibgZ_w2TYC64wJ1VSMZoWDioo50604N9fZooi7RvEeWH1iooHPyFIUtevrquxTYiMdLAwbW0FzEjba2h2TLxHn3wd3uzwLiJoLGRIzBT&s=ILkJVk3cvBccD1NxugnaO3J5pWB5AjjkZcedToiPPlJGny0q0vFsC9tg4AJUiOTNiEIkdmnMRAJdLC85AYGFw6tpoXR6Tf7R6PTiALUi0_Uo3jeBAUh2uEtEab9k-4-rkl6QOIFOT6VnZhBVxld6mypjqCKZt9X4_dpLPCA8soEl08LJZG4eBf4_w6Qy-tZTPkElArocOHHkqNxDEcsqzQiFIew0DxovEYEAk_-_BIZndx4Pg8Ib8SKEfvayyMbBsVQiOj6vMdm1QQthdj339fQQGnRgVgoEOzklDFDtAy9Ydm5sIPIIzKHIIBAQr1QwACCd9GZMZ0kjR3NquP-tIw&h=jvzwqIoGtl3Vqhfhejb4bQa90KKNIVhEUBEgV-5tJZs
+      cache-control:
+      - no-cache
+      content-length:
+      - '268'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:32:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus2/62153dfa-7a7e-485d-bb69-095440385047
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 1A37B66845844212A0A0F3604CF7672E Ref B: CO6AA3150218033 Ref C: 2026-07-17T18:32:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --retention-days --disable-local-auth
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099496187232&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=oQd7Lw8HC7Nh1sp4OJjb_o_tv1Mcm_m2PC6ysVsRwAxkKnM899Q6AyTTEMjHDGMARP8Fd-7Kiu8d8TnHVHs6htw3UhB1Q-wIRjmRLfBdWDhbrOVT4jxCrIFO87JhdVU3BQWEH-V44OQiN-2bFDvGir-igV1WK15is7n6XOjIXXvYR1kQ50aZGpJTXQV6AfjRWlGzMdEMDHzve9TR-ZO5SCrL6q9z8MXkmxM-wiS2W7zwgVvrso8RDPcM1hudGIY6sH3-Ng3XFjTUy9azhd1otMuvxkWagYbzo6Gb2M6YQBSQaMr7xdNVlw4IPVJR6fZZhY0v-sNgNdCLrRYciLj3Yg&h=xa_3BNWEZ_LjM7al-rcGnxFUyd2Gfl_BKxRINUqxjSo
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE",
+        "name": "2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE", "status": "Creating",
+        "error": null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099617310920&c=MIIHlDCCBnygAwIBAgIQAcfN_Jd6ViGd1-EkFH97aDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQwOTA0MzUxMFoXDTI2MTAwNDEwMzUxMFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9nzXnnnT0V5cDY5fHgY6fvt0f5K67TLY5rf3kXsgNDiGJL9Ub1_cJuWgTTjGYmxaPP6HFz_YOLdMBGPkVhZavejw0qLifjw8nEBivhzrnSlLVzv8ThjIxvzYq7Pixu564lZgpE4tktNQwXrbdQ8_M_ltt8Ia4jO8Wc47QJt-BIUGY10RRyuDzAEGrQRCDbQB1Kyo6IjF95ihEDSUcGthqOIsbqMERKgZokdpO3a8ikGNKVtOb3zrePXR71iCDdkdamGIsPVfGxaBtUDO5vqdKugYbOQDFCYaQdk7x3VINyRpvZXpU4-B41mD-vXX5Rm_X9BL0jN1rjSRIFvfK3YkxAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRktXyyceQOrjzGGHfthVAJlrP3gjAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBx5I6Sofmi5yGOz0alPqrZuIh1Qv1Gc7iCefJl7OITobABfs9PqLqAUqQ0NZt02K2ag8zFQWRLn3xJESxYpGcBV7meAUTJOJhRHdvwqFTOMyPwYKbVpl-gdceRQV0J4MdXD1EG8ZfrQqJh4yTpH9fs1bJNlNwJZx_jinURgGNM3AvMcEe8RipqTE4QFDEFqJqWftJzvHLBetVu8Z6AGm5099Z3hgXzQkneb6E4dITNtuFdibgZ_w2TYC64wJ1VSMZoWDioo50604N9fZooi7RvEeWH1iooHPyFIUtevrquxTYiMdLAwbW0FzEjba2h2TLxHn3wd3uzwLiJoLGRIzBT&s=ErlRHH1G_KVwzWmmqvQZWEOK8WI7LFfUcd1UkWq0ps_T7dNPeACxfEaPEK60eR0gfCwk5m5_Yh9CeEZXSDPdY2Yd3X6ugM2vH6CWKiwP-SJ0PnxWxY7FaHj1jm4vxw9gcd3W378A6Yx01hMy26iQz3Sma4ot9Ks4U65JEPlO8YeTm8a-AmZ46s-MyC4VDd7jEsLwZ828fCkOnGdTteR4sYgLfWuBm_c6IvmGNLeDd7cSfEqdZNIxteRB5aL6fH3RZnUKjjVW-cqbukcH04xgmcFuBZ5NTnrY8XWKyGdkTCxpYR0NFYYba3qzc5qLfTSIXAQpKlzxPatVzx04UyJ4lw&h=4VfdQHECeCpWBPIf6ngY9AIF6cYiFvd3Msbl2MMyHcQ
+      cache-control:
+      - no-cache
+      content-length:
+      - '268'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:32:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus2/3d5d3970-ef39-4a78-99f0-e14e9a89fd1b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CF6CC633336A410392E1DB2D4353B2BF Ref B: CO6AA3150220027 Ref C: 2026-07-17T18:32:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --retention-days --disable-local-auth
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099496187232&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=oQd7Lw8HC7Nh1sp4OJjb_o_tv1Mcm_m2PC6ysVsRwAxkKnM899Q6AyTTEMjHDGMARP8Fd-7Kiu8d8TnHVHs6htw3UhB1Q-wIRjmRLfBdWDhbrOVT4jxCrIFO87JhdVU3BQWEH-V44OQiN-2bFDvGir-igV1WK15is7n6XOjIXXvYR1kQ50aZGpJTXQV6AfjRWlGzMdEMDHzve9TR-ZO5SCrL6q9z8MXkmxM-wiS2W7zwgVvrso8RDPcM1hudGIY6sH3-Ng3XFjTUy9azhd1otMuvxkWagYbzo6Gb2M6YQBSQaMr7xdNVlw4IPVJR6fZZhY0v-sNgNdCLrRYciLj3Yg&h=xa_3BNWEZ_LjM7al-rcGnxFUyd2Gfl_BKxRINUqxjSo
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE",
+        "name": "2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE", "status": "Creating",
+        "error": null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099727896536&c=MIIHlDCCBnygAwIBAgIQAcfN_Jd6ViGd1-EkFH97aDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQwOTA0MzUxMFoXDTI2MTAwNDEwMzUxMFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9nzXnnnT0V5cDY5fHgY6fvt0f5K67TLY5rf3kXsgNDiGJL9Ub1_cJuWgTTjGYmxaPP6HFz_YOLdMBGPkVhZavejw0qLifjw8nEBivhzrnSlLVzv8ThjIxvzYq7Pixu564lZgpE4tktNQwXrbdQ8_M_ltt8Ia4jO8Wc47QJt-BIUGY10RRyuDzAEGrQRCDbQB1Kyo6IjF95ihEDSUcGthqOIsbqMERKgZokdpO3a8ikGNKVtOb3zrePXR71iCDdkdamGIsPVfGxaBtUDO5vqdKugYbOQDFCYaQdk7x3VINyRpvZXpU4-B41mD-vXX5Rm_X9BL0jN1rjSRIFvfK3YkxAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRktXyyceQOrjzGGHfthVAJlrP3gjAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBx5I6Sofmi5yGOz0alPqrZuIh1Qv1Gc7iCefJl7OITobABfs9PqLqAUqQ0NZt02K2ag8zFQWRLn3xJESxYpGcBV7meAUTJOJhRHdvwqFTOMyPwYKbVpl-gdceRQV0J4MdXD1EG8ZfrQqJh4yTpH9fs1bJNlNwJZx_jinURgGNM3AvMcEe8RipqTE4QFDEFqJqWftJzvHLBetVu8Z6AGm5099Z3hgXzQkneb6E4dITNtuFdibgZ_w2TYC64wJ1VSMZoWDioo50604N9fZooi7RvEeWH1iooHPyFIUtevrquxTYiMdLAwbW0FzEjba2h2TLxHn3wd3uzwLiJoLGRIzBT&s=c-cBE7s0eHePPRL8VHAUMFFdy6Iu2Z731lM3SjGsM4mmjk377IBMX88xunuQ6zn0u7ZLhR_pfasZi6tqilNiNznFDqXjzi_GeAaewDCv09LlU_NP2uLB9_Zhmzvv2nZ6Ym71MWsTruHgh-btlZKJvv6dE3l1jfYKUOWyV8NwdZsmx08TUpNCqmcs63tSR93rX1jIXg_qF9dJsq1kMLG4nKfnHMQ4p_KpG7t70U3z4FBNiVB62enGJ3YUoYLTCNVtlsvBSRIE0YqJusMC9vQI64fj6NlqSOIer_XJkYOJ7twoatx4YTqbgMWTMEQgm-5Un-Y-Z-SJ3PlOUos-Y5_ZqA&h=2dP8BWgDBVBYYOjmiJFzLIic39amB_vlyHtzYzTIVHc
+      cache-control:
+      - no-cache
+      content-length:
+      - '268'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:32:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus2/10fc5f0f-d17f-43d8-92ea-e19f26d013f2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A35105A99C8747DEB765568605E915E9 Ref B: MWH011020807042 Ref C: 2026-07-17T18:32:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --retention-days --disable-local-auth
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099496187232&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=oQd7Lw8HC7Nh1sp4OJjb_o_tv1Mcm_m2PC6ysVsRwAxkKnM899Q6AyTTEMjHDGMARP8Fd-7Kiu8d8TnHVHs6htw3UhB1Q-wIRjmRLfBdWDhbrOVT4jxCrIFO87JhdVU3BQWEH-V44OQiN-2bFDvGir-igV1WK15is7n6XOjIXXvYR1kQ50aZGpJTXQV6AfjRWlGzMdEMDHzve9TR-ZO5SCrL6q9z8MXkmxM-wiS2W7zwgVvrso8RDPcM1hudGIY6sH3-Ng3XFjTUy9azhd1otMuvxkWagYbzo6Gb2M6YQBSQaMr7xdNVlw4IPVJR6fZZhY0v-sNgNdCLrRYciLj3Yg&h=xa_3BNWEZ_LjM7al-rcGnxFUyd2Gfl_BKxRINUqxjSo
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE",
+        "name": "2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE", "status": "Succeeded",
+        "error": null}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/Y29uZmlndXJhdGlvblN0b3Jlcw.2kdeg642nkzUOvLSrtc3lCyGAmUwa1WHb1DPjL3trCE?api-version=2025-08-01-preview&t=639199099838759660&c=MIIHlDCCBnygAwIBAgIQAcfN_Jd6ViGd1-EkFH97aDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQwOTA0MzUxMFoXDTI2MTAwNDEwMzUxMFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9nzXnnnT0V5cDY5fHgY6fvt0f5K67TLY5rf3kXsgNDiGJL9Ub1_cJuWgTTjGYmxaPP6HFz_YOLdMBGPkVhZavejw0qLifjw8nEBivhzrnSlLVzv8ThjIxvzYq7Pixu564lZgpE4tktNQwXrbdQ8_M_ltt8Ia4jO8Wc47QJt-BIUGY10RRyuDzAEGrQRCDbQB1Kyo6IjF95ihEDSUcGthqOIsbqMERKgZokdpO3a8ikGNKVtOb3zrePXR71iCDdkdamGIsPVfGxaBtUDO5vqdKugYbOQDFCYaQdk7x3VINyRpvZXpU4-B41mD-vXX5Rm_X9BL0jN1rjSRIFvfK3YkxAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRktXyyceQOrjzGGHfthVAJlrP3gjAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBx5I6Sofmi5yGOz0alPqrZuIh1Qv1Gc7iCefJl7OITobABfs9PqLqAUqQ0NZt02K2ag8zFQWRLn3xJESxYpGcBV7meAUTJOJhRHdvwqFTOMyPwYKbVpl-gdceRQV0J4MdXD1EG8ZfrQqJh4yTpH9fs1bJNlNwJZx_jinURgGNM3AvMcEe8RipqTE4QFDEFqJqWftJzvHLBetVu8Z6AGm5099Z3hgXzQkneb6E4dITNtuFdibgZ_w2TYC64wJ1VSMZoWDioo50604N9fZooi7RvEeWH1iooHPyFIUtevrquxTYiMdLAwbW0FzEjba2h2TLxHn3wd3uzwLiJoLGRIzBT&s=dD8LWcd3twcGGmAhqK9ArbteD_16b-yn2PkoIoxno0AUk30GhYAX5VDfSKtNyL49z3bASyNcdbHRN_K5hm5H1LehtN6vqpIhSQQD2FyHftKtsmkjK3dYazooogzdy5lpKTZQ3khbvN4Z4EPGuBVUI6mNXf3n2YhQFh0rG4YA856U6JSXkZ933CHMatn7IKcZp7Z9yLCDZpYbj1AOj2lyqJz1uOEh1Ez38rOMxeR8uHFEm62sPXLGmSVLbBM9aeBrsKeXVHFyGkxdhB6Xn7MXtptefz5LCJjWEoGwy1wCEwNe3N-7ac5HMJ0jmAwTUfrncTas46G-VXHnQyB4I-HgsQ&h=44wnx1SVv0CBEXl3ufeUWK0mO3IXwoR1AI71xRNI1WM
+      cache-control:
+      - no-cache
+      content-length:
+      - '269'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus2/0753e92c-8370-41c6-aacb-bdd4c4d74cf0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 996EE313BA294058AE1E990DB8353168 Ref B: MWH011020809034 Ref C: 2026-07-17T18:33:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --retention-days --disable-local-auth
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "properties": {"provisioningState": "Succeeded", "creationDate":
+        "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:32:29+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:04 GMT
+      etag:
+      - '"db004997-0000-0100-0000-6a5a753e0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: B62D2EE5AD2A4F11B901650C2784D685 Ref B: MWH011020806023 Ref C: 2026-07-17T18:33:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001",
+        "name": "clitest.rg000001", "type": "Microsoft.Resources/resourceGroups",
+        "location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+        "test": "test_azconfig_identity", "date": "2026-07-17T18:32:21Z", "module":
+        "appconfig"}, "properties": {"provisioningState": "Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 60D23AAAADB44F0AA9B2D1C6BACBD9C7 Ref B: CO6AA3150219031 Ref C: 2026-07-17T18:33:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003?api-version=2025-05-31-preview
+  response:
+    body:
+      string: '{"location": "westus", "tags": {}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003",
+        "name": "UserAssignedIdentity000003", "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "properties": {"isolationScope": "None", "assignmentRestrictions": {"providers":
+        []}, "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "principalId": "e0cf1fbc-c989-4d07-acf9-5bb64711d6d0",
+        "clientId": "1fd2b182-f165-4f52-9d13-d2951a473f30"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:08 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus/4cb783a7-0ef4-43c5-8768-447d094ef6d0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D5B684A5777F47A787DA77DFEC1F3983 Ref B: CO6AA3150218009 Ref C: 2026-07-17T18:33:06Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "properties": {"provisioningState": "Succeeded", "creationDate":
+        "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:32:29+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:09 GMT
+      etag:
+      - '"db004997-0000-0100-0000-6a5a753e0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 114B72E9D54749388D86A1385FC58890 Ref B: CO6AA3150217023 Ref C: 2026-07-17T18:33:09Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned", "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "properties": {"provisioningState":
+        "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:13.7848679+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:13 GMT
+      etag:
+      - '"db00b2ce-0000-0100-0000-6a5a75690000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus2/d07a2f9b-d76a-45cd-9c80-66eca073d6eb
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 1E85E73AD2CB48399F827FABAC6A66B7 Ref B: MWH011020808025 Ref C: 2026-07-17T18:33:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned", "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "properties": {"provisioningState":
+        "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:13+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1252'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:14 GMT
+      etag:
+      - '"db00b2ce-0000-0100-0000-6a5a75690000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 44A67DBD649149138CDE4A96F1101FAB Ref B: MWH011020806031 Ref C: 2026-07-17T18:33:14Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned", "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "properties": {"provisioningState":
+        "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:13+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1252'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:15 GMT
+      etag:
+      - '"db00b2ce-0000-0100-0000-6a5a75690000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0A7CA54243D24010A3CC09B92223D12F Ref B: MWH011020809060 Ref C: 2026-07-17T18:33:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned,UserAssigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '258'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned, UserAssigned", "userAssignedIdentities":
+        {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
+        {"principalId": "e0cf1fbc-c989-4d07-acf9-5bb64711d6d0", "clientId": "1fd2b182-f165-4f52-9d13-d2951a473f30"}},
+        "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"},
+        "properties": {"provisioningState": "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00",
+        "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io", "encryption":
+        {"keyVaultProperties": null}, "privateEndpointConnections": null, "disableLocalAuth":
+        true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:17.7638979+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:17 GMT
+      etag:
+      - '"db0013d3-0000-0100-0000-6a5a756d0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus/66d2bc31-85cb-45be-8037-ed30e60f69a3
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: C21BF18D27A4402E93BCB1A5D457EA20 Ref B: MWH011020809042 Ref C: 2026-07-17T18:33:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned, UserAssigned", "userAssignedIdentities":
+        {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
+        {"principalId": "e0cf1fbc-c989-4d07-acf9-5bb64711d6d0", "clientId": "1fd2b182-f165-4f52-9d13-d2951a473f30"}},
+        "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"},
+        "properties": {"provisioningState": "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00",
+        "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io", "encryption":
+        {"keyVaultProperties": null}, "privateEndpointConnections": null, "disableLocalAuth":
+        true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:17+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:18 GMT
+      etag:
+      - '"db0013d3-0000-0100-0000-6a5a756d0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 61BB4FD879E44C89B44D03F6C0CF10C1 Ref B: MWH011020809029 Ref C: 2026-07-17T18:33:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned, UserAssigned", "userAssignedIdentities":
+        {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
+        {"principalId": "e0cf1fbc-c989-4d07-acf9-5bb64711d6d0", "clientId": "1fd2b182-f165-4f52-9d13-d2951a473f30"}},
+        "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"},
+        "properties": {"provisioningState": "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00",
+        "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io", "encryption":
+        {"keyVaultProperties": null}, "privateEndpointConnections": null, "disableLocalAuth":
+        true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:17+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:18 GMT
+      etag:
+      - '"db0013d3-0000-0100-0000-6a5a756d0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E7EEB5D252D041A18B4386CE68DF47C6 Ref B: CO6AA3150218017 Ref C: 2026-07-17T18:33:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned", "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "properties": {"provisioningState":
+        "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:21.8276233+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1260'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:21 GMT
+      etag:
+      - '"db0048d8-0000-0100-0000-6a5a75710000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d460ec4b-def1-4d45-b619-06ddc86b2c93/westus/69b05b9a-3028-455c-80ef-5270e6037c72
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: E255DACA9693417BB15A29809ED23AF5 Ref B: CO6AA3150218047 Ref C: 2026-07-17T18:33:20Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - appconfig identity show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2025-08-01-preview
+  response:
+    body:
+      string: '{"type": "Microsoft.AppConfiguration/configurationStores", "location":
+        "eastus", "identity": {"type": "SystemAssigned", "principalId": "cc082aad-685a-474e-a48f-e35b8d5b405c",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "properties": {"provisioningState":
+        "Succeeded", "creationDate": "2026-07-17T18:32:29+00:00", "endpoint": "https://identitytestohc2kw4xl5mi.azconfig.io",
+        "encryption": {"keyVaultProperties": null}, "privateEndpointConnections":
+        null, "disableLocalAuth": true, "softDeleteRetentionInDays": 1, "defaultKeyValueRevisionRetentionPeriodInSeconds":
+        2592000, "enablePurgeProtection": false, "dataPlaneProxy": {"authenticationMode":
+        "Local", "privateLinkDelegation": "Disabled"}, "telemetry": {"resourceId":
+        null}, "azureFrontDoor": {"resourceId": null}}, "sku": {"name": "standard"},
+        "systemData": {"createdBy": "test@example.com", "createdByType": "User", "createdAt":
+        "2026-07-17T18:32:29+00:00", "lastModifiedBy": "test@example.com", "lastModifiedByType":
+        "User", "lastModifiedAt": "2026-07-17T18:33:21+00:00"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestohc2kw4xl5mi",
+        "name": "IdentityTest000002", "tags": {}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1252'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 17 Jul 2026 18:33:22 GMT
+      etag:
+      - '"db0048d8-0000-0100-0000-6a5a75710000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F37EC462A285406DB74DF3B5E5972E3E Ref B: MWH011020806052 Ref C: 2026-07-17T18:33:22Z'
+    status:
+      code: 200
+      message: OK
 version: 1
