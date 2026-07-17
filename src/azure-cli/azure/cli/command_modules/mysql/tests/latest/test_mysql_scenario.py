@@ -224,7 +224,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-                 checks=[JMESPathCheck('type(@)', 'array')])
+                 checks=[JMESPathCheck('type(@)', 'array'),
+                         JMESPathCheck('length(@) > `0`', True)])
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
