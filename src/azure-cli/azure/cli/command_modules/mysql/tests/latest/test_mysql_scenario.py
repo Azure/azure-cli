@@ -15,7 +15,6 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
-from azure.cli.testsdk.exceptions import CliExecutionError
 from azure.core.exceptions import HttpResponseError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
@@ -742,7 +741,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         try:
             user = self.cmd('ad signed-in-user show').get_output_in_json()
             caller_object_id = user['id']
-        except CliExecutionError:  # Graph /me is delegated-only; fall back to SP object ID in CI
+        except Exception:  # Graph /me is delegated-only; fall back to SP object ID under service-principal auth
             account = self.cmd('account show').get_output_in_json()
             sp_client_id = account['user']['name']
             caller_object_id = self.cmd('ad sp show --id {}'.format(sp_client_id)).get_output_in_json()['id']
