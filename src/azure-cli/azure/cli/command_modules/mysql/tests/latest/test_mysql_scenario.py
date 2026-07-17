@@ -738,9 +738,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_location = DEFAULT_PAIRED_LOCATION
         replication_role = 'Replica'
 
-        user = self.cmd('ad signed-in-user show').get_output_in_json()
+        try:
+            user = self.cmd('ad signed-in-user show').get_output_in_json()
+            caller_object_id = user['id']
+        except Exception:  # pylint: disable=broad-except
+            # az ad signed-in-user show calls Graph /me which is only valid with delegated
+            # (interactive user) auth. Under service-principal auth (e.g. CI/OIDC), fall back
+            # to looking up the SP's own object ID.
+            account = self.cmd('account show').get_output_in_json()
+            sp_client_id = account['user']['name']
+            caller_object_id = self.cmd('ad sp show --id {}'.format(sp_client_id)).get_output_in_json()['id']
 
-        self.cmd('keyvault set-policy --name {} --object-id {} --key-permissions all'.format(vault_name, user['id']))
+        self.cmd('keyvault set-policy --name {} --object-id {} --key-permissions all'.format(vault_name, caller_object_id))
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
