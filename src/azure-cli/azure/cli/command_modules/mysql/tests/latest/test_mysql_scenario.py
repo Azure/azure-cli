@@ -742,7 +742,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         try:
             user = self.cmd('ad signed-in-user show').get_output_in_json()
             caller_object_id = user['id']
-        except CliExecutionError:  # Graph /me not available under service-principal auth
+        except CliExecutionError:  # Graph /me is delegated-only; fall back to SP object ID in CI
             account = self.cmd('account show').get_output_in_json()
             sp_client_id = account['user']['name']
             caller_object_id = self.cmd('ad sp show --id {}'.format(sp_client_id)).get_output_in_json()['id']
