@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
     CrossSubscriptionRestoreSettings, DeletedVaultUndeleteInputProperties, DeletedVaultUndeleteInput, \
-    SoftDeleteSettings
+    SoftDeleteSettings, CostManagementSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -156,7 +156,7 @@ standard_policy_type = "v1"
 def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
                  classic_alerts=None, azure_monitor_alerts_for_job_failures=None, tenant_id=None,
-                 backup_storage_redundancy=None, cross_region_restore_flag=None):
+                 backup_storage_redundancy=None, cross_region_restore_flag=None, cost_management_granularity=None):
     try:
         existing_vault = client.get(resource_group_name, vault_name)
     except CoreResourceNotFoundError:
@@ -174,6 +174,9 @@ def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
 
     if cross_subscription_restore_state is not None:
         patchvault.properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
+    if cost_management_granularity is not None:
+        patchvault.properties.cost_management_settings = _get_vault_cost_management_settings(cost_management_granularity, existing_vault)
 
     if classic_alerts is not None or azure_monitor_alerts_for_job_failures is not None:
         patchvault.properties.monitoring_settings = _get_vault_monitoring_settings(azure_monitor_alerts_for_job_failures,
@@ -208,7 +211,7 @@ def update_vault(cmd, client, vault_name, resource_group_name, tags=None,
 # Import SoftDeleteSettings, args in create_vault and _get_vault_security_settings
 def create_vault(cmd, client, vault_name, resource_group_name, location, tags=None,
                  public_network_access=None, immutability_state=None, cross_subscription_restore_state=None,
-                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None):
+                 classic_alerts=None, azure_monitor_alerts_for_job_failures=None, cost_management_granularity=None):
     try:
         client.get(resource_group_name, vault_name)
         logger.warning("You are using the az backup vault create command to update vault properties. Please "
@@ -216,9 +219,13 @@ def create_vault(cmd, client, vault_name, resource_group_name, location, tags=No
                        "to their default values. It is recommended to use az backup vault update instead.")
 
         # If the vault exists, we move to the update flow instead
-        return update_vault(cmd, client, vault_name, resource_group_name, tags, public_network_access,
-                            immutability_state, cross_subscription_restore_state, classic_alerts,
-                            azure_monitor_alerts_for_job_failures)
+        return update_vault(cmd, client, vault_name, resource_group_name, tags=tags, 
+                            public_network_access=public_network_access,
+                            immutability_state=immutability_state, 
+                            cross_subscription_restore_state=cross_subscription_restore_state, 
+                            classic_alerts=classic_alerts,
+                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures, 
+                            cost_management_granularity=cost_management_granularity)
     except CoreResourceNotFoundError:
         vault_properties = VaultProperties()
 
@@ -240,6 +247,8 @@ def create_vault(cmd, client, vault_name, resource_group_name, location, tags=No
 
     if cross_subscription_restore_state is not None:
         vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
+
+    vault_properties.cost_management_settings = _get_vault_cost_management_settings(cost_management_granularity)
 
     vault = Vault(location=location, sku=vault_sku, properties=vault_properties, tags=tags)
 
@@ -314,7 +323,6 @@ def _get_vault_security_settings(immutability_state, existing_vault=None):
 
     return security_settings
 
-
 def _get_vault_restore_settings(cross_subscription_restore_state):
     restore_settings = None
     if cross_subscription_restore_state is not None:
@@ -323,6 +331,18 @@ def _get_vault_restore_settings(cross_subscription_restore_state):
             cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state))
     return restore_settings
 
+def _get_vault_cost_management_settings(cost_management_granularity, existing_vault=None):
+    # Update scenario
+    if existing_vault is not None:
+        cost_management_settings = existing_vault.properties.cost_management_settings
+    else :
+        # Create scenario
+        cost_management_settings = CostManagementSettings()
+        cost_management_settings.granularity_level = "VaultLevel"
+
+    if cost_management_granularity is not None:
+        cost_management_settings.granularity_level = cost_management_granularity
+    return cost_management_settings
 
 def _get_vault_public_network_access(public_network_access):
     return cust_help.transform_enable_parameters(public_network_access)
