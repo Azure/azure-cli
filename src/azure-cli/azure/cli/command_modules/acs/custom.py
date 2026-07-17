@@ -3170,9 +3170,12 @@ def aks_agentpool_rollback(
         getattr(auto_upgrade_profile, "node_os_upgrade_channel", None) if auto_upgrade_profile else None
     )
 
-    upgrade_channel_enabled = upgrade_channel and str(upgrade_channel).lower() != "none"
+    upgrade_channel_value = getattr(upgrade_channel, "value", upgrade_channel)
+    node_os_upgrade_channel_value = getattr(node_os_upgrade_channel, "value", node_os_upgrade_channel)
+
+    upgrade_channel_enabled = upgrade_channel_value and str(upgrade_channel_value).lower() != "none"
     node_os_channel_enabled = (
-        node_os_upgrade_channel and str(node_os_upgrade_channel).lower() not in ["none", "unmanaged"]
+        node_os_upgrade_channel_value and str(node_os_upgrade_channel_value).lower() not in ["none", "unmanaged"]
     )
 
     if upgrade_channel_enabled or node_os_channel_enabled:
@@ -3180,8 +3183,8 @@ def aks_agentpool_rollback(
             "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s, nodeOSUpgradeChannel=%s). "
             "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
             cluster_name,
-            upgrade_channel or "none",
-            node_os_upgrade_channel or "Unmanaged",
+            upgrade_channel_value or "none",
+            node_os_upgrade_channel_value or "Unmanaged",
         )
 
     logger.info("Fetching the most recent rollback version...")
