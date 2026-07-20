@@ -2491,6 +2491,19 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
             ]:
                 if not read_from_mc and self.get_vnet_subnet_id() in ["", None] and not byo_subnets_configured:
+                    if self.decorator_mode == DecoratorMode.UPDATE:
+                        # --vnet-subnet-id is not registered for 'aks update'. For BYO VNet clusters the subnet
+                        # is already known from the agentpool, so validation passes above. Reaching here in update
+                        # mode means the cluster uses a managed VNet, which cannot be migrated to UDR/userAssignedNATGateway.
+                        raise InvalidArgumentValueError(
+                            "Updating outbound type to {outbound_type} is only supported for "
+                            "clusters using a custom (BYO) virtual network. Managed VNet clusters "
+                            "cannot be updated to {outbound_type}. Please refer to "
+                            "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype"
+                            "#updating-outboundtype-after-cluster-creation for supported migration paths.".format(
+                                outbound_type=outbound_type
+                            )
+                        )
                     self._raise_missing_vnet_subnet_for_outbound_type(outbound_type, skuName)
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:

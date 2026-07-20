@@ -2391,6 +2391,71 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx_17.get_outbound_type()
 
+        # update to UDR on a BYO VNet cluster (subnet known from agentpool) should succeed
+        ctx_18 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_18.agentpool_context = mock.MagicMock()
+        ctx_18.agentpool_context.get_vnet_subnet_id.return_value = "test_vnet_subnet_id"
+        self.assertEqual(
+            ctx_18.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+        )
+
+        # update to userAssignedNATGateway on a BYO VNet cluster (subnet known from agentpool) should succeed
+        ctx_18_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_18_1.agentpool_context = mock.MagicMock()
+        ctx_18_1.agentpool_context.get_vnet_subnet_id.return_value = "test_vnet_subnet_id"
+        self.assertEqual(
+            ctx_18_1.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        )
+
+        # update to UDR on a managed VNet cluster (no subnet) should fail with a clear error,
+        # not ask for --vnet-subnet-id (which is not registered for 'aks update')
+        ctx_19 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_19.agentpool_context = mock.MagicMock()
+        ctx_19.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters using a custom",
+        ):
+            ctx_19.get_outbound_type()
+
+        # update to userAssignedNATGateway on a managed VNet cluster (no subnet) should fail with a clear error
+        ctx_20 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_20.agentpool_context = mock.MagicMock()
+        ctx_20.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters using a custom",
+        ):
+            ctx_20.get_outbound_type()
+
     def test_get_network_plugin_mode(self):
         # default
         ctx_1 = AKSManagedClusterContext(
