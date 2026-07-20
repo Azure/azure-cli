@@ -11,7 +11,6 @@ from collections.abc import Mapping
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.mgmt.web.models import Site
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
@@ -64,8 +63,10 @@ class TestWebappMocked(unittest.TestCase):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     def test_rename_server_farm_props_handles_mutable_mapping(self):
-        site = Site(location='westus')
-        site['serverFarmId'] = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        site = {
+            'location': 'westus',
+            'serverFarmId': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        }
 
         _rename_server_farm_props(site)
 
