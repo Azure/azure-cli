@@ -47,7 +47,7 @@ def table_transform_output_list_servers(result):
 
 def mysql_table_transform_output_list_skus(result):
     table_result = []
-    if result:
+    if isinstance(result, list) and result:
         skus_tiers = result[0]["supportedFlexibleServerEditions"]
         for skus in skus_tiers:
             tier_name = skus["name"]
