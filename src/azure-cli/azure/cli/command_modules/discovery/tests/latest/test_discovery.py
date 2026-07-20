@@ -18,8 +18,8 @@ LOCATION = 'uksouth'
 # 'Storage Blob Data Contributor' roles assigned at subscription scope.
 FIXED_RG = 'fixedrg-uksouth-dev3'
 FIXED_VNET = 'vnet-dev-uksouth'
-FIXED_UAMI_ID = (
-    '/subscriptions/b7b46ea4-92fa-466d-9a33-c25506fc99ac/resourcegroups/'
+FIXED_UAMI_TEMPLATE = (
+    '/subscriptions/{sub}/resourcegroups/'
     'fixedrg-uksouth-dev3/providers/Microsoft.ManagedIdentity/'
     'userAssignedIdentities/dev-uksouth-uami'
 )
@@ -149,7 +149,8 @@ class DiscoveryScenarioTest(ScenarioTest):
         self.kwargs['search_subnet_id'] = search_sub['id']
 
         # Use the pre-provisioned UAMI (already has required RBAC roles)
-        self.kwargs['workload_ids'] = "{'" + FIXED_UAMI_ID + "':{}}"
+        uami_id = FIXED_UAMI_TEMPLATE.format(sub=self.get_subscription_id())
+        self.kwargs['workload_ids'] = "{'" + uami_id + "':{}}"
 
         # Create (SkipAssociateKeyVaultToNsp tag matches integration test pattern)
         bk = self.cmd(
@@ -380,7 +381,7 @@ class DiscoveryScenarioTest(ScenarioTest):
             'sc_name': sc_name,
             'fixed_rg': FIXED_RG,
             'fixed_vnet': FIXED_VNET,
-            'uami_id': FIXED_UAMI_ID,
+            'uami_id': FIXED_UAMI_TEMPLATE.format(sub=self.get_subscription_id()),
             'loc': LOCATION,
         })
 
@@ -392,10 +393,11 @@ class DiscoveryScenarioTest(ScenarioTest):
         self.kwargs['sc_subnet_id'] = sc_subnet['id']
 
         # Create
+        uami_id = FIXED_UAMI_TEMPLATE.format(sub=self.get_subscription_id())
         self.kwargs['sc_identities'] = (
-            "{cluster-identity:{id:'" + FIXED_UAMI_ID + "'},"
-            "kubelet-identity:{id:'" + FIXED_UAMI_ID + "'},"
-            "workload-identities:{'" + FIXED_UAMI_ID + "':{}}}"
+            "{cluster-identity:{id:'" + uami_id + "'},"
+            "kubelet-identity:{id:'" + uami_id + "'},"
+            "workload-identities:{'" + uami_id + "':{}}}"
         )
 
         self.cmd(
@@ -470,7 +472,7 @@ class DiscoveryScenarioTest(ScenarioTest):
             'cmd_name': cmd_name,
             'fixed_rg': FIXED_RG,
             'fixed_vnet': FIXED_VNET,
-            'uami_id': FIXED_UAMI_ID,
+            'uami_id': FIXED_UAMI_TEMPLATE.format(sub=self.get_subscription_id()),
             'loc': LOCATION,
             'ws_agent_sn': ws_agent_sn,
             'ws_ws_sn': ws_ws_sn,
