@@ -16,7 +16,7 @@ from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
-from azure.cli.command_modules.role._msgrpah._graph_client import GraphError
+from knack.util import CLIError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
 from ...custom import DbContext as MysqlDbContext, _determine_iops
@@ -743,10 +743,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # In interactive/delegated auth, `az ad signed-in-user show` returns the signed-in user.
             user = self.cmd('ad signed-in-user show').get_output_in_json()
             caller_object_id = user['id']
-        except GraphError:
+        except CLIError:
             # `az ad signed-in-user show` calls Graph /me which is delegated-only. Under
             # service-principal/OIDC auth (as used in live-test CI pipelines), the Graph API
-            # returns an HTTP 400, which the role module surfaces as GraphError.
+            # returns an HTTP 400. The role module's graph_err_handler converts the raw
+            # GraphError into a CLIError, which is what the test SDK re-raises here.
             # Fall back to resolving the caller's object ID via `az ad sp show`.
             account = self.cmd('account show').get_output_in_json()
             sp_client_id = account['user']['name']
