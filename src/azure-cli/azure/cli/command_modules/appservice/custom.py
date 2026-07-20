@@ -14,6 +14,7 @@ from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from binascii import hexlify
+from collections.abc import Mapping
 from os import urandom
 import datetime
 import json
@@ -60,7 +61,8 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
-    raise_enriched_deployment_error, EnrichedDeploymentError
+    raise_enriched_deployment_error, EnrichedDeploymentError,
+    raise_enriched_plan_error, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -884,7 +886,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -5003,12 +5005,47 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
+def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+    message_parts = []
+    top_message = getattr(ex, 'message', None)
+    if top_message:
+        message_parts.append(str(top_message))
+    inner_message = getattr(getattr(ex, 'error', None), 'message', None)
+    if inner_message:
+        message_parts.append(str(inner_message))
+    response = getattr(ex, 'response', None)
+    if response is not None:
+        try:
+            body = response.text()
+            if body:
+                message_parts.append(body)
+        except Exception:  # pylint: disable=broad-except
+            pass
+    error_message = "\n".join(message_parts) if message_parts else str(ex)
+
+    status_code = getattr(ex, 'status_code', None)
+    if status_code is None:
+        status_code = getattr(response, 'status_code', None)
+    if status_code is None:
+        status_code = extract_status_code_from_message(error_message)
+    raise_enriched_plan_error(
+        resource_group_name=resource_group_name,
+        plan_name=name,
+        location=location,
+        sku=sku,
+        status_code=status_code,
+        error_message=error_message,
+        last_known_step="App Service Plan create (control-plane request)"
+    )
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
-                            registry_adapters=None, install_scripts=None, storage_mounts=None):
+                            registry_adapters=None, install_scripts=None, storage_mounts=None,
+                            enriched_errors=False):
     if is_linux is None:
         is_linux = not hyper_v
     elif is_linux and hyper_v:
@@ -5106,44 +5143,51 @@ has been deployed ".format(app_service_environment)
     os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
     logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
 
-    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": name,
-        "resource_group": resource_group_name,
-        "location": location,
-        "tags": tags,
-        "sku": sku_def.as_dict(),
-        "reserved": plan_def.reserved,
-        "hyper_v": plan_def.hyper_v,
-        "per_site_scaling": plan_def.per_site_scaling,
-        "hosting_environment_profile": hosting_environment_profile,
-        "async_scaling_enabled": plan_def.async_scaling_enabled,
-        "zone_redundant": zone_redundant if zone_redundant else None,
-        "is_custom_mode": is_managed_instance,
-        "network": {
-            "virtual_network_subnet_id": subnet_resource_id,
-        } if subnet_resource_id else None,
-        "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
-        "mi_user_assigned": mi_user_assigned,
-        "plan_default_identity": plan_default_identity,
-        "registry_adapters": registry_adapters,
-        "install_scripts": install_scripts,
-        "storage_mounts": storage_mounts,
-    })
+    try:
+        poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": name,
+            "resource_group": resource_group_name,
+            "location": location,
+            "tags": tags,
+            "sku": sku_def.as_dict(),
+            "reserved": plan_def.reserved,
+            "hyper_v": plan_def.hyper_v,
+            "per_site_scaling": plan_def.per_site_scaling,
+            "hosting_environment_profile": hosting_environment_profile,
+            "async_scaling_enabled": plan_def.async_scaling_enabled,
+            "zone_redundant": zone_redundant if zone_redundant else None,
+            "is_custom_mode": is_managed_instance,
+            "network": {
+                "virtual_network_subnet_id": subnet_resource_id,
+            } if subnet_resource_id else None,
+            "rdp_enabled": rdp_enabled,
+            "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+            "mi_user_assigned": mi_user_assigned,
+            "plan_default_identity": plan_default_identity,
+            "registry_adapters": registry_adapters,
+            "install_scripts": install_scripts,
+            "storage_mounts": storage_mounts,
+        })
 
-    if no_wait:
-        return poller.result()
+        if no_wait:
+            return poller.result()
 
-    # Check if this is an asynchronous operation
-    is_async = is_async_response(poller)
+        # Check if this is an asynchronous operation
+        is_async = is_async_response(poller)
 
-    if not is_async:
-        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
-        return poller.result()
+        if not is_async:
+            # for synchronous operations, or if we are unable to get the initial response, directly return poller result
+            return poller.result()
 
-    # Asynchronous operation (202 response), use custom progress bar
-    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
-    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+        # Asynchronous operation (202 response), use custom progress bar
+        progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+        return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if not (enriched_errors and is_linux):
+            raise
+        _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku)
 
 
 def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_service_plan):
@@ -7733,63 +7777,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return 0
 
     @staticmethod
-    def _get_java_versions_from_minor_versions(minor_versions):
-        """Dynamically extract unique Java versions from minor version values.
-        Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
-        Returns versions sorted in descending order (newest first)."""
-        java_versions = set()
-        for minor in minor_versions:
-            # minor.value is like "25.0.0", "21.0.0", "17.0.0", "11.0.0", "8.0.0" or "1.8.0"
-            value = minor.value
-            if value:
-                # Handle both "1.8" format and newer "25", "21" formats
-                if value.startswith("1.8"):
-                    java_versions.add("1.8")
-                else:
-                    # Extract major version number (e.g., "25" from "25.0.0")
-                    major_ver = value.split('.')[0]
-                    if major_ver.isdigit():
-                        java_versions.add(major_ver)
-        # Sort descending (newest versions first)
-        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
-
-    @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
         """Dynamically extract Java versions from Windows container settings.
-        Looks at the 'runtimes' array in additional_properties or directly on the object.
+        Looks at the 'runtimes' array exposed by the container settings.
         Returns versions sorted in descending order (newest first)."""
         java_versions = set()
-        runtimes_array = []
-
-        # Handle both dict and object representations of container_settings
-        if isinstance(container_settings, dict):
-            runtimes_array = container_settings.get('runtimes', [])
-        else:
-            # Try multiple ways to access the runtimes array
-            # 1. Check additional_properties (where SDK puts unknown fields)
-            additional_props = getattr(container_settings, 'additional_properties', None)
-            if additional_props and isinstance(additional_props, dict):
-                runtimes_array = additional_props.get('runtimes', [])
-
-            # 2. Try direct attribute access (in case SDK exposes it directly)
-            if not runtimes_array:
-                runtimes_array = getattr(container_settings, 'runtimes', None) or []
-
-            # 3. Try as_dict() if available (converts SDK model to dict)
-            if not runtimes_array and hasattr(container_settings, 'as_dict'):
-                try:
-                    settings_dict = container_settings.as_dict()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
-
-            # 4. Try serialize() if available
-            if not runtimes_array and hasattr(container_settings, 'serialize'):
-                try:
-                    settings_dict = container_settings.serialize()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        runtimes_array = data.get('runtimes') or []
 
         for runtime_info in runtimes_array:
             if isinstance(runtime_info, dict):
@@ -7805,18 +7799,47 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
 
     @staticmethod
+    def _get_container_settings_data(container_settings):
+        """Return a dict of a container settings object's raw (camelCase) API fields.
+
+        The azure-mgmt-web SDK returns typespec models that behave like a read-only
+        ``Mapping`` and preserve API fields the SDK does not explicitly model -- e.g.
+        ``java17Runtime``/``java21Runtime``/``java25Runtime`` and the ``runtimes`` array.
+        Older msrest-based models instead expose such unknown fields via
+        ``additional_properties``. Reading only the SDK-typed attributes (which cover just
+        ``java8Runtime``/``java11Runtime``) or only ``additional_properties`` silently drops
+        newer Java versions, so consult every representation.
+        """
+        if container_settings is None:
+            return {}
+        if isinstance(container_settings, dict):
+            return container_settings
+        data = {}
+        # Legacy msrest models: unknown fields land in additional_properties.
+        additional = getattr(container_settings, 'additional_properties', None)
+        if isinstance(additional, dict):
+            data.update(additional)
+        # Typespec _Model instances are Mappings keyed by the raw camelCase field names.
+        if isinstance(container_settings, Mapping):
+            data.update(dict(container_settings))
+        return data
+
+    @staticmethod
     def _get_java_runtimes_from_container_settings(container_settings):
         """Dynamically extract Java runtimes from container settings.
         Prefers the 'runtimes' array from the API when available (most future-proof),
-        falls back to individual java*Runtime properties in additional_properties,
-        and finally SDK-defined properties (java8_runtime, java11_runtime).
+        falls back to individual java*Runtime fields, and finally to the SDK-typed
+        java8_runtime/java11_runtime attributes.
         Returns list of tuples: (runtime_name, version, is_auto_update)"""
         runtimes = []
-        is_auto_update = getattr(container_settings, 'is_auto_update', False)
-        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        is_auto_update = data.get('isAutoUpdate')
+        if is_auto_update is None:
+            is_auto_update = getattr(container_settings, 'is_auto_update', False)
+        is_auto_update = bool(is_auto_update)
 
         # Prefer the 'runtimes' array if available (cleanest, most future-proof)
-        runtimes_array = additional_props.get('runtimes', [])
+        runtimes_array = data.get('runtimes') or []
         if runtimes_array:
             for runtime_info in runtimes_array:
                 runtime_name = runtime_info.get('runtime')
@@ -7824,17 +7847,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if runtime_name and version:
                     runtimes.append((runtime_name, version, is_auto_update))
         else:
-            # Fallback: Get runtimes from additional_properties (java*Runtime keys)
-            for key, value in additional_props.items():
+            # Fallback: Get runtimes from the raw java*Runtime fields
+            for key, value in data.items():
                 # Match pattern like "java25Runtime", "java21Runtime", etc.
                 match = re.match(r'^java(\d+)Runtime$', key)
                 if match and value:
                     version = match.group(1)
                     runtimes.append((value, version, is_auto_update))
 
-            # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
+            # Also get runtimes from SDK-typed properties (java8_runtime, java11_runtime)
             if getattr(container_settings, 'java11_runtime', None):
-                # Avoid duplicates if already found in additional_properties
+                # Avoid duplicates if already found above
                 if not any(v == "11" for _, v, _ in runtimes):
                     runtimes.append((container_settings.java11_runtime, "11", is_auto_update))
             if getattr(container_settings, 'java8_runtime', None):
@@ -7946,13 +7969,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         minor_java_container_versions = self._get_valid_minor_versions(
             major_version, linux=True, java=True, include_eol=self._include_eol)
         if "SE" in major_version.display_text:
-            # Dynamically get Java versions from the available minor versions
-            java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
-            se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
-            for java in java_versions:
-                se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers
-            minor_java_container_versions = se_containers
+            # The displayed Java SE runtimes are the "friendly" auto-update names (e.g.
+            # JAVA|21-java21) carried by a single aggregate auto-update container, whose
+            # 'runtimes' array enumerates every available Java major version. Select that
+            # container by its is_auto_update flag instead of by position, which the API
+            # does not guarantee. The per-patch containers (e.g. JAVA|21.0.9) are
+            # non-auto-update and are filtered out of the table output downstream. Fall
+            # back to the first minor version if no auto-update container is present.
+            auto_update_containers = []
+            for container in minor_java_container_versions:
+                container_settings = container.stack_settings.linux_container_settings
+                settings_data = self._get_container_settings_data(container_settings)
+                if settings_data.get('isAutoUpdate') or getattr(container_settings, 'is_auto_update', False):
+                    auto_update_containers.append(container)
+            if auto_update_containers:
+                minor_java_container_versions = auto_update_containers
+            elif minor_java_container_versions:
+                minor_java_container_versions = [minor_java_container_versions[0]]
         if minor_java_container_versions:
             for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
@@ -10633,7 +10666,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=False):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -11074,7 +11107,7 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=False):
+                             enriched_errors=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11135,7 +11168,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
-        self.enriched_errors = False
+        self.enriched_errors = True
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call

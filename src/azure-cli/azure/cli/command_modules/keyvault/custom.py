@@ -32,7 +32,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.x509 import load_pem_x509_certificate
+from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 
 from knack.log import get_logger
 from knack.util import CLIError, todict
@@ -1089,19 +1089,195 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 # region KeyVault Key
 def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None,
+               external_key_id=None):
 
-    return client.create_key(name=name,
-                             key_type=kty,
-                             size=key_size,
-                             key_operations=key_ops,
-                             enabled=not disabled,
-                             not_before=not_before,
-                             expires_on=expires,
-                             tags=tags,
-                             curve=curve,
-                             exportable=exportable,
-                             release_policy=release_policy)
+    # External keys are backed by an External Key Manager (EKM). They use a dedicated SDK method,
+    # and the service rejects client-specified key type/size/curve/operations for them.
+    if external_key_id:
+        from azure.keyvault.keys import ExternalKey
+        return client.create_external_key(
+            name=name,
+            external_key=ExternalKey(id=external_key_id),
+            enabled=not disabled,
+            not_before=not_before,
+            expires_on=expires,
+            tags=tags,
+            release_policy=release_policy)
+
+    return client.create_key(
+        name=name,
+        key_type=kty,
+        size=key_size,
+        curve=curve,
+        key_operations=key_ops,
+        enabled=not disabled,
+        not_before=not_before,
+        expires_on=expires,
+        tags=tags,
+        exportable=exportable,
+        release_policy=release_policy)
+
+
+# region KeyVault EKM Connection
+def get_ekm_connection(client):
+    return client.get_ekm_connection()
+
+
+def get_ekm_certificate(client):
+    certificate = client.get_ekm_certificate()
+
+    # Latest preview SDK mirrors the connection payload (subject_common_name + ca_certificates list).
+    subject_common_name = getattr(certificate, 'subject_common_name', None)
+    ca_certificates = getattr(certificate, 'ca_certificates', None)
+    if isinstance(ca_certificates, (list, tuple)) and ca_certificates:
+        encoded_certs = []
+        for cert_bytes in ca_certificates:
+            if isinstance(cert_bytes, (bytes, bytearray, memoryview)):
+                encoded_certs.append(base64.b64encode(bytes(cert_bytes)).decode('ascii'))
+        if encoded_certs or subject_common_name:
+            return {
+                'subjectCommonName': subject_common_name,
+                'caCertificates': encoded_certs
+            }
+
+    def _extract_der_bytes(obj):
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return bytes(obj)
+
+        # Known/likely shapes across SDK iterations.
+        for attr in ('cer', 'certificate', 'cert', 'der', 'value', 'data'):
+            if hasattr(obj, attr):
+                value = getattr(obj, attr)
+                if isinstance(value, (bytes, bytearray, memoryview)):
+                    return bytes(value)
+
+        if isinstance(obj, dict):
+            for key in ('cer', 'certificate', 'cert', 'der', 'value', 'data'):
+                value = obj.get(key)
+                if isinstance(value, (bytes, bytearray, memoryview)):
+                    return bytes(value)
+
+        return None
+
+    def _find_bytes_anywhere(obj, *, _seen=None, _depth=0, _max_depth=4):  # pylint: disable=too-many-return-statements
+        if obj is None:
+            return None
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return bytes(obj)
+        if _depth >= _max_depth:
+            return None
+
+        if _seen is None:
+            _seen = set()
+        obj_id = id(obj)
+        if obj_id in _seen:
+            return None
+        _seen.add(obj_id)
+
+        if isinstance(obj, dict):
+            for v in obj.values():
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+            return None
+
+        if isinstance(obj, (list, tuple, set)):
+            for v in obj:
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+            return None
+
+        # SDK model objects often keep fields in __dict__.
+        if hasattr(obj, '__dict__') and isinstance(obj.__dict__, dict):
+            for v in obj.__dict__.values():
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+
+        # Last resort: materialize to dict and scan.
+        try:
+            as_dict = todict(obj)
+        except Exception:  # pylint: disable=broad-except
+            return None
+        return _find_bytes_anywhere(as_dict, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+
+    def _json_safe(obj):
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return base64.b64encode(bytes(obj)).decode('ascii')
+        if isinstance(obj, dict):
+            return {k: _json_safe(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple, set)):
+            return [_json_safe(v) for v in obj]
+
+        # Try to materialize SDK models into primitives.
+        try:
+            as_dict = todict(obj)
+        except Exception:  # pylint: disable=broad-except
+            return obj
+        return _json_safe(as_dict)
+
+    der_bytes = _extract_der_bytes(certificate)
+    if der_bytes is None:
+        der_bytes = _find_bytes_anywhere(certificate)
+
+    if der_bytes is None:
+        # Ensure we never return raw bytes anywhere in the payload.
+        return _json_safe(certificate)
+
+    pem = None
+    # Try to decode as PEM first (some services return PEM bytes).
+    try:
+        if der_bytes.lstrip().startswith(b'-----BEGIN CERTIFICATE-----'):
+            pem = der_bytes.decode('ascii', errors='strict')
+            der_bytes = load_pem_x509_certificate(der_bytes).public_bytes(Encoding.DER)
+        else:
+            pem = load_der_x509_certificate(der_bytes).public_bytes(Encoding.PEM).decode('ascii')
+    except Exception:  # pylint: disable=broad-except
+        # Bytes found, but not a certificate. Fall back to JSON-safe representation.
+        return _json_safe(certificate)
+
+    return {
+        'format': 'der',
+        'cer': base64.b64encode(der_bytes).decode('ascii'),
+        'pem': pem
+    }
+
+
+def check_ekm_connection(client):
+    return client.check_ekm_connection()
+
+
+def delete_ekm_connection(client):
+    return client.delete_ekm_connection()
+
+
+def create_ekm_connection(client, host, path_prefix=None, server_ca_certificates=None, server_subject_common_name=None):
+    from azure.keyvault.administration import KeyVaultEkmConnection
+
+    ekm_connection = KeyVaultEkmConnection(
+        host=host,
+        path_prefix=path_prefix,
+        server_ca_certificates=server_ca_certificates,
+        server_subject_common_name=server_subject_common_name
+    )
+    return client.create_ekm_connection(ekm_connection)
+
+
+def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certificates=None,
+                          server_subject_common_name=None):
+    existing = client.get_ekm_connection()
+    if host is not None:
+        existing.host = host
+    if path_prefix is not None:
+        existing.path_prefix = path_prefix
+    if server_ca_certificates is not None:
+        existing.server_ca_certificates = server_ca_certificates
+    if server_subject_common_name is not None:
+        existing.server_subject_common_name = server_subject_common_name
+    return client.update_ekm_connection(existing)
+# endregion
 
 
 def list_keys(client, maxresults=None, include_managed=False):

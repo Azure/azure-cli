@@ -2450,6 +2450,15 @@ class WebappListLocationsTest(ScenarioTest):
         self.cmd('appservice list-locations --sku P1MV4 --managed-instance-enabled', checks = [
             JMESPathCheck('length(@) > `0`', True)
         ])
+        self.cmd('appservice list-locations --sku P0V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
 
 
 class ContainerWebappE2ETest(ScenarioTest):
@@ -3628,7 +3637,7 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Status Code: 400"):
-            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war'.format(
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors false'.format(
                 resource_group, webapp_name, war_file))
 
     @AllowLargeResponse()
