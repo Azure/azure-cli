@@ -386,9 +386,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
     def _format_inline_object_change(
-        self,
-        change: StackModels.DeploymentStacksWhatIfPropertyChange,
-        parent_path: t.Optional[str] = None
+        self, change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
     ) -> bool:
         inline_obj = change.after or change.before
 
