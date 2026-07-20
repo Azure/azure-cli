@@ -321,12 +321,12 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _format_diagnostic(self, diagnostic: StackModels.DeploymentStacksDiagnostic):
         diag_color = DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None)
 
-        self.builder.append_line(f"{diagnostic.level.upper()}: [{diagnostic.code}] {diagnostic.message}", diag_color)
-
+        self.builder.append_line(f"{diagnostic.level.upper()}: [{diagnostic.code}]", diag_color)
+        self.builder.push_indent("  ")
+        self.builder.append_line(f"Message: {diagnostic.message}", diag_color)
         if diagnostic.target:
-            self.builder.push_indent("  ")
             self.builder.append_line(f"Target: {diagnostic.target}", diag_color)
-            self.builder.pop_indent()
+        self.builder.pop_indent()
 
     def _format_change(
         self,
