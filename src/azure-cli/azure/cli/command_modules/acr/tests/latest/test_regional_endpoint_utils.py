@@ -31,8 +31,8 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
             self.assertEqual(result, expected)
 
     def test_valid_regional_endpoint_conversion_multi_label_suffix(self):
-        """Regional endpoints in sovereign clouds whose login-server suffix has more than one
-        label (e.g. '.azurecr.sovcloud-azure.de') must still be converted. """
+        """Regional endpoints in sovereign clouds whose login-server suffix has more than two
+        labels (e.g. '.azurecr.sovcloud-azure.de') must still be converted."""
         test_cases = [
             ('registry123.deloscloudgermanycentral.geo.azurecr.sovcloud-azure.de',
              '.azurecr.sovcloud-azure.de', 'registry123.azurecr.sovcloud-azure.de'),
@@ -56,6 +56,8 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
             'testregistry.azurecr.io',
             'external-registry.com',
             'testregistry.eastus.notgeo.azurecr.io',
+            # Malformed: empty region label must NOT be converted
+            'testregistry..geo.azurecr.io',
             'testregistry.azurecr.sovcloud-azure.de',
             'testregistry.deloscloudgermanycentral.notgeo.azurecr.sovcloud-azure.de'
         ]
