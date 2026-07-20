@@ -201,7 +201,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                     Color.PURPLE)
                 has_potential_changes = True
 
+            self.builder.push_indent("  ")
             self._format_resource_change(change)
+            self.builder.pop_indent()
 
         return True
 
@@ -261,7 +263,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                     Color.RED)
                 has_potential_deletions = True
 
+            self.builder.push_indent("  ")
             self._format_resource_heading_line(delete_change)
+            self.builder.pop_indent()
 
         return printed
 
