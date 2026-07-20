@@ -740,9 +740,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         replication_role = 'Replica'
 
         try:
+            # In interactive/delegated auth, `az ad signed-in-user show` returns the signed-in user.
             user = self.cmd('ad signed-in-user show').get_output_in_json()
             caller_object_id = user['id']
-        except CLIError:  # Graph /me is delegated-only; fall back to SP object ID under service-principal auth
+        except CLIError:
+            # `az ad signed-in-user show` uses the Graph /me endpoint, which only works with delegated
+            # (interactive) auth, not service-principal/OIDC auth (as used in live-test CI pipelines).
+            # Fall back to resolving the caller's object ID via `az ad sp show`.
             account = self.cmd('account show').get_output_in_json()
             sp_client_id = account['user']['name']
             caller_object_id = self.cmd('ad sp show --id {}'.format(sp_client_id)).get_output_in_json()['id']
