@@ -32,22 +32,29 @@ class ColoredStringBuilder:
     def build(self):
         return "".join(self._contents)
 
-    def append(self, value, color=None, no_indent=False):
+    def append(self, value, color=None, no_indent=False, indent_new_lines=False):
         if not no_indent and self._should_indent():
             self._contents.append(''.join(self._indents))
 
         if color:
             self._push_color(color)
 
-        self._contents.append(str(value))
+        if not no_indent and indent_new_lines:
+            lines = value.splitlines()
+            for i, line in enumerate(lines):
+                self.append(line)
+                if i < len(lines) - 1:
+                    self.append('\n', no_indent=True)
+        else:
+            self._contents.append(str(value))
 
         if color:
             self._pop_color()
 
         return self
 
-    def append_line(self, value="", color=None, no_indent=False):
-        self.append(value, color, no_indent)
+    def append_line(self, value="", color=None, no_indent=False, indent_new_lines=False):
+        self.append(value, color, no_indent, indent_new_lines)
         return self.append("\n", no_indent=True)
 
     def new_color_scope(self, color):
@@ -85,8 +92,17 @@ class ColoredStringBuilder:
             self.append("\n" * num_new_lines)
             return
 
-        last_entry = self._contents[-1]
-        existing_newlines = len(last_entry) - len(last_entry.rstrip('\n'))
+        # Count existing newlines from the end of self._contents
+        existing_newlines = 0
+        for entry in reversed(self._contents):
+            # Count trailing newlines in this entry
+            num_non_newlines = len(entry.rstrip('\n'))
+            existing_newlines += len(entry) - num_non_newlines
+
+            # If entry has non-newline content, stop counting
+            if num_non_newlines > 0:
+                break
+
         remaining_newlines = num_new_lines - existing_newlines
 
         if remaining_newlines > 0:

@@ -371,7 +371,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             object_change.children if hasattr(object_change, "children") else None)
 
         if not children or len(children) == 0:
-            return False
+            return self._format_inline_object_change(object_change, parent_path)
 
         printed = False
 
@@ -381,15 +381,36 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return printed
 
+    def _format_inline_object_change(
+        self,
+        change: StackModels.DeploymentStacksWhatIfPropertyChange,
+        parent_path: t.Optional[str] = None
+    ) -> bool:
+        inline_obj = change.after or change.before
+
+        if not inline_obj:
+            return False
+
+        property_path = self._get_change_path(change, parent_path)
+        symbol, color = self._get_change_type_formatting(change.change_type)
+
+        self.builder.append(symbol, color)
+        self.builder.append(f" {property_path}: ")
+        self.builder.push_indent("  ")
+        self.builder.append_line(json.dumps(inline_obj, indent=2), color, indent_new_lines=True)
+        self.builder.pop_indent()
+
+        return True
+
     def _format_array_changes(
         self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
     ) -> bool:
-        if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
-            return False
-
         children = array_change.children
 
         if not children or len(children) == 0:
+            return self._format_inline_object_change(array_change, parent_path)
+
+        if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
             return False
 
         property_path = self._get_change_path(array_change, parent_path)
