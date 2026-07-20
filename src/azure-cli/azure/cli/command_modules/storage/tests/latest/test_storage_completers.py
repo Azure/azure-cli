@@ -11,26 +11,22 @@ from unittest import mock
 from azure.cli.command_modules.storage.completers import (get_storage_name_completion_list,
                                                           get_storage_acl_name_completion_list,
                                                           file_path_completer)
-from azure.cli.command_modules.storage.tests.latest.test_storage_validators import MockCLI, MockCmd
 
 
 class TestStorageCompleters(unittest.TestCase):
 
-    def setUp(self):
-        self.cli = MockCLI()
-
     def test_storage_name_completer_returns_empty_with_missing_legacy_service(self):
         completer = get_storage_name_completion_list(None, 'list_containers')
-        self.assertEqual(completer.func(MockCmd(self.cli), '', Namespace()), [])
+        self.assertEqual(completer.func(None, '', Namespace()), [])
 
     def test_storage_acl_name_completer_returns_empty_with_missing_legacy_service(self):
         completer = get_storage_acl_name_completion_list(None, 'container_name', 'get_container_acl')
-        self.assertEqual(completer.func(MockCmd(self.cli), '', Namespace(container_name='container')), [])
+        self.assertEqual(completer.func(None, '', Namespace(container_name='container')), [])
 
     @mock.patch('azure.cli.command_modules.storage.completers.validate_client_parameters')
     @mock.patch('azure.cli.command_modules.storage.completers._get_legacy_file_service_class', return_value=None)
     def test_file_path_completer_returns_empty_with_missing_legacy_service(self, _, __):
-        self.assertEqual(file_path_completer.func(MockCmd(self.cli), '', Namespace(share_name='share')), [])
+        self.assertEqual(file_path_completer.func(None, '', Namespace(share_name='share')), [])
 
 
 if __name__ == '__main__':
