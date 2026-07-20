@@ -671,7 +671,11 @@ jobs:
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
+      if brew list --versions azure-cli >/dev/null 2>&1; then
+        brew uninstall azure-cli
+      else
+        echo "azure-cli is not pre-installed"
+      fi
       
       echo == Install azure-cli.rb formula ==
       # Need to create a dummy homebrew tap to install the formula

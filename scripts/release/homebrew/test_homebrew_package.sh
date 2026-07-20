@@ -5,7 +5,11 @@ set -ev
 CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
 echo == Remove pre-installed azure-cli ==
-brew uninstall azure-cli
+if brew list --versions azure-cli >/dev/null 2>&1; then
+    brew uninstall azure-cli
+else
+    echo "azure-cli is not pre-installed"
+fi
 
 echo == Install azure-cli.rb formula ==
 # TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
