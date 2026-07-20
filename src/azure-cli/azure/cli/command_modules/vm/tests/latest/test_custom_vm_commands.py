@@ -196,6 +196,66 @@ class TestVMBootLog(unittest.TestCase):
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
 
 
+class TestSetVmssExtension(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.vm.custom.get_vmss_by_aaz')
+    @mock.patch('azure.cli.command_modules.vm.custom._normalize_extension_version')
+    @mock.patch('azure.cli.command_modules.vm.operations.vmss.VMSSCreate')
+    def test_set_vmss_extension_updates_existing(self, mock_vmss_create, mock_normalize_version,
+                                                 mock_get_vmss):
+        """Test that set_vmss_extension replaces an existing extension instead of duplicating it."""
+        from azure.cli.command_modules.vm.custom import set_vmss_extension
+
+        mock_normalize_version.return_value = '2.1'
+        mock_vmss_create_instance = mock.MagicMock()
+        mock_vmss_create.return_value = mock_vmss_create_instance
+
+        # Simulate a VMSS with an existing CustomScript extension (as returned by get_vmss_by_aaz)
+        mock_get_vmss.return_value = {
+            'location': 'eastus',
+            'virtualMachineProfile': {
+                'storageProfile': {'imageReference': {}},
+                'extensionProfile': {
+                    'extensions': [
+                        {
+                            'name': 'myScript',
+                            'type': 'CustomScript',
+                            'publisher': 'Microsoft.Azure.Extensions',
+                            'typeHandlerVersion': '2.0',
+                            'autoUpgradeMinorVersion': True,
+                            'settings': {'commandToExecute': 'echo old'},
+                        }
+                    ]
+                }
+            }
+        }
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        set_vmss_extension(
+            cmd,
+            resource_group_name='myRG',
+            vmss_name='myVMSS',
+            extension_name='CustomScript',
+            publisher='Microsoft.Azure.Extensions',
+            version='2.1',
+            settings={'commandToExecute': 'echo new'},
+            extension_instance_name='myScript',
+        )
+
+        # Verify VMSSCreate was called with the updated extension list
+        call_args = mock_vmss_create_instance.call_args
+        command_args = call_args[1]['command_args']
+        extensions = command_args['virtual_machine_profile']['extension_profile']['extensions']
+
+        # There should be exactly one extension (the old one replaced, not duplicated)
+        self.assertEqual(len(extensions), 1)
+        self.assertEqual(extensions[0]['name'], 'myScript')
+        self.assertEqual(extensions[0]['type'], 'CustomScript')
+        self.assertEqual(extensions[0]['settings'], {'commandToExecute': 'echo new'})
+
+
 class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
         self.network_profile = NetworkProfile(network_interfaces=nics)
