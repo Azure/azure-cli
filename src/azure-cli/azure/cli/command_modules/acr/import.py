@@ -124,10 +124,17 @@ def _regional_endpoint_uri_to_login_server(uri, login_server_suffix):
 
     uri_lower = uri.strip().lower()
     suffix_lower = login_server_suffix.lower()
-    parts = uri_lower.split('.')
 
-    if len(parts) == 5 and parts[2] == 'geo' and uri_lower.endswith(suffix_lower):
-        return f"{parts[0]}{login_server_suffix}"
+    # A regional endpoint looks like "<registry>.<region>.geo<suffix>". The suffix itself may
+    # contain more than one label (e.g. ".azurecr.io" in public clouds vs
+    # ".azurecr.sovcloud-azure.de" in sovereign clouds), so we strip the ".geo<suffix>" tail
+    # rather than assuming a fixed number of dot-separated parts.
+    geo_suffix = f".geo{suffix_lower}"
+    if uri_lower.endswith(geo_suffix):
+        prefix = uri_lower[:-len(geo_suffix)]  # "<registry>.<region>"
+        prefix_parts = prefix.split('.')
+        if len(prefix_parts) == 2 and prefix_parts[0]:
+            return f"{prefix_parts[0]}{login_server_suffix}"
 
     # If not a regional endpoint format, return as-is
     return uri
