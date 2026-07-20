@@ -1,0 +1,147 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-disks
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --rp-name --storage-account
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault?api-version=2025-08-01
+  response:
+    body:
+      string: '{"location":"eastus2euap","name":"singhprab-csb-vault","etag":"W/\"datetime''2026-01-26T15%3A04%3A04.3196337Z''\"","properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","backupStorageVersion":"V1","securitySettings":{"immutabilitySettings":{"state":"Disabled"},"softDeleteSettings":{"softDeleteRetentionPeriodInDays":14,"softDeleteState":"AlwaysON","enhancedSecurityState":"AlwaysON"},"multiUserAuthorization":"Disabled","sourceScanConfiguration":{"state":"Disabled"}},"redundancySettings":{"standardTierStorageRedundancy":"GeoRedundant","crossRegionRestore":"Enabled"},"regionOfChoiceSettings":{"status":"Disabled"},"secureScore":"Adequate","bcdrSecurityLevel":"Good","publicNetworkAccess":"Enabled","restoreSettings":{"crossSubscriptionRestoreSettings":{"crossSubscriptionRestoreState":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"RS0","tier":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1115'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2026 11:23:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D75F0B016473429CA2EBADE39AC9E706 Ref B: PNQ231110906034 Ref C: 2026-07-06T11:23:23Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-disks
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --rp-name --storage-account
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupProtectedItems?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123/protectedItems/VM;iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123","name":"VM;iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testcvm123","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-ccy-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-07-06T08:11:25.4685645Z","protectedItemDataId":"1213862319043972","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-ccy-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2026-07-06T08:13:33.7958354Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-csb-vault-rg;vm-test/protectedItems/VM;iaasvmcontainerv2;singhprab-csb-vault-rg;vm-test","name":"VM;iaasvmcontainerv2;singhprab-csb-vault-rg;vm-test","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"vm-test","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-csb-vault-rg/providers/Microsoft.Compute/virtualMachines/vm-test","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-07-06T01:09:57.7646082Z","protectedItemDataId":"1213860894808134","policyType":"V1","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;singhprab-csb-vault-rg;vm-test","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-csb-vault-rg/providers/Microsoft.Compute/virtualMachines/vm-test","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy","lastRecoveryPoint":"2026-07-06T01:10:06.7325253Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-ecy-aug25-drill-rg;singhprab-csb-vm/protectedItems/VM;iaasvmcontainerv2;singhprab-ecy-aug25-drill-rg;singhprab-csb-vm","name":"VM;iaasvmcontainerv2;singhprab-ecy-aug25-drill-rg;singhprab-csb-vm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"singhprab-csb-vm","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-ecy-aug25-drill-rg/providers/Microsoft.Compute/virtualMachines/singhprab-csb-vm","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"1213861779090887","policyType":"V1","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;singhprab-ecy-aug25-drill-rg;singhprab-csb-vm","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-ecy-aug25-drill-rg/providers/Microsoft.Compute/virtualMachines/singhprab-csb-vm","policyId":"","policyName":"","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-rg-1c;testcvm123/protectedItems/VM;iaasvmcontainerv2;singhprab-rg-1c;testcvm123","name":"VM;iaasvmcontainerv2;singhprab-rg-1c;testcvm123","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"testcvm123","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","protectionStatus":"Unhealthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Failed","lastBackupTime":"2026-07-06T08:11:28.6128677Z","protectedItemDataId":"1213862310952975","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;singhprab-rg-1c;testcvm123","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '7403'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2026 11:23:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f17e256d-a4e1-4dae-8520-844b6aa54acb/eastasia/a41ba39d-34c2-47ca-92ee-4fd71cabfb02
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: FAE542156D794D56A96355D3D9877CDD Ref B: PNQ231110909042 Ref C: 2026-07-06T11:23:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-disks
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --rp-name --storage-account
+      User-Agent:
+      - AZURECLI/2.88.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupProtectionContainers?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+friendlyName+eq+%27testcvm123%27+and+status+eq+%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123","name":"IaasVMContainer;iaasvmcontainerv2;singhprab-ccy-rg-1c;testcvm123","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-ccy-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","virtualMachineVersion":"Compute","resourceGroup":"singhprab-ccy-rg-1c","friendlyName":"testcvm123","backupManagementType":"AzureIaasVM","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"Microsoft.Compute/virtualMachines","protectableObjectType":"Microsoft.Compute/virtualMachines"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholapDMTesting-rg/providers/Microsoft.RecoveryServices/vaults/singhprab-csb-vault/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;singhprab-rg-1c;testcvm123","name":"IaasVMContainer;iaasvmcontainerv2;singhprab-rg-1c;testcvm123","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/singhprab-rg-1c/providers/Microsoft.Compute/virtualMachines/testcvm123","virtualMachineVersion":"Compute","resourceGroup":"singhprab-rg-1c","friendlyName":"testcvm123","backupManagementType":"AzureIaasVM","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"Microsoft.Compute/virtualMachines","protectableObjectType":"Microsoft.Compute/virtualMachines"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1803'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 06 Jul 2026 11:23:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f17e256d-a4e1-4dae-8520-844b6aa54acb/eastasia/69dcb72d-64cd-413b-87a0-d6e391aef4c3
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 9C9F3C692438428BB8620FAB0CB2481D Ref B: PNQ231110907025 Ref C: 2026-07-06T11:23:26Z'
+    status:
+      code: 200
+      message: OK
+version: 1
