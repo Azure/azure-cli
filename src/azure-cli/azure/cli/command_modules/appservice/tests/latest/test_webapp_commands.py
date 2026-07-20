@@ -2450,6 +2450,15 @@ class WebappListLocationsTest(ScenarioTest):
         self.cmd('appservice list-locations --sku P1MV4 --managed-instance-enabled', checks = [
             JMESPathCheck('length(@) > `0`', True)
         ])
+        self.cmd('appservice list-locations --sku P0V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
 
 
 class ContainerWebappE2ETest(ScenarioTest):
