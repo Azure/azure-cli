@@ -93,7 +93,8 @@ class AppConfigAadAuthUnitTest(unittest.TestCase):
         appconfig_client_cls_mock.assert_called_once_with(
             credential=appconfig_credential_cls_mock.return_value,
             base_url=endpoint,
-            user_agent=mock.ANY)
+            user_agent=mock.ANY,
+            retry_policy=mock.ANY)
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
