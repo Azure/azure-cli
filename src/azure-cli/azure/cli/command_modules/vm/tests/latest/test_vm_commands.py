@@ -33,24 +33,6 @@ TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r
 TEST_SSH_KEY_PUB_2 = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCof7rG2sYVyHSDPp4lbrq5zu8N8D7inS4Qb+ZZ5Kh410znTcoVJSNsLOhrM2COxg5LXca3DQMBi4S/V8UmMnwxwDVf38GvU+0QVDR6vSO6lPlj2OpPLk4OEdTv3qcj/gpEBvv1RCacpFuu5bL546r4BqG4f0dJXqBd5tT4kjpO9ytOZ1Wkg8tA35UvbucVAsDBfOZ5GtsnflPtKCY9h20LeXEjyDZ8eFzAGH/vNrfWPiWWznwN9EoPghIQHCiC0mnJgdsABraUzeTTMjxahi0DXBxb5dsKd6YbJxQw/V+AohVMPfPvs9y95Aj7IxM2zrtgBswC8bT0z678svTJSFX9 test@example.com"
 TEST_SSH_KEY_PUB_ED25519 = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure"
 
-
-def _check_security_profile_absent_or_standard(*path):
-    def _check(execution_result):
-        output = json.loads(execution_result.output)
-        security_profile = output
-        for key in path:
-            if not isinstance(security_profile, dict) or key not in security_profile:
-                return
-            security_profile = security_profile[key]
-
-        if security_profile in (None, 'None'):
-            return
-        if isinstance(security_profile, dict) and security_profile.get('securityType') == 'Standard':
-            return
-        raise AssertionError('Expected security profile to be absent or Standard, got {}'.format(security_profile))
-
-    return _check
-
 def _write_config_file(user_name):
 
     public_key = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8InHIPLAu6lMc0d+5voyXqigZfT5r6fAM1+FQAi+mkPDdk2hNq1BG0Bwfc88G'
@@ -5433,7 +5415,7 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type Standard')
         self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
             self.check('name', '{vmss3}'),
-            _check_security_profile_absent_or_standard('virtualMachineProfile', 'securityProfile'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'Standard'),
         ])
 
         self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --nsg {nsg} '
@@ -6964,7 +6946,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
                  '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
-            _check_security_profile_absent_or_standard('virtualMachineProfile', 'securityProfile'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'Standard'),
         ])
         instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs.update({
@@ -10245,7 +10227,7 @@ class VMCreateSpecialName(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('name', '{vm}'),
-            _check_security_profile_absent_or_standard('securityProfile'),
+            self.check('securityProfile.securityType', 'Standard'),
             self.check('osProfile.computerName', 'vm1')
         ])
 
@@ -12262,7 +12244,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 '
                  '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            _check_security_profile_absent_or_standard('securityProfile')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
         # create VM with specifying security type Standard
@@ -12270,7 +12252,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --size Standard_B2ms '
                  '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
-            _check_security_profile_absent_or_standard('securityProfile')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
     @AllowLargeResponse(size_kb=99999)
