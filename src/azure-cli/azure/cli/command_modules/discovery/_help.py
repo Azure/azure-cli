@@ -9,3 +9,201 @@
 # pylint: disable=too-many-lines
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
+helps['discovery workspace create'] = """
+type: command
+short-summary: Create a Workspace.
+examples:
+  - name: Create a workspace
+    text: |
+        az discovery workspace create -g MyResourceGroup -n MyWorkspace -l eastus
+"""
+
+helps['discovery workspace update'] = """
+type: command
+short-summary: Update a Workspace.
+examples:
+  - name: Update workspace tags
+    text: |
+        az discovery workspace update -g MyResourceGroup -n MyWorkspace --tags key=value
+"""
+
+helps['discovery workspace private-endpoint-connection create'] = """
+type: command
+short-summary: Create a private endpoint connection for a Workspace.
+examples:
+  - name: Approve a private endpoint connection
+    text: |
+        az discovery workspace private-endpoint-connection create -g MyResourceGroup --workspace-name MyWorkspace -n MyConnection --connection-state status=Approved description="Approved"
+"""
+
+helps['discovery workspace private-endpoint-connection update'] = """
+type: command
+short-summary: Update a private endpoint connection for a Workspace.
+examples:
+  - name: Update a private endpoint connection status
+    text: |
+        az discovery workspace private-endpoint-connection update -g MyResourceGroup --workspace-name MyWorkspace -n MyConnection --connection-state status=Rejected description="Rejected"
+"""
+
+helps['discovery workspace project create'] = """
+type: command
+short-summary: Create a Project in a Workspace.
+examples:
+  - name: Create a project
+    text: |
+        az discovery workspace project create -g MyResourceGroup --workspace-name MyWorkspace -n MyProject -l eastus
+"""
+
+helps['discovery workspace project update'] = """
+type: command
+short-summary: Update a Project in a Workspace.
+examples:
+  - name: Update project tags
+    text: |
+        az discovery workspace project update -g MyResourceGroup --workspace-name MyWorkspace -n MyProject --tags key=value
+"""
+
+helps['discovery workspace chat-model-deployment create'] = """
+type: command
+short-summary: Create a ChatModelDeployment in a Workspace.
+examples:
+  - name: Create a chat model deployment
+    text: |
+        az discovery workspace chat-model-deployment create -g MyResourceGroup --workspace-name MyWorkspace -n MyDeployment -l eastus --model-name gpt-4o --model-version 2024-05-13 --model-format OpenAI --sku-name GlobalStandard --capacity 1
+"""
+
+helps['discovery workspace chat-model-deployment update'] = """
+type: command
+short-summary: Update a ChatModelDeployment in a Workspace.
+examples:
+  - name: Update chat model deployment capacity
+    text: |
+        az discovery workspace chat-model-deployment update -g MyResourceGroup --workspace-name MyWorkspace -n MyDeployment --capacity 2
+"""
+
+helps['discovery bookshelf create'] = """
+type: command
+short-summary: Create a Bookshelf.
+examples:
+  - name: Create a bookshelf
+    text: |
+        az discovery bookshelf create -g MyResourceGroup -n MyBookshelf -l eastus
+"""
+
+helps['discovery bookshelf update'] = """
+type: command
+short-summary: Update a Bookshelf.
+examples:
+  - name: Update bookshelf tags
+    text: |
+        az discovery bookshelf update -g MyResourceGroup -n MyBookshelf --tags key=value
+"""
+
+helps['discovery bookshelf private-endpoint-connection create'] = """
+type: command
+short-summary: Create a private endpoint connection for a Bookshelf.
+examples:
+  - name: Approve a private endpoint connection
+    text: |
+        az discovery bookshelf private-endpoint-connection create -g MyResourceGroup --bookshelf-name MyBookshelf -n MyConnection --connection-state status=Approved description="Approved"
+"""
+
+helps['discovery bookshelf private-endpoint-connection update'] = """
+type: command
+short-summary: Update a private endpoint connection for a Bookshelf.
+examples:
+  - name: Update a private endpoint connection status
+    text: |
+        az discovery bookshelf private-endpoint-connection update -g MyResourceGroup --bookshelf-name MyBookshelf -n MyConnection --connection-state status=Rejected description="Rejected"
+"""
+
+helps['discovery supercomputer create'] = """
+type: command
+short-summary: Create a Supercomputer.
+examples:
+  - name: Create a supercomputer
+    text: |
+        az discovery supercomputer create -g MyResourceGroup -n MySupercomputer -l eastus
+"""
+
+helps['discovery supercomputer update'] = """
+type: command
+short-summary: Update a Supercomputer.
+examples:
+  - name: Update supercomputer tags
+    text: |
+        az discovery supercomputer update -g MyResourceGroup -n MySupercomputer --tags key=value
+"""
+
+helps['discovery supercomputer node-pool create'] = """
+type: command
+short-summary: Create a NodePool for a Supercomputer.
+examples:
+  - name: Create a node pool
+    text: |
+        az discovery supercomputer node-pool create -g MyResourceGroup --supercomputer-name MySupercomputer -n MyNodePool -l eastus --vm-size Standard_NC4as_T4_v3 --max-node-count 3
+"""
+
+helps['discovery supercomputer node-pool update'] = """
+type: command
+short-summary: Update a NodePool for a Supercomputer.
+examples:
+  - name: Update node pool scaling limits
+    text: |
+        az discovery supercomputer node-pool update -g MyResourceGroup --supercomputer-name MySupercomputer -n MyNodePool --max-node-count 5
+"""
+
+helps['discovery tool create'] = """
+type: command
+short-summary: Create a Tool.
+examples:
+  - name: Create a tool
+    text: |
+        az discovery tool create -g MyResourceGroup -n MyTool -l eastus
+"""
+
+helps['discovery tool update'] = """
+type: command
+short-summary: Update a Tool.
+examples:
+  - name: Update tool tags
+    text: |
+        az discovery tool update -g MyResourceGroup -n MyTool --tags key=value
+"""
+
+helps['discovery storage-container create'] = """
+type: command
+short-summary: Create a StorageContainer.
+examples:
+  - name: Create a storage container
+    text: |
+        az discovery storage-container create -g MyResourceGroup -n MyStorageContainer -l eastus
+"""
+
+helps['discovery storage-container update'] = """
+type: command
+short-summary: Update a StorageContainer.
+examples:
+  - name: Update storage container tags
+    text: |
+        az discovery storage-container update -g MyResourceGroup -n MyStorageContainer --tags key=value
+"""
+
+helps['discovery storage-container storage-asset create'] = """
+type: command
+short-summary: Create a StorageAsset in a StorageContainer.
+examples:
+  - name: Create a storage asset
+    text: |
+        az discovery storage-container storage-asset create -g MyResourceGroup --storage-container-name MyStorageContainer -n MyAsset -l eastus --path /data
+"""
+
+helps['discovery storage-container storage-asset update'] = """
+type: command
+short-summary: Update a StorageAsset in a StorageContainer.
+examples:
+  - name: Update storage asset description
+    text: |
+        az discovery storage-container storage-asset update -g MyResourceGroup --storage-container-name MyStorageContainer -n MyAsset --description "Updated description"
+"""
