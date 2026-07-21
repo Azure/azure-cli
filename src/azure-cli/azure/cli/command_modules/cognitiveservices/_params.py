@@ -803,12 +803,15 @@ def load_arguments(self, _):
         c.argument('compute_name', help='Cognitive Services account compute name.')
 
     with self.argument_context('cognitiveservices account compute create') as c:
-        c.argument('location', help='Location for the compute resource.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   help='Location for the compute resource.')
         c.argument('pool_name', arg_group='Pool', help='Name of the compute pool.')
         c.argument('instance_type', arg_group='Pool',
                    help='VM instance type for the pool (e.g. Standard_DS3_v2).')
         c.argument('node_count', arg_group='Pool', type=int,
                    help='Number of nodes in the pool.')
         c.argument('vm_priority', arg_group='Pool',
-                   help='VM priority for the pool (e.g. Dedicated, LowPriority).')
-        c.argument('no_wait', help='Do not wait for the long-running operation to finish.')
+                   help='VM priority for the pool (e.g. Dedicated, LowPriority). '
+                        'If omitted, the service default is used.')
+        c.argument('no_wait', action='store_true',
+                   help='Do not wait for the long-running operation to finish.')

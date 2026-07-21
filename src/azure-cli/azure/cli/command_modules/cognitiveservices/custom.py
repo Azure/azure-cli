@@ -2644,7 +2644,7 @@ def project_connection_update(
 def compute_begin_create_or_update(
         client, resource_group_name, account_name, compute_name,
         location, pool_name, instance_type, node_count,
-        vm_priority="Regular", no_wait=False):
+        vm_priority=None, no_wait=False):
     """
     Create a compute resource for Azure Cognitive Services account.
     """
