@@ -15,8 +15,6 @@ from .utils import is_linux_webapp
 
 logger = get_logger(__name__)
 
-_MAX_SHELL_PATH_LENGTH = 256
-
 # Windows special key codes and ANSI escape sequences.
 _WINDOWS_KEY_MAP = {
     72: b'\x1b[A',     # Up
@@ -71,9 +69,6 @@ def webapp_exec(cmd,
     if shell:
         if not shell.startswith('/'):
             raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
-        if len(shell) > _MAX_SHELL_PATH_LENGTH:
-            raise ValidationError(
-                "--shell path is too long (max {} characters).".format(_MAX_SHELL_PATH_LENGTH))
 
     if mode.lower() == 'execute':
         if exec_command and shell_command:
@@ -116,10 +111,8 @@ def webapp_exec(cmd,
     # Execute mode - run the command on each resolved instance in parallel.
     command, command_args = _build_execute_invocation(exec_command, shell_command, shell)
     logger.warning(
-        "Execute mode is fire-and-forget: a 'succeeded' result means the command was accepted, "
-        "not that it ran or finished. No output is returned - it is best for background or "
-        "long-running work; for immediate output, use '--mode shell'. "
-        "See 'az webapp exec --help' for how to capture output.")
+        "Execute mode is fire-and-forget: 'succeeded' means the command was accepted, "
+        "not that it ran or finished. No output is returned.")
     args_list = [(target, scm_url, headers, command, command_args, working_directory)
                  for target in target_instances]
     results = _execute_in_parallel(_run_execute_on_instance, args_list)
@@ -210,10 +203,14 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
     if shell:
         import urllib.parse
         ws_url += '?shell=' + urllib.parse.quote(shell, safe='')
+    else:
+        print("No --shell provided; defaulting to /bin/bash. If your container image does not "
+              "include bash, run with --shell <absolute path> (e.g. --shell /bin/sh).")
 
     cookie_str = '; '.join(f'{k}={v}' for k, v in cookies.items()) if cookies else None
 
     # Request Websocket connection with 30s timeout
+    print("Connecting to the web app container...")
     try:
         ws = websocket.create_connection(
             ws_url,
@@ -230,10 +227,6 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
     # Clear the 30s connect timeout so the read_from_server loop blocks indefinitely
     ws.settimeout(None)
 
-    logger.info("Connected to %s", ws_url)
-    print("Connected to the web app container.")
-    print("This session ends after 3 hours of inactivity, and may also end if the "
-          "container restarts or the host undergoes maintenance.")
     print("Press Ctrl+C twice to exit.\n")
 
     # Enable ANSI rendering on Windows consoles. No-op on Unix / redirected stdout.
@@ -419,7 +412,7 @@ def _send_to_server_windows(ws, closed):
             if exit_session:
                 break
     except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
-        logger.info("Shell session closed: %s", ex)
+        logger.warning("Shell session closed: %s", ex)
     finally:
         kernel32.SetConsoleMode(stdin_handle, old_mode.value)
 
@@ -471,7 +464,7 @@ def _send_to_server_non_windows(ws, closed):
                 last_ctrl_c = now
             ws.send(data, opcode=ws_module.ABNF.OPCODE_BINARY)
     except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
-        logger.info("Shell session closed: %s", ex)
+        logger.warning("Shell session closed: %s", ex)
     finally:
         # Reset defaults: stop listening for resize signals, restore terminal out of raw mode.
         signal.signal(signal.SIGWINCH, signal.SIG_DFL)
