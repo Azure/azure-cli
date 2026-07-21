@@ -6,7 +6,6 @@
 # AZURE CLI VM TEST DEFINITIONS
 import json
 import os
-import datetime
 import platform
 import tempfile
 import time
