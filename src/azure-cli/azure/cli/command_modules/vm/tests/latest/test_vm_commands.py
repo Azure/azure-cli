@@ -6,6 +6,7 @@
 # AZURE CLI VM TEST DEFINITIONS
 import json
 import os
+import datetime
 import platform
 import tempfile
 import time
@@ -4720,6 +4721,32 @@ class VMSSLifecycleHookScenarioTest(ScenarioTest):
         self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --all')
         self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
                  checks=[self.check('length(@)', 0)])
+
+
+class VMSSLifecycleHookEventScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lch_event')
+    # Not including approve/reject/show and update --action-state as they required live platform-generated event
+    def test_vmss_lifecycle_hook_event(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Lifecycle hook events are platform-generated; a fresh scale set has none.
+        self.cmd('vmss lifecycle-hook-event list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+        # --instance-ids requires --action-state (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent '
+                 '--instance-ids 0', expect_failure=True)
+
+        # update requires at least one of --action-state or --wait-until (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent',
+                 expect_failure=True)
 
 
 class VMSSCreateOptions(ScenarioTest):
