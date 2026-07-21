@@ -815,3 +815,7 @@ def load_arguments(self, _):
                         'If omitted, the service default is used.')
         c.argument('no_wait', action='store_true',
                    help='Do not wait for the long-running operation to finish.')
+
+    with self.argument_context('cognitiveservices account compute delete') as c:
+        c.argument('no_wait', action='store_true',
+                   help='Do not wait for the long-running operation to finish.')
