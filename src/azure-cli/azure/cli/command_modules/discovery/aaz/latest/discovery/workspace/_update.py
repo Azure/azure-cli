@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Workspace
+
+    :example: Update workspace tags
+        az discovery workspace update -g MyResourceGroup -n MyWorkspace --tags key=value
     """
 
     _aaz_info = {

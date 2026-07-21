@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a ChatModelDeployment
+
+    :example: Update chat model deployment capacity
+        az discovery workspace chat-model-deployment update -g MyResourceGroup --workspace-name MyWorkspace -n MyDeployment --capacity 2
     """
 
     _aaz_info = {

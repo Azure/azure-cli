@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a StorageContainer
+
+    :example: Update storage container tags
+        az discovery storage-container update -g MyResourceGroup -n MyStorageContainer --tags key=value
     """
 
     _aaz_info = {

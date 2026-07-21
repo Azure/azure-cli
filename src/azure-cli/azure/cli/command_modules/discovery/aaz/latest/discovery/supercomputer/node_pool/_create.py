@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a NodePool
+
+    :example: Create a node pool
+        az discovery supercomputer node-pool create -g MyResourceGroup --supercomputer-name MySupercomputer -n MyNodePool -l eastus --vm-size Standard_NC4as_T4_v3 --max-node-count 3
     """
 
     _aaz_info = {

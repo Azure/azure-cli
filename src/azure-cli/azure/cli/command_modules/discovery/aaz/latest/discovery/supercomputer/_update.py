@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Supercomputer
+
+    :example: Update supercomputer tags
+        az discovery supercomputer update -g MyResourceGroup -n MySupercomputer --tags key=value
     """
 
     _aaz_info = {

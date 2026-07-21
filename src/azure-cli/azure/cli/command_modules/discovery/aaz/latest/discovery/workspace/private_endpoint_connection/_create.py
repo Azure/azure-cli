@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create the specified private endpoint connection.
+
+    :example: Approve a private endpoint connection for a workspace
+        az discovery workspace private-endpoint-connection create -g MyResourceGroup --workspace-name MyWorkspace -n MyConnection --connection-state status=Approved description="Approved"
     """
 
     _aaz_info = {

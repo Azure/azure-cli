@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Bookshelf
+
+    :example: Create a bookshelf
+        az discovery bookshelf create -g MyResourceGroup -n MyBookshelf -l eastus
     """
 
     _aaz_info = {

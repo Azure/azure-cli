@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a StorageAsset
+
+    :example: Update storage asset description
+        az discovery storage-container storage-asset update -g MyResourceGroup --storage-container-name MyStorageContainer -n MyAsset --description "Updated description"
     """
 
     _aaz_info = {

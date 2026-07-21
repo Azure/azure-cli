@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Project
+
+    :example: Create a project in a workspace
+        az discovery workspace project create -g MyResourceGroup --workspace-name MyWorkspace -n MyProject -l eastus
     """
 
     _aaz_info = {

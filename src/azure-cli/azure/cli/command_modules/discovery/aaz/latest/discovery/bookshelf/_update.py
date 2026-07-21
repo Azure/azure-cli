@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Bookshelf
+
+    :example: Update bookshelf tags
+        az discovery bookshelf update -g MyResourceGroup -n MyBookshelf --tags key=value
     """
 
     _aaz_info = {

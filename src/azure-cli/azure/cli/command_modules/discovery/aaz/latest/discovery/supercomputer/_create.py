@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Supercomputer
+
+    :example: Create a supercomputer
+        az discovery supercomputer create -g MyResourceGroup -n MySupercomputer -l eastus
     """
 
     _aaz_info = {

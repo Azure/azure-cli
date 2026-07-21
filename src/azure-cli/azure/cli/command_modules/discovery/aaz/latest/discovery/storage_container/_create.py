@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a StorageContainer
+
+    :example: Create a storage container
+        az discovery storage-container create -g MyResourceGroup -n MyStorageContainer -l eastus
     """
 
     _aaz_info = {

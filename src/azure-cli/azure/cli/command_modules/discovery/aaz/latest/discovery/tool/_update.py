@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Tool
+
+    :example: Update tool tags
+        az discovery tool update -g MyResourceGroup -n MyTool --tags key=value
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update the specified private endpoint connection.
+
+    :example: Update a private endpoint connection status for a bookshelf
+        az discovery bookshelf private-endpoint-connection update -g MyResourceGroup --bookshelf-name MyBookshelf -n MyConnection --connection-state status=Rejected description="Rejected"
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Tool
+
+    :example: Create a tool
+        az discovery tool create -g MyResourceGroup -n MyTool -l eastus
     """
 
     _aaz_info = {
