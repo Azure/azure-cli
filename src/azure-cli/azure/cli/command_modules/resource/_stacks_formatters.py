@@ -338,7 +338,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange,
-            StackModels.DeploymentStacksChangeDeltaDenySettings]],
+            StackModels.DeploymentStacksChangeDeltaDenySettings,
+            StackModels.DeploymentStacksChangeBaseDenyStatusMode,
+            StackModels.DeploymentStacksChangeBaseDeploymentStacksManagementStatus]],
         parent_path: t.Optional[str] = None,
         is_array_item: bool = False
     ) -> bool:
@@ -517,7 +519,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange,
-            StackModels.DeploymentStacksChangeDeltaDenySettings]
+            StackModels.DeploymentStacksChangeDeltaDenySettings,
+            StackModels.DeploymentStacksChangeBaseDenyStatusMode,
+            StackModels.DeploymentStacksChangeBaseDeploymentStacksManagementStatus]
     ) -> t.Optional[t.Type]:
         if hasattr(change, "change_type"):
             if str_lower_eq(StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY, change.change_type):
