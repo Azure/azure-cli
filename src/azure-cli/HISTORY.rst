@@ -47,11 +47,6 @@ Release History
 
 * Migrate the entire module to `azure-cli-extensions` (#33336)
 
-**Cognitive Services**
-
-* [PREVIEW] `az cognitiveservices account compute`: Add new command group to manage compute resources for Cognitive Services accounts, including `create`, `delete`, `show`, and `list` commands.
-* Upgrade `azure-mgmt-cognitiveservices` from `15.0.0b2` to `15.0.0b3`.
-
 **Compute**
 
 * `az vm create/update/show`: Support scheduled events profile via new parameters `--scheduled-events-api-version` and `--enable-all-instance-down` (#33451)
