@@ -1,0 +1,110 @@
+Metadata-Version: 2.2
+Name: paramiko
+Version: 3.5.1
+Summary: SSH2 protocol library
+Home-page: https://paramiko.org
+Author: Jeff Forcier
+Author-email: jeff@bitprophet.org
+License: LGPL
+Project-URL: Docs, https://docs.paramiko.org
+Project-URL: Source, https://github.com/paramiko/paramiko
+Project-URL: Issues, https://github.com/paramiko/paramiko/issues
+Project-URL: Changelog, https://www.paramiko.org/changelog.html
+Project-URL: CI, https://app.circleci.com/pipelines/github/paramiko/paramiko
+Platform: Posix; MacOS X; Windows
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet
+Classifier: Topic :: Security :: Cryptography
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.6
+License-File: LICENSE
+Requires-Dist: bcrypt>=3.2
+Requires-Dist: cryptography>=3.3
+Requires-Dist: pynacl>=1.5
+Provides-Extra: gssapi
+Requires-Dist: pyasn1>=0.1.7; extra == "gssapi"
+Requires-Dist: gssapi>=1.4.1; platform_system != "Windows" and extra == "gssapi"
+Requires-Dist: pywin32>=2.1.8; platform_system == "Windows" and extra == "gssapi"
+Provides-Extra: invoke
+Requires-Dist: invoke>=2.0; extra == "invoke"
+Provides-Extra: ed25519
+Provides-Extra: all
+Requires-Dist: pyasn1>=0.1.7; extra == "all"
+Requires-Dist: gssapi>=1.4.1; platform_system != "Windows" and extra == "all"
+Requires-Dist: pywin32>=2.1.8; platform_system == "Windows" and extra == "all"
+Requires-Dist: invoke>=2.0; extra == "all"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: home-page
+Dynamic: license
+Dynamic: platform
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+|version| |python| |license| |ci| |coverage|
+
+.. |version| image:: https://img.shields.io/pypi/v/paramiko
+    :target: https://pypi.org/project/paramiko/
+    :alt: PyPI - Package Version
+.. |python| image:: https://img.shields.io/pypi/pyversions/paramiko
+    :target: https://pypi.org/project/paramiko/
+    :alt: PyPI - Python Version
+.. |license| image:: https://img.shields.io/pypi/l/paramiko
+    :target: https://github.com/paramiko/paramiko/blob/main/LICENSE
+    :alt: PyPI - License
+.. |ci| image:: https://img.shields.io/circleci/build/github/paramiko/paramiko/main
+    :target: https://app.circleci.com/pipelines/github/paramiko/paramiko
+    :alt: CircleCI
+.. |coverage| image:: https://img.shields.io/codecov/c/gh/paramiko/paramiko
+    :target: https://app.codecov.io/gh/paramiko/paramiko
+    :alt: Codecov
+
+Welcome to Paramiko!
+====================
+
+Paramiko is a pure-Python [#]_ (3.6+) implementation of the SSHv2 protocol
+[#]_, providing both client and server functionality. It provides the
+foundation for the high-level SSH library `Fabric <https://fabfile.org>`_,
+which is what we recommend you use for common client use-cases such as running
+remote shell commands or transferring files.
+
+Direct use of Paramiko itself is only intended for users who need
+advanced/low-level primitives or want to run an in-Python sshd.
+
+For installation information, changelogs, FAQs and similar, please visit `our
+main project website <https://paramiko.org>`_; for API details, see `the
+versioned docs <https://docs.paramiko.org>`_. Additionally, the project
+maintainer keeps a `roadmap <http://bitprophet.org/projects#roadmap>`_ on his
+personal site.
+
+.. [#]
+    Paramiko relies on `cryptography <https://cryptography.io>`_ for crypto
+    functionality, which makes use of C and Rust extensions but has many
+    precompiled options available. See `our installation page
+    <https://www.paramiko.org/installing.html>`_ for details.
+
+.. [#]
+    OpenSSH's RFC specification page is a fantastic resource and collection of
+    links that we won't bother replicating here:
+    https://www.openssh.com/specs.html
+
+    OpenSSH itself also happens to be our primary reference implementation:
+    when in doubt, we consult how they do things, unless there are good reasons
+    not to. There are always some gaps, but we do our best to reconcile them
+    when possible.

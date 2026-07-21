@@ -2649,8 +2649,8 @@ def compute_begin_create_or_update(
     Create a compute resource for Azure Cognitive Services account.
     """
     resource = Compute(
+        location=location,
         properties=ComputeProperties(
-            location=location,
             pools=[
                 Pool(
                     name=pool_name,

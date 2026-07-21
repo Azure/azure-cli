@@ -1,0 +1,13 @@
+jobs:
+  build:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v1
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: azure/mysql@v1
+        with:
+          server-name: MYSQL_SERVER_NAME
+          connection-string: MYSQL_CONNECTION_STRING
+          sql-file: MYSQL_FILE_NAME

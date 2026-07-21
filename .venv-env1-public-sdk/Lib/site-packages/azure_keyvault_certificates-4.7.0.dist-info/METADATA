@@ -1,0 +1,675 @@
+Metadata-Version: 2.1
+Name: azure-keyvault-certificates
+Version: 4.7.0
+Summary: Microsoft Azure Key Vault Certificates Client Library for Python
+Home-page: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates
+Author: Microsoft Corporation
+Author-email: azurekeyvault@microsoft.com
+License: MIT License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: azure-common (~=1.1)
+Requires-Dist: azure-core (<2.0.0,>=1.24.0)
+Requires-Dist: isodate (>=0.6.1)
+Requires-Dist: typing-extensions (>=4.0.1)
+
+# Azure Key Vault Certificates client library for Python
+Azure Key Vault helps solve the following problems:
+- Certificate management (this library) - create, manage, and deploy public and private SSL/TLS certificates
+- Cryptographic key management
+([azure-keyvault-keys](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-keys)) - create, store, and control access to the keys used to encrypt your data
+- Secrets management
+([azure-keyvault-secrets](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-secrets)) -
+securely store and control access to tokens, passwords, certificates, API keys,
+and other secrets
+- Vault administration ([azure-keyvault-administration](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration)) - role-based access control (RBAC), and vault-level backup and restore options
+
+[Source code][library_src]
+| [Package (PyPI)][pypi_package_certificates]
+| [Package (Conda)](https://anaconda.org/microsoft/azure-keyvault/)
+| [API reference documentation][reference_docs]
+| [Product documentation][azure_keyvault]
+| [Samples][certificates_samples]
+
+## _Disclaimer_
+
+_Azure SDK Python packages support for Python 2.7 has ended 01 January 2022. For more information and questions, please refer to https://github.com/Azure/azure-sdk-for-python/issues/20691_.
+_Python 3.7 or later is required to use this package. For more details, please refer to [Azure SDK for Python version support policy](https://github.com/Azure/azure-sdk-for-python/wiki/Azure-SDKs-Python-version-support-policy)._
+
+## Getting started
+### Install the package
+Install [azure-keyvault-certificates][pypi_package_certificates] and
+[azure-identity][azure_identity_pypi] with [pip][pip]:
+```Bash
+pip install azure-keyvault-certificates azure-identity
+```
+[azure-identity][azure_identity] is used for Azure Active Directory
+authentication as demonstrated below.
+
+### Prerequisites
+* An [Azure subscription][azure_sub]
+* Python 3.7 or later
+* An existing [Azure Key Vault][azure_keyvault]. If you need to create one, you can do so using the Azure CLI by following the steps in [this document][azure_keyvault_cli].
+
+### Authenticate the client
+In order to interact with the Azure Key Vault service, you will need an instance of a [CertificateClient][certificate_client_docs], as well as a **vault url** and a credential object. This document demonstrates using a [DefaultAzureCredential][default_cred_ref], which is appropriate for most scenarios, including local development and production environments. We recommend using a [managed identity][managed_identity] for authentication in production environments.
+
+See [azure-identity][azure_identity] documentation for more information about other methods of authentication and their corresponding credential types.
+
+#### Create a client
+After configuring your environment for the [DefaultAzureCredential][default_cred_ref] to use a suitable method of authentication, you can do the following to create a certificate client (replacing the value of `VAULT_URL` with your vault's URL):
+
+<!-- SNIPPET:hello_world.create_a_certificate_client -->
+
+```python
+VAULT_URL = os.environ["VAULT_URL"]
+credential = DefaultAzureCredential()
+client = CertificateClient(vault_url=VAULT_URL, credential=credential)
+```
+
+<!-- END SNIPPET -->
+
+> **NOTE:** For an asynchronous client, import `azure.keyvault.certificates.aio`'s `CertificateClient` instead.
+
+## Key concepts
+### CertificateClient
+With a [CertificateClient][certificate_client_docs] you can get certificates from the vault, create new certificates and new versions of existing certificates, update certificate metadata, and delete certificates. You can also manage certificate issuers, contacts, and management policies of certificates. This is illustrated in the [examples](#examples) below.
+
+## Examples
+This section contains code snippets covering common tasks:
+* [Create a certificate](#create-a-certificate)
+* [Retrieve a certificate](#retrieve-a-certificate)
+* [Update properties of an existing certificate](#update-properties-of-an-existing-certificate)
+* [Delete a certificate](#delete-a-certificate)
+* [List properties of certificates](#list-properties-of-certificates)
+* [Async operations](#async-operations)
+* [Asynchronously create a certificate](#asynchronously-create-a-certificate)
+* [Asynchronously list properties of certificates](#asynchronously-list-properties-of-certificates)
+
+### Create a certificate
+[begin_create_certificate](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.begin_create_certificate)
+creates a certificate to be stored in the Azure Key Vault. If a certificate with the same name already exists, a new
+version of the certificate is created. Before creating a certificate, a management policy for the certificate can be
+created or our default policy will be used. This method returns a long running operation poller.
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient, CertificatePolicy
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+create_certificate_poller = certificate_client.begin_create_certificate(
+    certificate_name="cert-name", policy=CertificatePolicy.get_default()
+)
+print(create_certificate_poller.result())
+```
+If you would like to check the status of your certificate creation, you can call `status()` on the poller or
+[get_certificate_operation](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.get_certificate_operation)
+with the name of the certificate.
+
+### Retrieve a certificate
+[get_certificate](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.get_certificate)
+retrieves the latest version of a certificate previously stored in the Key Vault.
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+certificate = certificate_client.get_certificate("cert-name")
+
+print(certificate.name)
+print(certificate.properties.version)
+print(certificate.policy.issuer_name)
+```
+
+[get_certificate_version](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.get_certificate_version)
+retrieves a specific version of a certificate.
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+certificate = certificate_client.get_certificate_version(certificate_name="cert-name", version="cert-version")
+
+print(certificate.name)
+print(certificate.properties.version)
+```
+
+### Update properties of an existing certificate
+[update_certificate_properties](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.update_certificate_properties)
+updates a certificate previously stored in the Key Vault.
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+# we will now disable the certificate for further use
+updated_certificate= certificate_client.update_certificate_properties(
+    certificate_name="cert-name", enabled=False
+)
+
+print(updated_certificate.name)
+print(updated_certificate.properties.enabled)
+```
+
+### Delete a certificate
+[begin_delete_certificate](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.begin_delete_certificate)
+requests Key Vault delete a certificate, returning a poller which allows you to wait for the deletion to finish.
+Waiting is helpful when the vault has [soft-delete][soft_delete] enabled, and you want to purge
+(permanently delete) the certificate as soon as possible. When [soft-delete][soft_delete] is disabled,
+`begin_delete_certificate` itself is permanent.
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+deleted_certificate_poller = certificate_client.begin_delete_certificate("cert-name")
+
+deleted_certificate = deleted_certificate_poller.result()
+print(deleted_certificate.name)
+print(deleted_certificate.deleted_on)
+```
+### List properties of certificates
+[list_properties_of_certificates](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient.list_properties_of_certificates)
+lists the properties of all certificates in the specified Key Vault.
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+certificates = certificate_client.list_properties_of_certificates()
+
+for certificate in certificates:
+    # this list doesn't include versions of the certificates
+    print(certificate.name)
+```
+
+### Async operations
+This library includes a complete set of async APIs. To use them, you must
+first install an async transport, such as [aiohttp](https://pypi.org/project/aiohttp/).
+See
+[azure-core documentation](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/core/azure-core/CLIENT_LIBRARY_DEVELOPER.md#transport)
+for more information.
+
+Async clients and credentials should be closed when they're no longer needed. These
+objects are async context managers and define async `close` methods. For
+example:
+
+```python
+from azure.identity.aio import DefaultAzureCredential
+from azure.keyvault.certificates.aio import CertificateClient
+
+credential = DefaultAzureCredential()
+
+# call close when the client and credential are no longer needed
+client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+...
+await client.close()
+await credential.close()
+
+# alternatively, use them as async context managers (contextlib.AsyncExitStack can help)
+client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+async with client:
+  async with credential:
+    ...
+```
+
+### Asynchronously create a certificate
+[create_certificate](https://aka.ms/azsdk/python/keyvault-certificates/aio/docs#azure.keyvault.certificates.aio.CertificateClient.create_certificate)
+creates a certificate to be stored in the Azure Key Vault. If a certificate with the same name already exists, a new
+version of the certificate is created. Before creating a certificate, a management policy for the certificate can be
+created or our default policy will be used. Awaiting `create_certificate` returns your created certificate if creation
+is successful, and a
+[CertificateOperation](https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateOperation)
+if it is not.
+```python
+from azure.identity.aio import DefaultAzureCredential
+from azure.keyvault.certificates.aio import CertificateClient
+from azure.keyvault.certificates import CertificatePolicy
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+create_certificate_result = await certificate_client.create_certificate(
+    certificate_name="cert-name", policy=CertificatePolicy.get_default()
+)
+print(create_certificate_result)
+```
+
+### Asynchronously list properties of certificates
+[list_properties_of_certificates](https://aka.ms/azsdk/python/keyvault-certificates/aio/docs#azure.keyvault.certificates.aio.CertificateClient.list_properties_of_certificates)
+lists all the properties of the certificates in the client's vault:
+```python
+from azure.identity.aio import DefaultAzureCredential
+from azure.keyvault.certificates.aio import CertificateClient
+
+credential = DefaultAzureCredential()
+
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+certificates = certificate_client.list_properties_of_certificates()
+async for certificate in certificates:
+    print(certificate.name)
+```
+
+## Troubleshooting
+
+See the `azure-keyvault-certificates`
+[troubleshooting guide](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/TROUBLESHOOTING.md)
+for details on how to diagnose various failure scenarios.
+
+### General
+Key Vault clients raise exceptions defined in [azure-core][azure_core_exceptions].
+For example, if you try to get a key that doesn't exist in the vault, [CertificateClient][certificate_client_docs]
+raises [ResourceNotFoundError](https://aka.ms/azsdk-python-core-exceptions-resource-not-found-error):
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+from azure.core.exceptions import ResourceNotFoundError
+
+credential = DefaultAzureCredential()
+certificate_client = CertificateClient(vault_url="https://my-key-vault.vault.azure.net/", credential=credential)
+
+try:
+    certificate_client.get_certificate("which-does-not-exist")
+except ResourceNotFoundError as e:
+    print(e.message)
+```
+### Logging
+This library uses the standard
+[logging](https://docs.python.org/3.5/library/logging.html) library for logging.
+Basic information about HTTP sessions (URLs, headers, etc.) is logged at INFO
+level.
+
+Detailed DEBUG level logging, including request/response bodies and unredacted
+headers, can be enabled on a client with the `logging_enable` argument:
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.certificates import CertificateClient
+import sys
+import logging
+
+# Create a logger for the 'azure' SDK
+logger = logging.getLogger('azure')
+logger.setLevel(logging.DEBUG)
+
+# Configure a console output
+handler = logging.StreamHandler(stream=sys.stdout)
+logger.addHandler(handler)
+
+credential = DefaultAzureCredential()
+
+# This client will log detailed information about its HTTP sessions, at DEBUG level
+client = CertificateClient(
+    vault_url="https://my-key-vault.vault.azure.net/",
+    credential=credential,
+    logging_enable=True
+)
+```
+
+Network trace logging can also be enabled for any single operation:
+```python
+certificate = certificate_client.get_certificate(certificate_name="cert-name", logging_enable=True)
+```
+
+## Next steps
+Several samples are available in the Azure SDK for Python GitHub repository. These samples provide example code for additional Key Vault scenarios:
+| File | Description |
+|-------------|-------------|
+| [hello_world.py][hello_world_sample] ([async version][hello_world_async_sample]) | create/get/update/delete certificates |
+| [backup_restore_operations.py][backup_operations_sample] ([async version][backup_operations_async_sample]) | back up and recover certificates |
+| [import_certificate.py][import_certificate_sample] ([async version][import_certificate_async_sample]) | import PKCS#12 (PFX) and PEM-formatted certificates into Key Vault |
+| [list_operations.py][list_operations_sample] ([async version][list_operations_async_sample]) | list certificates |
+| [recover_purge_operations.py][recover_purge_operations_sample] ([async version][recover_purge_operations_async_sample]) | recover and purge certificates |
+| [issuers.py][issuers_sample] ([async version][issuers_async_sample]) | manage certificate issuers |
+| [contacts.py][contacts_sample] ([async version][contacts_async_sample]) | manage certificate contacts |
+| [parse_certificate.py][parse_sample] ([async version][parse_async_sample]) | extract a certificate's private key |
+
+###  Additional documentation
+For more extensive documentation on Azure Key Vault, see the [API reference documentation][reference_docs].
+
+## Contributing
+This project welcomes contributions and suggestions. Most contributions require
+you to agree to a Contributor License Agreement (CLA) declaring that you have
+the right to, and actually do, grant us the rights to use your contribution.
+For details, visit https://cla.microsoft.com.
+
+When you submit a pull request, a CLA-bot will automatically determine whether
+you need to provide a CLA and decorate the PR appropriately (e.g., label,
+comment). Simply follow the instructions provided by the bot. You will only
+need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct][code_of_conduct].
+For more information, see the
+[Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact opencode@microsoft.com with any additional questions or comments.
+
+
+<!-- LINKS -->
+[azure_core_exceptions]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/core/azure-core#azure-core-library-exceptions
+[azure_identity]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/identity/azure-identity
+[azure_identity_pypi]: https://pypi.org/project/azure-identity/
+[azure_keyvault]: https://docs.microsoft.com/azure/key-vault/general/overview
+[azure_keyvault_cli]: https://docs.microsoft.com/azure/key-vault/general/quick-create-cli
+[azure_sub]: https://azure.microsoft.com/free/
+
+[backup_operations_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/backup_restore_operations.py
+[backup_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/backup_restore_operations_async.py
+
+[certificate_client_docs]: https://aka.ms/azsdk/python/keyvault-certificates/docs#azure.keyvault.certificates.CertificateClient
+[certificates_samples]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/samples
+[code_of_conduct]: https://opensource.microsoft.com/codeofconduct/
+[contacts_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/contacts.py
+[contacts_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/contacts_async.py
+
+[default_cred_ref]: https://aka.ms/azsdk/python/identity/docs#azure.identity.DefaultAzureCredential
+
+[hello_world_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/hello_world.py
+[hello_world_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/hello_world_async.py
+
+[import_certificate_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/samples/import_certificate.py
+[import_certificate_async_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/samples/import_certificate_async.py
+[issuers_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/issuers.py
+[issuers_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/issuers_async.py
+
+[library_src]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/azure/keyvault/certificates
+[list_operations_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/list_operations.py
+[list_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/list_operations_async.py
+
+[managed_identity]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview
+
+[parse_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/parse_certificate.py
+[parse_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/parse_certificate_async.py
+[pip]: https://pypi.org/project/pip/
+[pypi_package_certificates]: https://pypi.org/project/azure-keyvault-certificates/
+
+[recover_purge_operations_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/recover_purge_operations.py
+[recover_purge_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/keyvault/azure-keyvault-certificates/samples/recover_purge_operations_async.py
+[reference_docs]: https://aka.ms/azsdk/python/keyvault-certificates/docs
+
+[soft_delete]: https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview
+
+![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-python%2Fsdk%2Fkeyvault%2Fazure-keyvault-certificates%2FREADME.png)
+
+
+# Release History
+
+## 4.7.0 (2023-03-16)
+
+### Features Added
+- Added support for service API version `7.4`
+- Clients each have a `send_request` method that can be used to send custom requests using the
+  client's existing pipeline ([#25172](https://github.com/Azure/azure-sdk-for-python/issues/25172))
+
+### Bugs Fixed
+- The type hints for `KeyVaultCertificate.cer` and `DeletedCertificate.cer` are now
+  `Optional[bytearray]` instead of `Optional[bytes]`
+  ([#28959](https://github.com/Azure/azure-sdk-for-python/issues/28959))
+
+### Other Changes
+- Python 3.6 is no longer supported. Please use Python version 3.7 or later.
+- Key Vault API version `7.4` is now the default
+- Updated minimum `azure-core` version to 1.24.0
+- Dropped `msrest` requirement
+- Added requirement for `isodate>=0.6.1` (`isodate` was required by `msrest`)
+- Added requirement for `typing-extensions>=4.0.1`
+
+## 4.6.0 (2022-09-19)
+
+### Breaking Changes
+- Clients verify the challenge resource matches the vault domain. This should affect few customers,
+  who can provide `verify_challenge_resource=False` to client constructors to disable.
+  See https://aka.ms/azsdk/blog/vault-uri for more information.
+
+## 4.5.1 (2022-08-11)
+
+### Other Changes
+- Documentation improvements 
+  ([#25039](https://github.com/Azure/azure-sdk-for-python/issues/25039))
+
+## 4.5.0b1 (2022-06-07)
+
+### Bugs Fixed
+- Port numbers are now preserved in the `vault_url` property of a `KeyVaultCertificateIdentifier`
+  ([#24446](https://github.com/Azure/azure-sdk-for-python/issues/24446))
+
+## 4.4.0 (2022-03-28)
+
+### Features Added
+- Key Vault API version 7.3 is now the default
+- Added support for multi-tenant authentication when using `azure-identity`
+  1.8.0 or newer ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+### Bugs Fixed
+- `KeyType` now ignores casing during declaration, which resolves a scenario where Key Vault
+  keys created with non-standard casing could not be fetched with the SDK
+  ([#22797](https://github.com/Azure/azure-sdk-for-python/issues/22797))
+
+### Other Changes
+- (From 4.4.0b3) Python 2.7 is no longer supported. Please use Python version 3.6 or later.
+- Updated minimum `azure-core` version to 1.20.0
+- (From 4.4.0b2) To support multi-tenant authentication, `get_token` calls during challenge
+  authentication requests now pass in a `tenant_id` keyword argument
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698)). See
+  https://aka.ms/azsdk/python/identity/tokencredential for more details on how to integrate
+  this parameter if `get_token` is implemented by a custom credential.
+
+## 4.4.0b3 (2022-02-08)
+
+### Other Changes
+- Python 2.7 is no longer supported. Please use Python version 3.6 or later.
+- (From 4.4.0b2) To support multi-tenant authentication, `get_token` calls during challenge
+  authentication requests now pass in a `tenant_id` keyword argument
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+## 4.4.0b2 (2021-11-11)
+
+### Features Added
+- Added support for multi-tenant authentication when using `azure-identity` 1.7.1 or newer
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+### Other Changes
+- Updated minimum `azure-core` version to 1.15.0
+
+## 4.4.0b1 (2021-09-09)
+
+### Features Added
+- Key Vault API version 7.3-preview is now the default
+
+### Other Changes
+- Updated type hints to fix mypy errors
+  ([#19158](https://github.com/Azure/azure-sdk-for-python/issues/19158))
+
+## 4.3.0 (2021-06-22)
+This is the last version to support Python 3.5. The next version will require Python 2.7 or 3.6+.
+### Changed
+- Key Vault API version 7.2 is now the default
+- Updated minimum `msrest` version to 0.6.21
+- The `issuer_name` parameter for `CertificatePolicy` is now optional
+
+### Added
+- Added class `KeyVaultCertificateIdentifier` that parses out a full ID returned by Key Vault,
+  so users can easily access the certificate's `name`, `vault_url`, and `version`.
+
+
+## 4.2.1 (2020-09-08)
+### Fixed
+- Correct typing for paging methods
+- Fixed incompatibility issues with API version 2016-10-01
+
+
+## 4.2.0 (2020-08-11)
+### Fixed
+- Fixed an `AttributeError` during `get_certificate_version`
+- `import_certificate` no longer raises `AttributeError` when the `policy`
+  keyword argument isn't passed
+- Values of `x-ms-keyvault-region` and `x-ms-keyvault-service-version` headers
+  are no longer redacted in logging output
+
+### Changed
+- Key Vault API version 7.1 is now the default
+- Updated minimum `azure-core` version to 1.7.0
+
+### Added
+- At construction, clients accept a `CustomHookPolicy` through the optional
+  keyword argument `custom_hook_policy`
+- All client requests include a unique ID in the header `x-ms-client-request-id`
+- Dependency on `azure-common` for multiapi support
+
+## 4.2.0b1 (2020-03-10)
+- Support for Key Vault API version 7.1-preview
+([#10124](https://github.com/Azure/azure-sdk-for-python/pull/10124))
+  - Added `recoverable_days` to `CertificateProperties`
+  - Added `ApiVersion` enum identifying Key Vault versions supported by this package
+
+## 4.1.0 (2020-03-10)
+- `CertificateClient` instances have a `close` method which closes opened
+sockets. Used as a context manager, a `CertificateClient` closes opened sockets
+on exit. ([#9906](https://github.com/Azure/azure-sdk-for-python/pull/9906))
+- Pollers no longer sleep after operation completion
+([#9991](https://github.com/Azure/azure-sdk-for-python/pull/9991))
+
+## 4.0.1 (2020-02-11)
+- `azure.keyvault.certificates` defines `__version__`
+- Updated `msrest` requirement to >=0.6.0
+- Challenge authentication policy requires TLS
+([#9457](https://github.com/Azure/azure-sdk-for-python/pull/9457))
+- Methods no longer raise the internal error `KeyVaultErrorException`
+([#9690](https://github.com/Azure/azure-sdk-for-python/issues/9690))
+
+## 4.0.0 (2020-01-08)
+- First GA release
+
+## 4.0.0b7 (2019-12-17)
+- Challenge authentication policy preserves request options
+([#8999](https://github.com/Azure/azure-sdk-for-python/pull/8999))
+- Added `vault_url` property to `CertificateOperation`
+- Removed `id`, `expires_on`, `not_before`, and `recover_level` properties from `CertificatePolicy`
+- Removed `vault_url` property from `CertificateIssuer`
+- Removed `vault_url` property from `IssuerProperties`
+
+
+## 4.0.0b6 (2019-12-04)
+- Updated `msrest` requirement to >=0.6.0
+- Renamed `get_policy` to `get_certificate_policy`
+- Renamed `update_policy` to `update_certificate_policy`
+- Renamed `create_contacts` to `set_contacts`
+- Renamed parameter `admin_details` of `create_issuer` and `update_issuer` to `admin_contacts`
+- Renamed all `name` parameters to include the name of the object whose name we are referring to.
+For example, the `name` parameter of `get_certificate` is now `certificate_name`
+- Renamed `AdministratorDetails` to `AdministratorContact`
+- Renamed the `ekus` property of `CertificatePolicy` to `enhanced_key_usage`
+- Renamed the `curve` property of `CertificatePolicy` to `key_curve_name`
+- Renamed the `san_upns` property of `CertificatePolicy` to `san_user_principal_names`
+- Made the `subject_name` property of `CertificatePolicy` a kwarg and renamed it to `subject`
+- Renamed the `deleted_date` property of `DeletedCertificate` to `deleted_on`
+- Removed the `issuer_properties` property from `CertificateIssuer` and added the `provider` property
+directly onto `CertificateIssuer`
+- Renamed property `admin_details` of `CertificateIssuer` to `admin_contacts`
+- Renamed the `thumbprint` property of `CertificateProperties` to `x509_thumbprint`
+- Added `WellKnownIssuerNames` enum class that holds popular issuer names
+- Renamed `SecretContentType` enum class to `CertificateContentType`
+
+
+## 4.0.0b5 (2019-11-01)
+- Removed redundant method `get_pending_certificate_signing_request()`. A pending CSR can be retrieved via `get_certificate_operation()`.
+- Renamed the sync method `create_certificate` to `begin_create_certificate`
+- Renamed `restore_certificate` to `restore_certificate_backup`
+- Renamed `get_certificate` to `get_certificate_version`
+- Renamed `get_certificate_with_policy` to `get_certificate`
+- Renamed `list_certificates` to `list_properties_of_certificates`
+- Renamed `list_properties_of_issuers` to `list_properties_of_issuers`
+- Renamed `list_certificate_versions` to `list_properties_of_certificate_versions`
+- `create_certificate` now has policy as a required parameter
+- All optional positional parameters besides `version` have been moved to kwargs
+- Renamed sync method `delete_certificate` to `begin_delete_certificate`
+- Renamed sync method `recover_certificate` to `begin_recover_deleted_certificate`
+- Renamed async method `recover_certificate` to `recover_deleted_certificate`
+- The sync method `begin_delete_certificate` and async `delete_certificate` now return pollers that return a `DeletedCertificate`
+- The sync method `begin_recover_deleted_certificate` and async `recover_deleted_certificate` now return pollers that return a `KeyVaultCertificate`
+
+- Renamed enum `ActionType` to `CertificatePolicyAction`
+- Renamed `Certificate` to `KeyVaultCertificate`
+- Renamed `Contact` to `CertificateContact`
+- Renamed `Issuer` to `CertificateIssuer`
+- Renamed `CertificateError` to `CertificateOperationError`
+- Renamed `expires` property of `CertificateProperties` and `CertificatePolicy` to `expires_on`
+- Renamed `created` property of `CertificateProperties`, `CertificatePolicy`, and `CertificateIssuer` to `created_on`
+- Renamed `updated` property of `CertificateProperties`, `CertificatePolicy`, and `CertificateIssuer` to `updated_on`
+- The `vault_endpoint` parameter of `CertificateClient` has been renamed to `vault_url`
+- The property `vault_endpoint` has been renamed to `vault_url` in all models
+- `CertificatePolicy` now has a public class method `get_default` allowing users to get the default `CertificatePolicy`
+- Logging can now be enabled properly on the client level
+
+## 4.0.0b4 (2019-10-08)
+- Enums `JsonWebKeyCurveName` and `JsonWebKeyType` have been renamed to `KeyCurveName` and `KeyType`, respectively.
+- Both async and sync versions of `create_certificate` now return pollers that return the created `Certificate` if creation is successful,
+and a `CertificateOperation` if not.
+- `Certificate` now has attribute `properties`, which holds certain properties of the
+certificate, such as `version`. This changes the shape of the `Certificate` type,
+as certain properties of `Certificate` (such as `version`) have to be accessed
+through the `properties` property.
+
+- `update_certificate` has been renamed to `update_certificate_properties`
+- The `vault_url` parameter of `CertificateClient` has been renamed to `vault_endpoint`
+- The property `vault_url` has been renamed to `vault_endpoint` in all models
+
+## 4.0.0b3 (2019-09-11)
+Version 4.0.0b3 is the first preview of our efforts to create a user-friendly and Pythonic client library for Azure Key Vault's certificates.
+
+ This library is not a direct replacement for `azure-keyvault`. Applications
+using that library would require code changes to use `azure-keyvault-certificates`.
+This package's
+[documentation](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/README.md)
+and
+[samples](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates/samples)
+demonstrate the new API.
+
+### Breaking changes from `azure-keyvault`:
+- Packages scoped by functionality
+    - `azure-keyvault-certificates` contains a client for certificate operations
+- Client instances are scoped to vaults (an instance interacts with one vault
+only)
+- Authentication using `azure-identity` credentials
+  - see this package's
+  [documentation](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-keys/README.md)
+  , and the
+  [Azure Identity documentation](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/identity/azure-identity/README.md)
+  for more information
+
+### New Features:
+- Distributed tracing framework OpenCensus is now supported
+- Asynchronous API supported on Python 3.5.3+
+    - the `azure.keyvault.certificates.aio` namespace contains an async equivalent of
+    the synchronous client in `azure.keyvault.certificates`
+    - Async clients use [aiohttp](https://pypi.org/project/aiohttp/) for transport
+    by default. See [azure-core documentation](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/core/azure-core/README.md/#transport)
+    for more information about using other transports.

@@ -1,0 +1,667 @@
+Metadata-Version: 2.1
+Name: azure-keyvault-administration
+Version: 4.4.0
+Summary: Microsoft Azure Key Vault Administration Client Library for Python
+Home-page: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration
+Author: Microsoft Corporation
+Author-email: azurekeyvault@microsoft.com
+License: MIT License
+Keywords: azure,azure sdk
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: azure-core <2.0.0,>=1.29.5
+Requires-Dist: isodate >=0.6.1
+Requires-Dist: typing-extensions >=4.0.1
+
+# Azure Key Vault Administration client library for Python
+
+>**Note:** The Administration library only works with [Managed HSM][managed_hsm] – functions targeting a Key Vault will fail.
+
+Azure Key Vault helps solve the following problems:
+- Vault administration (this library) - role-based access control (RBAC), and vault-level backup and restore options
+- Cryptographic key management ([azure-keyvault-keys](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-keys)) - create, store, and control
+access to the keys used to encrypt your data
+- Secrets management
+([azure-keyvault-secrets](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-secrets)) -
+securely store and control access to tokens, passwords, certificates, API keys,
+and other secrets
+- Certificate management
+([azure-keyvault-certificates](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-certificates)) -
+create, manage, and deploy public and private SSL/TLS certificates
+
+[Source code][library_src]
+| [Package (PyPI)][pypi_package_administration]
+| [Package (Conda)](https://anaconda.org/microsoft/azure-keyvault/)
+| [API reference documentation][reference_docs]
+| [Product documentation][keyvault_docs]
+| [Samples][administration_samples]
+
+## _Disclaimer_
+
+_Azure SDK Python packages support for Python 2.7 has ended 01 January 2022. For more information and questions, please refer to https://github.com/Azure/azure-sdk-for-python/issues/20691._
+_Python 3.8 or later is required to use this package. For more details, please refer to [Azure SDK for Python version support policy](https://github.com/Azure/azure-sdk-for-python/wiki/Azure-SDKs-Python-version-support-policy)._
+
+## Getting started
+### Install packages
+Install [azure-keyvault-administration][pypi_package_administration] and
+[azure-identity][azure_identity_pypi] with [pip][pip]:
+```Bash
+pip install azure-keyvault-administration azure-identity
+```
+[azure-identity][azure_identity] is used for Azure Active Directory
+authentication as demonstrated below.
+
+### Prerequisites
+* An [Azure subscription][azure_sub]
+* Python 3.8 or later
+* An existing [Key Vault Managed HSM][managed_hsm]. If you need to create one, you can do so using the Azure CLI by following the steps in [this document][managed_hsm_cli].
+
+### Authenticate the client
+In order to interact with the Azure Key Vault service, you will need an instance of either a [KeyVaultAccessControlClient](#create-a-keyvaultaccesscontrolclient) or [KeyVaultBackupClient](#create-a-keyvaultbackupclient), as well as a **vault url** (which you may see as "DNS Name" in the Azure Portal) and a credential object. This document demonstrates using a [DefaultAzureCredential][default_cred_ref], which is appropriate for most scenarios, including local development and production environments. We recommend using a [managed identity][managed_identity] for authentication in production environments.
+
+See [azure-identity][azure_identity] documentation for more information about other methods of authentication and their corresponding credential types.
+
+#### Create a KeyVaultAccessControlClient
+After configuring your environment for the [DefaultAzureCredential][default_cred_ref] to use a suitable method of authentication, you can do the following to create an access control client (replacing the value of `vault_url` with your Managed HSM's URL):
+
+<!-- SNIPPET:access_control_operations.create_an_access_control_client -->
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.administration import KeyVaultAccessControlClient
+
+MANAGED_HSM_URL = os.environ["MANAGED_HSM_URL"]
+credential = DefaultAzureCredential()
+client = KeyVaultAccessControlClient(vault_url=MANAGED_HSM_URL, credential=credential)
+```
+
+<!-- END SNIPPET -->
+
+> **NOTE:** For an asynchronous client, import `azure.keyvault.administration.aio`'s `KeyVaultAccessControlClient` instead.
+
+#### Create a KeyVaultBackupClient
+After configuring your environment for the [DefaultAzureCredential][default_cred_ref] to use a suitable method of authentication, you can do the following to create a backup client (replacing the value of `vault_url` with your Managed HSM's URL):
+
+<!-- SNIPPET:backup_restore_operations.create_a_backup_restore_client -->
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.administration import KeyVaultBackupClient
+
+MANAGED_HSM_URL = os.environ["MANAGED_HSM_URL"]
+credential = DefaultAzureCredential()
+client = KeyVaultBackupClient(vault_url=MANAGED_HSM_URL, credential=credential)
+```
+
+<!-- END SNIPPET -->
+
+> **NOTE:** For an asynchronous client, import `azure.keyvault.administration.aio`'s `KeyVaultBackupClient` instead.
+
+#### Create a KeyVaultSettingsClient
+After configuring your environment for the [DefaultAzureCredential][default_cred_ref] to use a suitable method of authentication, you can do the following to create a settings client (replacing the value of `vault_url` with your Managed HSM's URL):
+
+<!-- SNIPPET:settings_operations.create_a_settings_client -->
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.administration import KeyVaultSettingsClient
+
+MANAGED_HSM_URL = os.environ["MANAGED_HSM_URL"]
+credential = DefaultAzureCredential()
+client = KeyVaultSettingsClient(vault_url=MANAGED_HSM_URL, credential=credential)
+```
+
+<!-- END SNIPPET -->
+
+> **NOTE:** For an asynchronous client, import `azure.keyvault.administration.aio`'s `KeyVaultSettingsClient` instead.
+
+## Key concepts
+
+### Role definition
+A role definition defines the operations that can be performed, such as read, write, and delete. It can also define the operations that are excluded from allowed operations.
+
+A role definition is specified as part of a role assignment.
+
+### Role assignment
+A role assignment is the association of a role definition to a service principal. They can be created, listed, fetched individually, and deleted.
+
+### KeyVaultAccessControlClient
+A `KeyVaultAccessControlClient` manages role definitions and role assignments.
+
+### KeyVaultBackupClient
+A `KeyVaultBackupClient` performs full key backups, full key restores, and selective key restores.
+
+### KeyVaultSettingsClient
+
+A `KeyVaultSettingsClient` manages Managed HSM account settings.
+
+## Examples
+This section contains code snippets covering common tasks:
+* Access control
+    * [List all role definitions](#list-all-role-definitions)
+    * [Set, get, and delete a role definition](#set-get-and-delete-a-role-definition)
+    * [List all role assignments](#list-all-role-assignments)
+    * [Create, get, and delete a role assignment](#create-get-and-delete-a-role-assignment)
+* Backup and restore
+    * [Perform a full key backup](#perform-a-full-key-backup)
+    * [Perform a full key restore](#perform-a-full-key-restore)
+    * [Perform a selective key restore](#perform-a-selective-key-restore)
+
+### List all role definitions
+`list_role_definitions` can be used by a `KeyVaultAccessControlClient` to list the role definitions available for
+assignment.
+
+<!-- SNIPPET:access_control_operations.list_role_definitions -->
+
+```python
+from azure.keyvault.administration import KeyVaultRoleScope
+
+role_definitions = client.list_role_definitions(scope=KeyVaultRoleScope.GLOBAL)
+for definition in role_definitions:
+    print(f"Role name: {definition.role_name}; Role definition name: {definition.name}")
+```
+
+<!-- END SNIPPET -->
+
+### Set, get, and delete a role definition
+`set_role_definition` can be used by a `KeyVaultAccessControlClient` to either create a custom role definition or update
+an existing definition with the specified unique `name` (a UUID).
+
+<!-- SNIPPET:access_control_operations.create_a_role_definition -->
+
+```python
+from azure.keyvault.administration import KeyVaultDataAction, KeyVaultPermission, KeyVaultRoleScope
+
+role_name = "customRole"
+scope = KeyVaultRoleScope.GLOBAL
+permissions = [KeyVaultPermission(data_actions=[KeyVaultDataAction.CREATE_HSM_KEY])]
+role_definition = client.set_role_definition(scope=scope, role_name=role_name, permissions=permissions)
+```
+
+<!-- END SNIPPET -->
+
+<!-- SNIPPET:access_control_operations.update_a_role_definition -->
+
+```python
+new_permissions = [
+    KeyVaultPermission(
+        data_actions=[KeyVaultDataAction.READ_HSM_KEY],
+        not_data_actions=[KeyVaultDataAction.CREATE_HSM_KEY]
+    )
+]
+unique_definition_name = role_definition.name
+updated_definition = client.set_role_definition(
+    scope=scope, name=unique_definition_name, role_name=role_name, permissions=new_permissions
+)
+```
+
+<!-- END SNIPPET -->
+
+`get_role_definition` can be used by a `KeyVaultAccessControlClient` to fetch a role definition with the specified scope
+and unique name.
+
+<!-- SNIPPET:access_control_operations.get_a_role_definition -->
+
+```python
+fetched_definition = client.get_role_definition(scope=scope, name=unique_definition_name)
+```
+
+<!-- END SNIPPET -->
+
+`delete_role_definition` can be used by a `KeyVaultAccessControlClient` to delete a role definition with the specified
+scope and unique name.
+
+<!-- SNIPPET:access_control_operations.delete_a_role_definition -->
+
+```python
+client.delete_role_definition(scope=scope, name=unique_definition_name)
+```
+
+<!-- END SNIPPET -->
+
+### List all role assignments
+`list_role_assignments` can be used by a `KeyVaultAccessControlClient` to list all of the current role assignments.
+
+<!-- SNIPPET:access_control_operations.list_role_assignments -->
+
+```python
+from azure.keyvault.administration import KeyVaultRoleScope
+
+role_assignments = client.list_role_assignments(KeyVaultRoleScope.GLOBAL)
+for assignment in role_assignments:
+    assert assignment.properties
+    print(f"Role assignment name: {assignment.name}")
+    print(f"Principal ID associated with this assignment: {assignment.properties.principal_id}")
+```
+
+<!-- END SNIPPET -->
+
+### Create, get, and delete a role assignment
+Role assignments assign a role to a service principal. This will require a role definition ID and service principal
+object ID. You can use an ID from the retrieved [list of role definitions](#list-all-role-definitions) for the former,
+and an assignment's `principal_id` from the list retrieved in the [above snippet](#list-all-role-assignments) for the
+latter. Provide these values, and a scope, to a `KeyVaultAccessControlClient`'s `create_role_assignment` method.
+
+<!-- SNIPPET:access_control_operations.create_a_role_assignment -->
+
+```python
+from azure.keyvault.administration import KeyVaultRoleScope
+
+scope = KeyVaultRoleScope.GLOBAL
+role_assignment = client.create_role_assignment(scope=scope, definition_id=definition_id, principal_id=principal_id)
+print(f"Role assignment {role_assignment.name} created successfully.")
+```
+
+<!-- END SNIPPET -->
+
+`get_role_assignment` can be used by a `KeyVaultAccessControlClient` to fetch an existing role assignment with the
+specified scope and unique name.
+
+<!-- SNIPPET:access_control_operations.get_a_role_assignment -->
+
+```python
+fetched_assignment = client.get_role_assignment(scope=scope, name=role_assignment.name)
+assert fetched_assignment.properties
+print(f"Role assignment for principal {fetched_assignment.properties.principal_id} fetched successfully.")
+```
+
+<!-- END SNIPPET -->
+
+`delete_role_assignment` can be used by a `KeyVaultAccessControlClient` to delete a role assignment with the specified
+scope and unique name.
+
+<!-- SNIPPET:access_control_operations.delete_a_role_assignment -->
+
+```python
+client.delete_role_assignment(scope=scope, name=role_assignment.name)
+```
+
+<!-- END SNIPPET -->
+
+### Perform a full key backup
+The `KeyVaultBackupClient` can be used to back up your entire collection of keys. The backing store for full key
+backups is a blob storage container using Shared Access Signature (SAS) authentication.
+
+For more details on creating a SAS token using a `BlobServiceClient` from [`azure-storage-blob`][storage_blob], refer
+to the library's [credential documentation][sas_docs]. Alternatively, it is possible to
+[generate a SAS token in Storage Explorer][storage_explorer].
+
+<!-- SNIPPET:backup_restore_operations.begin_backup -->
+
+```python
+CONTAINER_URL = os.environ["CONTAINER_URL"]
+SAS_TOKEN = os.environ["SAS_TOKEN"]
+
+backup_result: KeyVaultBackupResult = client.begin_backup(CONTAINER_URL, sas_token=SAS_TOKEN).result()
+print(f"Azure Storage Blob URL of the backup: {backup_result.folder_url}")
+```
+
+<!-- END SNIPPET -->
+
+Note that the `begin_backup` method returns a poller. Calling `result()` on this poller returns a
+`KeyVaultBackupResult` containing information about the backup. Calling `wait()` on the poller will instead block until
+the operation is complete without returning an object.
+
+### Perform a full key restore
+The `KeyVaultBackupClient` can be used to restore your entire collection of keys from a backup. The data source for a
+full key restore is a storage blob accessed using Shared Access Signature authentication. You will also need the URL of
+the backup (`KeyVaultBackupResult.folder_url`) from the [above snippet](#perform-a-full-key-backup).
+
+For more details on creating a SAS token using a `BlobServiceClient` from [`azure-storage-blob`][storage_blob], refer
+to the library's [credential documentation][sas_docs]. Alternatively, it is possible to
+[generate a SAS token in Storage Explorer][storage_explorer].
+
+<!-- SNIPPET:backup_restore_operations.begin_restore -->
+
+```python
+SAS_TOKEN = os.environ["SAS_TOKEN"]
+
+# `backup_result` is the KeyVaultBackupResult returned by `begin_backup`
+client.begin_restore(backup_result.folder_url, sas_token=SAS_TOKEN).wait()
+print("Vault restored successfully.")
+```
+
+<!-- END SNIPPET -->
+
+Note that the `begin_restore` method returns a poller. Unlike the poller returned by `begin_backup`, this poller's
+`result` method returns `None`; therefore, calling `wait()` is functionally the same.
+
+### Perform a selective key restore
+
+To restore a single key from a backed up vault instead of all keys, provide the key name as a `key_name` argument to the
+`begin_restore` method [shown above](#perform-a-full-key-restore).
+
+## Troubleshooting
+
+See the `azure-keyvault-administration`
+[troubleshooting guide](https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/TROUBLESHOOTING.md)
+for details on how to diagnose various failure scenarios.
+
+### General
+Key Vault clients raise exceptions defined in [azure-core][azure_core_exceptions].
+For example, if you try to get a role assignment that doesn't exist, KeyVaultAccessControlClient
+raises [ResourceNotFoundError](https://aka.ms/azsdk-python-core-exceptions-resource-not-found-error):
+
+```python
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.administration import KeyVaultAccessControlClient
+from azure.core.exceptions import ResourceNotFoundError
+
+credential = DefaultAzureCredential()
+client = KeyVaultAccessControlClient(vault_url="https://my-managed-hsm-name.managedhsm.azure.net/", credential=credential)
+
+try:
+    client.get_role_assignment("/", "which-does-not-exist")
+except ResourceNotFoundError as e:
+    print(e.message)
+```
+
+Clients from the Administration library can only be used to perform operations on a managed HSM, so attempting to do so on a Key Vault will raise an error.
+
+## Next steps
+Several samples are available in the Azure SDK for Python GitHub repository. These samples provide example code for additional Key Vault scenarios:
+
+- [Create/update/delete role definitions and role assignments][access_control_operations_sample] ([async version][access_control_operations_async_sample])
+- [Full backup and restore][backup_operations_sample] ([async version][backup_operations_async_sample])
+- [List and update Key Vault settings][settings_operations_sample] ([async version][settings_operations_async_sample])
+
+###  Additional documentation
+For more extensive documentation on Azure Key Vault, see the [API reference documentation][reference_docs].
+
+For more extensive documentation on Managed HSM, see the [service documentation][managed_hsm].
+
+## Contributing
+This project welcomes contributions and suggestions. Most contributions require
+you to agree to a Contributor License Agreement (CLA) declaring that you have
+the right to, and actually do, grant us the rights to use your contribution.
+For details, visit https://cla.microsoft.com.
+
+When you submit a pull request, a CLA-bot will automatically determine whether
+you need to provide a CLA and decorate the PR appropriately (e.g., label,
+comment). Simply follow the instructions provided by the bot. You will only
+need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct][code_of_conduct].
+For more information, see the
+[Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact opencode@microsoft.com with any additional questions or comments.
+
+
+<!-- LINKS -->
+[access_control]: https://docs.microsoft.com/azure/key-vault/managed-hsm/access-control
+[access_control_operations_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/access_control_operations.py
+[access_control_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/access_control_operations_async.py
+[administration_samples]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples
+[azure_cloud_shell]: https://shell.azure.com/bash
+[azure_core_exceptions]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/core/azure-core#azure-core-library-exceptions
+[azure_identity]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/identity/azure-identity
+[azure_identity_pypi]: https://pypi.org/project/azure-identity/
+[azure_sub]: https://azure.microsoft.com/free/
+
+[backup_operations_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/backup_restore_operations.py
+[backup_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/backup_restore_operations_async.py
+[best_practices]: https://docs.microsoft.com/azure/key-vault/managed-hsm/best-practices
+[built_in_roles]: https://docs.microsoft.com/azure/key-vault/managed-hsm/built-in-roles
+
+[code_of_conduct]: https://opensource.microsoft.com/codeofconduct/
+
+[default_cred_ref]: https://aka.ms/azsdk/python/identity/docs#azure.identity.DefaultAzureCredential
+
+[keyvault_docs]: https://docs.microsoft.com/azure/key-vault/
+
+[library_src]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/azure/keyvault/administration
+
+[managed_hsm]: https://docs.microsoft.com/azure/key-vault/managed-hsm/overview
+[managed_hsm_cli]: https://docs.microsoft.com/azure/key-vault/managed-hsm/quick-create-cli
+[managed_identity]: https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview
+
+[pip]: https://pypi.org/project/pip/
+[pypi_package_administration]: https://pypi.org/project/azure-keyvault-administration
+
+[reference_docs]: https://aka.ms/azsdk/python/keyvault-administration/docs
+
+[sas_docs]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/storage/azure-storage-blob/README.md#types-of-credentials
+[settings_operations_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/settings_operations.py
+[settings_operations_async_sample]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/keyvault/azure-keyvault-administration/samples/settings_operations_async.py
+[storage_blob]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/storage/azure-storage-blob/README.md
+[storage_explorer]: https://learn.microsoft.com/azure/vs-azure-tools-storage-manage-with-storage-explorer
+
+
+![Impressions](https://azure-sdk-impressions.azurewebsites.net/api/impressions/azure-sdk-for-python%2Fsdk%2Fkeyvault%2Fazure-keyvault-administration%2FREADME.png)
+
+
+# Release History
+
+## 4.4.0 (2024-02-22)
+
+### Features Added
+- Added support for service API version `7.5`
+- (From 4.4.0b2) `KeyVaultBackupClient.begin_backup` and `KeyVaultBackupClient.begin_restore` now accept a
+  `use_managed_identity` keyword-only argument to enable authentication via Managed Identity
+
+### Bugs Fixed
+- (From 4.4.0b1) Token requests made during AD FS authentication no longer specify an erroneous "adfs" tenant ID
+  ([#29888](https://github.com/Azure/azure-sdk-for-python/issues/29888))
+
+### Other Changes
+- Python 3.7 is no longer supported. Please use Python version 3.8 or later.
+- Key Vault API version `7.5` is now the default
+- Updated minimum `azure-core` version to 1.29.5
+- Dropped `azure-common` requirement
+
+## 4.4.0b2 (2023-11-03)
+
+### Features Added
+- Added support for service API version `7.5-preview.1`
+- `KeyVaultBackupClient.begin_backup` and `KeyVaultBackupClient.begin_restore` now accept a `use_managed_identity`
+  keyword-only argument to enable authentication via Managed Identity
+
+### Other Changes
+- Key Vault API version `7.5-preview.1` is now the default
+
+## 4.4.0b1 (2023-05-16)
+
+### Bugs Fixed
+- Token requests made during AD FS authentication no longer specify an erroneous "adfs" tenant ID
+  ([#29888](https://github.com/Azure/azure-sdk-for-python/issues/29888))
+
+## 4.3.0 (2023-03-16)
+
+### Features Added
+- Added support for service API version `7.4`
+- Clients each have a `send_request` method that can be used to send custom requests using the
+  client's existing pipeline ([#25172](https://github.com/Azure/azure-sdk-for-python/issues/25172))
+- (From 4.3.0b1) Added sync and async `KeyVaultSettingsClient`s for getting and updating Managed HSM settings
+- The `KeyVaultSetting` class has a `getboolean` method that will return the setting's `value` as a `bool`, if possible,
+  and raise a `ValueError` otherwise
+
+### Breaking Changes
+> These changes do not impact the API of stable versions such as 4.2.0. Only code written against a beta version such as 4.3.0b1 may be affected.
+- `KeyVaultSettingsClient.update_setting` now accepts a single `setting` argument (a `KeyVaultSetting` instance)
+  instead of a `name` and `value`
+- The `KeyVaultSetting` model's `type` parameter and attribute have been renamed to `setting_type`
+- The `SettingType` enum has been renamed to `KeyVaultSettingType`
+
+### Other Changes
+- Key Vault API version `7.4` is now the default
+- (From 4.3.0b1) Python 3.6 is no longer supported. Please use Python version 3.7 or later.
+- (From 4.3.0b1) Updated minimum `azure-core` version to 1.24.0
+- (From 4.3.0b1) Dropped `msrest` requirement
+- (From 4.3.0b1) Dropped `six` requirement
+- (From 4.3.0b1) Added requirement for `isodate>=0.6.1` (`isodate` was required by `msrest`)
+- (From 4.3.0b1) Added requirement for `typing-extensions>=4.0.1`
+
+## 4.3.0b1 (2022-11-15)
+
+### Features Added
+- Added sync and async `KeyVaultSettingsClient`s for getting and updating Managed HSM settings.
+- Added support for service API version `7.4-preview.1`
+
+### Other Changes
+- Python 3.6 is no longer supported. Please use Python version 3.7 or later.
+- Key Vault API version `7.4-preview.1` is now the default
+- Updated minimum `azure-core` version to 1.24.0
+- Dropped `msrest` requirement
+- Dropped `six` requirement
+- Added requirement for `isodate>=0.6.1` (`isodate` was required by `msrest`)
+- Added requirement for `typing-extensions>=4.0.1`
+
+## 4.2.0 (2022-09-19)
+
+### Breaking Changes
+- Clients verify the challenge resource matches the vault domain. This should affect few customers,
+  who can provide `verify_challenge_resource=False` to client constructors to disable.
+  See https://aka.ms/azsdk/blog/vault-uri for more information.
+
+## 4.1.1 (2022-08-11)
+
+### Other Changes
+- Documentation improvements 
+  ([#25039](https://github.com/Azure/azure-sdk-for-python/issues/25039))
+
+## 4.1.0 (2022-03-28)
+
+### Features Added
+- Key Vault API version 7.3 is now the default
+- Added support for multi-tenant authentication when using `azure-identity`
+  1.8.0 or newer ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+### Other Changes
+- (From 4.1.0b3) Python 2.7 is no longer supported. Please use Python version 3.6 or later.
+- (From 4.1.0b3) Updated minimum `azure-core` version to 1.20.0
+- (From 4.1.0b2) To support multi-tenant authentication, `get_token` calls during challenge
+  authentication requests now pass in a `tenant_id` keyword argument
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698)). See
+  https://aka.ms/azsdk/python/identity/tokencredential for more details on how to integrate
+  this parameter if `get_token` is implemented by a custom credential.
+
+## 4.1.0b3 (2022-02-08)
+
+### Other Changes
+- Python 2.7 is no longer supported. Please use Python version 3.6 or later.
+- Updated minimum `azure-core` version to 1.20.0
+- (From 4.1.0b2) To support multi-tenant authentication, `get_token` calls during challenge
+  authentication requests now pass in a `tenant_id` keyword argument
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+## 4.1.0b2 (2021-11-11)
+
+### Features Added
+- Added support for multi-tenant authentication when using `azure-identity` 1.7.1 or newer
+  ([#20698](https://github.com/Azure/azure-sdk-for-python/issues/20698))
+
+### Other Changes
+- Updated minimum `azure-core` version to 1.15.0
+
+## 4.1.0b1 (2021-09-09)
+
+### Features Added
+- Key Vault API version 7.3-preview is now the default
+
+## 4.0.0 (2021-06-22)
+### Changed
+- Key Vault API version 7.2 is now the default
+- `KeyVaultAccessControlClient.delete_role_assignment` and
+  `.delete_role_definition` no longer raise an error  when the resource to be
+  deleted is not found
+- Raised minimum azure-core version to 1.11.0
+
+### Added
+- `KeyVaultAccessControlClient.set_role_definition` accepts an optional
+  `assignable_scopes` keyword-only argument
+
+### Breaking Changes
+- `KeyVaultAccessControlClient.delete_role_assignment` and
+  `.delete_role_definition` return None
+- Changed parameter order in `KeyVaultAccessControlClient.set_role_definition`.
+  `permissions` is now an optional keyword-only argument
+- Renamed `BackupOperation` to `KeyVaultBackupResult`, and removed all but
+  its `folder_url` property
+- Removed `RestoreOperation` and `SelectiveKeyRestoreOperation` classes
+- Removed `KeyVaultBackupClient.begin_selective_restore`. To restore a
+  single key, pass the key's name to `KeyVaultBackupClient.begin_restore`:
+  ```
+  # before (4.0.0b3):
+  client.begin_selective_restore(folder_url, sas_token, key_name)
+
+  # after:
+  client.begin_restore(folder_url, sas_token, key_name=key_name)
+  ```
+- Removed `KeyVaultBackupClient.get_backup_status` and `.get_restore_status`. Use
+  the pollers returned by `KeyVaultBackupClient.begin_backup` and `.begin_restore`
+  to check whether an operation has completed
+- `KeyVaultRoleAssignment`'s `principal_id`, `role_definition_id`, and `scope`
+  are now properties of a `properties` property
+  ```
+  # before (4.0.0b3):
+  print(KeyVaultRoleAssignment.scope)
+
+  # after:
+  print(KeyVaultRoleAssignment.properties.scope)
+  ```
+- Renamed `KeyVaultPermission` properties:
+  - `allowed_actions` -> `actions`
+  - `denied_actions` -> `not_actions`
+  - `allowed_data_actions` -> `data_actions`
+  - `denied_data_actions` -> `denied_data_actions`
+- Renamed argument `role_assignment_name` to `name` in
+  `KeyVaultAccessControlClient.create_role_assignment`, `.delete_role_assignment`,
+  and `.get_role_assignment`
+- Renamed argument `role_definition_name` to `name` in
+  `KeyVaultAccessControlClient.delete_role_definition` and `.get_role_definition`
+- Renamed argument `role_scope` to `scope` in `KeyVaultAccessControlClient` methods
+
+## 4.0.0b3 (2021-02-09)
+### Added
+- `KeyVaultAccessControlClient` supports managing custom role definitions
+
+### Breaking Changes
+- Renamed `KeyVaultBackupClient.begin_full_backup()` to `.begin_backup()`
+- Renamed `KeyVaultBackupClient.begin_full_restore()` to `.begin_restore()`
+- Renamed `BackupOperation.azure_storage_blob_container_uri` to `.folder_url`
+- Renamed `id` property of `BackupOperation`, `RestoreOperation`, and
+ `SelectiveKeyRestoreOperation` to `job_id`
+- Renamed `blob_storage_uri` parameters of `KeyVaultBackupClient.begin_restore()`
+  and `.begin_selective_restore()` to `folder_url`
+- Removed redundant `folder_name` parameter from
+  `KeyVaultBackupClient.begin_restore()` and `.begin_selective_restore()` (the
+  `folder_url` parameter contains the folder name)
+- Renamed `KeyVaultPermission` attributes:
+  - `actions` -> `allowed_actions`
+  - `data_actions` -> `allowed_data_actions`
+  - `not_actions` -> `denied_actions`
+  - `not_data_actions` -> `denied_data_actions`
+- Renamed `KeyVaultRoleAssignment.assignment_id` to `.role_assignment_id`
+- Renamed `KeyVaultRoleScope` enum values:
+  - `global_value` -> `GLOBAL`
+  - `keys_value` -> `KEYS`
+
+## 4.0.0b2 (2020-10-06)
+### Added
+- `KeyVaultBackupClient.get_backup_status` and `.get_restore_status` enable
+  checking the status of a pending operation by its job ID
+  ([#13718](https://github.com/Azure/azure-sdk-for-python/issues/13718))
+
+### Breaking Changes
+- The `role_assignment_name` parameter of
+  `KeyVaultAccessControlClient.create_role_assignment` is now an optional
+  keyword-only argument. When this argument isn't passed, the client will
+  generate a name for the role assignment.
+  ([#13512](https://github.com/Azure/azure-sdk-for-python/issues/13512))
+
+## 4.0.0b1 (2020-09-08)
+### Added
+- `KeyVaultAccessControlClient` performs role-based access control operations
+- `KeyVaultBackupClient` performs full vault backup and full and selective
+  restore operations
