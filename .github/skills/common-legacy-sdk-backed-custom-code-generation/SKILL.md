@@ -59,8 +59,8 @@ Gather only the evidence needed for the slots.
 1. Read the target module's `commands.py` around the command group and nearby `CliCommandType` definitions.
 2. Read `_client_factory.py` for reusable `cf_*` factories and client shapes.
 3. Read the nearest SDK-backed handler in `custom.py` or a sibling manual module.
-4. Read `_params.py` only if the change needs new or changed CLI parameters.
-5. Read `_help.py` or generated help only if examples/help need updates.
+4. Read `_params.py` when the change affects command behavior or argument UX for an existing or new parameter.
+5. Read `_help.py` or generated help when user-facing help or examples may need to stay aligned with the behavior.
 6. Inspect local validators, `_utils.py`, `_validators.py`, `_format.py`, and tests only when the target command needs those patterns.
 
 ## Uncertainty Gates
@@ -78,13 +78,13 @@ Before generating code, reduce uncertainty with these gates:
 
 1. Add or reuse a `CliCommandType` in the registration file.
 2. Register the command with the local style: `g.command`, `g.show_command`, or `g.generic_update_command`.
-3. Add or update parameters in `_params.py` only when the handler signature or UX changes require it.
+3. Add or update parameters in `_params.py` when the handler signature, command behavior, or argument UX changes require it.
 4. Add the handler function in the manual code file.
 5. Keep the handler signature aligned with registration: include `cmd` when using CLI context/models, include `client` when using a `client_factory`.
 6. Reuse local validators/helpers for resource group resolution, resource ID parsing, SKU checks, confirmation prompts, or cloud-specific behavior.
 7. Construct SDK models with `cmd.get_models(...)` only for model types actually needed.
 8. Return SDK pollers directly for LRO commands unless neighboring code wraps them with `LongRunningOperation` for a reason.
-9. Update help/tests only when examples, parameters, or behavior changed.
+9. For behavior changes, do a consistency pass over the affected command surface and update related params, help/examples, validation/errors, output expectations, and focused tests as needed.
 10. Run the narrowest validation available.
 
 ## Templates

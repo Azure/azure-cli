@@ -17,7 +17,8 @@ Rules:
 - If an OpenSpec design records the route and implementation plan, follow it. Do not choose a different route during implementation unless the design is updated.
 - Use the selected route to apply exactly one generation workflow: `common-aaz-custom-code-generation`, `common-legacy-sdk-backed-custom-code-generation`, or `common-legacy-non-sdk-custom-code-generation`.
 - Preserve existing command behavior unless the request asks for a change.
-- Update tests when behavior changes.
+- For any behavior change, perform a consistency pass over the affected command surface and update related implementation, argument definitions, user-facing help, validation/errors, examples, and focused tests as needed.
+- Treat `_params.py` argument help as user-facing command help, the same as authored help in `_help.py`.
 - Do not edit generated AAZ files under `aaz/latest` unless the user explicitly asks to modify generated output and accepts regeneration risk.
 - Ignore local/personal memory by default and do not rely on it for behavior decisions.
 - Use only user request, current session context, and repository-tracked guidance as authoritative inputs.
