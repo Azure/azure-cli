@@ -5,17 +5,18 @@
 
 import json
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 import unittest
 import time
 import random
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
+from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
     StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
-    DESPreparer, KeyPreparer, RGPreparer
+    DESPreparer, KeyPreparer, ResourceGroupPreparer
 
 
 def _get_vm_version(vm_type):
@@ -410,6 +411,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm1.lower(), item1_json['properties']['virtualMachineId'].lower())
         self.assertIn(self.kwargs['default'].lower(), item1_json['properties']['policyId'].lower())
 
+        # containerSubscriptionId is surfaced for Azure VM items and is parsed from sourceResourceId.
+        # It equals the subscription that hosts the protected VM (which, for a Cross Subscription Backup
+        # item, differs from the vault's subscription).
+        self.assertEqual(item1_json['properties']['containerSubscriptionId'],
+                         item1_json['properties']['sourceResourceId'].split('/')[2])
+
         self.kwargs['container1_fullname'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg} --query name').get_output_in_json()
 
         self.cmd('backup item show --workload-type VM -g {rg} -v {vault} -c {container1_fullname} -n {vm1}', checks=[
@@ -672,6 +679,220 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
         self.wait_for_restore_complete(job_out["id"])
         self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+
+    # Prerequisites (needed only for re-recording this test live): two VMs with the SAME friendly name
+    # but in different resource groups, both protected in the same vault. This produces multiple
+    # registered containers with the same friendly name, which cannot be provisioned via the standard
+    # Preparers (they generate unique names), hence this test targets pre-existing resources and is
+    # validated via its recording in playback.
+    def test_backup_restore_multiple_containers_same_friendly_name(self):
+        self.kwargs.update({
+            'rg': 'sgholapDMTesting-rg',
+            'vault': 'singhprab-csb-vault',
+            'container_name': 'testcvm123',
+            'item_name': 'testcvm123',
+            'sa': 'smorteylcdtplane1',
+            'rp': '1198973670844227'
+        })
+
+        # Passing the friendly container name resolves to multiple containers (same friendly name in
+        # different resource groups). The command must fail with a clear validation error instead of
+        # crashing, asking the customer to provide the native container name.
+        self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_name} -i {item_name} '
+                 '--rp-name {rp} --storage-account {sa}', expect_failure=True)
+
+
+    # =====================================================================================================
+    # Cross Subscription Backup (CSB) live-only tests.
+    #
+    # CSB requires a VM in a subscription different from the vault's subscription. This cannot be modelled
+    # with the standard Preparers (they provision in a single subscription), and it cannot be validated in
+    # playback because the test framework sanitizes every subscription id to a single dummy value, which
+    # collapses the "VM sub != vault sub" distinction the CSB code branches on. These tests are therefore
+    # marked @live_only (skipped in CI/playback) and are intended to be run live by the team validating CSB,
+    # against a pre-existing cross-subscription setup. Fill in the placeholder values below before running.
+    # =====================================================================================================
+
+    @live_only()
+    # Test Owner @ singhprab
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastasia")
+    @VaultPreparer()
+    def test_backup_csb_enable_for_vm(self, resource_group, vault_name):
+        # Cross Subscription Backup (CSB): the VM lives in a subscription different from the vault's.
+        # A fresh vault is created on the fly (VaultPreparer) each run so there is no leftover state
+        # (soft-deleted items etc.) to interfere. Only the cross-subscription VM is a pre-existing resource
+        # (there is no Preparer that can provision a VM in a different subscription). At the end, protection
+        # is disabled so the VM is freed and can be re-protected on the next run.
+        #
+        # If this test fails because the VM below no longer exists (deleted, or you don't have access),
+        # create a new one in a subscription DIFFERENT from the vault's, in the SAME region as the vault
+        # (eastasia, per the ResourceGroupPreparer above), then update vm_id / vm_sub / vm_name accordingly:
+        self.kwargs.update({
+            'rg': resource_group,
+            'vault': vault_name,
+            # Full ARM id of a pre-existing VM whose subscription differs from the vault's subscription.
+            # It must be in the same region as the vault (see ResourceGroupPreparer location above).
+            'vm_id': '/subscriptions/80abcfe3-b410-42b2-983f-df23cba781dc/resourceGroups/singhprab-rg-1c/providers/Microsoft.Compute/virtualMachines/singhprab-ps-vm7',
+            # The VM's subscription id (same as the one embedded in vm_id above); used for assertions.
+            'vm_sub': '80abcfe3-b410-42b2-983f-df23cba781dc',
+            # Friendly name of the VM (used to locate the protected item after enabling).
+            'vm_name': 'singhprab-ps-vm7',
+            'policy1': self.create_random_name('clitest-csb-pol1', 24),
+            'policy2': self.create_random_name('clitest-csb-pol2', 24)
+        })
+
+        # Build two Enhanced (V2) hourly policies from the vault's built-in EnhancedPolicy template:
+        # policy1 with a 4-hour backup frequency and policy2 with an 8-hour backup frequency.
+        enhanced_policy = self.cmd('backup policy show -g {rg} -v {vault} -n EnhancedPolicy').get_output_in_json()
+
+        enhanced_policy['name'] = self.kwargs['policy1']
+        enhanced_policy['properties']['schedulePolicy']['hourlySchedule']['interval'] = 4
+        self.kwargs['policy1_json'] = json.dumps(enhanced_policy)
+        self.cmd("backup policy create --backup-management-type AzureIaasVM -g {rg} -v {vault} -n {policy1} "
+                 "--policy '{policy1_json}'", checks=[
+                     self.check('name', '{policy1}'),
+                     self.check('properties.schedulePolicy.scheduleRunFrequency', 'Hourly'),
+                     self.check('properties.schedulePolicy.hourlySchedule.interval', 4)
+                 ])
+
+        enhanced_policy['name'] = self.kwargs['policy2']
+        enhanced_policy['properties']['schedulePolicy']['hourlySchedule']['interval'] = 8
+        self.kwargs['policy2_json'] = json.dumps(enhanced_policy)
+        self.cmd("backup policy create --backup-management-type AzureIaasVM -g {rg} -v {vault} -n {policy2} "
+                 "--policy '{policy2_json}'", checks=[
+                     self.check('name', '{policy2}'),
+                     self.check('properties.schedulePolicy.scheduleRunFrequency', 'Hourly'),
+                     self.check('properties.schedulePolicy.hourlySchedule.interval', 8)
+                 ])
+
+        # Configure Backup for the cross-subscription VM by passing its full ARM id (scenario #6).
+        self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm_id} -p {policy1}', checks=[
+            self.check("properties.entityFriendlyName", '{vm_name}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed")
+        ])
+
+        # The protected item must belong to the VM's subscription (CSB), surfaced as containerSubscriptionId.
+        item = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM '
+                        '-g {rg} -v {vault} -c {vm_name} -n {vm_name}').get_output_in_json()
+        self.assertEqual(item['properties']['containerSubscriptionId'], self.kwargs['vm_sub'])
+        self.assertEqual(item['properties']['sourceResourceId'].split('/')[2], self.kwargs['vm_sub'])
+
+        # Modify Protection: switch the already-protected CSB item to a different policy (scenario #7).
+        self.cmd('backup item set-policy --backup-management-type AzureIaasVM --workload-type VM '
+                 '-g {rg} -v {vault} -c {vm_name} -n {vm_name} -p {policy2}', checks=[
+                     self.check("properties.entityFriendlyName", '{vm_name}'),
+                     self.check("properties.operation", "ConfigureBackup"),
+                     self.check("properties.status", "Completed")
+                 ])
+
+        # Disable protection (and delete backup data) so the cross-subscription VM is freed for the next run.
+        # Use the VM friendly name for the container/item: for a CSB item the raw containerName is not in the
+        # format 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat).
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
+                 '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
+
+    @live_only()
+    # Test Owner @ singhprab
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastasia")
+    @VaultPreparer()
+    def test_backup_csb_restore_olr(self, resource_group, vault_name):
+        # Cross Subscription Backup (CSB) Original Location Recovery (OLR): the VM lives in a subscription
+        # different from the vault's. This test is fully self-contained (like test_backup_csb_enable_for_vm):
+        # a fresh vault is created (VaultPreparer), the cross-subscription VM is protected, an on-demand
+        # backup is taken, and its recovery point is restored back to the original location. Only the
+        # cross-subscription VM and its staging storage account are pre-existing (no Preparer can provision
+        # resources in a different subscription). At the end, protection is disabled to free the VM.
+        #
+        # If this test fails because the VM/storage account below no longer exist (deleted, or you don't
+        # have access), create new ones in a subscription DIFFERENT from the vault's, in the SAME region as
+        # the vault (eastasia, per ResourceGroupPreparer above), then update the values below:
+        self.kwargs.update({
+            'rg': resource_group,
+            'vault': vault_name,
+            # Full ARM id of a pre-existing VM whose subscription differs from the vault's subscription.
+            # It must be in the same region as the vault (see ResourceGroupPreparer location above).
+            'vm_id': '/subscriptions/80abcfe3-b410-42b2-983f-df23cba781dc/resourceGroups/singhprab-rg-1c/providers/Microsoft.Compute/virtualMachines/singhprab-ps-vm8',
+            # The VM's subscription id (same as the one embedded in vm_id above); used for assertions.
+            'vm_sub': '80abcfe3-b410-42b2-983f-df23cba781dc',
+            # Friendly name of the VM (used as the container/item friendly name after enabling).
+            'vm_name': 'singhprab-ps-vm8',
+            # The VM's own resource group (embedded in the native container/item names used for restore).
+            'vm_rg': 'singhprab-rg-1c',
+            # Staging storage account for OLR - must reside in the VM's (cross) subscription and same region.
+            'sa': 'ssinghprabsa',
+            'sa_rg': 'singhprab-rg-1c',
+            'policy': self.create_random_name('clitest-csb-pol', 24)
+        })
+        # Native container/item names for the CSB VM. restore-disks must be called with native names: for a
+        # cross-subscription container, resolving it by friendly name is unreliable, so we pass the fully
+        # qualified names (which skip the friendly-name lookup). Format matches 'az backup container/item list'.
+        self.kwargs['csb_container'] = 'IaasVMContainer;iaasvmcontainerv2;{};{}'.format(
+            self.kwargs['vm_rg'], self.kwargs['vm_name'])
+        self.kwargs['csb_item'] = 'VM;iaasvmcontainerv2;{};{}'.format(
+            self.kwargs['vm_rg'], self.kwargs['vm_name'])
+
+        # Build an Enhanced (V2) hourly policy from the vault's built-in EnhancedPolicy template.
+        enhanced_policy = self.cmd('backup policy show -g {rg} -v {vault} -n EnhancedPolicy').get_output_in_json()
+        enhanced_policy['name'] = self.kwargs['policy']
+        self.kwargs['policy_json'] = json.dumps(enhanced_policy)
+        self.cmd("backup policy create --backup-management-type AzureIaasVM -g {rg} -v {vault} -n {policy} "
+                 "--policy '{policy_json}'", checks=[self.check('name', '{policy}')])
+
+        # Configure Backup for the cross-subscription VM by passing its full ARM id.
+        self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm_id} -p {policy}', checks=[
+            self.check("properties.entityFriendlyName", '{vm_name}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed")
+        ])
+
+        # Confirm the protected item belongs to the VM's subscription (CSB).
+        item = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM '
+                        '-g {rg} -v {vault} -c {vm_name} -n {vm_name}').get_output_in_json()
+        self.assertEqual(item['properties']['containerSubscriptionId'], self.kwargs['vm_sub'])
+
+        # Take an on-demand backup so there is a recovery point to restore from.
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['backup_job'] = self.cmd('backup protection backup-now --backup-management-type AzureIaasVM '
+                                             '--workload-type VM -g {rg} -v {vault} -c {vm_name} -i {vm_name} '
+                                             '--retain-until {retain_date} --query name').get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {backup_job}')
+
+        # Get the recovery point produced by the on-demand backup.
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM '
+                                     '--workload-type VM -g {rg} -v {vault} -c {vm_name} -i {vm_name} '
+                                     '--query [0].name').get_output_in_json()
+
+        # Original Location Recovery for a CSB protected item: no --target-resource-group and no
+        # --target-subscription-id. The container subscription is derived from the item's sourceResourceId,
+        # and the staging storage account is resolved in that subscription (scenario #8). Native container/
+        # item names are used because friendly-name resolution is unreliable for cross-subscription containers.
+        self.kwargs['restore_job'] = self.cmd(
+            'backup restore restore-disks -g {rg} -v {vault} -c {csb_container} -i {csb_item} '
+            '--rp-name {rp} --restore-mode OriginalLocation --storage-account {sa} '
+            '--storage-account-resource-group {sa_rg}', checks=[
+                self.check("properties.operation", "Restore"),
+                self.check("properties.status", "InProgress")
+            ]).get_output_in_json()['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {restore_job}')
+        self.cmd('backup job show -g {rg} -v {vault} -n {restore_job}', checks=[
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed")
+        ])
+
+        # For a CSB job, containerSubscriptionId is populated from extendedInfo and must match the VM's
+        # subscription. Validate it on both the on-demand backup job and the restore job (scenario #14).
+        backup_job = self.cmd('backup job show -g {rg} -v {vault} -n {backup_job}').get_output_in_json()
+        self.assertEqual(backup_job['properties']['containerSubscriptionId'], self.kwargs['vm_sub'])
+        restore_job = self.cmd('backup job show -g {rg} -v {vault} -n {restore_job}').get_output_in_json()
+        self.assertEqual(restore_job['properties']['containerSubscriptionId'], self.kwargs['vm_sub'])
+
+        # Disable protection (and delete backup data) so the cross-subscription VM is freed for the next run.
+        # Use the VM friendly name: for a CSB item the raw containerName is not in the format
+        # 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat).
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
+                 '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
 
 
     @AllowLargeResponse()
@@ -1691,3 +1912,48 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Test listing deleted vaults with location filter
         deleted_vaults = self.cmd('backup deleted-vault list --location {location}').get_output_in_json()
         self.assertIsInstance(deleted_vaults, list)
+
+
+class BackupJobContainerSubscriptionIdTests(unittest.TestCase):
+    """Unit tests for set_job_container_subscription_id, which surfaces containerSubscriptionId on
+    'az backup job show' by reading the 'VM Subscription ID' key from the job's extendedInfo property bag
+    (populated for Cross Subscription Backup jobs). These guard the property-bag key name/parsing without
+    requiring a live cross-subscription setup."""
+
+    @staticmethod
+    def _make_job(property_bag=None, with_extended_info=True, with_properties=True):
+        if not with_properties:
+            return SimpleNamespace()
+        extended_info = SimpleNamespace(property_bag=property_bag) if with_extended_info else None
+        properties = SimpleNamespace(extended_info=extended_info, container_subscription_id=None)
+        return SimpleNamespace(properties=properties)
+
+    def test_sets_container_subscription_id_from_property_bag(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        vm_sub = '00000000-0000-0000-0000-000000000000'
+        job = self._make_job(property_bag={'VM Subscription ID': vm_sub})
+        result = set_job_container_subscription_id(job)
+        self.assertEqual(result.properties.container_subscription_id, vm_sub)
+
+    def test_leaves_container_subscription_id_unset_when_key_absent(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        job = self._make_job(property_bag={'Some Other Key': 'value'})
+        result = set_job_container_subscription_id(job)
+        self.assertIsNone(result.properties.container_subscription_id)
+
+    def test_handles_missing_property_bag_and_extended_info(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        job_no_bag = self._make_job(property_bag=None)
+        self.assertIsNone(set_job_container_subscription_id(job_no_bag).properties.container_subscription_id)
+        job_no_ext = self._make_job(with_extended_info=False)
+        self.assertIsNone(set_job_container_subscription_id(job_no_ext).properties.container_subscription_id)
+
+    def test_handles_job_without_properties_or_none(self):
+        from azure.cli.command_modules.backup.custom_help import set_job_container_subscription_id
+        self.assertIsNone(set_job_container_subscription_id(None))
+        job = self._make_job(with_properties=False)
+        self.assertIs(set_job_container_subscription_id(job), job)
+
+
+if __name__ == '__main__':
+    unittest.main()
