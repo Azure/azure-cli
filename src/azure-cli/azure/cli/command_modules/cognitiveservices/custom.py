@@ -2648,18 +2648,24 @@ def compute_begin_create_or_update(
     """
     Create a compute resource for Azure Cognitive Services account.
     """
+    properties = ClusterComputeProperties(
+        pools=[
+            Pool(
+                name=pool_name,
+                instance_type=instance_type,
+                node_count=node_count,
+                vm_priority=vm_priority,
+            )
+        ],
+    )
+    # RP for cluster-type compute requires 'location' inside properties (matches the private-feed
+    # SDK schema). The public 15.0.0b3 SDK's ClusterComputeProperties class does not declare
+    # 'location' as a kwarg, so inject via the underlying data dict. Also set it on the outer
+    # Compute envelope for correctness with the top-level ARM resource model.
+    properties['location'] = location
     resource = Compute(
         location=location,
-        properties=ClusterComputeProperties(
-            pools=[
-                Pool(
-                    name=pool_name,
-                    instance_type=instance_type,
-                    node_count=node_count,
-                    vm_priority=vm_priority,
-                )
-            ],
-        ),
+        properties=properties,
     )
     poller = client.begin_create_or_update(
         resource_group_name=resource_group_name,
