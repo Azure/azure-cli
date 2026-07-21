@@ -11,12 +11,12 @@ import time
 import random
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
-    StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
+    KeyVaultPreparer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
-    DESPreparer, KeyPreparer, ResourceGroupPreparer
+    DESPreparer, KeyPreparer, ResourceGroupPreparer, StorageAccountPreparer
 
 
 def _get_vm_version(vm_type):
@@ -1706,12 +1706,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # associate vault with an already present resource guard
         self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 9)
+            self.check('length(properties.resourceGuardOperationDetails)', 14)
         ])
 
         self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 9)
+            self.check('length(properties.resourceGuardOperationDetails)', 14)
         ])
 
         time.sleep(300)
