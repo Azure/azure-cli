@@ -379,8 +379,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         children = object_change.delta if hasattr(object_change, "delta") else (
             object_change.children if hasattr(object_change, "children") else None)
 
-        if (not children or len(children) == 0) and hasattr(object_change, "change_type"):
-            return self._format_inline_object_change(object_change, parent_path)
+        if not children or len(children) == 0:
+            if hasattr(object_change, "change_type"):
+                return self._format_inline_object_change(object_change, parent_path)
+            else:
+                return False
 
         printed = False
 
@@ -415,7 +418,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         children = array_change.children
 
         if not children or len(children) == 0:
-            return self._format_inline_object_change(array_change, parent_path)
+            if hasattr(array_change, "change_type"):
+                return self._format_inline_object_change(array_change, parent_path)
+            else:
+                return False
 
         if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
             return False
