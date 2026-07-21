@@ -115,7 +115,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled'),
-            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled'),
+            self.check('properties.costManagementSettings.granularityLevel', 'VaultLevel')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
@@ -203,6 +204,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault update -n {vault4} -g {rg} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
             self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
             self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'PermanentlyDisabled')
+        ])
+
+        # Cost management settings testing.
+        self.cmd('backup vault update -n {vault3} -g {rg} --cost-management-granularity ProtectedItemWithParentTag', checks=[
+            self.check('properties.costManagementSettings.granularityLevel', 'ProtectedItemWithParentTag')
+        ])
+
+        self.cmd('backup vault update -n {vault4} -g {rg} --cost-management-granularity ProtectedItemLevel', checks=[
+            self.check('properties.costManagementSettings.granularityLevel', 'ProtectedItemLevel')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)

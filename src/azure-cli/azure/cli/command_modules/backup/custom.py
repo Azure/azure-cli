@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
     CrossSubscriptionRestoreSettings, DeletedVaultUndeleteInputProperties, DeletedVaultUndeleteInput, \
-    SoftDeleteSettings, CostManagementSettings
+    SoftDeleteSettings, CostManagementSettings, ImmutabilityConfiguration
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -319,7 +319,18 @@ def _get_vault_security_settings(immutability_state, existing_vault=None):
         security_settings.soft_delete_settings = soft_delete_settings
 
     if immutability_state is not None:
-        security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
+        # When immutability state is Unlocked or Locked (enabled states), we need to provide
+        # a configuration with type. Default to "AsPerPolicy" as it doesn't require durationInDays.
+        # When state is Disabled, we don't need to provide configuration.
+        if immutability_state in ("Unlocked", "Locked"):
+            immutability_config = ImmutabilityConfiguration(type="AsPerPolicy")
+            security_settings.immutability_settings = ImmutabilitySettings(
+                state=immutability_state,
+                configuration=immutability_config
+            )
+        else:
+            # For Disabled state, only set the state without configuration
+            security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
 
     return security_settings
 
