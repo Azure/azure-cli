@@ -18,6 +18,7 @@ Rules:
 - Use the selected route to apply exactly one generation workflow: `common-aaz-custom-code-generation`, `common-legacy-sdk-backed-custom-code-generation`, or `common-legacy-non-sdk-custom-code-generation`.
 - Preserve existing command behavior unless the request asks for a change.
 - For any behavior change, perform a consistency pass over the affected command surface and update related implementation, argument definitions, user-facing help, validation/errors, examples, and focused tests as needed.
+- When updating tests, do not treat existing recordings as the source of truth for expected response values or response shape. Use recordings only as historical evidence to locate affected scenarios, understand previous responses, and identify existing assertions. Expected values and response structure must come from the current product/API specification and the requested custom code change; treat documentation as supporting context only, especially when the API behavior is changing. If existing recordings disagree with the new specification, update tests to the specification and expect recordings to be re-recorded rather than relaxing assertions to old values or old structures.
 - Treat `_params.py` argument help as user-facing command help, the same as authored help in `_help.py`.
 - Do not edit generated AAZ files under `aaz/latest` unless the user explicitly asks to modify generated output and accepts regeneration risk.
 - Ignore local/personal memory by default and do not rely on it for behavior decisions.
