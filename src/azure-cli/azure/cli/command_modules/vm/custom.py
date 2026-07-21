@@ -5328,7 +5328,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         if extensions:
             extension_profile['extensions'] = \
                 [x for x in extensions if
-                 x.get('type_properties_type', '').lower() != extension_name.lower() or
+                 x.get('type', '').lower() != extension_name.lower() or
                  x.get('publisher', '').lower() != publisher.lower()]
 
     ext = {
