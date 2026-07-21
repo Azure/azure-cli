@@ -337,7 +337,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         change: t.Optional[t.Union[
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
-            StackModels.DeploymentStacksWhatIfPropertyChange]],
+            StackModels.DeploymentStacksWhatIfPropertyChange,
+            StackModels.DeploymentStacksChangeDeltaDenySettings]],
         parent_path: t.Optional[str] = None,
         is_array_item: bool = False
     ) -> bool:
@@ -365,7 +366,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _format_object_change(
         self,
         object_change: t.Optional[t.Union[
-            StackModels.DeploymentStacksChangeDeltaRecord, StackModels.DeploymentStacksWhatIfPropertyChange]],
+            StackModels.DeploymentStacksChangeDeltaRecord,
+            StackModels.DeploymentStacksWhatIfPropertyChange,
+            StackModels.DeploymentStacksChangeDeltaDenySettings]],
         parent_path: t.Optional[str] = None
     ) -> bool:
         if not object_change:
@@ -374,7 +377,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         children = object_change.delta if hasattr(object_change, "delta") else (
             object_change.children if hasattr(object_change, "children") else None)
 
-        if not children or len(children) == 0:
+        if (not children or len(children) == 0) and hasattr(object_change, "change_type"):
             return self._format_inline_object_change(object_change, parent_path)
 
         printed = False
@@ -513,7 +516,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         change: t.Union[
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
-            StackModels.DeploymentStacksWhatIfPropertyChange]
+            StackModels.DeploymentStacksWhatIfPropertyChange,
+            StackModels.DeploymentStacksChangeDeltaDenySettings]
     ) -> t.Optional[t.Type]:
         if hasattr(change, "change_type"):
             if str_lower_eq(StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY, change.change_type):

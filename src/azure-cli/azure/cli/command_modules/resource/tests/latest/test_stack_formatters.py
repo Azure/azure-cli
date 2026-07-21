@@ -27,6 +27,19 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
 
         self.assertEqual(
             expected_no_color_result, DeploymentStacksWhatIfResultFormatter(enable_color=False).format(what_if_result))
+        
+    def test_what_if_2(self):
+        what_if_result = self._get_stacks_what_if_result("what-if-2.json")
+
+        formatted = DeploymentStacksWhatIfResultFormatter().format(what_if_result)
+        self.assertEqual(self.EXPECTED_STACKS_WHAT_IF_2, formatted)
+
+        expected_no_color_result = self.EXPECTED_STACKS_WHAT_IF_2
+        for color in list(Color):
+            expected_no_color_result = expected_no_color_result.replace(str(color), '')
+
+        self.assertEqual(
+            expected_no_color_result, DeploymentStacksWhatIfResultFormatter(enable_color=False).format(what_if_result))
 
     def _get_stacks_what_if_result(self, file_name: str):
         return StackModels.DeploymentStacksWhatIfResult(self._get_stacks_what_if_json(file_name))
@@ -146,5 +159,102 @@ INFO: [InfoCode]
 {Color.RED}ERROR: [ErrorCode]{Color.RESET}
   {Color.RED}Message: This is an error diagnostic with a target.{Color.RESET}
   {Color.RED}Target: /subscriptions/d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/tests/testResource{Color.RESET}
+
+"""
+    
+    EXPECTED_STACKS_WHAT_IF_2 = f"""Resource and property changes are indicated with these symbols:
+  {Color.GREEN}+{Color.RESET} Create              ! Unsupported
+  {Color.PURPLE}~{Color.RESET} Modify              {Color.RED}-{Color.RESET} Delete
+  = NoChange            {Color.BLUE}v{Color.RESET} Detach
+
+{Color.DARK_YELLOW}Changes to Managed Resources:{Color.RESET}
+
+Azure
+  {Color.BLUE}v {Color.RESET}{Color.BLUE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/networkSecurityGroups/wv-nsg-mjwo5pow6lmvm{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"notManaged"{Color.RESET}
+    = Deny Status: "none"
+  {Color.BLUE}v {Color.RESET}{Color.BLUE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/routeTables/wv-routes-mjwo5pow6lmvm{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"notManaged"{Color.RESET}
+    = Deny Status: "none"
+  {Color.BLUE}v {Color.RESET}{Color.BLUE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/virtualNetworks/wv-vnet-mjwo5pow6lmvm{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"notManaged"{Color.RESET}
+    = Deny Status: "none"
+  {Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm [2022-02-01]{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
+    {Color.PURPLE}~ {Color.RESET}properties.description: {Color.PURPLE}"Baseline description"{Color.RESET} => {Color.PURPLE}"Updated description with nested content changes"{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}properties.displayName: {Color.PURPLE}"WhatIf visual validation"{Color.RESET} => {Color.PURPLE}"WhatIf visual validation updated"{Color.RESET}
+  {Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm/versions/v1 [2022-02-01]{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
+    {Color.PURPLE}~ {Color.RESET}properties.mainTemplate.contentVersion: {Color.PURPLE}"1.0.0.0"{Color.RESET} => {Color.PURPLE}"2.0.0.0"{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}properties.mainTemplate.outputs.state.value: {Color.PURPLE}"before"{Color.RESET} => {Color.PURPLE}"after"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties.mainTemplate.outputs.nested: {Color.GREEN}{{
+        "type": "object",
+        "value": {{
+          "enabled": true,
+          "values": [
+            1,
+            2,
+            3
+          ]
+        }}
+      }}{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}properties.mainTemplate.variables.nestedObject.level1.level2: {Color.PURPLE}"before"{Color.RESET} => {Color.PURPLE}"after"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties.mainTemplate.variables.nestedObject.level1.addedArray: {Color.GREEN}[
+        "one",
+        "two"
+      ]{Color.RESET}
+    {Color.GREEN}+ {Color.RESET}properties.mainTemplate.variables.nestedObject.level1.addedBoolean: {Color.GREEN}True{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties.mainTemplate.parameters: {Color.GREEN}{{
+        "message": {{
+          "defaultValue": "hello",
+          "type": "string"
+        }}
+      }}{Color.RESET}
+  {Color.GREEN}+ {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
+    = Deny Status: "none"
+  {Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvmodmjwo5pow6lmvm [2023-05-01]{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
+    {Color.PURPLE}~ {Color.RESET}sku.name: {Color.PURPLE}"Standard_LRS"{Color.RESET} => {Color.PURPLE}"Standard_GRS"{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}tags.modifiedTag: {Color.PURPLE}"before"{Color.RESET} => {Color.PURPLE}"after"{Color.RESET}
+    {Color.RED}- {Color.RESET}tags.oldTag: {Color.RED}"deleted-in-updated-template"{Color.RESET}
+    {Color.GREEN}+ {Color.RESET}tags.newTag: {Color.GREEN}"created-in-updated-template"{Color.RESET}
+  {Color.BLUE}v {Color.RESET}{Color.BLUE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvremovemjwo5pow6lmvm{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"notManaged"{Color.RESET}
+    = Deny Status: "none"
+  = /subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvsamemjwo5pow6lmvm [2023-05-01]
+    = Management Status: "managed"
+    = Deny Status: "none"
+  {Color.GREEN}+ {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar [1999-12-31]{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
+    = Deny Status: "none"
+  {Color.GREEN}+ {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo [1999-12-31]{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
+    = Deny Status: "none"
+
+>> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
+  {Color.CYAN}?{Color.RESET}{Color.GREEN}+ {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
+    = Deny Status: "none"
+  {Color.CYAN}?{Color.RESET}{Color.PURPLE}~ {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm [2023-05-01]{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
+    {Color.GREEN}+ {Color.RESET}condition: {Color.GREEN}"[greater(int(utcNow('%f')), 4)]"{Color.RESET}
+  {Color.CYAN}?{Color.RESET}{Color.BLUE}v {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.BLUE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm{Color.RESET}
+    {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"notManaged"{Color.RESET}
+    = Deny Status: "none"
+
+Diagnostics (2):
+
+{Color.DARK_YELLOW}WARNING: [ResourceDeployedMultipleTimes]{Color.RESET}
+  {Color.DARK_YELLOW}Message: The resource '/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar' is defined multiple times in this deployment. Only the final state of the resource is shown.{Color.RESET}
+  {Color.DARK_YELLOW}Target: /subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar{Color.RESET}
+
+{Color.DARK_YELLOW}WARNING: [ResourceDeployedMultipleTimes]{Color.RESET}
+  {Color.DARK_YELLOW}Message: The resource '/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo' is defined multiple times in this deployment. Only the final state of the resource is shown.{Color.RESET}
+  {Color.DARK_YELLOW}Target: /subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo{Color.RESET}
 
 """
