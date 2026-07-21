@@ -194,14 +194,16 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 self._format_section_spacer()
                 self.builder.append_line(group)
 
+            self.builder.push_indent("  ")
+
             if not has_potential_changes and str_lower_eq(
                     change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                self.builder.append("\n>> ").append_line(
+                self.builder.append_line(no_indent=True)
+                self.builder.append(">> ").append_line(
                     "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.PURPLE)
                 has_potential_changes = True
 
-            self.builder.push_indent("  ")
             self._format_resource_change(change)
             self.builder.pop_indent()
 
@@ -255,15 +257,17 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 last_group = group
                 has_potential_deletions = False
 
+            self.builder.push_indent("  ")
+
             if not has_potential_deletions and str_lower_eq(
                     delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                self.builder.append("\n>> ").append_line(
+                self.builder.append_line(no_indent=True)
+                self.builder.append(">> ").append_line(
                     f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total"
                     " (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.RED)
                 has_potential_deletions = True
 
-            self.builder.push_indent("  ")
             self._format_resource_heading_line(delete_change)
             self.builder.pop_indent()
 
@@ -398,7 +402,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     ) -> bool:
         inline_obj = change.after or change.before
 
-        if not inline_obj:
+        if inline_obj is None:
             return False
 
         property_path = self._get_change_path(change, parent_path)
