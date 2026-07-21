@@ -5123,8 +5123,8 @@ def vmss_lifecycle_hook_show(cmd, resource_group_name, vmss_name, type):
 def _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait):
     from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
     vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name)
+    vmss["lifecycleHooksProfile"] = {"lifecycleHooks": hooks}
     vmss = convert_show_result_to_snake_case(vmss)
-    vmss["lifecycle_hooks_profile"] = {"lifecycle_hooks": hooks}
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = vmss_name
     vmss["no_wait"] = no_wait
@@ -5143,10 +5143,10 @@ def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_dura
     hook = {"type": type}
 
     if wait_duration is not None:
-        hook["wait_duration"] = wait_duration
+        hook["waitDuration"] = wait_duration
 
     if default_action is not None:
-        hook["default_action"] = default_action
+        hook["defaultAction"] = default_action
 
     lifecycle_hooks.append(hook)
     return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
@@ -5166,10 +5166,10 @@ def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_d
             "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
 
     if wait_duration is not None:
-        target_hook["wait_duration"] = wait_duration
+        target_hook["waitDuration"] = wait_duration
 
     if default_action is not None:
-        target_hook["default_action"] = default_action
+        target_hook["defaultAction"] = default_action
 
     return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
 
