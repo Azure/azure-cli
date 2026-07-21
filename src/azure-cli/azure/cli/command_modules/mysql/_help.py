@@ -332,6 +332,8 @@ examples:
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
     crafted: true
+  - name: Update the batch of the custom-managed maintenance window (existing batch is preserved when --maintenance-batch is omitted).
+    text: az mysql flexible-server update --resource-group testGroup --name testserver --maintenance-window "Fri:13:00" --maintenance-batch Batch2
   - name: Set or change key and identity for data encryption.
     text: >
       # get key identifier of the existing key

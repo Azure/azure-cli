@@ -140,6 +140,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         help='The patch strategy of maintenance policy. Accepted values: Regular, VirtualCanary. Default value is Regular.'
     )
 
+    maintenance_batch_arg_type = CLIArgumentType(
+        arg_type=get_enum_type(['Default', 'Batch1', 'Batch2']),
+        options_list=['--maintenance-batch'],
+        help='The batch of the custom-managed maintenance window. Accepted values: Default, Batch1, Batch2. '
+             'Only valid with an enabled --maintenance-window; if omitted, the existing batch is preserved.'
+    )
+
     yes_arg_type = CLIArgumentType(
         options_list=['--yes', '-y'],
         action='store_true',
@@ -464,6 +471,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
         c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
                    help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
+        c.argument('maintenance_batch', arg_type=maintenance_batch_arg_type)
         c.argument('tags', tags_type)
         c.argument('tier', arg_type=tier_arg_type)
         c.argument('sku_name', arg_type=sku_name_arg_type)

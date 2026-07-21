@@ -70,6 +70,10 @@ Release History
 * `az keyvault ekm-connection`: Add command group to manage External Key Manager (EKM) connections for Managed HSM (Preview) (#33651)
 * `az keyvault key create`: Add `--external-key-id` to create EKM-backed external keys on Managed HSM (Preview) (#33651)
 
+**MySQL**
+
+* `az mysql flexible-server update`: Add `--maintenance-batch` parameter to set the batch (Default, Batch1, Batch2) of the custom-managed maintenance window; the existing batch is preserved when the parameter is omitted
+
 **NetAppFiles**
 
 * `az netappfiles subvolumes`: Add deprecation notice `az netappfiles subvolume` command group is being deprecated and will be removed in a future release (#33484)
