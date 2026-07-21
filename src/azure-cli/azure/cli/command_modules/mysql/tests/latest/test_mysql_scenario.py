@@ -2301,6 +2301,53 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
         self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
 
 
+class FlexibleServerMaintenanceBatchScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_mysql_flexible_server_maintenance_batch_mgmt(self, resource_group):
+        self._test_maintenance_batch_mgmt('mysql', resource_group)
+
+    def _test_maintenance_batch_mgmt(self, database_engine, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier GeneralPurpose --sku-name {}'
+                 .format(database_engine, resource_group, server_name, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        # set a custom maintenance window together with a batch
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Fri:13:00" --maintenance-batch Batch1'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.customWindow', 'Enabled'),
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 5),
+                     JMESPathCheck('maintenanceWindow.startHour', 13),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # update the window only (no --maintenance-batch): the existing batch must be preserved
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00"'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 6),
+                     JMESPathCheck('maintenanceWindow.startHour', 14),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # change the batch explicitly
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch2')])
+
+        # guardrail: --maintenance-batch without --maintenance-window is rejected
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        # guardrail: --maintenance-batch cannot be combined with disabling the window
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Disabled" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, server_name))
+
+
 class MySQLExportTest(ScenarioTest):
     profile = None
 
