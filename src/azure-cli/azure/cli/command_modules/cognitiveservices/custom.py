@@ -31,7 +31,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     OutboundRuleBasicResource, FqdnOutboundRule, \
     PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
     ServiceTagOutboundRule, ServiceTagOutboundRuleDestination, \
-    Compute, ComputeProperties, Pool
+    Compute, ClusterComputeProperties, Pool
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import (
     BadRequestError,
@@ -2650,7 +2650,7 @@ def compute_begin_create_or_update(
     """
     resource = Compute(
         location=location,
-        properties=ComputeProperties(
+        properties=ClusterComputeProperties(
             pools=[
                 Pool(
                     name=pool_name,
