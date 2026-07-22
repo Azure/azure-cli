@@ -387,10 +387,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     # Only suggest deployment command when no deployment method is already configured
-    if not using_webapp_up and not any([container_image_name, deployment_container_image_name,
-                                        multicontainer_config_type, sitecontainers_app,
-                                        deployment_source_url, deployment_local_git]):
-        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    if not using_webapp_up:
+        if not any([container_image_name, deployment_container_image_name,
+                    multicontainer_config_type, sitecontainers_app,
+                    deployment_source_url, deployment_local_git]):
+            logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
     return webapp
 
 
@@ -2460,6 +2461,18 @@ def show_app(cmd, resource_group_name, name, slot=None):
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
         _remove_list_duplicates(app)
     return app
+
+
+def _extract_webapp_status_items(result):
+    # The siteStatus response holds per-instance status under 'properties':
+    # a list for /siteStatus, a single object for /siteStatus/{instanceId}.
+    # Normalize both shapes into a list for uniform formatting.
+    properties = result.get('properties')
+    if isinstance(properties, list):
+        return properties
+    if isinstance(properties, dict):
+        return [properties]
+    return []
 
 
 def _list_app(cli_ctx, resource_group_name=None, show_details=False):
@@ -6456,6 +6469,11 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
 
 
 def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp log startup'")
+
+
+def _ensure_linux_webapp(cmd, resource_group, name, slot=None, command_label='This command'):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         app = client.web_apps.get_slot(resource_group, name, slot)
@@ -6463,7 +6481,7 @@ def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
         app = client.web_apps.get(resource_group, name)
     if app is None or not is_linux_webapp(app):
         raise ArgumentUsageError(
-            "'az webapp log startup' is only supported for Linux web apps.")
+            "{} is only supported for Linux web apps.".format(command_label))
 
 
 def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
@@ -6558,6 +6576,501 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
         return metadata
 
     return response.json()
+
+
+# -----------------------------------------------------------------------------
+# az webapp troubleshoot config
+# -----------------------------------------------------------------------------
+
+# Runtime-error freshness window. Both the structured payload and the --report
+# view surface the runtime error only when its lastErrorTimestamp is within
+# this many minutes of "now", so scripts and human readers agree.
+_RUNTIME_ERROR_FRESHNESS_MINUTES = 15
+
+
+def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES):
+    """Return True iff the runtime error's lastErrorTimestamp is within the
+    last N minutes (UTC). ARM emits lastErrorTimestamp as an ISO 8601 string;
+    tolerate a trailing 'Z' and missing tzinfo (treated as UTC)."""
+    if not runtime_error:
+        return False
+    raw = runtime_error.get('lastErrorTimestamp')
+    if not raw:
+        return False
+    from datetime import datetime, timezone, timedelta
+    try:
+        ts = str(raw).strip()
+        if ts.endswith('Z'):
+            ts = ts[:-1] + '+00:00'
+        parsed = datetime.fromisoformat(ts)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        return False
+    delta = datetime.now(timezone.utc) - parsed
+    # Reject future timestamps: a clock-skewed or malformed value would
+    # produce a negative delta, which still satisfies `<= 15min` and would
+    # incorrectly mark stale errors as recent.
+    return timedelta(0) <= delta <= timedelta(minutes=minutes)
+
+
+def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        app = client.web_apps.get_slot(resource_group_name, name, slot)
+    else:
+        app = client.web_apps.get(resource_group_name, name)
+    if app is None or not is_linux_webapp(app):
+        raise ArgumentUsageError(
+            "'az webapp troubleshoot config' is only supported for Linux web apps.")
+
+
+def _extract_runtime_error(arm_response):
+    """Return the freshest runtime-error block from an ARM /siteStatus response.
+
+    /siteStatus returns per-instance status under 'properties' (a list); the
+    single-instance form returns a dict. We normalize both, then pick the entry
+    with the latest ``lastErrorTimestamp`` that also has a non-empty
+    ``lastError``. Returns ``None`` when no runtime error is reported.
+    """
+    if not isinstance(arm_response, dict):
+        return None
+    properties = arm_response.get('properties')
+    if isinstance(properties, list):
+        items = properties
+    elif isinstance(properties, dict):
+        items = [properties]
+    else:
+        return None
+    candidates = [item for item in items if isinstance(item, dict) and item.get('lastError')]
+    if not candidates:
+        return None
+
+    def _ts_key(item):
+        return item.get('lastErrorTimestamp') or ''
+
+    candidates.sort(key=_ts_key, reverse=True)
+    freshest = candidates[0]
+    freshest['failingInstanceCount'] = len(candidates)
+    return freshest
+
+
+def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False):
+    """Aggregate built-in KuduLite config-check findings plus the most recent ARM
+    /siteStatus runtime error for a Linux web app.
+
+    Data sources:
+      * Built-in checks come from KuduLite (SCM):
+        GET https://{scm-host}/api/troubleshoot/config
+      * Last runtime error comes from ARM:
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
+            /sites/{name}[/slots/{slot}]/siteStatus?api-version=...
+
+    By default returns the structured payload so the standard
+    ``-o json/yaml/tsv/table`` formatters handle output. Pass ``--report`` to
+    print the human-readable two-section report to stdout instead.
+    """
+    import requests
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.core.exceptions import HttpResponseError as _Hre
+
+    _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot)
+
+    # ---- 1. Built-in checks from KuduLite ----
+    #
+    # KuduLite reads the config snapshot from ``/appsvctmp/config_check_{siteName}.json``
+    # on the worker where the request lands. On multi-worker plans only the
+    # instance that most recently ran the site's startup pipeline has the
+    # file, so ARR-affinity routing to any other worker returns 404. Retry
+    # per-instance until one worker responds with data.
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    config_url = '{}/api/troubleshoot/config'.format(scm_url)
+
+    config_check = None
+    last_status = None
+    last_body_text = ''
+    tried_instances = []
+
+    # SCM (Kudu) is occasionally slow to respond — especially when the app has
+    # alwaysOn=false (so Kudu itself cold-starts) or the container is thrashing
+    # during startup. Transient 5xx / timeouts / connection errors resolve after
+    # a short wait, so retry a few times with backoff before treating the
+    # failure as terminal. 404 is NOT transient — that's handled separately by
+    # the per-instance ARR walk below.
+    _TRANSIENT_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+    _MAX_ATTEMPTS = 3
+    _BACKOFF_SECONDS = 1.5
+
+    def _try_config(cookies=None):
+        try:
+            return requests.get(config_url, headers=headers, cookies=cookies,
+                                timeout=30, allow_redirects=False)
+        except requests.RequestException as ex:
+            logger.warning("Failed to call '%s': %s", config_url, ex)
+            return None
+
+    def _try_config_with_retry(cookies=None):
+        import time
+        resp = None
+        for attempt in range(1, _MAX_ATTEMPTS + 1):
+            resp = _try_config(cookies=cookies)
+            transient = (resp is None) or (resp.status_code in _TRANSIENT_STATUSES)
+            if not transient:
+                return resp
+            if attempt < _MAX_ATTEMPTS:
+                time.sleep(_BACKOFF_SECONDS * attempt)
+        return resp
+
+    def _consume(resp):
+        nonlocal config_check, last_status, last_body_text
+        if resp is None:
+            return False
+        last_status = resp.status_code
+        last_body_text = (resp.text or '').strip()
+        if last_status == 200:
+            try:
+                body = resp.json()
+            except ValueError:
+                body = None
+            if isinstance(body, dict):
+                config_check = body
+                return True
+            snippet = last_body_text[:200]
+            logger.warning(
+                "Built-in configuration checks endpoint '%s' returned 200 but the body "
+                "wasn't the expected JSON object. First 200 chars: %r",
+                config_url, snippet)
+        return False
+
+    # First attempt: whichever worker ARR picks (with transient-failure retry).
+    if not _consume(_try_config_with_retry()):
+        # On 404, walk instances and retry with ARR affinity pinned to each.
+        if last_status == 404:
+            try:
+                # Pin api-version explicitly. Using a literal here avoids depending
+                # on client._config.api_version (a protected attribute) and pins
+                # the URL to a version known to serve /instances.
+                api_version = '2024-11-01'
+                subscription_id = get_subscription_id(cmd.cli_ctx)
+                slot_segment = '/slots/{}'.format(slot) if slot else ''
+                instances_url = (
+                    '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+                    '/sites/{name}{slot_seg}/instances?api-version={ver}'
+                ).format(
+                    rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+                    sub=subscription_id, rg=resource_group_name, name=name,
+                    slot_seg=slot_segment, ver=api_version)
+                instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
+                instance_ids = [e.get('name') for e in (instances_payload.get('value') or [])
+                                if isinstance(e, dict) and e.get('name')]
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning('Failed to enumerate site instances for retry: %s', ex)
+                instance_ids = []
+
+            for instance_id in instance_ids:
+                tried_instances.append(instance_id)
+                cookies = {'ARRAffinity': instance_id, 'ARRAffinitySameSite': instance_id}
+                if _consume(_try_config_with_retry(cookies=cookies)):
+                    break
+
+    if config_check is None and not report:
+        status = last_status
+        if status == 404:
+            logger.warning('Configuration check feature is currently unavailable.')
+        elif status in (401, 403):
+            logger.warning(
+                "Access to built-in configuration checks was denied by the SCM "
+                "endpoint (status %s). Make sure basic auth is enabled for SCM on "
+                "this site, or that your credentials have SCM access.", status)
+        elif status in (301, 302, 303, 307, 308):
+            logger.warning(
+                "Built-in configuration checks endpoint '%s' returned a redirect "
+                "(status %s). This usually means SCM authentication is "
+                "misconfigured for this app.", config_url, status)
+        elif status is not None:
+            logger.warning(
+                "Failed to retrieve built-in configuration checks from '%s' "
+                "(status %s).",
+                config_url, status)
+
+    # ---- 2. Site runtime status from ARM /siteStatus ----
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Pin api-version explicitly. Using a literal here avoids depending on
+    # client._config.api_version (a protected attribute) and pins the URL
+    # to a version known to serve /siteStatus.
+    api_version = '2024-11-01'
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+    arm_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/siteStatus?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group_name, name=name,
+        slot_seg=slot_segment, ver=api_version)
+
+    runtime_error = None
+    try:
+        arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
+        runtime_error = _extract_runtime_error(arm_response)
+    except _Hre as ex:
+        logger.warning("Failed to retrieve site runtime status from '%s': %s", arm_url, ex)
+    except ValueError as ex:
+        logger.warning("Failed to parse site runtime status response: %s", ex)
+
+    # Annotate the runtime error with a freshness signal so the --report
+    # renderer can gate the recommendation section on a 15-minute window.
+    # These fields are internal plumbing and are stripped from the payload
+    # before it's returned to the caller (see below).
+    if runtime_error is not None:
+        runtime_error['freshnessWindowMinutes'] = _RUNTIME_ERROR_FRESHNESS_MINUTES
+        runtime_error['isRecent'] = _runtime_error_is_recent(
+            runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES)
+
+    payload = {
+        'name': name,
+        'resourceGroup': resource_group_name,
+        'configCheck': config_check,
+        'configCheckStatus': last_status,
+        'runtimeError': runtime_error,
+    }
+    if report:
+        from azure.cli.command_modules.appservice import _troubleshoot_config_report
+        _troubleshoot_config_report.render_report(payload)
+        return None
+    # Strip internal plumbing fields from the structured payload so the
+    # JSON/YAML/table output stays focused on user-visible data.
+    payload.pop('configCheckStatus', None)
+    if runtime_error is not None:
+        runtime_error.pop('freshnessWindowMinutes', None)
+        runtime_error.pop('isRecent', None)
+    return payload
+
+
+# ---------------------------------------------------------------------------
+# az webapp troubleshoot status
+# ---------------------------------------------------------------------------
+
+def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, report=False):
+    """Fetch runtime + startup status for a Linux web app.
+
+    Data sources:
+      * Site Runtime Status comes from ARM:
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
+            /sites/{name}[/slots/{slot}]/siteStatus[/{instanceId}]?api-version=...
+      * Startup summary comes from KuduLite (SCM):
+        GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
+
+    By default returns the structured payload (list of instances + startup
+    summary) so the standard `-o json/yaml/tsv/table` formatters handle output.
+    Pass --report to print the human-readable report to stdout instead.
+    """
+    import requests
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.core.exceptions import HttpResponseError as _Hre
+
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp troubleshoot status'")
+
+    # --- 1. Map ARM hex instanceId <-> friendly machineName via ARM /instances.
+    # We fetch this first so we can accept either form on --instance and resolve
+    # the right value before calling /siteStatus (ARM) and /api/startuplogs/summary (SCM).
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Pin the api-version explicitly. Using a literal here avoids depending on
+    # client._config.api_version, which is a protected attribute and can shift
+    # when the SDK bumps its default. 2024-11-01 is known to serve /instances
+    # and /siteStatus.
+    api_version = '2024-11-01'
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+    instances_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/instances?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, ver=api_version)
+    id_to_machine = {}
+    machine_to_id = {}
+    try:
+        instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
+        for entry in instances_payload.get('value') or []:
+            entry_name = entry.get('name')
+            machine = (entry.get('properties') or {}).get('machineName')
+            if entry_name and machine:
+                id_to_machine[entry_name] = machine
+                machine_to_id[machine] = entry_name
+    except _Hre as ex:
+        logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
+
+    # Resolve --instance: accept either hex GUID (ARM form) or machineName (SCM form).
+    arm_instance_id = instance
+    if instance and instance in machine_to_id:
+        arm_instance_id = machine_to_id[instance]
+    elif instance and instance not in id_to_machine and machine_to_id:
+        # User passed something that matches neither known id nor machineName.
+        raise ResourceNotFoundError(
+            "Instance '{}' was not found for this webapp. "
+            "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+
+    # --- 2. Site Runtime Status from ARM /siteStatus[/{hex-instanceId}] ---
+    instance_segment = '/{}'.format(arm_instance_id) if arm_instance_id else ''
+    arm_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/siteStatus{inst_seg}?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, inst_seg=instance_segment, ver=api_version)
+
+    try:
+        arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
+    except _Hre as ex:
+        if instance and getattr(ex, 'status_code', None) == 404:
+            raise ResourceNotFoundError(
+                "Instance '{}' was not found for this webapp. "
+                "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+        raise
+
+    runtime_items = _extract_webapp_status_items(arm_response)
+    for item in runtime_items:
+        machine = id_to_machine.get(item.get('instanceId'))
+        if machine:
+            item['machineName'] = machine
+
+    # --- 3. Per-instance Startup summary from SCM /api/startuplogs/summary ---
+    # KuduLite's summary endpoint already returns one entry per instance
+    # ([{InstanceId, Startup}, ...]) for everything seen in the last 24h, so we
+    # make a single round-trip and pair the entries with runtime_items locally
+    # instead of fanning out one call per instance.
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    # When --instance was supplied we still pass the filter to KuduLite so it
+    # only walks the requested worker's log directory (and the response stays
+    # small). Otherwise we fetch the full set in one call.
+    target_machine = None
+    if instance and len(runtime_items) == 1:
+        target_machine = runtime_items[0].get('machineName')
+
+    summary_url = '{}/api/startuplogs/summary'.format(scm_url)
+    if target_machine:
+        summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
+
+    startup_by_machine = {}
+    # KuduLite may return a plaintext (non-JSON) body when the endpoint can't
+    # produce a per-instance summary at all — for example when the customer sets
+    # WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS=true. That message applies to every
+    # worker on the app, so we hoist it to the instance-level SummaryFetchStatus
+    # below (after per-instance JSON entries, if any, are already loaded).
+    app_wide_fetch_status = None
+    try:
+        summary_response = requests.get(summary_url, headers=headers, timeout=30)
+    except requests.RequestException as ex:
+        logger.warning("Failed to call '%s': %s", summary_url, ex)
+        summary_response = None
+        # Surface the transport-level failure per instance instead of
+        # rendering "No startup attempts recorded", which would falsely
+        # suggest KuduLite reported no data.
+        app_wide_fetch_status = (
+            "Failed to reach SCM startup summary endpoint ({}: {}).".format(
+                ex.__class__.__name__, ex))
+
+    if summary_response is not None:
+        if summary_response.status_code == 200:
+            try:
+                body = summary_response.json()
+            except ValueError:
+                body = None
+            if isinstance(body, list):
+                for entry in body:
+                    if not isinstance(entry, dict):
+                        continue
+                    # KuduLite serializes its C# POCO with default settings -> PascalCase
+                    # (InstanceId, Startup, Succeeded, MostRecentSuccess, ...). When KuduLite
+                    # ships a [JsonPropertyName] / camelCase contract, switch the keys
+                    # here (and in _print_startup_block / overview-table renderer) accordingly.
+                    key = entry.get('InstanceId')
+                    if not key:
+                        continue
+                    startup_by_machine[key] = entry.get('Startup') or entry
+            elif isinstance(body, dict):
+                # Tolerate a single-object response (older KuduLite shape).
+                inner = body.get('Startup') or body
+                key = body.get('InstanceId') or target_machine
+                if key:
+                    startup_by_machine[key] = inner
+            else:
+                # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice).
+                text = (summary_response.text or '').strip()
+                if text:
+                    app_wide_fetch_status = text
+        else:
+            # Any non-200 response means KuduLite couldn't produce a startup
+            # summary for this app. In practice we see:
+            #   * 404: newer KuduLite doesn't recognize the /summary route yet
+            #     (feature not rolled out to this region / stamp).
+            #   * 400 "Invalid startup log filename.": older KuduLite routes
+            #     /api/startuplogs/{filename} — no /summary sub-route — so it
+            #     treats 'summary' as a filename and rejects it.
+            #   * 5xx / auth errors: transient or config problem.
+            app_wide_fetch_status = (
+                "Startup summary is not available for this app. "
+                "This feature requires a platform version that has "
+                "not rolled out to your app's region yet."
+            )
+
+    # Correlate SCM startup summaries with ARM runtime items. In practice the
+    # two systems don't always agree on instance IDs: ARM's machineName is the
+    # worker-slot identity (e.g. "ln0sdlwk0001I1"), while KuduLite's InstanceId
+    # is a per-container identity (e.g. "ln0sdlwk0001XB" or a docker short-id
+    # like "cee9a66e57b2"). Match by machineName first, then fall back to
+    # cardinality pairing when there is exactly one unmatched item on each
+    # side (the common single-instance case). Anything still unmatched surfaces
+    # under an "orphan_startups" bucket that the renderer prints as its own
+    # section below the ARM cards.
+    remaining_keys = set(startup_by_machine.keys())
+    unmatched_items = []
+    for item in runtime_items:
+        machine = item.get('machineName')
+        per_instance = startup_by_machine.get(machine) if machine else None
+        if per_instance is not None and machine in remaining_keys:
+            remaining_keys.discard(machine)
+        if per_instance is None:
+            unmatched_items.append(item)
+        else:
+            item['startup'] = per_instance
+
+    if len(unmatched_items) == 1 and len(remaining_keys) == 1:
+        only_key = next(iter(remaining_keys))
+        unmatched_items[0]['startup'] = startup_by_machine[only_key]
+        unmatched_items[0]['startupInstanceId'] = only_key
+        remaining_keys.discard(only_key)
+        unmatched_items = []
+
+    for item in unmatched_items:
+        if app_wide_fetch_status:
+            item['startup'] = {'SummaryFetchStatus': app_wide_fetch_status}
+        else:
+            item['startup'] = None
+
+    orphan_startups = [
+        {'InstanceId': k, 'Startup': startup_by_machine[k]}
+        for k in sorted(remaining_keys)
+    ]
+
+    # --- 3. Assemble payload ---
+    payload = {
+        'name': name,
+        'resourceGroup': resource_group,
+        'instances': runtime_items,
+    }
+    if orphan_startups:
+        payload['orphanStartups'] = orphan_startups
+    if report:
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report
+        _troubleshoot_status_report.render_report(payload)
+        return None
+    return payload
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):

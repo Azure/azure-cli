@@ -2432,6 +2432,83 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
+helps['webapp troubleshoot'] = """
+type: group
+short-summary: Diagnose common Linux web app problems.
+long-summary: >
+    Preview command group that pairs built-in configuration checks (from
+    KuduLite on the worker) with per-instance runtime status and startup
+    summaries from ARM. Use when a Linux app is failing to start, returning
+    HTTP 502/503, or exhibiting other post-deployment misbehavior.
+"""
+
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface the last runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The most recent site runtime status error reported by App Service.
+    The runtime error recommendation section is only surfaced when the
+    error occurred within the last 15 minutes; older errors are still
+    included in the structured payload but are hidden from the `--report`
+    view.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show the runtime error, if any (JSON by default)
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+"""
+
+helps['webapp troubleshoot status'] = """
+type: command
+short-summary: Show site runtime status and recent startup summary for a Linux web app.
+long-summary: |
+    Aggregates two data sources:
+
+      - Site Runtime Status
+      - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
+        successful and failed startup attempts in the last 24h, plus the
+        most recent success and failure timestamps).
+
+    Use --instance to scope both to a single worker. By default the command
+    returns a structured payload so the standard `-o json/yaml/table` formatters
+    handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Show status for all instances of a web app (JSON by default)
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Show status scoped to a single worker instance
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --instance 7c2d9
+parameters:
+  - name: --instance
+    short-summary: Scope the report to a single worker instance.
+    long-summary: >
+        Accepts either the hex instanceId (from `az webapp list-instances`) or the
+        machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of
+        every instance seen in the last 24 hours.
+  - name: --report
+    short-summary: Print a human-readable, color-coded report instead of returning structured data.
+    long-summary: >
+        When set, the command writes a formatted report (overview table plus
+        per-instance Last runtime status and Startup summary) to stdout and
+        returns no machine-readable output. Omit --report to keep the default
+        structured payload that works with `-o json`, `-o yaml`, and `-o table`.
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
