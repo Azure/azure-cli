@@ -20,7 +20,7 @@ from packaging.version import parse
 from knack.log import get_logger
 logger = get_logger(__name__)
 
-WAIT_MESSAGE = ['Finding examples and documentation...']
+WAIT_MESSAGE = ['\nFinding examples and documentation...']
 
 # Display limits
 MAX_DOC_RESULTS = 2
