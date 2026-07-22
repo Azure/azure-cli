@@ -110,30 +110,20 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
         pool = client.begin_create_or_update.call_args.kwargs['resource'].as_dict()['properties']['pools'][0]
         self.assertNotIn('vmPriority', pool)
 
-    def test_create_no_wait_returns_poller_without_result(self):
+    def test_create_returns_poller_without_waiting(self):
+        """With supports_no_wait=True on the command, the CLI framework handles
+        wait vs. no-wait. The custom function must return the poller directly,
+        NOT call `.result()` (that would bypass the LRO wrapper)."""
         client = mock.Mock()
         poller = client.begin_create_or_update.return_value
 
         returned = compute_begin_create_or_update(
             client, self.RG, self.ACCOUNT, self.COMPUTE_NAME,
             self.LOCATION, self.POOL_NAME, self.INSTANCE_TYPE, self.NODE_COUNT,
-            no_wait=True,
         )
 
         self.assertIs(returned, poller)
         poller.result.assert_not_called()
-
-    def test_create_waits_and_returns_result_by_default(self):
-        client = mock.Mock()
-        poller = client.begin_create_or_update.return_value
-
-        returned = compute_begin_create_or_update(
-            client, self.RG, self.ACCOUNT, self.COMPUTE_NAME,
-            self.LOCATION, self.POOL_NAME, self.INSTANCE_TYPE, self.NODE_COUNT,
-        )
-
-        poller.result.assert_called_once()
-        self.assertEqual(returned, poller.result.return_value)
 
     # ---- list / show ----
 
@@ -151,19 +141,8 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
 
     # ---- delete ----
 
-    def test_delete_no_wait_returns_poller_without_result(self):
-        client = mock.Mock()
-        poller = client.begin_delete.return_value
-
-        returned = compute_delete(
-            client, self.RG, self.ACCOUNT, self.COMPUTE_NAME, no_wait=True,
-        )
-
-        client.begin_delete.assert_called_once_with(self.RG, self.ACCOUNT, self.COMPUTE_NAME)
-        self.assertIs(returned, poller)
-        poller.result.assert_not_called()
-
-    def test_delete_waits_and_returns_result_by_default(self):
+    def test_delete_returns_poller_without_waiting(self):
+        """Same contract as create: return the poller, let the CLI framework wait."""
         client = mock.Mock()
         poller = client.begin_delete.return_value
 
@@ -171,8 +150,9 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
             client, self.RG, self.ACCOUNT, self.COMPUTE_NAME,
         )
 
-        poller.result.assert_called_once()
-        self.assertEqual(returned, poller.result.return_value)
+        client.begin_delete.assert_called_once_with(self.RG, self.ACCOUNT, self.COMPUTE_NAME)
+        self.assertIs(returned, poller)
+        poller.result.assert_not_called()
 
 
 @live_only()

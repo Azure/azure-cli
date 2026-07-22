@@ -2669,8 +2669,6 @@ def compute_begin_create_or_update(
         compute_name=compute_name,
         resource=resource,
     )
-    if not no_wait:
-        return poller.result()
     return poller
 
 
@@ -2684,6 +2682,4 @@ def compute_show(client, resource_group_name, account_name, compute_name):
 
 def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):
     poller = client.begin_delete(resource_group_name, account_name, compute_name)
-    if not no_wait:
-        return poller.result()
     return poller
