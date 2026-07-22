@@ -385,11 +385,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     # Only suggest deployment command when no deployment method is already configured
-    if not using_webapp_up:
-        if not any([container_image_name, deployment_container_image_name,
-                    multicontainer_config_type, sitecontainers_app,
-                    deployment_source_url, deployment_local_git]):
-            logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    if not using_webapp_up and not any([container_image_name, deployment_container_image_name,
+                                        multicontainer_config_type, sitecontainers_app,
+                                        deployment_source_url, deployment_local_git]):
+        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
     return webapp
 
 
