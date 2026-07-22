@@ -82,6 +82,7 @@ Release History
 * `az network ddos-custom-policy`: Support specifying frontend IP configuration associations (#33413)
 * `az network traffic-manager profile create/update`: Add `--record-type` parameter to support record type filtering (#33503)
 * `az network private-endpoint-connection`: Add provider `Microsoft.HorizonDB/clusters` (#33644)
+* `az network virtual-appliance migration prepare/execute/commit/abort`: Add commands to migrate a Network Virtual Appliance to the new internal load balancer (ILB) architecture
 
 **Packaging**
 
