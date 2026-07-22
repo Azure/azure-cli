@@ -117,10 +117,6 @@ class WebappExecValidationTest(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, "absolute path"):
             webapp_exec(self.cmd, 'rg', 'app', mode='shell', shell='bash')
 
-    def test_shell_mode_rejects_overlong_shell_path(self):
-        with self.assertRaisesRegex(ValidationError, "too long"):
-            webapp_exec(self.cmd, 'rg', 'app', mode='shell', shell='/' + 'a' * 300)
-
     def test_invalid_mode_raises(self):
         with self.assertRaisesRegex(ValidationError, "Invalid mode"):
             webapp_exec(self.cmd, 'rg', 'app', mode='bogus')

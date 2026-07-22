@@ -50,7 +50,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
                                        UnclassifiedUserFault, AzureResponseError, AzureInternalError,
-                                       ArgumentUsageError, FileOperationError, AzureConnectionError)
+                                       ArgumentUsageError, FileOperationError)
 
 from .tunnel import TunnelServer
 

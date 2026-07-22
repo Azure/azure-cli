@@ -1994,6 +1994,15 @@ long-summary: |
     Use --shell-command to run a shell command line where shell operators (|, &&, >, etc.) work, e.g. "cat log.txt | grep error > out.txt".
     Check the parameters and examples below, including how to capture output to a file.
 examples:
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+  - name: Start an interactive shell session using a specific shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
   - name: Run a direct command in the container
     text: >
         az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
@@ -2018,15 +2027,6 @@ examples:
   - name: Execute a command on a deployment slot
     text: >
         az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command "touch newfile.txt"
-  - name: Start an interactive shell session with the web app container
-    text: >
-        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
-  - name: Start an interactive shell session on a specific instance
-    text: >
-        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
-  - name: Start an interactive shell session using a specific shell
-    text: >
-        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
 """
 
 helps['webapp delete'] = """

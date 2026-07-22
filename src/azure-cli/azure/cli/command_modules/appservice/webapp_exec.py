@@ -137,7 +137,9 @@ def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
             raise ValidationError("No instances found for this web app.")
         return sorted(instance_names)
 
-    requested = [i.strip() for i in instance.split(',')]
+    requested = [i.strip() for i in instance.split(',') if i.strip()]
+    if not requested:
+        raise ValidationError("--instance must contain at least one instance ID, or 'all'.")
     invalid = [i for i in requested if i not in instance_names]
     if invalid:
         raise ValidationError(
@@ -251,22 +253,23 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
     _send_terminal_resize(ws)
 
     # 2. stdin -> server, blocks the main thread until the session ends
-    if platform.system() == 'Windows':
-        _send_to_server_windows(ws, closed)
-    else:
-        _send_to_server_non_windows(ws, closed)
-
-    # Send loop returned: signal the read thread to stop, then clean up.
-    closed.set()
-
-    # Restore the original Windows console output mode, if changed.
-    if vt_state is not None:
-        import ctypes
-        ctypes.windll.kernel32.SetConsoleMode(vt_state[0], vt_state[1])
     try:
-        ws.close()
-    except Exception:  # pylint: disable=broad-except
-        pass
+        if platform.system() == 'Windows':
+            _send_to_server_windows(ws, closed)
+        else:
+            _send_to_server_non_windows(ws, closed)
+    finally:
+        # Send loop returned (or raised): signal the read thread to stop, then clean up.
+        closed.set()
+
+        # Restore the original Windows console output mode, if changed.
+        if vt_state is not None:
+            import ctypes
+            ctypes.windll.kernel32.SetConsoleMode(vt_state[0], vt_state[1])
+        try:
+            ws.close()
+        except Exception:  # pylint: disable=broad-except
+            pass
 
 
 def _enable_windows_vt_output():
