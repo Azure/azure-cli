@@ -3,15 +3,34 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Unit tests for `az cognitiveservices account compute` custom commands.
+"""Unit and scenario tests for `az cognitiveservices account compute` custom commands.
 
-These tests mock the SDK client and do not require Azure resources. They validate
-that the CLI custom functions build the request payload in the shape the RP
-expects and pass through the SDK client calls correctly.
+`CognitiveServicesComputeUnitTests` uses mocks — no Azure resources required and
+runs in every CI job. Covers the wire-payload shape (including the location
+dual-placement) and the `--no-wait` behaviour of `create`/`delete`.
+
+`CognitiveServicesComputeScenarioTests` are `@live_only()` scenario tests — they
+exercise the four commands end-to-end against a real Azure subscription. They
+are skipped in normal CI runs and executed only when `AZURE_TEST_RUN_LIVE=True`
+is set. This matches the pattern used by `test_agent.py` in this same module.
+
+Live prerequisites:
+  * Logged in via `az login` with access to a subscription that has
+    Cognitive Services / AI-Foundry account permissions.
+  * `Standard_D64_v3` (full-node) cluster-vCPU quota in the target region for
+    the create/show/delete test.
+
+To run the scenario tests locally:
+  AZURE_TEST_RUN_LIVE=True azdev test cognitiveservices.test_compute.CognitiveServicesComputeScenarioTests
 """
 
+import time
 import unittest
 from unittest import mock
+
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.scenario_tests.decorators import live_only
+from azure.cli.testsdk.scenario_tests.decorators import live_only
 
 from azure.cli.command_modules.cognitiveservices.custom import (
     compute_begin_create_or_update,
@@ -154,6 +173,95 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
 
         poller.result.assert_called_once()
         self.assertEqual(returned, poller.result.return_value)
+
+
+@live_only()
+class CognitiveServicesComputeScenarioTests(ScenarioTest):
+    """End-to-end scenario tests for the compute command group.
+
+    Decorated with @live_only() at the class level: these tests are automatically
+    skipped in normal CI runs and only execute when `AZURE_TEST_RUN_LIVE=True`.
+    Matches the live-only pattern in this same module (see test_agent.py's
+    `CognitiveServicesAgentTests`).
+
+    When run live they create a fresh Cognitive Services account per test, exercise
+    the compute commands, and tear the account down. No persistent resources.
+    """
+
+    @ResourceGroupPreparer(name_prefix='clitest_cs_compute', location='westcentralus')
+    def test_cognitiveservices_compute_list_empty(self, resource_group):
+        """Fresh account -> `compute list` returns an empty array."""
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cog', length=12),
+            'kind': 'AIServices',
+            'sku': 'S0',
+            'location': 'westcentralus',
+        })
+
+        self.cmd(
+            'az cognitiveservices account create -n {sname} -g {rg} '
+            '--kind {kind} --sku {sku} -l {location} --yes '
+            '--assign-identity --allow-project-management true',
+            checks=[self.check('name', '{sname}')],
+        )
+
+        self.cmd(
+            'az cognitiveservices account compute list -n {sname} -g {rg}',
+            checks=[self.check('length(@)', 0)],
+        )
+
+        self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='clitest_cs_compute', location='westcentralus')
+    def test_cognitiveservices_compute_create_show_delete(self, resource_group):
+        """Full lifecycle: create a compute (async), show it, list, delete."""
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cog', length=12),
+            'cname': self.create_random_name(prefix='comp', length=12),
+            'pname': self.create_random_name(prefix='pool', length=12),
+            'kind': 'AIServices',
+            'sku': 'S0',
+            'location': 'westcentralus',
+            'instance_type': 'Standard_D64_v3',
+        })
+
+        self.cmd(
+            'az cognitiveservices account create -n {sname} -g {rg} '
+            '--kind {kind} --sku {sku} -l {location} --yes '
+            '--assign-identity --allow-project-management true',
+            checks=[self.check('name', '{sname}')],
+        )
+
+        # Fire compute create with --no-wait so the test does not block for the
+        # ~10 min provisioning window while recording. Poll via `show` below.
+        self.cmd(
+            'az cognitiveservices account compute create -n {sname} -g {rg} '
+            '--compute-name {cname} --location {location} '
+            '--pool-name {pname} --instance-type {instance_type} --node-count 1 '
+            '--no-wait',
+        )
+
+        # RP is eventually-consistent on read after --no-wait create; give it a
+        # moment before `show`/`list` so the compute is indexed.
+        time.sleep(30)
+
+        self.cmd(
+            'az cognitiveservices account compute show -n {sname} -g {rg} '
+            '--compute-name {cname}',
+            checks=[self.check('name', '{cname}'), self.check('location', '{location}')],
+        )
+
+        self.cmd(
+            'az cognitiveservices account compute list -n {sname} -g {rg}',
+            checks=[self.check('length(@)', 1), self.check('[0].name', '{cname}')],
+        )
+
+        self.cmd(
+            'az cognitiveservices account compute delete -n {sname} -g {rg} '
+            '--compute-name {cname} --no-wait',
+        )
+
+        self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
 
 
 if __name__ == '__main__':
