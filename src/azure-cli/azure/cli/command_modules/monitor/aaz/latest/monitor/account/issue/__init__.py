@@ -9,9 +9,16 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._add_investigation_result import *
+from ._add_or_update_alert import *
+from ._add_or_update_resource import *
 from ._create import *
 from ._delete import *
+from ._fetch_background_visualization import *
+from ._fetch_investigation_result import *
 from ._list import *
+from ._list_alert import *
+from ._list_resource import *
+from ._set_background_visualization import *
 from ._show import *
 from ._update import *
-from ._wait import *

@@ -12,26 +12,28 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor account update",
+    "monitor account identity assign",
 )
-class Update(AAZCommand):
-    """Update a workspace
+class Assign(AAZCommand):
+    """Assign the user or system managed identities.
 
-    :example: Update monitor account tags
-        az monitor account update -n account-name -g rg --tags "{tag:test}"
+    :example: Assign a system-assigned managed identity to an Azure Monitor workspace
+        az monitor account identity assign -n myWorkspace -g myRG --system-assigned
+
+    :example: Assign a user-assigned managed identity to an Azure Monitor workspace
+        az monitor account identity assign -n myWorkspace -g myRG --user-assigned /subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity
     """
 
     _aaz_info = {
         "version": "2025-10-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03", "identity"],
         ]
     }
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -50,7 +52,6 @@ class Update(AAZCommand):
             options=["-n", "--name", "--azure-monitor-workspace-name"],
             help="The name of the Azure Monitor workspace.  The name is case insensitive",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^(?!-)[a-zA-Z0-9-]+[^-]$",
             ),
@@ -59,52 +60,32 @@ class Update(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "Identity"
-
-        # define Arg Group "Metrics"
+        # define Arg Group "Resource.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.enable_access_using_resource_permissions = AAZBoolArg(
-            options=["--enable-access-using-resource-permissions", "--enable-res-perm"],
-            arg_group="Metrics",
-            help="Flag that indicates whether to enable access using resource permissions.",
-            nullable=True,
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Resource.identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Resource.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.public_network_access = AAZStrArg(
-            options=["--public-network-access"],
-            arg_group="Properties",
-            help="Gets or sets allow or disallow public network access to Azure Monitor Workspace",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-
-        # define Arg Group "Resource"
-
-        _args_schema = cls._args_schema
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Resource",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.AzureMonitorWorkspacesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         self.AzureMonitorWorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -125,8 +106,19 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class AzureMonitorWorkspacesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -207,7 +199,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200)
+            _AssignHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -302,51 +294,33 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200_201)
+            _AssignHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("properties", AAZObjectType)
-            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "assign"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "assign"}})
 
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("metrics", AAZObjectType)
-                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
-
-            metrics = _builder.get(".properties.metrics")
-            if metrics is not None:
-                metrics.set_prop("enableAccessUsingResourcePermissions", AAZBoolType, ".enable_access_using_resource_permissions")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _AssignHelper:
+    """Helper class for Assign"""
 
     _schema_azure_monitor_workspace_resource_read = None
 
@@ -376,9 +350,7 @@ class _UpdateHelper:
         azure_monitor_workspace_resource_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        azure_monitor_workspace_resource_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        azure_monitor_workspace_resource_read.properties = AAZObjectType()
         azure_monitor_workspace_resource_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
@@ -589,4 +561,4 @@ class _UpdateHelper:
         _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
-__all__ = ["Update"]
+__all__ = ["Assign"]

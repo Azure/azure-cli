@@ -12,26 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "monitor account update",
+    "monitor account identity show",
 )
-class Update(AAZCommand):
-    """Update a workspace
-
-    :example: Update monitor account tags
-        az monitor account update -n account-name -g rg --tags "{tag:test}"
+class Show(AAZCommand):
+    """Show the details of managed identities.
     """
 
     _aaz_info = {
         "version": "2025-10-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03", "identity"],
         ]
     }
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -50,7 +46,6 @@ class Update(AAZCommand):
             options=["-n", "--name", "--azure-monitor-workspace-name"],
             help="The name of the Azure Monitor workspace.  The name is case insensitive",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^(?!-)[a-zA-Z0-9-]+[^-]$",
             ),
@@ -58,54 +53,11 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Identity"
-
-        # define Arg Group "Metrics"
-
-        _args_schema = cls._args_schema
-        _args_schema.enable_access_using_resource_permissions = AAZBoolArg(
-            options=["--enable-access-using-resource-permissions", "--enable-res-perm"],
-            arg_group="Metrics",
-            help="Flag that indicates whether to enable access using resource permissions.",
-            nullable=True,
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.public_network_access = AAZStrArg(
-            options=["--public-network-access"],
-            arg_group="Properties",
-            help="Gets or sets allow or disallow public network access to Azure Monitor Workspace",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-
-        # define Arg Group "Resource"
-
-        _args_schema = cls._args_schema
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Resource",
-            help="Resource tags.",
-            nullable=True,
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.AzureMonitorWorkspacesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
-        self.AzureMonitorWorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -116,17 +68,20 @@ class Update(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class AzureMonitorWorkspacesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -207,146 +162,13 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200)
+            _ShowHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class AzureMonitorWorkspacesCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200, 201]:
-                return self.on_200_201(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Monitor/accounts/{azureMonitorWorkspaceName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "MgmtErrorFormat"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "azureMonitorWorkspaceName", self.ctx.args.azure_monitor_workspace_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2025-10-03",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_azure_monitor_workspace_resource_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
-            )
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("properties", AAZObjectType)
-            _builder.set_prop("tags", AAZDictType, ".tags")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("metrics", AAZObjectType)
-                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
-
-            metrics = _builder.get(".properties.metrics")
-            if metrics is not None:
-                metrics.set_prop("enableAccessUsingResourcePermissions", AAZBoolType, ".enable_access_using_resource_permissions")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
-
-            return _instance_value
-
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_azure_monitor_workspace_resource_read = None
 
@@ -376,9 +198,7 @@ class _UpdateHelper:
         azure_monitor_workspace_resource_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        azure_monitor_workspace_resource_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        azure_monitor_workspace_resource_read.properties = AAZObjectType()
         azure_monitor_workspace_resource_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
@@ -589,4 +409,4 @@ class _UpdateHelper:
         _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
-__all__ = ["Update"]
+__all__ = ["Show"]
