@@ -2641,7 +2641,7 @@ def project_connection_update(
     return project_connection
 
 
-def compute_begin_create_or_update(
+def compute_begin_create_or_update(  # pylint: disable=unused-argument
         client, resource_group_name, account_name, compute_name,
         location, pool_name, instance_type, node_count,
         vm_priority=None, no_wait=False):
@@ -2680,6 +2680,6 @@ def compute_show(client, resource_group_name, account_name, compute_name):
     return client.get(resource_group_name, account_name, compute_name)
 
 
-def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):
+def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):  # pylint: disable=unused-argument
     poller = client.begin_delete(resource_group_name, account_name, compute_name)
     return poller
