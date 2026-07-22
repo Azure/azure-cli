@@ -14,6 +14,7 @@ from pathlib import Path
 
 from knack.log import get_logger
 from azure.cli.core.decorators import retry
+from azure.cli.core.util import sdk_no_wait
 
 import azure.core.rest
 
@@ -2641,7 +2642,7 @@ def project_connection_update(
     return project_connection
 
 
-def compute_begin_create_or_update(  # pylint: disable=unused-argument
+def compute_begin_create_or_update(
         client, resource_group_name, account_name, compute_name,
         location, pool_name, instance_type, node_count,
         vm_priority=None, no_wait=False):
@@ -2663,13 +2664,14 @@ def compute_begin_create_or_update(  # pylint: disable=unused-argument
     # 'location' as a kwarg, so it is set via the underlying dict-backed model.
     properties["location"] = location
     resource = Compute(location=location, properties=properties)
-    poller = client.begin_create_or_update(
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
         resource_group_name=resource_group_name,
         account_name=account_name,
         compute_name=compute_name,
         resource=resource,
     )
-    return poller
 
 
 def compute_list(client, resource_group_name, account_name):
@@ -2680,6 +2682,9 @@ def compute_show(client, resource_group_name, account_name, compute_name):
     return client.get(resource_group_name, account_name, compute_name)
 
 
-def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):  # pylint: disable=unused-argument
-    poller = client.begin_delete(resource_group_name, account_name, compute_name)
-    return poller
+def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name, account_name, compute_name,
+    )
