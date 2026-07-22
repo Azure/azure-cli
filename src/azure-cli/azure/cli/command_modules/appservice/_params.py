@@ -94,6 +94,11 @@ def load_arguments(self, _):
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('webapp status') as c:
+        c.argument('instance', options_list=['--instance'],
+                   help='show runtime status for a specific instance only. '
+                        "Run 'az webapp list-instances' to discover instance IDs.")
+
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')
         c.argument('resource_group_name', arg_type=resource_group_name_type)

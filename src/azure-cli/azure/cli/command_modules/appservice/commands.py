@@ -48,6 +48,11 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_webapp_status_output(result):
+    from .custom import format_webapp_status_output
+    return format_webapp_status_output(result)
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -142,6 +147,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
+        g.custom_command('status', 'show_webapp_status', table_transformer=transform_webapp_status_output)
         g.custom_command('list-runtimes', 'list_runtimes', table_transformer=transform_runtime_list_output)
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
