@@ -14471,6 +14471,31 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
                 '--vm-sku {vm_sku} '
             )
 
+    def test_vmss_zone_placement_policy_validation_include_exclude_conflict(self):
+        self.kwargs.update({
+            'rg': 'rgtest',
+            'vmss': 'vmss-zone-placement-invalid',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        with self.assertRaisesRegex(Exception, 'You can only specify one of --include-zones and --exclude-zones'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--zone-placement-policy Auto '
+                '--include-zones 1 '
+                '--exclude-zones 2 '
+                '--vm-sku {vm_sku} '
+            )
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_overprovision_')
     def test_vmss_zone_placement_policy_validation_overprovision_uniform(self, resource_group):
         self.kwargs.update({

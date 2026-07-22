@@ -1961,6 +1961,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
+    _validate_vmss_auto_zone_placement_include_exclude(namespace)
 # endregion
 
 
@@ -2706,7 +2707,14 @@ def _validate_vmss_create_host_group(cmd, namespace):
             )
 
 
+def _validate_vmss_auto_zone_placement_include_exclude(namespace):
+    if getattr(namespace, 'include_zones', None) and getattr(namespace, 'exclude_zones', None):
+        raise MutuallyExclusiveArgumentError('You can only specify one of --include-zones and --exclude-zones')
+
+
 def _validate_vmss_create_auto_zone_placement(namespace):
+    _validate_vmss_auto_zone_placement_include_exclude(namespace)
+
     zpp = getattr(namespace, 'zone_placement_policy', None)
     zones = getattr(namespace, 'zones', None)
     zone_balance = getattr(namespace, 'zone_balance', None)
