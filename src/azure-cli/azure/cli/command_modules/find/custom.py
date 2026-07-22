@@ -512,7 +512,7 @@ def format_results(query, docs_results, code_results):
         if examples:
             print("Examples")
             for title, command_lines, url in examples:
-                print(format_styled_text((Style.ACTION, "  - " + title)))
+                print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
                 for line in command_lines:
                     print("    " + line)
                 if url:
@@ -540,7 +540,7 @@ def format_results(query, docs_results, code_results):
         if docs:
             print("Documentation")
             for title, summary, url in docs:
-                print(format_styled_text((Style.ACTION, "  - " + title)))
+                print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
                 if summary:
                     print("    " + summary)
                 if url:
