@@ -194,7 +194,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 self._format_section_spacer()
                 self.builder.append_line(group)
 
-            self.builder.push_indent("  ")
+            self._push_indent()
 
             if not has_potential_changes and str_lower_eq(
                     change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
@@ -205,7 +205,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 has_potential_changes = True
 
             self._format_resource_change(change)
-            self.builder.pop_indent()
+            self._pop_indent()
 
         return True
 
@@ -257,7 +257,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 last_group = group
                 has_potential_deletions = False
 
-            self.builder.push_indent("  ")
+            self._push_indent()
 
             if not has_potential_deletions and str_lower_eq(
                     delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
@@ -269,7 +269,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 has_potential_deletions = True
 
             self._format_resource_heading_line(delete_change)
-            self.builder.pop_indent()
+            self._pop_indent()
 
         return printed
 
@@ -330,11 +330,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         diag_color = DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None)
 
         self.builder.append_line(f"{diagnostic.level.upper()}: [{diagnostic.code}]", diag_color)
-        self.builder.push_indent("  ")
+        self._push_indent()
         self.builder.append_line(f"Message: {diagnostic.message}", diag_color)
         if diagnostic.target:
             self.builder.append_line(f"Target: {diagnostic.target}", diag_color)
-        self.builder.pop_indent()
+        self._pop_indent()
 
     def _format_change(
         self,
@@ -409,9 +409,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         self.builder.append(symbol, color)
         self.builder.append(f" {property_path}: ")
-        self.builder.push_indent("  ")
+        self._push_indent()
         self.builder.append_line(json.dumps(inline_obj, indent=2), color, indent_new_lines=True)
-        self.builder.pop_indent()
+        self._pop_indent()
 
         return True
 
@@ -431,7 +431,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         property_path = self._get_change_path(array_change, parent_path)
         symbol, color = self._get_change_type_formatting(StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
 
-        self.builder.append_line(f"{symbol} {property_path}: ", color)
+        self.builder.append(symbol, color)
+        self.builder.append_line(f" {property_path}:")
         self._push_indent()
 
         print_array_indices = all(c.path for c in children)
