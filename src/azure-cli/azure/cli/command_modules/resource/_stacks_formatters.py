@@ -403,7 +403,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         parent_path: t.Optional[str] = None,
         is_array_item: bool = False
     ) -> bool:
-        inline_obj = change.after or change.before
+        inline_obj = change.after if change.after is not None else change.before
 
         if inline_obj is None:
             return False
@@ -416,7 +416,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.builder.append(f" {property_path}: ")
 
         self._push_indent()
-        self.builder.append_line(json.dumps(inline_obj, indent=2), color, indent_new_lines=True)
+
+        json_lines = json.dumps(inline_obj, indent=2).splitlines()
+        for i, json_line in enumerate(json_lines):
+            self.builder.append_line(json_line, color)
+
         self._pop_indent()
 
         return True

@@ -32,29 +32,22 @@ class ColoredStringBuilder:
     def build(self):
         return "".join(self._contents)
 
-    def append(self, value, color=None, no_indent=False, indent_new_lines=False):
+    def append(self, value, color=None, no_indent=False):
         if not no_indent and self._should_indent():
             self._contents.append(''.join(self._indents))
 
         if color:
             self._push_color(color)
 
-        if not no_indent and indent_new_lines:
-            lines = value.splitlines()
-            for i, line in enumerate(lines):
-                self.append(line)
-                if i < len(lines) - 1:
-                    self.append('\n', no_indent=True)
-        else:
-            self._contents.append(str(value))
+        self._contents.append(str(value))
 
         if color:
             self._pop_color()
 
         return self
 
-    def append_line(self, value="", color=None, no_indent=False, indent_new_lines=False):
-        self.append(value, color, no_indent, indent_new_lines)
+    def append_line(self, value="", color=None, no_indent=False):
+        self.append(value, color, no_indent)
         return self.append("\n", no_indent=True)
 
     def new_color_scope(self, color):
