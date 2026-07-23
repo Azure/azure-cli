@@ -197,9 +197,10 @@ def load_command_table(self, _):
         g.custom_command('download', 'flexible_server_log_download')
 
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backup_sdk,
+                            custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_backup) as g:
         g.command('create', 'begin_create')
-        g.command('delete', 'begin_delete')
+        g.custom_command('delete', 'flexible_backup_delete')
 
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backups_sdk,
                             client_factory=cf_mysql_flexible_backups) as g:

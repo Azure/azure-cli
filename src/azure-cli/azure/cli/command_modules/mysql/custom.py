@@ -278,7 +278,8 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
+        # Setting to None omits created_time from the serialized output (matches prior behavior).
+        f.created_time = None
         files.append(f)
 
     return files
@@ -1322,7 +1323,17 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
         value=configurations
     )
 
-    return client.begin_batch_update(resource_group_name, server_name, parameters)
+    # The batch update is a long-running operation whose final response body is empty with the
+    # current SDK, so surface the operation status to keep the command output meaningful.
+    poller = client.begin_batch_update(resource_group_name, server_name, parameters)
+    poller.result()
+    return {'status': poller.status()}
+
+
+def flexible_backup_delete(client, resource_group_name, server_name, backup_name):
+    # Invoke the operation as a bound method so the SDK api-version validation decorator
+    # receives the client as its first positional argument.
+    return client.begin_delete(resource_group_name, server_name, backup_name)
 
 
 # Replica commands

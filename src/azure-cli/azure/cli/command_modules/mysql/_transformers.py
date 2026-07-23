@@ -92,7 +92,8 @@ def transform_backup(result):
         result.name = result.name[62:]
 
     if hasattr(result, 'system_data'):
-        delattr(result, 'system_data')
+        # Setting to None omits system_data from the serialized output (matches prior behavior).
+        result.system_data = None
 
     return result
 
