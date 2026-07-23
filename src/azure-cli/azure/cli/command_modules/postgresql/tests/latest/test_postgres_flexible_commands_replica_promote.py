@@ -50,7 +50,6 @@ class ReplicaCommandsTest(unittest.TestCase):
         )
 
         mock_client.begin_update.assert_called_once()
-        _, call_kwargs = mock_client.begin_update.call_args
         # begin_update is called as positional: (resource_group, name, params)
         call_args = mock_client.begin_update.call_args[0]
         params = call_args[2]
