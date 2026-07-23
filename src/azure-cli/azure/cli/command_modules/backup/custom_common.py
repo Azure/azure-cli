@@ -123,7 +123,8 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
     else:
         if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
             client = protected_items_cf(cmd.cli_ctx)
-            return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
+            item = client.get(vault_name, resource_group_name, fabric_name, container_name, name)
+            return custom_help.set_container_subscription_id(item)
 
     items = list_items(cmd, client, resource_group_name, vault_name, workload_type, container_name,
                        container_type, use_secondary_region)
@@ -158,6 +159,8 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
         client = backup_protected_items_crr_cf(cmd.cli_ctx)
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = custom_help.get_list_from_paged_response(items)
+    for item in paged_items:
+        custom_help.set_container_subscription_id(item)
 
     if container_name:
         if custom_help.is_native_name(container_name):

@@ -38,7 +38,7 @@ Archive Contents:
     ├── bin/
     │   └── az (entry script - Homebrew or AZ_PYTHON)
     └── lib/
-        └── python3.13
+        └── python3.14
             └── site-packages/
                 ├── azure/
                 ├── msal/
@@ -81,7 +81,7 @@ TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.ta
 
 # Python version we're building for (must match Homebrew python@X.Y)
 # Can be overridden via PYTHON_MAJOR_MINOR env var
-PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.13")
+PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.14")
 PYTHON_BIN = "python3"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 LAUNCHER_TEMPLATE_PATH = TEMPLATE_DIR / "az_launcher.sh.in"
@@ -138,8 +138,8 @@ def _load_template(path: Path) -> str:
 def find_homebrew_python() -> Path:
     """Find necessary Homebrew Python x.yz installation."""
     candidates = [
-        Path(f"/opt/homebrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python3"),
-        Path(f"/usr/local/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python3"),
+        Path(f"/opt/homebrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
+        Path(f"/usr/local/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
         Path(f"/opt/homebrew/bin/python{PYTHON_MAJOR_MINOR}"),
         Path(f"/usr/local/bin/python{PYTHON_MAJOR_MINOR}"),
     ]
@@ -157,7 +157,7 @@ def find_homebrew_python() -> Path:
             check=True,
         )
         prefix = Path(result.stdout.strip())
-        python_path = prefix / "libexec" / "bin" / "python3"
+        python_path = prefix / "libexec" / "bin" / "python"
         if python_path.exists() and _is_python_version(python_path, PYTHON_MAJOR_MINOR):
             print(f"Found Homebrew Python via brew --prefix: {python_path}")
             return python_path

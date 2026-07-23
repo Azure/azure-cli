@@ -14,7 +14,7 @@ import datetime
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
+                               StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
@@ -816,7 +816,8 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
     def test_functionapp_flex_migration_list_candidates(self, resource_group, storage_account):
         eligible_functionapp_name = self.create_random_name('consumption-func', 24)
         noneligible_slots_functionapp_name = self.create_random_name('noneligible-slots-func', 40)
-        noneligible_cert_functionapp_name = self.create_random_name('noneligible-cert-func', 40)
+        eligible_cert_functionapp_name = self.create_random_name('eligible-cert-func', 40)
+
         slot_name = self.create_random_name(prefix='slotname', length=24)
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
@@ -828,9 +829,9 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, noneligible_slots_functionapp_name, slot_name))
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_cert_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, eligible_cert_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
-        self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, noneligible_cert_functionapp_name))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, eligible_cert_functionapp_name))
 
         candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
 
@@ -838,21 +839,25 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
 
         self.assertTrue(eligible_functionapp_name in candidate_names)
         self.assertTrue(noneligible_slots_functionapp_name in candidate_names)
-        self.assertTrue(noneligible_cert_functionapp_name not in candidate_names)
+        # Apps with WEBSITE_LOAD_CERTIFICATES are now eligible with a warning note
+        self.assertTrue(eligible_cert_functionapp_name in candidate_names)
+        cert_candidate = next((c for c in candidates if c.get('name') == eligible_cert_functionapp_name), None)
+        self.assertIsNotNone(cert_candidate)
+        self.assertIn('WEBSITE_LOAD_CERTIFICATES', cert_candidate.get('note', ''))
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_migration_private_cert_list_candidates(self, resource_group, storage_account):
-        noneligible_privatekey_functionapp_name = self.create_random_name('noneligible-privatekey-func', 40)
+        eligible_ssl_functionapp_name = self.create_random_name('eligible-ssl-func', 40)
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_privatekey_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, eligible_ssl_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
-        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, noneligible_privatekey_functionapp_name, pfx_file, cert_password, "test123"), checks=[
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, eligible_ssl_functionapp_name, pfx_file, cert_password, "test123"), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint),
             JMESPathCheck('name', 'test123')
         ])
@@ -861,20 +866,24 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
 
         candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
 
-        self.assertTrue(noneligible_privatekey_functionapp_name in candidate_names)
+        self.assertTrue(eligible_ssl_functionapp_name in candidate_names)
 
-        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, noneligible_privatekey_functionapp_name, cert_thumbprint, 'SNI'), checks=[
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, eligible_ssl_functionapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
-                noneligible_privatekey_functionapp_name), 'SniEnabled'),
+                eligible_ssl_functionapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
-                noneligible_privatekey_functionapp_name), cert_thumbprint)
+                eligible_ssl_functionapp_name), cert_thumbprint)
         ])
 
         candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
 
         candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
 
-        self.assertTrue(noneligible_privatekey_functionapp_name not in candidate_names)
+        # Apps with SSL bindings are now eligible with a warning note
+        self.assertTrue(eligible_ssl_functionapp_name in candidate_names)
+        ssl_candidate = next((c for c in candidates if c.get('name') == eligible_ssl_functionapp_name), None)
+        self.assertIsNotNone(ssl_candidate)
+        self.assertIn('TLS/SSL certificates', ssl_candidate.get('note', ''))
 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
@@ -1602,6 +1611,159 @@ class FunctionAppFlex(LiveScenarioTest):
                                           .format(resource_group, functionapp_name)).get_output_in_json()
         self.assertEqual(update_strategy_config['type'], 'RollingUpdate')
 
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_ssl_commands(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('flexssltest', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Upload SSL certificate with --load-to-code parameter
+        self.cmd('functionapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {} --load-to-code true'
+                 .format(resource_group, functionapp_name, pfx_file, cert_password, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # List SSL certificates with -n parameter (site-scoped for Flex)
+        certs = self.cmd('functionapp config ssl list -g {} -n {}'
+                         .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(len(certs) >= 1)
+        cert_names = [c['name'] for c in certs]
+        self.assertIn(cert_name, cert_names)
+
+        # Show SSL certificate with -n parameter
+        cert = self.cmd('functionapp config ssl show -g {} -n {} --certificate-name {}'
+                        .format(resource_group, functionapp_name, cert_name)).get_output_in_json()
+        self.assertEqual(cert['thumbprint'], cert_thumbprint)
+
+        # Delete SSL certificate with -n parameter
+        self.cmd('functionapp config ssl delete -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint))
+
+        # Verify certificate is deleted
+        certs_after = self.cmd('functionapp config ssl list -g {} -n {}'
+                               .format(resource_group, functionapp_name)).get_output_in_json()
+        cert_names_after = [c['name'] for c in certs_after]
+        self.assertNotIn(cert_name, cert_names_after)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    @KeyVaultPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP, name_prefix='kv-flex-ssl', name_len=20, additional_params='--enable-rbac-authorization false')
+    def test_functionapp_flex_ssl_import(self, resource_group, storage_account, key_vault):
+        functionapp_name = self.create_random_name('flexsslimport', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-import-cert'
+        kv_cert_name = 'test-import-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Enable managed identity for the function app (required for MSI-based certificate import)
+        identity_result = self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        principal_id = identity_result['principalId']
+
+        # Set Key Vault policy for App Service resource provider
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
+
+        # Set Key Vault policy for the function app's managed identity (required for MSI-based import)
+        self.cmd('keyvault set-policy -g {} --name {} --object-id {} --secret-permissions get'.format(
+            resource_group, key_vault, principal_id))
+
+        # Import certificate to Key Vault
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            kv_cert_name, key_vault, pfx_file, cert_password))
+
+        # Import SSL certificate from Key Vault with --load-to-code and --enable-using-msi parameters
+        self.cmd('functionapp config ssl import -g {} -n {} --key-vault {} --key-vault-certificate-name {} --certificate-name {} --load-to-code true --enable-using-msi true'
+                 .format(resource_group, functionapp_name, key_vault, kv_cert_name, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # Verify certificate is listed
+        certs = self.cmd('functionapp config ssl list -g {} -n {}'
+                         .format(resource_group, functionapp_name)).get_output_in_json()
+        cert_names = [c['name'] for c in certs]
+        self.assertIn(cert_name, cert_names)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_ssl_bind_unbind(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('flexsslbind', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-bind-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Upload SSL certificate
+        self.cmd('functionapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'
+                 .format(resource_group, functionapp_name, pfx_file, cert_password, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # Bind SSL certificate to the default hostname
+        self.cmd('functionapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                functionapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                functionapp_name), cert_thumbprint)
+        ])
+
+        # Unbind SSL certificate from the hostname
+        self.cmd('functionapp config ssl unbind -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                functionapp_name), 'Disabled')
+        ])
+
+        # Clean up - delete the certificate
+        self.cmd('functionapp config ssl delete -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint))
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_managed_ssl_cert_create(self, resource_group, storage_account):
+        """Test create_managed_ssl_cert on Flex Consumption function apps.
+
+        This test validates the Flex-specific path in create_managed_ssl_cert which uses
+        site_certificates.create_or_update instead of certificates.create_or_update.
+        """
+        functionapp_name = self.create_random_name('flexsslcreate', 40)
+        test_hostname = 'test.customdomain.com'
+        cert_name = 'test-managed-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Test that --slot is rejected for Flex Consumption apps
+        self.cmd('functionapp config ssl create -g {} -n {} --hostname {} --slot staging'
+                 .format(resource_group, functionapp_name, test_hostname),
+                 expect_failure=True)
+
+        # Test that managed certificate creation fails with validation error when hostname is not registered
+        # This validates the Flex path is being taken (site_certificates endpoint)
+        self.cmd('functionapp config ssl create -g {} -n {} --hostname {} --certificate-name {}'
+                 .format(resource_group, functionapp_name, test_hostname, cert_name),
+                 expect_failure=True)
+
 
 class FunctionAppManagedEnvironment(ScenarioTest):
     @AllowLargeResponse()
@@ -2044,7 +2206,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('powerShellVersion', '7.4')])
+            JMESPathCheck('powerShellVersion', '7.6')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2556,7 +2718,7 @@ class FunctionAppServicePlan(ScenarioTest):
             JMESPathCheck('sku.name', 'EP1'),
             JMESPathCheck('sku.capacity', 1)
         ])
-        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, plan))
+        self.cmd('functionapp plan delete -g {} -n {} -y'.format(resource_group, plan))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -3748,13 +3910,13 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('powerShellVersion', '7.4')
+            JMESPathCheck('powerShellVersion', '7.6')
         ])
 
         time.sleep(60)
-        self.cmd('functionapp config set -g {} -n {} --powershell-version 7.4'
+        self.cmd('functionapp config set -g {} -n {} --powershell-version 7.6'
                  .format(resource_group, functionapp_name)).assert_with_checks([
-                     JMESPathCheck('powerShellVersion', '7.4')])
+                     JMESPathCheck('powerShellVersion', '7.6')])
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 

@@ -50,8 +50,8 @@ jobs:
       fullTest: true
       jobName: 'FullTest'
 
-- job: AutomationFullTestPython313ProfileLatest
-  displayName: Automation Full Test Python313 Profile Latest
+- job: AutomationFullTestPython314ProfileLatest
+  displayName: Automation Full Test Python314 Profile Latest
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -77,7 +77,7 @@ jobs:
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
-      pythonVersion: '3.13'
+      pythonVersion: '3.14'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'

@@ -18,16 +18,14 @@ from azure.cli.core.aaz import *
 class ListVmss(AAZCommand):
     """List VirtualMachineScaleSet resources by Fleet
 
-    List VirtualMachineScaleSet resources by Fleet
-
     :example: Fleets_ListVirtualMachineScaleSets
-        az azure-fleet virtual-machine-scale-set list --resource-group rgazurefleet --name myFleet
+        az compute-fleet list-vmss --resource-group rgazurefleet --name myFleet
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachinescalesets", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachinescalesets", "2026-04-01-preview"],
         ]
     }
 
@@ -127,7 +125,7 @@ class ListVmss(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01-preview",
                     required=True,
                 ),
             }

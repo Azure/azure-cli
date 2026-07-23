@@ -1041,21 +1041,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and url.lower().startswith('https://'):
         # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # If url's origin matches the ARM endpoint, like `https://management.azure.com/`,
             # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
             # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 resource = endpoints.active_directory_resource_id
             else:
-                from azure.cli.core.cloud import CloudEndpointNotSetException
-                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                    try:
-                        value = getattr(endpoints, p)
-                    except CloudEndpointNotSetException:
-                        continue
-                    if isinstance(value, str) and url.lower().startswith(value.lower()):
-                        resource = value
-                        break
+                resource = match_cloud_endpoint(url, cli_ctx)
         if resource:
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
@@ -1063,7 +1055,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 token_subscription = _extract_subscription_id(url)
             if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
@@ -1208,6 +1200,92 @@ def urlretrieve(url):
     from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def is_same_origin(url, endpoint):
+    """Check whether ``url`` and ``endpoint`` share the same origin (scheme + host + port).
+
+    This performs an exact origin comparison rather than substring or prefix matching, so a
+    malicious host such as ``https://management.azure.com.attacker`` is not mistaken for
+    the trusted endpoint ``https://management.azure.com``. It is intended for validating that a
+    URL points to a trusted endpoint before sensitive data (e.g., an Azure access token) is sent
+    to it.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param endpoint: The trusted endpoint to validate against, e.g., ``https://management.azure.com/``.
+    :return: ``True`` if both share the same origin, otherwise ``False``.
+    :rtype: bool
+    """
+    from urllib.parse import urlparse
+
+    if not isinstance(url, str) or not isinstance(endpoint, str):
+        return False
+
+    try:
+        url_parts = urlparse(url)
+        endpoint_parts = urlparse(endpoint)
+
+    except (TypeError, ValueError):
+        return False
+
+    # Require a real host on both sides to avoid false positives against non-URL endpoint values.
+    # `hostname` (rather than `netloc`) is used so that userinfo tricks like
+    # `https://management.azure.com@attacker` resolve to the actual host `attacker`.
+    if not url_parts.hostname or not endpoint_parts.hostname:
+        return False
+
+    def _effective_port(parts):
+        # Treat a missing port as the scheme's default port so that, e.g.,
+        # `https://management.azure.com:443/` and `https://management.azure.com/` are equivalent.
+        if parts.port is not None:
+            return parts.port
+
+        return {'http': 80, 'https': 443}.get(parts.scheme.lower())
+
+    try:
+        if _effective_port(url_parts) != _effective_port(endpoint_parts):
+            return False
+
+    except ValueError:
+        return False
+
+    return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
+            url_parts.hostname.lower() == endpoint_parts.hostname.lower())
+
+
+def match_cloud_endpoint(url, cli_ctx):
+    """Return the active cloud endpoint that shares the same origin as ``url``.
+
+    :param url: The URL to match, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: The matching endpoint value, or ``None`` if no endpoint shares ``url``'s origin.
+    :rtype: str or None
+    """
+    from azure.cli.core.cloud import CloudEndpointNotSetException
+
+    endpoints = cli_ctx.cloud.endpoints
+    for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+        try:
+            value = getattr(endpoints, p)
+
+        except CloudEndpointNotSetException:
+            continue
+
+        if isinstance(value, str) and is_same_origin(url, value):
+            return value
+
+    return None
+
+
+def is_trusted_cloud_endpoint(url, cli_ctx):
+    """Check whether ``url`` shares the same origin as any endpoint of the active cloud.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: ``True`` if ``url`` shares the same origin as any cloud endpoint, otherwise ``False``.
+    :rtype: bool
+    """
+    return match_cloud_endpoint(url, cli_ctx) is not None
 
 
 def parse_proxy_resource_id(rid):

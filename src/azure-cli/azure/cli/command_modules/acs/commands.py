@@ -11,10 +11,12 @@ from azure.cli.command_modules.acs._client_factory import (
     cf_snapshots,
     cf_trustedaccess_role,
     cf_trustedaccess_role_binding,
-    cf_machines
+    cf_machines,
+    cf_identity_bindings
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
+    aks_agentpool_rollback_versions_table_format,
     aks_namespace_list_table_format,
     aks_agentpool_show_table_format,
     aks_list_nodepool_snapshot_table_format,
@@ -99,6 +101,14 @@ def load_command_table(self, _):
         client_factory=cf_trustedaccess_role_binding
     )
 
+    identity_bindings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_operations#IdentityBindingsOperations.{}',
+        operation_group='identity_bindings',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_identity_bindings
+    )
+
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk,
                             client_factory=cf_managed_clusters) as g:
@@ -176,6 +186,10 @@ def load_command_table(self, _):
         g.custom_command('update', 'aks_agentpool_update',
                          supports_no_wait=True)
         g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
+        g.custom_command('get-rollback-versions', 'aks_agentpool_get_rollback_versions',
+                         table_transformer=aks_agentpool_rollback_versions_table_format)
+        g.custom_command('rollback', 'aks_agentpool_rollback',
+                         supports_no_wait=True)
         g.custom_command('upgrade', 'aks_agentpool_upgrade',
                          supports_no_wait=True)
         g.custom_command('scale', 'aks_agentpool_scale', supports_no_wait=True)
@@ -260,6 +274,13 @@ def load_command_table(self, _):
         g.custom_command('update', 'aks_trustedaccess_role_binding_update')
         g.custom_command(
             'delete', 'aks_trustedaccess_role_binding_delete', confirmation=True)
+
+    # AKS identity binding commands
+    with self.command_group('aks identity-binding', identity_bindings_sdk, client_factory=cf_identity_bindings) as g:
+        g.custom_command('create', 'aks_identity_binding_create', supports_no_wait=True)
+        g.custom_command('delete', 'aks_identity_binding_delete', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'aks_identity_binding_show')
+        g.custom_command('list', 'aks_identity_binding_list')
 
     # AKS mesh commands
     with self.command_group('aks mesh', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:

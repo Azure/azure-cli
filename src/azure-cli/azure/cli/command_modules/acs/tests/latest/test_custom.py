@@ -25,8 +25,12 @@ from azure.cli.command_modules.acs.addonconfiguration import (
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_agentpool_get_rollback_versions,
+    aks_agentpool_rollback,
+    aks_agentpool_upgrade,
     aks_enable_addons,
     aks_stop,
+    aks_upgrade,
     is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
@@ -968,6 +972,51 @@ class TestAKSCommand(unittest.TestCase):
         )
         self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
 
+    def test_aks_upgrade_node_image_only_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during --node-image-only to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+
+        self.client.get = mock.Mock(return_value=mc)
+
+        with mock.patch("azure.cli.command_modules.acs.custom.cf_agent_pools") as mock_cf, \
+             mock.patch("azure.cli.command_modules.acs.custom._upgrade_single_nodepool_image_version") as mock_upgrade:
+            mock_cf.return_value = mock.Mock()
+
+            aks_upgrade(self.cmd, self.client, "rg", "name", node_image_only=True, yes=True)
+
+            # Only the VMSS pool should be upgraded; the Machines mode pool must be skipped.
+            upgraded_pools = [call.args[4] for call in mock_upgrade.call_args_list]
+            self.assertNotIn("machinespool", upgraded_pools)
+            self.assertIn("nodepool1", upgraded_pools)
+
+    def test_aks_upgrade_kubernetes_version_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during Kubernetes version upgrade to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+        mc.service_principal_profile = None
+
+        self.client.get = mock.Mock(return_value=mc)
+        self.client.begin_create_or_update = mock.Mock(return_value=None)
+
+        aks_upgrade(self.cmd, self.client, "rg", "name", kubernetes_version="1.25.0", yes=True)
+
+        # Machines mode pool must not have orchestrator_version set; VMSS pool must be upgraded.
+        self.assertIsNone(machines_pool.orchestrator_version)
+        self.assertEqual(vmss_pool.orchestrator_version, "1.25.0")
+
 
 class TestRunCommand(unittest.TestCase):
     def test_get_command_context_invalid_file(self):
@@ -1453,6 +1502,123 @@ class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
         mock_ensure.assert_called_once()
         _, kwargs = mock_ensure.call_args
         self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+
+class AksAgentpoolUpgradeTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_upgrade_sets_max_unavailable(self, mock_sdk_no_wait):
+        """Test that max_unavailable is set on upgrade_settings during agentpool upgrade."""
+        AgentPoolUpgradeSettings = self.cmd.get_models(
+            "AgentPoolUpgradeSettings",
+            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+            operation_group="managed_clusters",
+        )
+        instance = mock.Mock()
+        instance.orchestrator_version = "1.32.0"
+        instance.provisioning_state = "Succeeded"
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
+
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_agentpool_upgrade(
+            self.cmd,
+            client,
+            resource_group_name="rg",
+            cluster_name="cluster",
+            nodepool_name="nodepool1",
+            kubernetes_version="1.33.0",
+            max_unavailable="5",
+            yes=True,
+        )
+
+        self.assertEqual(instance.upgrade_settings.max_unavailable, "5")
+        mock_sdk_no_wait.assert_called_once()
+
+
+class AksAgentpoolRollbackTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    def test_aks_agentpool_get_rollback_versions_returns_recently_used_versions(self):
+        versions = [
+            mock.Mock(
+                orchestrator_version="1.32.1",
+                node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
+                timestamp=datetime.datetime(2026, 5, 1),
+            )
+        ]
+        upgrade_profile = mock.Mock(recently_used_versions=versions)
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+
+        result = aks_agentpool_get_rollback_versions(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        self.assertEqual(result, versions)
+        client.get_upgrade_profile.assert_called_once_with("rg", "cluster", "nodepool1")
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_uses_most_recent_version(self, mock_sdk_no_wait, mock_cf_managed_clusters):
+        older_version = mock.Mock(
+            orchestrator_version="1.31.9",
+            node_image_version="AKSUbuntu-2204gen2containerd-202604.10.0",
+            timestamp=datetime.datetime(2026, 4, 1),
+        )
+        most_recent_version = mock.Mock(
+            orchestrator_version="1.32.1",
+            node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
+            timestamp=datetime.datetime(2026, 5, 1),
+        )
+        upgrade_profile = mock.Mock(recently_used_versions=[older_version, most_recent_version])
+        agentpool = mock.Mock()
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+        client.get.return_value = agentpool
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(auto_upgrade_profile=None)
+        mock_sdk_no_wait.return_value = "rollback-result"
+
+        result = aks_agentpool_rollback(
+            self.cmd,
+            client,
+            resource_group_name="rg",
+            cluster_name="cluster",
+            nodepool_name="nodepool1",
+            aks_custom_headers="Header=Value",
+            if_match="etag",
+            no_wait=True,
+        )
+
+        self.assertEqual(result, "rollback-result")
+        self.assertEqual(agentpool.orchestrator_version, "1.32.1")
+        self.assertEqual(agentpool.node_image_version, "AKSUbuntu-2204gen2containerd-202605.12.0")
+        mock_sdk_no_wait.assert_called_once()
+        args, kwargs = mock_sdk_no_wait.call_args
+        self.assertEqual(
+            args[:6],
+            (True, client.begin_create_or_update, "rg", "cluster", "nodepool1", agentpool),
+        )
+        self.assertEqual(kwargs["headers"], {"Header": "Value"})
+        self.assertEqual(kwargs["etag"], "etag")
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_raises_when_no_recent_versions(self, mock_sdk_no_wait, mock_cf_managed_clusters):
+        upgrade_profile = mock.Mock(recently_used_versions=[])
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = upgrade_profile
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(auto_upgrade_profile=None)
+
+        with self.assertRaises(CLIError):
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_sdk_no_wait.assert_not_called()
 
 
 if __name__ == "__main__":

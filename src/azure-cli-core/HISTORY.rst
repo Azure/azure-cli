@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.88.0
+++++++
+* Resolve CVE-2026-48526 (#33562)
+* Update global policy argument `--acquire-policy-token` to pick up new api-version and propagate correlation-id (#33661)
+
+2.87.0
+++++++
+* Resolve CVE-2026-44431 (#33351)
+* Resolve CVE-2026-44432 (#33351)
+* `az login`: Support Entra agentic session differentiation for Copilot agent requests (#33309)
+* Resolve CVE-2026-45409 (#33401)
+
 2.86.0
 ++++++
 * Resolve CVE-2025-15467 (#33201)
