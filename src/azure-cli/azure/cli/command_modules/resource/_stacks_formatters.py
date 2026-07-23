@@ -361,10 +361,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             if self._format_primitive_change(change, parent_path, is_array_item):
                 return True
         elif value_type is list:
-            if self._format_array_changes(change, parent_path):
+            if self._format_array_changes(change, parent_path, is_array_item):
                 return True
         elif value_type is dict:
-            if self._format_object_change(change, parent_path):
+            if self._format_object_change(change, parent_path, is_array_item):
                 return True
 
         return False
@@ -375,7 +375,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange,
             StackModels.DeploymentStacksChangeDeltaDenySettings]],
-        parent_path: t.Optional[str] = None
+        parent_path: t.Optional[str] = None,
+        is_array_item: bool = False
     ) -> bool:
         if not object_change:
             return False
@@ -385,7 +386,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         if not children or len(children) == 0:
             if hasattr(object_change, "change_type"):
-                return self._format_inline_object_change(object_change, parent_path)
+                return self._format_inline_object_change(object_change, parent_path, is_array_item=is_array_item)
             return False
 
         printed = False
@@ -397,18 +398,23 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
     def _format_inline_object_change(
-        self, change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
+        self,
+        change: StackModels.DeploymentStacksWhatIfPropertyChange,
+        parent_path: t.Optional[str] = None,
+        is_array_item: bool = False
     ) -> bool:
         inline_obj = change.after or change.before
 
         if inline_obj is None:
             return False
 
-        property_path = self._get_change_path(change, parent_path)
         symbol, color = self._get_change_type_formatting(change.change_type)
 
-        self.builder.append(symbol, color)
-        self.builder.append(f" {property_path}: ")
+        if not is_array_item:
+            property_path = self._get_change_path(change, parent_path)
+            self.builder.append(symbol, color)
+            self.builder.append(f" {property_path}: ")
+
         self._push_indent()
         self.builder.append_line(json.dumps(inline_obj, indent=2), color, indent_new_lines=True)
         self._pop_indent()
@@ -416,13 +422,16 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return True
 
     def _format_array_changes(
-        self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
+        self,
+        array_change: StackModels.DeploymentStacksWhatIfPropertyChange,
+        parent_path: t.Optional[str] = None,
+        is_array_item: bool = False
     ) -> bool:
         children = array_change.children
 
         if not children or len(children) == 0:
             if hasattr(array_change, "change_type"):
-                return self._format_inline_object_change(array_change, parent_path)
+                return self._format_inline_object_change(array_change, parent_path, is_array_item=is_array_item)
             return False
 
         if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
