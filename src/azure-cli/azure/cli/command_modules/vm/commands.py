@@ -58,6 +58,19 @@ def load_command_table(self, _):
         client_factory=cf_img_bldr_image_templates,
     )
 
+    monitor_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
+        exception_handler=monitor_exception_handler
+    )
+
+    metric_definitions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
+        resource_type=ResourceType.MGMT_MONITOR,
+        client_factory=cf_metric_def,
+        operation_group='metric_definitions',
+        exception_handler=monitor_exception_handler
+    )
+
     with self.command_group("ppg"):
         from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
