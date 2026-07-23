@@ -19,110 +19,131 @@ from datetime import datetime, timezone
 from azure.cli.core.style import Style, print_styled_text
 
 
-def render_report(payload):
-    """Print the human-readable report (Site Runtime Status + per-instance Startup summary).
-    Invoked by 'az webapp troubleshoot status' when --report is passed."""
-    instances = payload.get('instances') or []
-    app_name = payload.get('name') or '<webapp>'
-    resource_group = payload.get('resourceGroup')
-
-    def _out(*objs):
-        print_styled_text(*objs, file=sys.stdout)
-
-    def _row(*objs):
-        _out(list(objs))
-
+def _emit_header(instances, orphan_startups, app_name, emit):
+    """Emit the top-of-report header. Returns False when there's nothing to render
+    (empty instances AND no orphan startups) so the caller can bail out early."""
     if not instances:
-        orphan_startups = payload.get('orphanStartups') or []
         if not orphan_startups:
-            _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}'. "
+            emit((Style.PRIMARY, "No per-instance runtime status was returned for '{}'. "
                                  "Please visit the Azure Portal for further diagnosis.".format(app_name)))
-            return
-        _out('')
-        _out((Style.PRIMARY, "No per-instance runtime status was returned for '{}', "
+            return False
+        emit('')
+        emit((Style.PRIMARY, "No per-instance runtime status was returned for '{}', "
                              "but startup summaries were available. "
                              "Please visit the Azure Portal for further diagnosis.".format(app_name)))
-        _out('')
-    else:
-        _out('')
-        _out((Style.HIGHLIGHT, "Application status for {}.".format(app_name)))
-        _out('')
+        emit('')
+        return True
+    emit('')
+    emit((Style.HIGHLIGHT, "Application status for {}.".format(app_name)))
+    emit('')
+    return True
 
-    # Overview table (skip when only one instance is present, e.g. --instance filter).
-    if len(instances) > 1:
-        col_widths = (14, 20, 12, 24)
-        header = "{:<{w0}}{:<{w1}}{:<{w2}}{}".format(
-            'INSTANCE', 'MACHINE', 'STATE', 'UPDATED',
-            w0=col_widths[0], w1=col_widths[1], w2=col_widths[2])
-        _out((Style.PRIMARY, header))
-        _out((Style.PRIMARY, '-' * sum(col_widths)))
-        for inst in instances:
-            startup = inst.get('startup') or {}
-            updated = _format_dt(_most_recent_startup(startup)) or '-'
-            state = inst.get('state') or '-'
-            # Pad plain text first, then wrap the STATE segment in its style — the
-            # framework's color escapes don't perturb the visible column width.
-            _out([
-                (Style.PRIMARY, '{:<{w}}'.format(_short_id(inst.get('instanceId')), w=col_widths[0])),
-                (Style.PRIMARY, '{:<{w}}'.format(inst.get('machineName') or '-', w=col_widths[1])),
-                (_state_style(state), '{:<{w}}'.format(state, w=col_widths[2])),
-                (Style.PRIMARY, updated),
-            ])
-        _out('')
-        _out('')
 
-    # Per-instance Site Runtime Status + Startup summary.
+def _emit_overview_table(instances, emit):
+    """Emit the overview table (one row per instance). Skip when we're only
+    rendering a single card (either only one instance total, or --instance filter)."""
+    col_widths = (14, 20, 12, 24)
+    header = "{:<{w0}}{:<{w1}}{:<{w2}}{}".format(
+        'INSTANCE', 'MACHINE', 'STATE', 'UPDATED',
+        w0=col_widths[0], w1=col_widths[1], w2=col_widths[2])
+    emit((Style.PRIMARY, header))
+    emit((Style.PRIMARY, '-' * sum(col_widths)))
     for inst in instances:
-        machine = inst.get('machineName')
-        label = machine if machine else _short_id(inst.get('instanceId'))
-        scm_id = inst.get('startupInstanceId')
-        # When ARM's machineName and SCM's InstanceId disagree (common on
-        # Linux App Service — ARM tracks the worker slot, KuduLite tracks the
-        # container) surface both so users can correlate with SCM logs.
-        _out("-" * 76)
-        if scm_id and scm_id != machine:
-            header = 'Instance {} Full Status Report (SCM: {}) '.format(label, scm_id)
-        else:
-            header = 'Instance {} Full Status Report '.format(label)
-        _out(header)
-        _out("-" * 76)
-        _out((Style.HIGHLIGHT, 'Last runtime status'))
-        _print_runtime_block(inst, _out)
-        _out('')
-        _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
-        if not machine and not inst.get('startup'):
-            # Without machineName we couldn't query KuduLite for this instance, so
-            # distinguish the "couldn't ask" case from "asked, nothing recorded".
-            _out('  Startup summary unavailable: machine name could not be determined for this instance.')
-            _out('')
-        else:
-            _print_startup_block(inst.get('startup'), _out)
-        _out()
-        _out()
+        startup = inst.get('startup') or {}
+        updated = _format_dt(_most_recent_startup(startup)) or '-'
+        state = inst.get('state') or '-'
+        # Pad plain text first, then wrap the STATE segment in its style — the
+        # framework's color escapes don't perturb the visible column width.
+        emit([
+            (Style.PRIMARY, '{:<{w}}'.format(_short_id(inst.get('instanceId')), w=col_widths[0])),
+            (Style.PRIMARY, '{:<{w}}'.format(inst.get('machineName') or '-', w=col_widths[1])),
+            (_state_style(state), '{:<{w}}'.format(state, w=col_widths[2])),
+            (Style.PRIMARY, updated),
+        ])
+    emit('')
+    emit('')
 
-    # Orphan startups — SCM entries with no matching ARM instance. These
-    # commonly show up when a container has been recycled: SCM still has the
-    # last container's logs, but ARM has already replaced the worker-slot ID.
-    orphan_startups = payload.get('orphanStartups') or []
-    for orphan in orphan_startups:
-        scm_id = orphan.get('InstanceId') or '<unknown>'
-        _out((Style.HIGHLIGHT, 'Instance {} Startup Summary'.format(scm_id)))
-        _row((Style.HIGHLIGHT, '─' * 76))
-        _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
-        _print_startup_block(orphan.get('Startup'), _out)
-        _out()
 
-    # Hint footer — surfaced only when at least one instance has a real
-    # failure in the report's window (Failed > 0 + lastError set).
+def _emit_instance_section(inst, emit):
+    """Emit one per-instance card: header rule + Last runtime status + Startup summary."""
+    machine = inst.get('machineName')
+    label = machine if machine else _short_id(inst.get('instanceId'))
+    scm_id = inst.get('startupInstanceId')
+    # When ARM's machineName and SCM's InstanceId disagree (common on Linux App
+    # Service — ARM tracks the worker slot, KuduLite tracks the container)
+    # surface both so users can correlate with SCM logs.
+    emit("-" * 76)
+    if scm_id and scm_id != machine:
+        emit('Instance {} Full Status Report (SCM: {}) '.format(label, scm_id))
+    else:
+        emit('Instance {} Full Status Report '.format(label))
+    emit("-" * 76)
+    emit((Style.HIGHLIGHT, 'Last runtime status'))
+    _print_runtime_block(inst, emit)
+    emit('')
+    emit((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
+    if not machine and not inst.get('startup'):
+        # Without machineName we couldn't query KuduLite for this instance, so
+        # distinguish the "couldn't ask" case from "asked, nothing recorded".
+        emit('  Startup summary unavailable: machine name could not be determined for this instance.')
+        emit('')
+    else:
+        _print_startup_block(inst.get('startup'), emit)
+    emit()
+    emit()
+
+
+def _emit_orphan_startup(orphan, emit):
+    """Emit an orphan-startup card: an SCM entry with no matching ARM instance.
+    Common cause: the container has been recycled — SCM still has the last
+    container's logs, but ARM has already replaced the worker-slot ID."""
+    scm_id = orphan.get('InstanceId') or '<unknown>'
+    emit((Style.HIGHLIGHT, 'Instance {} Startup Summary'.format(scm_id)))
+    emit([(Style.HIGHLIGHT, '─' * 76)])
+    emit((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
+    _print_startup_block(orphan.get('Startup'), emit)
+    emit()
+
+
+def _emit_hint_footer(instances, app_name, resource_group, emit):
+    """Emit the follow-up hint footer when at least one instance has a real failure
+    in the report's window (Failed > 0 AND lastError populated)."""
     has_error = any(
         (inst.get('lastError') and _failed_count(inst.get('startup')) > 0)
         for inst in instances
     )
-    if has_error:
-        rg = resource_group or '<resource-group>'
-        _out((Style.WARNING, '▶ Hint:'))
-        _out('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
-        _out('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+    if not has_error:
+        return
+    rg = resource_group or '<resource-group>'
+    emit((Style.WARNING, '▶ Hint:'))
+    emit('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
+    emit('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+
+
+def render_report(payload):
+    """Print the human-readable report (Site Runtime Status + per-instance Startup summary).
+    Invoked by 'az webapp troubleshoot status' when --report is passed."""
+    instances = payload.get('instances') or []
+    orphan_startups = payload.get('orphanStartups') or []
+    app_name = payload.get('name') or '<webapp>'
+    resource_group = payload.get('resourceGroup')
+
+    def emit(*objs):
+        print_styled_text(*objs, file=sys.stdout)
+
+    if not _emit_header(instances, orphan_startups, app_name, emit):
+        return
+
+    if len(instances) > 1:
+        _emit_overview_table(instances, emit)
+
+    for inst in instances:
+        _emit_instance_section(inst, emit)
+
+    for orphan in orphan_startups:
+        _emit_orphan_startup(orphan, emit)
+
+    _emit_hint_footer(instances, app_name, resource_group, emit)
 
 
 def _state_style(state):

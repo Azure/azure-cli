@@ -6548,37 +6548,11 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
 # az webapp troubleshoot status
 # ---------------------------------------------------------------------------
 
-def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, report=False):
-    """Fetch runtime + startup status for a Linux web app.
-
-    Data sources:
-      * Site Runtime Status comes from ARM:
-        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
-            /sites/{name}[/slots/{slot}]/siteStatus[/{instanceId}]?api-version=...
-      * Startup summary comes from KuduLite (SCM):
-        GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
-
-    By default returns the structured payload (list of instances + startup
-    summary) so the standard `-o json/yaml/tsv/table` formatters handle output.
-    Pass --report to print the human-readable report to stdout instead.
-    """
-    import requests
-    from azure.cli.core.commands.client_factory import get_subscription_id
+def _map_arm_instance_ids(cmd, subscription_id, resource_group, name, slot_segment, api_version):
+    """Fetch ARM /instances and build hex-instanceId <-> machineName mappings.
+    Returns (id_to_machine, machine_to_id). Both are empty on failure — the caller
+    can still proceed using the ARM hex form on --instance."""
     from azure.core.exceptions import HttpResponseError as _Hre
-
-    _ensure_linux_webapp(cmd, resource_group, name, slot,
-                         command_label="'az webapp troubleshoot status'")
-
-    # --- 1. Map ARM hex instanceId <-> friendly machineName via ARM /instances.
-    # We fetch this first so we can accept either form on --instance and resolve
-    # the right value before calling /siteStatus (ARM) and /api/startuplogs/summary (SCM).
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    # Pin to a version validated against /siteStatus and /instances (2024-11-01
-    # is what the appsettings/list call in this module also targets). Using a
-    # literal here avoids depending on client._config.api_version, which is
-    # protected and can shift when the SDK bumps its default.
-    api_version = '2024-11-01'
-    slot_segment = '/slots/{}'.format(slot) if slot else ''
     instances_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
         '/sites/{name}{slot_seg}/instances?api-version={ver}'
@@ -6600,18 +6574,29 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning("Unexpected error retrieving machine names from '%s': %s", instances_url, ex)
+    return id_to_machine, machine_to_id
 
-    # Resolve --instance: accept either hex GUID (ARM form) or machineName (SCM form).
-    arm_instance_id = instance
-    if instance and instance in machine_to_id:
-        arm_instance_id = machine_to_id[instance]
-    elif instance and instance not in id_to_machine and machine_to_id:
-        # User passed something that matches neither known id nor machineName.
+
+def _resolve_arm_instance_id(instance, id_to_machine, machine_to_id):
+    """Resolve --instance (ARM hex id OR machineName) to the ARM hex id used by /siteStatus.
+    Raises ResourceNotFoundError when the value matches neither known form and we have
+    a non-empty mapping to compare against."""
+    if not instance:
+        return None
+    if instance in machine_to_id:
+        return machine_to_id[instance]
+    if instance not in id_to_machine and machine_to_id:
         raise ResourceNotFoundError(
             "Instance '{}' was not found for this webapp. "
             "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+    return instance
 
-    # --- 2. Site Runtime Status from ARM /siteStatus[/{hex-instanceId}] ---
+
+def _fetch_site_runtime_items(cmd, subscription_id, resource_group, name, slot_segment,
+                              arm_instance_id, api_version, instance, id_to_machine):
+    """Call ARM /siteStatus[/{instanceId}] and return the normalized list of runtime items,
+    each enriched with machineName looked up from id_to_machine."""
+    from azure.core.exceptions import HttpResponseError as _Hre
     instance_segment = '/{}'.format(arm_instance_id) if arm_instance_id else ''
     arm_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
@@ -6620,7 +6605,6 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
         sub=subscription_id, rg=resource_group, name=name,
         slot_seg=slot_segment, inst_seg=instance_segment, ver=api_version)
-
     try:
         arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
     except _Hre as ex:
@@ -6635,18 +6619,43 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         machine = id_to_machine.get(item.get('instanceId'))
         if machine:
             item['machineName'] = machine
+    return runtime_items
 
-    # --- 3. Per-instance Startup summary from SCM /api/startuplogs/summary ---
-    # KuduLite's summary endpoint already returns one entry per instance
-    # ([{InstanceId, Startup}, ...]) for everything seen in the last 24h, so we
-    # make a single round-trip and pair the entries with runtime_items locally
-    # instead of fanning out one call per instance.
+
+def _parse_startup_summary_body(body, target_machine):
+    """Parse the JSON body returned by KuduLite /api/startuplogs/summary.
+    Returns (startup_by_machine, plaintext_notice_or_None)."""
+    startup_by_machine = {}
+    if isinstance(body, list):
+        for entry in body:
+            if not isinstance(entry, dict):
+                continue
+            # KuduLite serializes its C# POCO with default PascalCase settings
+            # (InstanceId, Startup, ...). Update these keys if the contract flips
+            # to camelCase in a future KuduLite release.
+            key = entry.get('InstanceId')
+            if not key:
+                continue
+            startup_by_machine[key] = entry.get('Startup') or entry
+        return startup_by_machine, None
+    if isinstance(body, dict):
+        # Tolerate a single-object response (older KuduLite shape).
+        inner = body.get('Startup') or body
+        key = body.get('InstanceId') or target_machine
+        if key:
+            startup_by_machine[key] = inner
+        return startup_by_machine, None
+    return startup_by_machine, None
+
+
+def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_items):
+    """Call KuduLite /api/startuplogs/summary once for the app. When --instance is set
+    and we have a matching runtime item, forward the machine filter so KuduLite only
+    walks that worker's log directory. Returns (startup_by_machine, app_wide_fetch_status)."""
+    import requests
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
 
-    # When --instance was supplied we still pass the filter to KuduLite so it
-    # only walks the requested worker's log directory (and the response stays
-    # small). Otherwise we fetch the full set in one call.
     target_machine = None
     if instance and len(runtime_items) == 1:
         target_machine = runtime_items[0].get('machineName')
@@ -6656,75 +6665,46 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
 
     startup_by_machine = {}
-    # KuduLite may return a plaintext (non-JSON) body when the endpoint can't
-    # produce a per-instance summary at all — for example when the customer sets
-    # WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS=true. That message applies to every
-    # worker on the app, so we hoist it to the instance-level SummaryFetchStatus
-    # below (after per-instance JSON entries, if any, are already loaded).
-    app_wide_fetch_status = None
     try:
         summary_response = requests.get(summary_url, headers=headers, timeout=30)
     except requests.RequestException as ex:
         logger.warning("Failed to call '%s': %s", summary_url, ex)
-        summary_response = None
-        app_wide_fetch_status = (
+        return startup_by_machine, (
             "Failed to reach SCM startup summary endpoint ({}: {}).".format(
-                ex.__class__.__name__, ex)
+                ex.__class__.__name__, ex))
+
+    if summary_response.status_code != 200:
+        # Common non-200s:
+        #   * 404: newer KuduLite doesn't recognize /summary yet in this region/stamp.
+        #   * 400 "Invalid startup log filename.": older KuduLite treats 'summary' as a filename.
+        #   * 5xx / auth: transient or config problem.
+        return startup_by_machine, (
+            "Startup summary is not available for this app. "
+            "This feature requires a platform version that has "
+            "not rolled out to your app's region yet."
         )
 
-    if summary_response is not None:
-        if summary_response.status_code == 200:
-            try:
-                body = summary_response.json()
-            except ValueError:
-                body = None
-            if isinstance(body, list):
-                for entry in body:
-                    if not isinstance(entry, dict):
-                        continue
-                    # KuduLite serializes its C# POCO with default settings -> PascalCase
-                    # (InstanceId, Startup, Succeeded, MostRecentSuccess, ...). When KuduLite
-                    # ships a [JsonPropertyName] / camelCase contract, switch the keys
-                    # here (and in _print_startup_block / overview-table renderer) accordingly.
-                    key = entry.get('InstanceId')
-                    if not key:
-                        continue
-                    startup_by_machine[key] = entry.get('Startup') or entry
-            elif isinstance(body, dict):
-                # Tolerate a single-object response (older KuduLite shape).
-                inner = body.get('Startup') or body
-                key = body.get('InstanceId') or target_machine
-                if key:
-                    startup_by_machine[key] = inner
-            else:
-                # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice).
-                text = (summary_response.text or '').strip()
-                if text:
-                    app_wide_fetch_status = text
-        else:
-            # Any non-200 response means KuduLite couldn't produce a startup
-            # summary for this app. In practice we see:
-            #   * 404: newer KuduLite doesn't recognize the /summary route yet
-            #     (feature not rolled out to this region / stamp).
-            #   * 400 "Invalid startup log filename.": older KuduLite routes
-            #     /api/startuplogs/{filename} — no /summary sub-route — so it
-            #     treats 'summary' as a filename and rejects it.
-            #   * 5xx / auth errors: transient or config problem.
-            app_wide_fetch_status = (
-                "Startup summary is not available for this app. "
-                "This feature requires a platform version that has "
-                "not rolled out to your app's region yet."
-            )
+    try:
+        body = summary_response.json()
+    except ValueError:
+        body = None
 
-    # Correlate SCM startup summaries with ARM runtime items. In practice the
-    # two systems don't always agree on instance IDs: ARM's machineName is the
-    # worker-slot identity (e.g. "ln0sdlwk0001I1"), while KuduLite's InstanceId
-    # is a per-container identity (e.g. "ln0sdlwk0001XB" or a docker short-id
-    # like "cee9a66e57b2"). Match by machineName first, then fall back to
-    # cardinality pairing when there is exactly one unmatched item on each
-    # side (the common single-instance case). Anything still unmatched surfaces
-    # under an "orphan_startups" bucket that the renderer prints as its own
-    # section below the ARM cards.
+    if body is None:
+        # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice) —
+        # applies app-wide, hoist to instance-level SummaryFetchStatus later.
+        text = (summary_response.text or '').strip()
+        return startup_by_machine, (text or None)
+
+    startup_by_machine, notice = _parse_startup_summary_body(body, target_machine)
+    return startup_by_machine, notice
+
+
+def _correlate_startups_with_runtime(runtime_items, startup_by_machine, app_wide_fetch_status):
+    """Pair SCM startup entries with ARM runtime items in-place. ARM's machineName is the
+    worker-slot identity; KuduLite's InstanceId is the per-container identity, so they
+    don't always agree. Strategy: match by machineName first; if we end up with exactly
+    one unmatched item on each side (common single-instance case), pair them. Anything
+    still unmatched is returned as orphan_startups for the renderer's own section."""
     remaining_keys = set(startup_by_machine.keys())
     unmatched_items = []
     for item in runtime_items:
@@ -6750,12 +6730,54 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         else:
             item['startup'] = None
 
-    orphan_startups = [
+    return [
         {'InstanceId': k, 'Startup': startup_by_machine[k]}
         for k in sorted(remaining_keys)
     ]
 
-    # --- 4. Assemble payload ---
+
+def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, report=False):
+    """Fetch runtime + startup status for a Linux web app.
+
+    Data sources:
+      * Site Runtime Status comes from ARM:
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
+            /sites/{name}[/slots/{slot}]/siteStatus[/{instanceId}]?api-version=...
+      * Startup summary comes from KuduLite (SCM):
+        GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
+
+    By default returns the structured payload (list of instances + startup
+    summary) so the standard `-o json/yaml/tsv/table` formatters handle output.
+    Pass --report to print the human-readable report to stdout instead.
+    """
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp troubleshoot status'")
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Pin to a version validated against /siteStatus and /instances (2024-11-01
+    # is what the appsettings/list call in this module also targets). Using a
+    # literal here avoids depending on client._config.api_version, which is
+    # protected and can shift when the SDK bumps its default.
+    api_version = '2024-11-01'
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+
+    id_to_machine, machine_to_id = _map_arm_instance_ids(
+        cmd, subscription_id, resource_group, name, slot_segment, api_version)
+
+    arm_instance_id = _resolve_arm_instance_id(instance, id_to_machine, machine_to_id)
+
+    runtime_items = _fetch_site_runtime_items(
+        cmd, subscription_id, resource_group, name, slot_segment,
+        arm_instance_id, api_version, instance, id_to_machine)
+
+    startup_by_machine, app_wide_fetch_status = _fetch_startup_summaries(
+        cmd, resource_group, name, slot, instance, runtime_items)
+
+    orphan_startups = _correlate_startups_with_runtime(
+        runtime_items, startup_by_machine, app_wide_fetch_status)
+
     payload = {
         'name': name,
         'resourceGroup': resource_group,
