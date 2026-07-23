@@ -6598,6 +6598,8 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
                 machine_to_id[machine] = entry_name
     except _Hre as ex:
         logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Unexpected error retrieving machine names from '%s': %s", instances_url, ex)
 
     # Resolve --instance: accept either hex GUID (ARM form) or machineName (SCM form).
     arm_instance_id = instance
