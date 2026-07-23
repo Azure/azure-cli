@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-04-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-05-01"],
         ]
     }
 
@@ -537,7 +537,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -644,7 +644,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -883,6 +883,9 @@ class _UpdateHelper:
         properties.baremetal_tenant_id = AAZStrType(
             serialized_name="baremetalTenantId",
             flags={"read_only": True},
+        )
+        properties.breakthrough_mode = AAZStrType(
+            serialized_name="breakthroughMode",
         )
         properties.capacity_pool_resource_id = AAZStrType(
             serialized_name="capacityPoolResourceId",
