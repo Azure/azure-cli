@@ -17,6 +17,18 @@ runs:
         fetch-depth: 0 # checkout all branches
         ref: ${{ github.event.pull_request.head.ref }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}  # checkout pull request branch
+    - name: Use base branch requirements
+      shell: bash
+      env:
+        base_repo: ${{ github.event.pull_request.base.repo.clone_url }}
+        base_ref: ${{ github.event.pull_request.base.ref }}
+      run: |
+        # Use base branch requirements.txt to avoid outdated dependency conflicts
+        # in old PR branches that have not been rebased against the base branch.
+        # This prevents old setuptools pins from breaking the editable installs.
+        git remote add base "$base_repo" 2>/dev/null || git remote set-url base "$base_repo"
+        git fetch base "$base_ref" --depth=1
+        git checkout FETCH_HEAD -- requirements.txt
     - name: Set up Python 3.12
       uses: actions/setup-python@v3
       with:
