@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "interconnect-block create",
 )
 class Create(AAZCommand):
-    """Create an Interconnect Block. When updating an Interconnect Block, only tags and sku.capacity may be modified.
+    """Create an Interconnect Block. When updating an Interconnect Block, only tags and sku-capacity may be modified.
 
     :example: Creates a new InterconnectBlock resource.
         az interconnect-block create --name training-icb-001 --resource-group ai-training-rg --location eastus --zone 1 --sku-name Standard_ND128isr_GB300_v6 --sku-capacity 36 --interconnect-group-id "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/network-rg/providers/Microsoft.Network/interconnectGroups/training-ig" --tags Environment=Production Workload=AI-Training CostCenter=ML-Engineering
@@ -136,7 +136,7 @@ class Create(AAZCommand):
         _args_schema.sku_tier = AAZStrArg(
             options=["--sku-tier"],
             arg_group="Sku",
-            help="Specifies the tier of virtual machines in a scale set.<br /><br /> Possible Values:<br /><br /> **Standard**<br /><br /> **Basic**",
+            help="Specifies the tier of virtual machines in a scale set. Possible Values: Standard, Basic",
         )
         return cls._args_schema
 

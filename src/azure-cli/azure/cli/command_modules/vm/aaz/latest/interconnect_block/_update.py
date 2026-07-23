@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "interconnect-block update",
 )
 class Update(AAZCommand):
-    """Update an Interconnect Block. When updating an Interconnect Block, only tags and sku.capacity may be modified.
+    """Update an Interconnect Block. When updating an Interconnect Block, only tags and sku-capacity may be modified.
 
     :example: Update scale capacity
         az interconnect-block update --name training-icb-001 --resource-group ai-training-rg --sku-capacity 54
@@ -143,7 +143,7 @@ class Update(AAZCommand):
         _args_schema.sku_tier = AAZStrArg(
             options=["--sku-tier"],
             arg_group="Sku",
-            help="Specifies the tier of virtual machines in a scale set.<br /><br /> Possible Values:<br /><br /> **Standard**<br /><br /> **Basic**",
+            help="Specifies the tier of virtual machines in a scale set. Possible Values: Standard, Basic",
             nullable=True,
         )
         return cls._args_schema
