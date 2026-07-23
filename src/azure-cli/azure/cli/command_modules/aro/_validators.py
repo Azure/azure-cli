@@ -8,14 +8,20 @@ import json
 import re
 import uuid
 from os.path import exists
+from collections import Counter
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
-    RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    CLIInternalError,
+    InvalidArgumentValueError,
+    RequiredArgumentMissingError,
+    MutuallyExclusiveArgumentError
+)
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -34,24 +40,38 @@ def validate_cidr(key):
     return _validate_cidr
 
 
-def validate_client_id(namespace):
-    if namespace.client_id is None:
-        return
-    try:
-        uuid.UUID(namespace.client_id)
-    except ValueError as e:
-        raise InvalidArgumentValueError(f"Invalid --client-id '{namespace.client_id}'.") from e
+def validate_client_id(isCreate):
+    def _validate_client_id(namespace):
+        if namespace.client_id is None:
+            return
+        if hasattr(namespace, 'enable_managed_identity') and namespace.enable_managed_identity is True:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-id when --enable-managed-identity is True')  # pylint: disable=line-too-long
+        if namespace.platform_workload_identities is not None:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-id when --assign-platform-workload-identity is used')  # pylint: disable=line-too-long
+        try:
+            uuid.UUID(namespace.client_id)
+        except ValueError as e:
+            raise InvalidArgumentValueError(f"Invalid --client-id '{namespace.client_id}'.") from e  # pylint: disable=line-too-long
 
-    if namespace.client_secret is None or not str(namespace.client_secret):
-        raise RequiredArgumentMissingError('Must specify --client-secret with --client-id.')
+        if namespace.client_secret is None or not str(namespace.client_secret):
+            raise RequiredArgumentMissingError('Must specify --client-secret with --client-id.')  # pylint: disable=line-too-long
+        if not isCreate and namespace.upgradeable_to is not None:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-id when --upgradeable-to is used.')  # pylint: disable=line-too-long
+    return _validate_client_id
 
 
 def validate_client_secret(isCreate):
     def _validate_client_secret(namespace):
-        if not isCreate or namespace.client_secret is None:
+        if namespace.client_secret is None:
             return
-        if namespace.client_id is None or not str(namespace.client_id):
+        if hasattr(namespace, 'enable_managed_identity') and namespace.enable_managed_identity is True:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-secret when --enable-managed-identity is True')  # pylint: disable=line-too-long
+        if namespace.platform_workload_identities is not None:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-secret when --assign-platform-workload-identity is used')  # pylint: disable=line-too-long
+        if isCreate and (namespace.client_id is None or not str(namespace.client_id)):
             raise RequiredArgumentMissingError('Must specify --client-id with --client-secret.')
+        if not isCreate and namespace.upgradeable_to is not None:
+            raise MutuallyExclusiveArgumentError('Must not specify --client-secret when --upgradeable-to is used.')  # pylint: disable=line-too-long
 
     return _validate_client_secret
 
@@ -111,8 +131,8 @@ def validate_pull_secret(namespace):
                 namespace.pull_secret = file.read().rstrip('\n')
 
         if not isinstance(json.loads(namespace.pull_secret), dict):
-            raise Exception()  # pylint: disable=broad-exception-raised
-    except Exception as e:
+            raise ValueError("Pull secret must be a valid JSON object")
+    except (ValueError, json.JSONDecodeError) as e:
         raise InvalidArgumentValueError("Invalid --pull-secret.") from e
 
 
@@ -194,8 +214,9 @@ def validate_subnets(master_subnet, worker_subnet):
     worker_parts = parse_resource_id(worker_subnet)
 
     if master_parts['resource_group'].lower() != worker_parts['resource_group'].lower():
-        raise InvalidArgumentValueError(f"--master-subnet resource group '{master_parts['resource_group']}' must equal "
-                                        f"--worker-subnet resource group '{worker_parts['resource_group']}'.")
+        raise InvalidArgumentValueError(
+            f"--master-subnet resource group '{master_parts['resource_group']}' must equal "
+            f"--worker-subnet resource group '{worker_parts['resource_group']}'.")
 
     if master_parts['name'].lower() != worker_parts['name'].lower():
         raise InvalidArgumentValueError(
@@ -267,11 +288,22 @@ def validate_refresh_cluster_credentials(namespace):
         return
     if namespace.client_secret is not None or namespace.client_id is not None:
         raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
+    if namespace.platform_workload_identities is not None:
+        raise MutuallyExclusiveArgumentError('--platform-workload-identities must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
+    if namespace.upgradeable_to is not None:
+        raise MutuallyExclusiveArgumentError('Must not specify --refresh-credentials when --upgradeable-to is used.')  # pylint: disable=line-too-long
 
 
 def validate_version_format(namespace):
     if namespace.version is not None and not re.match(r'^[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$', namespace.version):
         raise InvalidArgumentValueError('--version is invalid')
+
+
+def validate_upgradeable_to_format(namespace):
+    if not namespace.upgradeable_to:
+        return
+    if not re.match(r'^[4-9]{1}\.(1[4-9]|[1-9][0-9])\.[0-9]{1,2}$', namespace.upgradeable_to):
+        raise InvalidArgumentValueError('--upgradeable-to format is invalid')
 
 
 def validate_load_balancer_managed_outbound_ip_count(namespace):
@@ -283,3 +315,97 @@ def validate_load_balancer_managed_outbound_ip_count(namespace):
     if namespace.load_balancer_managed_outbound_ip_count < minimum_managed_outbound_ips or namespace.load_balancer_managed_outbound_ip_count > maximum_managed_outbound_ips:  # pylint: disable=line-too-long
         error_msg = f"--load-balancer-managed-outbound-ip-count must be between {minimum_managed_outbound_ips} and {maximum_managed_outbound_ips} (inclusive)."  # pylint: disable=line-too-long
         raise InvalidArgumentValueError(error_msg)
+
+
+def validate_enable_managed_identity(namespace):
+    if not namespace.enable_managed_identity:
+        return
+
+    if namespace.client_id is not None:
+        raise InvalidArgumentValueError('Must not specify --client-id when --enable-managed-identity is True')
+
+    if namespace.client_secret is not None:
+        raise InvalidArgumentValueError('Must not specify --client-secret when --enable-managed-identity is True')
+
+    if not namespace.platform_workload_identities:
+        raise RequiredArgumentMissingError('Enabling managed identity requires platform workload identities to be provided')  # pylint: disable=line-too-long
+
+    if not namespace.mi_user_assigned:
+        raise RequiredArgumentMissingError('Enabling managed identity requires cluster identity to be provided')
+
+
+def validate_platform_workload_identities(isCreate):
+    def _validate_platform_workload_identities(cmd, namespace):
+        if namespace.platform_workload_identities is None:
+            return
+
+        if isCreate and not namespace.enable_managed_identity:
+            raise RequiredArgumentMissingError('Must set --enable-managed-identity when providing platform workload identities')  # pylint: disable=line-too-long
+
+        names = [name for (name, _) in namespace.platform_workload_identities]
+        name_counter = Counter()
+        name_counter.update(names)
+        duplicates = [name for name, count in name_counter.items() if count > 1]
+        if duplicates:
+            raise InvalidArgumentValueError(f"Platform workload identities {duplicates} were provided multiple times")
+
+        for (name, identity) in namespace.platform_workload_identities:
+            if not is_valid_resource_id(identity.resource_id):
+                identity.resource_id = identity_name_to_resource_id(
+                    cmd, namespace, identity.resource_id)
+
+            if not is_valid_identity_resource_id(identity.resource_id):
+                raise InvalidArgumentValueError(f"Resource {identity.resource_id} used for platform workload identity {name} is not a valid userAssignedIdentity")  # pylint: disable=line-too-long
+
+    return _validate_platform_workload_identities
+
+
+def validate_cluster_identity(cmd, namespace):
+    if namespace.mi_user_assigned is None:
+        return
+
+    if not namespace.enable_managed_identity:
+        raise RequiredArgumentMissingError('Must set --enable-managed-identity when providing a cluster identity')  # pylint: disable=line-too-long
+
+    if not is_valid_resource_id(namespace.mi_user_assigned):
+        namespace.mi_user_assigned = identity_name_to_resource_id(
+            cmd, namespace, namespace.mi_user_assigned)
+
+    if not is_valid_identity_resource_id(namespace.mi_user_assigned):
+        raise InvalidArgumentValueError(f"Resource {namespace.mi_user_assigned} used for cluster user assigned identity is not a valid userAssignedIdentity")  # pylint: disable=line-too-long
+
+
+def validate_cluster_identity_update(cmd, namespace):
+    if namespace.mi_user_assigned is None:
+        return
+
+    if not is_valid_resource_id(namespace.mi_user_assigned):
+        namespace.mi_user_assigned = identity_name_to_resource_id(
+            cmd, namespace, namespace.mi_user_assigned)
+
+    if not is_valid_identity_resource_id(namespace.mi_user_assigned):
+        raise InvalidArgumentValueError(f"Resource {namespace.mi_user_assigned} used for cluster user assigned identity is not a valid userAssignedIdentity")  # pylint: disable=line-too-long
+
+
+def validate_delete_identities(namespace):
+    if namespace.delete_identities is None:
+        return
+
+    if namespace.delete_identities and namespace.no_wait:
+        raise MutuallyExclusiveArgumentError('Must not specify --no-wait when --delete-identities is used')
+
+
+def identity_name_to_resource_id(cmd, namespace, name):
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=namespace.resource_group_name,
+        namespace='Microsoft.ManagedIdentity',
+        type='userAssignedIdentities',
+        name=name,
+    )
+
+
+def is_valid_identity_resource_id(rid):
+    parsed = parse_resource_id(rid)
+    return parsed['namespace'] == 'Microsoft.ManagedIdentity' and \
+        parsed['type'] == 'userAssignedIdentities'

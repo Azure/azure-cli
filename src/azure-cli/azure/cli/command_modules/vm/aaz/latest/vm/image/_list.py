@@ -16,9 +16,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions", "2024-11-01"],
         ]
     }
 
@@ -59,6 +59,8 @@ class List(AAZCommand):
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
             help="The expand expression to apply on the operation.",
+            required=True,
+            default="properties",
         )
         _args_schema.orderby = AAZStrArg(
             options=["--orderby"],
@@ -70,7 +72,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineImagesList(ctx=self.ctx)()
+        self.VirtualMachineImagesListWithProperties(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -85,7 +87,7 @@ class List(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineImagesList(AAZHttpOperation):
+    class VirtualMachineImagesListWithProperties(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -142,6 +144,7 @@ class List(AAZCommand):
             parameters = {
                 **self.serialize_query_param(
                     "$expand", self.ctx.args.expand,
+                    required=True,
                 ),
                 **self.serialize_query_param(
                     "$orderby", self.ctx.args.orderby,
@@ -150,7 +153,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -196,7 +199,9 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
-            _element.properties = AAZObjectType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.tags = AAZDictType()
 
             extended_location = cls._schema_on_200.Element.extended_location

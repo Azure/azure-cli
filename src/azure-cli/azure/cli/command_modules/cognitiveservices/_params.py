@@ -387,6 +387,13 @@ def load_arguments(self, _):
         )
         c.argument("agent_version", help="Cognitive Services hosted agent version")
 
+    with self.argument_context("cognitiveservices agent status") as c:
+        c.argument(
+            "agent_version",
+            help="Cognitive Services hosted agent version",
+            required=True,
+        )
+
     with self.argument_context('cognitiveservices agent create') as c:
         c.argument(
             'agent_name',
@@ -511,6 +518,16 @@ def load_arguments(self, _):
             ),
             default=600
         )
+        c.argument(
+            'show_logs',
+            options_list=['--show-logs'],
+            action='store_true',
+            help=(
+                'Stream container console logs during deployment. '
+                'Shows real-time output from the agent container as it starts up. '
+                'Useful for debugging startup issues.'
+            )
+        )
 
     with self.argument_context("cognitiveservices agent update") as c:
         c.argument(
@@ -533,6 +550,67 @@ def load_arguments(self, _):
             help="Cognitive Services hosted agent version. If not provided, deletes all versions.",
             required=False,
         )
+
+    with self.argument_context("cognitiveservices agent start") as c:
+        c.argument(
+            'show_logs',
+            options_list=['--show-logs'],
+            action='store_true',
+            help=(
+                'Stream container console logs during startup. '
+                'Shows real-time output from the agent container as it starts. '
+                'Useful for debugging startup issues.'
+            )
+        )
+        c.argument(
+            'timeout',
+            type=int,
+            help=(
+                'Maximum time in seconds to wait for deployment to be ready. '
+                'Default: 600 seconds (10 minutes).'
+            ),
+            default=600
+        )
+
+    with self.argument_context("cognitiveservices agent logs") as c:
+        c.argument(
+            "account_name",
+            options_list=["--account-name", "-a"],
+            help="Cognitive service account name."
+        )
+        c.argument(
+            "project_name",
+            options_list=["--project-name", "-p"],
+            help="AI project name"
+        )
+        c.argument(
+            "agent_name",
+            options_list=["--name", "-n"],
+            help="Cognitive Services hosted agent name",
+        )
+        c.argument("agent_version", help="Cognitive Services hosted agent version")
+
+    with self.argument_context("cognitiveservices agent logs show") as c:
+        c.argument(
+            'kind',
+            options_list=['--type', '-t'],
+            help="Type of logs to stream. 'console' for stdout/stderr, 'system' for container events.",
+            arg_type=get_enum_type(['console', 'system']),
+            default='console'
+        )
+        c.argument(
+            'tail',
+            type=int,
+            help='Number of trailing log lines to fetch (1-300). Default: 50',
+            default=50
+        )
+        c.argument(
+            'follow',
+            options_list=['--follow', '-f'],
+            action='store_true',
+            help='Stream logs in real-time. Without this flag, fetches recent logs and exits.'
+        )
+
     with self.argument_context('cognitiveservices') as c:
         c.argument('account_name', arg_type=name_arg_type, help='cognitive service account name',
                    completer=get_resource_name_completion_list('Microsoft.CognitiveServices/accounts'))
@@ -594,6 +672,24 @@ def load_arguments(self, _):
             'scale_settings_capacity', options_list=['--scale-capacity', '--scale-settings-capacity'],
             help='Cognitive Services account deployment scale settings capacity.')
 
+    with self.argument_context('cognitiveservices account managed-compute-deployment') as c:
+        c.argument('deployment_name', help='Managed compute deployment name.')
+
+    with self.argument_context('cognitiveservices account managed-compute-deployment create') as c:
+        c.argument('model', help='AzureML registry model URI '
+                   '(e.g., azureml://registries/{registry}/models/{model}/versions/{version}).')
+        c.argument('deployment_template', options_list=['--deployment-template'],
+                   help='AzureML registry deployment template URI '
+                   '(e.g., azureml://registries/{registry}/deploymenttemplates/{template}/versions/{version}).')
+        c.argument('accelerator_type', options_list=['--accelerator-type'],
+                   help='GPU accelerator type (e.g., H100_80GB).')
+        c.argument('version_upgrade_option', options_list=['--version-upgrade-option'],
+                   help='Version upgrade policy. Allowed values: OnceNewDefaultVersionAvailable, '
+                   'OnceCurrentVersionExpired, NoAutoUpgrade.')
+
+    with self.argument_context('cognitiveservices account managed-compute-deployment update') as c:
+        c.argument('tags', tags_type)
+
     with self.argument_context('cognitiveservices account commitment-plan') as c:
         c.argument('commitment_plan_name', help='Cognitive Services account commitment plan name')
         c.argument('plan_type', help='Cognitive Services account commitment plan type')
@@ -609,6 +705,70 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account commitment-plan', arg_group='Next CommitmentPeriod') as c:
         c.argument('next_count', help='Cognitive Services account commitment plan next commitment period count.')
         c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')
+
+    with self.argument_context('cognitiveservices account managed-network') as c:
+        c.argument('managed_network_name',
+                   options_list=['--managed-network-name'],
+                   help='Name of the managed network. Only "default" is supported.',
+                   default='default')
+
+    with self.argument_context('cognitiveservices account managed-network create') as c:
+        c.argument('managed_network',
+                   options_list=['--managed-network'],
+                   arg_type=get_enum_type(['allow_internet_outbound', 'allow_only_approved_outbound']),
+                   help='Isolation mode for the managed network.',
+                   required=True)
+        c.argument('firewall_sku',
+                   options_list=['--firewall-sku'],
+                   arg_type=get_enum_type(['Basic', 'Standard']),
+                   help='Firewall SKU for the managed network.')
+
+    with self.argument_context('cognitiveservices account managed-network update') as c:
+        c.argument('managed_network',
+                   options_list=['--managed-network'],
+                   arg_type=get_enum_type(['allow_internet_outbound', 'allow_only_approved_outbound']),
+                   help='Isolation mode for the managed network.')
+        c.argument('firewall_sku',
+                   options_list=['--firewall-sku'],
+                   arg_type=get_enum_type(['Basic', 'Standard']),
+                   help='Firewall SKU for the managed network.')
+
+    with self.argument_context('cognitiveservices account managed-network outbound-rule') as c:
+        c.argument('managed_network_name',
+                   options_list=['--managed-network-name'],
+                   help='Name of the managed network. Only "default" is supported.',
+                   default='default',
+                   required=False)
+        c.argument('rule_name',
+                   options_list=['--rule'],
+                   help='Name of the outbound rule.')
+
+    with self.argument_context('cognitiveservices account managed-network outbound-rule set') as c:
+        c.argument('rule_type',
+                   options_list=['--type'],
+                   arg_type=get_enum_type(['fqdn', 'privateendpoint', 'servicetag']),
+                   help='Type of the outbound rule.',
+                   required=True)
+        c.argument('category',
+                   options_list=['--category'],
+                   arg_type=get_enum_type(['Required', 'Recommended', 'UserDefined', 'Dependency']),
+                   help='Category of the outbound rule.')
+        c.argument('destination',
+                   options_list=['--destination'],
+                   help='Destination for the outbound rule. '
+                        'For FQDN rules, this is the FQDN string. '
+                        'For PrivateEndpoint rules, this is the service resource ID. '
+                        'For ServiceTag rules, provide a JSON string.')
+        c.argument('subresource_target',
+                   options_list=['--subresource-target'],
+                   help='Subresource target for PrivateEndpoint outbound rules '
+                        '(e.g. blob, table, queue, file, web, dfs).')
+
+    with self.argument_context('cognitiveservices account managed-network outbound-rule bulk-set') as c:
+        c.argument('file',
+                   options_list=['--file'],
+                   help='Path to a YAML or JSON file containing outbound rules definition.',
+                   required=True)
 
     with self.argument_context('cognitiveservices account project') as c:
         c.argument('project_name', help='Cognitive Services account project name')

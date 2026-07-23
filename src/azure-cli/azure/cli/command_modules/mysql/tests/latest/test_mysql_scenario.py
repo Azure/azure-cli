@@ -122,6 +122,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @live_only()
+    def test_mysql_flexible_server_restore_no_wait_mgmt(self, resource_group):
+        self._test_flexible_server_restore_no_wait('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_gtid_reset(self, resource_group):
         self._test_flexible_server_gtid_reset('mysql', resource_group)
 
@@ -694,6 +700,23 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Disabled'
                  .format(database_engine, resource_group, source_server),
                  checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
+
+    def _test_flexible_server_restore_no_wait(self, database_engine, resource_group):
+        location = DEFAULT_LOCATION
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --tier GeneralPurpose --sku-name {}'
+                 .format(database_engine, resource_group, source_server, location, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --no-wait'
+                 .format(database_engine, resource_group, target_server, source_server))
+
+        self.cmd('{} flexible-server wait -g {} -n {} --created --interval 30 --timeout 600'
+                 .format(database_engine, resource_group, target_server))
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))

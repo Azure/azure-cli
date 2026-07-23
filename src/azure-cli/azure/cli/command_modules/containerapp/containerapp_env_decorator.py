@@ -225,16 +225,15 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
             self.managed_env_def["properties"]["InfrastructureResourceGroup"] = self.get_argument_infrastructure_resource_group()
 
     def set_up_workload_profiles(self):
+        # If the environment exists, infer the environment type
+        existing_environment = None
+        try:
+            existing_environment = self.client.show(cmd=self.cmd,
+                                                    resource_group_name=self.get_argument_resource_group_name(),
+                                                    name=self.get_argument_name())
+        except Exception as e:
+            handle_non_404_status_code_exception(e)
         if self.get_argument_enable_workload_profiles():
-            # If the environment exists, infer the environment type
-            existing_environment = None
-            try:
-                existing_environment = self.client.show(cmd=self.cmd,
-                                                        resource_group_name=self.get_argument_resource_group_name(),
-                                                        name=self.get_argument_name())
-            except Exception as e:
-                handle_non_404_status_code_exception(e)
-
             if existing_environment and safe_get(existing_environment, "properties", "workloadProfiles") is None:
                 # check if input params include -w/--enable-workload-profiles
                 if self.cmd.cli_ctx.data.get('safe_params') and ('-w' in self.cmd.cli_ctx.data.get(
@@ -244,6 +243,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
                 return
 
             self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
+        else:
+            if existing_environment and safe_get(existing_environment, "properties", "workloadProfiles") is not None:
+                raise ValidationError(
+                    f"Existing environment {self.get_argument_name()} uses workload profiles. If you want to use Consumption-Only environment, please create a new one.")
 
     def set_up_app_log_configuration(self):
         if (self.get_argument_logs_customer_id() is None or self.get_argument_logs_key() is None) and self.get_argument_logs_destination() == "log-analytics":
@@ -362,10 +365,12 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         workload_profile_name = self.get_argument_workload_profile_name()
         workload_profile_type = self.get_argument_workload_profile_type()
 
+        workload_profile_name = workload_profile_type if workload_profile_name is None else workload_profile_name
+
         if workload_profile_name:
             if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
                 raise ValidationError(
-                    "This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
+                    "This environment does not allow for workload profiles. You can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
 
             if workload_profile_type:
                 workload_profile_type = workload_profile_type.upper()

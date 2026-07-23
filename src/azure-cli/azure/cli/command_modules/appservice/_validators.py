@@ -18,7 +18,7 @@ from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
                     get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
-                    _normalize_location)
+                    _normalize_location, get_site_server_farm_id)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -82,10 +82,12 @@ def validate_site_create(cmd, namespace):
 
 def validate_ase_create(cmd, namespace):
     # Validate the ASE Name availability
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
     resource_type = 'Microsoft.Web/hostingEnvironments'
     if isinstance(namespace.name, str):
-        name_validation = client.check_name_availability(namespace.name, resource_type)
+        request = ResourceNameAvailabilityRequest(name=namespace.name, type=resource_type)
+        name_validation = client.check_name_availability(request)
         if not name_validation.name_available:
             raise ValidationError(name_validation.message)
 
@@ -109,10 +111,23 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 
 def validate_asp_create(namespace):
     validate_tags(namespace)
+    # is_linux is None when not explicitly provided by the user (default).
+    # Resolve the default: Linux unless --hyper-v is specified.
+    if namespace.is_linux is None:
+        namespace.is_linux = not namespace.hyper_v
+    elif namespace.is_linux and namespace.hyper_v:
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux true and --hyper-v cannot be used together.')
+    if namespace.sku is None:
+        if namespace.is_linux:
+            namespace.sku = 'P0V3'
+            logger.warning("No --sku specified. Using default: P0V3 (Premium V3 Extra Small). "
+                           "See all options: az appservice plan create --help. "
+                           "For current pricing, visit: "
+                           "https://azure.microsoft.com/pricing/details/app-service/")
+        else:
+            namespace.sku = 'B1'
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
-    if namespace.is_linux and namespace.hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
 
 def validate_functionapp_asp_create(namespace):
@@ -132,6 +147,7 @@ def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config container set")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespace):
@@ -151,6 +167,7 @@ def validate_functionapp_on_containerapp_update(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
             "Please use either 'az functionapp config appsettings set' or 'az functionapp config container set'")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
@@ -160,15 +177,17 @@ def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config container show")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_flex_plan(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = _get_app_name(namespace)
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         return
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
@@ -182,15 +201,63 @@ def validate_is_flex_functionapp(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
     if plan_info.sku.tier.lower() != 'flexconsumption':
         raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
+
+
+def warn_linux_consumption_eol(cmd, namespace):
+    """Shows a warning if the function app is on Linux Consumption plan.
+
+    This function is designed to never fail or raise exceptions. Any errors are silently ignored.
+    """
+    # pylint: disable=broad-except
+    try:
+        resource_group_name = (getattr(namespace, 'resource_group_name', None) or
+                               getattr(namespace, 'resource_group', None))
+        name = _get_app_name(namespace)
+        slot = getattr(namespace, 'slot', None)
+        if not name or not resource_group_name:
+            return
+
+        functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+        if functionapp is None:
+            return
+
+        # Check if Linux (reserved=True)
+        is_linux = getattr(functionapp, 'reserved', False)
+        if not is_linux:
+            return
+
+        # Get the plan and check if it's Consumption (Dynamic tier)
+        server_farm_id = get_site_server_farm_id(functionapp)
+        if server_farm_id is None:
+            return
+
+        parsed_plan_id = parse_resource_id(server_farm_id)
+        client = web_client_factory(cmd.cli_ctx)
+        plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+        if plan_info is None or not hasattr(plan_info, 'sku') or plan_info.sku is None:
+            return
+
+        if plan_info.sku.tier == 'Dynamic':
+            logger.warning(
+                "Migrate your app to Flex Consumption as Linux Consumption will reach EOL on "
+                "September 30, 2028 and will no longer be supported. Flex Consumption is now the "
+                "recommended serverless hosting plan for Azure Functions. It offers faster scaling, "
+                "reduced cold starts, private networking, and more control over performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+    except Exception:
+        # This warning function should never fail or block the main command execution.
+        pass
 
 
 def validate_app_exists(cmd, namespace):
@@ -214,6 +281,7 @@ def validate_functionapp_on_containerapp_vnet(cmd, namespace):
         raise ValidationError(
             'Unsupported operation on function app.',
             'Please set virtual network configuration for the function app at Container app environment level.')
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_add_vnet(cmd, namespace):
@@ -310,10 +378,75 @@ def _validate_ip_address_existence(cmd, namespace):
     scm_site = namespace.scm_site
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    ip_exists = [x.ip_address == namespace.ip_address for x in access_rules]
-    if True in ip_exists:
-        raise ArgumentUsageError('IP address: ' + namespace.ip_address + ' already exists. '
-                                 'Cannot add duplicate IP address values.')
+    new_headers = _normalize_http_headers(getattr(namespace, 'http_headers', None))
+    new_ip_set = _normalize_ip_address_list(namespace.ip_address)
+    for rule in access_rules or []:
+        if _normalize_ip_address_list(rule.ip_address) != new_ip_set:
+            continue
+        if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "An access-restriction rule with IP address '{}' already exists. Cannot add a "
+                    "duplicate rule. Use a different IP address, or add a --http-header filter to "
+                    "create an additional rule.".format(namespace.ip_address))
+            raise ArgumentUsageError(
+                "An access-restriction rule with IP address '{}' and the same HTTP header filter "
+                "already exists. Cannot add a duplicate rule. Use a different IP address or vary "
+                "the --http-header values to create an additional rule.".format(namespace.ip_address))
+
+
+def _normalize_ip_address_list(ip_address):
+    """Return a frozenset of canonical CIDR strings parsed from a comma-separated input.
+
+    The CLI accepts up to 8 comma-separated CIDRs in a single rule's ``--ip-address``. ARM stores
+    them in the same comma-separated form on the rule's ``ip_address`` attribute. Two rules
+    represent the same source set regardless of the order in which the CIDRs appear, so duplicate
+    detection should compare unordered sets. Returns ``frozenset()`` for missing/empty input.
+    """
+    if not ip_address:
+        return frozenset()
+    return frozenset(part.strip() for part in ip_address.split(',') if part.strip())
+
+
+def _normalize_http_headers(headers):
+    """Normalize an http-header collection for duplicate-rule comparison.
+
+    Accepts either the CLI input form (list of "name=value" strings, as supplied via --http-header)
+    or the SDK/ARM form (dict mapping header name to a list of values). Returns a dict whose keys
+    are lowercased header names and whose values are frozensets of value strings, so that order of
+    values within a single header (which ARM treats as a set) does not affect equality. None and
+    an empty collection are both normalized to an empty dict so that a rule with no headers
+    compares equal to itself regardless of representation.
+    """
+    if not headers:
+        return {}
+    result = {}
+    if isinstance(headers, dict):
+        for header_name, values in headers.items():
+            if header_name is None:
+                continue
+            normalized_name = header_name.strip().lower()
+            if values is None:
+                continue
+            if isinstance(values, str):
+                values = [values]
+            value_set = frozenset(v for v in values if v)
+            if value_set:
+                result[normalized_name] = value_set
+        return result
+    # CLI input form: list of "name=value" strings.
+    for header_str in headers:
+        if header_str is None or '=' not in header_str:
+            continue
+        header_name, _, header_value = header_str.partition('=')
+        normalized_name = header_name.strip().lower()
+        normalized_value = header_value.strip()
+        if not normalized_name or not normalized_value:
+            continue
+        existing = set(result.get(normalized_name, frozenset()))
+        existing.add(normalized_value)
+        result[normalized_name] = frozenset(existing)
+    return result
 
 
 def validate_service_tag(cmd, namespace):
@@ -360,10 +493,21 @@ def _validate_service_tag_existence(cmd, namespace):
     input_tag_value = namespace.service_tag.replace(' ', '')
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    for rule in access_rules:
-        if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
-            raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
-                                     'Cannot add duplicate Service Tag values.')
+    new_headers = _normalize_http_headers(getattr(namespace, 'http_headers', None))
+    for rule in access_rules or []:
+        if not rule.ip_address or rule.ip_address.lower() != input_tag_value.lower():
+            continue
+        if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "A service-tag access-restriction rule with value '{}' already exists. Cannot "
+                    "add a duplicate rule. Use a different service tag, or add a --http-header "
+                    "filter to create an additional rule.".format(namespace.service_tag))
+            raise ArgumentUsageError(
+                "A service-tag access-restriction rule with value '{}' and the same HTTP header "
+                "filter already exists. Cannot add a duplicate rule. Use a different service tag "
+                "or vary the --http-header values to create an additional rule.".format(
+                    namespace.service_tag))
 
 
 def validate_public_cloud(cmd):
@@ -540,6 +684,7 @@ def validate_app_is_functionapp(cmd, namespace):
         raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
     if is_webapp(app):
         raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_centauri_delete_function(cmd, namespace):
@@ -549,6 +694,7 @@ def validate_centauri_delete_function(cmd, namespace):
         raise ValidationError(
             "Invalid Operation. This function is currently present in your image",
             "Please modify your image to remove the function and provide an updated image.")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_registry_server(namespace):

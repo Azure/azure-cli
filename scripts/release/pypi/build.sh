@@ -17,7 +17,8 @@ echo "Branch $branch"
 echo "Search setup files from `pwd`."
 python --version
 
-pip install -U pip setuptools wheel
+# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources); `python setup.py bdist_wheel` below relies on setup.py.
+pip install -U pip "setuptools<81" wheel
 pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`

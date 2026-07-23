@@ -21,7 +21,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
 from knack.log import get_logger
-from knack.util import todict, CLIError
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -227,10 +227,8 @@ def register_global_policy_argument(cli_ctx):
             command.add_argument('_change_reference', '--change-reference', **change_reference_kwargs)
             command.add_argument('_acquire_policy_token', '--acquire-policy-token', **acquire_policy_token_kwargs)
 
-    policy_token_feature_enabled = cli_ctx.config.getboolean('core', 'enable_policy_token', False)
-    if policy_token_feature_enabled:
-        from knack import events
-        cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
+    from knack import events
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
 
 
 # pylint: disable=too-many-statements
@@ -479,6 +477,7 @@ def show_exception_handler(ex):
 
 
 def verify_property(instance, condition):
+    from azure.cli.core.util import todict
     from jmespath import compile as compile_jmespath
     result = todict(instance)
     jmes_query = compile_jmespath(condition)
@@ -775,6 +774,11 @@ def create_role_assignment(cli_ctx, principal_id, identity_role=None, identity_s
     import time
     from azure.core.exceptions import HttpResponseError
 
+    # Coerce AAZSimpleValue/model values to plain strings for SDK 5.0.0b2 compatibility
+    principal_id = str(principal_id) if principal_id else principal_id
+    identity_role = str(identity_role) if identity_role else identity_role
+    identity_scope = str(identity_scope) if identity_scope else identity_scope
+
     identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
     assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
@@ -819,7 +823,7 @@ def resolve_role_id(cli_ctx, role, scope):
         except ValueError:
             pass
         if not role_id:  # retrieve role id
-            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(client.list(scope, filter="roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
             if len(role_defs) > 1:

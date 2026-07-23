@@ -77,5 +77,53 @@ class TestNetworkUnitTests(unittest.TestCase):
         self.assertEqual(result[1].value, 'noodle')
 
 
+class TestVpnConnectionCertAuthNoSharedKey(unittest.TestCase):
+    """Unit test to verify that --shared-key is not required when --auth-type Certificate is used."""
+
+    def _build_namespace(self, auth_type=None, shared_key=None):
+        namespace = mock.MagicMock()
+        namespace.resource_group_name = 'test-rg'
+        namespace.vnet_gateway1 = ('/subscriptions/00000000-0000-0000-0000-000000000000/'
+                                   'resourceGroups/test-rg/providers/Microsoft.Network/'
+                                   'virtualNetworkGateways/gw1')
+        namespace.local_gateway2 = ('/subscriptions/00000000-0000-0000-0000-000000000000/'
+                                    'resourceGroups/test-rg/providers/Microsoft.Network/'
+                                    'localNetworkGateways/lgw2')
+        namespace.vnet_gateway2 = None
+        namespace.express_route_circuit2 = None
+        namespace.shared_key = shared_key
+        namespace.shared_key_keyvault_id = None
+        namespace.auth_type = auth_type
+        namespace.tags = None
+        namespace.location = 'eastus'
+        return namespace
+
+    def test_cert_auth_without_shared_key_should_not_raise(self):
+        """--auth-type Certificate should not require --shared-key."""
+        from azure.cli.command_modules.network._validators import process_vpn_connection_create_namespace
+
+        cmd = mock.MagicMock()
+        namespace = self._build_namespace(auth_type='Certificate', shared_key=None)
+
+        try:
+            process_vpn_connection_create_namespace(cmd, namespace)
+        except CLIError as e:
+            if '--shared-key is required' in str(e):
+                self.fail(
+                    'Raised CLIError for missing --shared-key even though '
+                    '--auth-type Certificate was specified.')
+
+    def test_no_shared_key_without_cert_auth_should_raise(self):
+        """without --auth-type Certificate, missing --shared-key must raise CLIError."""
+        from azure.cli.command_modules.network._validators import process_vpn_connection_create_namespace
+
+        cmd = mock.MagicMock()
+        namespace = self._build_namespace(auth_type=None, shared_key=None)
+
+        with self.assertRaises(CLIError) as ctx:
+            process_vpn_connection_create_namespace(cmd, namespace)
+        self.assertIn('--shared-key is required', str(ctx.exception))
+
+
 if __name__ == '__main__':
     unittest.main()

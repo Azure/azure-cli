@@ -3,13 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
+import json
 from knack.log import get_logger
 
 from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Start as _Start,
                                Create as _VMSSCreate,
-                               Show as _VMSSShow)
+                               Show as _VMSSShow,
+                               Patch as _VMSSPatch,
+                               List as _VMSSList)
 from azure.cli.core.aaz import AAZUndefined, has_value
+from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
 
@@ -66,6 +70,96 @@ class VMSSShow(_VMSSShow):
         return result
 
 
+class VMSSPatch(_VMSSPatch):
+
+    def _output(self, *args, **kwargs):
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSIdentityRemove(_VMSSPatch):
+    def _output(self, *args, **kwargs):
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualMachineScaleSetsUpdate(_VMSSPatch.VirtualMachineScaleSetsUpdate):
+        def _format_content(self, content):
+            if isinstance(content, str):
+                content = json.loads(content)
+
+            if not content.get('identity'):
+                content['identity'] = {
+                    'userAssignedIdentities': None,
+                    'type': IdentityType.NONE.value
+                }
+                return json.dumps(content)
+
+            identities = content.get('identity', {}).get('userAssignedIdentities')
+            if identities:
+                if 'UserAssigned' in identities.keys():
+                    identities.pop('UserAssigned')
+
+                for key in list(identities.keys()):
+                    identities[key] = None
+
+            return json.dumps(content)
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            request.data = self._format_content(request.data)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200, 202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+
+class VMSSList(_VMSSList):
+    class VirtualMachineScaleSetsList(_VMSSList.VirtualMachineScaleSetsList):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualMachineScaleSetsListAll(_VMSSList.VirtualMachineScaleSetsListAll):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "extendedLocation" in result:
@@ -114,10 +208,14 @@ def convert_show_result_to_snake_case(result):
         new_result["constrained_maximum_capacity"] = result["constrainedMaximumCapacity"]
     if "doNotRunExtensionsOnOverprovisionedVMs" in result:
         new_result["do_not_run_extensions_on_overprovisioned_v_ms"] = result["doNotRunExtensionsOnOverprovisionedVMs"]
+    if "externalHealthPolicy" in result:
+        new_result["external_health_policy"] = result["externalHealthPolicy"]
     if "highSpeedInterconnectPlacement" in result:
         new_result["high_speed_interconnect_placement"] = result["highSpeedInterconnectPlacement"]
     if "hostGroup" in result:
         new_result["host_group"] = result["hostGroup"]
+    if "lifecycleHooksProfile" in result:
+        new_result["lifecycle_hooks_profile"] = result["lifecycleHooksProfile"]
     if "orchestrationMode" in result:
         new_result["orchestration_mode"] = result["orchestrationMode"]
     if "overprovision" in result:
@@ -168,6 +266,28 @@ def convert_show_result_to_snake_case(result):
         automatic_repairs_policy["repair_action"] = automatic_repairs_policy["repairAction"]
         automatic_repairs_policy.pop("repairAction")
 
+    external_health_policy = new_result.get("external_health_policy", {}) or {}
+    if "expiryDuration" in external_health_policy:
+        external_health_policy["expiry_duration"] = external_health_policy["expiryDuration"]
+        external_health_policy.pop("expiryDuration")
+    if "gracePeriod" in external_health_policy:
+        external_health_policy["grace_period"] = external_health_policy["gracePeriod"]
+        external_health_policy.pop("gracePeriod")
+
+    lifecycle_hooks_profile = new_result.get("lifecycle_hooks_profile", {}) or {}
+    if "lifecycleHooks" in lifecycle_hooks_profile:
+        lifecycle_hooks_profile["lifecycle_hooks"] = lifecycle_hooks_profile["lifecycleHooks"]
+        lifecycle_hooks_profile.pop("lifecycleHooks")
+
+    lifecycle_hooks = lifecycle_hooks_profile.get("lifecycle_hooks", [])
+    for lifecycle_hook in lifecycle_hooks:
+        if "defaultAction" in lifecycle_hook:
+            lifecycle_hook["default_action"] = lifecycle_hook["defaultAction"]
+            lifecycle_hook.pop("defaultAction")
+        if "waitDuration" in lifecycle_hook:
+            lifecycle_hook["wait_duration"] = lifecycle_hook["waitDuration"]
+            lifecycle_hook.pop("waitDuration")
+
     priority_mix_policy = new_result.get("priority_mix_policy", {}) or {}
     if "baseRegularPriorityCount" in priority_mix_policy:
         priority_mix_policy["base_regular_priority_count"] = priority_mix_policy["baseRegularPriorityCount"]
@@ -180,6 +300,9 @@ def convert_show_result_to_snake_case(result):
     if "automaticZoneRebalancingPolicy" in resiliency_policy:
         resiliency_policy["automatic_zone_rebalancing_policy"] = resiliency_policy["automaticZoneRebalancingPolicy"]
         resiliency_policy.pop("automaticZoneRebalancingPolicy")
+    if "operationRecoverySettings" in resiliency_policy:
+        resiliency_policy["operation_recovery_settings"] = resiliency_policy["operationRecoverySettings"]
+        resiliency_policy.pop("operationRecoverySettings")
     if "resilientVMCreationPolicy" in resiliency_policy:
         resiliency_policy["resilient_vm_creation_policy"] = resiliency_policy["resilientVMCreationPolicy"]
         resiliency_policy.pop("resilientVMCreationPolicy")
@@ -197,6 +320,17 @@ def convert_show_result_to_snake_case(result):
     if "rebalanceStrategy" in automatic_zone_rebalancing_policy:
         automatic_zone_rebalancing_policy["rebalance_strategy"] = automatic_zone_rebalancing_policy["rebalanceStrategy"]
         automatic_zone_rebalancing_policy.pop("rebalanceStrategy")
+
+    operation_recovery_settings = resiliency_policy.get("operation_recovery_settings", {}) or {}
+    if "reimageRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["reimage_recovery_policy"] = operation_recovery_settings["reimageRecoveryPolicy"]
+        operation_recovery_settings.pop("reimageRecoveryPolicy")
+    if "restartRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["restart_recovery_policy"] = operation_recovery_settings["restartRecoveryPolicy"]
+        operation_recovery_settings.pop("restartRecoveryPolicy")
+    if "startRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["start_recovery_policy"] = operation_recovery_settings["startRecoveryPolicy"]
+        operation_recovery_settings.pop("startRecoveryPolicy")
 
     zone_allocation_policy = resiliency_policy.get("zone_allocation_policy", {}) or {}
     if "maxInstancePercentPerZonePolicy" in zone_allocation_policy:
@@ -825,6 +959,9 @@ def convert_show_result_to_snake_case(result):
         if "managedDisk" in data_disk:
             data_disk["managed_disk"] = data_disk["managedDisk"]
             data_disk.pop("managedDisk")
+        if "storageFaultDomainAlignment" in data_disk:
+            data_disk["storage_fault_domain_alignment"] = data_disk["storageFaultDomainAlignment"]
+            data_disk.pop("storageFaultDomainAlignment")
         if "writeAcceleratorEnabled" in data_disk:
             data_disk["write_accelerator_enabled"] = data_disk["writeAcceleratorEnabled"]
             data_disk.pop("writeAcceleratorEnabled")
@@ -878,6 +1015,9 @@ def convert_show_result_to_snake_case(result):
     if "vhdContainers" in os_disk:
         os_disk["vhd_containers"] = os_disk["vhdContainers"]
         os_disk.pop("vhdContainers")
+    if "storageFaultDomainAlignment" in os_disk:
+        os_disk["storage_fault_domain_alignment"] = os_disk["storageFaultDomainAlignment"]
+        os_disk.pop("storageFaultDomainAlignment")
     if "writeAcceleratorEnabled" in os_disk:
         os_disk["write_accelerator_enabled"] = os_disk["writeAcceleratorEnabled"]
         os_disk.pop("writeAcceleratorEnabled")

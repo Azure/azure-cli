@@ -43,12 +43,18 @@ helps['appservice plan create'] = """
 type: command
 short-summary: Create an app service plan.
 examples:
-  - name: Create a basic app service plan.
+  - name: Create a Linux app service plan.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
+  - name: Create a Windows app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan
-  - name: Create a standard app service plan with four Linux workers.
+  - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku S1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+  - name: Create a Linux app service plan with four Linux workers.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --hyper-v --sku P1V3
@@ -680,6 +686,34 @@ short-summary: Add or update existing always-ready settings in the scale configu
 examples:
   - name: Add or update existing always-ready settings in the scale configuration.
     text: az functionapp scale config always-ready set --name MyFunctionApp --resource-group MyResourceGroup --settings key1=value1 key2=value2
+"""
+
+helps['functionapp update-strategy'] = """
+type: group
+short-summary: Manage a function app's update strategy.
+"""
+
+helps['functionapp update-strategy config'] = """
+type: group
+short-summary: Manage a function app's update strategy configuration.
+"""
+
+helps['functionapp update-strategy config show'] = """
+type: command
+short-summary: Get the details of a function app's update strategy configuration.
+examples:
+  - name: Get the details of a function app's update strategy configuration.
+    text: az functionapp update-strategy config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp update-strategy config set'] = """
+type: command
+short-summary: Set or update a function app's update strategy configuration.
+examples:
+  - name: Set the update strategy to Recreate.
+    text: az functionapp update-strategy config set --name MyFunctionApp --resource-group MyResourceGroup --type Recreate
+  - name: Set the update strategy to RollingUpdate.
+    text: az functionapp update-strategy config set --name MyFunctionApp --resource-group MyResourceGroup --type RollingUpdate
 """
 
 helps['functionapp cors'] = """
@@ -1874,7 +1908,18 @@ examples:
 helps['webapp create'] = """
 type: command
 short-summary: Create a web app.
-long-summary: The web app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+long-summary: |
+    The web app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+
+    This command creates the web app resource but does not deploy code.
+    Use 'az webapp list-runtimes' to see available runtimes.
+
+    Suggested next steps after creation:
+    - Deploy your code:
+        az webapp deploy -g MyResourceGroup -n MyAppName --src-path app.zip
+    - For Linux apps loading large models or dependencies at startup, increase the container
+      start time limit (default 230s, max 1800s):
+        az webapp config appsettings set -g MyResourceGroup -n MyAppName --settings WEBSITES_CONTAINER_START_TIME_LIMIT=1800
 examples:
   - name: Create a web app with the default configuration.
     text: >
@@ -1907,6 +1952,15 @@ examples:
   - name: Create a container webapp with an image pulled from a private Azure Container Registry using a User Assigned Managed Identity
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --container-image-name myregistry.azurecr.io/docker-image:tag --assign-identity MyAssignIdentities --acr-use-identity --acr-identity MyUserAssignedIdentityResourceId
+  - name: Create a web app with end-to-end encryption enabled and minimum TLS version 1.2
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --end-to-end-encryption-enabled true --min-tls-version 1.2
+  - name: Create a Linux Python web app with a custom startup command.
+    text: >
+        az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "gunicorn --bind=0.0.0.0 app:app"
+  - name: Create a Linux Python web app with a startup script.
+    text: >
+        az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "startup.sh"
 """
 
 helps['webapp create-remote-connection'] = """
@@ -1982,7 +2036,10 @@ examples:
 
 helps['webapp deployment list-publishing-credentials'] = """
 type: command
-short-summary: Get the details for available web app publishing credentials
+short-summary: Get the details for available web app publishing credentials.
+long-summary: |
+    Note: These credentials require SCM basic authentication to be enabled.
+    To enable: az webapp update -g MyResourceGroup -n MyAppName --basic-auth Enabled
 examples:
   - name: Get the details for available web app publishing credentials (autogenerated)
     text: az webapp deployment list-publishing-credentials --name MyWebapp --resource-group MyResourceGroup --subscription MySubscription
@@ -2067,6 +2124,10 @@ examples:
 helps['webapp deployment source config-local-git'] = """
 type: command
 short-summary: Get a URL for a git repository endpoint to clone and push to for web app deployment.
+long-summary: |
+    Note: The default deployment branch is 'master'. If your local branch is 'main',
+    either push with: git push azure main:master, or set the app setting
+    DEPLOYMENT_BRANCH=main to change the deployment branch.
 examples:
   - name: Get an endpoint and add it as a git remote.
     text: >
@@ -2338,6 +2399,39 @@ examples:
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp log startup'] = """
+type: group
+short-summary: View web app container startup logs.
+long-summary: >
+    View startup logs written during container initialization for Linux web apps.
+    Use when a container fails to start, crashes on cold start, times out waiting
+    for a port, or returns HTTP 502/503 errors after deployment. These logs contain
+    platform lifecycle events and container stdout/stderr output.
+"""
+
+helps['webapp log startup list'] = """
+type: command
+short-summary: List all container startup log files for a web app.
+examples:
+  - name: List all startup log files
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup
+  - name: List only failure logs
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup --outcome failure
+"""
+
+helps['webapp log startup show'] = """
+type: command
+short-summary: Show the content of a container startup log.
+long-summary: By default, shows the most recent startup log (preferring a failure log when one exists for the latest date). Use --filename to view a specific log file, or --instance to scope the latest-log lookup to a specific worker. --filename and --instance are mutually exclusive.
+examples:
+  - name: Show the latest startup log (prefers failures)
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup
+  - name: Show a specific startup log file
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
+  - name: Show the latest startup log for a specific worker instance
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
@@ -2570,12 +2664,16 @@ examples:
 
 helps['webapp sitecontainers convert'] = """
 type: command
-short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa.
+short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa. Supports both single-container (DOCKER|) and multi-container (COMPOSE|) apps.
 examples:
   - name: Convert a webapp to classic custom container (docker) from sitecontainers
     text: az webapp sitecontainers convert --mode docker --name MyWebApp --resource-group MyResourceGroup
-  - name: Convert a webapp to sitecontainers from classic custom container (docker)
+  - name: Convert a single-container webapp (DOCKER|) to sitecontainers
     text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a multi-container webapp (COMPOSE|) to sitecontainers
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a COMPOSE app to sitecontainers specifying which service is the main container
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup --main-container-name web
 """
 
 
@@ -2589,6 +2687,10 @@ short-summary: >
     Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
     These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
     Run this command with the --debug parameter to see the API calls and parameters values being used.
+long-summary: |
+    Usage notes:
+    - If the app already exists, the existing SKU is kept. The --sku flag is ignored for existing apps.
+    - Use 'az webapp list-runtimes' to see available runtimes.
 
 examples:
   - name: View the details of the app that will be created, without actually running the operation
@@ -2600,6 +2702,12 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
+  - name: Deploy a Python app to Linux with explicit runtime and plan name.
+    text: >
+        az webapp up -n MyApp --runtime "PYTHON:3.14" --plan MyPlan --sku P1v3
+  - name: Deploy a .NET app to Linux (must specify --os-type linux).
+    text: >
+        az webapp up -n MyDotnetApp --runtime "DOTNETCORE:10.0" --os-type linux --plan MyPlan
   - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
@@ -2612,6 +2720,12 @@ examples:
   - name: Create a web app and deploy as a static HTML app.
     text: >
         az webapp up --html
+  - name: Create a web app with a specified domain name scope for unique hostname generation
+    text: >
+        az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
+  - name: Deploy with enriched error diagnostics on failure.
+    text: >
+        az webapp up --enriched-errors true
 """
 
 helps['webapp update'] = """
@@ -2623,6 +2737,9 @@ examples:
         az webapp update -g MyResourceGroup -n MyAppName --set tags.tagName=tagValue
   - name: Update a web app. (autogenerated)
     text: az webapp update --https-only true --name MyAppName --resource-group MyResourceGroup
+    crafted: true
+  - name: Update the platform release channel of a web app. Possible values are Latest, Standard, Extended.
+    text: az webapp update --platform-release-channel Extended --name MyAppName --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -2665,6 +2782,9 @@ examples:
 helps['webapp webjob'] = """
 type: group
 short-summary: Allows management operations for webjobs on a web app.
+long-summary: |
+    To create WebJobs, use the Azure portal. For more information and other options,
+    see: https://learn.microsoft.com/azure/app-service/webjobs-create
 """
 
 helps['webapp webjob continuous'] = """
@@ -3278,9 +3398,26 @@ helps['staticwebapp enterprise-edge show'] = """
 helps['webapp deploy'] = """
     type: command
     short-summary: Deploys a provided artifact to Azure Web Apps.
+    long-summary: |
+        Deploys a zip, war, jar, ear, static file, startup script, or library to an existing Azure Web App.
+        The web app must already exist — use 'az webapp create' to create one first.
+
+        IMPORTANT: Zip deployment does NOT automatically run build automation (dependency installation,
+        compilation, etc.). If your package is not pre-built, you must set the
+        app setting SCM_DO_BUILD_DURING_DEPLOYMENT=true before deploying:
+
+            az webapp config appsettings set -g ResourceGroup -n AppName --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
+
+        Supported --type values: zip, war, jar, ear, lib, static, startup.
     examples:
+    - name: Enable remote build and deploy an app from a zip file.
+      text: |
+        az webapp config appsettings set -g ResourceGroup -n AppName --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
+        az webapp deploy -g ResourceGroup -n AppName --src-path app.zip
     - name: Deploy a war file asynchronously.
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+    - name: Deploy a zip file with enriched error diagnostics on failure.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
 """

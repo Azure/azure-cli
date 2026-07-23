@@ -24,9 +24,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2024-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2025-11-01"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Update(AAZCommand):
             help={"short-summary": "The name of the policy assignment.", "long-summary": "The name of the policy assignment is the name segment of its resource ID."},
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
         _args_schema.scope = AAZStrArg(
@@ -99,9 +99,9 @@ class Update(AAZCommand):
             arg_group="Properties",
             help={"short-summary": "The policy assignment enforcement mode.", "long-summary": "The policy assignment enforcement mode. Possible values are Default and DoNotEnforce."},
             nullable=True,
-            enum={"Default": "Default", "DoNotEnforce": "DoNotEnforce"},
+            enum={"Default": "Default", "DoNotEnforce": "DoNotEnforce", "Enroll": "Enroll"},
         )
-        _args_schema.metadata = AAZDictArg(
+        _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
             help={"short-summary": "The policy assignment metadata.", "long-summary": "The policy assignment metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
@@ -137,9 +137,10 @@ class Update(AAZCommand):
             help={"short-summary": "The resource selectors list to filter policies by resource properties.", "long-summary": "The collection of resource selector expressions used to filter policy assignment applicability by certain resource property values."},
             nullable=True,
         )
-
-        metadata = cls._args_schema.metadata
-        metadata.Element = AAZAnyTypeArg(
+        _args_schema.self_serve_exemption_settings = AAZObjectArg(
+            options=["--self-serve", "--self-serve-exemption-settings"],
+            arg_group="Properties",
+            help="The self-serve exemption settings for the policy assignment.",
             nullable=True,
         )
 
@@ -211,6 +212,23 @@ class Update(AAZCommand):
             nullable=True,
         )
         cls._build_args_selector_update(selectors.Element)
+
+        self_serve_exemption_settings = cls._args_schema.self_serve_exemption_settings
+        self_serve_exemption_settings.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Indicates whether self-serve exemption is enabled.",
+            nullable=True,
+        )
+        self_serve_exemption_settings.policy_definition_reference_ids = AAZListArg(
+            options=["policy-definition-reference-ids"],
+            help="The policy definition reference IDs for self-serve exemption.",
+            nullable=True,
+        )
+
+        policy_definition_reference_ids = cls._args_schema.self_serve_exemption_settings.policy_definition_reference_ids
+        policy_definition_reference_ids.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "non-compliance-message"
 
@@ -360,7 +378,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -440,7 +458,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -508,17 +526,14 @@ class Update(AAZCommand):
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("displayName", AAZStrType, ".display_name")
                 properties.set_prop("enforcementMode", AAZStrType, ".enforcement_mode")
-                properties.set_prop("metadata", AAZDictType, ".metadata")
+                properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("nonComplianceMessages", AAZListType, ".non_compliance_messages")
                 properties.set_prop("notScopes", AAZListType, ".not_scopes")
                 properties.set_prop("overrides", AAZListType, ".overrides")
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyDefinitionId", AAZStrType, ".policy_set_definition")
                 properties.set_prop("resourceSelectors", AAZListType, ".resource_selectors")
-
-            metadata = _builder.get(".properties.metadata")
-            if metadata is not None:
-                metadata.set_elements(AAZAnyType, ".")
+                properties.set_prop("selfServeExemptionSettings", AAZObjectType, ".self_serve_exemption_settings")
 
             non_compliance_messages = _builder.get(".properties.nonComplianceMessages")
             if non_compliance_messages is not None:
@@ -567,6 +582,15 @@ class Update(AAZCommand):
             selectors = _builder.get(".properties.resourceSelectors[].selectors")
             if selectors is not None:
                 _UpdateHelper._build_schema_selector_update(selectors.set_elements(AAZObjectType, "."))
+
+            self_serve_exemption_settings = _builder.get(".properties.selfServeExemptionSettings")
+            if self_serve_exemption_settings is not None:
+                self_serve_exemption_settings.set_prop("enabled", AAZBoolType, ".enabled")
+                self_serve_exemption_settings.set_prop("policyDefinitionReferenceIds", AAZListType, ".policy_definition_reference_ids")
+
+            policy_definition_reference_ids = _builder.get(".properties.selfServeExemptionSettings.policyDefinitionReferenceIds")
+            if policy_definition_reference_ids is not None:
+                policy_definition_reference_ids.set_elements(AAZStrType, ".")
 
             return _instance_value
 
@@ -679,11 +703,15 @@ class _UpdateHelper:
         properties.enforcement_mode = AAZStrType(
             serialized_name="enforcementMode",
         )
+        properties.instance_id = AAZStrType(
+            serialized_name="instanceId",
+            flags={"read_only": True},
+        )
         properties.latest_definition_version = AAZStrType(
             serialized_name="latestDefinitionVersion",
             flags={"read_only": True},
         )
-        properties.metadata = AAZDictType()
+        properties.metadata = AAZAnyType()
         properties.non_compliance_messages = AAZListType(
             serialized_name="nonComplianceMessages",
         )
@@ -701,9 +729,9 @@ class _UpdateHelper:
         properties.scope = AAZStrType(
             flags={"read_only": True},
         )
-
-        metadata = _schema_policy_assignment_read.properties.metadata
-        metadata.Element = AAZAnyType()
+        properties.self_serve_exemption_settings = AAZObjectType(
+            serialized_name="selfServeExemptionSettings",
+        )
 
         non_compliance_messages = _schema_policy_assignment_read.properties.non_compliance_messages
         non_compliance_messages.Element = AAZObjectType()
@@ -747,6 +775,15 @@ class _UpdateHelper:
         selectors = _schema_policy_assignment_read.properties.resource_selectors.Element.selectors
         selectors.Element = AAZObjectType()
         cls._build_schema_selector_read(selectors.Element)
+
+        self_serve_exemption_settings = _schema_policy_assignment_read.properties.self_serve_exemption_settings
+        self_serve_exemption_settings.enabled = AAZBoolType()
+        self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+            serialized_name="policyDefinitionReferenceIds",
+        )
+
+        policy_definition_reference_ids = _schema_policy_assignment_read.properties.self_serve_exemption_settings.policy_definition_reference_ids
+        policy_definition_reference_ids.Element = AAZStrType()
 
         system_data = _schema_policy_assignment_read.system_data
         system_data.created_at = AAZStrType(

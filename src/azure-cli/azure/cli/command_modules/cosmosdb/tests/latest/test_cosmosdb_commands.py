@@ -22,7 +22,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         schemaType = "FullFidelity"
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --analytical-storage-schema-type ' + schemaType)
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('analyticalStorageConfiguration.schemaType', schemaType)
         ])
@@ -33,7 +33,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --analytical-storage-schema-type FullFidelity')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --analytical-storage-schema-type FullFidelity')
         schemaType = "WellDefined"
         self.cmd('az cosmosdb update -n {acc} -g {rg} --analytical-storage-schema-type ' + schemaType)
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
@@ -49,7 +49,7 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
@@ -148,7 +148,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
@@ -160,7 +160,7 @@ class CosmosDBTests(ScenarioTest):
 
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
         assert not result
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
         assert result
 
@@ -212,8 +212,8 @@ class CosmosDBTests(ScenarioTest):
             'acc2': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc1} -g {rg}')
-        self.cmd('az cosmosdb create -n {acc2} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc1} -g {rg} --disable-local-auth true')
+        self.cmd('az cosmosdb create -n {acc2} -g {rg} --disable-local-auth true')
         accounts_list = self.cmd('az cosmosdb list -g {rg}').get_output_in_json()
         assert next(acc for acc in accounts_list if acc['name'] == self.kwargs['acc1'])
         assert next(acc for acc in accounts_list if acc['name'] == self.kwargs['acc2'])
@@ -230,7 +230,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
         assert len(account1['writeLocations']) == 1
         assert len(account1['readLocations']) == 2
         assert account1['writeLocations'][0]['failoverPriority'] == 0
@@ -239,7 +239,13 @@ class CosmosDBTests(ScenarioTest):
         assert account1['readLocations'][0]['failoverPriority'] == 1 or account1['readLocations'][1]['failoverPriority'] == 1
 
         self.cmd('az cosmosdb failover-priority-change -n {acc} -g {rg} --failover-policies {read_location}=0 {write_location}=1')
-        account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        import time
+        for _ in range(0, 10):
+            account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+            if account2['writeLocations'][0]['locationName'] == "West US":
+                break
+            time.sleep(5)
+
         assert len(account2['writeLocations']) == 1
         assert len(account2['readLocations']) == 2
 
@@ -260,7 +266,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-automatic-failover --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
 
         assert account_pre_offline['writeLocations'][0]['locationName'] == "East US"
 
@@ -290,7 +296,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations {write_location}=0 --locations regionName={read_location} failoverPriority=1 isZoneRedundant=false').get_output_in_json()
+        account1 = self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --locations {write_location}=0 --locations regionName={read_location} failoverPriority=1 isZoneRedundant=false').get_output_in_json()
         assert len(account1['writeLocations']) == 1
         assert len(account1['readLocations']) == 2
         assert account1['writeLocations'][0]['failoverPriority'] == 0
@@ -305,7 +311,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-multiple-write-locations --default-consistency-level ConsistentPrefix')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-multiple-write-locations --default-consistency-level ConsistentPrefix')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableMultipleWriteLocations', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
@@ -348,7 +354,7 @@ class CosmosDBTests(ScenarioTest):
             'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-virtual-network --virtual-network-rule {subnet_id}').get_output_in_json()
 
         vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
@@ -370,7 +376,7 @@ class CosmosDBTests(ScenarioTest):
             'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-virtual-network')
 
         with self.assertRaisesRegex(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
             self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
@@ -398,7 +404,7 @@ class CosmosDBTests(ScenarioTest):
             'subnet_id': vnet_output["newVNet"]["subnets"][0]["id"]
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-virtual-network')
 
         vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {subnet_id} --ignore-missing-vnet-service-endpoint').get_output_in_json()
 
@@ -418,7 +424,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': 'centraluseuap'
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
 
         self.cmd('cosmosdb private-link-resource list --account-name {acc} --resource-group {rg}',
                  checks=[self.check('length(@)', 1), self.check('[0].groupId', 'Sql')])
@@ -435,7 +441,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         # Prepare cosmos db account and network
-        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={loc} failoverPriority=0 isZoneRedundant=False --disable-local-auth true').get_output_in_json()
         self.kwargs['acc_id'] = account['id']
         self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
@@ -478,6 +484,37 @@ class CosmosDBTests(ScenarioTest):
 
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_acl_bypass(self, resource_group):
+        network_acl_bypass_resource_id = '/subscriptions/subId/resourcegroups/rgName/providers/Microsoft.Synapse/workspaces/workspaceName'
+        fabric_network_acl_bypass_resource_id = '/tenants/72f988bf-86f1-41af-91ab-2d7cd011db47/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft.Fabric/workspaces/3e83f2c3-5a1e-45c3-95f3-53f3a1794e6f'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'network_acl_bypass_resource_id': network_acl_bypass_resource_id,
+            'fabric_network_acl_bypass_resource_id': fabric_network_acl_bypass_resource_id
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'None'),
+        ]).get_output_in_json()
+        assert len(account['networkAclBypassResourceIds']) == 0
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id}')
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', network_acl_bypass_resource_id)
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableFabricNetworkAclBypass --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {fabric_network_acl_bypass_resource_id}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', fabric_network_acl_bypass_resource_id),
+        ]).get_output_in_json()
+        assert len(account['capabilities']) == 1
+        assert account['capabilities'][0]['name'] == "EnableFabricNetworkAclBypass"
 
     @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
@@ -563,7 +600,7 @@ class CosmosDBTests(ScenarioTest):
             'db_name': db_name,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
 
         assert not self.cmd('az cosmosdb sql database exists -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
@@ -609,7 +646,7 @@ class CosmosDBTests(ScenarioTest):
             "full_text_policy": full_text_policy
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableNoSQLVectorSearch')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableNoSQLVectorSearch --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -641,6 +678,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container')
     def test_cosmosdb_sql_container_analytical_ttl(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -656,7 +694,7 @@ class CosmosDBTests(ScenarioTest):
             'ttl': ttl
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {ttl}').get_output_in_json()
@@ -667,6 +705,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analyticalStorageTtl')
     def test_cosmosdb_sql_container_update_analytical_ttl(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -682,7 +721,7 @@ class CosmosDBTests(ScenarioTest):
             'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
             'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {analyticalStorageTtlOnCollectionCreate}').get_output_in_json()
@@ -728,6 +767,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @unittest.skip('Enabling Analytical Storage during account creation is no longer supported by the service (deprecated). Will undergo formal deprecation in next PR.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_analytical_store_migration')
     def test_cosmosdb_sql_container_update_analytical_store_migration(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -743,7 +783,7 @@ class CosmosDBTests(ScenarioTest):
             'analyticalStorageTtlOnCollectionCreate': analyticalStorageTtlOnCollectionCreate,
             'analyticalStorageTtlOnCollectionUpdate': analyticalStorageTtlOnCollectionUpdate})
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part}').get_output_in_json()
@@ -777,7 +817,7 @@ class CosmosDBTests(ScenarioTest):
             'nbody': nbody
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
         sproc_create = self.cmd('az cosmosdb sql stored-procedure create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {body}').get_output_in_json()
@@ -817,7 +857,7 @@ class CosmosDBTests(ScenarioTest):
             'nbody': nbody
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
         udf_create = self.cmd('az cosmosdb sql user-defined-function create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {body}').get_output_in_json()
@@ -861,7 +901,7 @@ class CosmosDBTests(ScenarioTest):
             'nbody': nbody
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
         trigger_create = self.cmd('az cosmosdb sql trigger create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name} -b {body}').get_output_in_json()
@@ -893,7 +933,7 @@ class CosmosDBTests(ScenarioTest):
             'db_name': db_name,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --disable-local-auth true')
 
         assert not self.cmd('az cosmosdb mongodb database exists -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
@@ -921,12 +961,12 @@ class CosmosDBTests(ScenarioTest):
             'db_name': self.create_random_name(prefix='cli', length=15),
             'col_name': col_name,
             'shard_key': "theShardKey",
-            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"',
+            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_id\\"]}},{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"',
             'ttl': "3000",
             'new_ttl': "6000"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --enable-analytical-storage true --server-version 3.2')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --enable-analytical-storage true --server-version 3.2 --disable-local-auth true')
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
@@ -1122,7 +1162,7 @@ class CosmosDBTests(ScenarioTest):
             'table_name': table_name,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable --disable-local-auth true')
 
         assert not self.cmd('az cosmosdb table exists -g {rg} -a {acc} -n {table_name}').get_output_in_json()
 
@@ -1155,7 +1195,7 @@ class CosmosDBTests(ScenarioTest):
             'tp2': tp2,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
 
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
@@ -1191,7 +1231,7 @@ class CosmosDBTests(ScenarioTest):
             'manual': "manual"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
 
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
@@ -1238,7 +1278,7 @@ class CosmosDBTests(ScenarioTest):
             'manual': "manual"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --disable-local-auth true')
 
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
@@ -1373,7 +1413,7 @@ class CosmosDBTests(ScenarioTest):
             'autoscale': "autoscale"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable --disable-local-auth true')
 
         self.cmd('az cosmosdb table create -g {rg} -a {acc} -n {table_name} --throughput {tp1}')
         table_throughput_show = self.cmd('az cosmosdb table throughput show -g {rg} -a {acc} -n {table_name}').get_output_in_json()
@@ -1403,7 +1443,7 @@ class CosmosDBTests(ScenarioTest):
             'tp2': tp2,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
 
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --max-throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
@@ -1433,7 +1473,7 @@ class CosmosDBTests(ScenarioTest):
             'tp2': tp2,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --disable-local-auth true')
 
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb mongodb database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
@@ -1525,7 +1565,7 @@ class CosmosDBTests(ScenarioTest):
             'tp2': tp2,
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableTable --disable-local-auth true')
 
         self.cmd('az cosmosdb table create -g {rg} -a {acc} -n {tb_name} --throughput {tp1}')
         db_throughput_show = self.cmd('az cosmosdb table throughput show -g {rg} -a {acc} -n {tb_name}').get_output_in_json()
@@ -1760,7 +1800,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         self.cmd(
-            'az cosmosdb create -n {acc} -g {rg} --kind MongoDB --capabilities EnableMongoRoleBasedAccessControl')
+            'az cosmosdb create -n {acc} -g {rg} --kind MongoDB --capabilities EnableMongoRoleBasedAccessControl --disable-local-auth true')
         self.cmd(
             'az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
@@ -1916,7 +1956,7 @@ class CosmosDBTests(ScenarioTest):
             'principal_id': principal_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
@@ -2005,7 +2045,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('backupPolicy.type', 'Periodic')
         ])
@@ -2033,7 +2073,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {col} -p /pk ').get_output_in_json()
@@ -2054,7 +2094,7 @@ class CosmosDBTests(ScenarioTest):
             'rts': restore_ts_string
         })
 
-        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts}')
+        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts} --disable-local-auth true')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -2075,7 +2115,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'ins_id': account['instanceId']
@@ -2134,7 +2174,7 @@ class CosmosDBTests(ScenarioTest):
 
         time.sleep(300)
 
-        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc} --disable-local-auth true')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime'),
             self.check('restoreParameters.restoreSource', restorable_database_account['id']),
@@ -2154,7 +2194,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'ins_id': account['instanceId']
@@ -2183,7 +2223,7 @@ class CosmosDBTests(ScenarioTest):
         time.sleep(300)
         self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
 
-        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}')
+        self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc} --disable-local-auth true')
         self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime'),
             self.check('restoreParameters.restoreSource', restorable_database_account['id']),
@@ -2203,7 +2243,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'ins_id': account['instanceId']
@@ -2256,7 +2296,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
 
         self.kwargs.update({
@@ -2320,7 +2360,7 @@ class CosmosDBTests(ScenarioTest):
         # This should fail as account doesn't exist
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb sql retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
 
         # This should fail as database doesn't exist
@@ -2392,7 +2432,7 @@ class CosmosDBTests(ScenarioTest):
         # This should fail as account doesn't exist
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb mongodb retrieve-latest-backup-time -g {rg} -a {acc} -d {db_name} -c {col} -l {loc}'))
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind MongoDB --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
 
         # This should fail as database doesn't exist
@@ -2474,7 +2514,7 @@ class CosmosDBTests(ScenarioTest):
             'rts': restore_ts_string
         })
 
-        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts}')
+        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts} --disable-local-auth true')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -2515,7 +2555,7 @@ class CosmosDBTests(ScenarioTest):
             'rts': restore_ts_string
         })
 
-        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc}')
+        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc} --disable-local-auth true')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -2587,7 +2627,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.cmd('az cosmosdb table create -g {rg} -a {acc} -n {table}').get_output_in_json()
 
@@ -2605,7 +2645,7 @@ class CosmosDBTests(ScenarioTest):
             'rts': restore_ts_string
         })
 
-        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts}')
+        self.cmd('az cosmosdb create -n {restored_acc} -g {rg} --is-restore-request true --restore-source {db_id} --restore-timestamp {rts} --disable-local-auth true')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -2625,7 +2665,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         self.kwargs.update({
             'ins_id': account['instanceId']
@@ -2645,7 +2685,7 @@ class CosmosDBTests(ScenarioTest):
             'dt': True
         })
 
-        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc} --disable-ttl {dt}')
+        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc} --disable-ttl {dt} --disable-local-auth true')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
@@ -2665,7 +2705,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         print(account)
         self.kwargs.update({
@@ -2775,7 +2815,7 @@ class CosmosDBTests(ScenarioTest):
         # This should fail as account doesn't exist
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb table retrieve-latest-backup-time -g {rg} -a {acc} -n {table} -l {loc}'))
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --kind GlobalDocumentDB --capabilities EnableTable --disable-local-auth true')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
 
         # This should fail as collection doesn't exist
@@ -2855,7 +2895,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=15)
         })
 
-        acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
+        acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False --disable-local-auth true')
 
         service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" --gateway-type IntegratedCache').get_output_in_json()
         assert service_create["name"] == "sqlDedicatedGateway"
@@ -2881,7 +2921,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
 
         assert not self.cmd('az cosmosdb sql database exists -g {rg} -a {acc} -n {db_name}').get_output_in_json()
 
@@ -2959,7 +2999,7 @@ class CosmosDBTests(ScenarioTest):
             'ttl': ttl
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -3064,7 +3104,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -3148,7 +3188,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -3240,7 +3280,7 @@ class CosmosDBTests(ScenarioTest):
             'tp1': tp1
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
@@ -3317,7 +3357,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         # Create normal database + prov collection
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --server-version 3.6 --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --server-version 3.6 --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
@@ -3440,7 +3480,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         # create mongodb shared database + shared collection + prov collection
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --server-version 3.6 --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --server-version 3.6 --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name} --throughput {tp1}')
 
         assert not self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
@@ -3515,6 +3555,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 0
         
+    @unittest.skip('Service availability being upgraded in the background; will be re-enabled in the next version.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_gremlin_database_graph_restore')
     def test_cosmosdb_gremlin_database_graph_restore(self, resource_group):
@@ -3539,7 +3580,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin --backup-policy-type Continuous --locations regionName={loc}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableGremlin --backup-policy-type Continuous --locations regionName={loc} --disable-local-auth true')
         self.cmd('az cosmosdb gremlin database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb gremlin graph exists -g {rg} -a {acc} -d {db_name} -n {gp_name}').get_output_in_json()
@@ -3670,7 +3711,7 @@ class CosmosDBTests(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc} --capabilities EnableTable --disable-local-auth true')
 
         assert not self.cmd('az cosmosdb table exists -g {rg} -a {acc} -n {table_name}').get_output_in_json()
 

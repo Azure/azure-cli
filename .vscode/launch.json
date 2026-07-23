@@ -38,6 +38,26 @@
                 "--help"
             ],
             "console": "integratedTerminal",
+        },
+        {
+            "name": "Azure CLI Debug Tab Completion (External Console)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/azure-cli/azure/cli/__main__.py",
+            "args": [],
+            "console": "externalTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "_ARGCOMPLETE": "1",
+                "COMP_LINE": "az vm create --",
+                "COMP_POINT": "18",
+                "_ARGCOMPLETE_SUPPRESS_SPACE": "0",
+                "_ARGCOMPLETE_IFS": "\n",
+                "_ARGCOMPLETE_SHELL": "powershell",
+                "ARGCOMPLETE_USE_TEMPFILES": "1",
+                "_ARGCOMPLETE_STDOUT_FILENAME": "C:\\temp\\az_debug_completion.txt"
+            },
+            "justMyCode": false
         }
     ]
 }

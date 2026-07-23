@@ -27,9 +27,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2024-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2025-11-01"],
         ]
     }
 
@@ -54,7 +54,7 @@ class Delete(AAZCommand):
             help={"short-summary": "The name of the policy assignment.", "long-summary": "The name of the policy assignment is the name segment of its resource ID."},
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
         _args_schema.scope = AAZStrArg(
@@ -124,7 +124,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -221,11 +221,15 @@ class Delete(AAZCommand):
             properties.enforcement_mode = AAZStrType(
                 serialized_name="enforcementMode",
             )
+            properties.instance_id = AAZStrType(
+                serialized_name="instanceId",
+                flags={"read_only": True},
+            )
             properties.latest_definition_version = AAZStrType(
                 serialized_name="latestDefinitionVersion",
                 flags={"read_only": True},
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.non_compliance_messages = AAZListType(
                 serialized_name="nonComplianceMessages",
             )
@@ -243,9 +247,9 @@ class Delete(AAZCommand):
             properties.scope = AAZStrType(
                 flags={"read_only": True},
             )
-
-            metadata = cls._schema_on_200.properties.metadata
-            metadata.Element = AAZAnyType()
+            properties.self_serve_exemption_settings = AAZObjectType(
+                serialized_name="selfServeExemptionSettings",
+            )
 
             non_compliance_messages = cls._schema_on_200.properties.non_compliance_messages
             non_compliance_messages.Element = AAZObjectType()
@@ -289,6 +293,15 @@ class Delete(AAZCommand):
             selectors = cls._schema_on_200.properties.resource_selectors.Element.selectors
             selectors.Element = AAZObjectType()
             _DeleteHelper._build_schema_selector_read(selectors.Element)
+
+            self_serve_exemption_settings = cls._schema_on_200.properties.self_serve_exemption_settings
+            self_serve_exemption_settings.enabled = AAZBoolType()
+            self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
+            )
+
+            policy_definition_reference_ids = cls._schema_on_200.properties.self_serve_exemption_settings.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(

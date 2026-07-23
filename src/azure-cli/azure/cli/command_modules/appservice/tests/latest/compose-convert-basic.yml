@@ -1,0 +1,10 @@
+# Basic multi-container: web app + redis sidecar
+# Tests: auto-detect main (web has ports), simple image extraction, no env/volumes
+version: '3'
+services:
+  web:
+    image: "myacr.azurecr.io/webapp:v1"
+    ports:
+      - "8080:8080"
+  redis:
+    image: "redis:7-alpine"

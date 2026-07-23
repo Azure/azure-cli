@@ -39,6 +39,8 @@ import unittest
 import os
 import tempfile
 import shutil
+from unittest import mock
+from urllib.parse import urlparse, parse_qs
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
@@ -55,12 +57,42 @@ from azure.cli.command_modules.cognitiveservices.custom import (
     _is_docker_running,
     _is_fully_qualified_image,
     _validate_path_for_subprocess,
+    _get_agent_container_status,
+    AGENT_API_VERSION_PARAMS,
 )
 from azure.cli.command_modules.cognitiveservices._params import _environment_variables_type
 
 
 class CognitiveServicesAgentHelperTests(unittest.TestCase):
     """Unit tests for agent helper functions."""
+
+    def test_get_agent_container_status_builds_expected_request(self):
+        """Test that agent status calls the default container endpoint and returns payload."""
+        expected_payload = {"status": "Running"}
+
+        client = mock.Mock()
+        response = mock.Mock()
+        response.json.return_value = expected_payload
+        client.send_request.return_value = response
+
+        result = _get_agent_container_status(client, "myAgent", "10")
+
+        self.assertEqual(result, expected_payload)
+        client.send_request.assert_called_once()
+        response.raise_for_status.assert_called_once()
+
+        request = client.send_request.call_args[0][0]
+        self.assertEqual(getattr(request, "method", None), "GET")
+
+        parsed = urlparse(getattr(request, "url", ""))
+        self.assertEqual(
+            parsed.path,
+            "/agents/myAgent/versions/10/containers/default",
+        )
+        self.assertEqual(
+            parse_qs(parsed.query).get("api-version"),
+            [AGENT_API_VERSION_PARAMS["api-version"]],
+        )
     
     def test_validate_image_tag_valid(self):
         """Test tag validation and extraction from valid image URIs."""
@@ -297,6 +329,78 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
         
         with self.assertRaises(InvalidArgumentValueError):
             _validate_path_for_subprocess(None, "test path")
+
+    # =========================================================================
+    # Tests for agent logs functionality
+    # =========================================================================
+
+    def test_stream_agent_logs_function_signature(self):
+        """Test that _stream_agent_logs has correct parameters."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import _stream_agent_logs
+        
+        sig = signature(_stream_agent_logs)
+        self.assertIn('cmd', sig.parameters)
+        self.assertIn('client', sig.parameters)
+        self.assertIn('agent_name', sig.parameters)
+        self.assertIn('agent_version', sig.parameters)
+        self.assertIn('kind', sig.parameters)
+        self.assertIn('tail', sig.parameters)
+        self.assertIn('follow', sig.parameters)
+        # Verify defaults
+        self.assertEqual(sig.parameters['kind'].default, "console")
+        self.assertEqual(sig.parameters['tail'].default, 50)
+        self.assertEqual(sig.parameters['follow'].default, True)
+
+    def test_agent_logs_show_function_signature(self):
+        """Test that agent_logs_show has correct parameters."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import agent_logs_show
+        
+        sig = signature(agent_logs_show)
+        self.assertIn('cmd', sig.parameters)
+        self.assertIn('client', sig.parameters)
+        self.assertIn('account_name', sig.parameters)
+        self.assertIn('project_name', sig.parameters)
+        self.assertIn('agent_name', sig.parameters)
+        self.assertIn('agent_version', sig.parameters)
+        self.assertIn('kind', sig.parameters)
+        self.assertIn('tail', sig.parameters)
+        self.assertIn('follow', sig.parameters)
+        # Verify follow defaults to False for non-streaming behavior
+        self.assertEqual(sig.parameters['follow'].default, False)
+        self.assertEqual(sig.parameters['kind'].default, "console")
+        self.assertEqual(sig.parameters['tail'].default, 50)
+
+    def test_agent_start_show_logs_parameter(self):
+        """Test that agent_start accepts show_logs and timeout parameters."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import agent_start
+        
+        sig = signature(agent_start)
+        self.assertIn('cmd', sig.parameters)
+        self.assertIn('show_logs', sig.parameters)
+        self.assertIn('timeout', sig.parameters)
+        self.assertEqual(sig.parameters['show_logs'].default, False)
+        self.assertEqual(sig.parameters['timeout'].default, 600)
+
+    def test_agent_create_show_logs_parameter(self):
+        """Test that agent_create accepts show_logs parameter."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import agent_create
+        
+        sig = signature(agent_create)
+        self.assertIn('show_logs', sig.parameters)
+        self.assertEqual(sig.parameters['show_logs'].default, False)
+
+    def test_deploy_agent_version_show_logs_parameter(self):
+        """Test that _deploy_agent_version accepts show_logs parameter."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import _deploy_agent_version
+        
+        sig = signature(_deploy_agent_version)
+        self.assertIn('show_logs', sig.parameters)
+        self.assertEqual(sig.parameters['show_logs'].default, False)
 
 
 class CognitiveServicesAgentTests(ScenarioTest):
@@ -818,6 +922,161 @@ CMD ["python", "app.py"]
                     '--build-remote')
 
         # Cleanup
+        self.cmd('az cognitiveservices account delete -n {account} -g {rg}')
+
+    # =========================================================================
+    # Integration tests for agent logs functionality
+    # =========================================================================
+
+    @live_only()
+    @serial_test()
+    @ResourceGroupPreparer(location='eastus')
+    def test_agent_logs_show_basic(self, resource_group):
+        """
+        Test basic log streaming without --follow flag.
+
+        Validates:
+        - Log command executes without error
+        - Default parameters (console type, 50 lines tail)
+        - Command exits after fetching initial logs
+        """
+        account_name = self.create_random_name(prefix='cs_logs_', length=20)
+        project_name = self.create_random_name(prefix='proj_', length=15)
+        agent_name = 'test-logs-agent'
+
+        self.kwargs.update({
+            'account': account_name,
+            'project': project_name,
+            'agent': agent_name,
+            'kind': 'AIServices',
+            'sku': 'S0',
+            'location': 'eastus',
+            'image': 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        })
+
+        # Create Cognitive Services account
+        self.cmd('az cognitiveservices account create -n {account} -g {rg} '
+                 '--kind {kind} --sku {sku} -l {location} --yes --manage-projects',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
+
+        # Create agent with a sample image
+        self.cmd('az cognitiveservices agent create --skip-acr-check '
+                 '-a {account} --project-name {project} --name {agent} '
+                 '--image {image}',
+                 checks=[self.check('name', '{agent}')])
+
+        # Fetch logs without follow (should return and exit)
+        # This verifies the command runs successfully
+        self.cmd('az cognitiveservices agent logs show '
+                 '-a {account} -p {project} -n {agent} --agent-version 1')
+
+        # Cleanup
+        self.cmd('az cognitiveservices agent delete -a {account} -p {project} -n {agent}')
+        self.cmd('az cognitiveservices account delete -n {account} -g {rg}')
+
+    @live_only()
+    @serial_test()
+    @ResourceGroupPreparer(location='eastus')
+    def test_agent_logs_show_with_options(self, resource_group):
+        """
+        Test log streaming with various options.
+
+        Validates:
+        - --type system option
+        - --tail custom value
+        - Different log type outputs
+        """
+        account_name = self.create_random_name(prefix='cs_logs_', length=20)
+        project_name = self.create_random_name(prefix='proj_', length=15)
+        agent_name = 'test-logs-opts'
+
+        self.kwargs.update({
+            'account': account_name,
+            'project': project_name,
+            'agent': agent_name,
+            'kind': 'AIServices',
+            'sku': 'S0',
+            'location': 'eastus',
+            'image': 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        })
+
+        # Create Cognitive Services account
+        self.cmd('az cognitiveservices account create -n {account} -g {rg} '
+                 '--kind {kind} --sku {sku} -l {location} --yes --manage-projects',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
+
+        # Create agent
+        self.cmd('az cognitiveservices agent create --skip-acr-check '
+                 '-a {account} --project-name {project} --name {agent} '
+                 '--image {image}',
+                 checks=[self.check('name', '{agent}')])
+
+        # Test with --type system
+        self.cmd('az cognitiveservices agent logs show '
+                 '-a {account} -p {project} -n {agent} --agent-version 1 '
+                 '--type system')
+
+        # Test with --tail custom value
+        self.cmd('az cognitiveservices agent logs show '
+                 '-a {account} -p {project} -n {agent} --agent-version 1 '
+                 '--tail 100')
+
+        # Test with both options
+        self.cmd('az cognitiveservices agent logs show '
+                 '-a {account} -p {project} -n {agent} --agent-version 1 '
+                 '--type console --tail 200')
+
+        # Cleanup
+        self.cmd('az cognitiveservices agent delete -a {account} -p {project} -n {agent}')
+        self.cmd('az cognitiveservices account delete -n {account} -g {rg}')
+
+    @live_only()
+    @serial_test()
+    @ResourceGroupPreparer(location='eastus')
+    def test_agent_start_with_show_logs(self, resource_group):
+        """
+        Test agent start with --show-logs flag.
+
+        Validates:
+        - Agent can be stopped and started
+        - --show-logs flag streams logs during startup
+        """
+        account_name = self.create_random_name(prefix='cs_start_', length=20)
+        project_name = self.create_random_name(prefix='proj_', length=15)
+        agent_name = 'test-start-logs'
+
+        self.kwargs.update({
+            'account': account_name,
+            'project': project_name,
+            'agent': agent_name,
+            'kind': 'AIServices',
+            'sku': 'S0',
+            'location': 'eastus',
+            'image': 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        })
+
+        # Create Cognitive Services account
+        self.cmd('az cognitiveservices account create -n {account} -g {rg} '
+                 '--kind {kind} --sku {sku} -l {location} --yes --manage-projects',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
+
+        # Create agent
+        self.cmd('az cognitiveservices agent create --skip-acr-check '
+                 '-a {account} --project-name {project} --name {agent} '
+                 '--image {image}',
+                 checks=[self.check('name', '{agent}')])
+
+        # Stop the agent first
+        self.cmd('az cognitiveservices agent stop '
+                 '-a {account} -p {project} -n {agent} --agent-version 1')
+
+        # Start with --show-logs
+        self.cmd('az cognitiveservices agent start '
+                 '-a {account} -p {project} -n {agent} --agent-version 1 '
+                 '--show-logs --timeout 120')
+
+        # Cleanup
+        self.cmd('az cognitiveservices agent delete -a {account} -p {project} -n {agent}')
         self.cmd('az cognitiveservices account delete -n {account} -g {rg}')
 
 

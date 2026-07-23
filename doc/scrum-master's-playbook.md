@@ -1,11 +1,11 @@
 The Scrum Master role of CLI is primarily release-focused, but also includes several ongoing responsibilities:
-- Host the weekly sync meeting every Thursday.
 - Attend office hours held on Tuesday and Friday.
   - Join this [channel](https://teams.microsoft.com/l/chat/19:e4bb31fd84ab4f2f9375ad848e8a80fa@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D). If there is any topic related to CLI requested, make sure to join the call. Request product manager to add you to the meeting series.
-- Monitor Batched CI on a regular basis:
+- Monitor [Batched CI](https://dev.azure.com/azclitools/public/_build?definitionId=32&_a=summary&repositoryFilter=12&branchFilter=487%2C487%2C487) on a regular basis:
 
-  ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/batched-ci.png)
+  ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/batched-ci-pipeline.png)
   - Ensure that Batched CI is in a normal state before the release. If there are any failures, coordinate with the corresponding engineer to resolve them.
+- Monitor the status of [doc pipeline](https://apidrop.visualstudio.com/Content%20CI/_build?definitionId=6592&_a=summary) to ensure it remains healthy; otherwise, it may affect the normal release of Azure CLI documentation. Partners outside the Learn Engineering team can request access to these pipelines via [CoreIdentity](https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fcoreidentity.microsoft.com%2Fmanage%2FEntitlement%2Fentitlement%2Fdeveloperpro-xwbu&data=05%7C02%7Cxdanni%40microsoft.com%7C66b2783f501f4e3ee11d08ddf1d157e3%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C638932603714716428%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=QuZeygQ2KfI8SvPZFxw%2FGIp7%2FPXLIx9ozryEEbr0A2w%3D&reserved=0).
 
 The Azure CLI release process is highly automated **with some manual intervention steps** and has evolved to use both Azure DevOps and GitHub Actions.
 
@@ -20,6 +20,9 @@ Schedule release meetings in advance and involve the Azure CLI Dev distribution 
 - Phase 2: will take place on next Tuesday.
 
 Overall, these phases span seven weekdays across two working weeks.
+
+## prerequisite
+1. Ensure `NEXT_BREAKING_CHANGE_RELEASE` and `NEXT_BREAKING_CHANGE_DATE` in [breaking_change.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/breaking_change.py) are correct before proceeding with the phase1.
 
 ## Phase 1
 1. Triggering [Prepare for Release Build](https://dev.azure.com/azclitools/release/_release?definitionId=12) pipeline.

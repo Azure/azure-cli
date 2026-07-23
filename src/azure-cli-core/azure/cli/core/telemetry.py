@@ -51,7 +51,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
-        self.command_preserve_casing = None
         self.is_cmd_idx_rebuild_triggered = False
         self.show_survey_message = False
         self.region_input = None
@@ -80,6 +79,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.enable_broker_on_windows = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
+        self.agentic_session = False
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -132,6 +132,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
+        uname = platform.uname()
+
         return {
             'Reserved.ChannelUsed': 'AI',
             'Reserved.EventId': self.event_id,
@@ -152,9 +154,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
                 self.product_version, self.module_version),
             'Context.Default.VS.Core.MacAddressHash': _get_hash_mac_address(),
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
-            'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
-            'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
-            'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
+            'Context.Default.VS.Core.OS.Type': uname.system.lower(),  # eg. darwin, windows
+            'Context.Default.VS.Core.OS.Version': uname.version.lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.OS.Platform': '{}-{}-{}-{}'.format(
+                uname.system, uname.release, uname.version, uname.machine).lower(),  # eg. windows-10-10.0.19041-sp0
             # the distro info is complement of platform info for linux
             'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
@@ -209,8 +212,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
-        set_custom_properties(result, 'CommandPreserveCasing',
-                              self.command_preserve_casing or '')
         set_custom_properties(result, 'IsCmdIdxRebuildTriggered', str(self.is_cmd_idx_rebuild_triggered))
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         set_custom_properties(result, 'PythonVersion', platform.python_version())
@@ -239,6 +240,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
+        set_custom_properties(result, 'AgenticSession', str(self.agentic_session))
 
         return result
 
@@ -448,13 +450,12 @@ def set_command_index_rebuild_triggered(is_cmd_idx_rebuild_triggered=False):
 
 @decorators.suppress_all_exceptions()
 def set_command_details(command, output_type=None, parameters=None, extension_name=None,
-                        extension_version=None, command_preserve_casing=None):
+                        extension_version=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
     _session.extension_name = extension_name
     _session.extension_version = extension_version
-    _session.command_preserve_casing = command_preserve_casing
 
 
 @decorators.suppress_all_exceptions()
@@ -498,6 +499,11 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+
+
+@decorators.suppress_all_exceptions()
+def set_agentic_session(agentic_session):
+    _session.agentic_session = agentic_session
 # endregion
 
 

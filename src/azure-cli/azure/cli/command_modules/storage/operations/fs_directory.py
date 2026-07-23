@@ -99,7 +99,7 @@ def generate_sas_directory_uri(client, cmd, file_system_name, directory_name, pe
                                protocol=None, cache_control=None, content_disposition=None,
                                content_encoding=None, content_language=None,
                                content_type=None, full_uri=False, as_user=False, encryption_scope=None,
-                               user_delegation_oid=None):
+                               user_delegation_oid=None, user_delegation_tid=None):
     from urllib.parse import quote
     generate_directory_sas = cmd.get_models('_shared_access_signature#generate_directory_sas')
 
@@ -107,7 +107,8 @@ def generate_sas_directory_uri(client, cmd, file_system_name, directory_name, pe
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(),
-            get_datetime_from_string(expiry))
+            get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
 
     sas_token = generate_directory_sas(account_name=client.account_name, file_system_name=file_system_name,
                                        directory_name=directory_name,

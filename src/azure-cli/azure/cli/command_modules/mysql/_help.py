@@ -395,6 +395,19 @@ examples:
     text: >
       az mysql flexible-server restore --resource-group testGroup --name testserverNew \\
         --source-server testserver --public-access Enabled
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
+    text: >
+      az mysql flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
+  - name: >
+      Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az mysql flexible-server restore --resource-group testGroup --name testserverNew \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
 """
 
 helps['mysql flexible-server geo-restore'] = """
@@ -416,6 +429,13 @@ examples:
   - name: Geo-restore private access server 'testserver' as a new server 'testserverNew' with public access.
     text: >
       az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew  --source-server testserver --public-access Enabled --location newLocation
+  - name: >
+      Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
 """
 
 helps['mysql flexible-server start'] = """
@@ -656,6 +676,13 @@ short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testReplicaServer' for 'testserver' in the specified zone if available.
     text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testserver --zone 3
+  - name: >
+      Create a read replica 'testReplicaServer' for 'testserver' in a different subscription / resource group 'newTestGroup'.
+      Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
+      This resource ID can be in a subscription different than the subscription used for az account set.
+    text: >
+      az mysql flexible-server replica create --replica-name testReplicaServer -g newTestGroup \\
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
 """
 
 helps['mysql flexible-server replica list'] = """

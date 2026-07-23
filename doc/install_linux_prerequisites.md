@@ -6,7 +6,7 @@ Some native Linux packages are required when installing the CLI with:
 - Interactive installation script
 - `pip`
 
-Current supported Python versions are Python 3.10 ~ 3.13.
+Current supported Python versions are Python 3.10 ~ 3.14.
 
 The commands to run to install the dependencies for some common distributions are listed below.
 

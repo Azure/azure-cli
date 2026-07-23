@@ -93,9 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
 
-    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
-    if static_version:  # only for vnet
+    if static_version:
         api_version = static_version
+    else:
+        api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -164,6 +165,7 @@ def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
+                        ephemeral_os_disk_enable_full_caching=None,
                         data_disk_delete_option=None, source_snapshots_or_disks=None,
                         source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
                         source_disk_restore_point_size_gb=None):
@@ -203,6 +205,8 @@ def normalize_disk_info(image_data_disks=None,
             os_disk_caching = 'ReadOnly'
         if ephemeral_os_disk_placement:
             info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
+        if ephemeral_os_disk_enable_full_caching is not None:
+            info['os']['diffDiskSettings']['enableFullCaching'] = ephemeral_os_disk_enable_full_caching
 
     # add managed image data disks
     for data_disk in image_data_disks:
@@ -619,6 +623,12 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def raise_unsupported_error_for_flex_vmss_by_aaz(vmss, error_message):
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
@@ -656,7 +666,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         logger.warning(UPGRADE_SECURITY_HINT)
         return
 
-    security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
+    security_type = disk_security_profile.get('securityType')
     if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
@@ -780,3 +790,55 @@ class IdentityType(Enum):
     USER_ASSIGNED = 'UserAssigned'
     SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
     NONE = 'None'
+
+
+class RebootSetting(Enum):
+    ALWAYS = 'Always'
+    IF_REQUIRED = 'IfRequired'
+    NEVER = 'Never'
+
+
+class VMGuestPatchClassificationWindows(Enum):
+    CRITICAL = 'Critical'
+    DEFINITION = 'Definition'
+    FEATURE_PACK = 'FeaturePack'
+    SECURITY = 'Security'
+    SERVICE_PACK = 'ServicePack'
+    TOOLS = 'Tools'
+    UPDATES = 'Updates'
+    UPDATE_ROLL_UP = 'UpdateRollUp'
+
+
+class VMGuestPatchClassificationLinux(Enum):
+    CRITICAL = 'Critical'
+    OTHER = 'Other'
+    SECURITY = 'Security'
+
+
+class CachingTypes(Enum):
+    NONE = 'None'
+    READ_ONLY = 'ReadOnly'
+    READ_WRITE = 'ReadWrite'
+
+
+class DiskCreateOptionTypes(Enum):
+    ATTACH = 'Attach'
+    COPY = 'Copy'
+    EMPTY = 'Empty'
+    FROM_IMAGE = 'FromImage'
+    RESTORE = 'Restore'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'
+
+
+class OrchestrationServiceNames(Enum):
+    AUTOMATIC_REPAIRS = 'AutomaticRepairs'
+
+
+class OrchestrationServiceStateAction(Enum):
+    RESUME = 'Resume'
+    SUSPEND = 'Suspend'

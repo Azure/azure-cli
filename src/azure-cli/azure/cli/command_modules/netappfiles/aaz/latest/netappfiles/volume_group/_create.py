@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-05-01"],
         ]
     }
 
@@ -155,6 +155,11 @@ class Create(AAZCommand):
             help="UUID v4 or resource identifier used to identify the Backup.",
             nullable=True,
         )
+        _element.breakthrough_mode = AAZStrArg(
+            options=["breakthrough-mode"],
+            help="Specifies whether the volume operates in Breakthrough Mode.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
         _element.capacity_pool_resource_id = AAZStrArg(
             options=["capacity-pool-resource-id"],
             help="Pool Resource Id used in case of creating a volume through volume group",
@@ -187,7 +192,7 @@ class Create(AAZCommand):
             help="A unique file path for the volume. Used when creating mount targets",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -362,6 +367,10 @@ class Create(AAZCommand):
             options=["backup"],
             help="Backup Properties",
         )
+        data_protection.ransomware_protection = AAZObjectArg(
+            options=["ransomware-protection"],
+            help="Advanced Ransomware Protection settings",
+        )
         data_protection.replication = AAZObjectArg(
             options=["replication"],
             help="Replication properties",
@@ -387,6 +396,13 @@ class Create(AAZCommand):
         backup.policy_enforced = AAZBoolArg(
             options=["policy-enforced"],
             help="Policy Enforced",
+        )
+
+        ransomware_protection = cls._args_schema.volumes.Element.data_protection.ransomware_protection
+        ransomware_protection.desired_ransomware_protection_state = AAZStrArg(
+            options=["desired-ransomware-protection-state"],
+            help="The desired value of the Advanced Ransomware Protection feature state available to the volume",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         replication = cls._args_schema.volumes.Element.data_protection.replication
@@ -642,7 +658,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -707,6 +723,7 @@ class Create(AAZCommand):
                 properties.set_prop("acceptGrowCapacityPoolForShortTermCloneSplit", AAZStrType, ".accept_grow_capacity_pool_for_short_term_clone_split")
                 properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("backupId", AAZStrType, ".backup_id", typ_kwargs={"nullable": True})
+                properties.set_prop("breakthroughMode", AAZStrType, ".breakthrough_mode")
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
@@ -747,6 +764,7 @@ class Create(AAZCommand):
             data_protection = _builder.get(".properties.volumes[].properties.dataProtection")
             if data_protection is not None:
                 data_protection.set_prop("backup", AAZObjectType, ".backup")
+                data_protection.set_prop("ransomwareProtection", AAZObjectType, ".ransomware_protection")
                 data_protection.set_prop("replication", AAZObjectType, ".replication")
                 data_protection.set_prop("snapshot", AAZObjectType, ".snapshot")
                 data_protection.set_prop("volumeRelocation", AAZObjectType, ".volume_relocation")
@@ -756,6 +774,10 @@ class Create(AAZCommand):
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
+
+            ransomware_protection = _builder.get(".properties.volumes[].properties.dataProtection.ransomwareProtection")
+            if ransomware_protection is not None:
+                ransomware_protection.set_prop("desiredRansomwareProtectionState", AAZStrType, ".desired_ransomware_protection_state")
 
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
@@ -925,6 +947,9 @@ class Create(AAZCommand):
             properties.baremetal_tenant_id = AAZStrType(
                 serialized_name="baremetalTenantId",
                 flags={"read_only": True},
+            )
+            properties.breakthrough_mode = AAZStrType(
+                serialized_name="breakthroughMode",
             )
             properties.capacity_pool_resource_id = AAZStrType(
                 serialized_name="capacityPoolResourceId",
@@ -1115,6 +1140,9 @@ class Create(AAZCommand):
 
             data_protection = cls._schema_on_201.properties.volumes.Element.properties.data_protection
             data_protection.backup = AAZObjectType()
+            data_protection.ransomware_protection = AAZObjectType(
+                serialized_name="ransomwareProtection",
+            )
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
@@ -1132,6 +1160,15 @@ class Create(AAZCommand):
                 serialized_name="policyEnforced",
             )
 
+            ransomware_protection = cls._schema_on_201.properties.volumes.Element.properties.data_protection.ransomware_protection
+            ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+                serialized_name="actualRansomwareProtectionState",
+                flags={"read_only": True},
+            )
+            ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+                serialized_name="desiredRansomwareProtectionState",
+            )
+
             replication = cls._schema_on_201.properties.volumes.Element.properties.data_protection.replication
             replication.destination_replications = AAZListType(
                 serialized_name="destinationReplications",
@@ -1139,6 +1176,22 @@ class Create(AAZCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_info = AAZStrType(
+                serialized_name="externalReplicationSetupInfo",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_status = AAZStrType(
+                serialized_name="externalReplicationSetupStatus",
+                flags={"read_only": True},
+            )
+            replication.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
+                flags={"read_only": True},
+            )
+            replication.relationship_status = AAZStrType(
+                serialized_name="relationshipStatus",
                 flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(

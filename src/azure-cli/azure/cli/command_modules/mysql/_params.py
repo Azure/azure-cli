@@ -134,12 +134,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         help='Enable or disable Auto scale IOPS configuration for both the source and the newly provisioned replica server to enable faster provisioning.'
     )
 
-    storage_redundancy_arg_type = CLIArgumentType(
-        arg_type=get_enum_type(['LocalRedundancy', 'ZoneRedundancy']),
-        options_list=['--storage-redundancy'],
-        help='Enable local redundancy or zone redundancy. Zone redundancy only supports Business Critical tier.'
-    )
-
     maintenance_policy_patch_strategy_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Regular', 'VirtualCanary']),
         options_list=['--maintenance-policy-patch-strategy', '--patch-strategy'],
@@ -353,7 +347,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
         c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
         c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
-        c.argument('version', default='8.0.21', arg_type=version_arg_type)
+        c.argument('version', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', default='Enabled', arg_type=auto_scale_iops_arg_type)
@@ -372,7 +366,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('public_access', arg_type=public_access_create_arg_type)
         c.argument('vnet', arg_type=vnet_arg_type)
         c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
@@ -431,7 +424,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
         c.argument('zone', arg_type=zone_arg_type)
         c.argument('tags', tags_type)
@@ -464,7 +456,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
         c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
         c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
@@ -600,7 +591,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('sku_name', arg_type=sku_name_arg_type)
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
         c.argument('faster_provisioning', arg_type=faster_provisioning_arg_type)
         c.argument('database_port', arg_type=database_port_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)

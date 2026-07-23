@@ -116,9 +116,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
         g.custom_command('keys renew', 'regenerate_key',
-                         transform=lambda x: getattr(x, 'keys', x))
+                         transform=lambda x: getattr(x, 'keys_property', x))
         g.command('keys list', 'list_keys',
-                  transform=lambda x: getattr(x, 'keys', x))
+                  transform=lambda x: getattr(x, 'keys_property', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys')
 
     account_blob_service_custom_sdk = get_custom_sdk('account', client_factory=cf_blob_service,
@@ -515,12 +515,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.MGMT_STORAGE)) as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
-        g.show_command('show', 'get_immutability_policy',
-                       transform=transform_immutability_policy)
+        g.custom_show_command('show', 'get_immutability_policy', transform=transform_immutability_policy)
         g.custom_command('create', 'create_or_update_immutability_policy')
-        g.command('delete', 'delete_immutability_policy',
-                  transform=lambda x: None)
-        g.command('lock', 'lock_immutability_policy')
+        g.custom_command('delete', 'delete_immutability_policy', transform=lambda x: None)
+        g.custom_command('lock', 'lock_immutability_policy')
         g.custom_command('extend', 'extend_immutability_policy')
 
     with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk,
@@ -943,3 +941,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account'):
         from .operations.account import FileServiceUsage
         self.command_table['storage account file-service-usage'] = FileServiceUsage(loader=self)
+
+    with self.command_group('storage advanced-platform-metric'):
+        from .operations.advanced_platform_metric import AdvancedPlatformMetricUpdate
+        self.command_table['storage advanced-platform-metric update'] = AdvancedPlatformMetricUpdate(loader=self)

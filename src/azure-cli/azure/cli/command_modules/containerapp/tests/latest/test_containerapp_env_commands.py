@@ -7,6 +7,7 @@ import os
 import time
 import yaml
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
                                LogAnalyticsWorkspacePreparer)
@@ -50,6 +51,11 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
             JMESPathCheck('name', env_name),
         ])
+
+        # before deleting, validate can't create a consumption only environment
+        with self.assertRaisesRegex(ValidationError,
+                                     f"Existing environment {env_name} uses workload profiles. If you want to use Consumption-Only environment, please create a new one."):
+            self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --tags "foo=bar" "key1=val1" --enable-workload-profiles false'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
 
         self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name))
 

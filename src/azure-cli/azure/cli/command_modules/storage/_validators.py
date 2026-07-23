@@ -40,7 +40,7 @@ def _query_account_key(cli_ctx, account_name):
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
-    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys[0].value  # pylint: disable=no-member
+    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys_property[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):
@@ -1562,8 +1562,13 @@ def as_user_validator(namespace):
 def user_delegation_oid_validator(namespace):
     if namespace.user_delegation_oid and not namespace.as_user:
         raise argparse.ArgumentError(
-            None, "incorrect usage: need to specify '--as-user' when '--user-delegation-oid' is "
-                  "provided")
+            None, "incorrect usage: need to specify '--as-user' when '--user-delegation-oid' is provided")
+
+
+def user_delegation_tid_validator(namespace):
+    if namespace.user_delegation_tid and not namespace.user_delegation_oid:
+        raise argparse.ArgumentError(
+            None, "incorrect usage: need to specify '--user-delegation-oid' when '--user-delegation-tid' is provided")
 
 
 def validator_change_feed_retention_days(namespace):

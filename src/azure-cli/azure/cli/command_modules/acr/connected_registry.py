@@ -78,7 +78,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                               registry_name), yes)
         acr_update_custom(cmd, registry, data_endpoint_enabled=True)
         registry_client = cf_acr_registries(cmd.cli_ctx)
-        acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        LongRunningOperation(cmd.cli_ctx)(
+            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        )
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
@@ -691,3 +693,13 @@ def acr_connected_registry_permissions_update(cmd,
     _update_repo_permissions(cmd, resource_group_name, registry_name,
                              target_connected_registry, add_repos_set, remove_repos_set, msg=msg)
 # endregion
+
+
+def acr_connected_registry_resync(cmd,
+                                  client,
+                                  connected_registry_name,
+                                  registry_name,
+                                  resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    return client.resync(resource_group_name, registry_name, connected_registry_name)

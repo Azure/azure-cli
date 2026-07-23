@@ -24,9 +24,9 @@ class Volumes(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2026-05-01"],
         ]
     }
 
@@ -135,7 +135,7 @@ class Volumes(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -222,6 +222,9 @@ class Volumes(AAZCommand):
             properties.baremetal_tenant_id = AAZStrType(
                 serialized_name="baremetalTenantId",
                 flags={"read_only": True},
+            )
+            properties.breakthrough_mode = AAZStrType(
+                serialized_name="breakthroughMode",
             )
             properties.capacity_pool_resource_id = AAZStrType(
                 serialized_name="capacityPoolResourceId",
@@ -412,6 +415,9 @@ class Volumes(AAZCommand):
 
             data_protection = cls._schema_on_200.value.Element.properties.data_protection
             data_protection.backup = AAZObjectType()
+            data_protection.ransomware_protection = AAZObjectType(
+                serialized_name="ransomwareProtection",
+            )
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
@@ -429,6 +435,15 @@ class Volumes(AAZCommand):
                 serialized_name="policyEnforced",
             )
 
+            ransomware_protection = cls._schema_on_200.value.Element.properties.data_protection.ransomware_protection
+            ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+                serialized_name="actualRansomwareProtectionState",
+                flags={"read_only": True},
+            )
+            ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+                serialized_name="desiredRansomwareProtectionState",
+            )
+
             replication = cls._schema_on_200.value.Element.properties.data_protection.replication
             replication.destination_replications = AAZListType(
                 serialized_name="destinationReplications",
@@ -436,6 +451,22 @@ class Volumes(AAZCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_info = AAZStrType(
+                serialized_name="externalReplicationSetupInfo",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_status = AAZStrType(
+                serialized_name="externalReplicationSetupStatus",
+                flags={"read_only": True},
+            )
+            replication.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
+                flags={"read_only": True},
+            )
+            replication.relationship_status = AAZStrType(
+                serialized_name="relationshipStatus",
                 flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
