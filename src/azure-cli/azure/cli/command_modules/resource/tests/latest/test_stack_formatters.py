@@ -63,10 +63,10 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
 {Color.PURPLE}~ {Color.RESET}DeploymentScope: {Color.PURPLE}"ThisIsBefore"{Color.RESET} => {Color.PURPLE}"ThisIsAfter"{Color.RESET}
 {Color.PURPLE}~ {Color.RESET}DenySettings.Mode: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
 {Color.PURPLE}~ {Color.RESET}DenySettings.ApplyToChildScopes: {Color.PURPLE}"False"{Color.RESET} => {Color.PURPLE}"True"{Color.RESET}
-{Color.PURPLE}~ DenySettings.ExcludedPrincipals: {Color.RESET}
+{Color.PURPLE}~{Color.RESET} DenySettings.ExcludedPrincipals:
   {Color.GREEN}+ {Color.RESET}{Color.GREEN}"004afc20-146e-4932-a8b5-3098461c46a5"{Color.RESET}
   {Color.GREEN}+ {Color.RESET}{Color.GREEN}"e6a513a0-b872-4355-82b9-47645fb30d3a"{Color.RESET}
-{Color.PURPLE}~ DenySettings.ArrayOfMixed: {Color.RESET}
+{Color.PURPLE}~{Color.RESET} DenySettings.ArrayOfMixed:
   {Color.PURPLE}~{Color.RESET} 0:
     {Color.PURPLE}~ {Color.RESET}properties.something: {Color.PURPLE}"B4"{Color.RESET} => {Color.PURPLE}"Now"{Color.RESET}
   {Color.GREEN}+{Color.RESET} 1:
@@ -77,6 +77,75 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
 {Color.DARK_YELLOW}Changes to Managed Resources:{Color.RESET}
 
 Azure
+  {Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.Web/sites/web-gwfjnc7423h2a/providers/Microsoft.Insights/diagnosticSettings/diag-web-gwfjnc7423h2a [2021-05-01-preview]{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
+    {Color.PURPLE}~{Color.RESET} properties.nestedArrays:
+      {Color.GREEN}+{Color.RESET} 0:
+          {Color.GREEN}[]{Color.RESET}
+      {Color.GREEN}+{Color.RESET} 1:
+          {Color.GREEN}[{Color.RESET}
+          {Color.GREEN}  "1",{Color.RESET}
+          {Color.GREEN}  "2"{Color.RESET}
+          {Color.GREEN}]{Color.RESET}
+    {Color.PURPLE}~{Color.RESET} properties.logs:
+      {Color.PURPLE}~{Color.RESET} 0:
+        {Color.PURPLE}~ {Color.RESET}enabled: {Color.PURPLE}True{Color.RESET} => {Color.PURPLE}False{Color.RESET}
+        {Color.RED}- {Color.RESET}retentionPolicy.days: {Color.RED}0{Color.RESET}
+      {Color.PURPLE}~{Color.RESET} 1:
+        {Color.RED}- {Color.RESET}retentionPolicy.days: {Color.RED}0{Color.RESET}
+      {Color.PURPLE}~{Color.RESET} 2:
+        {Color.PURPLE}~ {Color.RESET}category: {Color.PURPLE}"AppServiceAppLogs"{Color.RESET} => {Color.PURPLE}"DanteFunLogs"{Color.RESET}
+        {Color.PURPLE}~ {Color.RESET}enabled: {Color.PURPLE}False{Color.RESET} => {Color.PURPLE}True{Color.RESET}
+        {Color.RED}- {Color.RESET}retentionPolicy.days: {Color.RED}0{Color.RESET}
+      {Color.RED}-{Color.RESET} 3:
+          {Color.RED}{{{Color.RESET}
+          {Color.RED}  "category": "AppServiceAuditLogs",{Color.RESET}
+          {Color.RED}  "enabled": false,{Color.RESET}
+          {Color.RED}  "retentionPolicy": {{{Color.RESET}
+          {Color.RED}    "days": 0,{Color.RESET}
+          {Color.RED}    "enabled": false{Color.RESET}
+          {Color.RED}  }}{Color.RESET}
+          {Color.RED}}}{Color.RESET}
+      {Color.RED}-{Color.RESET} 4:
+          {Color.RED}{{{Color.RESET}
+          {Color.RED}  "category": "AppServiceIPSecAuditLogs",{Color.RESET}
+          {Color.RED}  "enabled": false,{Color.RESET}
+          {Color.RED}  "retentionPolicy": {{{Color.RESET}
+          {Color.RED}    "days": 0,{Color.RESET}
+          {Color.RED}    "enabled": false{Color.RESET}
+          {Color.RED}  }}{Color.RESET}
+          {Color.RED}}}{Color.RESET}
+      {Color.RED}-{Color.RESET} 5:
+          {Color.RED}{{{Color.RESET}
+          {Color.RED}  "category": "AppServicePlatformLogs",{Color.RESET}
+          {Color.RED}  "enabled": false,{Color.RESET}
+          {Color.RED}  "retentionPolicy": {{{Color.RESET}
+          {Color.RED}    "days": 0,{Color.RESET}
+          {Color.RED}    "enabled": false{Color.RESET}
+          {Color.RED}  }}{Color.RESET}
+          {Color.RED}}}{Color.RESET}
+      {Color.RED}-{Color.RESET} 6:
+          {Color.RED}{{{Color.RESET}
+          {Color.RED}  "category": "AppServiceAuthenticationLogs",{Color.RESET}
+          {Color.RED}  "enabled": false,{Color.RESET}
+          {Color.RED}  "retentionPolicy": {{{Color.RESET}
+          {Color.RED}    "days": 0,{Color.RESET}
+          {Color.RED}    "enabled": false{Color.RESET}
+          {Color.RED}  }}{Color.RESET}
+          {Color.RED}}}{Color.RESET}
+    {Color.PURPLE}~{Color.RESET} properties.metrics:
+      {Color.PURPLE}~{Color.RESET} 0:
+        {Color.PURPLE}~ {Color.RESET}category: {Color.PURPLE}"AllMetrics"{Color.RESET} => {Color.PURPLE}"DanteMetrics"{Color.RESET}
+        {Color.RED}- {Color.RESET}retentionPolicy.days: {Color.RED}0{Color.RESET}
+      {Color.GREEN}+{Color.RESET} 1:
+          {Color.GREEN}{{{Color.RESET}
+          {Color.GREEN}  "category": "AllMetrics",{Color.RESET}
+          {Color.GREEN}  "enabled": false,{Color.RESET}
+          {Color.GREEN}  "retentionPolicy": {{{Color.RESET}
+          {Color.GREEN}    "enabled": false{Color.RESET}
+          {Color.GREEN}  }}{Color.RESET}
+          {Color.GREEN}}}{Color.RESET}
   {Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA [2021-05-01]{Color.RESET}
     = Management Status: "Managed"
     {Color.PURPLE}~ {Color.RESET}Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
@@ -102,21 +171,21 @@ Contoso@2.0.0
     = Management Status: "Managed"
     = Deny Status: "NotSupported"
     {Color.PURPLE}~ {Color.RESET}properties.properties1: {Color.PURPLE}"resourceA-before"{Color.RESET} => {Color.PURPLE}"resourceA-after"{Color.RESET}
-    {Color.GREEN}+{Color.RESET} properties.someConfig: {Color.GREEN}{{
-        "type": "object",
-        "value": {{
-          "enabled": true,
-          "values": [
-            1,
-            2,
-            3
-          ]
-        }}
-      }}{Color.RESET}
-    {Color.RED}-{Color.RESET} properties.some.deeply.nested.array: {Color.RED}[
-        "one",
-        "two"
-      ]{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties.someConfig: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "type": "object",{Color.RESET}
+      {Color.GREEN}  "value": {{{Color.RESET}
+      {Color.GREEN}    "enabled": true,{Color.RESET}
+      {Color.GREEN}    "values": [{Color.RESET}
+      {Color.GREEN}      1,{Color.RESET}
+      {Color.GREEN}      2,{Color.RESET}
+      {Color.GREEN}      3{Color.RESET}
+      {Color.GREEN}    ]{Color.RESET}
+      {Color.GREEN}  }}{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.RED}-{Color.RESET} properties.some.deeply.nested.array: {Color.RED}[{Color.RESET}
+      {Color.RED}  "one",{Color.RESET}
+      {Color.RED}  "two"{Color.RESET}
+      {Color.RED}]{Color.RESET}
   {Color.RED}- {Color.RESET}{Color.RED}Contoso/example name="defResource"{Color.RESET}
     {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Unmanaged"{Color.RESET}
     {Color.PURPLE}~ {Color.RESET}Deny Status: {Color.PURPLE}"NotSupported"{Color.RESET} => {Color.PURPLE}"None"{Color.RESET}
