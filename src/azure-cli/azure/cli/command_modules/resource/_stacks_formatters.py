@@ -419,7 +419,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self._push_indent()
 
         json_lines = json.dumps(inline_obj, indent=2).splitlines()
-        for i, json_line in enumerate(json_lines):
+        for json_line in json_lines:
             self.builder.append_line(json_line, color)
 
         self._pop_indent()
