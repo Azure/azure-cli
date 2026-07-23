@@ -389,7 +389,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                         multicontainer_config_type, sitecontainers_app,
                                         deployment_source_url, deployment_local_git]):
         logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    _log_webapp_troubleshoot_status_tip(name, resource_group_name, is_linux)
     return webapp
+
+
+def _log_webapp_troubleshoot_status_tip(name, resource_group_name, is_linux):
+    # Per-instance runtime status (siteStatus) is a Linux App Service feature,
+    # so only surface the tip for Linux webapps.
+    if not is_linux:
+        return
+    logger.warning("Tip: run 'az webapp troubleshoot status --name %s --resource-group %s' "
+                   "to see per-instance runtime status and recent startup summary.",
+                   name, resource_group_name)
 
 
 def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
@@ -10172,6 +10183,7 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     time_elapsed = 0
     deployment_status = None
     response_body = None
+    status_tip_logged = False
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
@@ -10186,12 +10198,19 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
         logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
+                status_tip_logged = True
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
                         deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
             break
         if deployment_status == "RuntimeFailed":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
             error_text = ""
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
@@ -11075,6 +11094,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
 
+    _log_webapp_troubleshoot_status_tip(name, rg_name, _is_linux)
+
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         try:
@@ -11829,6 +11850,8 @@ def _make_onedeploy_request(params):
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
+        if not (poll_async_deployment_for_debugging and params.track_status):
+            _log_webapp_troubleshoot_status_tip(params.webapp_name, params.resource_group_name, params.is_linux_webapp)
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 
