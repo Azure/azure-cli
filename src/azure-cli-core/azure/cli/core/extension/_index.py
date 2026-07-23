@@ -49,7 +49,7 @@ def get_index(index_url=None, cli_ctx=None):
                 return response.json()
             msg = ERR_TMPL_NON_200.format(response.status_code, index_url)
             raise CLIError(msg)
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError, ValueError) as err:
+        except (requests.exceptions.RequestException, ValueError) as err:
             if try_number == TRIES - 1:
                 # ValueError indicates that shortlink url is not redirecting properly to intended index url
                 msg = ERR_TMPL_BAD_JSON.format(str(err)) if isinstance(err, ValueError) else \
