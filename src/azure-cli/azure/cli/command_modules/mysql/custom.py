@@ -2026,14 +2026,16 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
 
 def _fm_settings_payload(state, uami=None):
     """
-    Build the flattened payload expected by the SDK for FabricMirroringSettings.
-    Because of x-ms-client-flatten, we set properties at the top level.
+    Build the ARM request body for a FabricMirroringSetting ('Default').
+    The 1.1.0b3 SDK model is nested: properties.state / properties.identityResourceId.
     """
-    # Most recent autorest will let us pass state/identityResourceId directly on the Settings model
-    return mysql_models.FabricMirroringSettings(
-        state=state,
-        identity_resource_id=uami  # optional when disabling
-    )
+    # Build the ARM request body. In SDK 1.1.0b3 the model is nested
+    # (properties.state / properties.identityResourceId), NOT flattened. A plain dict is
+    # accepted by the (typespec-generated) SDK and avoids the model-name/flatten mismatch.
+    props = {'state': state}
+    if uami:
+        props['identityResourceId'] = uami
+    return {'properties': props}
 
 
 def flexible_server_mirroring_enable(cmd, client, resource_group_name, server_name, identity_resource_id):
