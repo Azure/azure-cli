@@ -6742,7 +6742,7 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         for k in sorted(remaining_keys)
     ]
 
-    # --- 3. Assemble payload ---
+    # --- 4. Assemble payload ---
     payload = {
         'name': name,
         'resourceGroup': resource_group,
