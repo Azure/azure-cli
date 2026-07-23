@@ -2381,6 +2381,7 @@ class MySQLFabricMirroringEnableDisableTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus2euap')
+    @live_only()
     def test_mysql_fabric_mirroring_enable_disable(self, resource_group):
         # Arrange
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
