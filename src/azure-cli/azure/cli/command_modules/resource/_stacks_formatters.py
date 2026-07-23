@@ -282,7 +282,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         # print the change type and resource ID
         if is_potential_change:
             self.builder.append("?", Color.CYAN)
-        self.builder.append(f"{symbol} ", color)
+        self.builder.append(symbol, color)
+        self.builder.append(" ")
         if is_potential_change:
             self.builder.append("[Potential] ", Color.CYAN)
 
@@ -487,7 +488,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         property_path = self._get_change_path(primitive_change, parent_path)
         symbol, color = self._get_change_type_formatting(change_type)
 
-        self.builder.append(f"{symbol} ", color)
+        self.builder.append(symbol, color)
+        self.builder.append(" ")
         if not is_array_item:
             self.builder.append(f"{property_path}: ")
 
