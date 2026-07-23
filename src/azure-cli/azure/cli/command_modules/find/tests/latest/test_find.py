@@ -12,7 +12,7 @@ from azure.cli.command_modules.find.custom import (
     Example, MCPClient, search_mslearn, format_results,
     get_generated_examples, process_query, _extract_summary,
     _is_cli_command_relevant, _extract_query_command, _filter_results,
-    _get_query_keywords, _has_keyword_overlap,
+    _get_query_keywords, _has_keyword_overlap, _stem, _matches_keywords,
     MAX_DOC_RESULTS, MAX_CODE_RESULTS
 )
 
@@ -286,6 +286,26 @@ class TestRelevanceFiltering(unittest.TestCase):
     def test_has_keyword_overlap_no_match(self):
         result = {"title": "Albanian Keyboard", "content": "KLID code"}
         self.assertFalse(_has_keyword_overlap(result, {"alskdn1k2lenasd"}))
+
+    def test_stem_verb_variants_collapse(self):
+        # Inflected verb forms should collapse to the same stem
+        self.assertEqual(_stem("creating"), _stem("create"))
+        self.assertEqual(_stem("creates"), _stem("create"))
+        self.assertEqual(_stem("created"), _stem("create"))
+        self.assertEqual(_stem("deleting"), _stem("delete"))
+
+    def test_matches_keywords_morphological_variant(self):
+        # 'creating' in the query should match 'create' in the sample text
+        self.assertTrue(_matches_keywords("az vm create --name myvm", {"creating"}))
+        self.assertTrue(_matches_keywords("az vm delete --name myvm", {"deleting"}))
+
+    def test_matches_keywords_no_match(self):
+        self.assertFalse(_matches_keywords("az vm create", {"storage"}))
+
+    def test_has_keyword_overlap_morphological_variant(self):
+        # Regression: 'creating a vm' should still surface 'az vm create' results
+        result = {"title": "az vm create", "content": "Create a virtual machine"}
+        self.assertTrue(_has_keyword_overlap(result, _get_query_keywords("creating a vm")))
 
 
 class TestSearchMslearn(unittest.TestCase):

@@ -259,6 +259,49 @@ def _get_query_keywords(query):
     return {w for w in words if w != 'az' and w not in stop_words}
 
 
+def _stem(word):
+    """Reduce a word to a crude stem so morphological variants match.
+
+    Strips common inflectional suffixes and a trailing 'e' so that variants
+    such as 'creating', 'creates', 'created' and 'create' all collapse to the
+    same stem ('creat'). This is a lightweight, dependency-free approximation
+    (not a full Porter stemmer) that is sufficient for matching query terms
+    against documentation and code samples.
+
+    Args:
+        word: A single word.
+
+    Returns:
+        The stemmed, lowercased word.
+    """
+    word = word.lower()
+    for suffix in ('ings', 'ing', 'ies', 'ied', 'es', 'ed', 's'):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            word = word[:-len(suffix)]
+            break
+    if len(word) > 3 and word.endswith('e'):
+        word = word[:-1]
+    return word
+
+
+def _matches_keywords(text, query_words):
+    """Check if any query keyword matches a word in the text after stemming.
+
+    Both the query keywords and the text words are stemmed before comparison,
+    so morphological variants match (e.g. query 'creating' matches text
+    'create').
+
+    Args:
+        text: The text to search within.
+        query_words: Set of query keywords to match against.
+
+    Returns:
+        True if at least one query keyword stem matches a word stem in the text.
+    """
+    text_stems = {_stem(w) for w in re.findall(r'[a-zA-Z]+', text.lower())}
+    return any(_stem(word) in text_stems for word in query_words)
+
+
 def _has_keyword_overlap(result, query_words):
     """Check if a result has meaningful keyword overlap with the query.
 
@@ -269,11 +312,11 @@ def _has_keyword_overlap(result, query_words):
     Returns:
         True if at least one query keyword appears in the result's title or content.
     """
-    title = result.get("title", "").lower()
-    content = result.get("content", "").lower()[:500]  # Only check first 500 chars of content
+    title = result.get("title", "")
+    content = result.get("content", "")[:500]  # Only check first 500 chars of content
     combined = title + " " + content
 
-    return any(word in combined for word in query_words)
+    return _matches_keywords(combined, query_words)
 
 
 def search_mslearn(query):
@@ -314,9 +357,9 @@ def search_mslearn(query):
     query_words = _get_query_keywords(query)
     if query_words:
         code_results = [r for r in code_results
-                        if any(word in (r.get("codeSnippet", "") + " " +
-                                        r.get("description", "")).lower()
-                               for word in query_words)]
+                        if _matches_keywords(
+                            r.get("codeSnippet", "") + " " + r.get("description", ""),
+                            query_words)]
 
     return docs_results, code_results
 
@@ -550,7 +593,7 @@ def format_results(query, docs_results, code_results):
 
 def process_query(cli_term):
     if not cli_term:
-        logger.error('Please provide a search term e.g. az find "vm"')
+        logger.error('Please provide a search term, e.g., az find "vm"')
     else:
         print(random.choice(WAIT_MESSAGE), file=sys.stderr)
 
