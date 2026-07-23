@@ -531,6 +531,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('configuration_list', action=AddArgs, nargs='*', options_list=['--args'], required=True, help='List of the configuration key-value pair.')
         c.argument('source', options_list=['--source'], required=False, help='Source of the configuration.')
 
+    with self.argument_context('mysql flexible-server parameter list') as c:
+        c.argument('tags', help='The tags of the server configuration.')
+        c.argument('keyword', help='The keyword of the server configuration.')
+        c.argument('page', help='The page of the server configuration.')
+        c.argument('page_size', help='The page size of the server configuration.')
+
     # firewall-rule
     for scope in ['create', 'delete', 'list', 'show', 'update']:
         argument_context_string = 'mysql flexible-server firewall-rule {}'.format(scope)
@@ -739,7 +745,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     with self.argument_context('mysql flexible-server mirroring enable') as c:
         c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
-        c.argument('uami', options_list=['--identity-resource-id'], help='Resource ID of the User Assigned Managed Identity (UAMI) used for Fabric Mirroring. Example: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity-name}')
+        c.argument('identity_resource_id', options_list=['--identity-resource-id'], help='Resource ID of the User Assigned Managed Identity (UAMI) used for Fabric Mirroring. Example: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity-name}')
 
     with self.argument_context('mysql flexible-server mirroring disable') as c:
         c.argument('server_name', id_part=None, arg_type=server_name_arg_type)

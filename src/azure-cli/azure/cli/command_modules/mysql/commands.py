@@ -96,7 +96,7 @@ def load_command_table(self, _):
     )
 
     mysql_flexible_fabric_mirroring_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.mysql_flexibleservers.operations#FabricMirroringSettingsOperations.{}',
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#FabricMirroringSettingsOperations.{}',
         client_factory=cf_mysql_flexible_fabric_mirroring_settings
     )
 
