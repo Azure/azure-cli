@@ -352,6 +352,8 @@ def load_command_table(self, _):
                          validator=process_vmss_lifecycle_hook_event_action)
         g.custom_command('reject', 'vmss_lifecycle_hook_event_reject',
                          validator=process_vmss_lifecycle_hook_event_action)
+        g.custom_command('show', 'vmss_lifecycle_hook_event_show')
+        g.custom_command('list', 'vmss_lifecycle_hook_event_list')
 
     with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow

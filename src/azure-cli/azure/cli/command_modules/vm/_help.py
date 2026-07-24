@@ -3112,3 +3112,19 @@ examples:
   - name: Reject a subset of target resources.
     text: az vmss lifecycle-hook-event reject --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2
 """
+
+helps['vmss lifecycle-hook-event list'] = """
+type: command
+short-summary: List a list of virtual machine scale set lifecycle hook events created for a virtual machine scale set resource.
+examples:
+  - name: Gets a list of all lifecycle hook events in a virtual machine scale set.
+    text: az vmss lifecycle-hook-event list --resource-group RG01 --vmss-name VMSS01
+"""
+
+helps['vmss lifecycle-hook-event show'] = """
+type: command
+short-summary: Get a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Get a virtual machine scale set lifecycle hook event.
+    text: az vmss lifecycle-hook-event show --resource-group RG01 --vmss-name VMSS01 --lifecycle-hook-event-name 2e2e3046-f85f-4966-8fd2-5fd7bf6ea717
+"""
