@@ -59,7 +59,7 @@ DEPENDENCIES = [
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=1.0.1',
-    'azure-keyvault-administration==4.8.0b1',
+    'azure-keyvault-administration==4.8.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.12.0b2',
     'azure-keyvault-secrets==4.7.0',
