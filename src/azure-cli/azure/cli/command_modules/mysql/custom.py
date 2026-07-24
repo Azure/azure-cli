@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -2029,6 +2030,49 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
                              start_ip=rule.start_ip_address,
                              end_ip=rule.end_ip_address,
                              firewall_rule_name=rule.name)
+
+
+def _fm_settings_payload(state, uami=None):
+    """
+    Build the flattened payload expected by the SDK for FabricMirroringSettings.
+    Because of x-ms-client-flatten, we set properties at the top level.
+    """
+    # Most recent autorest will let us pass state/identityResourceId directly on the Settings model
+    return mysql_models.FabricMirroringSettings(
+        state=state,
+        identity_resource_id=uami  # optional when disabling
+    )
+
+
+def flexible_server_mirroring_enable(cmd, client, resource_group_name, server_name, identity_resource_id):
+    """
+    'Enable' translates to PUT the 'Default' FabricMirroringSettings with state=Enabled and UAMI.
+    The Swagger limits settings name to 'Default'.
+    """
+    if not identity_resource_id:
+        raise RequiredArgumentMissingError(
+            "Parameter --identity-resource-id is required when enabling fabric mirroring."
+        )
+
+    payload = _fm_settings_payload(state='Enabled', uami=identity_resource_id)
+
+    # Long-running operation
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Enable Fabric mirroring')
+
+
+def flexible_server_mirroring_disable(cmd, client, resource_group_name, server_name):
+    """
+    'Disable' translates to PUT the 'Default' FabricMirroringSettings with state=Disabled.
+    identityResourceId can be omitted when disabling<97>service will deactivate/clean bindings.
+    """
+    payload = _fm_settings_payload(state='Disabled', uami=None)
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Disable Fabric mirroring')
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods

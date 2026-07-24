@@ -2374,3 +2374,41 @@ class MySQLExportTest(ScenarioTest):
 
         # deletion of single server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
+
+
+class MySQLFabricMirroringEnableDisableTest(ScenarioTest):
+    """Scenario tests for Fabric Mirroring enable/disable commands."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_mysql_fabric_mirroring_enable_disable(self, resource_group):
+        # Arrange
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        identity_name = self.create_random_name('identity', 24)
+        location = 'eastus2euap'
+
+        # Create server (GeneralPurpose tier required for Fabric Mirroring, using Standard_D2ads_v5 valid in eastus2euap)
+        create_result = self.cmd('mysql flexible-server create -l {} -g {} -n {} --public-access {} --tier GeneralPurpose --sku-name {}'
+                                 .format(location, resource_group, server_name, '0.0.0.0', 'Standard_D2ads_v5')).get_output_in_json()
+
+        # Verify server was created by checking the host contains the server name
+        self.assertIn(server_name, create_result['host'])
+
+        # Set binlog_row_image to 'noblob' as required for Fabric Mirroring
+        self.cmd('mysql flexible-server parameter set -g {} -s {} -n binlog_row_image -v noblob'
+                 .format(resource_group, server_name))
+
+        # Create User Assigned Managed Identity
+        identity_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        identity_id = identity_result['id']
+
+        # Enable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring enable -g {} -n {} --identity-resource-id {}'
+                 .format(resource_group, server_name, identity_id))
+
+        # Disable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring disable -g {} -n {}'
+                 .format(resource_group, server_name))
+
+        # Cleanup
+        self.cmd('mysql flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))

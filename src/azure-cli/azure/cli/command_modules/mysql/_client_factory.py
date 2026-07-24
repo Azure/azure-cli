@@ -163,6 +163,10 @@ def private_dns_link_client_factory(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).virtual_network_links
 
 
+def cf_mysql_flexible_fabric_mirroring_settings(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).fabric_mirroring_settings
+
+
 # Operations for single server
 def cf_mysql_servers(cli_ctx, _):
     return get_mysql_management_client(cli_ctx).servers

@@ -726,3 +726,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             elif scope == "check-name-availability":
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                            help='Name of the migration.')
+
+    with self.argument_context('mysql flexible-server mirroring enable') as c:
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+        c.argument('uami', options_list=['--identity-resource-id'], help='Resource ID of the User Assigned Managed Identity (UAMI) used for Fabric Mirroring. Example: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity-name}')
+
+    with self.argument_context('mysql flexible-server mirroring disable') as c:
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
