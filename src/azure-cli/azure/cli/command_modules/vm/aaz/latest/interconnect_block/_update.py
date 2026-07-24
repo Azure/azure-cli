@@ -58,9 +58,6 @@ class Update(AAZCommand):
             help="The name of the Interconnect Block.",
             required=True,
             id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="",
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -69,14 +66,14 @@ class Update(AAZCommand):
         # define Arg Group "Placement"
 
         _args_schema = cls._args_schema
-        _args_schema.placement_exclude_zone = AAZListArg(
-            options=["--exclude-zone", "--placement-exclude-zone"],
+        _args_schema.placement_exclude_zones = AAZListArg(
+            options=["--exclude-zones", "--placement-exclude-zones"],
             arg_group="Placement",
             help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must not be present in the list of availability zones passed with 'excludeZones'. If 'excludeZones' is not provided, all availability zones in region will be considered for selection.",
             nullable=True,
         )
-        _args_schema.placement_include_zone = AAZListArg(
-            options=["--include-zone", "--placement-include-zone"],
+        _args_schema.placement_include_zones = AAZListArg(
+            options=["--include-zones", "--placement-include-zones"],
             arg_group="Placement",
             help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must be present in the list of availability zones passed with 'includeZones'. If 'includeZones' is not provided, all availability zones in region will be considered for selection.",
             nullable=True,
@@ -89,13 +86,13 @@ class Update(AAZCommand):
             enum={"Any": "Any", "Auto": "Auto"},
         )
 
-        placement_exclude_zone = cls._args_schema.placement_exclude_zone
-        placement_exclude_zone.Element = AAZStrArg(
+        placement_exclude_zones = cls._args_schema.placement_exclude_zones
+        placement_exclude_zones.Element = AAZStrArg(
             nullable=True,
         )
 
-        placement_include_zone = cls._args_schema.placement_include_zone
-        placement_include_zone.Element = AAZStrArg(
+        placement_include_zones = cls._args_schema.placement_include_zones
+        placement_include_zones.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -257,141 +254,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.location = AAZStrType(
-                flags={"required": True},
-            )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.placement = AAZObjectType()
-            _schema_on_200.properties = AAZObjectType()
-            _schema_on_200.sku = AAZObjectType(
-                flags={"required": True},
-            )
-            _schema_on_200.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.zones = AAZListType()
-
-            placement = cls._schema_on_200.placement
-            placement.exclude_zones = AAZListType(
-                serialized_name="excludeZones",
-            )
-            placement.include_zones = AAZListType(
-                serialized_name="includeZones",
-            )
-            placement.zone_placement_policy = AAZStrType(
-                serialized_name="zonePlacementPolicy",
-            )
-
-            exclude_zones = cls._schema_on_200.placement.exclude_zones
-            exclude_zones.Element = AAZStrType()
-
-            include_zones = cls._schema_on_200.placement.include_zones
-            include_zones.Element = AAZStrType()
-
-            properties = cls._schema_on_200.properties
-            properties.instance_view = AAZObjectType(
-                serialized_name="instanceView",
-                flags={"read_only": True},
-            )
-            properties.interconnect_block_id = AAZStrType(
-                serialized_name="interconnectBlockId",
-                flags={"read_only": True},
-            )
-            properties.interconnect_group = AAZObjectType(
-                serialized_name="interconnectGroup",
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.provisioning_time = AAZStrType(
-                serialized_name="provisioningTime",
-                flags={"read_only": True},
-            )
-            properties.time_created = AAZStrType(
-                serialized_name="timeCreated",
-                flags={"read_only": True},
-            )
-            properties.virtual_machines_associated = AAZListType(
-                serialized_name="virtualMachinesAssociated",
-                flags={"read_only": True},
-            )
-
-            instance_view = cls._schema_on_200.properties.instance_view
-            instance_view.current_capacity = AAZIntType(
-                serialized_name="currentCapacity",
-                flags={"read_only": True},
-            )
-            instance_view.statuses = AAZListType(
-                flags={"read_only": True},
-            )
-
-            statuses = cls._schema_on_200.properties.instance_view.statuses
-            statuses.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.instance_view.statuses.Element
-            _element.code = AAZStrType()
-            _element.display_status = AAZStrType(
-                serialized_name="displayStatus",
-            )
-            _element.level = AAZStrType()
-            _element.message = AAZStrType()
-            _element.time = AAZStrType()
-
-            interconnect_group = cls._schema_on_200.properties.interconnect_group
-            interconnect_group.id = AAZStrType()
-
-            virtual_machines_associated = cls._schema_on_200.properties.virtual_machines_associated
-            virtual_machines_associated.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.virtual_machines_associated.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            sku = cls._schema_on_200.sku
-            sku.capacity = AAZIntType()
-            sku.name = AAZStrType()
-            sku.tier = AAZStrType()
-
-            system_data = cls._schema_on_200.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200.zones
-            zones.Element = AAZStrType()
+            _UpdateHelper._build_schema_interconnect_block_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -502,141 +365,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.location = AAZStrType(
-                flags={"required": True},
-            )
-            _schema_on_200_201.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.placement = AAZObjectType()
-            _schema_on_200_201.properties = AAZObjectType()
-            _schema_on_200_201.sku = AAZObjectType(
-                flags={"required": True},
-            )
-            _schema_on_200_201.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.tags = AAZDictType()
-            _schema_on_200_201.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.zones = AAZListType()
-
-            placement = cls._schema_on_200_201.placement
-            placement.exclude_zones = AAZListType(
-                serialized_name="excludeZones",
-            )
-            placement.include_zones = AAZListType(
-                serialized_name="includeZones",
-            )
-            placement.zone_placement_policy = AAZStrType(
-                serialized_name="zonePlacementPolicy",
-            )
-
-            exclude_zones = cls._schema_on_200_201.placement.exclude_zones
-            exclude_zones.Element = AAZStrType()
-
-            include_zones = cls._schema_on_200_201.placement.include_zones
-            include_zones.Element = AAZStrType()
-
-            properties = cls._schema_on_200_201.properties
-            properties.instance_view = AAZObjectType(
-                serialized_name="instanceView",
-                flags={"read_only": True},
-            )
-            properties.interconnect_block_id = AAZStrType(
-                serialized_name="interconnectBlockId",
-                flags={"read_only": True},
-            )
-            properties.interconnect_group = AAZObjectType(
-                serialized_name="interconnectGroup",
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.provisioning_time = AAZStrType(
-                serialized_name="provisioningTime",
-                flags={"read_only": True},
-            )
-            properties.time_created = AAZStrType(
-                serialized_name="timeCreated",
-                flags={"read_only": True},
-            )
-            properties.virtual_machines_associated = AAZListType(
-                serialized_name="virtualMachinesAssociated",
-                flags={"read_only": True},
-            )
-
-            instance_view = cls._schema_on_200_201.properties.instance_view
-            instance_view.current_capacity = AAZIntType(
-                serialized_name="currentCapacity",
-                flags={"read_only": True},
-            )
-            instance_view.statuses = AAZListType(
-                flags={"read_only": True},
-            )
-
-            statuses = cls._schema_on_200_201.properties.instance_view.statuses
-            statuses.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.properties.instance_view.statuses.Element
-            _element.code = AAZStrType()
-            _element.display_status = AAZStrType(
-                serialized_name="displayStatus",
-            )
-            _element.level = AAZStrType()
-            _element.message = AAZStrType()
-            _element.time = AAZStrType()
-
-            interconnect_group = cls._schema_on_200_201.properties.interconnect_group
-            interconnect_group.id = AAZStrType()
-
-            virtual_machines_associated = cls._schema_on_200_201.properties.virtual_machines_associated
-            virtual_machines_associated.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.properties.virtual_machines_associated.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            sku = cls._schema_on_200_201.sku
-            sku.capacity = AAZIntType()
-            sku.name = AAZStrType()
-            sku.tier = AAZStrType()
-
-            system_data = cls._schema_on_200_201.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            tags = cls._schema_on_200_201.tags
-            tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200_201.zones
-            zones.Element = AAZStrType()
+            _UpdateHelper._build_schema_interconnect_block_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -658,8 +387,8 @@ class Update(AAZCommand):
 
             placement = _builder.get(".placement")
             if placement is not None:
-                placement.set_prop("excludeZones", AAZListType, ".placement_exclude_zone")
-                placement.set_prop("includeZones", AAZListType, ".placement_include_zone")
+                placement.set_prop("excludeZones", AAZListType, ".placement_exclude_zones")
+                placement.set_prop("includeZones", AAZListType, ".placement_include_zones")
                 placement.set_prop("zonePlacementPolicy", AAZStrType, ".placement_zone_placement_policy")
 
             exclude_zones = _builder.get(".placement.excludeZones")
@@ -697,6 +426,171 @@ class Update(AAZCommand):
 
 class _UpdateHelper:
     """Helper class for Update"""
+
+    _schema_interconnect_block_read = None
+
+    @classmethod
+    def _build_schema_interconnect_block_read(cls, _schema):
+        if cls._schema_interconnect_block_read is not None:
+            _schema.id = cls._schema_interconnect_block_read.id
+            _schema.location = cls._schema_interconnect_block_read.location
+            _schema.name = cls._schema_interconnect_block_read.name
+            _schema.placement = cls._schema_interconnect_block_read.placement
+            _schema.properties = cls._schema_interconnect_block_read.properties
+            _schema.sku = cls._schema_interconnect_block_read.sku
+            _schema.system_data = cls._schema_interconnect_block_read.system_data
+            _schema.tags = cls._schema_interconnect_block_read.tags
+            _schema.type = cls._schema_interconnect_block_read.type
+            _schema.zones = cls._schema_interconnect_block_read.zones
+            return
+
+        cls._schema_interconnect_block_read = _schema_interconnect_block_read = AAZObjectType()
+
+        interconnect_block_read = _schema_interconnect_block_read
+        interconnect_block_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        interconnect_block_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        interconnect_block_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        interconnect_block_read.placement = AAZObjectType()
+        interconnect_block_read.properties = AAZObjectType()
+        interconnect_block_read.sku = AAZObjectType(
+            flags={"required": True},
+        )
+        interconnect_block_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        interconnect_block_read.tags = AAZDictType()
+        interconnect_block_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+        interconnect_block_read.zones = AAZListType()
+
+        placement = _schema_interconnect_block_read.placement
+        placement.exclude_zones = AAZListType(
+            serialized_name="excludeZones",
+        )
+        placement.include_zones = AAZListType(
+            serialized_name="includeZones",
+        )
+        placement.zone_placement_policy = AAZStrType(
+            serialized_name="zonePlacementPolicy",
+        )
+
+        exclude_zones = _schema_interconnect_block_read.placement.exclude_zones
+        exclude_zones.Element = AAZStrType()
+
+        include_zones = _schema_interconnect_block_read.placement.include_zones
+        include_zones.Element = AAZStrType()
+
+        properties = _schema_interconnect_block_read.properties
+        properties.instance_view = AAZObjectType(
+            serialized_name="instanceView",
+            flags={"read_only": True},
+        )
+        properties.interconnect_block_id = AAZStrType(
+            serialized_name="interconnectBlockId",
+            flags={"read_only": True},
+        )
+        properties.interconnect_group = AAZObjectType(
+            serialized_name="interconnectGroup",
+            flags={"required": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.provisioning_time = AAZStrType(
+            serialized_name="provisioningTime",
+            flags={"read_only": True},
+        )
+        properties.time_created = AAZStrType(
+            serialized_name="timeCreated",
+            flags={"read_only": True},
+        )
+        properties.virtual_machines_associated = AAZListType(
+            serialized_name="virtualMachinesAssociated",
+            flags={"read_only": True},
+        )
+
+        instance_view = _schema_interconnect_block_read.properties.instance_view
+        instance_view.current_capacity = AAZIntType(
+            serialized_name="currentCapacity",
+            flags={"read_only": True},
+        )
+        instance_view.statuses = AAZListType(
+            flags={"read_only": True},
+        )
+
+        statuses = _schema_interconnect_block_read.properties.instance_view.statuses
+        statuses.Element = AAZObjectType()
+
+        _element = _schema_interconnect_block_read.properties.instance_view.statuses.Element
+        _element.code = AAZStrType()
+        _element.display_status = AAZStrType(
+            serialized_name="displayStatus",
+        )
+        _element.level = AAZStrType()
+        _element.message = AAZStrType()
+        _element.time = AAZStrType()
+
+        interconnect_group = _schema_interconnect_block_read.properties.interconnect_group
+        interconnect_group.id = AAZStrType()
+
+        virtual_machines_associated = _schema_interconnect_block_read.properties.virtual_machines_associated
+        virtual_machines_associated.Element = AAZObjectType()
+
+        _element = _schema_interconnect_block_read.properties.virtual_machines_associated.Element
+        _element.id = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        sku = _schema_interconnect_block_read.sku
+        sku.capacity = AAZIntType()
+        sku.name = AAZStrType()
+        sku.tier = AAZStrType()
+
+        system_data = _schema_interconnect_block_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        tags = _schema_interconnect_block_read.tags
+        tags.Element = AAZStrType()
+
+        zones = _schema_interconnect_block_read.zones
+        zones.Element = AAZStrType()
+
+        _schema.id = cls._schema_interconnect_block_read.id
+        _schema.location = cls._schema_interconnect_block_read.location
+        _schema.name = cls._schema_interconnect_block_read.name
+        _schema.placement = cls._schema_interconnect_block_read.placement
+        _schema.properties = cls._schema_interconnect_block_read.properties
+        _schema.sku = cls._schema_interconnect_block_read.sku
+        _schema.system_data = cls._schema_interconnect_block_read.system_data
+        _schema.tags = cls._schema_interconnect_block_read.tags
+        _schema.type = cls._schema_interconnect_block_read.type
+        _schema.zones = cls._schema_interconnect_block_read.zones
 
 
 __all__ = ["Update"]

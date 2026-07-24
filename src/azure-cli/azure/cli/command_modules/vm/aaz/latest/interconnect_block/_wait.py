@@ -45,12 +45,14 @@ class Wait(AAZWaitCommand):
             help="The name of the Interconnect Block.",
             required=True,
             id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="",
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand expression to apply on the operation. 'instanceView' retrieves a snapshot of the runtime properties of the Interconnect Block that is managed by the platform and can change outside of control plane operations.",
+            enum={"instanceView": "instanceView"},
         )
         return cls._args_schema
 
@@ -118,6 +120,9 @@ class Wait(AAZWaitCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2026-03-01",
                     required=True,

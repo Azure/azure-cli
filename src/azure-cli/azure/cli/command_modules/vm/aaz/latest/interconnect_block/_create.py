@@ -49,9 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name", "--interconnect-block-name"],
             help="The name of the Interconnect Block.",
             required=True,
-            fmt=AAZStrArgFormat(
-                pattern="",
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -69,13 +66,13 @@ class Create(AAZCommand):
         # define Arg Group "Placement"
 
         _args_schema = cls._args_schema
-        _args_schema.placement_exclude_zone = AAZListArg(
-            options=["--exclude-zone", "--placement-exclude-zone"],
+        _args_schema.placement_exclude_zones = AAZListArg(
+            options=["--exclude-zones", "--placement-exclude-zones"],
             arg_group="Placement",
             help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must not be present in the list of availability zones passed with 'excludeZones'. If 'excludeZones' is not provided, all availability zones in region will be considered for selection.",
         )
-        _args_schema.placement_include_zone = AAZListArg(
-            options=["--include-zone", "--placement-include-zone"],
+        _args_schema.placement_include_zones = AAZListArg(
+            options=["--include-zones", "--placement-include-zones"],
             arg_group="Placement",
             help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must be present in the list of availability zones passed with 'includeZones'. If 'includeZones' is not provided, all availability zones in region will be considered for selection.",
         )
@@ -86,11 +83,11 @@ class Create(AAZCommand):
             enum={"Any": "Any", "Auto": "Auto"},
         )
 
-        placement_exclude_zone = cls._args_schema.placement_exclude_zone
-        placement_exclude_zone.Element = AAZStrArg()
+        placement_exclude_zones = cls._args_schema.placement_exclude_zones
+        placement_exclude_zones.Element = AAZStrArg()
 
-        placement_include_zone = cls._args_schema.placement_include_zone
-        placement_include_zone.Element = AAZStrArg()
+        placement_include_zones = cls._args_schema.placement_include_zones
+        placement_include_zones.Element = AAZStrArg()
 
         # define Arg Group "Resource"
 
@@ -255,8 +252,8 @@ class Create(AAZCommand):
 
             placement = _builder.get(".placement")
             if placement is not None:
-                placement.set_prop("excludeZones", AAZListType, ".placement_exclude_zone")
-                placement.set_prop("includeZones", AAZListType, ".placement_include_zone")
+                placement.set_prop("excludeZones", AAZListType, ".placement_exclude_zones")
+                placement.set_prop("includeZones", AAZListType, ".placement_include_zones")
                 placement.set_prop("zonePlacementPolicy", AAZStrType, ".placement_zone_placement_policy")
 
             exclude_zones = _builder.get(".placement.excludeZones")

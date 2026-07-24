@@ -18,7 +18,7 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Delete an Interconnect Block. The operation is only allowed when there are no virtual machines or VMSS VM instances associated with the Interconnect Block.
 
-    :example: Delete with confirmation
+    :example: Delete an Interconnect Block.
         az interconnect-block delete --name training-icb-001 --resource-group ai-training-rg
 
     :example: Delete without confirmation
@@ -54,9 +54,6 @@ class Delete(AAZCommand):
             help="The name of the Interconnect Block.",
             required=True,
             id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="",
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,

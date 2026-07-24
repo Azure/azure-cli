@@ -52,9 +52,6 @@ class Show(AAZCommand):
             help="The name of the Interconnect Block.",
             required=True,
             id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="",
-            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -130,6 +127,9 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2026-03-01",
                     required=True,
