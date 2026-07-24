@@ -126,6 +126,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     last_seen_etag = current_etag
 
                     if current_provisioning_state == 'Succeeded':
+                        result = poll_result
                         break
                     elif current_provisioning_state in {'Failed', 'Canceled'}:
                         raise AssertionError(
@@ -140,13 +141,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                         f"provisioningState did not reach 'Succeeded' after {max_retries} retries. "
                         f"Final state: {current_provisioning_state}{final_etag_msg}"
                     )
-                # Polled to 'Succeeded'; don't re-check `result` (stale body).
-            else:
-                # Did not poll (already Succeeded, or missing id/state).
-                # Run the assertion anyway so it can't be silently dropped.
-                result.assert_with_checks(provisioning_checks)
+            # Validate the terminal response. This also keeps missing id/state
+            # failures loud when polling cannot start.
+            result.assert_with_checks(provisioning_checks)
 
-        # Run all non-provisioning checks against the original result
+        # After polling, validate and return the settled resource rather than
+        # the stale response that triggered the retry.
         if other_checks:
             result.assert_with_checks(other_checks)
 

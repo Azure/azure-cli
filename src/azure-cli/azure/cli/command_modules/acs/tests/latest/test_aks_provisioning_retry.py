@@ -163,6 +163,35 @@ class TestCmdWithRetry(unittest.TestCase):
         self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded'), name_check], False)
         name_check.assert_called_once()
 
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_checks_and_return_value_use_settled_response(self, mock_execute, _mock_random, _mock_sleep):
+        resource_id = '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/mc'
+        initial_result = self._result({
+            'id': resource_id,
+            'provisioningState': 'Updating',
+            'feature': {'enabled': False},
+        })
+        settled_result = self._result({
+            'id': resource_id,
+            'provisioningState': 'Succeeded',
+            'feature': {'enabled': True},
+        })
+        mock_execute.side_effect = [initial_result, settled_result]
+
+        result = self._make_instance()._cmd_with_retry(
+            'aks show',
+            [
+                JMESPathCheck('provisioningState', 'Succeeded'),
+                JMESPathCheck('feature.enabled', True),
+            ],
+            False,
+        )
+
+        self.assertIs(result, settled_result)
+
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
     @patch('time.sleep', return_value=None)
     @patch('random.uniform', return_value=0)
