@@ -190,7 +190,7 @@ examples:
         az acr create -n myregistry -g MyResourceGroup --sku Premium --data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6
   - name: Create a managed container registry with writable cache repositories enabled.
     text: >
-        az acr create -n myregistry -g MyResourceGroup --sku Premium --writable-cache-repos Enabled
+        az acr create -n myregistry -g MyResourceGroup --sku Premium --writable-cache-repos enabled
 """
 
 helps['acr credential'] = """
@@ -1540,7 +1540,7 @@ examples:
         az acr update -n myregistry --endpoint-protocol IPv4AndIPv6
   - name: Enable writable cache repositories on an existing registry.
     text: >
-        az acr update -n myregistry --writable-cache-repos Enabled
+        az acr update -n myregistry --writable-cache-repos enabled
 """
 
 helps['acr webhook'] = """

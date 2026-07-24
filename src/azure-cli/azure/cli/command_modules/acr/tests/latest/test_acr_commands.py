@@ -1011,6 +1011,7 @@ class AcrCommandsTests(ScenarioTest):
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
+    @live_only()
     @ResourceGroupPreparer()
     @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_writable_cache_repos_default_disabled(self, resource_group, resource_group_location):
@@ -1057,6 +1058,7 @@ class AcrCommandsTests(ScenarioTest):
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
 
+    @live_only()
     @ResourceGroupPreparer()
     @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_writable_cache_repos_enabled(self, resource_group, resource_group_location):
