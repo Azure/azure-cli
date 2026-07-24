@@ -74,7 +74,8 @@ printf "#!/usr/bin/env bash
 bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
 python_cmd=%{python_cmd}
 if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; fi
-AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
+site_packages=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\"
+AZ_INSTALLER=RPM PYTHONPATH=\"\$site_packages\" \$python_cmd -s \"\$site_packages/azure/cli/__main__.py\" \"\$@\"
 " > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 

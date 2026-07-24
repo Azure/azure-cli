@@ -1,13 +1,22 @@
 $env:AZ_INSTALLER="PIP"
+$moduleSearchPath = if (Test-Path "$PSScriptRoot\src\azure\cli\__main__.py") {
+    "$PSScriptRoot\src"
+}
+else {
+    $PSScriptRoot
+}
+$env:PYTHONPATH = "$moduleSearchPath$([IO.Path]::PathSeparator)$env:PYTHONPATH"
+$launcherCode = 'import os,runpy,sys; cwd=os.path.normcase(os.path.realpath(os.getcwd())); sys.path[:]=[path for path in sys.path if os.path.normcase(os.path.realpath(path or os.curdir)) != cwd]; runpy.run_module("azure.cli.__main__", run_name="__main__", alter_sys=True)'
 
 if (Test-Path "$PSScriptRoot\python.exe") {
-    # Perfer python.exe in venv
-    & "$PSScriptRoot\python.exe" -m azure.cli $args
+    # Prefer python.exe in venv
+    & "$PSScriptRoot\python.exe" -c $launcherCode $args
 }
 else {
     # Run system python.exe
-    python.exe -m azure.cli $args
+    python.exe -c $launcherCode $args
 }
+exit $LASTEXITCODE
 
 # SIG # Begin signature block
 # MIInqgYJKoZIhvcNAQcCoIInmzCCJ5cCAQExDzANBglghkgBZQMEAgEFADB5Bgor

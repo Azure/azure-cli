@@ -765,11 +765,8 @@ def _push_image_to_registry(_cmd, image_name, registry_name):  # pylint: disable
 
     try:
         # Login to ACR using Azure CLI credentials
-        # We use sys.executable + '-m azure.cli' instead of 'az' command to ensure
-        # compatibility when developing/testing the CLI from source. In development
-        # environments, 'az' may not be in PATH or may point to a different installation.
-        # In production, sys.executable will still correctly invoke the installed CLI.
-        az_cmd = [sys.executable, '-m', 'azure.cli', 'acr', 'login', '--name', registry_name]
+        azure_cli_main = Path(__file__).resolve().parents[2] / '__main__.py'
+        az_cmd = [sys.executable, str(azure_cli_main), 'acr', 'login', '--name', registry_name]
         logger.info("Logging into ACR: %s", registry_name)
 
         result = subprocess.run(

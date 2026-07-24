@@ -26,7 +26,7 @@ import hashlib
 from urllib.request import urlopen
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
-{install_dir}/bin/python -m azure.cli "$@"
+{install_dir}/bin/python -c 'import os, runpy, sys; cwd = os.path.normcase(os.path.realpath(os.getcwd())); sys.path[:] = [path for path in sys.path if os.path.normcase(os.path.realpath(path or os.curdir)) != cwd]; runpy.run_module("azure.cli.__main__", run_name="__main__", alter_sys=True)' "$@"
 """
 
 VIRTUALENV_VERSION = '16.7.11'
