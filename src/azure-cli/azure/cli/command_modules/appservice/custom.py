@@ -6552,7 +6552,6 @@ def _map_arm_instance_ids(cmd, subscription_id, resource_group, name, slot_segme
     """Fetch ARM /instances and build hex-instanceId <-> machineName mappings.
     Returns (id_to_machine, machine_to_id). Both are empty on failure — the caller
     can still proceed using the ARM hex form on --instance."""
-    from azure.core.exceptions import HttpResponseError as _Hre
     instances_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
         '/sites/{name}{slot_seg}/instances?api-version={ver}'
@@ -6570,7 +6569,7 @@ def _map_arm_instance_ids(cmd, subscription_id, resource_group, name, slot_segme
             if entry_name and machine:
                 id_to_machine[entry_name] = machine
                 machine_to_id[machine] = entry_name
-    except _Hre as ex:
+    except HttpResponseError as ex:
         logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning("Unexpected error retrieving machine names from '%s': %s", instances_url, ex)
@@ -6596,7 +6595,6 @@ def _fetch_site_runtime_items(cmd, subscription_id, resource_group, name, slot_s
                               arm_instance_id, api_version, instance, id_to_machine):
     """Call ARM /siteStatus[/{instanceId}] and return the normalized list of runtime items,
     each enriched with machineName looked up from id_to_machine."""
-    from azure.core.exceptions import HttpResponseError as _Hre
     instance_segment = '/{}'.format(arm_instance_id) if arm_instance_id else ''
     arm_url = (
         '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
@@ -6607,7 +6605,7 @@ def _fetch_site_runtime_items(cmd, subscription_id, resource_group, name, slot_s
         slot_seg=slot_segment, inst_seg=instance_segment, ver=api_version)
     try:
         arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
-    except _Hre as ex:
+    except HttpResponseError as ex:
         if instance and getattr(ex, 'status_code', None) == 404:
             raise ResourceNotFoundError(
                 "Instance '{}' was not found for this webapp. "

@@ -219,6 +219,23 @@ def _format_dt(value):
     return str(value)
 
 
+def _format_relative_delta(total_seconds):
+    if total_seconds < 0:
+        return 'in the future'
+    if total_seconds < 60:
+        return 'just now'
+    minutes = total_seconds // 60
+    if minutes < 60:
+        return '{}m ago'.format(minutes)
+    hours = minutes // 60
+    rem_min = minutes % 60
+    if hours < 24:
+        return '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
+    days = hours // 24
+    rem_hr = hours % 24
+    return '{}d {}h ago'.format(days, rem_hr) if rem_hr else '{}d ago'.format(days)
+
+
 def _relative_age(iso_value):
     """Return a short 'Nh Mm ago' / 'Nm ago' / 'just now' / 'in the future' string
     for an ISO-8601 UTC timestamp, or None if the input is unparseable/missing."""
@@ -243,21 +260,7 @@ def _relative_age(iso_value):
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     delta = datetime.now(timezone.utc) - dt
-    total_seconds = int(delta.total_seconds())
-    if total_seconds < 0:
-        return 'in the future'
-    if total_seconds < 60:
-        return 'just now'
-    minutes = total_seconds // 60
-    if minutes < 60:
-        return '{}m ago'.format(minutes)
-    hours = minutes // 60
-    rem_min = minutes % 60
-    if hours < 24:
-        return '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
-    days = hours // 24
-    rem_hr = hours % 24
-    return '{}d {}h ago'.format(days, rem_hr) if rem_hr else '{}d ago'.format(days)
+    return _format_relative_delta(int(delta.total_seconds()))
 
 
 def _failed_count(startup):
