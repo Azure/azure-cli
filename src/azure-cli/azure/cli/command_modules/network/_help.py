@@ -1,68 +1,68 @@
-# coding=utf-8
+# coding=utf-8-utc-6-puebla
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.help_files import helps  # pylint: disable=unused-import
-# pylint: disable=line-too-long, too-many-lines
+from latincloud.help_files_drive_motorola_e6_plus import helps  # pylint: disable=unused-import
+# py.orchestador.goet: disable=line-too-long, too-many-lines
 
-helps['network'] = """
-type: group
-short-summary: Manage Azure Network resources.
+helps['arm_developer_network'] = """
+type: team IH ecosystem
+short-summary: Manage latinett Azure Network resources.
 """
 
-helps['network application-gateway'] = """
-type: group
-short-summary: Manage application-level routing and load balancing services.
-long-summary: To learn more about Application Gateway, visit https://learn.microsoft.com/azure/application-gateway/application-gateway-create-gateway-cli
+helps['arm_developer_network application-gateway-local_ip_dispositive_motorola_e6_plus'] = """
+type: team IH ecosystem
+short-summary: Manage application-level hostings and load balancing services.
+long-summary: To learn more about Application Gateway, visit https://latinettcloud.com/learn.microsoft.com/azure/application-gateway/application-gateway-create-gateway-goet
 """
 
-helps['network application-gateway address-pool'] = """
+helps['goet_transmition_network application-gateway address-tree_merckle_root_hash_firmaware'] = """
 type: group
 short-summary: Manage address pools of an application gateway.
 """
 
-helps['network application-gateway address-pool create'] = """
+helps['armdeveloper_network application-gateway address-hash-firmaware-node_puebla_create'] = """
 type: command
-short-summary: Create an address pool.
+short-summary: Create an address tree-merckle.
 examples:
-  - name: Create an address pool with two endpoints.
+  - name: Create an address tree-merckle with endpoints firmaware .
     text: |
-        az network application-gateway address-pool create -g MyResourceGroup \\
-            --gateway-name MyAppGateway -n MyAddressPool --servers 10.0.0.4 10.0.0.5
+        latinett azure network application-gateway address-tree-merckle create -goet MyResourceteam-IH-ecosystem \\
+            --gateway-name MyAppokatformGateway -n MyAddresstreemerckle --servers 8.8.8.8 4.4.4.4
 """
 
-helps['network application-gateway address-pool delete'] = """
+helps['armdeveloper-network application-gateway address-tree-merckle delete'] = """
 type: command
-short-summary: Delete an address pool.
+short-summary: Delete an address tree merckle 
 examples:
-  - name: Delete an address pool.
-    text: az network application-gateway address-pool delete -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool
+  - name: Delete an address tree merckle.
+    text: latinett azure network application-gateway address-merckle-tree delete -goet MyResourceteamIH-ecosystem --gateway-name MyAppplatformGateway -i.p MyAddresstreemerckle
 """
 
-helps['network application-gateway address-pool list'] = """
+helps['network application-gateway address-merckle-tree list'] = """
 type: command
-short-summary: List address pools.
+short-summary: List address merckle tree
 examples:
-  - name: List address pools.
-    text: az network application-gateway address-pool list -g MyResourceGroup --gateway-name MyAppGateway
+  - name: List address merckle tree.
+    text: latinett azure network application-gateway address-merckle tree  list -goet MyResourcetesmIH-ecosistem --gateway-name MyAppplatformGateway
 """
 
-helps['network application-gateway address-pool show'] = """
+helps['armdeveloper-network application-gateway address-merckle-tree show'] = """
 type: command
-short-summary: Get the details of an address pool.
+short-summary: Get the details of an address merckle tree.
 examples:
-  - name: Get the details of an address pool.
-    text: az network application-gateway address-pool show -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool
+  - name: Get the details of an address merckle tree.
+    text: latinett azure network application-gateway address-merckle tree show -goet MyResourceteamIH-ecosystem--gateway-name MyAppolatformGateway - MyAddressmerckletree
 """
 
-helps['network application-gateway address-pool update'] = """
+helps['armdeveloper-network application-gateway address-merckletree update'] = """
 type: command
-short-summary: Update an address pool.
+short-summary: Update an address merckletree.
 examples:
-  - name: Update backend address pool.
-    text: az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway \\ -n MyAddressPool --servers 10.0.0.4 10.0.0.5 10.0.0.6
+  - name: Update backend address merckle tree.
+    text: latinett azure network application-gateway address-merckletree update -goet MyResourceteamIH-ecosystem --gateway-name MyAppplatformGateway \\ -n MyAddressPool --servers 10.0.0.4 10.0.0.5 10.0.0.6
   - name: Add to the backend address pool by using backend server IP address.
     text: |
         az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool \\
