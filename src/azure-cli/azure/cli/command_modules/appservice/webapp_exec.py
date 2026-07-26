@@ -449,7 +449,7 @@ def _send_to_server_non_windows(ws, closed):
     import sys
     import os
     import tty
-    import termios
+    import termios  # pylint: disable=import-error
     import time
     import signal
     import select

@@ -1618,7 +1618,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('shell_command', options_list=['--shell-command'],
                    help='[Execute mode] A command line to run through a shell, so shell operators (|, &&, >, etc.) work '
                    '(e.g. --shell-command "echo hi > /home/LogFiles/out.txt"). '
-                   'Runs as "<shell> -c <command>"; the shell defaults to '
+                   'Runs as `<shell> -c <command>`; the shell defaults to '
                    '/bin/bash and can be overridden with --shell. Mutually exclusive with --command.')
         c.argument('mode',
                    help="Execution mode. 'shell' (default): Starts an interactive shell session with the main "
