@@ -498,16 +498,15 @@ class ReadFromServerTest(unittest.TestCase):
 
     @mock.patch(_MODULE + '.logger.debug')
     @mock.patch(_MODULE + '.logger.warning')
-    def test_connection_closed_is_reported_when_cleanup_has_not_started(self, warning_mock, debug_mock):
+    def test_connection_closed_is_silent_when_cleanup_has_not_started(self, warning_mock, debug_mock):
         import threading
         ws = mock.Mock()
         ws.recv_data.side_effect = websocket.WebSocketConnectionClosedException('closed')
         closed = threading.Event()
         decoder = codecs.getincrementaldecoder('utf-8')('replace')
         _read_from_server(ws, closed, decoder)
-        warning_mock.assert_called_once_with("Shell session connection closed.")
-        debug_mock.assert_called_once_with(
-            "Shell session receive connection closed: %s", mock.ANY, exc_info=True)
+        warning_mock.assert_not_called()
+        debug_mock.assert_not_called()
         self.assertTrue(closed.is_set())
 
     @mock.patch(_MODULE + '.logger.debug')

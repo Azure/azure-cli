@@ -346,10 +346,8 @@ def _read_from_server(ws, closed, decoder):
                 enc = getattr(sys.stdout, 'encoding', None) or 'utf-8'
                 sys.stdout.write(text.encode(enc, 'replace').decode(enc, 'replace'))
             sys.stdout.flush()
-    except websocket.WebSocketConnectionClosedException as ex:
-        if not closed.is_set():
-            logger.warning("Shell session connection closed.")
-            logger.debug("Shell session receive connection closed: %s", ex, exc_info=True)
+    except websocket.WebSocketConnectionClosedException:
+        pass
     except (websocket.WebSocketException, OSError) as ex:
         logger.warning("Shell session closed unexpectedly.")
         logger.debug("Shell session receive error: %s", ex, exc_info=True)
@@ -374,7 +372,7 @@ def _send_terminal_resize(ws):
         pass
 
 
-def _send_to_server_windows(ws, closed):  # pylint: disable=too-many-branches
+def _send_to_server_windows(ws, closed):
     import os
     import time
     import ctypes
@@ -451,10 +449,8 @@ def _send_to_server_windows(ws, closed):  # pylint: disable=too-many-branches
                 ws.send(bytes(buf), opcode=ws_module.ABNF.OPCODE_BINARY)
             if exit_session:
                 break
-    except ws_module.WebSocketConnectionClosedException as ex:
-        if not closed.is_set():
-            logger.warning("Shell session connection closed.")
-            logger.debug("Shell session send connection closed: %s", ex, exc_info=True)
+    except ws_module.WebSocketConnectionClosedException:
+        pass
     except (ws_module.WebSocketException, OSError) as ex:
         logger.warning("Shell session closed unexpectedly.")
         logger.debug("Shell session send error: %s", ex, exc_info=True)
@@ -517,10 +513,8 @@ def _send_to_server_non_windows(ws, closed):
                     break  # Ctrl+C twice in 2 seconds will end the session
                 last_ctrl_c = now
             ws.send(data, opcode=ws_module.ABNF.OPCODE_BINARY)
-    except ws_module.WebSocketConnectionClosedException as ex:
-        if not closed.is_set():
-            logger.warning("Shell session connection closed.")
-            logger.debug("Shell session send connection closed: %s", ex, exc_info=True)
+    except ws_module.WebSocketConnectionClosedException:
+        pass
     except (ws_module.WebSocketException, OSError) as ex:
         if not terminal_ready:
             raise CLIInternalError("Could not configure the local terminal for interactive shell mode.") from ex
