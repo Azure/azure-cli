@@ -30,6 +30,8 @@ from azure.cli.command_modules.appservice.webapp_exec import (
     _parse_server_message,
     _friendly_exec_error_message,
     _read_from_server,
+    _send_to_server_windows,
+    _send_to_server_non_windows,
     _start_shell_session,
 )
 
@@ -94,6 +96,14 @@ class WebappExecValidationTest(unittest.TestCase):
     def test_execute_mode_rejects_shell_without_shell_command(self):
         with self.assertRaisesRegex(ValidationError, "--shell is only valid together with --shell-command"):
             webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls', shell='/bin/sh')
+
+    def test_execute_mode_rejects_invalid_working_directory(self):
+        for working_directory in ('   ', 'home/site'):
+            with self.subTest(working_directory=working_directory):
+                with self.assertRaisesRegex(ValidationError, "--working-directory must be a non-empty absolute path"):
+                    webapp_exec(
+                        self.cmd, 'rg', 'app', mode='execute', exec_command='ls',
+                        working_directory=working_directory)
 
     def test_shell_mode_rejects_command(self):
         with self.assertRaisesRegex(ValidationError, r"--command is only supported in 'execute' mode"):
@@ -282,6 +292,12 @@ class ResolveTargetInstancesTest(unittest.TestCase):
     def test_valid_comma_list_returns_requested(self, _list_mock):
         self.assertEqual(_resolve_target_instances(self.cmd, 'rg', 'app', 'i1, i2', None), ['i1', 'i2'])
 
+    @mock.patch(_MODULE + '.list_instances', return_value=[_instance('i1'), _instance('i2')])
+    def test_duplicate_instances_are_removed_preserving_order(self, _list_mock):
+        self.assertEqual(
+            _resolve_target_instances(self.cmd, 'rg', 'app', 'i2,i1,i2,i1', None),
+            ['i2', 'i1'])
+
     @mock.patch(_MODULE + '.list_instances', return_value=[_instance('i1')])
     def test_invalid_instance_raises(self, _list_mock):
         with self.assertRaisesRegex(ValidationError, "not valid for this web app"):
@@ -364,16 +380,26 @@ class ExecuteCommandOnInstanceTest(unittest.TestCase):
         self.assertFalse(post_mock.call_args.kwargs['verify'])
 
     @mock.patch('requests.post', autospec=True)
-    def test_non_202_raises_internal_error_with_message(self, post_mock):
+    def test_server_error_raises_response_error_with_message(self, post_mock):
         post_mock.return_value = mock.Mock(status_code=500, text='{"Message": "Internal Error"}')
-        with self.assertRaisesRegex(CLIInternalError, "Internal Error"):
+        with self.assertRaisesRegex(AzureResponseError, "Internal Error"):
             _execute_command_on_instance('https://scm', {}, {}, 'ls')
 
     @mock.patch('requests.post', autospec=True)
-    def test_non_202_empty_body_uses_fallback_message(self, post_mock):
+    def test_server_error_with_empty_body_uses_fallback_message(self, post_mock):
         post_mock.return_value = mock.Mock(status_code=500, text='')
-        with self.assertRaisesRegex(CLIInternalError, "could not be completed"):
+        with self.assertRaisesRegex(AzureResponseError, "could not be completed"):
             _execute_command_on_instance('https://scm', {}, {}, 'ls')
+
+    @mock.patch('requests.post', autospec=True)
+    def test_non_202_responses_preserve_server_message(self, post_mock):
+        for status_code in (400, 403, 404, 500, 503):
+            with self.subTest(status_code=status_code):
+                post_mock.return_value = mock.Mock(
+                    status_code=status_code,
+                    text='{"Message": "request rejected"}')
+                with self.assertRaisesRegex(AzureResponseError, "request rejected"):
+                    _execute_command_on_instance('https://scm', {}, {}, 'ls')
 
     @mock.patch('requests.post', autospec=True)
     def test_request_exception_raises_connection_error(self, post_mock):
@@ -439,6 +465,170 @@ class ReadFromServerTest(unittest.TestCase):
             (websocket.ABNF.OPCODE_CLOSE, b''),
         ])
         self.assertEqual(out, '\u00e9')
+
+    @mock.patch(_MODULE + '.logger.debug')
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_websocket_error_is_sanitized_and_closes_session(self, warning_mock, debug_mock):
+        import threading
+        ws = mock.Mock()
+        ws.recv_data.side_effect = websocket.WebSocketProtocolException('invalid frame details')
+        closed = threading.Event()
+        decoder = codecs.getincrementaldecoder('utf-8')('replace')
+        with mock.patch('sys.stdout', io.StringIO()):
+            _read_from_server(ws, closed, decoder)
+        warning_mock.assert_called_once_with("Shell session closed unexpectedly.")
+        debug_mock.assert_called_once_with(
+            "Shell session receive error: %s", mock.ANY, exc_info=True)
+        self.assertTrue(closed.is_set())
+
+    @mock.patch(_MODULE + '.logger.debug')
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_unexpected_reader_error_does_not_escape_background_thread(self, warning_mock, debug_mock):
+        import threading
+        ws = mock.Mock()
+        ws.recv_data.side_effect = RuntimeError('internal details')
+        closed = threading.Event()
+        decoder = codecs.getincrementaldecoder('utf-8')('replace')
+        with mock.patch('sys.stdout', io.StringIO()):
+            _read_from_server(ws, closed, decoder)
+        warning_mock.assert_called_once_with("Shell session closed unexpectedly.")
+        debug_mock.assert_called_once_with(
+            "Unexpected shell session receive error: %s", mock.ANY, exc_info=True)
+        self.assertTrue(closed.is_set())
+
+    @mock.patch(_MODULE + '.logger.debug')
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_connection_closed_is_reported_when_cleanup_has_not_started(self, warning_mock, debug_mock):
+        import threading
+        ws = mock.Mock()
+        ws.recv_data.side_effect = websocket.WebSocketConnectionClosedException('closed')
+        closed = threading.Event()
+        decoder = codecs.getincrementaldecoder('utf-8')('replace')
+        _read_from_server(ws, closed, decoder)
+        warning_mock.assert_called_once_with("Shell session connection closed.")
+        debug_mock.assert_called_once_with(
+            "Shell session receive connection closed: %s", mock.ANY, exc_info=True)
+        self.assertTrue(closed.is_set())
+
+    @mock.patch(_MODULE + '.logger.debug')
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_connection_closed_is_silent_when_cleanup_is_in_progress(self, warning_mock, debug_mock):
+        ws = mock.Mock()
+        ws.recv_data.side_effect = websocket.WebSocketConnectionClosedException('closed')
+        closed = mock.Mock()
+        closed.is_set.side_effect = [False, True]
+        decoder = codecs.getincrementaldecoder('utf-8')('replace')
+        _read_from_server(ws, closed, decoder)
+        warning_mock.assert_not_called()
+        debug_mock.assert_not_called()
+        closed.set.assert_called_once_with()
+
+
+class NonWindowsTerminalTest(unittest.TestCase):
+    """Validate Unix terminal state cleanup without requiring a Unix test host."""
+
+    def test_terminal_setup_errors_are_sanitized(self):
+        for failure_stage in ('attributes', 'signal', 'raw-mode'):
+            with self.subTest(failure_stage=failure_stage):
+                termios_mock = mock.Mock(TCSADRAIN=1)
+                tty_mock = mock.Mock()
+                signal_mock = mock.Mock(SIGWINCH=object())
+                signal_mock.getsignal.return_value = object()
+                select_mock = mock.Mock()
+                if failure_stage == 'attributes':
+                    termios_mock.tcgetattr.side_effect = OSError('terminal details')
+                elif failure_stage == 'signal':
+                    signal_mock.signal.side_effect = ValueError('signal details')
+                else:
+                    termios_mock.tcgetattr.return_value = object()
+                    tty_mock.setraw.side_effect = OSError('raw mode details')
+
+                with mock.patch.dict('sys.modules', {
+                        'termios': termios_mock,
+                        'tty': tty_mock,
+                        'signal': signal_mock,
+                        'select': select_mock,
+                }), mock.patch('sys.stdin.fileno', return_value=7):
+                    with self.assertRaisesRegex(
+                            CLIInternalError,
+                            "Could not configure the local terminal for interactive shell mode"):
+                        _send_to_server_non_windows(mock.Mock(), mock.Mock())
+
+    def test_terminal_settings_and_resize_handler_are_restored(self):
+        fd = 7
+        old_settings = object()
+        old_winch_handler = object()
+        sigwinch = object()
+        termios_mock = mock.Mock(TCSADRAIN=1)
+        termios_mock.tcgetattr.return_value = old_settings
+        tty_mock = mock.Mock()
+        signal_mock = mock.Mock(SIGWINCH=sigwinch)
+        signal_mock.getsignal.return_value = old_winch_handler
+        select_mock = mock.Mock()
+        closed = mock.Mock()
+        closed.is_set.return_value = True
+
+        with mock.patch.dict('sys.modules', {
+                'termios': termios_mock,
+                'tty': tty_mock,
+                'signal': signal_mock,
+                'select': select_mock,
+        }), mock.patch('sys.stdin.fileno', return_value=fd):
+            _send_to_server_non_windows(mock.Mock(), closed)
+
+        tty_mock.setraw.assert_called_once_with(fd)
+        self.assertEqual(signal_mock.signal.call_count, 2)
+        self.assertEqual(signal_mock.signal.call_args_list[0].args[0], sigwinch)
+        self.assertTrue(callable(signal_mock.signal.call_args_list[0].args[1]))
+        self.assertEqual(
+            signal_mock.signal.call_args_list[1],
+            mock.call(sigwinch, old_winch_handler))
+        termios_mock.tcsetattr.assert_called_once_with(fd, termios_mock.TCSADRAIN, old_settings)
+
+
+class WindowsTerminalTest(unittest.TestCase):
+    """Validate Windows console setup and cleanup without requiring a Windows console."""
+
+    @staticmethod
+    def _console_modules(get_mode_result=True, set_mode_result=True):
+        kernel32 = mock.Mock()
+        kernel32.GetStdHandle.return_value = 12
+        kernel32.GetConsoleMode.return_value = get_mode_result
+        kernel32.SetConsoleMode.return_value = set_mode_result
+        old_mode = mock.Mock(value=7)
+        ctypes_mock = mock.Mock()
+        ctypes_mock.windll.kernel32 = kernel32
+        ctypes_mock.c_uint32.return_value = old_mode
+        ctypes_mock.byref.side_effect = lambda value: value
+        return ctypes_mock, mock.Mock(), kernel32
+
+    def test_console_setup_errors_are_sanitized(self):
+        for get_mode_result, set_mode_result in ((False, True), (True, False)):
+            with self.subTest(get_mode_result=get_mode_result, set_mode_result=set_mode_result):
+                ctypes_mock, msvcrt_mock, _kernel32 = self._console_modules(
+                    get_mode_result, set_mode_result)
+                with mock.patch.dict('sys.modules', {
+                        'ctypes': ctypes_mock,
+                        'msvcrt': msvcrt_mock,
+                }):
+                    with self.assertRaisesRegex(
+                            CLIInternalError,
+                            "Could not configure the local terminal for interactive shell mode"):
+                        _send_to_server_windows(mock.Mock(), mock.Mock())
+
+    def test_console_mode_is_restored(self):
+        ctypes_mock, msvcrt_mock, kernel32 = self._console_modules()
+        closed = mock.Mock()
+        closed.is_set.return_value = True
+        with mock.patch.dict('sys.modules', {
+                'ctypes': ctypes_mock,
+                'msvcrt': msvcrt_mock,
+        }):
+            _send_to_server_windows(mock.Mock(), closed)
+
+        self.assertEqual(
+            kernel32.SetConsoleMode.call_args_list,
+            [mock.call(12, 6), mock.call(12, 7)])
 
 
 class ShellSessionConnectTest(unittest.TestCase):

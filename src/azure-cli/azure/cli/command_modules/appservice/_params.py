@@ -1626,7 +1626,7 @@ subscription than the app service environment, please use the resource ID for --
                    "returning command output.",
                    arg_type=get_enum_type(['shell', 'execute']), default='shell')
         c.argument('working_directory', options_list=['--working-directory', '--cwd'],
-                   help="[Execute mode] Working directory for command execution. "
+                   help="[Execute mode] Absolute working directory for command execution. "
                    "Defaults to the container's working directory.")
         c.argument('instance', options_list=['--instance', '-i'],
                    help='Webapp instance(s) to target. Specify a comma-separated list of instance IDs '

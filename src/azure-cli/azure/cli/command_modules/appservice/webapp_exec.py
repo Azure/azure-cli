@@ -69,9 +69,8 @@ def webapp_exec(cmd,
     if instance is not None:
         instance = instance.strip()
 
-    if shell:
-        if not shell.startswith('/'):
-            raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
+    if shell and not shell.startswith('/'):
+        raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
 
     if mode.lower() == 'execute':
         if exec_command and shell_command:
@@ -82,6 +81,9 @@ def webapp_exec(cmd,
             raise ValidationError("--shell-command must not be empty.")
         if shell and not shell_command:
             raise ValidationError("--shell is only valid together with --shell-command in 'execute' mode.")
+        if working_directory is not None and (
+                not working_directory.strip() or not working_directory.startswith('/')):
+            raise ValidationError("--working-directory must be a non-empty absolute path.")
     elif mode.lower() == 'shell':
         if exec_command:
             raise ValidationError("--command is only supported in 'execute' mode.")
@@ -140,7 +142,7 @@ def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
             raise ValidationError("No instances found for this web app.")
         return sorted(instance_names)
 
-    requested = [i.strip() for i in instance.split(',') if i.strip()]
+    requested = list(dict.fromkeys(i.strip() for i in instance.split(',') if i.strip()))
     if not requested:
         raise ValidationError("--instance must contain at least one instance ID, or 'all'.")
     invalid = [i for i in requested if i not in instance_names]
@@ -344,8 +346,17 @@ def _read_from_server(ws, closed, decoder):
                 enc = getattr(sys.stdout, 'encoding', None) or 'utf-8'
                 sys.stdout.write(text.encode(enc, 'replace').decode(enc, 'replace'))
             sys.stdout.flush()
-    except (websocket.WebSocketConnectionClosedException, OSError):
-        pass
+    except websocket.WebSocketConnectionClosedException as ex:
+        if not closed.is_set():
+            logger.warning("Shell session connection closed.")
+            logger.debug("Shell session receive connection closed: %s", ex, exc_info=True)
+    except (websocket.WebSocketException, OSError) as ex:
+        logger.warning("Shell session closed unexpectedly.")
+        logger.debug("Shell session receive error: %s", ex, exc_info=True)
+    except Exception as ex:  # pylint: disable=broad-except
+        # This runs on a background thread, so prevent unexpected failures from escaping as raw tracebacks.
+        logger.warning("Shell session closed unexpectedly.")
+        logger.debug("Unexpected shell session receive error: %s", ex, exc_info=True)
     finally:
         closed.set()
 
@@ -358,12 +369,12 @@ def _send_terminal_resize(ws):
     try:
         size = os.get_terminal_size()
         ws.send(json.dumps({"width": size.columns, "height": size.lines}))
-    except (OSError, websocket.WebSocketConnectionClosedException):
+    except (OSError, websocket.WebSocketException):
         # No console attached (stdout redirected) or the session is already gone.
         pass
 
 
-def _send_to_server_windows(ws, closed):
+def _send_to_server_windows(ws, closed):  # pylint: disable=too-many-branches
     import os
     import time
     import ctypes
@@ -375,8 +386,9 @@ def _send_to_server_windows(ws, closed):
     kernel32 = ctypes.windll.kernel32
     stdin_handle = kernel32.GetStdHandle(-10)  # STD_INPUT_HANDLE
     old_mode = ctypes.c_uint32()
-    kernel32.GetConsoleMode(stdin_handle, ctypes.byref(old_mode))
-    kernel32.SetConsoleMode(stdin_handle, old_mode.value & ~0x0001)
+    if not (kernel32.GetConsoleMode(stdin_handle, ctypes.byref(old_mode)) and
+            kernel32.SetConsoleMode(stdin_handle, old_mode.value & ~0x0001)):
+        raise CLIInternalError("Could not configure the local terminal for interactive shell mode.")
 
     last_ctrl_c = 0
 
@@ -439,8 +451,13 @@ def _send_to_server_windows(ws, closed):
                 ws.send(bytes(buf), opcode=ws_module.ABNF.OPCODE_BINARY)
             if exit_session:
                 break
-    except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
-        logger.warning("Shell session closed: %s", ex)
+    except ws_module.WebSocketConnectionClosedException as ex:
+        if not closed.is_set():
+            logger.warning("Shell session connection closed.")
+            logger.debug("Shell session send connection closed: %s", ex, exc_info=True)
+    except (ws_module.WebSocketException, OSError) as ex:
+        logger.warning("Shell session closed unexpectedly.")
+        logger.debug("Shell session send error: %s", ex, exc_info=True)
     finally:
         kernel32.SetConsoleMode(stdin_handle, old_mode.value)
 
@@ -457,7 +474,10 @@ def _send_to_server_non_windows(ws, closed):
     import websocket as ws_module
 
     fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
+    try:
+        old_settings = termios.tcgetattr(fd)
+    except OSError as ex:
+        raise CLIInternalError("Could not configure the local terminal for interactive shell mode.") from ex
     last_ctrl_c = 0
 
     # Set up for terminal window resizing
@@ -468,11 +488,17 @@ def _send_to_server_non_windows(ws, closed):
 
     # On SIGWINCH (terminal resize), run on_sigwinch to signal resize_needed.
     # This will eventually allow send_terminal_resize to be called and send resize request to server.
-    signal.signal(signal.SIGWINCH, on_sigwinch)
+    try:
+        old_winch_handler = signal.getsignal(signal.SIGWINCH)
+        signal.signal(signal.SIGWINCH, on_sigwinch)
+    except (OSError, ValueError) as ex:
+        raise CLIInternalError("Could not configure the local terminal for interactive shell mode.") from ex
 
+    terminal_ready = False
     try:
         # Raw mode: pass keystrokes straight to the remote shell (no local echo/buffering).
         tty.setraw(fd)
+        terminal_ready = True
         while not closed.is_set():
             if resize_needed.is_set():
                 resize_needed.clear()
@@ -491,11 +517,18 @@ def _send_to_server_non_windows(ws, closed):
                     break  # Ctrl+C twice in 2 seconds will end the session
                 last_ctrl_c = now
             ws.send(data, opcode=ws_module.ABNF.OPCODE_BINARY)
-    except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
-        logger.warning("Shell session closed: %s", ex)
+    except ws_module.WebSocketConnectionClosedException as ex:
+        if not closed.is_set():
+            logger.warning("Shell session connection closed.")
+            logger.debug("Shell session send connection closed: %s", ex, exc_info=True)
+    except (ws_module.WebSocketException, OSError) as ex:
+        if not terminal_ready:
+            raise CLIInternalError("Could not configure the local terminal for interactive shell mode.") from ex
+        logger.warning("Shell session closed unexpectedly.")
+        logger.debug("Shell session send error: %s", ex, exc_info=True)
     finally:
-        # Reset defaults: stop listening for resize signals, restore terminal out of raw mode.
-        signal.signal(signal.SIGWINCH, signal.SIG_DFL)
+        # Restore the previous resize handler and terminal mode.
+        signal.signal(signal.SIGWINCH, old_winch_handler)
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
@@ -529,7 +562,8 @@ def _execute_command_on_instance(scm_url, headers, cookies, command, args=None, 
 
     if response.status_code == 202:
         return _parse_server_message(response.text)
-    raise CLIInternalError(_friendly_exec_error_message(response.text))
+
+    raise AzureResponseError(_friendly_exec_error_message(response.text))
 
 
 # --- shared helpers ---
