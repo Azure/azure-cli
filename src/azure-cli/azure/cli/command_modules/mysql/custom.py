@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -277,7 +278,8 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
+        # Setting to None omits created_time from the serialized output (matches prior behavior).
+        f.created_time = None
         files.append(f)
 
     return files
@@ -1321,7 +1323,17 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
         value=configurations
     )
 
-    return client.begin_batch_update(resource_group_name, server_name, parameters)
+    # The batch update is a long-running operation whose final response body is empty with the
+    # current SDK, so surface the operation status to keep the command output meaningful.
+    poller = client.begin_batch_update(resource_group_name, server_name, parameters)
+    poller.result()
+    return {'status': poller.status()}
+
+
+def flexible_backup_delete(client, resource_group_name, server_name, backup_name):
+    # Invoke the operation as a bound method so the SDK api-version validation decorator
+    # receives the client as its first positional argument.
+    return client.begin_delete(resource_group_name, server_name, backup_name)
 
 
 # Replica commands
@@ -2029,6 +2041,51 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
                              start_ip=rule.start_ip_address,
                              end_ip=rule.end_ip_address,
                              firewall_rule_name=rule.name)
+
+
+def _fm_settings_payload(state, uami=None):
+    """
+    Build the ARM request body for a FabricMirroringSetting ('Default').
+    The 1.1.0b3 SDK model is nested: properties.state / properties.identityResourceId.
+    """
+    # Build the ARM request body. In SDK 1.1.0b3 the model is nested
+    # (properties.state / properties.identityResourceId), NOT flattened. A plain dict is
+    # accepted by the (typespec-generated) SDK and avoids the model-name/flatten mismatch.
+    props = {'state': state}
+    if uami:
+        props['identityResourceId'] = uami
+    return {'properties': props}
+
+
+def flexible_server_mirroring_enable(cmd, client, resource_group_name, server_name, identity_resource_id):
+    """
+    'Enable' translates to PUT the 'Default' FabricMirroringSettings with state=Enabled and UAMI.
+    The Swagger limits settings name to 'Default'.
+    """
+    if not identity_resource_id:
+        raise RequiredArgumentMissingError(
+            "Parameter --identity-resource-id is required when enabling fabric mirroring."
+        )
+
+    payload = _fm_settings_payload(state='Enabled', uami=identity_resource_id)
+
+    # Long-running operation
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Enable Fabric mirroring')
+
+
+def flexible_server_mirroring_disable(cmd, client, resource_group_name, server_name):
+    """
+    'Disable' translates to PUT the 'Default' FabricMirroringSettings with state=Disabled.
+    identityResourceId can be omitted when disabling<97>service will deactivate/clean bindings.
+    """
+    payload = _fm_settings_payload(state='Disabled', uami=None)
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Disable Fabric mirroring')
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
