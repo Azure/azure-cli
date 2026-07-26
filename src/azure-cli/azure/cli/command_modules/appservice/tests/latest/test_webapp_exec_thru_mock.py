@@ -5,6 +5,7 @@
 
 import codecs
 import io
+import ssl
 import unittest
 from unittest import mock
 
@@ -24,6 +25,7 @@ from azure.cli.command_modules.appservice.webapp_exec import (
     webapp_exec,
     _resolve_target_instances,
     _build_execute_invocation,
+    _run_execute_on_instance,
     _execute_command_on_instance,
     _parse_server_message,
     _friendly_exec_error_message,
@@ -109,6 +111,10 @@ class WebappExecValidationTest(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, "single instance"):
             webapp_exec(self.cmd, 'rg', 'app', mode='shell', instance='all')
 
+    def test_shell_mode_rejects_all_instances_with_whitespace(self):
+        with self.assertRaisesRegex(ValidationError, "single instance"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='shell', instance=' all ')
+
     def test_shell_mode_rejects_instance_list(self):
         with self.assertRaisesRegex(ValidationError, "single instance"):
             webapp_exec(self.cmd, 'rg', 'app', mode='shell', instance='i1,i2')
@@ -130,23 +136,23 @@ class WebappExecValidationTest(unittest.TestCase):
         self.assertIsNone(result)
         start_session.assert_called_once()
 
-    @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'success'}])
+    @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'accepted'}])
     @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
     @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
     @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
     def test_execute_mode_happy_path_runs_in_parallel(self, _scm, _headers, _resolve, run_parallel):
         result = webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls')
-        self.assertEqual(result, [{'status': 'success'}])
+        self.assertEqual(result, [{'status': 'accepted'}])
         run_parallel.assert_called_once()
 
-    @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'success'}])
+    @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'accepted'}])
     @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
     @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
     @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
     def test_execute_mode_shell_command_happy_path(self, _scm, _headers, _resolve, run_parallel):
         result = webapp_exec(self.cmd, 'rg', 'app', mode='execute',
                              shell_command='echo hi > /home/LogFiles/out.txt')
-        self.assertEqual(result, [{'status': 'success'}])
+        self.assertEqual(result, [{'status': 'accepted'}])
         run_parallel.assert_called_once()
 
     @mock.patch(_MODULE + '._execute_in_parallel',
@@ -155,7 +161,7 @@ class WebappExecValidationTest(unittest.TestCase):
     @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
     @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
     def test_execute_mode_failed_instance_raises(self, _scm, _headers, _resolve, _run_parallel):
-        with self.assertRaisesRegex(AzureResponseError, "failed on 1 of 1 instance"):
+        with self.assertRaisesRegex(AzureResponseError, "not accepted on 1 of 1 instance"):
             webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls')
 
 
@@ -182,6 +188,16 @@ class BuildExecuteInvocationTest(unittest.TestCase):
         self.assertEqual(command, '/bin/sh')
         self.assertEqual(args, ['-c', 'echo hi'])
 
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_shell_command_contents_are_not_logged(self, warning_mock):
+        _build_execute_invocation(None, 'echo super-secret-value', None)
+        warning_mock.assert_called_once_with("Running shell command with %s.", '/bin/bash')
+
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_direct_command_contents_are_not_logged(self, warning_mock):
+        _build_execute_invocation('curl --header super-secret-value', None, None)
+        warning_mock.assert_not_called()
+
     def test_empty_command_raises(self):
         with self.assertRaisesRegex(ValidationError, "must not be empty"):
             _build_execute_invocation('   ', None, None)
@@ -204,6 +220,41 @@ class BuildExecuteInvocationTest(unittest.TestCase):
         command, args = _build_execute_invocation(None, 'echo hi', '')
         self.assertEqual(command, '/bin/bash')
         self.assertEqual(args, ['-c', 'echo hi'])
+
+
+class RunExecuteOnInstanceTest(unittest.TestCase):
+    """Validate per-instance result messages."""
+
+    @mock.patch(_MODULE + '.logger.warning')
+    @mock.patch(_MODULE + '._execute_command_on_instance', return_value='Command accepted.')
+    def test_accepted_without_explicit_instance_omits_instance_label(self, _execute_mock, warning_mock):
+        result = _run_execute_on_instance(None, 'https://scm', {}, 'ls', [], None)
+        warning_mock.assert_called_once_with("%s", "Command accepted.")
+        self.assertEqual(result['instance'], 'default')
+
+    @mock.patch(_MODULE + '.logger.warning')
+    @mock.patch(_MODULE + '._execute_command_on_instance', side_effect=CLIInternalError('rejected'))
+    def test_failed_without_explicit_instance_omits_instance_label(self, _execute_mock, warning_mock):
+        result = _run_execute_on_instance(None, 'https://scm', {}, 'ls', [], None)
+        warning_mock.assert_called_once_with("%s", mock.ANY)
+        self.assertEqual(result['instance'], 'default')
+
+    @mock.patch(_MODULE + '.logger.debug')
+    @mock.patch(_MODULE + '.logger.warning')
+    @mock.patch(_MODULE + '._execute_command_on_instance', side_effect=ValueError('unexpected'))
+    def test_unexpected_exception_returns_failed_result(self, _execute_mock, warning_mock, debug_mock):
+        result = _run_execute_on_instance(None, 'https://scm', {}, 'ls', [], None)
+        debug_mock.assert_called_once_with(
+            "An unexpected error occurred while submitting the command.", exc_info=True)
+        warning_mock.assert_called_once_with(
+            "%s", "An unexpected error occurred while submitting the command.")
+        self.assertEqual(
+            result,
+            {
+                'instance': 'default',
+                'status': 'failed',
+                'error': 'An unexpected error occurred while submitting the command.',
+            })
 
 
 class ResolveTargetInstancesTest(unittest.TestCase):
@@ -298,6 +349,20 @@ class ExecuteCommandOnInstanceTest(unittest.TestCase):
             post_mock.call_args.kwargs['json'],
             {'Command': 'bash', 'Args': ['-c', 'pwd'], 'WorkingDirectory': '/home'})
 
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('requests.post', autospec=True)
+    def test_request_verifies_certificates_by_default(self, post_mock, _disable_verify):
+        post_mock.return_value = mock.Mock(status_code=202, text='')
+        _execute_command_on_instance('https://scm', {}, {}, 'ls')
+        self.assertTrue(post_mock.call_args.kwargs['verify'])
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=True)
+    @mock.patch('requests.post', autospec=True)
+    def test_request_honors_disabled_certificate_verification(self, post_mock, _disable_verify):
+        post_mock.return_value = mock.Mock(status_code=202, text='')
+        _execute_command_on_instance('https://scm', {}, {}, 'ls')
+        self.assertFalse(post_mock.call_args.kwargs['verify'])
+
     @mock.patch('requests.post', autospec=True)
     def test_non_202_raises_internal_error_with_message(self, post_mock):
         post_mock.return_value = mock.Mock(status_code=500, text='{"Message": "Internal Error"}')
@@ -387,6 +452,7 @@ class ShellSessionConnectTest(unittest.TestCase):
             mock.patch(_MODULE + '._send_to_server_windows'),
             mock.patch(_MODULE + '._send_to_server_non_windows'),
             mock.patch(_MODULE + '._enable_windows_vt_output', return_value=None),
+            mock.patch('sys.stdin.isatty', return_value=True),
             mock.patch('websocket.create_connection'),
         ]
         started = [p.start() for p in patchers]
@@ -415,6 +481,27 @@ class ShellSessionConnectTest(unittest.TestCase):
     def test_no_cookies_sends_none(self):
         _start_shell_session('https://scm.example', {})
         self.assertIsNone(self.create_conn.call_args.kwargs['cookie'])
+
+    def test_redirected_stdin_raises_validation_error_before_connecting(self):
+        with mock.patch('sys.stdin.isatty', return_value=False):
+            with self.assertRaisesRegex(ValidationError, "requires an interactive terminal"):
+                _start_shell_session('https://scm.example', {})
+        self.create_conn.assert_not_called()
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    def test_connection_is_thread_safe_and_verifies_certificates_by_default(self, _disable_verify):
+        _start_shell_session('https://scm.example', {})
+        self.assertTrue(self.create_conn.call_args.kwargs['enable_multithread'])
+        self.assertEqual(
+            self.create_conn.call_args.kwargs['sslopt'],
+            {'cert_reqs': ssl.CERT_REQUIRED})
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=True)
+    def test_connection_honors_disabled_certificate_verification(self, _disable_verify):
+        _start_shell_session('https://scm.example', {})
+        self.assertEqual(
+            self.create_conn.call_args.kwargs['sslopt'],
+            {'cert_reqs': ssl.CERT_NONE})
 
     def test_bad_handshake_raises_internal_error(self):
         self.create_conn.side_effect = websocket.WebSocketBadStatusException(

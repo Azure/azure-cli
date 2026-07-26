@@ -66,6 +66,9 @@ def webapp_exec(cmd,
         raise ValidationError("Site is not a Linux web app. 'az webapp exec' is only supported for Linux web apps.")
 
     # Validate parameters
+    if instance is not None:
+        instance = instance.strip()
+
     if shell:
         if not shell.startswith('/'):
             raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
@@ -111,8 +114,8 @@ def webapp_exec(cmd,
     # Execute mode - run the command on each resolved instance in parallel.
     command, command_args = _build_execute_invocation(exec_command, shell_command, shell)
     logger.warning(
-        "Execute mode is fire-and-forget: 'succeeded' means the command was accepted, "
-        "not that it ran or finished. No output is returned.")
+        "Execute mode is fire-and-forget: 'accepted' means the command request was accepted, "
+        "not that it ran or finished. No output is returned.\n")
     args_list = [(target, scm_url, headers, command, command_args, working_directory)
                  for target in target_instances]
     results = _execute_in_parallel(_run_execute_on_instance, args_list)
@@ -120,7 +123,7 @@ def webapp_exec(cmd,
     failed = [r for r in results if r.get('status') == 'failed']
     if failed:
         raise AzureResponseError(
-            "Command execution failed on {} of {} instance(s). See the messages above for details."
+            "Command request was not accepted on {} of {} instance(s). See the messages above for details."
             .format(len(failed), len(results)))
 
     return results
@@ -152,7 +155,7 @@ def _build_execute_invocation(exec_command, shell_command, shell):
     # Parse the user's input into the (command, args) argv pair.
     if shell_command:
         shell_path = shell or '/bin/bash'
-        logger.warning("Running shell command with %s: %s", shell_path, shell_command)
+        logger.warning("Running shell command with %s.", shell_path)
         return shell_path, ['-c', shell_command]
 
     import shlex
@@ -163,24 +166,37 @@ def _build_execute_invocation(exec_command, shell_command, shell):
             "Could not parse --command: {}. Check for unbalanced quotes.".format(ex))
     if not tokens:
         raise ValidationError("--command must not be empty.")
-    logger.warning("Running command: %s | arguments: %s", tokens[0], tokens[1:])
     return tokens[0], tokens[1:]
 
 
 def _run_execute_on_instance(target, scm_url, headers, command, args, working_directory):
     # Run the command on a single instance and return a result dict. Never raises:
-    # a CLIError from one instance is captured so it can't abort the others.
+    # failures from one instance are captured so they can't abort the others.
     cookies = {}
     if target is not None:
         cookies['ARRAffinity'] = target
     label = target or 'default'
     try:
         result = _execute_command_on_instance(scm_url, headers, cookies, command, args, working_directory)
-        logger.warning("Instance '%s' succeeded%s", label, ": {}".format(result) if result else ".")
-        return {'instance': label, 'status': 'success', 'result': result}
+        if target is not None:
+            logger.warning("Instance '%s': %s", target, result)
+        else:
+            logger.warning("%s", result)
+        return {'instance': label, 'status': 'accepted', 'result': result}
     except CLIError as e:
-        logger.warning("Instance '%s' failed: %s", label, e)
+        if target is not None:
+            logger.warning("Instance '%s': %s", target, e)
+        else:
+            logger.warning("%s", e)
         return {'instance': label, 'status': 'failed', 'error': str(e)}
+    except Exception:  # pylint: disable=broad-except
+        message = "An unexpected error occurred while submitting the command."
+        logger.debug(message, exc_info=True)
+        if target is not None:
+            logger.warning("Instance '%s': %s", target, message)
+        else:
+            logger.warning("%s", message)
+        return {'instance': label, 'status': 'failed', 'error': message}
 
 
 def _execute_in_parallel(fn, args_list, max_workers=10):
@@ -198,27 +214,38 @@ def _execute_in_parallel(fn, args_list, max_workers=10):
 def _start_shell_session(scm_url, headers, cookies=None, shell=None):
     import codecs
     import platform
+    import ssl
+    import sys
     import threading
     import websocket
+    from azure.cli.core.util import should_disable_connection_verify
+
+    if not sys.stdin.isatty():
+        raise ValidationError(
+            "Interactive shell mode requires an interactive terminal; stdin cannot be redirected.")
 
     ws_url = scm_url.replace('https://', 'wss://') + '/exec/shell'
     if shell:
         import urllib.parse
         ws_url += '?shell=' + urllib.parse.quote(shell, safe='')
     else:
-        print("No --shell provided; defaulting to /bin/bash. If your container image does not "
-              "include bash, run with --shell <absolute path> (e.g. --shell /bin/sh).")
+        logger.warning("No --shell provided; defaulting to /bin/bash. If your container image does not "
+                       "include bash, run with --shell <absolute path> (e.g. --shell /bin/sh).")
 
     cookie_str = '; '.join(f'{k}={v}' for k, v in cookies.items()) if cookies else None
 
     # Request Websocket connection with 30s timeout
-    print("Connecting to the web app container...")
+    logger.warning("Connecting to the web app container...")
+    # Honor the CLI-wide certificate verification setting, consistent with other SCM connections.
+    verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
     try:
         ws = websocket.create_connection(
             ws_url,
             header=headers,
             cookie=cookie_str,
-            timeout=30
+            sslopt={'cert_reqs': verify_mode},
+            timeout=30,
+            enable_multithread=True
         )
     except websocket.WebSocketBadStatusException as ex:
         # The server rejected the upgrade handshake
@@ -229,7 +256,7 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
     # Clear the 30s connect timeout so the read_from_server loop blocks indefinitely
     ws.settimeout(None)
 
-    print("Press Ctrl+C twice to exit.\n")
+    logger.warning("Press Ctrl+C twice to exit.\n")
 
     # Enable ANSI rendering on Windows consoles. No-op on Unix / redirected stdout.
     vt_state = _enable_windows_vt_output()
@@ -394,8 +421,6 @@ def _send_to_server_windows(ws, closed):
                         break
                     last_ctrl_c = now
                     buf += b'\x03'
-                elif ch == '\r':  # Enter: Windows gives CR, Unix shells expect LF
-                    buf += b'\n'
                 elif ch == '\x08':  # Backspace: Windows gives BS, Unix shells expect DEL (0x7f)
                     buf += b'\x7f'
                 elif ch in ('\x00', '\xe0'):  # Special key prefix: the next getwch() is the key code
@@ -479,6 +504,7 @@ def _send_to_server_non_windows(ws, closed):
 
 def _execute_command_on_instance(scm_url, headers, cookies, command, args=None, working_directory=None):
     import requests
+    from azure.cli.core.util import should_disable_connection_verify
 
     exec_url = f"{scm_url}/exec/execute"
 
@@ -494,7 +520,8 @@ def _execute_command_on_instance(scm_url, headers, cookies, command, args=None, 
             json=body,
             headers=headers,
             cookies=cookies,
-            timeout=30
+            timeout=30,
+            verify=not should_disable_connection_verify()
         )
     except requests.exceptions.RequestException as ex:
         # No HTTP response: refused/timed-out connection, DNS/TLS/proxy error, etc.
