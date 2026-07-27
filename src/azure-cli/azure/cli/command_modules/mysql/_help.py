@@ -332,6 +332,8 @@ examples:
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
     crafted: true
+  - name: Update the batch of the custom-managed maintenance window (existing batch is preserved when --maintenance-batch is omitted).
+    text: az mysql flexible-server update --resource-group testGroup --name testserver --maintenance-window "Fri:13:00" --maintenance-batch Batch2
   - name: Set or change key and identity for data encryption.
     text: >
       # get key identifier of the existing key
@@ -928,4 +930,34 @@ short-summary: Create an export backup for a given server with specified backup 
 examples:
   - name: Create a export backup for 'testsvr' with backup name 'testbackup'.
     text: az mysql flexible-server export create -g testgroup -n testsvr -b testbackup -u destsasuri
+"""
+
+helps['mysql flexible-server mirroring'] = """
+type: group
+short-summary: Manage Microsoft Fabric Mirroring for Azure Database for MySQL Flexible Server.
+long-summary: |
+  Fabric Mirroring allows continuous data replication from MySQL Flexible Server into Microsoft Fabric for analytics and reporting.
+"""
+
+helps['mysql flexible-server mirroring enable'] = """
+type: command
+short-summary: Enable Fabric Mirroring for a MySQL Flexible Server.
+long-summary: |
+  Configures the server for Fabric Mirroring.
+  Requires a User Assigned Managed Identity (UAMI) resource ID with appropriate permissions.
+examples:
+  - name: Enable Fabric Mirroring for server 'testsvr' using a User Assigned Managed Identity.
+    text: >
+      az mysql flexible-server mirroring enable -g testgroup -n testsvr \
+        --identity-resource-id /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<name>
+"""
+
+helps['mysql flexible-server mirroring disable'] = """
+type: command
+short-summary: Disable Fabric Mirroring for a MySQL Flexible Server.
+long-summary: |
+  Removes Fabric Mirroring configuration from the server.
+examples:
+  - name: Disable Fabric Mirroring for server 'testsvr'.
+    text: az mysql flexible-server mirroring disable -g testgroup -n testsvr
 """

@@ -377,7 +377,7 @@ def load_command_table(self, _):
         from .operations.sig_image_definition import SigImageDefinitionListShared
         self.command_table['sig image-definition list-shared'] = SigImageDefinitionListShared(loader=self)
 
-    with self.command_group('sig image-version', operation_group='gallery_image_versions') as g:
+    with self.command_group('sig image-version') as g:
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
         g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
