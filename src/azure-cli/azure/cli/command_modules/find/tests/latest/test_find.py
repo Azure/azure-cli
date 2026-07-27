@@ -9,8 +9,7 @@ from unittest import mock
 from io import StringIO
 
 from azure.cli.command_modules.find.custom import (
-    Example, MCPClient, search_mslearn, format_results,
-    get_generated_examples, process_query, _extract_summary,
+    MCPClient, search_mslearn, format_results, process_query, _extract_summary,
     _is_cli_command_relevant, _extract_query_command, _filter_results,
     _get_query_keywords, _has_keyword_overlap, _stem, _matches_keywords,
     _extract_command, _build_docs_query, _prefer_cli_docs, _dedupe_key,
@@ -598,41 +597,6 @@ class TestProcessQuery(unittest.TestCase):
     def test_process_query_empty_term(self, _):
         # Should not raise, just log error
         process_query(None)
-
-
-class TestGetGeneratedExamples(unittest.TestCase):
-
-    @mock.patch('azure.cli.command_modules.find.custom.telemetry_core')
-    @mock.patch('requests.post')
-    def test_get_generated_examples(self, mock_post, mock_telemetry):
-        mock_telemetry._get_installation_id.return_value = "test-install-id"
-        mock_telemetry.is_telemetry_enabled.return_value = False
-
-        mock_post.side_effect = [
-            _make_init_response(),
-            _make_notify_response(),
-            _make_tool_response(SAMPLE_DOC_RESULTS),
-            _make_tool_response(SAMPLE_CODE_RESULTS),
-        ]
-
-        examples = get_generated_examples("az vm delete")
-
-        self.assertGreater(len(examples), 0)
-        # Should return Example namedtuples
-        self.assertIsInstance(examples[0], Example)
-        self.assertEqual(examples[0].title, "az vm delete")
-
-    @mock.patch('azure.cli.command_modules.find.custom.telemetry_core')
-    @mock.patch('requests.post')
-    def test_get_generated_examples_network_error(self, mock_post, mock_telemetry):
-        mock_telemetry._get_installation_id.return_value = "test-install-id"
-        mock_telemetry.is_telemetry_enabled.return_value = False
-
-        import requests as req
-        mock_post.side_effect = req.exceptions.ConnectionError("fail")
-
-        examples = get_generated_examples("az vm delete")
-        self.assertEqual(len(examples), 0)
 
 
 if __name__ == '__main__':
