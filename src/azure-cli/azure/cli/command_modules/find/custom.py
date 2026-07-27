@@ -26,6 +26,9 @@ WAIT_MESSAGE = ['\nFinding examples and documentation...']
 MAX_DOC_RESULTS = 2
 MAX_CODE_RESULTS = 3
 
+# Hints appended to the docs query so results stay Azure CLI specific
+DOCS_QUERY_HINTS = ['Azure CLI', 'az command']
+
 Example = namedtuple("Example", "title snippet")
 
 
@@ -319,6 +322,68 @@ def _has_keyword_overlap(result, query_words):
     return _matches_keywords(combined, query_words)
 
 
+def _build_docs_query(query):
+    """Scope a user query to Azure CLI documentation.
+
+    The docs search is semantic and otherwise returns portal/PowerShell/SDK
+    articles. Appending Azure CLI hints biases results toward `az` content.
+
+    Args:
+        query: The user's query string.
+
+    Returns:
+        The query string with Azure CLI hint keywords appended.
+    """
+    query = (query or "").strip()
+    lowered = query.lower()
+    hints = [hint for hint in DOCS_QUERY_HINTS if hint.lower() not in lowered]
+    return " ".join([query] + hints) if hints else query
+
+
+def _cli_doc_score(result):
+    """Score how Azure CLI specific a doc result is.
+
+    Args:
+        result: A doc result dict from MCP.
+
+    Returns:
+        3 for the `az` command reference, 2 for content with `az` invocations,
+        1 for content merely mentioning the Azure CLI, 0 otherwise.
+    """
+    url = (result.get("contentUrl", "") or "").lower()
+    if "/cli/azure" in url:
+        return 3
+
+    content = (result.get("content", "") or "") + " " + (result.get("title", "") or "")
+    if re.search(r'(?m)^\s*az\s+[a-z][\w-]*', content) or "azurecli" in content.lower():
+        return 2
+
+    return 1 if "azure cli" in content.lower() else 0
+
+
+def _prefer_cli_docs(results):
+    """Keep and rank the Azure CLI related doc results.
+
+    Results without any Azure CLI signal are dropped; the rest are ordered
+    most-CLI-specific first, preserving the server's relative ranking within
+    the same score. Falls back to the original results if none look CLI
+    specific, so the user still gets something back.
+
+    Args:
+        results: List of doc result dicts from MCP.
+
+    Returns:
+        Filtered and ranked list of doc results.
+    """
+    scored = [(_cli_doc_score(r), i, r) for i, r in enumerate(results)]
+    cli_results = [item for item in scored if item[0] > 0]
+    if not cli_results:
+        return results
+
+    cli_results.sort(key=lambda item: (-item[0], item[1]))
+    return [r for _, _, r in cli_results]
+
+
 def search_mslearn(query):
     """Search Microsoft Learn via MCP for docs and code samples.
 
@@ -339,7 +404,7 @@ def search_mslearn(query):
 
     docs_response = client.call_tool(
         "microsoft_docs_search",
-        {"query": query}
+        {"query": _build_docs_query(query)}
     )
 
     code_response = client.call_tool(
@@ -352,6 +417,9 @@ def search_mslearn(query):
 
     # Filter out irrelevant CLI commands (e.g., 'az lab vm' when searching 'az vm')
     docs_results = _filter_results(docs_results, query)
+
+    # Drop docs that aren't about the Azure CLI (portal/PowerShell/SDK articles)
+    docs_results = _prefer_cli_docs(docs_results)
 
     # Filter code results by keyword overlap too
     query_words = _get_query_keywords(query)
@@ -502,6 +570,10 @@ def _extract_command(snippet):
             continue
 
         continued = stripped.endswith(('\\', '^', '`'))
+        # Docs sometimes typo the continuation as ' /'; only treat a slash
+        # preceded by whitespace as one so trailing-slash values are kept.
+        if not continued and re.search(r'\s/$', stripped):
+            continued = True
         if continued:
             stripped = stripped[:-1].rstrip()
 
