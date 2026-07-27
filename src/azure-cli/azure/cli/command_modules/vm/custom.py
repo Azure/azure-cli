@@ -5219,7 +5219,9 @@ def vmss_lifecycle_hook_event_show(cmd, resource_group_name, vmss_name, lifecycl
 
 def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
                                      action_state=None, wait_until=None, target_resource_ids=None, instance_ids=None):
-    from .aaz.latest.vmss.lifecycle_hook_event import Update as _lifecycleHookEventUpdate
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .operations.vmss_lifecycle_hook_event import VMSSLifecycleHookEventUpdate as _lifecycleHookEventUpdate
+    unregister_global_transforms(cmd.cli_ctx)
 
     command_args = {
         "lifecycle_hook_event_name": lifecycle_hook_event_name,
