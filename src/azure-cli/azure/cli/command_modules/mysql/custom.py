@@ -1008,7 +1008,8 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
                                        high_availability=None, standby_availability_zone=None, maintenance_window=None,
                                        tags=None, replication_role=None, byok_identity=None, backup_byok_identity=None,
                                        byok_key=None, backup_byok_key=None, disable_data_encryption=False,
-                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None):
+                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None,
+                                       maintenance_batch=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1066,14 +1067,22 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
     if backup_interval:
         instance.backup.backup_interval_hours = backup_interval
 
+    if maintenance_batch and not maintenance_window:
+        raise CLIError('--maintenance-batch can only be used together with an enabled --maintenance-window.')
+
     if maintenance_window:
         # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
+            if maintenance_batch:
+                raise CLIError('--maintenance-batch cannot be used when disabling the maintenance window.')
             day_of_week = start_hour = start_minute = 0
             custom_window = "Disabled"
+            instance.maintenance_window.batch_of_maintenance = None
         else:
             day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
             custom_window = "Enabled"
+            if maintenance_batch:
+                instance.maintenance_window.batch_of_maintenance = maintenance_batch
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
