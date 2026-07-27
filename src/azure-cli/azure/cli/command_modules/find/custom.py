@@ -476,15 +476,15 @@ def _extract_description(description):
 def _extract_command(snippet):
     """Extract the `az` command block from a code snippet.
 
-    Returns the snippet lines starting from the first line that begins with
-    'az', preserving the server's original formatting. Stops at a blank line
-    that isn't a shell line-continuation, so a single example is returned.
+    Returns the command lines starting from the first line that begins with
+    'az'. Shell line-continuations (`\\`, `^` or backtick) are collapsed so that
+    each command is returned as a single line.
 
     Args:
         snippet: Raw code snippet string.
 
     Returns:
-        List of command lines (server formatting preserved), or empty list.
+        List of single-line commands, or empty list.
     """
     if not snippet:
         return []
@@ -494,21 +494,26 @@ def _extract_command(snippet):
     if start is None:
         return []
 
-    # If the command block is indented, strip the leading indent of the first
-    # `az` line from every line, preserving relative indentation.
-    indent = len(lines[start]) - len(lines[start].lstrip())
     result = []
+    pending = None
     for line in lines[start:]:
-        if not line.strip():
+        stripped = line.strip()
+        if not stripped:
             continue
-        # Remove up to `indent` leading whitespace chars, keeping deeper indents.
-        stripped = line
-        for _ in range(indent):
-            if stripped[:1] in (' ', '\t'):
-                stripped = stripped[1:]
-            else:
-                break
-        result.append(stripped.rstrip())
+
+        continued = stripped.endswith(('\\', '^', '`'))
+        if continued:
+            stripped = stripped[:-1].rstrip()
+
+        pending = stripped if pending is None else (pending + ' ' + stripped).strip()
+
+        if not continued:
+            result.append(pending)
+            pending = None
+
+    if pending:
+        result.append(pending)
+
     return result
 
 
