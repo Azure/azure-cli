@@ -30,6 +30,22 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
             result = acr_import._regional_endpoint_uri_to_login_server(regional_uri, login_server_suffix)
             self.assertEqual(result, expected)
 
+    def test_valid_regional_endpoint_conversion_multi_label_suffix(self):
+        """Regional endpoints in sovereign clouds whose login-server suffix has more than two
+        labels (e.g. '.azurecr.sovcloud-azure.de') must still be converted."""
+        test_cases = [
+            ('registry123.deloscloudgermanycentral.geo.azurecr.sovcloud-azure.de',
+             '.azurecr.sovcloud-azure.de', 'registry123.azurecr.sovcloud-azure.de'),
+            ('myregistry.francecentral.geo.azurecr.sovcloud-azure.fr',
+             '.azurecr.sovcloud-azure.fr', 'myregistry.azurecr.sovcloud-azure.fr'),
+            # DNL registry (hash suffix) in a multi-label sovereign cloud
+            ('myregistry-d7ezgzevdwfvc8ht.deloscloudgermanycentral.geo.azurecr.sovcloud-azure.de',
+             '.azurecr.sovcloud-azure.de', 'myregistry-d7ezgzevdwfvc8ht.azurecr.sovcloud-azure.de'),
+        ]
+
+        for regional_uri, suffix, expected in test_cases:
+            result = acr_import._regional_endpoint_uri_to_login_server(regional_uri, suffix)
+            self.assertEqual(result, expected)
 
     def test_non_regional_endpoint_uris_unchanged(self):
         """Test that non-regional endpoint URIs are returned unchanged."""
@@ -40,6 +56,10 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
             'testregistry.azurecr.io',
             'external-registry.com',
             'testregistry.eastus.notgeo.azurecr.io',
+            # Malformed: empty region label must NOT be converted
+            'testregistry..geo.azurecr.io',
+            'testregistry.azurecr.sovcloud-azure.de',
+            'testregistry.deloscloudgermanycentral.notgeo.azurecr.sovcloud-azure.de'
         ]
 
         for uri in test_cases:
