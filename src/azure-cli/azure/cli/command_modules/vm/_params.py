@@ -1188,6 +1188,7 @@ def load_arguments(self, _):
             c.ignore('target_resource_ids')
 
     with self.argument_context('vmss lifecycle-hook-event list') as c:
+        c.argument('vmss_name', id_part=None)
         c.ignore('lifecycle_hook_event_name')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
