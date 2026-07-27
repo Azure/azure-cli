@@ -655,6 +655,92 @@ def _extract_command(snippet):
     return result
 
 
+def _dedupe_key(text):
+    """Normalize text into a key for duplicate detection.
+
+    Lowercases and collapses whitespace and punctuation so titles that differ
+    only in casing or trailing punctuation compare equal.
+
+    Args:
+        text: The text to normalize.
+
+    Returns:
+        Normalized key string, or '' if there's nothing meaningful.
+    """
+    return re.sub(r'[^a-z0-9]+', ' ', (text or "").lower()).strip()
+
+
+def _collect_unique(results, limit, build_entry):
+    """Collect entries from results, skipping duplicates and empty entries.
+
+    An entry is skipped when its URL or its normalized title has already been
+    seen, so the same article never appears twice even if its URL fragment
+    differs.
+
+    Args:
+        results: List of raw result dicts from MCP.
+        limit: Maximum number of entries to collect.
+        build_entry: Callable taking a result and returning
+            (title, body, url), or None to skip the result.
+
+    Returns:
+        List of (title, body, url) tuples.
+    """
+    entries = []
+    seen_urls = set()
+    seen_titles = set()
+
+    for result in results:
+        entry = build_entry(result)
+        if not entry:
+            continue
+
+        title, _, url = entry
+        title_key = _dedupe_key(title)
+        if (url and url in seen_urls) or (title_key and title_key in seen_titles):
+            continue
+
+        seen_urls.add(url)
+        seen_titles.add(title_key)
+        entries.append(entry)
+        if len(entries) >= limit:
+            break
+
+    return entries
+
+
+def _build_example_entry(result):
+    """Build an example entry from a code sample result.
+
+    Args:
+        result: A code sample dict from MCP.
+
+    Returns:
+        (title, command_lines, url) tuple, or None if there's no `az` command.
+    """
+    command_lines = _extract_command(result.get("codeSnippet", ""))
+    if not command_lines:
+        return None
+
+    return (_extract_description(result.get("description", "")),
+            command_lines,
+            result.get("link", ""))
+
+
+def _build_doc_entry(result):
+    """Build a documentation entry from a doc result.
+
+    Args:
+        result: A doc result dict from MCP.
+
+    Returns:
+        (title, summary, url) tuple.
+    """
+    return (_clean_title(result.get("title", "")),
+            _extract_summary(result.get("content", "")),
+            result.get("contentUrl", ""))
+
+
 def format_results(query, docs_results, code_results):
     """Format and print search results to stdout.
 
@@ -674,64 +760,27 @@ def format_results(query, docs_results, code_results):
 
     print("\nHere is what I found for [" + query + "]: \n", file=sys.stderr)
 
-    if code_results:
-        examples = []
-        seen_urls = set()
-        for result in code_results:
-            command_lines = _extract_command(result.get("codeSnippet", ""))
-            if not command_lines:
-                continue
-            url = result.get("link", "")
-            # Skip duplicate URLs, keeping only the first occurrence.
-            if url and url in seen_urls:
-                continue
+    examples = _collect_unique(code_results, MAX_CODE_RESULTS, _build_example_entry)
+    if examples:
+        print("Examples")
+        for title, command_lines, url in examples:
+            print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
+            for line in command_lines:
+                print("    " + line)
             if url:
-                seen_urls.add(url)
-            examples.append((
-                _extract_description(result.get("description", "")),
-                command_lines,
-                url
-            ))
-            if len(examples) >= MAX_CODE_RESULTS:
-                break
+                print("    " + format_styled_text((Style.SECONDARY, url)))
+            print()
 
-        if examples:
-            print("Examples")
-            for title, command_lines, url in examples:
-                print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
-                for line in command_lines:
-                    print("    " + line)
-                if url:
-                    print("    " + format_styled_text((Style.SECONDARY, url)))
-                print()
-
-    if docs_results:
-        docs = []
-        seen_urls = set()
-        for result in docs_results:
-            url = result.get("contentUrl", "")
-            # Skip duplicate URLs, keeping only the first occurrence.
-            if url and url in seen_urls:
-                continue
+    docs = _collect_unique(docs_results, MAX_DOC_RESULTS, _build_doc_entry)
+    if docs:
+        print("Documentation")
+        for title, summary, url in docs:
+            print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
+            if summary:
+                print("    " + summary)
             if url:
-                seen_urls.add(url)
-            docs.append((
-                _clean_title(result.get("title", "")),
-                _extract_summary(result.get("content", "")),
-                url
-            ))
-            if len(docs) >= MAX_DOC_RESULTS:
-                break
-
-        if docs:
-            print("Documentation")
-            for title, summary, url in docs:
-                print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
-                if summary:
-                    print("    " + summary)
-                if url:
-                    print("    " + format_styled_text((Style.SECONDARY, url)))
-                print()
+                print("    " + format_styled_text((Style.SECONDARY, url)))
+            print()
 
 
 def process_query(cli_term):
