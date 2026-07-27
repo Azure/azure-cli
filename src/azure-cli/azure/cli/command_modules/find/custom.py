@@ -29,6 +29,11 @@ MAX_CODE_RESULTS = 3
 # Hints appended to the docs query so results stay Azure CLI specific
 DOCS_QUERY_HINTS = ['Azure CLI', 'az command']
 
+# Doc summary length and the marker shown when a summary is cut short
+MAX_SUMMARY_LENGTH = 150
+MIN_SUMMARY_LENGTH = 40
+CONTINUATION_MARKER = ' ... (see link for the full article)'
+
 Example = namedtuple("Example", "title snippet")
 
 
@@ -432,17 +437,67 @@ def search_mslearn(query):
     return docs_results, code_results
 
 
+def _clean_markdown(text):
+    """Strip markdown noise so a summary reads as plain prose.
+
+    Converts `[label](url)` links to their label and removes emphasis and
+    inline code markers.
+
+    Args:
+        text: Raw markdown text.
+
+    Returns:
+        Plain-text version of the input.
+    """
+    text = re.sub(r'!\[[^\]]*\]\([^)]*\)', '', text)
+    text = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
+    text = re.sub(r'[*_`]+', '', text)
+    return re.sub(r'\s+', ' ', text).strip()
+
+
+def _shorten(text):
+    """Trim a summary to MAX_SUMMARY_LENGTH without cutting mid-word.
+
+    Prefers ending on a sentence boundary. When the text is cut short, a
+    continuation marker is appended so it's clear more content follows at the
+    documentation link.
+
+    Args:
+        text: The summary text.
+
+    Returns:
+        A summary no longer than MAX_SUMMARY_LENGTH (plus the marker).
+    """
+    text = text.strip()
+    if len(text) <= MAX_SUMMARY_LENGTH:
+        return text
+
+    window = text[:MAX_SUMMARY_LENGTH + 1]
+
+    # Prefer a sentence boundary, as long as it keeps most of the window.
+    sentence_end = max(window.rfind('. '), window.rfind('! '), window.rfind('? '))
+    if sentence_end >= MAX_SUMMARY_LENGTH // 2:
+        return window[:sentence_end + 1] + CONTINUATION_MARKER
+
+    cut = window.rfind(' ')
+    if cut <= 0:
+        cut = MAX_SUMMARY_LENGTH
+    return window[:cut].rstrip(' ,;:-') + CONTINUATION_MARKER
+
+
 def _extract_summary(content):
     """Extract a clean summary from MCP doc content.
 
     MCP returns markdown content with headers. Extract the Summary section
-    or first meaningful paragraph.
+    or first meaningful paragraph, then trim it to a readable length with a
+    continuation marker when the text is cut short.
 
     Args:
         content: Raw markdown content string.
 
     Returns:
-        Clean summary string, max 150 chars.
+        Clean summary string, at most MAX_SUMMARY_LENGTH chars plus a
+        continuation marker.
     """
     if not content:
         return ""
@@ -450,19 +505,30 @@ def _extract_summary(content):
     # Try to find a "### Summary" section
     summary_match = re.search(r'###\s*Summary\s*\n(.+?)(?:\n###|\Z)', content, re.DOTALL)
     if summary_match:
-        summary = summary_match.group(1).strip()
-        # Take first sentence/line
-        first_line = summary.split('\n')[0].strip()
-        if first_line:
-            return first_line[:150]
+        summary = _clean_markdown(summary_match.group(1).split('\n\n')[0])
+        if summary:
+            return _shorten(summary)
 
-    # Try first non-header, non-empty line
+    # Try the first meaningful prose line, preferring one that reads as a
+    # complete thought over a short fragment or heading-like lead-in.
+    candidates = []
     for line in content.split('\n'):
         line = line.strip()
-        if line and not line.startswith('#') and not line.startswith('---'):
-            return line[:150]
+        if not line or line.startswith(('#', '---', '|', '```', '>')):
+            continue
+        cleaned = _clean_markdown(line)
+        if cleaned:
+            candidates.append(cleaned)
+        if len(candidates) >= 10:
+            break
 
-    return content[:150]
+    if candidates:
+        best = next((c for c in candidates
+                     if len(c) >= MIN_SUMMARY_LENGTH and not c.endswith((':', ';', ','))),
+                    candidates[0])
+        return _shorten(best)
+
+    return _shorten(_clean_markdown(content))
 
 
 def _clean_title(title):
