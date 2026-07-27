@@ -13,7 +13,8 @@ from azure.cli.command_modules.find.custom import (
     get_generated_examples, process_query, _extract_summary,
     _is_cli_command_relevant, _extract_query_command, _filter_results,
     _get_query_keywords, _has_keyword_overlap, _stem, _matches_keywords,
-    MAX_DOC_RESULTS, MAX_CODE_RESULTS
+    _extract_command, _build_docs_query, _prefer_cli_docs, _dedupe_key,
+    MAX_DOC_RESULTS, MAX_CODE_RESULTS, MAX_SUMMARY_LENGTH, CONTINUATION_MARKER
 )
 
 
@@ -69,7 +70,7 @@ SAMPLE_DOC_RESULTS = [
     },
     {
         "title": "Delete a VM and attached resources",
-        "content": "# Delete a VM and attached resources\nYou can change the behavior when you delete a VM.",
+        "content": "# Delete a VM and attached resources\nYou can change the behavior when you delete a VM.\n\naz vm delete --resource-group myResourceGroup --name myVM",
         "contentUrl": "https://learn.microsoft.com/azure/virtual-machines/delete"
     }
 ]
@@ -210,7 +211,27 @@ class TestExtractSummary(unittest.TestCase):
     def test_extract_summary_truncates(self):
         long_content = "A" * 200
         summary = _extract_summary(long_content)
-        self.assertEqual(len(summary), 150)
+        self.assertTrue(summary.endswith(CONTINUATION_MARKER))
+        self.assertEqual(len(summary), MAX_SUMMARY_LENGTH + len(CONTINUATION_MARKER))
+
+    def test_extract_summary_marks_truncated_sentence(self):
+        content = "Create a VM with the Azure CLI. " + ("word " * 60)
+        summary = _extract_summary(content)
+        self.assertTrue(summary.startswith("Create a VM with the Azure CLI."))
+        self.assertTrue(summary.endswith(CONTINUATION_MARKER))
+
+    def test_extract_summary_not_truncated_has_no_marker(self):
+        self.assertNotIn(CONTINUATION_MARKER, _extract_summary("A short summary."))
+
+    def test_extract_summary_strips_markdown_links(self):
+        content = "# Title\n[New-AZVM](https://learn.microsoft.com/powershell) creates the resources you need."
+        self.assertEqual(_extract_summary(content),
+                         "New-AZVM creates the resources you need.")
+
+    def test_extract_summary_skips_fragment_lines(self):
+        content = "# Title\nIf you plan to use Cloud Shell:\nCloud Shell is an interactive shell that you run in your browser."
+        self.assertEqual(_extract_summary(content),
+                         "Cloud Shell is an interactive shell that you run in your browser.")
 
 
 class TestRelevanceFiltering(unittest.TestCase):
@@ -275,9 +296,15 @@ class TestRelevanceFiltering(unittest.TestCase):
         self.assertEqual(len(filtered), 0)
 
     def test_get_query_keywords(self):
-        self.assertEqual(_get_query_keywords("az vm create"), {"create"})  # 'az' excluded, 'vm' < 3 chars
+        # 'az' is dropped, short-but-meaningful terms like 'vm' are kept
+        self.assertEqual(_get_query_keywords("az vm create"), {"vm", "create"})
         self.assertEqual(_get_query_keywords("az storage blob list"), {"storage", "blob", "list"})
         self.assertEqual(_get_query_keywords("deploy arm template"), {"deploy", "arm", "template"})
+
+    def test_get_query_keywords_drops_filler_words(self):
+        # Regression: natural-language queries must keep their subject
+        self.assertEqual(_get_query_keywords("what is vm"), {"vm"})
+        self.assertEqual(_get_query_keywords("how do i create a vm"), {"vm", "create"})
 
     def test_has_keyword_overlap_match(self):
         result = {"title": "az vm create", "content": "Create a virtual machine"}
@@ -308,8 +335,75 @@ class TestRelevanceFiltering(unittest.TestCase):
         self.assertTrue(_has_keyword_overlap(result, _get_query_keywords("creating a vm")))
 
 
-class TestSearchMslearn(unittest.TestCase):
+class TestCliScoping(unittest.TestCase):
 
+    def test_build_docs_query_appends_hints(self):
+        query = _build_docs_query("create a vm")
+        self.assertTrue(query.startswith("create a vm"))
+        self.assertIn("Azure CLI", query)
+
+    def test_build_docs_query_skips_existing_hint(self):
+        self.assertEqual(_build_docs_query("azure cli vm create").count("Azure CLI"), 0)
+
+    def test_prefer_cli_docs_drops_non_cli(self):
+        results = [
+            {"title": "Create a VM in the portal", "content": "Select Create.", "contentUrl": "https://x/portal"},
+            {"title": "az vm create", "content": "Create a VM.", "contentUrl": "https://learn.microsoft.com/cli/azure/vm"},
+        ]
+        kept = _prefer_cli_docs(results)
+        self.assertEqual([r["title"] for r in kept], ["az vm create"])
+
+    def test_prefer_cli_docs_ranks_reference_first(self):
+        results = [
+            {"title": "Tutorial", "content": "Run:\naz vm create --name myVM", "contentUrl": "https://x/tutorial"},
+            {"title": "az vm create", "content": "Create a VM.", "contentUrl": "https://learn.microsoft.com/cli/azure/vm"},
+        ]
+        self.assertEqual([r["title"] for r in _prefer_cli_docs(results)], ["az vm create", "Tutorial"])
+
+    def test_prefer_cli_docs_falls_back_when_none_match(self):
+        results = [{"title": "Portal", "content": "Select Create.", "contentUrl": "https://x/portal"}]
+        self.assertEqual(_prefer_cli_docs(results), results)
+
+
+class TestExtractCommand(unittest.TestCase):
+
+    def test_collapses_backslash_continuations(self):
+        snippet = "az vm create \\\n  -n myVM \\\n  --image myImage"
+        self.assertEqual(_extract_command(snippet), ["az vm create -n myVM --image myImage"])
+
+    def test_collapses_caret_and_backtick_continuations(self):
+        self.assertEqual(_extract_command("az vm create ^\n  -n myVM"), ["az vm create -n myVM"])
+        self.assertEqual(_extract_command("az vm create `\n  -n myVM"), ["az vm create -n myVM"])
+
+    def test_collapses_mistyped_slash_continuation(self):
+        snippet = "az storage account create -n acc /\n  -g rg --sku Standard_GRS"
+        self.assertEqual(_extract_command(snippet), ["az storage account create -n acc -g rg --sku Standard_GRS"])
+
+    def test_keeps_trailing_slash_in_values(self):
+        snippet = "az storage blob upload --url https://x.blob.core.windows.net/c/"
+        self.assertEqual(_extract_command(snippet), [snippet])
+
+    def test_keeps_separate_commands_on_separate_lines(self):
+        self.assertEqual(_extract_command("az vm create -n x\n\naz vm show -n x"),
+                         ["az vm create -n x", "az vm show -n x"])
+
+    def test_no_command_returns_empty(self):
+        self.assertEqual(_extract_command("Write-Host hello"), [])
+        self.assertEqual(_extract_command(""), [])
+
+
+class TestDedupeKey(unittest.TestCase):
+
+    def test_ignores_case_and_punctuation(self):
+        self.assertEqual(_dedupe_key("Create an Azure storage account"),
+                         _dedupe_key("Create an Azure Storage Account."))
+
+    def test_empty_input(self):
+        self.assertEqual(_dedupe_key(""), "")
+        self.assertEqual(_dedupe_key(None), "")
+
+
+class TestSearchMslearn(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.find.custom.telemetry_core')
     @mock.patch('requests.post')
     def test_search_returns_docs_and_code(self, mock_post, mock_telemetry):
@@ -390,15 +484,17 @@ class TestFormatResults(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
     @mock.patch('sys.stdout', new_callable=StringIO)
     def test_format_caps_results(self, mock_stdout, _):
-        # Create more (distinct-URL) results than the max.
+        # Create more (distinct URL and title) results than the max.
         many_docs = []
         for i in range(MAX_DOC_RESULTS + 5):
             doc = dict(SAMPLE_DOC_RESULTS[0])
+            doc["title"] = "az vm delete %d" % i
             doc["contentUrl"] = "https://learn.microsoft.com/doc/%d" % i
             many_docs.append(doc)
         many_code = []
         for i in range(MAX_CODE_RESULTS + 5):
             code = dict(SAMPLE_CODE_RESULTS[0])
+            code["description"] = "Deletes an Azure virtual machine, variant %d." % i
             code["link"] = "https://learn.microsoft.com/code/%d" % i
             many_code.append(code)
         format_results("az vm", many_docs, many_code)
@@ -423,6 +519,7 @@ class TestFormatResults(unittest.TestCase):
 
         dup_code = dict(SAMPLE_CODE_RESULTS[0])
         extra_code = dict(SAMPLE_CODE_RESULTS[1])
+        extra_code["description"] = "Deletes a virtual machine and its disks in Azure."
         extra_code["link"] = "https://learn.microsoft.com/code/extra"
         code = [SAMPLE_CODE_RESULTS[0], dup_code, SAMPLE_CODE_RESULTS[1], extra_code]
 
@@ -435,6 +532,29 @@ class TestFormatResults(unittest.TestCase):
         # Caps are filled from the remaining unique results.
         self.assertIn("https://learn.microsoft.com/doc/extra", output)
         self.assertIn("https://learn.microsoft.com/code/extra", output)
+
+    @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
+    @mock.patch('sys.stdout', new_callable=StringIO)
+    def test_format_dedupes_by_title(self, mock_stdout, _):
+        # Same article under different URL fragments must appear only once.
+        dup_doc = dict(SAMPLE_DOC_RESULTS[0])
+        dup_doc["title"] = "AZ VM Delete."  # same title, different casing/punctuation
+        dup_doc["contentUrl"] = "https://learn.microsoft.com/cli/azure/vm#delete"
+        other_doc = dict(SAMPLE_DOC_RESULTS[1])
+
+        dup_code = dict(SAMPLE_CODE_RESULTS[0])
+        dup_code["link"] = "https://learn.microsoft.com/code/other-fragment"
+
+        format_results("az vm", [SAMPLE_DOC_RESULTS[0], dup_doc, other_doc],
+                       [SAMPLE_CODE_RESULTS[0], dup_code, SAMPLE_CODE_RESULTS[1]])
+        output = mock_stdout.getvalue()
+
+        self.assertEqual(output.count("az vm delete."), 1)
+        self.assertNotIn("https://learn.microsoft.com/cli/azure/vm#delete", output)
+        self.assertNotIn("https://learn.microsoft.com/code/other-fragment", output)
+        # The next unique results still fill the freed slots.
+        self.assertIn(SAMPLE_DOC_RESULTS[1]["contentUrl"], output)
+        self.assertIn(SAMPLE_CODE_RESULTS[1]["link"], output)
 
 
 class TestProcessQuery(unittest.TestCase):

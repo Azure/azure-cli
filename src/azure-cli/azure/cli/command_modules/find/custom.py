@@ -34,6 +34,17 @@ MAX_SUMMARY_LENGTH = 150
 MIN_SUMMARY_LENGTH = 40
 CONTINUATION_MARKER = ' ... (see link for the full article)'
 
+# Filler words that carry no search signal and would otherwise skew filtering
+STOP_WORDS = {
+    'about', 'all', 'also', 'an', 'and', 'any', 'are', 'as', 'at', 'be', 'been', 'being', 'but',
+    'by', 'can', 'could', 'did', 'do', 'does', 'for', 'from', 'had', 'has', 'have', 'here', 'how',
+    'if', 'in', 'into', 'is', 'it', 'its', 'may', 'me', 'might', 'must', 'my', 'no', 'not', 'of',
+    'on', 'or', 'our', 'over', 'please', 'shall', 'should', 'so', 'some', 'such', 'than', 'that',
+    'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this', 'those', 'to', 'up', 'us',
+    'via', 'want', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'why',
+    'will', 'with', 'would', 'you', 'your',
+}
+
 Example = namedtuple("Example", "title snippet")
 
 
@@ -254,7 +265,11 @@ def _filter_results(results, query):
 
 
 def _get_query_keywords(query):
-    """Extract meaningful keywords from the query (words with 3+ chars, excluding 'az').
+    """Extract meaningful keywords from the query.
+
+    Keeps words of 2+ characters so short but meaningful Azure terms such as
+    'vm', 'ad' or 'k8s' survive, while dropping the 'az' prefix and common
+    filler words (articles, auxiliaries, interrogatives) that carry no signal.
 
     Args:
         query: The user's query string.
@@ -262,9 +277,8 @@ def _get_query_keywords(query):
     Returns:
         Set of lowercase keyword strings.
     """
-    words = re.findall(r'[a-zA-Z]{3,}', query.lower())
-    stop_words = {'the', 'and', 'for', 'with', 'from', 'that', 'this', 'are', 'was', 'has', 'have'}
-    return {w for w in words if w != 'az' and w not in stop_words}
+    words = re.findall(r'[a-z0-9]{2,}', query.lower())
+    return {w for w in words if w != 'az' and w not in STOP_WORDS}
 
 
 def _stem(word):
@@ -306,7 +320,7 @@ def _matches_keywords(text, query_words):
     Returns:
         True if at least one query keyword stem matches a word stem in the text.
     """
-    text_stems = {_stem(w) for w in re.findall(r'[a-zA-Z]+', text.lower())}
+    text_stems = {_stem(w) for w in re.findall(r'[a-z0-9]+', text.lower())}
     return any(_stem(word) in text_stems for word in query_words)
 
 
@@ -754,8 +768,8 @@ def format_results(query, docs_results, code_results):
         code_results: List of code sample dicts from MCP.
     """
     if not docs_results and not code_results:
-        print("\nSorry I am not able to help with [" + query + "]."
-              "\nTry typing the beginning of a command e.g., " + style_message('az vm') + ".", file=sys.stderr)
+        print('\nSorry I am not able to help with [' + query + '].'
+              '\nTry typing the beginning of a command, e.g., "az vm create".\n', file=sys.stderr)
         return
 
     print("\nHere is what I found for [" + query + "]: \n", file=sys.stderr)
@@ -785,7 +799,7 @@ def format_results(query, docs_results, code_results):
 
 def process_query(cli_term):
     if not cli_term:
-        logger.error('Please provide a search term, e.g., az find "vm"')
+        logger.error('Please provide a search term, e.g., az find "az vm create".')
     else:
         print(random.choice(WAIT_MESSAGE), file=sys.stderr)
 
