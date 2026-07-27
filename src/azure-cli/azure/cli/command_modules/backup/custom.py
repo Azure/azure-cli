@@ -219,12 +219,12 @@ def create_vault(cmd, client, vault_name, resource_group_name, location, tags=No
                        "to their default values. It is recommended to use az backup vault update instead.")
 
         # If the vault exists, we move to the update flow instead
-        return update_vault(cmd, client, vault_name, resource_group_name, tags=tags, 
+        return update_vault(cmd, client, vault_name, resource_group_name, tags=tags,
                             public_network_access=public_network_access,
-                            immutability_state=immutability_state, 
-                            cross_subscription_restore_state=cross_subscription_restore_state, 
+                            immutability_state=immutability_state,
+                            cross_subscription_restore_state=cross_subscription_restore_state,
                             classic_alerts=classic_alerts,
-                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures, 
+                            azure_monitor_alerts_for_job_failures=azure_monitor_alerts_for_job_failures,
                             cost_management_granularity=cost_management_granularity)
     except CoreResourceNotFoundError:
         vault_properties = VaultProperties()
@@ -334,6 +334,7 @@ def _get_vault_security_settings(immutability_state, existing_vault=None):
 
     return security_settings
 
+
 def _get_vault_restore_settings(cross_subscription_restore_state):
     restore_settings = None
     if cross_subscription_restore_state is not None:
@@ -342,11 +343,12 @@ def _get_vault_restore_settings(cross_subscription_restore_state):
             cross_subscription_restore_state=cust_help.transform_enable_parameters(cross_subscription_restore_state))
     return restore_settings
 
+
 def _get_vault_cost_management_settings(cost_management_granularity, existing_vault=None):
     # Update scenario
     if existing_vault is not None:
         cost_management_settings = existing_vault.properties.cost_management_settings
-    else :
+    else:
         # Create scenario
         cost_management_settings = CostManagementSettings()
         cost_management_settings.granularity_level = "VaultLevel"
@@ -354,6 +356,7 @@ def _get_vault_cost_management_settings(cost_management_granularity, existing_va
     if cost_management_granularity is not None:
         cost_management_settings.granularity_level = cost_management_granularity
     return cost_management_settings
+
 
 def _get_vault_public_network_access(public_network_access):
     return cust_help.transform_enable_parameters(public_network_access)
