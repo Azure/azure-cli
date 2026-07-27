@@ -990,7 +990,7 @@ jobs:
           pool: ${{ arch.pool }}
 
         Resolute ${{ arch.name }}:
-          # 24.04
+          # 26.04
           deb_system: ubuntu
           distro: resolute
           arch: ${{ arch.value }}
@@ -1046,6 +1046,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
+        Resolute ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
