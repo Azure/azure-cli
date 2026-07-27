@@ -10,7 +10,8 @@ from knack.log import get_logger
 from azure.cli.core.aaz import AAZStrType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate,
-                             ListUsage as _VMListUsage, Deallocate as _VMDeallocate)
+                             ListUsage as _VMListUsage, Deallocate as _VMDeallocate,
+                             Delete as _VMDelete)
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -273,6 +274,22 @@ class VMDeallocate(_VMDeallocate):
         args_schema.force_deallocate._registered = False
 
         return args_schema
+
+
+class VMDelete(_VMDelete):
+    def pre_operations(self):
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        resource_group = str(self.ctx.args.resource_group)
+        vm_name = str(self.ctx.args.name)
+        try:
+            VMShow(cli_ctx=self.cli_ctx)(command_args={
+                'resource_group': resource_group,
+                'vm_name': vm_name
+            })
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError(
+                "The VM '{}' under resource group '{}' was not found.".format(vm_name, resource_group)
+            )
 
 
 def convert_show_result_to_snake_case(result):

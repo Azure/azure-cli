@@ -214,5 +214,53 @@ class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
         self.type_handler_version = version
 
 
+class TestVMDeletePreOperations(unittest.TestCase):
+    """Unit tests for VMDelete.pre_operations existence check."""
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.VMShow')
+    def test_pre_operations_raises_error_when_vm_not_found(self, mock_vm_show):
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        from azure.cli.command_modules.vm.operations.vm import VMDelete
+
+        # Mock VMShow to raise ResourceNotFoundError (simulating non-existent VM)
+        mock_vm_show_instance = mock.MagicMock()
+        mock_vm_show_instance.side_effect = ResourceNotFoundError("VM not found")
+        mock_vm_show.return_value = mock_vm_show_instance
+
+        cli_ctx = DummyCli()
+        vm_delete = VMDelete(cli_ctx=cli_ctx)
+
+        # Set up ctx with mocked args
+        vm_delete.ctx = mock.MagicMock()
+        vm_delete.ctx.args.resource_group = "nonexistent-rg"
+        vm_delete.ctx.args.name = "nonexistent-vm"
+
+        with self.assertRaises(ResourceNotFoundError) as cm:
+            vm_delete.pre_operations()
+
+        self.assertIn("nonexistent-vm", str(cm.exception))
+        self.assertIn("nonexistent-rg", str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.VMShow')
+    def test_pre_operations_succeeds_when_vm_exists(self, mock_vm_show):
+        from azure.cli.command_modules.vm.operations.vm import VMDelete
+
+        # Mock VMShow to return successfully (simulating existing VM)
+        mock_vm_show_instance = mock.MagicMock()
+        mock_vm_show_instance.return_value = {'id': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1'}
+        mock_vm_show.return_value = mock_vm_show_instance
+
+        cli_ctx = DummyCli()
+        vm_delete = VMDelete(cli_ctx=cli_ctx)
+
+        # Set up ctx with mocked args
+        vm_delete.ctx = mock.MagicMock()
+        vm_delete.ctx.args.resource_group = "existing-rg"
+        vm_delete.ctx.args.name = "existing-vm"
+
+        # Should not raise an exception
+        vm_delete.pre_operations()
+
+
 if __name__ == '__main__':
     unittest.main()
