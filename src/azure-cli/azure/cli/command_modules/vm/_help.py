@@ -3126,5 +3126,5 @@ type: command
 short-summary: Get a virtual machine scale set lifecycle hook event.
 examples:
   - name: Get a virtual machine scale set lifecycle hook event.
-    text: az vmss lifecycle-hook-event show --resource-group RG01 --vmss-name VMSS01 --lifecycle-hook-event-name 2e2e3046-f85f-4966-8fd2-5fd7bf6ea717
+    text: az vmss lifecycle-hook-event show --resource-group RG01 --vmss-name VMSS01 --name 2e2e3046-f85f-4966-8fd2-5fd7bf6ea717
 """
