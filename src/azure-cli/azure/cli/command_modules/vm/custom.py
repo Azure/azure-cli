@@ -5198,7 +5198,7 @@ def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, r
 
 def vmss_lifecycle_hook_event_list(cmd, resource_group_name, vmss_name):
     from azure.cli.core.commands.transform import unregister_global_transforms
-    from .aaz.latest.vmss.lifecycle_hook_event._list import List as _lifecycleHookEventList
+    from .aaz.latest.vmss.lifecycle_hook_event import List as _lifecycleHookEventList
     unregister_global_transforms(cmd.cli_ctx)
     return _lifecycleHookEventList(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
@@ -5208,7 +5208,7 @@ def vmss_lifecycle_hook_event_list(cmd, resource_group_name, vmss_name):
 
 def vmss_lifecycle_hook_event_show(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name):
     from azure.cli.core.commands.transform import unregister_global_transforms
-    from .aaz.latest.vmss.lifecycle_hook_event._show import Show as _lifecycleHookEventShow
+    from .aaz.latest.vmss.lifecycle_hook_event import Show as _lifecycleHookEventShow
     unregister_global_transforms(cmd.cli_ctx)
     return _lifecycleHookEventShow(cli_ctx=cmd.cli_ctx)(command_args={
         'lifecycle_hook_event_name': lifecycle_hook_event_name,
