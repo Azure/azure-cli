@@ -277,18 +277,13 @@ class VMDeallocate(_VMDeallocate):
 
 
 class VMDelete(_VMDelete):
-    def pre_operations(self):
-        from azure.cli.core.azclierror import ResourceNotFoundError
-        resource_group = str(self.ctx.args.resource_group)
-        vm_name = str(self.ctx.args.name)
-        try:
-            VMShow(cli_ctx=self.cli_ctx)(command_args={
-                'resource_group': resource_group,
-                'vm_name': vm_name
-            })
-        except ResourceNotFoundError:
+    class VirtualMachinesDelete(_VMDelete.VirtualMachinesDelete):
+        def on_204(self, session):
+            from azure.cli.core.azclierror import ResourceNotFoundError
             raise ResourceNotFoundError(
-                "The VM '{}' under resource group '{}' was not found.".format(vm_name, resource_group)
+                "The VM '{}' under resource group '{}' was not found.".format(
+                    str(self.ctx.args.name), str(self.ctx.args.resource_group)
+                )
             )
 
 
