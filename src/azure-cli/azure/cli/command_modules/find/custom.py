@@ -541,20 +541,23 @@ def _print_entry(title, body_lines, url):
 
 def format_results(query, docs_results, code_results):
     """Print the runnable examples first, then the documentation links."""
-    if not docs_results and not code_results:
+    # Collect first: results can still end up empty here, for instance when no
+    # code sample contains an actual `az` command.
+    examples = _collect_unique(code_results, MAX_CODE_RESULTS, _build_example_entry)
+    docs = _collect_unique(docs_results, MAX_DOC_RESULTS, _build_doc_entry)
+
+    if not examples and not docs:
         print('\nSorry I am not able to help with [' + query + '].'
               '\nTry typing the beginning of a command, e.g., "az vm create".\n', file=sys.stderr)
         return
 
     print("\nHere is what I found for [" + query + "]: \n", file=sys.stderr)
 
-    examples = _collect_unique(code_results, MAX_CODE_RESULTS, _build_example_entry)
     if examples:
         print("Examples")
         for title, command_lines, url in examples:
             _print_entry(title, command_lines, url)
 
-    docs = _collect_unique(docs_results, MAX_DOC_RESULTS, _build_doc_entry)
     if docs:
         print("Documentation")
         for title, summary, url in docs:

@@ -466,6 +466,18 @@ class TestFormatResults(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
     @mock.patch('sys.stdout', new_callable=StringIO)
+    @mock.patch('sys.stderr', new_callable=StringIO)
+    def test_format_unusable_results(self, mock_stderr, mock_stdout, _):
+        # Regression: code samples without an `az` command produce no entries,
+        # so the apology must be shown instead of an empty result header.
+        code = [dict(SAMPLE_CODE_RESULTS[0], codeSnippet="Remove-AzVM -Name myVM")]
+        format_results("what is rm", [], code)
+        self.assertIn("Sorry I am not able to help with", mock_stderr.getvalue())
+        self.assertNotIn("Here is what I found", mock_stderr.getvalue())
+        self.assertEqual(mock_stdout.getvalue(), "")
+
+    @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
+    @mock.patch('sys.stdout', new_callable=StringIO)
     def test_format_docs_only(self, mock_stdout, _):
         format_results("az vm", SAMPLE_DOC_RESULTS, [])
         output = mock_stdout.getvalue()
