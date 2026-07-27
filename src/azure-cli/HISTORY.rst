@@ -3,6 +3,70 @@
 Release History
 ===============
 
+2.89.0
+++++++
+
+**ACR**
+
+* `az acr import`: Fix regional endpoint source resolution for multi-label sovereign suffixes (#33754)
+
+**AKS**
+
+* `az aks upgrade`: Skip Machines mode agent pools during node image and Kubernetes version upgrade (#33693)
+* `az aks identity-binding`: Add command group to manage identity bindings (trust domain) for a managed cluster (#33558)
+* `az aks update`: Fix `--outbound-type` validation for `userDefinedRouting` and `userAssignedNATGateway` so BYO VNet clusters no longer require `--vnet-subnet-id` and managed VNet clusters get a clear error message (#33694)
+* `az aks nodepool rollback`: Fix false auto-upgrade warning when upgrade channels are disabled (#33748)
+* Vendor new SDK and bump API version to 2026-05-01 (#33785)
+
+**App Config**
+
+* Update CLI to use Audience and update to 1.8.0 (#33393)
+
+**App Configuration**
+
+* `az appconfig`: Increase retry resilience for data-plane operations to better handle transient server throttling (HTTP 429) and network errors (#33219)
+
+**App Service**
+
+* `az appservice plan`: Remove preview flag for managed instance app service plans (#33690)
+* `az appservice plan`: Add Premium V3 SKU support (`P0V3`, `P1-3V3`, `P1-5MV3`) for managed instances (#33690)
+* `az webapp troubleshoot status`: Provide latest application startup attempt data (#33673)
+
+**Backup**
+
+* Add support for cost management settings (#33757)
+
+**Cognitive Services**
+
+* `az cognitiveservices account compute`: Support compute cluster resources management (#33759)
+
+**Cosmos DB**
+
+* `az cosmosdb`: Add support for API version 2026-03-15 (#33303)
+
+**MySQL**
+
+* `az mysql flexible-server mirroring`: Add `enable` and `disable` commands to support Fabric Mirroring (#33774)
+
+**MySQL Flexible Server**
+
+* `az mysql flexible-server update`: Add `--maintenance-batch` to set the batch (Default, Batch1, Batch2) of the custom-managed maintenance window; existing batch is preserved when omitted (#33768)
+
+**NetAppFiles**
+
+* `az netappfiles volume create`: Add `--breakthrough-mode` to specify whether the volume operates in Breakthrough Mode (#33763)
+
+**Network**
+
+* `az network nat gateway`: Add `--nat64` to enable/disable NAT64 on StandardV2 NAT gateway (#33679)
+* `az network private-endpoint-connection`: Update provider `Microsoft.HardwareSecurityModules/cloudHsmClusters` (#33739)
+
+**PostgreSQL**
+
+* `az postgres flexible-server backup create`: Fix duplicate auto-generated backup names after deletions (#33684)
+* `az postgres flexible-server create`: Add example to create elastic cluster with custom database name (#33712)
+* `az postgres flexible-server upgrade`: Introduced `--validate-only` param for PVC (#33683)
+
 2.88.0
 ++++++
 
