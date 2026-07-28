@@ -49,6 +49,10 @@ Release History
 
 * `az vmss application set`: Fix command silently failing to set gallery applications and remove leftover debug output (#33715)
 
+**CosmosDB**
+
+* `az cosmosdb`: Revert API version from `2026-03-15` back to `2025-10-15` (#33802)
+
 **MySQL**
 
 * `az mysql flexible-server mirroring`: Add `enable` and `disable` commands to support Fabric Mirroring (#33774)
