@@ -15388,7 +15388,7 @@ spec:
 
         # delete the second autoscale profile
         delete_autoscale_cmd = 'aks nodepool auto-scale delete -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
-                               '--current-node-vm-size {node_vm_size1}'
+                               '--current-node-vm-size {node_vm_size1} --yes'
         np = self.cmd(delete_autoscale_cmd).get_output_in_json()
         assert len(np["virtualMachinesProfile"]["scale"]["autoscale"]) == 1
 

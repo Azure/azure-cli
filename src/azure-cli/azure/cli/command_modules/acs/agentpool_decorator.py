@@ -1106,15 +1106,17 @@ class AKSAgentPoolContext(BaseAKSContext):
             decorator_mode=DecoratorMode.UPDATE,
         )
 
-        autoscale_profile = None
-        manual_scale_profile = None
-        if (
-            self.agentpool and
+        autoscale_profile = (
             self.agentpool.virtual_machines_profile and
-            self.agentpool.virtual_machines_profile.scale
-        ):
-            autoscale_profile = self.agentpool.virtual_machines_profile.scale.autoscale
-            manual_scale_profile = self.agentpool.virtual_machines_profile.scale.manual
+            self.agentpool.virtual_machines_profile.scale and
+            self.agentpool.virtual_machines_profile.scale.autoscale
+        )
+
+        manual_scale_profile = (
+            self.agentpool.virtual_machines_profile and
+            self.agentpool.virtual_machines_profile.scale and
+            self.agentpool.virtual_machines_profile.scale.manual
+        )
 
         # if enabling cluster autoscaler
         if enable_cluster_autoscaler:
