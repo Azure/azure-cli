@@ -8747,6 +8747,98 @@ class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_migration')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_migration(self, resource_group):
+        from time import sleep
+
+        # Variables to use in the test
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',  # Virtual WAN name
+            'vhub': 'clivhub',  # Virtual Hub name
+            'nva_name': 'clivirtualappliancemigration',  # NVA name
+            'rg': resource_group,
+            'subscription': subscriptionId,
+            'migration_type': 'MigrateToNewILBArchitecture',
+        })
+
+        # Add the required extension
+        self.cmd('extension add -n virtual-wan')
+
+        # Create Virtual WAN
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
+            self.check('name', '{vwan}'),
+            self.check('type', 'Microsoft.Network/virtualWans')
+        ])
+
+        # Create Virtual Hub within the Virtual WAN
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard', checks=[
+            self.check('name', '{vhub}'),
+        ])
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        # Create the NVA
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc"',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Phase 1: prepare the migration to the new ILB architecture
+        self.cmd('network virtual-appliance migration prepare -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Prepare migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 2: execute the migration
+        self.cmd('network virtual-appliance migration execute -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Execute migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 3: commit the migration to finalize the new ILB architecture
+        self.cmd('network virtual-appliance migration commit -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        # Ensure that the provisioning state is 'Succeeded' after committing the migration
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Commit migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
 class NetworkVirtualApplianceVnetScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
