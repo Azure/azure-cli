@@ -23,8 +23,6 @@ Release History
 
 * Update CLI to use Audience and update to 1.8.0 (#33393)
 
-**App Configuration**
-
 * `az appconfig`: Increase retry resilience for data-plane operations to better handle transient server throttling (HTTP 429) and network errors (#33219)
 
 **App Service**
