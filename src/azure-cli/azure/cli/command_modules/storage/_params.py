@@ -58,8 +58,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          cf_container_client, 'list_blobs', required='container_name'))
 
     container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='The container name.',
-                                          completer=get_storage_name_completion_list_track2(cf_blob_service,
-                                                                                           'list_containers'))
+                                          completer=get_storage_name_completion_list_track2(
+                                              cf_blob_service, 'list_containers'))
     directory_type = CLIArgumentType(options_list=['--directory-name', '-d'], help='The directory name.',
                                      completer=get_storage_name_completion_list_track2(
                                          cf_share_client, 'list_directories_and_files', required='share_name'))
