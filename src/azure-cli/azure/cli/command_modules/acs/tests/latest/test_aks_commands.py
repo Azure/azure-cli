@@ -15321,6 +15321,237 @@ spec:
             ],
         )
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    def test_vms_cluster_create_and_add_autoscale_mode(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name("cliakstest", 16)
+        autoscaled_pool_name = self.create_random_name("ap", 6)
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "autoscaled_pool_name": autoscaled_pool_name,
+            }
+        )
+
+        # create cluster with VirtualMachines system node pool in autoscale mode
+        self.cmd(
+            "aks create "
+            "--resource-group {resource_group} "
+            "--name {name} "
+            "--location {location} "
+            "--ssh-key-value {ssh_key_value} "
+            "--vm-set-type VirtualMachines "
+            "--node-vm-size Standard_D4s_v3 "
+            "--enable-cluster-autoscaler "
+            "--min-count 2 "
+            "--max-count 5",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("agentPoolProfiles[0].type", "VirtualMachines"),
+                self.check("agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].size", "Standard_D4s_v3", False),
+                self.check("agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].minCount", "2"),
+                self.check("agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].maxCount", "5"),
+            ],
+        )
+
+        # add autoscaled VirtualMachines user nodepool
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {autoscaled_pool_name} "
+            "--vm-set-type VirtualMachines "
+            "--node-vm-size Standard_D4s_v3 "
+            "--enable-cluster-autoscaler "
+            "--min-count 2 "
+            "--max-count 5",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("typePropertiesType", "VirtualMachines"),
+                self.check("virtualMachinesProfile.scale.autoscale[0].size", "Standard_D4s_v3", False),
+                self.check("virtualMachinesProfile.scale.autoscale[0].minCount", "2"),
+                self.check("virtualMachinesProfile.scale.autoscale[0].maxCount", "5"),
+            ],
+        )
+
+        self.cmd(
+            "aks delete --resource-group {resource_group} --name {name} --yes --no-wait",
+            checks=[
+                self.is_empty(),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    def test_vms_agentpool_autoscale_commands(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name("cliakstest", 16)
+        vmss_pool_name = self.create_random_name("vmss", 6)
+        vms_pool_name = self.create_random_name("vms", 6)
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "vmss_pool_name": vmss_pool_name,
+                "vms_pool_name": vms_pool_name,
+            }
+        )
+
+        self.cmd(
+            "aks create "
+            "--resource-group {resource_group} "
+            "--name {name} "
+            "--location {location} "
+            "--ssh-key-value {ssh_key_value} "
+            "--nodepool-name {vmss_pool_name} "
+            "--node-vm-size Standard_D2s_v3 "
+            "--node-count 1",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("agentPoolProfiles[0].name", "{vmss_pool_name}"),
+            ],
+        )
+
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--vm-set-type VirtualMachines "
+            "--vm-sizes Standard_D2s_v3 "
+            "--node-count 2",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("typePropertiesType", "VirtualMachines"),
+                self.check("virtualMachinesProfile.scale.manual[0].size", "Standard_D2s_v3", False),
+                self.check("virtualMachinesProfile.scale.manual[0].count", "2"),
+            ],
+        )
+
+        self.cmd(
+            "aks nodepool manual-scale add "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--vm-sizes Standard_DS2_v2 "
+            "--node-count 1",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("virtualMachinesProfile.scale.manual[1].size", "Standard_DS2_v2", False),
+                self.check("virtualMachinesProfile.scale.manual[1].count", "1"),
+            ],
+        )
+
+        # auto-scale command is valid only for VirtualMachines pools
+        self.cmd(
+            "aks nodepool auto-scale add "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vmss_pool_name} "
+            "--node-vm-size Standard_D4s_v3 "
+            "--min-count 1 "
+            "--max-count 3",
+            expect_failure=True,
+        )
+
+        self.cmd(
+            "aks nodepool update "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--enable-cluster-autoscaler "
+            "--min-count 1 "
+            "--max-count 4",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("virtualMachinesProfile.scale.autoscale[0].size", "Standard_D2s_v3", False),
+                self.check("virtualMachinesProfile.scale.autoscale[0].minCount", "1"),
+                self.check("virtualMachinesProfile.scale.autoscale[0].maxCount", "4"),
+                self.check("virtualMachinesProfile.scale.autoscale[1].size", "Standard_DS2_v2", False),
+                self.check("virtualMachinesProfile.scale.autoscale[1].minCount", "1"),
+                self.check("virtualMachinesProfile.scale.autoscale[1].maxCount", "4"),
+            ],
+        )
+
+        # update-cluster-autoscaler is not supported for VirtualMachines pools
+        self.cmd(
+            "aks nodepool update "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--update-cluster-autoscaler "
+            "--min-count 2 "
+            "--max-count 5",
+            expect_failure=True,
+        )
+
+        self.cmd(
+            "aks nodepool auto-scale add "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--node-vm-size Standard_D4s_v3 "
+            "--min-count 2 "
+            "--max-count 6",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("virtualMachinesProfile.scale.autoscale[2].size", "Standard_D4s_v3", False),
+                self.check("virtualMachinesProfile.scale.autoscale[2].minCount", "2"),
+                self.check("virtualMachinesProfile.scale.autoscale[2].maxCount", "6"),
+            ],
+        )
+
+        self.cmd(
+            "aks nodepool auto-scale update "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--current-node-vm-size Standard_D4s_v3 "
+            "--node-vm-size Standard_D8s_v3 "
+            "--min-count 3 "
+            "--max-count 7",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("virtualMachinesProfile.scale.autoscale[2].size", "Standard_D8s_v3", False),
+                self.check("virtualMachinesProfile.scale.autoscale[2].minCount", "3"),
+                self.check("virtualMachinesProfile.scale.autoscale[2].maxCount", "7"),
+            ],
+        )
+
+        np = self.cmd(
+            "aks nodepool auto-scale delete "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--current-node-vm-size Standard_D8s_v3 "
+            "--yes"
+        ).get_output_in_json()
+        assert len(np["virtualMachinesProfile"]["scale"]["autoscale"]) == 2
+
+        np = self.cmd(
+            "aks nodepool update "
+            "--resource-group {resource_group} "
+            "--cluster-name {name} "
+            "--name {vms_pool_name} "
+            "--disable-cluster-autoscaler",
+        ).get_output_in_json()
+        assert len(np["virtualMachinesProfile"]["scale"]["manual"]) == 2
+        self.assertEqual(np["virtualMachinesProfile"]["scale"]["manual"][0]["count"], 1)
+        self.assertEqual(np["virtualMachinesProfile"]["scale"]["manual"][1]["count"], 1)
+
+        self.cmd(
+            "aks delete --resource-group {resource_group} --name {name} --yes --no-wait",
+            checks=[
+                self.is_empty(),
+            ],
+        )
+
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
