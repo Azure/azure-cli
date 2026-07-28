@@ -2374,24 +2374,50 @@ class AKSAgentPoolAddDecorator:
         # validate vm_sizes first, then skip if not Virtual Machines
         sizes = self.context.get_vm_sizes()
         if len(sizes) != 1:
-            raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {sizes} is invalid.")
+            raise InvalidArgumentValueError(f"We only accept single sku size for scale profile. {sizes} is invalid.")
 
         if self.context.get_vm_set_type() != CONST_VIRTUAL_MACHINES:
             return agentpool
 
-        count, _, _, _ = self.context.get_node_count_and_enable_cluster_autoscaler_min_max_count()
-        agentpool.virtual_machines_profile = self.models.VirtualMachinesProfile(
-            scale=self.models.ScaleProfile(
-                manual=[
-                    self.models.ManualScaleProfile(
-                        size=sizes[0],
-                        count=count,
-                    )
-                ]
+        (
+            count,
+            enable_auto_scaling,
+            min_count,
+            max_count,
+        ) = self.context.get_node_count_and_enable_cluster_autoscaler_min_max_count()
+
+        if enable_auto_scaling:
+            agentpool.virtual_machines_profile = self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    autoscale=[
+                        self.models.AutoScaleProfile(
+                            size=sizes[0],
+                            min_count=min_count,
+                            max_count=max_count,
+                        )
+                    ]
+                )
             )
-        )
+        else:
+            agentpool.virtual_machines_profile = self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    manual=[
+                        self.models.ManualScaleProfile(
+                            size=sizes[0],
+                            count=count,
+                        )
+                    ]
+                )
+            )
+
+        # EnableAutoScaling, MinCount and MaxCount are VMSS-specific properties and must not
+        # be set for VirtualMachines agent pools; the autoscale intent is expressed through
+        # virtualMachinesProfile.scale.autoscale instead.
         agentpool.vm_size = None
         agentpool.count = None
+        agentpool.enable_auto_scaling = False
+        agentpool.min_count = None
+        agentpool.max_count = None
 
         return agentpool
 

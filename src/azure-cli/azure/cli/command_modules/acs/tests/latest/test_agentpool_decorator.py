@@ -2908,6 +2908,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             type=CONST_VIRTUAL_MACHINES,
             count=None,
             vm_size=None,
+            enable_auto_scaling=False,
+            min_count=None,
+            max_count=None,
             virtual_machines_profile=self.models.VirtualMachinesProfile(
                 scale=self.models.ScaleProfile(
                     manual=[
@@ -2920,6 +2923,49 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             )
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # VirtualMachines pool with cluster autoscaler enabled should be expressed through
+        # virtualMachinesProfile.scale.autoscale, not the VMSS-only enable_auto_scaling/min/max fields
+        dec_autoscale = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vm_set_type": "VirtualMachines",
+                "vm_sizes": "Standard_D4s_v3",
+                "node_count": 3,
+                "enable_cluster_autoscaler": True,
+                "min_count": 2,
+                "max_count": 5,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_autoscale = self.create_initialized_agentpool_instance(
+            type=CONST_VIRTUAL_MACHINES, restore_defaults=False
+        )
+        dec_autoscale.context.attach_agentpool(agentpool_autoscale)
+        dec_agentpool_autoscale = dec_autoscale.set_up_virtual_machines_profile(agentpool_autoscale)
+        dec_agentpool_autoscale = self._restore_defaults_in_agentpool(dec_agentpool_autoscale)
+        ground_truth_agentpool_autoscale = self.create_initialized_agentpool_instance(
+            type=CONST_VIRTUAL_MACHINES,
+            count=None,
+            vm_size=None,
+            enable_auto_scaling=False,
+            min_count=None,
+            max_count=None,
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    autoscale=[
+                        self.models.AutoScaleProfile(
+                            size="Standard_D4s_v3",
+                            min_count=2,
+                            max_count=5,
+                        )
+                    ]
+                )
+            )
+        )
+        self.assertEqual(dec_agentpool_autoscale, ground_truth_agentpool_autoscale)
 
         # fail on passing more than 1 vm_sizes
         dec_2 = AKSAgentPoolAddDecorator(
