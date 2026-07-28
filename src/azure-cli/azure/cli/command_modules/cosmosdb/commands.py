@@ -522,20 +522,20 @@ def setup_fleet_commands(self):
         operations_tmpl='azure.mgmt.cosmosdb.operations#FleetspaceAccountOperations.{}',
         client_factory=cf_fleetspace_account)
 
-    with self.command_group('cosmosdb fleet', cosmosdb_fleet_sdk, client_factory=cf_fleet) as g:
+    with self.command_group('cosmosdb fleet', cosmosdb_fleet_sdk, client_factory=cf_fleet, is_preview=True) as g:
         g.custom_command('create', 'cli_cosmosdb_fleet_create')
         g.custom_command('list', 'cli_list_cosmosdb_fleets')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
 
-    with self.command_group('cosmosdb fleetspace', cosmosdb_fleetspace_sdk, client_factory=cf_fleetspace) as g:
+    with self.command_group('cosmosdb fleetspace', cosmosdb_fleetspace_sdk, client_factory=cf_fleetspace, is_preview=True) as g:
         g.custom_command('create', 'cli_cosmosdb_fleetspace_create')
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.custom_command('update', 'cli_cosmosdb_fleetspace_update')
         g.command('delete', 'begin_delete', confirmation=True)
 
-    with self.command_group('cosmosdb fleetspace account', cosmosdb_fleetspace_account_sdk, client_factory=cf_fleetspace_account) as g:
+    with self.command_group('cosmosdb fleetspace account', cosmosdb_fleetspace_account_sdk, client_factory=cf_fleetspace_account, is_preview=True) as g:
         g.custom_command('create', 'cli_cosmosdb_fleetspace_account_create')
         g.command('list', 'list')
         g.show_command('show', 'get')
