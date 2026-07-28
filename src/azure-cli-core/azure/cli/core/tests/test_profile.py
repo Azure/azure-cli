@@ -744,6 +744,66 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_specific_tenant_subscription_list_403_raises_friendly_error(
+            self, can_launch_browser_mock, login_with_auth_code_mock, get_user_credential_mock,
+            create_subscription_client_mock):
+        """When ``az login --tenant`` hits a 403 listing subscriptions (e.g. blocked by a firewall),
+        a friendly ``AzureResponseError`` is raised instead of a raw ``HttpResponseError``."""
+        from azure.core.exceptions import HttpResponseError
+        from azure.cli.core.azclierror import AzureResponseError
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        http_response_mock = mock.MagicMock()
+        http_response_mock.status_code = 403
+        mock_subscription_client.subscriptions.list.side_effect = HttpResponseError(response=http_response_mock)
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        with self.assertRaises(AzureResponseError) as cm:
+            profile.login(True, None, None, False, self.tenant_id,
+                          use_device_code=False, allow_no_subscriptions=False)
+        self.assertIn("403", str(cm.exception))
+        self.assertIn("subscriptions", str(cm.exception))
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_specific_tenant_subscription_list_decode_error_raises_friendly_error(
+            self, can_launch_browser_mock, login_with_auth_code_mock, get_user_credential_mock,
+            create_subscription_client_mock):
+        """When ``az login --tenant`` gets a non-JSON body listing subscriptions (e.g. HTML block
+        page), a friendly ``AzureResponseError`` is raised instead of ``DecodeError``."""
+        from azure.core.exceptions import DecodeError
+        from azure.cli.core.azclierror import AzureResponseError
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.subscriptions.list.side_effect = DecodeError(
+            message="JSON is invalid: Expecting value: line 1 column 1 (char 0)",
+            response=mock.MagicMock(),
+            error=None
+        )
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        with self.assertRaises(AzureResponseError) as cm:
+            profile.login(True, None, None, False, self.tenant_id,
+                          use_device_code=False, allow_no_subscriptions=False)
+        self.assertIn("could not be parsed", str(cm.exception))
+        self.assertIn("subscriptions", str(cm.exception))
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
     def test_login_no_tenant(self, can_launch_browser_mock,
                              login_with_auth_code_mock, get_user_credential_mock,
                              create_subscription_client_mock):

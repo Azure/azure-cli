@@ -8,8 +8,10 @@ import os.path
 from copy import deepcopy
 from enum import Enum
 
+from azure.core.exceptions import DecodeError, HttpResponseError
+
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.azclierror import AuthenticationError
+from azure.cli.core.azclierror import AuthenticationError, AzureResponseError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
 from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
@@ -808,6 +810,25 @@ class ManagedIdentityAuth:
         raise ValueError("Unrecognized managed identity ID type '{}'".format(id_type))
 
 
+def _raise_friendly_error(ex, resource_name):
+    # Translate blocked-transport errors (HTTP 403 or non-JSON body) into an actionable
+    # AzureResponseError. Any other exception is re-raised unchanged. resource_name is
+    # interpolated into the error message (e.g. "tenants", "subscriptions").
+    if isinstance(ex, DecodeError):
+        raise AzureResponseError(
+            "Failed to retrieve {name}. The response from the server could not be parsed. "
+            "This may be caused by a network firewall or proxy returning an unexpected response. "
+            "Please check your network settings and try again.".format(name=resource_name)
+        ) from ex
+    if isinstance(ex, HttpResponseError) and ex.status_code == 403:
+        raise AzureResponseError(
+            "Failed to retrieve {name}. The request was blocked (HTTP 403 Forbidden). "
+            "This may be caused by a network firewall, proxy, or Conditional Access policy. "
+            "Please check your network settings and try again.".format(name=resource_name)
+        ) from ex
+    raise ex
+
+
 class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
@@ -826,30 +847,11 @@ class SubscriptionFinder:
 
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
-        from azure.core.exceptions import DecodeError, HttpResponseError
-        from azure.cli.core.azclierror import AzureResponseError
         try:
-            # Eagerly materialise tenants here so any HTTP errors (e.g. firewall blocking the
-            # request with a non-JSON response) are caught below before iteration begins.
-            # Tenant counts are typically small so materialising up-front is not a concern.
+            # list(...) forces the pager's HTTP call to fire inside this try (it's lazy otherwise).
             tenants = list(client.tenants.list())
         except (DecodeError, HttpResponseError) as ex:
-            if isinstance(ex, DecodeError):
-                raise AzureResponseError(
-                    "Failed to retrieve tenants. The response from the server could not be parsed. "
-                    "This may be caused by a network firewall or proxy returning an unexpected response. "
-                    "Please check your network settings and try again, or use "
-                    "'az login --tenant TENANT_ID' to log in to a specific tenant."
-                ) from ex
-            # HttpResponseError (but not DecodeError)
-            if ex.status_code == 403:
-                raise AzureResponseError(
-                    "Failed to retrieve tenants. The request was blocked (HTTP 403 Forbidden). "
-                    "This may be caused by a network firewall, proxy, or Conditional Access policy. "
-                    "Please check your network settings and try again, or use "
-                    "'az login --tenant TENANT_ID' to log in to a specific tenant."
-                ) from ex
-            raise
+            _raise_friendly_error(ex, "tenants")
 
         for t in tenants:
             tenant_id = t.tenant_id
@@ -921,7 +923,10 @@ class SubscriptionFinder:
         """
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
-        subscriptions = client.subscriptions.list()
+        try:
+            subscriptions = list(client.subscriptions.list())
+        except (DecodeError, HttpResponseError) as ex:
+            _raise_friendly_error(ex, "subscriptions")
         all_subscriptions = []
         for s in subscriptions:
             _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
