@@ -1015,7 +1015,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     def get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms(
         self,
-    ) -> Tuple[bool, bool, Union[int, None], Union[int, None], str]:
+    ) -> Tuple[bool, bool, Union[int, None], Union[int, None], Union[str, None]]:
         """Obtain the value of enable_cluster_autoscaler, disable_cluster_autoscaler,
         min_count and max_count, and vm size.
 
@@ -1032,7 +1032,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         :return: a tuple containing five elements: enable_cluster_autoscaler of bool type,
         disable_cluster_autoscaler of bool type, min_count of int type or None, max_count of int type
-        or None, and vm_size of str type
+        or None, and vm_size of str type or None
         """
         update_cluster_autoscaler = self.raw_param.get("update_cluster_autoscaler", False)
         enable_cluster_autoscaler = self.raw_param.get("enable_cluster_autoscaler", False)
@@ -1053,7 +1053,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 'Please use "az aks nodepool auto-scale update" to update individual autoscale profiles.'
             )
 
-        self._AKSAgentPoolContext__validate_counts_in_autoscaler(
+        self.__validate_counts_in_autoscaler(
             None,
             enable_cluster_autoscaler,
             min_count,

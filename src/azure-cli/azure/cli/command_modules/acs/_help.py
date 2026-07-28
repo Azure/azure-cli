@@ -2422,7 +2422,7 @@ examples:
 
 helps["aks nodepool manual-scale"] = """
     type: group
-    short-summary: Commands to manage nodepool virtualMachineProfile.scale.manual.
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.manual.
 """
 
 helps["aks nodepool manual-scale add"] = """
@@ -2463,7 +2463,7 @@ helps["aks nodepool manual-scale delete"] = """
 
 helps["aks nodepool auto-scale"] = """
     type: group
-    short-summary: Commands to manage nodepool virtualMachineProfile.scale.autoscale.
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.autoscale.
 """
 
 helps["aks nodepool auto-scale add"] = """
