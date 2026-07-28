@@ -9891,6 +9891,95 @@ class NetworkPrivateEndpointScenarioTest(ScenarioTest):
             self.check('length(@)', 3)
         ])
 
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_billing_sku', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='sapebsku', kind='StorageV2')
+    def test_network_private_endpoint_billing_sku(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'location': 'eastus2euap',
+
+            'vnet': 'vnetbsku',
+            'subnet_pe': 'subnetpe',
+            'subnet_pe_prefix': '10.0.1.0/24',
+            'vnet_prefix': '10.0.0.0/16',
+
+            'pe_conn': 'cn',
+            'pe_fixed': 'pefixed',
+            'pe_paygo': 'pepaygo',
+            'nic_fixed': 'nicfixed',
+            'nic_paygo': 'nicpaygo',
+        })
+
+        # VNet + Private Endpoint subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} -l {location} '
+            '--address-prefixes {vnet_prefix} '
+            '--subnet-name {subnet_pe} --subnet-prefixes {subnet_pe_prefix}'
+        )
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--disable-private-endpoint-network-policies'
+        )
+
+        # Storage PLR
+        pr = self.cmd(
+            'storage account private-link-resource list --account-name {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd(
+            'storage account show -n {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+
+        # Create with billing sku Fixed
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_fixed} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_fixed} '
+            '--billing-sku Fixed',
+            checks=[
+                self.check('name', '{pe_fixed}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'Fixed'),
+            ]
+        )
+
+        # Create with billing sku PayAsYouGo
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_paygo} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_paygo} '
+            '--billing-sku PayAsYouGo',
+            checks=[
+                self.check('name', '{pe_paygo}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'PayAsYouGo'),
+            ]
+        )
+
+        # Update billing sku PayAsYouGo -> Fixed
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_paygo} '
+            '--billing-sku Fixed',
+            checks=[
+                self.check('name', '{pe_paygo}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'Fixed'),
+            ]
+        )
+
+        self.cmd('network private-endpoint show -g {rg} -n {pe_fixed}', checks=[
+            self.check('billingSku', 'Fixed'),
+        ])
+
 
 class NetworkApplicationGatewayHttpSettingsScenario(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_ag', location='eastus')
