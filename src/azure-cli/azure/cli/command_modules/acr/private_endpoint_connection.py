@@ -62,7 +62,7 @@ def delete(cmd, client, registry_name, private_endpoint_connection_name, resourc
                                  private_endpoint_connection_name=private_endpoint_connection_name)
 
     # Surface server-side warning (e.g. PE connection not found, returned 204)
-    initial_response = poller.polling_method()._initial_response
+    initial_response = poller.polling_method()._initial_response  # pylint: disable=protected-access
     warning = initial_response.http_response.headers.get("x-ms-warning")
     if warning:
         logger.warning(warning)
