@@ -1044,14 +1044,10 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         agentpool = self.create_initialized_agentpool_instance(
             type_properties_type=CONST_VIRTUAL_MACHINES,
-            virtual_machines_profile=self.models.VirtualMachinesProfile(
-                scale=self.models.ScaleProfile(
-                    manual=[
-                        self.models.ManualScaleProfile(size="Standard_D2s_v3", count=2),
-                        self.models.ManualScaleProfile(size="Standard_D4s_v3", count=3),
-                    ]
-                )
-            ),
+            virtual_machine_nodes_status=[
+                self.models.VirtualMachineNodes(size="Standard_D2s_v3", count=2),
+                self.models.VirtualMachineNodes(size="Standard_D4s_v3", count=3),
+            ],
         )
         ctx.attach_agentpool(agentpool)
         self.assertEqual(ctx.get_node_count_from_vms_agentpool(agentpool), 5)
@@ -3413,7 +3409,6 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         agentpool_1 = self.create_initialized_agentpool_instance(
-            type_properties_type=CONST_VIRTUAL_MACHINES,
             virtual_machines_profile=self.models.VirtualMachinesProfile(
                 scale=self.models.ScaleProfile(
                     manual=[
@@ -3423,8 +3418,14 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
                 )
             ),
         )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool_1.type = CONST_VIRTUAL_MACHINES
+        else:
+            if agentpool_1.properties is None:
+                agentpool_1.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
+            agentpool_1.properties.type_properties_type = CONST_VIRTUAL_MACHINES
         dec_1.context.attach_agentpool(agentpool_1)
-        dec_agentpool_1 = dec_1.update_auto_scaler_properties(agentpool_1)
+        dec_agentpool_1 = dec_1.update_auto_scaler_properties_vms(agentpool_1)
         self.assertEqual(len(dec_agentpool_1.virtual_machines_profile.scale.autoscale), 2)
         self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[0].size, "Standard_D2s_v3")
         self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[0].min_count, 1)
@@ -3448,7 +3449,6 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         agentpool_2 = self.create_initialized_agentpool_instance(
-            type_properties_type=CONST_VIRTUAL_MACHINES,
             virtual_machines_profile=self.models.VirtualMachinesProfile(
                 scale=self.models.ScaleProfile(
                     autoscale=[
@@ -3458,8 +3458,14 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
                 )
             ),
         )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool_2.type = CONST_VIRTUAL_MACHINES
+        else:
+            if agentpool_2.properties is None:
+                agentpool_2.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
+            agentpool_2.properties.type_properties_type = CONST_VIRTUAL_MACHINES
         dec_2.context.attach_agentpool(agentpool_2)
-        dec_agentpool_2 = dec_2.update_auto_scaler_properties(agentpool_2)
+        dec_agentpool_2 = dec_2.update_auto_scaler_properties_vms(agentpool_2)
         self.assertEqual(len(dec_agentpool_2.virtual_machines_profile.scale.manual), 2)
         self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[0].size, "Standard_D2s_v3")
         self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[0].count, 2)
