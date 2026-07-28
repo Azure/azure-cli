@@ -8,8 +8,6 @@ Release History
 
 **ACR**
 
-* `az acr create`: Add `--writable-cache-repos` parameter to enable or disable cache operations that write to repositories in the registry
-* `az acr update`: Add `--writable-cache-repos` parameter to enable or disable cache operations that write to repositories in the registry
 * `az acr create`: Add `--data-endpoint-enabled` parameter to support enabling dedicated data endpoint for client firewall configuration (#33472)
 * `az acr create`: Add `--endpoint-protocol` parameter to support specifying the endpoint protocol for the registry (#33472)
 * `az acr task logs`: Align log streaming with the default TLS behavior used by the rest of Azure CLI commands (#33486)
