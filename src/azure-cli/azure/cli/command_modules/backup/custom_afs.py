@@ -18,8 +18,13 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
-    resources_cf, backup_protected_items_cf, protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
+    resources_cf, backup_protected_items_cf, protected_items_cf, \
+    recovery_points_crr_cf, recovery_points_passive_cf, aad_properties_cf, cross_region_restore_cf, vaults_cf, \
+    file_shares_cf
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError, InvalidArgumentValueError
+from azure.core.exceptions import ResourceNotFoundError
+
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -226,10 +231,24 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
                            target_storage_account_name=None, target_file_share_name=None, target_folder=None,
-                           target_resource_group_name=None, tenant_id=None):
+                           target_resource_group_name=None, tenant_id=None, use_secondary_region=None):
 
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
+
+    if use_secondary_region:
+        if restore_request_type != "FullShareRestore":
+            raise InvalidArgumentValueError(
+                "Cross Region Restore for Azure Files supports only full file-share restore.")
+        if restore_mode != "AlternateLocation":
+            raise InvalidArgumentValueError(
+                "Cross Region Restore for Azure Files supports only Alternate Location Restore.")
+        if target_storage_account_name is None:
+            raise InvalidArgumentValueError(
+                "Please provide --target-storage-account for Azure Files Cross Region Restore.")
+        if target_file_share_name is None:
+            raise InvalidArgumentValueError(
+                "Please provide --target-file-share for Azure Files Cross Region Restore.")
 
     # sa_name = item.properties.container_name
 
@@ -283,11 +302,40 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
         target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)
+        if use_secondary_region:
+            _validate_target_file_share(cmd.cli_ctx, target_sa_rg, target_sa_name, target_file_share_name)
         afs_restore_request.target_details = target_details
 
     afs_restore_request.restore_file_specs = restore_file_specs
 
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
+
+    # CRR path: route through passive stamp (secondary region endpoint)
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        import azure.cli.command_modules.backup.custom as custom_module
+        azure_region = custom_module.secondary_region_map[vault.location]
+
+        aad_client = aad_properties_cf(cmd.cli_ctx)
+        filter_string = helper.get_filter_string({'backupManagementType': 'AzureStorage'})
+        aad_result = aad_client.get(azure_region, filter_string)
+
+        rp_client = recovery_points_passive_cf(cmd.cli_ctx)
+        crr_access_token = rp_client.get_access_token(
+            vault_name, resource_group_name, fabric_name,
+            container_uri, item_uri, rp_name, aad_result).properties
+        # For AFS identity-based CRR the response is WorkloadCrrAccessToken.
+        # extra fields (accessType, isSystemAssignedIdentity, managedIdentityResourceId)
+        # land in additional_properties — enable sending them so the backend gets them.
+        crr_access_token.enable_additional_properties_sending()
+
+        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        trigger_crr_request = CrossRegionRestoreRequest(
+            cross_region_restore_access_details=crr_access_token,
+            restore_request=afs_restore_request)
+        result = crr_client.begin_trigger(azure_region, trigger_crr_request,
+                                          cls=helper.get_pipeline_response, polling=False).result()
+        return helper.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
         # Cross Tenant scenario
@@ -308,13 +356,6 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
                          use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
                          recommended_for_archive=None):
-    if use_secondary_region:
-        raise ArgumentUsageError(
-            """
-            --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
-            Please either remove the flag or query for any other backup-management-type.
-            """)
-
     if is_ready_for_move is not None or target_tier is not None:
         raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
         are not supported for --backup-management-type AzureStorage.""")
@@ -326,19 +367,22 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     if cmd.name.split()[2] == 'show-log-chain':
         raise ArgumentUsageError("show-log-chain is supported by AzureWorkload backup management type only.")
 
-    # Get container and item URIs
+    # Get container and item URIs (common to both paths)
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
-
     query_end_date, query_start_date = helper.get_query_dates(end_date, start_date)
+    filter_string = helper.get_filter_string({'startDate': query_start_date, 'endDate': query_end_date})
 
-    filter_string = helper.get_filter_string({
-        'startDate': query_start_date,
-        'endDate': query_end_date})
-
-    # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
-    paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
+    if use_secondary_region:
+        crr_client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = crr_client.list(vault_name, resource_group_name, fabric_name,
+                                          container_uri, item_uri, filter_string)
+        paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
+    else:
+        # Get recovery points
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, filter_string)
+        paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
     if tier:
         filtered_recovery_points = []
@@ -485,6 +529,15 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
+
+
+def _validate_target_file_share(cli_ctx, resource_group_name, storage_account_name, file_share_name):
+    try:
+        file_shares_cf(cli_ctx).get(resource_group_name, storage_account_name, file_share_name)
+    except ResourceNotFoundError as ex:
+        raise InvalidArgumentValueError(
+            "Target file share '{}' was not found in storage account '{}'.".format(
+                file_share_name, storage_account_name)) from ex
 
 
 def _get_source_resource_id_from_item(item):

@@ -186,6 +186,82 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
+    @AllowLargeResponse()
+    @record_only()
+    def test_afs_cross_region_restore(self):
+        self.kwargs.update({
+            'sub': ('14d16a2a-56f6-4c75-b091-084df9640297'
+                    if self.is_live else self.get_subscription_id()),
+            'rg': 'afsbvtlonghaulrgne',
+            'vault': 'afsbvtcrrlonghaulvaultne',
+            'container': 'StorageContainer;Storage;afsbvtlonghaulrgne;afsbvtlonghaulcrrsane',
+            'item': 'AzureFileShare;DCAEC29D689395B269170A2156B6771285091236BA6D65E2A8FAD70B90587754',
+            'friendly_item': 'afs1hrtestfs',
+            'target_sa': 'afsbvttargetsacrrne',
+            'target_share': 'afsfilesharetarget1hr'
+        })
+
+        self.cmd(
+            'backup item list --subscription {sub} -g {rg} -v {vault} '
+            '--backup-management-type AzureStorage --workload-type AzureFileShare '
+            '--use-secondary-region',
+            checks=[
+                self.check("length([?name == '{item}'])", 1),
+                self.check(
+                    "[?name == '{item}'] | [0].properties.friendlyName",
+                    '{friendly_item}'
+                )
+            ]
+        )
+
+        self.cmd(
+            'backup item show --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -n {item} --backup-management-type AzureStorage '
+            '--workload-type AzureFileShare --use-secondary-region',
+            checks=[
+                self.check('name', '{item}'),
+                self.check('properties.friendlyName', '{friendly_item}'),
+                self.check('properties.backupManagementType', 'AzureStorage')
+            ]
+        )
+
+        self.kwargs['rp'] = self.cmd(
+            'backup recoverypoint list --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -i {item} --backup-management-type AzureStorage '
+            '--workload-type AzureFileShare --use-secondary-region --query [0].name'
+        ).get_output_in_json()
+
+        restore_job = self.cmd(
+            'backup restore restore-azurefileshare --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --target-storage-account {target_sa} '
+            '--target-file-share {target_share} --target-resource-group-name {rg} '
+            '--use-secondary-region',
+            checks=[
+                self.check('properties.operation', 'CrossRegionRestore'),
+                self.check('properties.status', 'InProgress')
+            ]
+        ).get_output_in_json()
+        self.kwargs['job'] = restore_job['name']
+
+        self.cmd(
+            'backup job wait --subscription {sub} -g {rg} -v {vault} '
+            '-n {job} --use-secondary-region'
+        )
+
+        self.cmd(
+            'backup job show --subscription {sub} -g {rg} -v {vault} '
+            '-n {job} --use-secondary-region',
+            checks=[
+                self.check('properties.operation', 'CrossRegionRestore'),
+                self.check('properties.status', 'Completed'),
+                self.check(
+                    'properties.extendedInfo.tasksList[0].status',
+                    'Completed'
+                )
+            ]
+        )
+
     #@record_only()
     @live_only()
     @AllowLargeResponse()
