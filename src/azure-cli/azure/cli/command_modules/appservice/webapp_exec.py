@@ -376,7 +376,7 @@ def _send_to_server_windows(ws, closed):
     import os
     import time
     import ctypes
-    import msvcrt
+    import msvcrt  # pylint: disable=import-error
     import websocket as ws_module
 
     # Clear the ENABLE_PROCESSED_INPUT flag from stdin's console mode so a Ctrl+C is processed as
