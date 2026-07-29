@@ -2,35 +2,51 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from collections import namedtuple
 import hashlib
-import random
 import json
+import platform
 import re
 import sys
-import platform
+
 import requests
 import colorama  # pylint: disable=import-error
-
 
 from azure.cli.core import telemetry as telemetry_core
 from azure.cli.core import __version__ as core_version
 from azure.cli.core.style import Style, format_styled_text
 from packaging.version import parse
 from knack.log import get_logger
+
 logger = get_logger(__name__)
 
-WAIT_MESSAGE = ['Finding examples and documentation...']
+WAIT_MESSAGE = '\nFinding examples and documentation...'
 
-# Display limits
-MAX_DOC_RESULTS = 2
+# Number of entries printed in each section
 MAX_CODE_RESULTS = 3
+MAX_DOC_RESULTS = 2
 
-Example = namedtuple("Example", "title snippet")
+# Hints appended to the docs query so the semantic search stays Azure CLI specific
+DOCS_QUERY_HINTS = ['Azure CLI', 'az command']
+
+# Doc summary length and the marker shown when a summary is cut short
+MAX_SUMMARY_LENGTH = 150
+MIN_SUMMARY_LENGTH = 40
+CONTINUATION_MARKER = ' ... (see link for the full article)'
+
+# Filler words that carry no search signal and would otherwise skew filtering
+STOP_WORDS = {
+    'about', 'all', 'also', 'an', 'and', 'any', 'are', 'as', 'at', 'be', 'been', 'being', 'but',
+    'by', 'can', 'could', 'did', 'do', 'does', 'for', 'from', 'had', 'has', 'have', 'here', 'how',
+    'if', 'in', 'into', 'is', 'it', 'its', 'may', 'me', 'might', 'must', 'my', 'no', 'not', 'of',
+    'on', 'or', 'our', 'over', 'please', 'shall', 'should', 'so', 'some', 'such', 'than', 'that',
+    'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this', 'those', 'to', 'up', 'us',
+    'via', 'want', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'why',
+    'will', 'with', 'would', 'you', 'your',
+}
 
 
 class MCPClient:
-    """Lightweight MCP client for Microsoft Learn MCP Server.
+    """Lightweight MCP client for the Microsoft Learn MCP server.
 
     Implements the minimum JSON-RPC 2.0 over Streamable HTTP protocol
     needed for single-invocation tool calls (initialize → notify → tools/call).
@@ -49,30 +65,21 @@ class MCPClient:
         self._context = self._build_telemetry_context()
 
     def _build_telemetry_context(self):
-        """Build telemetry context sent alongside MCP requests.
+        """Build the telemetry context sent alongside MCP requests.
 
-        Mirrors the dev branch behavior: the hashed installation id is always
-        sent as the ``X-UserId`` header (used for DDOS protection and rate
-        limiting), while the remaining contextual values are only included when
-        the user has consented to telemetry.
+        The hashed installation id is always sent as the ``X-UserId`` header
+        (used for DDOS protection and rate limiting); the remaining contextual
+        values are only included when the user has consented to telemetry.
         """
-        # Used for DDOS protection and rate limiting
         user_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
-        hashed_user_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
-        self._headers["X-UserId"] = hashed_user_id
+        self._headers["X-UserId"] = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
 
-        context = {
-            "versionNumber": self.client_version,
-        }
+        context = {"versionNumber": self.client_version}
 
-        # Only pull in the contextual values if we have consent
         if telemetry_core.is_telemetry_enabled():
-            correlation_id = telemetry_core._session.correlation_id  # pylint: disable=protected-access
-            event_id = telemetry_core._session.event_id  # pylint: disable=protected-access
+            context["correlationId"] = telemetry_core._session.correlation_id  # pylint: disable=protected-access
+            context["eventId"] = telemetry_core._session.event_id  # pylint: disable=protected-access
             subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
-
-            context["correlationId"] = correlation_id
-            context["eventId"] = event_id
             if subscription_id is not None:
                 context["subscriptionId"] = subscription_id
 
@@ -87,7 +94,7 @@ class MCPClient:
         return self._request_id
 
     def initialize(self):
-        """Send initialize request and store session ID."""
+        """Send the initialize request and store the session ID."""
         body = {
             "jsonrpc": "2.0",
             "id": self._next_id(),
@@ -109,20 +116,12 @@ class MCPClient:
         return self._parse_sse(resp.text)
 
     def notify_initialized(self):
-        """Send initialized notification to confirm client readiness."""
+        """Send the initialized notification to confirm client readiness."""
         body = {"jsonrpc": "2.0", "method": "notifications/initialized"}
         requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, params=self._params, timeout=10)
 
     def call_tool(self, tool_name, arguments):
-        """Call an MCP tool and return parsed results.
-
-        Args:
-            tool_name: Name of the MCP tool (e.g., 'microsoft_docs_search').
-            arguments: Dict of tool arguments.
-
-        Returns:
-            Parsed JSON result from the tool's text content.
-        """
+        """Call an MCP tool (e.g. 'microsoft_docs_search') and return its parsed result."""
         body = {
             "jsonrpc": "2.0",
             "id": self._next_id(),
@@ -134,110 +133,112 @@ class MCPClient:
         }
         resp = requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, params=self._params, timeout=30)
         resp.raise_for_status()
-        result = self._parse_sse(resp.text)
-        content_list = result.get("result", {}).get("content", [])
-        if content_list and content_list[0].get("text"):
-            return json.loads(content_list[0]["text"])
+        content = self._parse_sse(resp.text).get("result", {}).get("content", [])
+        if content and content[0].get("text"):
+            return json.loads(content[0]["text"])
         return {}
 
     @staticmethod
     def _parse_sse(text):
-        """Parse single-event SSE response.
-
-        The MCP server returns responses in SSE format with a single 'data:' event.
-        """
+        """Parse a single-event SSE response, which carries one 'data:' line."""
         for line in text.split("\n"):
             if line.startswith("data: "):
                 return json.loads(line[6:])
         return {}
 
 
+def _get_query_keywords(query):
+    """Extract the meaningful keywords of a query.
+
+    Words of 2+ characters are kept so short but meaningful Azure terms such as
+    'vm', 'ad' or 'k8s' survive; the 'az' prefix and filler words (articles,
+    auxiliaries, interrogatives) are dropped because they carry no signal.
+    """
+    words = re.findall(r'[a-z0-9]{2,}', query.lower())
+    return {w for w in words if w != 'az' and w not in STOP_WORDS}
+
+
+def _stem(word):
+    """Reduce a word to a crude stem so morphological variants match.
+
+    Strips common inflectional suffixes and a trailing 'e' so that 'creating',
+    'creates', 'created' and 'create' all collapse to 'creat'. A lightweight,
+    dependency-free approximation of a real stemmer, good enough for matching
+    query terms against documentation and code samples.
+    """
+    word = word.lower()
+    for suffix in ('ings', 'ing', 'ies', 'ied', 'es', 'ed', 's'):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            word = word[:-len(suffix)]
+            break
+    if len(word) > 3 and word.endswith('e'):
+        word = word[:-1]
+    return word
+
+
+def _matches_keywords(text, query_words):
+    """Check whether any query keyword appears in the text, comparing stems."""
+    text_stems = {_stem(w) for w in re.findall(r'[a-z0-9]+', text.lower())}
+    return any(_stem(word) in text_stems for word in query_words)
+
+
+def _has_keyword_overlap(result, query_words):
+    """Check whether a doc result's title or content shares a keyword with the query."""
+    combined = result.get("title", "") + " " + result.get("content", "")[:500]
+    return _matches_keywords(combined, query_words)
+
+
 def _extract_query_command(query):
-    """Extract the CLI command group/name from a query string.
+    """Normalize a query into an `az` command, or None if it isn't one.
 
-    Examples:
-        'az vm create' → 'az vm create'
-        'az vm' → 'az vm'
-        'vm create' → 'az vm create'
-        'deploy arm template' → None (not a CLI command pattern)
-
-    Returns:
-        Normalized command string or None if not a CLI command pattern.
+    'az vm create' → 'az vm create'; 'vm create' → 'az vm create';
+    'deploy/arm template' → None (doesn't look like a command).
     """
     query = query.strip().lower()
     if query.startswith('az '):
         return query
-    # If the query looks like a CLI subcommand (single words that could be a group)
+
     parts = query.split()
-    if parts and not any(c in parts[0] for c in ' ./-'):
+    if parts and not any(c in parts[0] for c in './-'):
         return 'az ' + query
     return None
 
 
 def _is_cli_command_relevant(title, query):
-    """Check if a CLI command result title is relevant to the query.
+    """Check whether a CLI command title belongs to the same command group as the query.
 
-    For CLI command results (titles starting with 'az '), checks that
-    the result command shares the same command group as the query.
+    Only titles that look like a command ('az ...') are judged; anything else
+    (tutorials, concept articles) is always considered relevant.
 
-    Examples (query='az vm create'):
-        'az vm create' → True (exact match)
-        'az vm run-command create' → True (same group)
-        'az lab vm create' → False (different group: 'lab' vs 'vm')
-        'az connectedvmware vm create' → False (different group)
-
-    Args:
-        title: The result title string.
-        query: The user's query string.
-
-    Returns:
-        True if the result is relevant, False otherwise.
+    With query='az vm create': 'az vm create' and 'az vm run-command create'
+    are relevant, while 'az lab vm create' and 'az connectedvmware vm create'
+    belong to other groups.
     """
     title_lower = title.strip().lower()
-
-    # Only filter CLI command titles (starting with 'az ')
     if not title_lower.startswith('az '):
         return True
 
-    cmd = _extract_query_command(query)
-    if not cmd:
+    command = _extract_query_command(query)
+    if not command:
         return True
 
-    # Extract the command group (first word after 'az')
-    cmd_parts = cmd.split()
-    if len(cmd_parts) < 2:
-        return True
-
-    query_group = cmd_parts[1]  # e.g., 'vm' from 'az vm create'
-
+    command_parts = command.split()
     title_parts = title_lower.split()
-    if len(title_parts) < 2:
+    if len(command_parts) < 2 or len(title_parts) < 2:
         return True
 
-    title_group = title_parts[1]  # e.g., 'lab' from 'az lab vm create'
-
-    # The result's first command group must match the query's command group
-    return title_group == query_group
+    # e.g. 'vm' from 'az vm create' vs 'lab' from 'az lab vm create'
+    return title_parts[1] == command_parts[1]
 
 
 def _filter_results(results, query):
-    """Filter MCP results for relevance to the query.
+    """Drop doc results that belong to another command group or share no keyword.
 
-    Removes CLI command results that belong to different command groups,
-    and filters out results whose titles have no meaningful word overlap
-    with the query (to discard noise from semantic search on gibberish queries).
-
-    Args:
-        results: List of MCP doc result dicts.
-        query: The user's query string.
-
-    Returns:
-        Filtered list of result dicts.
+    The keyword check discards the noise a semantic search returns for
+    gibberish queries.
     """
     filtered = [r for r in results if _is_cli_command_relevant(r.get("title", ""), query)]
 
-    # For non-empty queries, check that at least some results are genuinely relevant
-    # by verifying word overlap between the query and result titles/content
     query_words = _get_query_keywords(query)
     if query_words:
         filtered = [r for r in filtered if _has_keyword_overlap(r, query_words)]
@@ -245,127 +246,148 @@ def _filter_results(results, query):
     return filtered
 
 
-def _get_query_keywords(query):
-    """Extract meaningful keywords from the query (words with 3+ chars, excluding 'az').
+def _build_docs_query(query):
+    """Append Azure CLI hints to a query so the docs search stays CLI specific.
 
-    Args:
-        query: The user's query string.
-
-    Returns:
-        Set of lowercase keyword strings.
+    Without them the semantic search happily returns portal, PowerShell or SDK
+    articles. Hints already present in the query are not repeated.
     """
-    words = re.findall(r'[a-zA-Z]{3,}', query.lower())
-    stop_words = {'the', 'and', 'for', 'with', 'from', 'that', 'this', 'are', 'was', 'has', 'have'}
-    return {w for w in words if w != 'az' and w not in stop_words}
+    query = (query or "").strip()
+    lowered = query.lower()
+    hints = [hint for hint in DOCS_QUERY_HINTS if hint.lower() not in lowered]
+    return " ".join([query] + hints) if hints else query
 
 
-def _has_keyword_overlap(result, query_words):
-    """Check if a result has meaningful keyword overlap with the query.
+def _cli_doc_score(result):
+    """Score how Azure CLI specific a doc result is.
 
-    Args:
-        result: A doc result dict with 'title' and optionally 'content'.
-        query_words: Set of query keywords to match against.
-
-    Returns:
-        True if at least one query keyword appears in the result's title or content.
+    3 for the `az` command reference, 2 for content showing `az` invocations,
+    1 for content merely mentioning the Azure CLI, 0 for everything else.
     """
-    title = result.get("title", "").lower()
-    content = result.get("content", "").lower()[:500]  # Only check first 500 chars of content
-    combined = title + " " + content
+    if "/cli/azure" in (result.get("contentUrl", "") or "").lower():
+        return 3
 
-    return any(word in combined for word in query_words)
+    content = (result.get("content", "") or "") + " " + (result.get("title", "") or "")
+    lowered = content.lower()
+    if "azurecli" in lowered or re.search(r'(?m)^\s*az\s+[a-z][\w-]*', content):
+        return 2
+
+    return 1 if "azure cli" in lowered else 0
+
+
+def _prefer_cli_docs(results):
+    """Keep the Azure CLI related doc results, most CLI specific first.
+
+    The server's relative ranking is preserved within the same score. If no
+    result looks CLI specific at all, the original list is returned so the user
+    still gets something back.
+    """
+    scored = [(score, i, result) for i, result in enumerate(results)
+              if (score := _cli_doc_score(result)) > 0]
+    if not scored:
+        return results
+
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return [result for _, _, result in scored]
 
 
 def search_mslearn(query):
-    """Search Microsoft Learn via MCP for docs and code samples.
+    """Search Microsoft Learn for docs and code samples matching the query.
 
-    Calls two MCP tools:
-    1. microsoft_docs_search - for command reference and documentation
-    2. microsoft_code_sample_search - for runnable CLI examples
-
-    Args:
-        query: Search query string (e.g., 'az vm delete').
-
-    Returns:
-        Tuple of (docs_results, code_results) where each is a list of dicts.
+    Returns a (docs_results, code_results) tuple, each a list of result dicts
+    already filtered down to what is relevant to the Azure CLI.
     """
     client = MCPClient()
-
     client.initialize()
     client.notify_initialized()
 
     docs_response = client.call_tool(
         "microsoft_docs_search",
-        {"query": query}
+        {"query": _build_docs_query(query)}
     )
-
     code_response = client.call_tool(
         "microsoft_code_sample_search",
         {"query": query, "language": "azurecli"}
     )
 
-    docs_results = docs_response.get("results", [])
+    docs_results = _prefer_cli_docs(_filter_results(docs_response.get("results", []), query))
+
     code_results = code_response.get("results", [])
-
-    # Filter out irrelevant CLI commands (e.g., 'az lab vm' when searching 'az vm')
-    docs_results = _filter_results(docs_results, query)
-
-    # Filter code results by keyword overlap too
     query_words = _get_query_keywords(query)
     if query_words:
         code_results = [r for r in code_results
-                        if any(word in (r.get("codeSnippet", "") + " " +
-                                        r.get("description", "")).lower()
-                               for word in query_words)]
+                        if _matches_keywords(r.get("codeSnippet", "") + " " + r.get("description", ""),
+                                             query_words)]
 
     return docs_results, code_results
 
 
-def _extract_summary(content):
-    """Extract a clean summary from MCP doc content.
+def _clean_markdown(text):
+    """Strip markdown noise (images, links, emphasis) so text reads as plain prose."""
+    text = re.sub(r'!\[[^\]]*\]\([^)]*\)', '', text)
+    text = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
+    text = re.sub(r'[*_`]+', '', text)
+    return re.sub(r'\s+', ' ', text).strip()
 
-    MCP returns markdown content with headers. Extract the Summary section
-    or first meaningful paragraph.
 
-    Args:
-        content: Raw markdown content string.
+def _shorten(text):
+    """Trim text to MAX_SUMMARY_LENGTH, never cutting mid-word.
 
-    Returns:
-        Clean summary string, max 150 chars.
+    A sentence boundary is preferred as the cut point. Whenever text is
+    dropped, CONTINUATION_MARKER is appended so it's clear the rest of the
+    article lives behind the link.
     """
+    text = text.strip()
+    if len(text) <= MAX_SUMMARY_LENGTH:
+        return text
+
+    window = text[:MAX_SUMMARY_LENGTH + 1]
+
+    # Only cut at a sentence boundary if that still keeps most of the window.
+    sentence_end = max(window.rfind('. '), window.rfind('! '), window.rfind('? '))
+    if sentence_end >= MAX_SUMMARY_LENGTH // 2:
+        return window[:sentence_end + 1] + CONTINUATION_MARKER
+
+    cut = window.rfind(' ')
+    if cut <= 0:
+        cut = MAX_SUMMARY_LENGTH
+    return window[:cut].rstrip(' ,;:-') + CONTINUATION_MARKER
+
+
+def _extract_summary(content):
+    """Build a short, readable summary from a doc result's markdown content."""
     if not content:
         return ""
 
-    # Try to find a "### Summary" section
     summary_match = re.search(r'###\s*Summary\s*\n(.+?)(?:\n###|\Z)', content, re.DOTALL)
     if summary_match:
-        summary = summary_match.group(1).strip()
-        # Take first sentence/line
-        first_line = summary.split('\n')[0].strip()
-        if first_line:
-            return first_line[:150]
+        summary = _clean_markdown(summary_match.group(1).split('\n\n')[0])
+        if summary:
+            return _shorten(summary)
 
-    # Try first non-header, non-empty line
+    candidates = []
     for line in content.split('\n'):
         line = line.strip()
-        if line and not line.startswith('#') and not line.startswith('---'):
-            return line[:150]
+        if not line or line.startswith(('#', '---', '|', '```', '>')):
+            continue
+        cleaned = _clean_markdown(line)
+        if cleaned:
+            candidates.append(cleaned)
+        if len(candidates) >= 10:
+            break
 
-    return content[:150]
+    if candidates:
+        # Prefer a line that reads as a complete thought over a lead-in fragment.
+        best = next((c for c in candidates
+                     if len(c) >= MIN_SUMMARY_LENGTH and not c.endswith((':', ';', ','))),
+                    candidates[0])
+        return _shorten(best)
+
+    return _shorten(_clean_markdown(content))
 
 
 def _clean_title(title):
-    """Normalize a title into a real sentence.
-
-    Strips leading markdown header markers ('#') and ensures the title
-    ends with a sentence mark (period, question mark, or exclamation mark).
-
-    Args:
-        title: Raw title string.
-
-    Returns:
-        Cleaned title string, or empty string if no title.
-    """
+    """Normalize a title into a sentence: no leading '#', always end-punctuated."""
     if not title:
         return ""
 
@@ -378,16 +400,8 @@ def _clean_title(title):
 def _to_imperative(text):
     """Convert a leading third-person-singular verb to imperative mood.
 
-    Examples:
-        'Deploys the template.' -> 'Deploy the template.'
-        'Creates a virtual machine.' -> 'Create a virtual machine.'
-        'Specifies the name.' -> 'Specify the name.'
-
-    Args:
-        text: A description sentence.
-
-    Returns:
-        The sentence with its first word converted to imperative mood.
+    'Deploys the template.' → 'Deploy the template.'
+    'Specifies the name.' → 'Specify the name.'
     """
     if not text:
         return text
@@ -403,17 +417,10 @@ def _to_imperative(text):
 
 
 def _extract_description(description):
-    """Extract the human-readable description from a code sample's metadata.
+    """Pull the human-readable sentence out of a code sample's metadata blob.
 
-    The MCP code sample 'description' field is a metadata blob such as:
-        'description: Deploys the ARM template ...\\nlanguage: azurecli\\n'
-    This extracts just the description text as a clean sentence.
-
-    Args:
-        description: Raw description metadata string.
-
-    Returns:
-        Cleaned description sentence, or 'Example.' as a fallback.
+    The raw field looks like 'description: Deploys the ARM template\\nlanguage:
+    azurecli\\n'.
     """
     if description:
         for line in description.split('\n'):
@@ -421,7 +428,6 @@ def _extract_description(description):
             if line.lower().startswith('description:'):
                 return _clean_title(_to_imperative(line[len('description:'):].strip()))
 
-        # Fallback: first non-empty, non-metadata line
         for line in description.split('\n'):
             line = line.strip()
             if line and not line.lower().startswith(('language:', 'package:')):
@@ -431,17 +437,10 @@ def _extract_description(description):
 
 
 def _extract_command(snippet):
-    """Extract the `az` command block from a code snippet.
+    """Extract the `az` commands from a code snippet, one per line.
 
-    Returns the snippet lines starting from the first line that begins with
-    'az', preserving the server's original formatting. Stops at a blank line
-    that isn't a shell line-continuation, so a single example is returned.
-
-    Args:
-        snippet: Raw code snippet string.
-
-    Returns:
-        List of command lines (server formatting preserved), or empty list.
+    Shell line-continuations are collapsed so a command that the docs wrapped
+    over many lines is printed as a single copy-pasteable line.
     """
     if not snippet:
         return []
@@ -451,108 +450,134 @@ def _extract_command(snippet):
     if start is None:
         return []
 
-    # If the command block is indented, strip the leading indent of the first
-    # `az` line from every line, preserving relative indentation.
-    indent = len(lines[start]) - len(lines[start].lstrip())
-    result = []
+    commands = []
+    pending = None
     for line in lines[start:]:
-        if not line.strip():
+        line = line.strip()
+        if not line:
             continue
-        # Remove up to `indent` leading whitespace chars, keeping deeper indents.
-        stripped = line
-        for _ in range(indent):
-            if stripped[:1] in (' ', '\t'):
-                stripped = stripped[1:]
-            else:
-                break
-        result.append(stripped.rstrip())
-    return result
+
+        # '/' is a typo for '\' seen in some docs; require preceding whitespace
+        # so that trailing slashes in URLs and paths are left alone.
+        continued = line.endswith(('\\', '^', '`')) or bool(re.search(r'\s/$', line))
+        if continued:
+            line = line[:-1].rstrip()
+
+        pending = line if pending is None else (pending + ' ' + line).strip()
+        if not continued:
+            commands.append(pending)
+            pending = None
+
+    if pending:
+        commands.append(pending)
+
+    return commands
+
+
+def _dedupe_key(text):
+    """Normalize text into a comparison key, ignoring case and punctuation."""
+    return re.sub(r'[^a-z0-9]+', ' ', (text or "").lower()).strip()
+
+
+def _build_example_entry(result):
+    """Turn a code sample result into a (title, command lines, url) entry.
+
+    Returns None when the sample contains no `az` command.
+    """
+    command_lines = _extract_command(result.get("codeSnippet", ""))
+    if not command_lines:
+        return None
+
+    return (_extract_description(result.get("description", "")),
+            command_lines,
+            result.get("link", ""))
+
+
+def _build_doc_entry(result):
+    """Turn a doc result into a (title, summary, url) entry."""
+    return (_clean_title(result.get("title", "")),
+            _extract_summary(result.get("content", "")),
+            result.get("contentUrl", ""))
+
+
+def _collect_unique(results, limit, build_entry):
+    """Build up to `limit` entries, skipping empty ones and duplicates.
+
+    A result is skipped when its URL or its normalized title was already used,
+    so the same article never shows up twice under different URL fragments.
+    """
+    entries = []
+    seen_urls = set()
+    seen_titles = set()
+
+    for result in results:
+        entry = build_entry(result)
+        if not entry:
+            continue
+
+        title, _, url = entry
+        title_key = _dedupe_key(title)
+        if (url and url in seen_urls) or (title_key and title_key in seen_titles):
+            continue
+
+        seen_urls.add(url)
+        seen_titles.add(title_key)
+        entries.append(entry)
+        if len(entries) >= limit:
+            break
+
+    return entries
+
+
+def _print_entry(title, body_lines, url):
+    """Print one result: a highlighted title, its body, then the source link."""
+    print(format_styled_text((Style.HIGHLIGHT, "  - " + title)))
+    for line in body_lines:
+        print("    " + line)
+    if url:
+        print("    " + format_styled_text((Style.SECONDARY, url)))
+    print()
 
 
 def format_results(query, docs_results, code_results):
-    """Format and print search results to stdout.
+    """Print the runnable examples first, then the documentation links."""
+    # Collect first: results can still end up empty here, for instance when no
+    # code sample contains an actual `az` command.
+    examples = _collect_unique(code_results, MAX_CODE_RESULTS, _build_example_entry)
+    docs = _collect_unique(docs_results, MAX_DOC_RESULTS, _build_doc_entry)
 
-    Displays results in two sections:
-    1. Examples - from microsoft_code_sample_search (shown first)
-    2. Documentation - from microsoft_docs_search
-
-    Args:
-        query: Original search query (for display).
-        docs_results: List of doc result dicts from MCP.
-        code_results: List of code sample dicts from MCP.
-    """
-    if not docs_results and not code_results:
-        print("\nSorry I am not able to help with [" + query + "]."
-              "\nTry typing the beginning of a command e.g., " + style_message('az vm') + ".", file=sys.stderr)
+    if not examples and not docs:
+        print('\nSorry I am not able to help with [' + query + '].'
+              '\nTry typing the beginning of a command, e.g., "az vm create".\n', file=sys.stderr)
         return
 
     print("\nHere is what I found for [" + query + "]: \n", file=sys.stderr)
 
-    if code_results:
-        examples = []
-        seen_urls = set()
-        for result in code_results:
-            command_lines = _extract_command(result.get("codeSnippet", ""))
-            if not command_lines:
-                continue
-            url = result.get("link", "")
-            # Skip duplicate URLs, keeping only the first occurrence.
-            if url and url in seen_urls:
-                continue
-            if url:
-                seen_urls.add(url)
-            examples.append((
-                _extract_description(result.get("description", "")),
-                command_lines,
-                url
-            ))
-            if len(examples) >= MAX_CODE_RESULTS:
-                break
+    if examples:
+        print("Examples")
+        for title, command_lines, url in examples:
+            _print_entry(title, command_lines, url)
 
-        if examples:
-            print("Examples")
-            for title, command_lines, url in examples:
-                print(format_styled_text((Style.ACTION, "  - " + title)))
-                for line in command_lines:
-                    print("    " + line)
-                if url:
-                    print("    " + format_styled_text((Style.SECONDARY, url)))
-                print()
+    if docs:
+        print("Documentation")
+        for title, summary, url in docs:
+            _print_entry(title, [summary] if summary else [], url)
 
-    if docs_results:
-        docs = []
-        seen_urls = set()
-        for result in docs_results:
-            url = result.get("contentUrl", "")
-            # Skip duplicate URLs, keeping only the first occurrence.
-            if url and url in seen_urls:
-                continue
-            if url:
-                seen_urls.add(url)
-            docs.append((
-                _clean_title(result.get("title", "")),
-                _extract_summary(result.get("content", "")),
-                url
-            ))
-            if len(docs) >= MAX_DOC_RESULTS:
-                break
 
-        if docs:
-            print("Documentation")
-            for title, summary, url in docs:
-                print(format_styled_text((Style.ACTION, "  - " + title)))
-                if summary:
-                    print("    " + summary)
-                if url:
-                    print("    " + format_styled_text((Style.SECONDARY, url)))
-                print()
+def should_enable_styling():
+    """Check whether output is going to a terminal that can render styling."""
+    try:
+        return bool(sys.stdout.isatty())
+    except AttributeError:
+        return False
 
 
 def process_query(cli_term):
+    """Entry point for `az find`."""
     if not cli_term:
-        logger.error('Please provide a search term e.g. az find "vm"')
+        logger.error('Please provide a search term, e.g., az find "az vm create".')
     else:
-        print(random.choice(WAIT_MESSAGE), file=sys.stderr)
+        print(WAIT_MESSAGE, file=sys.stderr)
 
         try:
             docs_results, code_results = search_mslearn(cli_term)
@@ -572,47 +597,3 @@ def process_query(cli_term):
 
     from azure.cli.core.util import show_updates_available
     show_updates_available()
-
-
-def get_generated_examples(cli_term):
-    """Get generated examples for a CLI term.
-
-    Returns list of Example namedtuples for backward compatibility.
-    """
-    examples = []
-    try:
-        docs_results, code_results = search_mslearn(cli_term)
-
-        for result in docs_results:
-            title = result.get("title", "")
-            summary = _extract_summary(result.get("content", ""))
-            examples.append(Example(title, summary))
-
-        for result in code_results:
-            snippet = result.get("codeSnippet", "")
-            desc = result.get("description", "")
-            examples.append(Example(desc[:100] if desc else "Example", snippet))
-
-    except requests.exceptions.RequestException:
-        pass
-
-    return examples
-
-
-def style_message(msg):
-    if should_enable_styling():
-        try:
-            msg = colorama.Style.BRIGHT + msg + colorama.Style.RESET_ALL
-        except KeyError:
-            pass
-    return msg
-
-
-def should_enable_styling():
-    try:
-        # Style if tty stream is available
-        if sys.stdout.isatty():
-            return True
-    except AttributeError:
-        pass
-    return False
