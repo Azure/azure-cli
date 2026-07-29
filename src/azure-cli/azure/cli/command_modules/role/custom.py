@@ -160,12 +160,16 @@ def _deny_assignment_to_dict(da):
 USER = 'User'
 SERVICE_PRINCIPAL = 'ServicePrincipal'
 GROUP = 'Group'
+AGENT_USER = 'AgentUser'
+AGENT_SERVICE_PRINCIPAL = 'AgentServicePrincipal'
 
 # Map Graph '@odata.type' to ARM RBAC's principalType
 ODATA_TYPE_TO_PRINCIPAL_TYPE = {
     '#microsoft.graph.user': USER,
     '#microsoft.graph.servicePrincipal': SERVICE_PRINCIPAL,
-    '#microsoft.graph.group': GROUP
+    '#microsoft.graph.group': GROUP,
+    '#microsoft.graph.agentUser': AGENT_USER,
+    '#microsoft.graph.agentIdentity': AGENT_SERVICE_PRINCIPAL
 }
 
 # Object ID property name
@@ -1859,13 +1863,16 @@ def _resolve_object_id_and_type(cli_ctx, assignee, fallback_to_object_id=False):
         if assignee.find('@') >= 0:  # looks like a user principal name
             result = list(client.user_list(filter="userPrincipalName eq '{}'".format(assignee)))
             if result:
-                return result[0][ID], USER
+                principal_type = _odata_type_to_arm_principal_type(result[0].get('@odata.type')) or USER
+                return result[0][ID], principal_type
 
         # Try resolving as service principal
         result = list(client.service_principal_list(
             filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
         if result:
-            return result[0][ID], SERVICE_PRINCIPAL
+            principal_type = _odata_type_to_arm_principal_type(
+                result[0].get('@odata.type')) or SERVICE_PRINCIPAL
+            return result[0][ID], principal_type
 
         # Try resolving as object ID
         if is_guid(assignee):  # assume an object id, let us verify it

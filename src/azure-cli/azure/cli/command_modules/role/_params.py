@@ -5,6 +5,8 @@
 
 # pylint: disable=line-too-long
 
+from enum import Enum
+
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
@@ -18,6 +20,15 @@ from azure.cli.command_modules.role._validators import validate_group, validate_
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 JSON_PROPERTY_HELP = "Should be JSON file path or in-line JSON string. See examples for details"
+
+
+class RoleAssignmentPrincipalType(str, Enum):
+    agent_service_principal = "AgentServicePrincipal"
+    agent_user = "AgentUser"
+    user = "User"
+    group = "Group"
+    service_principal = "ServicePrincipal"
+    foreign_group = "ForeignGroup"
 
 
 # pylint: disable=too-many-statements
@@ -371,15 +382,7 @@ def load_arguments(self, _):
         # As only 'User', 'Group' or 'ServicePrincipal' are allowed values, the REST spec contains invalid values
         # (like MSI) which are used only internally by the service. So hide them.
         # https://github.com/Azure/azure-rest-api-specs/blob/962013a1cf9bf5b87e3aad75a14c7dd620acda62/specification/authorization/resource-manager/Microsoft.Authorization/preview/2020-04-01-preview/authorization-RoleAssignmentsCalls.json#L508-L522
-        from enum import Enum
-
-        class PrincipalType(str, Enum):
-            user = "User"
-            group = "Group"
-            service_principal = "ServicePrincipal"
-            foreign_group = "ForeignGroup"
-
-        c.argument('assignee_principal_type', arg_type=get_enum_type(PrincipalType),
+        c.argument('assignee_principal_type', arg_type=get_enum_type(RoleAssignmentPrincipalType),
                    help='use with --assignee-object-id to avoid errors caused by propagation latency in Microsoft Graph')
 
     with self.argument_context('role assignment update') as c:
