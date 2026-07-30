@@ -199,7 +199,7 @@ class TestCmdWithRetry(unittest.TestCase):
         })
         mock_execute.side_effect = [initial_result, settled_result]
         instance = self._make_instance()
-        instance._get_settled_aks_result = MagicMock(return_value=settled_result)
+        instance._refetch_settled_aks_result = MagicMock(return_value=settled_result)
 
         result = instance._cmd_with_retry(
             'aks show',
@@ -211,7 +211,7 @@ class TestCmdWithRetry(unittest.TestCase):
         )
 
         self.assertIs(result, settled_result)
-        instance._get_settled_aks_result.assert_called_once_with(resource_id, initial_result)
+        instance._refetch_settled_aks_result.assert_called_once_with(resource_id, initial_result)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
     @patch('time.sleep', return_value=None)
@@ -277,7 +277,7 @@ class TestCmdWithRetry(unittest.TestCase):
             self.assertLessEqual(call.args[0], 10.0)
 
 
-class TestExecuteWithOperationRetry(unittest.TestCase):
+class TestExecuteWithTransientConflictRetry(unittest.TestCase):
 
     def _make_instance(self):
         from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
@@ -301,7 +301,7 @@ class TestExecuteWithOperationRetry(unittest.TestCase):
             expected,
         ]
 
-        result = self._make_instance()._execute_with_operation_retry('aks update', False)
+        result = self._make_instance()._execute_with_transient_conflict_retry('aks update', False)
 
         self.assertIs(result, expected)
         self.assertEqual(mock_execute.call_count, 2)
@@ -314,7 +314,7 @@ class TestExecuteWithOperationRetry(unittest.TestCase):
         mock_execute.side_effect = CLIError('Invalid parameter')
 
         with self.assertRaisesRegex(CLIError, 'Invalid parameter'):
-            self._make_instance()._execute_with_operation_retry('aks update', False)
+            self._make_instance()._execute_with_transient_conflict_retry('aks update', False)
 
         mock_execute.assert_called_once()
         mock_sleep.assert_not_called()
@@ -328,13 +328,13 @@ class TestExecuteWithOperationRetry(unittest.TestCase):
         )
 
         with self.assertRaises(CLIError):
-            self._make_instance()._execute_with_operation_retry('aks update', True)
+            self._make_instance()._execute_with_transient_conflict_retry('aks update', True)
 
         mock_execute.assert_called_once()
         mock_sleep.assert_not_called()
 
 
-class TestGetSettledAksResult(unittest.TestCase):
+class TestRefetchSettledAksResult(unittest.TestCase):
 
     def _make_instance(self):
         from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
@@ -354,7 +354,7 @@ class TestGetSettledAksResult(unittest.TestCase):
         )
         instance = self._make_instance()
 
-        result = instance._get_settled_aks_result(resource_id, MagicMock())
+        result = instance._refetch_settled_aks_result(resource_id, MagicMock())
 
         self.assertIs(result, expected)
         mock_execute.assert_called_once_with(
@@ -373,7 +373,7 @@ class TestGetSettledAksResult(unittest.TestCase):
         )
         instance = self._make_instance()
 
-        result = instance._get_settled_aks_result(resource_id, MagicMock())
+        result = instance._refetch_settled_aks_result(resource_id, MagicMock())
 
         self.assertIs(result, expected)
         mock_execute.assert_called_once_with(
@@ -386,7 +386,7 @@ class TestGetSettledAksResult(unittest.TestCase):
     def test_keeps_original_result_for_non_aks_resource(self, mock_execute):
         original = MagicMock()
 
-        result = self._make_instance()._get_settled_aks_result(
+        result = self._make_instance()._refetch_settled_aks_result(
             '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet',
             original,
         )
@@ -402,7 +402,7 @@ class TestGetSettledAksResult(unittest.TestCase):
             'managedClusters/cluster/trustedAccessRoleBindings/binding'
         )
 
-        result = self._make_instance()._get_settled_aks_result(resource_id, original)
+        result = self._make_instance()._refetch_settled_aks_result(resource_id, original)
 
         self.assertIs(result, original)
         mock_execute.assert_not_called()

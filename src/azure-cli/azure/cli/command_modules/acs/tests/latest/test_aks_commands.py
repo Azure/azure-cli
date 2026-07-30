@@ -99,7 +99,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "in-progress PutExtensionAddonHandler.PUT operation" in message
         )
 
-    def _execute_with_operation_retry(self, command, expect_failure):
+    def _execute_with_transient_conflict_retry(self, command, expect_failure):
         from azure.cli.testsdk.base import execute
         import logging
 
@@ -128,7 +128,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         raise AssertionError("unreachable")
 
-    def _get_settled_aks_result(self, resource_id, fallback_result):
+    def _refetch_settled_aks_result(self, resource_id, fallback_result):
         from azure.cli.testsdk.base import execute
 
         resource_parts = resource_id.strip('/').split('/')
@@ -164,7 +164,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # Apply kwargs substitution (e.g. {resource_group}) before executing,
         # matching what ScenarioTest.cmd() does internally.
         command = self._apply_kwargs(command)
-        result = self._execute_with_operation_retry(command, expect_failure)
+        result = self._execute_with_transient_conflict_retry(command, expect_failure)
 
         # Split checks into provisioning vs everything else
         provisioning_checks = [c for c in (checks or []) if self._is_provisioning_state_check(c)]
@@ -198,7 +198,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     last_seen_etag = current_etag
 
                     if current_provisioning_state == 'Succeeded':
-                        result = self._get_settled_aks_result(resource_id, result)
+                        result = self._refetch_settled_aks_result(resource_id, result)
                         break
                     elif current_provisioning_state in {'Failed', 'Canceled'}:
                         raise AssertionError(
