@@ -408,7 +408,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone_type)
         c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
-        c.argument('ssh_key_value', required=False, type=file_type, default=None,
+        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('dns_service_ip')
