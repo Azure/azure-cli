@@ -7160,6 +7160,26 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_set_up_linux_profile_automatic_sku_skips_ssh_key(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "admin_username": "azureuser",
+                "no_ssh_key": False,
+                "ssh_key_value": "unused-for-managed-system-pool",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+
+        dec_mc_1 = dec_1.set_up_linux_profile(mc_1)
+
+        self.assertIs(dec_mc_1, mc_1)
+        self.assertIsNone(dec_mc_1.linux_profile)
+
     def test_set_up_windows_profile(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
