@@ -14,8 +14,8 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.core.azclierror import AzureInternalError, MutuallyExclusiveArgumentError
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -24,22 +24,25 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_import_export(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('ImportTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_import_export(self):
+        store_name_prefix = get_resource_name_prefix('importtest')
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # File <--> AppConfig tests
 
@@ -58,9 +61,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -75,12 +78,12 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'imported_file_path': ignore_match_file_path
         })
 
-        background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+        background_color_kv = self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}').get_output_in_json()
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
 
         # Confirm that the key has the same etag after re-importing
-        self.cmd('appconfig kv show -n {config_store_name} --key {key}',
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
                  checks=[
                      self.check('key', key_name),
                      self.check('etag', background_color_kv['etag']),
@@ -91,9 +94,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y --import-mode all')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y --import-mode all')
 
-        updated_background_color_kv = self.cmd('appconfig kv show -n {config_store_name} --key {key}').get_output_in_json()
+        updated_background_color_kv = self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}').get_output_in_json()
 
         self.assertNotEqual(background_color_kv['etag'], updated_background_color_kv['etag'])
 
@@ -103,9 +106,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'secret_identifier': "https://testkeyvault.vault.azure.net/secrets/mysecret"
         })
         self.cmd(
-            'appconfig kv set-keyvault -n {config_store_name} --key {key} --secret-identifier {secret_identifier} -y')
+            'appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --skip-keyvault -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --skip-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
@@ -118,7 +121,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, "The input is not a well formatted json file.\nException: Json object required but type 'str' was given."):
             self.cmd(
-                'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format}')
+                'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format}')
 
         '''
         1. Import configuration from JSON file which has a key "arr" with array values. Assign label "array_test" and separator "/"
@@ -134,11 +137,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'label': 'array_test'
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
         self.cmd(
-            'appconfig kv set -n {config_store_name} --key {key} --value {value} --label {label} -y')
+            'appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --label {label} -y')
         with open(exported_json_object) as json_file:
             exported_kvs = json.load(json_file)
         with open(exported_json_object_reference) as json_file:
@@ -165,9 +168,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -177,7 +180,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         # skip features while exporting
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --skip-features -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --skip-features -y')
         with open(skipped_features_file_path) as json_file:
             only_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -189,9 +192,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'label': 'SkipFeatures'
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --skip-features -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --skip-features -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert only_kvs == exported_kvs
@@ -202,9 +205,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'prefix': 'Test'
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
         with open(prefix_added_features_file_path) as json_file:
             prefix_added_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -213,7 +216,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         # Prefix trimming test
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --prefix {prefix} -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
@@ -224,7 +227,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'key': 'Col*'
         })
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --key {key} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --key {key} -y')
         with open(key_filtered_features_file_path) as json_file:
             key_filtered_features = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -238,9 +241,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'imported_file_path': import_separator_features_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
         with open(export_separator_features_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -253,9 +256,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'imported_file_path': import_features_alt_syntax_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --separator {separator} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -268,9 +271,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'label': 'RandomConditionsTest',
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
         with open(import_features_random_conditions_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -280,31 +283,33 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         # Dry run and yes options should not be used together
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
-            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --dry-run -y')
+            self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --dry-run -y')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
-            self.cmd('appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --dry-run -y')
+            self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --dry-run -y')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_import_export_new_fm_schema(self):
         # Feature flags test with new ms fm schema
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
 
-        new_fm_store_prefix = get_resource_name_prefix('NewFmImport')
+        new_fm_store_prefix = get_resource_name_prefix('newfmimport')
         config_store_name = self.create_random_name(prefix=new_fm_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku,
             'import_source': 'file',
             'imported_format': 'json',
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
        
         # Invalid requirement type should fail import
         import_features_invalid_requirement_type_file_path = os.path.join(TEST_DIR, 'import_features_invalid_requirement_type.json')
@@ -314,7 +319,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an Any/All requirement type"):
             self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
         # Invalid variants import
         invalid_variants_file_path = os.path.join(TEST_DIR, 'import_invalid_variants.json')
@@ -323,7 +328,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, "Feature variant must contain required 'name' attribute:"):
             self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
         
         imported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'import_features_new_fm_schema.json')
         exported_new_fm_schema_file_path = os.path.join(TEST_DIR, 'export_features_new_fm_schema.json')
@@ -334,9 +339,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_new_fm_path': exported_new_fm_schema_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_new_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_new_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_new_fm_path}" --format {imported_format} --label {label} -y')
         with open(imported_new_fm_schema_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_new_fm_schema_file_path) as json_file:
@@ -356,9 +361,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_ffv2_file_path': exported_new_fm_schema_yaml_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_ffv2_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_ffv2_file_path}" --format {imported_format} --label {label} -y')
         exported_new_fm_yaml_file = {}
         exported_new_fm_as_yaml_file = {}
         with open(exported_new_fm_schema_yaml_file_path) as yaml_file:
@@ -382,9 +387,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_prop_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} -y')
         with open(exported_prop_file_path) as prop_file:
             exported_prop_file = javaproperties.load(prop_file)
         with open(exported_as_kv_prop_file_path) as prop_file:
@@ -394,20 +399,22 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_import_export_kvset(self, resource_group, location):
-        kvset_store_prefix = get_resource_name_prefix('KVSetImportTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_import_export_kvset(self):
+        kvset_store_prefix = get_resource_name_prefix('kvsetimporttest')
         config_store_name = self.create_random_name(prefix=kvset_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # File <--> AppConfig tests
 
@@ -422,9 +429,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -435,9 +442,9 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         no_features_file_path = os.path.join(TEST_DIR, 'kvset_no_features.json')
 
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} --skip-features -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} --skip-features -y')
 
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
@@ -447,20 +454,22 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         os.remove(exported_file_path)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_strict_import(self, resource_group, location):
-        strict_store_prefix = get_resource_name_prefix('StrictImportTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_strict_import(self):
+        strict_store_prefix = get_resource_name_prefix('strictimporttest')
         config_store_name = self.create_random_name(prefix=strict_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # File <--> AppConfig tests
         imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
@@ -476,11 +485,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'strict_import_file_path': strict_import_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{strict_import_file_path}" --format {imported_format} --profile {profile} --strict -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{strict_import_file_path}" --format {imported_format} --profile {profile} --strict -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
         with open(strict_import_file_path) as json_file:
             expected_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -493,37 +502,31 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
-        import_export_store_prefix = get_resource_name_prefix('ImportExportTest')
+        import_export_store_prefix = get_resource_name_prefix('importexporttest')
         config_store_name = self.create_random_name(prefix=import_export_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
-
-        # Get connection string
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'connection_string': credential_list[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # Create AppService plan and webapp
-        web_app_prefix = get_resource_name_prefix('WebApp')
+        web_app_prefix = get_resource_name_prefix('webapp')
         webapp_name = self.create_random_name(prefix=web_app_prefix, length=24)
-        plan_prefix = get_resource_name_prefix('Plan')
+        plan_prefix = get_resource_name_prefix('plan')
         plan = self.create_random_name(prefix=plan_prefix, length=24)
         # Require a standard sku to allow for deployment slots
         self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} -p {}'.format(resource_group, webapp_name, plan))
 
         # Create deployment slot
-        slot_prefix = get_resource_name_prefix('Slot')
+        slot_prefix = get_resource_name_prefix('slot')
         slot = self.create_random_name(prefix=slot_prefix, length=24)
         self.cmd('webapp deployment slot create -g {} -n {} -s {}'.format(resource_group, webapp_name, slot))
 
@@ -552,7 +555,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         })
 
         # Add a new key-value entry
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('label', entry_label)])
@@ -563,7 +566,7 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         })
 
         # Add second key-value entry (No label)
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
                  checks=[self.check('key', entry_key2),
                          self.check('value', entry_value2)])
 
@@ -575,10 +578,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
          # Export snapshot kvs to app service as reference should fail
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'Cannot export snapshot key-values as references to App Service.'):
-            self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference --snapshot dummy_snapshot')
+            self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference --snapshot dummy_snapshot')
 
-        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
-        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
+        self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {export_dest} --appservice-account {appservice_account} --label {label} -y --export-as-reference')
+        self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {export_dest} --appservice-account {appservice_account} -y --export-as-reference')
 
         # Assert first reference is in the right format
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
@@ -619,10 +622,10 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'label': import_label
         })
-        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
         # Verfiy that app configuration reference does not exist in imported keys
-        imported_config =  self.cmd('appconfig kv list --connection-string {connection_string} --label {label}').get_output_in_json()
+        imported_config =  self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --label {label}').get_output_in_json()
         assert not any(setting['value'].lower().startswith(AppServiceConstants.APPSVC_CONFIG_REFERENCE_PREFIX.lower()) for setting in imported_config)
 
 
@@ -639,13 +642,13 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         })
 
         # Add new KeyVault ref in AppConfig
-        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} --label {label} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('label', label),
                          self.check('value', appconfig_keyvault_value)])
 
-        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
         exported_keys = next(x for x in app_settings if x['name'] == keyvault_key)
@@ -666,9 +669,9 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'label': updated_label
         })
-        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
 
-        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+        self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --label {label}',
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
@@ -691,14 +694,14 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         })
 
         # Add new KeyVault ref in AppConfig for the slot
-        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} --label {label} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} --label {label} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('label', label),
                          self.check('value', appconfigslot_keyvault_value)])
 
         # Export KeyVault ref to AppService
-        self.cmd('appconfig kv export --connection-string {connection_string} -d {export_dest} --appservice-account {slot_id} --label {label} -y')
+        self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {export_dest} --appservice-account {slot_id} --label {label} -y')
 
         # Verify that the webapp configuration was not updated
         app_settings = self.cmd('webapp config appsettings list -g {rg} -n {appservice_account}').get_output_in_json()
@@ -719,9 +722,9 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'label': updated_label
         })
-        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {slot_id} --label {label} -y')
+        self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {export_dest} --appservice-account {slot_id} --label {label} -y')
 
-        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+        self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --label {label}',
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', keyvault_key),
                          self.check('[0].value', appconfigslot_keyvault_value),
@@ -739,8 +742,8 @@ class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
             'settings': keyvault_ref
         })
         self.cmd('webapp config appsettings set -g {rg} -n {appservice_account} --slot-settings {settings}')
-        self.cmd('appconfig kv import --connection-string {connection_string} -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
-        self.cmd('appconfig kv list --connection-string {connection_string} --label {label}',
+        self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {export_dest} --appservice-account {appservice_account} --label {label} -y')
+        self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --label {label}',
                  checks=[self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].key', alt_keyvault_key),
                          self.check('[0].value', appconfig_keyvault_value),
@@ -753,22 +756,25 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_import_export_naming_conventions(self, resource_group, location):
-        naming_convention_store_prefix = get_resource_name_prefix('NamingConventionTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_import_export_naming_conventions(self):
+        naming_convention_store_prefix = get_resource_name_prefix('namingconventiontest')
         config_store_name = self.create_random_name(prefix=naming_convention_store_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'True'
         import_hyphen_path = os.path.join(TEST_DIR, 'import_features_hyphen.json')
@@ -786,9 +792,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
         with open(export_underscore_path) as json_file:
             export_underscore_path = json.load(json_file)
         with open(exported_file_path) as json_file:
@@ -801,14 +807,14 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'imported_file_path': import_multiple_feature_sections_path
         })
         with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
-            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Error if imported file has "enabled for" in wrong format
         self.kwargs.update({
             'imported_file_path': import_wrong_enabledfor_format_path
         })
         with self.assertRaisesRegex(CLIError, 'definition or have a true/false value.'):
-            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Import/Export yaml file
         imported_yaml_file_path = os.path.join(TEST_DIR, 'import_features_yaml.json')
@@ -823,9 +829,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_path': exported_yaml_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --naming-convention {naming_convention} -y')
         exported_yaml_file = {}
         exported_hyphen_yaml_file = {}
         with open(exported_yaml_file_path) as yaml_file:
@@ -838,22 +844,24 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         os.remove(exported_yaml_file_path)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self):
         # Respect both fm schemas in file
-        both_schema_test_prefix = get_resource_name_prefix('BothSchemaTest')
+        both_schema_test_prefix = get_resource_name_prefix('bothschematest')
         config_store_name = self.create_random_name(prefix=both_schema_test_prefix, length=24)
 
         location = 'eastus'
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku,
             'import_source': 'file'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # # Camel case naming convention
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
@@ -869,9 +877,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_both_schemas_fm_path': exported_both_schemas_camel_case_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_camel_case_file_path) as json_file:
             exported_camel_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -890,9 +898,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_both_schemas_fm_path': exported_both_schemas_pascal_case_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_pascal_case_file_path) as json_file:
             exported_pascal_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -911,9 +919,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_both_schemas_fm_path': exported_both_schemas_hyphen_case_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_hyphen_case_file_path) as json_file:
             exported_hyphen_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -933,9 +941,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_both_schemas_fm_path': exported_both_schemas_underscore_case_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_both_schemas_underscore_case_file_path) as json_file:
             exported_underscore_case_kvs = json.load(json_file)
         with open(expected_exported_both_schemas_file_path) as json_file:
@@ -955,9 +963,9 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'exported_file_both_schemas_fm_path': exported_duplicate_features_both_schemas_file_path
         })
         self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         self.cmd(
-            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_both_schemas_fm_path}" --format {imported_format} --label {label} -y')
         with open(exported_duplicate_features_both_schemas_file_path) as json_file:
             exported_duplicate_features = json.load(json_file)
         with open(expected_export_duplicate_features_both_schemas_file_path) as json_file:
@@ -973,7 +981,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, "Data contains an already defined section with the key FeatureManagement."):
             self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
 
         invalid_fm_sections_file_path = os.path.join(TEST_DIR, 'import_invalid_fm_sections.json')
@@ -982,7 +990,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
             self.cmd(
-            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
 
 class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
@@ -992,10 +1000,11 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         super().__init__(*args, **kwargs)
     
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_appconfig_to_appconfig_import_export(self, resource_group, location):
-        src_config_store_prefix = get_resource_name_prefix('Source')
-        dest_config_store_prefix = get_resource_name_prefix('Destination')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_appconfig_to_appconfig_import_export(self):
+        src_config_store_prefix = get_resource_name_prefix('source')
+        dest_config_store_prefix = get_resource_name_prefix('destination')
         src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
         dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
@@ -1003,27 +1012,18 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': src_config_store_name,
+            'src_endpoint': 'https://' + src_config_store_name + '.azconfig.io',
+            'dest_endpoint': 'https://' + dest_config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
-        # Get src connection string
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
-            'src_connection_string': credential_list[0]['connectionString'],
             'config_store_name': dest_config_store_name
         })
-        create_config_store(self, self.kwargs)
-
-        # Get dest connection string
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'dest_connection_string': credential_list[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # Add duplicate keys with different labels in src config store
         entry_key = "Color"
@@ -1035,7 +1035,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': entry_label
         })
         # add a new key-value entry
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('label', entry_label)])
@@ -1046,7 +1046,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'value': updated_value,
             'label': updated_label
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', updated_value),
                          self.check('label', updated_label)])
@@ -1059,7 +1059,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': entry_label
         })
         # add a new feature flag entry
-        self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {src_endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
                          self.check('label', entry_label)])
@@ -1068,7 +1068,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': updated_label
         })
-        self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {src_endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
                          self.check('label', updated_label)])
@@ -1086,7 +1086,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Importing with a new label should only import one KV and one feature as src labels will be overwritten in dest
         self.cmd(
-            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} -y')
+            'appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --src-label {src_label} --label {label} -y')
 
         # Check kv and features that were imported to dest config store
         # We can check by deleting since its better to clear dest config store for next import test
@@ -1094,7 +1094,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'key': any_key_pattern,
             'label': any_label_pattern
         })
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', dest_label),
                                        self.check('[1].key', entry_key),
@@ -1104,8 +1104,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Not specifying a label or preserve-labels should assign null label and import only one KV and one feature
         self.cmd(
-            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} -y')
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+            'appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --src-label {src_label} -y')
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', null_label),
                                        self.check('[1].key', entry_key),
@@ -1115,8 +1115,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Preserving labels and importing all kv and all features
         self.cmd(
-            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --preserve-labels -y')
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+            'appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --src-label {src_label} --preserve-labels -y')
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', entry_label),
                                        self.check('[1].key', internal_feature_key),
@@ -1134,18 +1134,18 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': dest_label
         })
         with self.assertRaisesRegex(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
-            self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} --preserve-labels -y')
+            self.cmd('appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --src-label {src_label} --label {label} --preserve-labels -y')
 
         # Export tests from src config store to dest config store
         # Exporting with a new label should only export one KV and one feature as src labels will be overwritten in dest
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login --label {src_label} --dest-label {label} -y')
         # Check kv and features that were exported to dest config store
         # We can check by deleting since its better to clear dest config store for next export test
         self.kwargs.update({
             'label': any_label_pattern
         })
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', dest_label),
                                        self.check('[1].key', entry_key),
@@ -1155,8 +1155,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Not specifying a label or preserve-labels should assign null label and export only one KV and one feature
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} -y')
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login --label {src_label} -y')
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', null_label),
                                        self.check('[1].key', entry_key),
@@ -1166,8 +1166,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Preserving labels and exporting all kv and all features
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --preserve-labels -y')
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y',
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login --label {src_label} --preserve-labels -y')
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y',
                                checks=[self.check('[0].key', internal_feature_key),
                                        self.check('[0].label', entry_label),
                                        self.check('[1].key', internal_feature_key),
@@ -1185,7 +1185,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'label': dest_label
         })
         with self.assertRaisesRegex(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
-            self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
+            self.cmd('appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login --label {src_label} --dest-label {label} --preserve-labels -y')
 
         # Tag filtering test
         key_tag_test = "TagTestKey"
@@ -1200,7 +1200,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
 
         # add a new key-value entry with tags
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --tags {tags} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --tags {tags} -y',
                  checks=[self.check('key', key_tag_test),
                          self.check('tags', tags)])
         
@@ -1211,7 +1211,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
 
         # add a new key-value entry without tags
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --label {label} --value {value} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --label {label} --value {value} -y',
                  checks=[self.check('label', label_without_tags),
                          self.check('tags', {})])
         
@@ -1224,16 +1224,125 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'dest_tags': dest_tags_str
         })
 
-        self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --key {key} --tags {tags} --dest-tags {dest_tags} -y')
-        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+        self.cmd('appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login --key {key} --tags {tags} --dest-tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --tags {dest_tags} -y',
                                         checks=[self.check('[0].key', key_tag_test),
                                                 self.check('[0].tags', dest_tags)]).get_output_in_json()
         assert(len(deleted_kv_with_tags) == 1)
 
         # import only key-value with tags and add new tags
-        self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-key {key} --src-tags {tags} --tags {dest_tags} -y')
-        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+        self.cmd('appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --src-key {key} --src-tags {tags} --tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --tags {dest_tags} -y',
                                         checks=[self.check('[0].key', key_tag_test),
                                                 self.check('[0].tags', dest_tags)]).get_output_in_json()
         assert(len(deleted_kv_with_tags) == 1)
 
+
+
+class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
+    """Test suite for importing key-values from Kubernetes ConfigMaps using AKS RunCommand."""
+
+    def __init__(self, method_name):
+        super().__init__(method_name)
+        self.recording_processors = [CredentialResponseSanitizer()]
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_appconfig_import_from_kubernetes_configmap(self, resource_group, location):
+        """Test all scenarios for importing key-values from Kubernetes ConfigMaps using AKS RunCommand."""
+        configmap_import_store_prefix = get_resource_name_prefix('configmapimporttest')
+        configmap_import_aks_prefix = get_resource_name_prefix('importakstest')
+        config_store_name = self.create_random_name(prefix=configmap_import_store_prefix, length=24)
+
+        aks_cluster_name = self.create_random_name(prefix=configmap_import_aks_prefix, length=18)
+
+        location = 'westus2'
+        sku = 'standard'
+        namespace = 'default'
+
+        node_resource_group = self.create_random_name(prefix='MC_aks_', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io',
+            'aks_cluster_name': aks_cluster_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'namespace': namespace,
+            'node_resource_group': node_resource_group
+        })
+        
+        # Create App Configuration store
+        create_config_store(self, self.kwargs, disable_local_auth=True)
+
+        aks_created = False
+        
+        try:
+            # Create AKS cluster and wait for completion
+            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-resource-group {node_resource_group} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage --os-sku AzureLinux')
+            
+            # Wait for AKS cluster to be ready
+            self.cmd('aks wait -g {rg} -n {aks_cluster_name} --created')
+            
+            aks_created = True
+
+            # try:
+            # Scenario 1: Import from a specific ConfigMap
+            configmap_name = 'test-config'
+            label1 = 'ConfigMapImport'
+            prefix = 'test/'
+            
+            kubectl_create_cmd = f'''kubectl create configmap {configmap_name} --from-literal=database.host=localhost --from-literal=database.port=5432 --from-literal=app.name=testapp -n {namespace}'''
+            
+            self.kwargs.update({
+                'configmap_name': configmap_name,
+                'label': label1,
+                'prefix': prefix,
+                'kubectl_create_cmd': kubectl_create_cmd
+            })
+            
+            # Create ConfigMap using AKS run command
+            self.cmd('aks command invoke -g {rg} -n {aks_cluster_name} --command "{kubectl_create_cmd}"')
+            
+            # Import from specific ConfigMap
+            self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s aks --aks-cluster {aks_cluster_name} --configmap-name {configmap_name} --configmap-namespace {namespace} --label {label} --prefix {prefix} -y')
+
+            # Verify imported key-values
+            imported_kvs = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --label {label}').get_output_in_json()
+            
+            # Check that all expected keys were imported
+            expected_keys = ['test/database.host', 'test/database.port', 'test/app.name']
+            imported_keys = [kv['key'] for kv in imported_kvs]
+            
+            for expected_key in expected_keys:
+                assert expected_key in imported_keys, f"Expected key '{expected_key}' not found in imported keys"
+            
+            # Verify specific values
+            database_host = next(kv for kv in imported_kvs if kv['key'] == 'test/database.host')
+            assert database_host['value'] == 'localhost'
+
+            database_port = next(kv for kv in imported_kvs if kv['key'] == 'test/database.port')
+            assert database_port['value'] == '5432'
+            
+            app_name = next(kv for kv in imported_kvs if kv['key'] == 'test/app.name')
+            assert app_name['value'] == 'testapp'
+
+            # Scenario 2: Error handling - non-existent ConfigMap
+            non_existent_configmap = 'non-existent-config'
+            error_label = 'ErrorTest'
+            
+            self.kwargs.update({
+                'non_existent_configmap': non_existent_configmap,
+                'error_label': error_label
+            })
+            
+            # This should fail gracefully
+            with self.assertRaises(AzureInternalError):
+                self.cmd('appconfig kv import --endpoint {endpoint} --auth-mode login -s aks --aks-cluster {aks_cluster_name} --configmap-name {non_existent_configmap} --configmap-namespace {namespace} --label {error_label} -y')
+        finally:
+            if aks_created:
+                try:
+                    self.cmd('aks delete -g {rg} -n {aks_cluster_name} --yes --no-wait')
+                except Exception as cleanup_error:
+                    print(f"Warning: Failed to clean up AKS cluster {aks_cluster_name}: {str(cleanup_error)}")

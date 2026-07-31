@@ -6,7 +6,7 @@
 import os
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.decorators import serial_test
 from ..storage_test_util import StorageScenarioMixin
@@ -128,7 +128,6 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             JMESPathCheck('name', blob_name)])
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-12-12')
 class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
@@ -175,7 +174,7 @@ class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
 
 class StorageBlobURLScenarioTest(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2')
     def test_storage_blob_url_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info, prefix="con1")

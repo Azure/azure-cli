@@ -122,6 +122,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @live_only()
+    def test_mysql_flexible_server_restore_no_wait_mgmt(self, resource_group):
+        self._test_flexible_server_restore_no_wait('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_gtid_reset(self, resource_group):
         self._test_flexible_server_gtid_reset('mysql', resource_group)
 
@@ -147,12 +153,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        storage_redundancy = "LocalRedundancy"
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} --storage-redundancy {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
                  .format(database_engine, resource_group, server_name, backup_retention, sku_name, tier, storage_size,
-                         storage_redundancy, 'dbadmin', version, database_name))
+                         'dbadmin', version, database_name))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -162,7 +167,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
-        self.assertEqual(basic_info['storage']['storageRedundancy'], storage_redundancy)
         self.assertEqual(basic_info['storage']['logOnDisk'], "Disabled")
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
@@ -347,7 +351,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location))
 
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.iops', 640)]).get_output_in_json()
+                          checks=[JMESPathCheck('storage.iops', 900)]).get_output_in_json()
 
         # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
 
@@ -408,12 +412,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location, DEFAULT_GENERAL_PURPOSE_SKU))
         
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
-
-        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
-                 .format(database_engine, resource_group, server_name))
-        
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
         
         self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
@@ -422,6 +420,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
 
+        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
+                 .format(database_engine, resource_group, server_name))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
+        
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Enabled --storage-size 64 --sku-name {} --tier GeneralPurpose'
                  .format(database_engine, resource_group, server_name_2, location, DEFAULT_GENERAL_PURPOSE_SKU))
 
@@ -447,12 +451,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
-        self.cmd('{} flexible-server create -g {} -n {} --storage-redundancy {} --vnet {} --subnet {} -l {} --yes'.format(
-                 database_engine, resource_group, source_server, storage_redundancy, source_vnet, source_subnet, location))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
+                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['storage']['storageRedundancy'], storage_redundancy)
 
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
@@ -569,8 +570,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
@@ -587,12 +586,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
 
         # 2. vnet to public access
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --storage-redundancy {} --public-access enabled'
-                                .format(database_engine, resource_group, target_location, target_server_public_access, source_server,
-                                        storage_redundancy)).get_output_in_json()
-        self.assertEqual(restore_result['storage']['storageRedundancy'], storage_redundancy)
-
-        #self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --public-access enabled'
+                                .format(database_engine, resource_group, target_location, target_server_public_access, source_server)).get_output_in_json()
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # 3. vnet to different vnet
@@ -705,6 +700,23 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Disabled'
                  .format(database_engine, resource_group, source_server),
                  checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
+
+    def _test_flexible_server_restore_no_wait(self, database_engine, resource_group):
+        location = DEFAULT_LOCATION
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --tier GeneralPurpose --sku-name {}'
+                 .format(database_engine, resource_group, source_server, location, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --no-wait'
+                 .format(database_engine, resource_group, target_server, source_server))
+
+        self.cmd('{} flexible-server wait -g {} -n {} --created --interval 30 --timeout 600'
+                 .format(database_engine, resource_group, target_server))
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
@@ -1280,12 +1292,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'None'
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
-        storage_redundancy = "LocalRedundancy"
 
         master_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --storage-redundancy {} --public-access none'
-                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU, storage_redundancy))
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --public-access none'
+                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
@@ -2037,6 +2048,9 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self.assertEqual(backup_name, customer_backup['name'])
         self.assertDictEqual(customer_backup, backups[0])
 
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {}'
+                 .format(database_engine, resource_group, server, backup_name), expect_failure=False)
+
 
 class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 
@@ -2280,11 +2294,58 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         self.assertEqual(maintenance_id, maintenance_read_response['id'])
 
-        reschedule_start_time = "2024-10-23T03:41Z"
+        reschedule_start_time = "2025-12-25T03:41Z"
         maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
                  .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
         maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
         self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
+
+
+class FlexibleServerMaintenanceBatchScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_mysql_flexible_server_maintenance_batch_mgmt(self, resource_group):
+        self._test_maintenance_batch_mgmt('mysql', resource_group)
+
+    def _test_maintenance_batch_mgmt(self, database_engine, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier GeneralPurpose --sku-name {}'
+                 .format(database_engine, resource_group, server_name, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        # set a custom maintenance window together with a batch
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Fri:13:00" --maintenance-batch Batch1'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.customWindow', 'Enabled'),
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 5),
+                     JMESPathCheck('maintenanceWindow.startHour', 13),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # update the window only (no --maintenance-batch): the existing batch must be preserved
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00"'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 6),
+                     JMESPathCheck('maintenanceWindow.startHour', 14),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # change the batch explicitly
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch2')])
+
+        # guardrail: --maintenance-batch without --maintenance-window is rejected
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        # guardrail: --maintenance-batch cannot be combined with disabling the window
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Disabled" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, server_name))
 
 
 class MySQLExportTest(ScenarioTest):
@@ -2317,12 +2378,11 @@ class MySQLExportTest(ScenarioTest):
         self.storage_cmd('storage container create -n {}', account_info, container_name)
         return container_name
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="eastus")
     @ServerPreparer(engine_type='mysql', location="eastus")
     @StorageAccountPreparer(location="eastus")
-
+    @unittest.skip("MySQL server backup export is not supported temporarily.")
     def test_mysql_export(self, resource_group, server, storage_account):
         self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
 
@@ -2361,3 +2421,42 @@ class MySQLExportTest(ScenarioTest):
 
         # deletion of single server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
+
+
+class MySQLFabricMirroringEnableDisableTest(ScenarioTest):
+    """Scenario tests for Fabric Mirroring enable/disable commands."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    @live_only()
+    def test_mysql_fabric_mirroring_enable_disable(self, resource_group):
+        # Arrange
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        identity_name = self.create_random_name('identity', 24)
+        location = 'eastus2euap'
+
+        # Create server (GeneralPurpose tier required for Fabric Mirroring, using Standard_D2ads_v5 valid in eastus2euap)
+        create_result = self.cmd('mysql flexible-server create -l {} -g {} -n {} --public-access {} --tier GeneralPurpose --sku-name {}'
+                                 .format(location, resource_group, server_name, '0.0.0.0', 'Standard_D2ads_v5')).get_output_in_json()
+
+        # Verify server was created by checking the host contains the server name
+        self.assertIn(server_name, create_result['host'])
+
+        # Set binlog_row_image to 'noblob' as required for Fabric Mirroring
+        self.cmd('mysql flexible-server parameter set -g {} -s {} -n binlog_row_image -v noblob'
+                 .format(resource_group, server_name))
+
+        # Create User Assigned Managed Identity
+        identity_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        identity_id = identity_result['id']
+
+        # Enable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring enable -g {} -n {} --identity-resource-id {}'
+                 .format(resource_group, server_name, identity_id))
+
+        # Disable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring disable -g {} -n {}'
+                 .format(resource_group, server_name))
+
+        # Cleanup
+        self.cmd('mysql flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))

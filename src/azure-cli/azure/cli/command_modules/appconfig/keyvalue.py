@@ -30,11 +30,11 @@ from ._kv_import_helpers import (
     __delete_configuration_setting_from_config_store,
     __read_features_from_file,
     __read_kv_from_app_service,
+    __read_kv_from_kubernetes_configmap,
     __read_kv_from_file,
 )
 from knack.log import get_logger
 from knack.util import CLIError
-from ._constants import HttpHeaders
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -49,8 +49,11 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff, ImportMode)
+                         JsonDiff, ImportMode,
+                         AIConfigConstants, HttpHeaders,
+                         SnapshotReferenceConstants)
 from ._featuremodels import map_keyvalue_to_featureflag
+from ._json import parse_json_with_comments
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
@@ -92,7 +95,11 @@ def import_config(cmd,
                   src_endpoint=None,
                   src_tags=None,  # tags to filter
                   # from-appservice parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  # from-aks parameters
+                  aks_cluster=None,
+                  configmap_namespace="default",
+                  configmap_name=None):
 
     src_features = []
     dest_features = []
@@ -175,6 +182,25 @@ def import_config(cmd,
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
+
+    elif source == 'aks':
+        if separator:
+            # If separator is provided, use max depth by default unless depth is specified.
+            depth = sys.maxsize if depth is None else int(depth)
+        else:
+            if depth and int(depth) != 1:
+                logger.warning("Cannot flatten hierarchical data without a separator. --depth argument will be ignored.")
+            depth = 1
+
+        src_kvs = __read_kv_from_kubernetes_configmap(cmd,
+                                                      aks_cluster=aks_cluster,
+                                                      configmap_name=configmap_name,
+                                                      namespace=configmap_namespace,
+                                                      prefix_to_add=prefix,
+                                                      content_type=content_type,
+                                                      format_=format_,
+                                                      separator=separator,
+                                                      depth=depth)
 
     if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
@@ -483,9 +509,10 @@ def set_key(cmd,
         if retrieved_kv is None:
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
+                    # Ensure that provided value is valid JSON and strip comments if needed.
                     value = 'null' if value is None else value
-                    json.loads(value)
+
+                    __validate_json_value(value, content_type)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -499,8 +526,8 @@ def set_key(cmd,
             content_type = retrieved_kv.content_type if content_type is None else content_type
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    json.loads(value)
+                    # Ensure that provided value is valid JSON and strip comments if needed.
+                    __validate_json_value(value, content_type)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -620,6 +647,85 @@ def set_keyvault(cmd,
         except Exception as exception:
             raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
+
+
+def set_snapshot_reference(cmd,
+                           key,
+                           snapshot_name,
+                           name=None,
+                           label=None,
+                           tags=None,
+                           yes=False,
+                           connection_string=None,
+                           auth_mode="key",
+                           endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    snapshot_ref_value = json.dumps({SnapshotReferenceConstants.SNAPSHOT_NAME_KEY: snapshot_name}, ensure_ascii=False)
+    retry_times = 3
+    retry_interval = 1
+
+    label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
+    for i in range(0, retry_times):
+        retrieved_kv = None
+        set_kv = None
+        new_kv = None
+
+        try:
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+        except ResourceNotFoundError:
+            logger.debug("Key '%s' with label '%s' not found. A new snapshot reference will be created.", key, label)
+        except HttpResponseError as exception:
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
+
+        if retrieved_kv is None:
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=snapshot_ref_value,
+                                          content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
+                                          tags=tags)
+        else:
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=snapshot_ref_value,
+                                          content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
+                                          tags=retrieved_kv.tags if tags is None else tags,
+                                          read_only=retrieved_kv.read_only,
+                                          etag=retrieved_kv.etag)
+
+        verification_kv = {
+            "key": set_kv.key,
+            "label": set_kv.label,
+            "content_type": set_kv.content_type,
+            "value": set_kv.value,
+            "tags": set_kv.tags
+        }
+        entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
+        confirmation_message = "Are you sure you want to set the snapshot reference: \n" + entry + "\n"
+        user_confirmation(confirmation_message, yes)
+
+        try:
+            if set_kv.etag is None:
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+            else:
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+            return convert_configurationsetting_to_keyvalue(new_kv)
+
+        except ResourceReadOnlyError:
+            raise CLIError("Failed to update read only snapshot reference. Unlock the key-value before updating it.")
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
+                time.sleep(retry_interval)
+            else:
+                raise CLIErrors.AzureResponseError("Failed to set the snapshot reference due to an exception: " + str(exception))
+        except Exception as exception:
+            raise CLIError("Failed to set the snapshot reference due to an exception: " + str(exception))
+    raise CLIError("Failed to set the snapshot reference '{}' due to a conflicting operation.".format(key))
 
 
 def delete_key(cmd,
@@ -795,6 +901,7 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False,
+             resolve_snapshot_references=False,
              auth_mode="key",
              endpoint=None):
     if fields and resolve_keyvault:
@@ -815,7 +922,45 @@ def list_key(cmd,
                                             top=top,
                                             all_=all_,
                                             cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
+
+    if resolve_snapshot_references:
+        keyvalues = __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
+
     return keyvalues
+
+
+def __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=None):
+    """Return key-values in the referenced snapshot. The result may contain duplicate keys,
+    which the caller is responsible for handling.
+    """
+    resolved_keyvalues = []
+    for keyvalue in keyvalues:
+        content_type = getattr(keyvalue, 'content_type', None)
+        if not (isinstance(content_type, str) and
+                content_type.lower() == SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE.lower()):
+            resolved_keyvalues.append(keyvalue)
+            continue
+
+        reference_value = getattr(keyvalue, 'value', None) or '{}'
+        try:
+            snapshot_name = json.loads(reference_value).get(SnapshotReferenceConstants.SNAPSHOT_NAME_KEY)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning("Skipping snapshot reference with key '%s': invalid value format.", getattr(keyvalue, 'key', None))
+            continue
+
+        if not snapshot_name:
+            logger.warning("Skipping snapshot reference with key '%s': missing snapshot name.", getattr(keyvalue, 'key', None))
+            continue
+
+        try:
+            snapshot_keyvalues = __read_kv_from_config_store(azconfig_client, snapshot=snapshot_name, cli_ctx=cli_ctx)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Skipping snapshot reference '%s': %s", snapshot_name, str(ex))
+            continue
+
+        resolved_keyvalues.extend(snapshot_keyvalues)
+
+    return resolved_keyvalues
 
 
 def restore_key(cmd,
@@ -960,3 +1105,12 @@ def list_revision(cmd,
         return retrieved_revisions
     except HttpResponseError as ex:
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
+
+
+def __validate_json_value(json_string, content_type):
+    # We do not allow comments in keyvault references, feature flags, and AI chat completion configs
+    if content_type in (FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE, KeyVaultConstants.KEYVAULT_CONTENT_TYPE, AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE):
+        json.loads(json_string)
+
+    else:
+        parse_json_with_comments(json_string)

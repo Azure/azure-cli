@@ -23,9 +23,6 @@ CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 # Add names of clouds that don't allow telemetry data collection here such as some air-gapped clouds.
 CLOUDS_FORBIDDING_TELEMETRY = ['USSec', 'USNat']
 
-# Add names of clouds that don't allow Aladdin requests for command recommendations here
-CLOUDS_FORBIDDING_ALADDIN_REQUEST = ['USSec', 'USNat']
-
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
@@ -66,6 +63,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         "active_directory_resource_id": "authentication.audiences[0]",
         "app_insights_resource_id": "appInsightsResourceId",
         "app_insights_telemetry_channel_resource_id": "appInsightsTelemetryChannelResourceId",
+        "app_service_resource_id": "appServiceResourceId",
         "attestation_resource_id": "attestationResourceId",
         "azmirror_storage_account_resource_id": "azmirrorStorageAccountResourceId",
         "batch_resource_id": "batch",
@@ -89,6 +87,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  active_directory_resource_id=None,
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
+                 app_service_resource_id=None,
                  attestation_resource_id=None,
                  azmirror_storage_account_resource_id=None,
                  batch_resource_id=None,
@@ -111,6 +110,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.active_directory_resource_id = active_directory_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
+        self.app_service_resource_id = app_service_resource_id
         self.attestation_resource_id = attestation_resource_id
         self.azmirror_storage_account_resource_id = azmirror_storage_account_resource_id
         self.batch_resource_id = batch_resource_id
@@ -272,6 +272,7 @@ def _arm_to_cli_mapper(arm_dict):
                                                   fallback_value=get_endpoint_fallback_value('app_insights_resource_id')),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId',
                                                                     fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
+            app_service_resource_id=get_endpoint('appServiceResourceId', fallback_value=get_endpoint_fallback_value('app_service_resource_id')),
             attestation_resource_id=get_endpoint('attestationResourceId',
                                                  fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
             azmirror_storage_account_resource_id=get_endpoint('azmirrorStorageAccountResourceId'),
@@ -354,6 +355,7 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
     AzureGermanCloud = 'AzureGermanCloud'
+    AzureBleuCloud = 'AzureBleuCloud'
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -369,7 +371,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_graph_resource_id='https://graph.windows.net/',
         microsoft_graph_resource_id='https://graph.microsoft.com/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
         media_resource_id='https://rest.media.azure.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
@@ -377,6 +379,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.net',
         attestation_resource_id='https://attest.azure.net',
+        app_service_resource_id='https://appservice.azure.com',
         portal='https://portal.azure.com'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
@@ -405,13 +408,16 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
         microsoft_graph_resource_id='https://microsoftgraph.chinacloudapi.cn',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
         media_resource_id='https://rest.media.chinacloudapi.cn',
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.azure.cn',
+        # App Service Audience is currently not available in Mooncake,
+        # Using the management endpoint until the App Service audience is enabled
+        app_service_resource_id='https://management.core.chinacloudapi.cn/',
         portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
@@ -436,13 +442,16 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.microsoftazure.us/',
         microsoft_graph_resource_id='https://graph.microsoft.us/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
         media_resource_id='https://rest.media.usgovcloudapi.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.usgovcloudapi.net',
+        # App Service Audience is currently not available in US Government cloud,
+        # Using the management endpoint until the App Service audience is enabled
+        app_service_resource_id='https://management.core.usgovcloudapi.net/',
         portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
@@ -468,7 +477,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
         microsoft_graph_resource_id='https://graph.microsoft.de',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
         media_resource_id='https://rest.media.cloudapi.de',
         ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de',
         portal='https://portal.microsoftazure.de'),
@@ -481,7 +490,36 @@ AZURE_GERMAN_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.cloudapi.de',
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
-HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+AZURE_BLEU_CLOUD = Cloud(
+    CloudNameEnum.AzureBleuCloud,
+    endpoints=CloudEndpoints(
+        management='https://management.sovcloud-api.fr/',
+        resource_manager='https://management.sovcloud-api.fr',
+        sql_management='https://management.database.sovcloud-api.fr:8443/',
+        batch_resource_id='https://batch.sovcloud-api.fr/',
+        gallery='https://gallery.sovcloud-api.fr/',
+        active_directory='https://login.sovcloud-identity.fr',
+        active_directory_resource_id='https://management.sovcloud-api.fr/',
+        active_directory_graph_resource_id='https://graph.svc.sovcloud.fr/',
+        microsoft_graph_resource_id='https://graph.svc.sovcloud.fr',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases_master.json',
+        media_resource_id='https://rest.media.sovcloud-api.fr',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.sovcloud-api.fr',
+        portal='https://portal.sovcloud-azure.fr'),
+    suffixes=CloudSuffixes(
+        acr_login_server_endpoint='.azurecr.sovcloud-azure.fr',
+        attestation_endpoint='attest.sovcloud-api.fr',
+        storage_endpoint='core.sovcloud-api.fr',
+        storage_sync_endpoint='afs.sovcloud-api.fr',
+        keyvault_dns='.vault.sovcloud-api.fr',
+        mhsm_dns='.managedhsm.sovcloud-api.fr',
+        sql_server_hostname='.database.sovcloud-api.fr',
+        mysql_server_endpoint='.mysql.database.sovcloud-api.fr',
+        postgresql_server_endpoint='.postgres.database.sovcloud-api.fr',
+        mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
+        synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
+
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, AZURE_BLEU_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():

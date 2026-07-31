@@ -8,7 +8,7 @@ import re
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
-from ._constants import ACR_NAME_VALIDATION_REGEX
+from ._constants import ACR_NAME_VALIDATION_REGEX, USER_ASSIGNED_IDENTITY_RESOURCE_ID_TEMPLATE
 
 BAD_REPO_FQDN = "The positional parameter 'repo_id' must be a fully qualified repository specifier such"\
                 " as 'myregistry.azurecr.io/hello-world'."
@@ -192,3 +192,36 @@ def validate_repository(namespace):
 def validate_docker_file_path(docker_file_path):
     if not os.path.isfile(docker_file_path):
         raise FileOperationError("Unable to find '{}'.".format(docker_file_path))
+
+
+def validate_cache_credentials(namespace):
+    """Validate cache credential options - allow both --identity and --cred-set, but --remove-cred-set is exclusive."""
+    has_identity = namespace.identity is not None
+    has_cred_set = namespace.cred_set is not None
+    has_remove_cred_set = getattr(namespace, 'remove_cred_set', False)
+
+    if has_remove_cred_set and (has_identity or has_cred_set):
+        raise InvalidArgumentValueError(
+            "Cannot specify --remove-cred-set with other credential options. "
+            "Use --remove-cred-set alone to remove credentials."
+        )
+
+    # Validate identity format if provided
+    if has_identity:
+        identity_pattern = (
+            r'^/subscriptions/[^/]+/resource[Gg]roups/[^/]+'
+            r'/providers/Microsoft\.ManagedIdentity'
+            r'/userAssignedIdentities/[^/]+$'
+        )
+
+        if not re.match(identity_pattern, namespace.identity, re.IGNORECASE):
+            example_format = USER_ASSIGNED_IDENTITY_RESOURCE_ID_TEMPLATE.format(
+                sub_id='{subscriptionId}',
+                rg='{resourceGroupName}',
+                identity_name='{identityName}'
+            )
+            raise InvalidArgumentValueError(
+                f"The --identity parameter must be a valid ARM resource ID "
+                f"for a user-assigned managed identity. "
+                f"Format: {example_format}"
+            )

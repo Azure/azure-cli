@@ -7,22 +7,25 @@
 
 import json
 
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    def test_azconfig_snapshot_mgmt(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('SnapshotStore') 
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_snapshot_mgmt(self):
+        store_name_prefix = get_resource_name_prefix('snapshotstore') 
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         snapshot_name = "TestSnapshot"
         store_location = 'francecentral'
@@ -32,18 +35,14 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'snapshot_name': snapshot_name,
             'rg_loc': store_location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku,
             'retention_days': 1,
-            'enable_purge_protection': False
+            'enable_purge_protection': False,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
 
-        create_config_store(self, self.kwargs)
-
-        credential_list =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'connection_string': credential_list[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         entry_key = "TestKey1"
         entry_value = "TestValue1"
@@ -60,7 +59,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             "label": dev_label
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('label', dev_label)])
@@ -70,7 +69,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'value': entry_value2,
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key2),
                          self.check('value', entry_value2),
                          self.check('label', dev_label)])
@@ -80,7 +79,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'value': entry_value3,
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key3),
                          self.check('value', entry_value3),
                          self.check('label', dev_label)])
@@ -93,13 +92,13 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'retention_period': retention_period
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])
 
 
         # Test showing created snapshot
-        created_snapshot = self.cmd('appconfig snapshot show --connection-string {connection_string} --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
+        created_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
 
         self.assertEqual(created_snapshot['items_count'], 2)
         self.check(created_snapshot['status'], 'ready')
@@ -107,28 +106,28 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.assertRaises(KeyError, lambda: created_snapshot['created'])
 
         # Test listing snapshots
-        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --connection-string {connection_string} --fields name status items_count filters').get_output_in_json()
+        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --endpoint {endpoint} --auth-mode login --fields name status items_count filters').get_output_in_json()
         self.assertEqual(created_snapshots[0]['items_count'], 2)
         self.assertEqual(created_snapshots[0]['status'], 'ready')
         self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
 
         # Test snapshot archive
-        archived_snapshot = self.cmd('appconfig snapshot archive --connection-string {connection_string} --snapshot-name {snapshot_name}').get_output_in_json()
+        archived_snapshot = self.cmd('appconfig snapshot archive --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name}').get_output_in_json()
         self.assertIsNotNone(archived_snapshot['expires'])
         self.assertEqual(archived_snapshot['status'], 'archived')
-        active_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --status ready').get_output_in_json()
+        active_snapshots = self.cmd('appconfig snapshot list --endpoint {endpoint} --auth-mode login --status ready').get_output_in_json()
         self.assertEqual(len(active_snapshots), 0)
 
         # Test snapshot recovery
-        self.cmd('appconfig snapshot recover --connection-string {connection_string} -s {snapshot_name}',
+        self.cmd('appconfig snapshot recover --endpoint {endpoint} --auth-mode login -s {snapshot_name}',
                                      checks=[self.check('itemsCount', 2),
                                              self.check('status', 'ready'),
                                              self.check('expires', None),])
-        archived_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --status archived').get_output_in_json()
+        archived_snapshots = self.cmd('appconfig snapshot list --endpoint {endpoint} --auth-mode login --status archived').get_output_in_json()
         self.assertEqual(len(archived_snapshots), 0)
 
         # Test listing snapshot kvs
-        kvs = self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}').get_output_in_json()
+        kvs = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --snapshot {snapshot_name}').get_output_in_json()
         assert len(kvs) == 2
 
         # Test error returned for listing kvs in non-existent snapshot
@@ -139,7 +138,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CliResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
-            self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
+            self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --snapshot {snapshot_name}')
 
         # Test snapshot import/export
         config_store_2_name = self.create_random_name(prefix=store_name_prefix, length=24)
@@ -147,49 +146,46 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_2_name,
             'snapshot_name': snapshot_name,
+            'dest_endpoint': 'https://' + config_store_2_name + '.azconfig.io'
         })
 
-        create_config_store(self, self.kwargs)
-
-        credential_list_2 =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'dest_connection_string': credential_list_2[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # Export snapshot kvs to store
-        self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} -y')
+        self.cmd('appconfig kv export -d appconfig --endpoint {endpoint} --auth-mode login --dest-endpoint {dest_endpoint} --dest-auth-mode login --snapshot {snapshot_name} -y')
 
         # Export with skip-features should fail
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments."):
-            self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} --skip-features -y')
+            self.cmd('appconfig kv export -d appconfig --endpoint {endpoint} --auth-mode login --dest-endpoint {dest_endpoint} --dest-auth-mode login --snapshot {snapshot_name} --skip-features -y')
 
         # Export with skip-keyvault should fail
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments."):
-            self.cmd('appconfig kv export -d appconfig --connection-string {connection_string} --dest-connection-string {dest_connection_string} --snapshot {snapshot_name} --skip-keyvault -y')
+            self.cmd('appconfig kv export -d appconfig --endpoint {endpoint} --auth-mode login --dest-endpoint {dest_endpoint} --dest-auth-mode login --snapshot {snapshot_name} --skip-keyvault -y')
 
         # List snapshots in store
-        dest_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        dest_kvs = self.cmd('appconfig kv list --endpoint {dest_endpoint} --auth-mode login --key * --label *').get_output_in_json()
         self.assertEqual(len(dest_kvs), 2)
 
         # Delete all kvs
-        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key * --label * -y')
+        self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key * --label * -y')
 
         # Import snapshot kvs from source
-        self.cmd('appconfig kv import -s appconfig --connection-string {dest_connection_string} --src-connection-string {connection_string} --src-snapshot {snapshot_name} -y')
+        self.cmd('appconfig kv import -s appconfig --endpoint {dest_endpoint} --auth-mode login --src-endpoint {endpoint} --src-auth-mode login --src-snapshot {snapshot_name} -y')
 
         # Import with skip-features should fail
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments."):
-            self.cmd('appconfig kv import -s appconfig --connection-string {dest_connection_string} --src-connection-string {connection_string} --src-snapshot {snapshot_name} --skip-features -y')
+            self.cmd('appconfig kv import -s appconfig --endpoint {dest_endpoint} --auth-mode login --src-endpoint {endpoint} --src-auth-mode login --src-snapshot {snapshot_name} --skip-features -y')
 
         # List snapshots in store
-        current_kvs = self.cmd('appconfig kv list --connection-string {dest_connection_string} --key * --label *').get_output_in_json()
+        current_kvs = self.cmd('appconfig kv list --endpoint {dest_endpoint} --auth-mode login --key * --label *').get_output_in_json()
         self.assertEqual(len(current_kvs), 2)
 
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    def test_azconfig_snapshot_filtering(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('SnapshotFilters') 
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_snapshot_filtering(self):
+        store_name_prefix = get_resource_name_prefix('snapshotfilters') 
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
         store_location = 'francecentral'
         sku = 'standard'
@@ -197,18 +193,14 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': store_location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku,
             'retention_days': 1,
-            'enable_purge_protection': False
+            'enable_purge_protection': False,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
 
-        create_config_store(self, self.kwargs)
-
-        credential_list =  self.cmd('appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'connection_string': credential_list[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # # Filter by tags test
 
@@ -233,7 +225,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'retention_period': retention_period
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tags} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tags} -y',
              checks=[self.check('key', key_with_tags + "1"),
              self.check('label', label_with_tags),
             self.check('tags', tags)])
@@ -246,7 +238,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': "TestSnapshotWith5Tags"
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter_with_tags} --retention-period {retention_period} --composition-type key_label',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter_with_tags} --retention-period {retention_period} --composition-type key_label',
              checks=[self.check('itemsCount', 1),
                  self.check('status', 'ready')])
 
@@ -260,7 +252,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'tag1': tag1
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag1} -y',
              checks=[self.check('key', key_with_tags + "2"),
                  self.check('label', label_with_tags),
                  self.check('tags', tag1_dict)])
@@ -272,7 +264,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': "TestSnapshotWith1Tag"
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter_with_tag1} --retention-period {retention_period} --composition-type key_label',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter_with_tag1} --retention-period {retention_period} --composition-type key_label',
              checks=[self.check('itemsCount', 2),
                  self.check('status', 'ready')])
 
@@ -286,7 +278,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'tag_with_empty_value': tag_with_empty_value
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag_with_empty_value} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag_with_empty_value} -y',
              checks=[self.check('key', key_with_tags + "3"),
                  self.check('label', label_with_tags),
                  self.check('tags', empty_tag_value_dict)])
@@ -298,7 +290,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': "TestSnapshotWithEmptyTagValue"
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter_with_empty_tag_value} --retention-period {retention_period} --composition-type key_label',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter_with_empty_tag_value} --retention-period {retention_period} --composition-type key_label',
              checks=[self.check('itemsCount', 1),
              self.check('status', 'ready')])
 
@@ -309,7 +301,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': "TestSnapshotWithAllKVs"
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter_all_kvs} --retention-period {retention_period} --composition-type key_label',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter_all_kvs} --retention-period {retention_period} --composition-type key_label',
              checks=[self.check('itemsCount', 3),
                  self.check('status', 'ready')])
 
@@ -328,7 +320,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             "label": dev_label
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('label', dev_label)])
@@ -338,7 +330,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'value': entry_value2,
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key2),
                          self.check('value', entry_value2),
                          self.check('label', dev_label)])
@@ -348,7 +340,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'value': entry_value3,
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --label {label} -y',
                  checks=[self.check('key', entry_key3),
                          self.check('value', entry_value3),
                          self.check('label', dev_label)])
@@ -361,6 +353,6 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': "TestSnapshotWithPrefix"
         })
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])

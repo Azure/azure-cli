@@ -35,6 +35,7 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
+from azure.cli.core.util import shell_safe_json_parse
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -108,6 +109,7 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
         c.argument('ssl_profile_id', help='SSL profile resource of the application gateway.', is_preview=True)
+        c.argument('enable_fips', arg_type=get_three_state_flag(), help='Whether FIPS is enabled on the application gateway resource.')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
         c.argument('enable_private_link',
@@ -225,7 +227,7 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-policy') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
         c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP']),
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP', 'Microsoft_HTTPDDoSRuleSet']),
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
@@ -613,7 +615,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
@@ -639,6 +641,7 @@ def load_arguments(self, _):
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+        c.argument('record_type', help='When record type is set, a traffic manager profile will allow only endpoints that match this type.', arg_type=get_enum_type(['A', 'AAAA', 'CNAME']))
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
         c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
@@ -780,6 +783,11 @@ def load_arguments(self, _):
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
 
+        c.argument('auth_type', options_list=['--authentication-type', '--auth-type'], help='Authentication type for the VPN connection.', arg_type=get_enum_type(['Certificate', 'PSK']))
+        c.argument('cert_auth', options_list=['--certificate-authentication', '--cert-auth'],
+                   help='Certificate-based authentication configuration. Provide as JSON string or file path with @ prefix, Expected keys (outboundAuthCertificate, inboundAuthCertificateChain, inboundAuthCertificateSubjectName).',
+                   type=shell_safe_json_parse)
+
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
                    help='Name of the route server.')
@@ -835,4 +843,15 @@ def load_arguments(self, _):
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
             c.argument('resource_name', required=False, help='Name of the resource')
+    # endregion
+
+    # region DdosCustomPolicy
+    with self.argument_context('network ddos-custom-policy create') as c:
+        c.argument('ddos_custom_policy_name', options_list=['--ddos-custom-policy-name', '--name', '-n'], help='The name of the DDoS custom policy.')
+        c.argument('location', arg_group='Parameters', help='Resource location.')
+        c.argument('tags', arg_group='Parameters', help='Resource tags.')
+        c.argument('detection_rule_name', arg_group='Detection Rules', help='The name of the DDoS detection rule.')
+        c.argument('detection_mode', arg_group='Detection Rules', help='The detection mode for the DDoS detection rule.')
+        c.argument('traffic_type', arg_group='Detection Rules', help='The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.')
+        c.argument('packets_per_second', arg_group='Detection Rules', help='The customized packets per second threshold.')
     # endregion

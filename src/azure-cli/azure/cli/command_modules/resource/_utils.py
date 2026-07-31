@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import typing as t
 import re
 import json
 
@@ -12,6 +13,10 @@ _management_group_pattern = (
 _subscription_pattern = r"^\/?subscriptions\/(?P<subscription_id>[a-f0-9-]+)"
 _resource_group_pattern = r"^\/resourceGroups\/(?P<resource_group_name>[-\w\._\(\)]+)"
 _relative_resource_id_pattern = r"^\/providers/(?P<relative_resource_id>.+$)"
+
+
+def str_lower_eq(str1: t.Optional[str], str2: t.Optional[str]):
+    return str1.lower() == str2.lower() if str1 and str2 else False
 
 
 def split_resource_id(resource_id):
@@ -87,12 +92,7 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _build_http_response_error_message(http_error):
-    from azure.core.exceptions import StreamClosedError, StreamConsumedError
-    try:
-        error_txt = http_error.response.internal_response.text
-        error_info = json.loads(error_txt)['error']
-    except (StreamClosedError, StreamConsumedError):
-        error_info = http_error.response.json()['error']
+    error_info = http_error.response.json()['error']
     error_details = error_info.pop('details') if 'details' in error_info else []
     err_messages = [f'{json.dumps(error_info)}']
 

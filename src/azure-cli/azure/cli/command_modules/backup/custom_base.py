@@ -6,8 +6,9 @@
 from azure.cli.command_modules.backup import custom
 from azure.cli.command_modules.backup import custom_afs
 from azure.cli.command_modules.backup import custom_help
-import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.command_modules.backup import custom_wl
+import azure.cli.command_modules.backup.custom_common as common
+from azure.cli.command_modules.backup._validators import validate_reconfigure_cli_parameters
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf, vaults_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
@@ -17,6 +18,51 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 # pylint: disable=import-error
 
 fabric_name = "Azure"
+
+
+def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
+                                  new_vault_name, new_vault_resource_group,
+                                  new_policy_name, backup_management_type, workload_type=None,
+                                  retain_as_per_policy=False, tenant_id=None):
+    """Entry point for reconfiguring backup protection across vaults.
+
+    This function performs common validation and dispatches to workload specific implementations
+    in custom.py (VM), custom_afs.py (AFS) and custom_wl.py (Workload)."""
+
+    # Common CLI-level validation (different vaults, workload type rules etc.)
+    validate_reconfigure_cli_parameters(vault_name, resource_group_name,
+                                        new_vault_name, new_vault_resource_group,
+                                        backup_management_type, workload_type)
+
+    # Fetch the protected item from old vault (use existing show_item logic)
+    item = show_item(cmd, client, resource_group_name, vault_name,
+                     container_name, item_name, backup_management_type, workload_type)
+    custom_help.validate_item(item)
+    if isinstance(item, list):  # Ambiguous friendly name
+        raise ValidationError("Multiple items found. Please use native container and item names.")
+
+    # Item-level validation (state, workload specifics)
+    from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectionState
+    if item.properties.protection_state not in [ProtectionState.protected,
+                                                ProtectionState.protection_stopped]:
+        raise ValidationError(f"Reconfiguration only supported for items in states: Protected or "
+                              f"ProtectionStopped. Current state: "
+                              f"{item.properties.protection_state}")
+
+    # Dispatch by backup management type
+    dispatch_type = backup_management_type.lower()
+    if dispatch_type == 'azureiaasvm':
+        return custom.reconfigure_vm_protection(cmd, item, vault_name, resource_group_name,
+                                                new_vault_name, new_vault_resource_group,
+                                                new_policy_name, retain_as_per_policy, tenant_id)
+    if dispatch_type == 'azurestorage':
+        return custom_afs.reconfigure_afs_protection(cmd, item, vault_name, resource_group_name,
+                                                     new_vault_name, new_vault_resource_group,
+                                                     new_policy_name, retain_as_per_policy, tenant_id)
+    if dispatch_type == 'azureworkload':
+        return custom_wl.reconfigure_wl_protection(cmd, item, vault_name, resource_group_name,
+                                                   new_vault_name, new_vault_resource_group,
+                                                   new_policy_name, workload_type, retain_as_per_policy, tenant_id)
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,

@@ -8,7 +8,6 @@ from azure.core.configuration import Configuration
 from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
 from abc import abstractmethod
 
-from ._poller import AAZNoPolling, AAZBasePolling
 from azure.cli.core.cloud import (CloudEndpointNotSetException, CloudSuffixNotSetException,
                                   CloudNameEnum as _CloudNameEnum)
 
@@ -73,6 +72,9 @@ class AAZBaseClient(PipelineClient):
         base_url = self._build_base_url(ctx, **kwargs)
         if not base_url:
             raise CloudEndpointNotSetException()
+        if not kwargs.get('custom_hook_policy'):
+            from azure.cli.core.sdk.policies import get_custom_hook_policy
+            kwargs['custom_hook_policy'] = get_custom_hook_policy(ctx.cli_ctx)
         super().__init__(
             base_url=base_url,
             config=self._build_configuration(ctx, credential, **kwargs),
@@ -108,6 +110,7 @@ class AAZBaseClient(PipelineClient):
     def build_lro_polling(self, no_wait, initial_session, deserialization_callback, error_callback,
                           lro_options=None, path_format_arguments=None):
         from azure.core.polling.base_polling import OperationResourcePolling
+        from ._poller import AAZNoPolling, AAZBasePolling
         if no_wait == True:  # noqa: E712, pylint: disable=singleton-comparison
             polling = AAZNoPolling()
         else:
@@ -230,6 +233,7 @@ class AAZMgmtClient(AAZBaseClient):
     def build_lro_polling(self, no_wait, initial_session, deserialization_callback, error_callback,
                           lro_options=None, path_format_arguments=None):
         from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
+        from ._poller import AAZNoPolling, AAZBasePolling
         if no_wait == True:  # noqa: E712, pylint: disable=singleton-comparison
             polling = AAZNoPolling()
         else:

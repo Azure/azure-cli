@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "sig update",
 )
 class Update(AAZCommand):
-    """Update a share image gallery.
+    """Update a Shared Image Gallery.
 
     :example: Enable gallery to be shared to subscription or tenant
         az sig update --resource-group myResourceGroup --gallery-name myGallery --permissions groups

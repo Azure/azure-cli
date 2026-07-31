@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class PerformReplicationTransfer(AAZCommand):
     """Performs an adhoc replication transfer on a volume with volumeType Migration
+
+    :example: Volumes_PerformReplicationTransfer
+        az netappfiles volume replication perform-replication-transfer --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/performreplicationtransfer", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/performreplicationtransfer", "2026-05-01"],
         ]
     }
 
@@ -154,7 +157,7 @@ class PerformReplicationTransfer(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }

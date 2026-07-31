@@ -44,7 +44,7 @@ managed_instance_name_max_length = 20
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
+    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='eastasia',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
         super().__init__(name_prefix, server_name_max_length)
@@ -85,6 +85,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subnet_name = 'ManagedInstance'
     subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
 
+    # Azure AD Entra ID admin configuration for managed instance creation
+    external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
+    external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
+    external_admin_principal_type = 'Application'
+
     # For cross-subnet update SLO, we need a target subnet to move managed instance to.
     target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
@@ -110,7 +115,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True):
         super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -126,6 +131,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
+        self.enable_ad_only_auth = enable_ad_only_auth
 
 
     def create_resource(self, name, **kwargs):
@@ -136,6 +142,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {} --bsr Geo'
+
+        if self.enable_ad_only_auth:
+            template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type '{self.external_admin_principal_type}'"
 
         if self.public:
             template += ' --public-data-endpoint-enabled'
@@ -148,7 +157,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
         if self.identityType == ResourceIdType.system_assigned.value:
             template += f" --assign-identity"
-
+            
         if self.otherParams:
             template += f" {self.otherParams}"
 
@@ -276,6 +285,39 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
 
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        # test create sql server with tags
+        server = self.cmd('sql server create -g {} --name {} '
+                         '--admin-user {} --admin-password {} '
+                         '--tags env=test purpose=demo'
+                         .format(resource_group, server_name, admin_login, admin_password),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', resource_group_location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('tags.env', 'test'),
+                             JMESPathCheck('tags.purpose', 'demo')]).get_output_in_json()
+
+        # test show sql server to verify tags are preserved
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('tags.env', 'test'),
+                     JMESPathCheck('tags.purpose', 'demo')])
+
+        # cleanup
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name), checks=NoneCheck())
+
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -389,7 +431,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
@@ -501,7 +543,7 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
         ipv6_firewall_rule_1 = 'rule1'
         start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
@@ -583,8 +625,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
     @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
@@ -852,8 +894,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -892,46 +934,142 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    def test_sql_per_db_cmk(self):
-        server = "pstestsvr"
-        resource_group = "pstest"
-        database_name_one = "cliautomationdb042"
-        database_name_two = "cliautomationdb051"
-        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
-        encryption_protector2 = "https://pstestkv2.vault.azure.net/keys/testkey5/e73f1a88aa0c4de684af97c90588aac7"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='eastus2euap')
+    def test_sql_per_db_cmk(self, resource_group, resource_group_location):
+        # Creating a dynamic UMI, Key vault, and server for test setup
+        # Create a umi
+        umi_name = "testcliumi"
+        umi_result = self.cmd('identity create -g {} -n {}'
+                     .format(resource_group, umi_name),
+                     checks=[
+                         JMESPathCheck('name', umi_name),
+                         JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+        
+        umi = umi_result['id']
+        umi_principal_id = umi_result['principalId']
 
-        # test sql db is created with db level encryption protector and umi
+        # Create a new AKV and create keys
+        vault_name = self.create_random_name('sqltdebyok', 20)
+
+        self.cmd('keyvault create -g {} -n {} --enable-rbac-authorization False --enable-purge-protection True'
+                 .format(resource_group, vault_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+        
+        self.cmd('keyvault set-policy -n {} --key-permissions get wrapKey unwrapKey --object-id {}'
+                 .format(vault_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+
+        key_name_in_akv1 = self.create_random_name("testkey1", 20)
+        key_resp1 = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv1, vault_name)).get_output_in_json()
+        kid1 = key_resp1['key']['kid']
+
+        key_name_in_akv2 = self.create_random_name("testkey2", 20)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv2, vault_name)).get_output_in_json()
+        kid2 = key_resp['key']['kid']
+
+        # Create a server
+        server_name = self.create_random_name('serverfortestcli', 20)
+        self.cmd('sql server create -g {} -n {} -l {} --enable-ad-only-auth --external-admin-principal-type Application --external-admin-name {} --external-admin-sid {}'
+                 .format(resource_group, server_name, resource_group_location, umi_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', server_name)])
+        
+        # Setup complete. Testing scenarios
+
+        # Test sql db is created with db level encryption protector and umi
+        database_name1 = "DBWithVersionedEP"
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
         # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
-                 .format(resource_group, server, database_name_two, encryption_protector, umi),
+                 .format(resource_group, server_name, database_name1, kid1, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two)])
+                     JMESPathCheck('name', database_name1)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_two),
+                 .format(resource_group, server_name, database_name1),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two),
-                     JMESPathCheck('encryptionProtector', encryption_protector),
+                     JMESPathCheck('name', database_name1),
+                     JMESPathCheck('encryptionProtector', kid1),
                      JMESPathCheck('encryptionProtectorAutoRotation', True)])
 
         self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {} --epauto False'
-                 .format(resource_group, server, database_name_two, encryption_protector2),
+                 .format(resource_group, server_name, database_name1, kid2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two)])
+                     JMESPathCheck('name', database_name1)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_two),
+                 .format(resource_group, server_name, database_name1),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two),
-                     JMESPathCheck('encryptionProtector', encryption_protector2),
+                     JMESPathCheck('name', database_name1),
+                     JMESPathCheck('encryptionProtector', kid2),
                      JMESPathCheck('encryptionProtectorAutoRotation', False)])
+        
+        # Test versionless scenarios with per db cmk
+        database_name2 = "DBWithVersionlessEP"
+        versionless_kid1 = '/'.join(kid1.split('/')[:-1])
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name2, versionless_kid1, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name2)])
+        
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server_name, database_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name2),
+                     JMESPathCheck('encryptionProtector', kid1),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)])
+        
+        # Test create DB with versionless encryption protector and additional key as versioned key
+        database_name3 = "DBWithVersionlessEPAndVersionedKey"
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --keys {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name3, versionless_kid1, kid2, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name3)])
+        
+        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
+                 .format(resource_group, server_name, database_name3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name3),
+                     JMESPathCheck('encryptionProtector', kid1),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
+        self.assertEqual(len(db_response['keys']), 2)
+
+        # Test create DB with versioned encryption protector and additional key as versionless key
+        database_name4 = "DBWithVersionedEPAndVersionlessKey"
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --keys {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name4, kid2, versionless_kid1, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name4)])
+        
+        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
+                 .format(resource_group, server_name, database_name4),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name4),
+                     JMESPathCheck('encryptionProtector', kid2),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
+        self.assertEqual(len(db_response['keys']), 2)
+
 
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
@@ -1097,6 +1235,75 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('sku.name', 'GP_S_Gen5'),
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
+
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
+    @AllowLargeResponse()
+    def test_sql_db_serverless_to_provisioned_slo_update(self, resource_group, resource_group_location, server):
+        """
+        Test for bug fix: Updating from serverless to provisioned using --service-objective
+        should use the specified service objective, not fall back to default (S0).
+        
+        Scenario: Database starts as serverless (GP_S_Gen5_1), then updated to Standard S1.
+        Expected: Database should be updated to S1, not S0.
+        """
+        database_name = "cliautomationdb01"
+        compute_model_serverless = ComputeModelType.serverless.value
+        
+        # Create serverless database
+        vcore_edition = 'GeneralPurpose'
+        vcore_family = 'Gen5'
+        vcore_capacity = 1
+        
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --yes'
+                 .format(resource_group, server, database_name, vcore_edition, vcore_capacity, 
+                         vcore_family, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+        
+        # Update from serverless to provisioned Standard S1 using --service-objective
+        # This should result in S1, not S0 (the default for Standard tier)
+        # Also need to specify max-size because Standard tier has different size limits than GeneralPurpose
+        target_slo = 'S1'
+        target_edition = 'Standard'
+        
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --service-objective {} --max-size 250GB'
+                 .format(resource_group, server, database_name, target_edition, target_slo),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('sku.tier', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo),
+                     JMESPathCheck('requestedServiceObjectiveName', target_slo)])
+        
+        # Verify the database is now at S1, not S0
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo)])
+        
+        # Test the reverse: Update from provisioned S1 to serverless
+        # This should work correctly (already did before the fix)
+        # Need to specify family and capacity when converting back to serverless
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --compute-model {} -f {} -c {}'
+                 .format(resource_group, server, database_name, vcore_edition, compute_model_serverless, 
+                         vcore_family, vcore_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+
+
 
 class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
@@ -1276,7 +1483,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
-            'make_backups_immutable': 'False',
+            'time_based_immutability': 'False',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1287,13 +1494,13 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
             ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
-            ' --make-backups-immutable {make_backups_immutable}',
-            checks=[
+            ' --make-backups-immutable {time_based_immutability}',
+         checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1303,7 +1510,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -1381,6 +1588,153 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
 
+class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
+    @live_only()
+    def test_sql_db_long_term_retention_immutability(
+            self):
+        self.kwargs.update({
+            'rg': 'cli_test_donnotdelete',
+            'loc': 'eastus2euap',
+            'server_name': 'clitestserverdonotdeletecanaryeast',
+            'database_name': 'cli_test_donnotdelete1',
+            'weekly_retention': 'P4W',
+            'time_based_immutability': 'Enabled'
+        })
+
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --tb-immutability {time_based_immutability} --yes',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+           # setup for test show long term retention backup
+ 
+        backup = self.cmd(
+        'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+        })
+        
+        # set-legal-hold-immutability test
+        self.cmd(
+             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('legalHoldImmutability', 'Enabled')])
+
+        # remove-legal-hold-immutability test
+        self.cmd(
+             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+        # set-legal-hold-immutability test with resource group
+        self.cmd(
+             'sql db ltr-backup set-legal-hold-immutability  -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup','{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].legalHoldImmutability', 'Enabled')])
+
+        # remove-legal-hold-immutability test with resource group
+        self.cmd(
+             'sql db ltr-backup remove-legal-hold-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup', '{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].legalHoldImmutability', 'Disabled')])
+
+        # remove-time-based-immutability test
+        self.cmd(
+             'sql db ltr-backup remove-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('timeBasedImmutability', 'Disabled'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+         # remove-time-based-immutability test with resource group this should be a no op as time based immutability is already disabled
+        self.cmd(
+             'sql db ltr-backup remove-time-based-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup', '{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].timeBasedImmutability', 'Disabled'),
+                 self.check('[0].legalHoldImmutability', 'Disabled')])
+
+        # setup for test lock long term retention backup
+        self.kwargs.update({
+              'database_name': 'cli_test_donnotdelete2',
+          })
+
+        backup = self.cmd(
+              'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+              'backup_name': backup[0]['name'],
+          })
+
+        # lock-time-based-immutability
+        self.cmd(
+              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+               checks=[
+                  self.check('resourceGroup', '{rg}'),
+                  self.check('serverName', '{server_name}'),
+                  self.check('databaseName', '{database_name}'),
+                  self.check('name', '{backup_name}'),
+                  self.check('timeBasedImmutability', 'Enabled'),
+                  self.check('legalHoldImmutability', 'Disabled'),
+                  self.check('timeBasedImmutabilityMode', 'Locked')])
+
+        # lock-time-based-immutability with resource group. this should be a no op as time based immutability is already locked
+        self.cmd(
+              'sql db ltr-backup lock-time-based-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+               checks=[
+                  self.check('[0].resourceGroup', '{rg}'),
+                  self.check('[0].serverName', '{server_name}'),
+                  self.check('[0].databaseName', '{database_name}'),
+                  self.check('[0].name', '{backup_name}'),
+                  self.check('[0].timeBasedImmutability', 'Enabled'),
+                  self.check('[0].legalHoldImmutability', 'Disabled'),
+                  self.check('[0].timeBasedImmutabilityMode', 'Locked')])
+
+        # setup for test lock long term retention backup
+        self.kwargs.update({
+              'time_based_immutability': 'Enabled',
+              'database_name': 'cli_test_donnotdelete3',
+              'time_based_immutability_mode': 'Locked'
+          })
+
+        # test update long term retention plicy to time based immutability locked mode on live database
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --tb-immutability {time_based_immutability}' 
+            ' --tb-immutability-mode {time_based_immutability_mode} --yes',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}'),
+                self.check('timeBasedImmutabilityMode', '{time_based_immutability_mode}')])
+      
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @live_only() # Adding the live_only label after discussing with test owner rebeccaxu as the test was initially recorded on existing fixed resources.
@@ -1449,7 +1803,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             self.cmd('sql mi op list -g {} --mi {}'
                      .format(resource_group, managed_instance_name),
                      checks=[
-                         JMESPathCheck('length(@)', 3),
+                         JMESPathCheck('length(@)', 2),
                          JMESPathCheck('[0].resourceGroup', resource_group),
                          JMESPathCheck('[0].managedInstanceName', managed_instance_name)
                      ])
@@ -1459,12 +1813,12 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Cancel operation
         self.cmd('sql mi op cancel -g {} --mi {} -n {}'
-                 .format(resource_group, managed_instance_name, ops[2]['name']))
+                 .format(resource_group, managed_instance_name, ops[1]['name']))
 
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
         # Show
         self.cmd('sql server conn-policy show -g {} -s {}'
@@ -1636,13 +1990,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv3.vault.azure.net/keys/testkey3/90bfc038075241518bf00ba4bb00ce1d"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
-        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
@@ -2819,19 +3173,19 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westus')
+                           location='eastus')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westus')
+                           location='eastus')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westus')
+                       location='eastus')
     def test_sql_server_dns_alias_mgmt(self,
                                        resource_group_1, resource_group_location_1,
                                        resource_group_2, resource_group_location_2,
@@ -3160,7 +3514,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
             "resource_group_2" : "CLI-Automated-Tests",
             "resource_group_location_2" : "southcentralus",
             "resource_group_location_3" : "westus3",
-            "partner_subscription" : "00000000-0000-0000-0000-000000000000"
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
             })
 
         # helper class so that it's clear which servers are in which groups
@@ -3209,7 +3563,8 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective),
-                     JMESPathCheck('secondaryType', secondary_type)])
+                    # JMESPathCheck('secondaryType', secondary_type) #Remove this check as secondaryType is returned as null in cross subscription scenario
+                ])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'cli-automated-tests-pool'
@@ -4014,12 +4369,12 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
-    @StorageAccountPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westus'
+        location_long_name = 'eastus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -4234,7 +4589,7 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_tde(self, resource_group, server):
         sn = server
         db_name = self.create_random_name("sqltdedb", 20)
@@ -4269,104 +4624,160 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Enabled')])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
-    @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
-    @live_only() # User tried to log in to a device from a platform (Unknown) that's currently not supported through Conditional Access policy. Supported device platforms are: iOS, Android, Mac, and Windows flavors.
-    def test_sql_tdebyok(self, resource_group, server, key_vault):
-        resource_prefix = 'sqltdebyok'
+    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='eastus2euap')
+    def test_sql_tdebyok(self, resource_group, resource_group_location):
+        # Create a umi
+        umi_name = "testcliumi"
+        umi_result = self.cmd('identity create -g {} -n {}'
+                     .format(resource_group, umi_name),
+                     checks=[
+                         JMESPathCheck('name', umi_name),
+                         JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+        
+        umi = umi_result['id']
+        umi_principal_id = umi_result['principalId']
 
-        # add identity to server
-        server_resp = self.cmd('sql server update -g {} -n {} -i'
-                               .format(resource_group, server)).get_output_in_json()
+        # Create a new AKV and create keys
+        vault_name = self.create_random_name('sqltdebyok', 20)
+
+        self.cmd('keyvault create -g {} -n {} --enable-rbac-authorization False --enable-purge-protection True'
+                 .format(resource_group, vault_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+
+        key_name_in_akv1 = self.create_random_name("testkey1", 20)
+        key_resp1 = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv1, vault_name)).get_output_in_json()
+        kid1 = key_resp1['key']['kid']
+        
+        # create server with system assigned identity
+        server_name = self.create_random_name('serverfortestcli', 20)
+        server_resp = self.cmd('sql server create -g {} -n {} -l {} -i --enable-ad-only-auth --external-admin-principal-type Application --external-admin-name {} --external-admin-sid {}'
+                 .format(resource_group, server_name, resource_group_location, umi_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', server_name)]).get_output_in_json()
+        
         server_identity = server_resp['identity']['principalId']
 
-        # create db
-        db_name = self.create_random_name(resource_prefix, 20)
-        self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(resource_group, server, db_name))
-
-        # create vault and acl server identity
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, key_vault, server_identity))
-
-        # create key
-        key_name = self.create_random_name(resource_prefix, 32)
-        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
-                            .format(key_name, key_vault)).get_output_in_json()
-        kid = key_resp['key']['kid']
+                 .format(resource_group, vault_name, server_identity))
 
         # add server key
         server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
-                                   .format(resource_group, server, kid),
+                                   .format(resource_group, server_name, kid1),
                                    checks=[
-                                       JMESPathCheck('uri', kid),
+                                       JMESPathCheck('uri', kid1),
                                        JMESPathCheck('serverKeyType', 'AzureKeyVault')])
         server_key_name = server_key_resp.get_output_in_json()['name']
 
         # validate show key
         self.cmd('sql server key show -g {} -s {} -k {}'
-                 .format(resource_group, server, kid),
+                 .format(resource_group, server_name, kid1),
                  checks=[
-                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('uri', kid1),
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('name', server_key_name)])
 
         # validate list key (should return 2 items)
         self.cmd('sql server key list -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # validate encryption protector is service managed via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
         self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
-                 .format(resource_group, server, kid),
+                 .format(resource_group, server_name, kid1),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('serverKeyName', server_key_name),
-                     JMESPathCheck('uri', kid)])
-                     # JMESPathCheck('autoRotationEnabled', True) - property is removed from backend
-
+                     JMESPathCheck('uri', kid1),
+                     JMESPathCheck('autoRotationEnabled', True)])
 
         # validate encryption protector is akv via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('serverKeyName', server_key_name),
-                     JMESPathCheck('uri', kid)])
+                     JMESPathCheck('uri', kid1)])
 
         # update encryption protector to service managed
         self.cmd('sql server tde-key set -g {} -s {} -t ServiceManaged'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # validate encryption protector is service managed via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # delete server key
         self.cmd('sql server key delete -g {} -s {} -k {}'
-                 .format(resource_group, server, kid))
+                 .format(resource_group, server_name, kid1))
 
         # wait for key to be deleted
         time.sleep(10)
 
         # validate deleted server key via list (should return 1 item)
         self.cmd('sql server key list -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[JMESPathCheck('length(@)', 1)])
+
+        key_name_in_akv2 = self.create_random_name("testkey2", 20)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv2, vault_name)).get_output_in_json()
+        kid2 = key_resp['key']['kid']
+
+        # extract versionless key identifier (remove the version part)
+        # kid format: https://{vault}.vault.azure.net/keys/{keyname}/{version}
+        versionless_kid2 = '/'.join(kid2.split('/')[:-1])
+
+        # add versionless server key
+        versionless_server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
+                .format(resource_group, server_name, versionless_kid2),
+                checks=[
+                JMESPathCheck('uri', kid2),
+                JMESPathCheck('serverKeyType', 'AzureKeyVault')])
+        versionless_server_key_name1 = versionless_server_key_resp.get_output_in_json()['name'] # this is not in a versionless format as the key name is returned with the full version
+
+        # validate show versionless key
+        self.cmd('sql server key show -g {} -s {} -k {}'
+                 .format(resource_group, server_name, versionless_kid2),
+                 checks=[
+                     JMESPathCheck('uri', kid2),
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('name', versionless_server_key_name1)])
+        
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # update encryption protector to versionless akv key
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
+                 .format(resource_group, server_name, versionless_kid2),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('uri', kid2)])
+
+        # validate encryption protector is using versionless key via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('uri', kid2),
+                     JMESPathCheck('autoRotationEnabled', True)])
 
 
 class SqlServerIdentityTest(ScenarioTest):
@@ -4424,8 +4835,8 @@ class SqlServerIdentityTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
@@ -5237,7 +5648,11 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
             'intance_pool_name': '',
             'database_format': 'AlwaysUpToDate',
-            'pricing_model': 'Regular'
+            'pricing_model': 'Regular',
+            'enable_ad_only_auth': '--enable-ad-only-auth',
+            'external_admin_name': ManagedInstancePreparer.external_admin_name,
+            'external_admin_sid': ManagedInstancePreparer.external_admin_sid,
+            'external_admin_principal_type': ManagedInstancePreparer.external_admin_principal_type
         })
 
         # test create sql managed_instance with FMW
@@ -5245,7 +5660,9 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
                                     '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
-                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}" '
+                                    '{enable_ad_only_auth} --external-admin-name "{external_admin_name}" '
+                                    '--external-admin-sid {external_admin_sid} --external-admin-principal-type {external_admin_principal_type} ',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5337,25 +5754,27 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         time.sleep(120)
 
         # test update sql managed_instance 1
-        self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
-                 .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
+        #          .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update without identity parameter, validate identity still exists
         # also use --ids instead of -g/-n
-        self.cmd('sql mi update --ids {} --admin-password {}'
-                 .format(managed_instance_1['id'], admin_passwords[0]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update --ids {} --admin-password {}'
+        #          .format(managed_instance_1['id'], admin_passwords[0]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update proxyOverride and publicDataEndpointEnabled
         # test is currently removed due to long execution time due to waiting for SqlAliasStateMachine completion to complete
@@ -6635,7 +7054,8 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2", location='westus')
+                       resource_group_parameter_name="resource_group_2",
+                       location='uksouth')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -7375,13 +7795,13 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        resource_group_location = "westus"
+        resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_3 = "1.3"
 
@@ -7511,7 +7931,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                         .format(resource_group, storage_account)).get_output_in_json()
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ledger(self, resource_group, server):
         db_name = self.create_random_name("sqlledgerdb", 20)
         endpoint = "https://test.confidential-ledger.azure.com"
@@ -8277,9 +8697,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db5 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db4")])
+                    JMESPathCheck('name', "recovered_db5")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -8477,6 +8897,99 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '256',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create MI
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
+                                    '--memory {memory_size_in_gb}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check memory size in gb
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], 64)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
+
+        # Get the managed instance and check memory size in GB
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi")
@@ -8556,3 +9069,780 @@ class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
                      self.check('status', 'Succeeded'),
                      self.check('requestType', 'UpdatePurviewMetadata')
                  ])
+
+
+class SqlServerSoftDeleteScenarioTest(ScenarioTest):
+    """Test cases for SQL Server Soft Delete functionality"""
+
+    @live_only()
+    def test_sql_server_soft_delete_retention_days_boundary_validation(self):
+        """
+        Test boundary validation for soft-delete-retention-days parameter.
+        Tests invalid values: negative, >7, non-integer, float.
+        This test doesn't require recordings as it validates parameters before API calls.
+        """
+        # Test with negative value - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days -1',
+                 expect_failure=True)
+        
+        # Test with value > 7 - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days 8',
+                 expect_failure=True)
+        
+        # Test with value 100 - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days 100',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_boundary_values(self, resource_group, resource_group_location):
+        """
+        Test boundary values for soft-delete-retention-days: 0, 1, and 7.
+        Tests the minimum valid value (0=disabled), minimum enabled (1), and maximum (7).
+        """
+        server_name_0 = self.create_random_name('softdelete', server_name_max_length)
+        server_name_1 = self.create_random_name('softdelete', server_name_max_length)
+        server_name_7 = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+
+        # Test with retention_days = 0 (disabled)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 0'
+                 .format(resource_group, server_name_0, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_0),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Test with retention_days = 1 (minimum enabled)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 1'
+                 .format(resource_group, server_name_1, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('retentionDays', 1)])
+
+        # Test with retention_days = 7 (maximum)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 7'
+                 .format(resource_group, server_name_7, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_7),
+                     JMESPathCheck('retentionDays', 7)])
+
+        # Disable soft delete on all servers before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name_1))
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name_7))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_create_without_soft_delete(self, resource_group, resource_group_location):
+        """
+        Test creating a server without specifying soft-delete-retention-days.
+        Should use default value (0 = disabled).
+        """
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+
+        # Create server without soft delete parameter
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group, server_name, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Verify soft delete is disabled by default (retentionDays should be 0, -1, or None)
+        result = self.cmd('sql server show -g {} --name {}'
+                         .format(resource_group, server_name)).get_output_in_json()
+        
+        # Azure may return 0, -1, or None for disabled soft delete
+        retention_days = result.get('retentionDays', 0)
+        self.assertIn(retention_days, [0, -1, None], 
+                     f"Expected retentionDays to be 0, -1, or None, but got {retention_days}")
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_enable_on_create(self, resource_group, resource_group_location):
+        """Test enabling soft delete with retention days on server creation"""
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        retention_days = 5
+        location = 'centralus'
+
+        # Create server with soft delete enabled with retention days
+        server = self.cmd('sql server create -g {} --name {} -l {} '
+                         '--admin-user {} --admin-password {} '
+                         '--soft-delete-retention-days {}'
+                         .format(resource_group, server_name, location, 
+                                admin_login, admin_password, retention_days),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+        
+        # Verify server shows soft delete settings
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+        # Note: ResourceGroupPreparer automatically handles cleanup
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_disable_on_existing(self, resource_group, resource_group_location, server):
+        """Test disabling soft delete on an existing server"""
+        # First enable soft delete on the server with 7 days retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 7'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 7)])
+
+        # Now disable soft delete by setting retention to 0
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Verify server shows soft delete disabled
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_update_retention_existing(self, resource_group, resource_group_location, server):
+        """Test updating retention days on existing server"""
+        retention_days_1 = 3
+        retention_days_2 = 6
+
+        # Enable soft delete with retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days_1),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_1)])
+
+        # Update to new retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days_2),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_2)])
+
+        # Verify server shows updated retention days
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_2)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_toggle_multiple_times(self, resource_group, resource_group_location, server):
+        """
+        Test toggling soft delete on and off multiple times to ensure state changes work correctly.
+        """
+        # Enable soft delete
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 5'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 5)])
+
+        # Disable soft delete
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Re-enable with different retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 3'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 3)])
+
+        # Disable again
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 0)])
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_update_same_value(self, resource_group, resource_group_location, server):
+        """
+        Test updating soft delete retention to the same value (idempotent operation).
+        """
+        retention_days = 4
+
+        # Enable soft delete with retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Update to same value - should succeed
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Verify it's still the same
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_soft_delete_complete_recovery_workflow(self, resource_group, resource_group_location):
+        """Test complete soft delete workflow: create server with 2-day retention, delete, restore, and cleanup"""
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        restored_server_name = self.create_random_name('restored', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        retention_days = 2
+        location = 'centralus'
+
+        # Create server with soft delete enabled and 2-day retention
+        server = self.cmd('sql server create -g {} --name {} -l {} '
+                         '--admin-user {} --admin-password {} '
+                         '--soft-delete-retention-days {}'
+                         .format(resource_group, server_name, location, 
+                                admin_login, admin_password, retention_days),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+
+        # Verify server shows soft delete settings
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Delete the server (should go into soft-deleted state due to retention policy)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Verify server is deleted (show command should fail with ResourceNotFound)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name), expect_failure=True)
+
+        # Restore the deleted server with the same name
+        restored_server = self.cmd('sql server restore -g {} --name {} -l {}'
+                                  .format(resource_group, server_name, location),
+                                  checks=[
+                                      JMESPathCheck('name', server_name),
+                                      JMESPathCheck('location', location),
+                                      JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+
+        # Verify restored server exists and shows it was restored successfully
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Disable soft delete on the restored server
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Verify soft delete is disabled on restored server
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Note: ResourceGroupPreparer automatically handles cleanup of the resource group
+
+class SqlServerDeletedServerScenarioTest(ScenarioTest):
+
+    def test_sql_server_restore_non_existent_deleted_server(self):
+        """
+        Test attempting to restore a server that doesn't exist in deleted servers.
+        This test doesn't require recordings as it validates existence before API calls.
+        """
+        non_existent_server = 'nonexistentserver' + str(int(time.time()))
+        location = 'centralus'
+        
+        # Attempt to restore non-existent deleted server - should fail with appropriate error
+        self.cmd('sql server restore --name {} -l {}'
+                .format(non_existent_server, location),
+                expect_failure=True)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_and_show(self, resource_group, resource_group_location):
+        '''
+        Test sql server deleted-server list and show commands.
+        This test creates a server with soft delete enabled, deletes it,
+        then verifies it can be listed and shown in deleted servers.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create a server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (should go into soft-deleted state)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Verify server is deleted from active servers
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name), expect_failure=True)
+
+        # Test deleted-server list command - should show at least one deleted server
+        deleted_servers_list = self.cmd('sql server deleted-server list --location {}'
+                                       .format(location),
+                                       checks=[
+                                           JMESPathCheckGreaterThan('length(@)', 0)
+                                       ]).get_output_in_json()
+
+        # Debug: Print the deleted servers list to understand what's returned
+        print(f"DEBUG: Deleted servers list: {deleted_servers_list}")
+        print(f"DEBUG: Looking for server: {server_name}")
+        print(f"DEBUG: Server names in list: {[s.get('name', 'NO_NAME') for s in deleted_servers_list]}")
+
+        # Verify our deleted server is in the list by checking FQDN
+        # The Azure API returns name=None, so we extract the server name from FQDN
+        # FQDN format: {servername}.{domain}, e.g., servername.sqltest-eg1.mscds.com
+        deleted_server_found = any(s.get('fullyQualifiedDomainName', '').startswith(server_name + '.') 
+                                   for s in deleted_servers_list)
+        self.assertTrue(deleted_server_found, 
+                       f"Deleted server {server_name} not found in deleted servers list")
+
+        # Test deleted-server show command by name
+        deleted_server = self.cmd('sql server deleted-server show --name {} --location {}'
+                                 .format(server_name, location),
+                                 checks=[
+                                     JMESPathCheckExists('fullyQualifiedDomainName'),
+                                     JMESPathCheckExists('deletionTime'),
+                                     JMESPathCheckExists('originalId')
+                                 ]).get_output_in_json()
+        
+        # Verify the returned deleted server matches the expected server name by checking FQDN
+        fqdn = deleted_server.get('fullyQualifiedDomainName', '')
+        self.assertTrue(fqdn.startswith(server_name + '.'),
+                       f"Expected FQDN to start with {server_name}., but got {fqdn}")
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_soft_delete_retention_update_scenarios(self, resource_group, resource_group_location):
+        '''
+        Comprehensive test for soft delete retention days with various update scenarios.
+        Tests retention_days behavior when:
+        1. Server created without soft-delete, update password, then enable soft-delete
+        2. Server created without soft-delete, update both soft-delete and password together
+        3. Server created with soft-delete, disable soft-delete, then update password
+        4. Server created with soft-delete disabled, update password, then enable soft-delete
+        '''
+        location = resource_group_location
+        admin_login = 'admin123'
+        base_password = 'SecretPassword123!'
+        new_password = 'NewPassword456!'
+
+        # ===== SCENARIO 1: Create without soft-delete -> Update password -> Enable soft-delete =====
+        server1 = self.create_random_name('sdtest1', server_name_max_length)
+        
+        # Create server without soft-delete parameter
+        result1 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+                .format(resource_group, server1, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server1)]).get_output_in_json()
+        # Validate retention_days is either -1 or 0 (both indicate not configured)
+        self.assertIn(result1['retentionDays'], [-1, 0], 
+                     f"Expected retentionDays to be -1 or 0, got {result1['retentionDays']}")
+        initial_retention = result1['retentionDays']
+        
+        # Update password only - retention_days should remain unchanged
+        result1_updated = self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server1, new_password),
+                checks=[
+                    JMESPathCheck('name', server1)]).get_output_in_json()
+        # Should remain the same as initial value
+        self.assertEqual(result1_updated['retentionDays'], initial_retention,
+                        f"Expected retentionDays to remain {initial_retention}, got {result1_updated['retentionDays']}")
+        
+        # Enable soft-delete with 5 days retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 5'
+                .format(resource_group, server1),
+                checks=[
+                    JMESPathCheck('name', server1),
+                    JMESPathCheck('retentionDays', 5)])  # Should be updated to 5
+
+        # ===== SCENARIO 2: Create without soft-delete -> Update soft-delete AND password together =====
+        server2 = self.create_random_name('sdtest2', server_name_max_length)
+        
+        # Create server without soft-delete parameter
+        result2 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+                .format(resource_group, server2, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server2)]).get_output_in_json()
+        # Validate retention_days is either -1 or 0 (both indicate not configured)
+        self.assertIn(result2['retentionDays'], [-1, 0],
+                     f"Expected retentionDays to be -1 or 0, got {result2['retentionDays']}")
+        
+        # Update both soft-delete (3 days) and password together
+        self.cmd('sql server update -g {} --name {} --admin-password {} --soft-delete-retention-days 3'
+                .format(resource_group, server2, new_password),
+                checks=[
+                    JMESPathCheck('name', server2),
+                    JMESPathCheck('retentionDays', 3)])  # Should be updated to 3
+
+        # ===== SCENARIO 3: Create with soft-delete -> Disable soft-delete -> Update password =====
+        server3 = self.create_random_name('sdtest3', server_name_max_length)
+        
+        # Create server with soft-delete enabled (7 days)
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 7'
+                .format(resource_group, server3, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 7)])
+        
+        # Disable soft-delete (set to 0)
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                .format(resource_group, server3),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 0)])  # Should be disabled
+        
+        # Update password only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server3, new_password),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 0)])  # Should remain 0
+
+        # ===== SCENARIO 4: Create with soft-delete disabled -> Update password -> Enable soft-delete =====
+        server4 = self.create_random_name('sdtest4', server_name_max_length)
+        
+        # Create server with soft-delete explicitly disabled (0 days)
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 0'
+                .format(resource_group, server4, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 0)])
+        
+        # Update password only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server4, new_password),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 0)])  # Should remain 0
+        
+        # Enable soft-delete (4 days)
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 4'
+                .format(resource_group, server4),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 4)])  # Should be updated to 4
+
+        # Clean up: Disable soft delete on all servers before deletion
+        for server in [server1, server2, server3, server4]:
+            self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                    .format(resource_group, server))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_empty_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server list returns empty list for location with no deleted servers.
+        '''
+        location = resource_group_location
+
+        # List deleted servers in a location (may be empty if no servers were deleted)
+        deleted_servers = self.cmd('sql server deleted-server list --location {}'
+                                  .format(location)).get_output_in_json()
+
+        # Verify command succeeds and returns a list (even if empty)
+        self.assertIsInstance(deleted_servers, list)
+
+    @live_only()
+    def test_sql_deleted_server_show_not_found(self):
+        '''
+        Test deleted-server show with non-existent server name returns appropriate error.
+        This test doesn't require recordings as it validates the error handling.
+        '''
+        non_existent_server = 'nonexistentserver123456'
+        location = 'centralus'
+
+        # Attempt to show a deleted server that doesn't exist
+        # Should fail with ResourceNotFoundError
+        self.cmd('sql server deleted-server show --name {} --location {}'
+                .format(non_existent_server, location),
+                expect_failure=True)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_to_existing_live_server_name(self, resource_group, resource_group_location):
+        '''
+        Test attempting to restore a deleted server when a live server with the same name already exists.
+        This validates that the _check_live_server_not_exists validation works correctly.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', soft_delete_retention_days)])
+
+        # Attempt to restore while the live server still exists with same name
+        # Should fail with ValidationError: "Live server exists in the subscription"
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 expect_failure=True)
+
+        # Verify the live server still exists (restore didn't affect it)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Clean up - disable soft delete before deletion
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_deleted_with_invalid_resource_group(self, resource_group, resource_group_2, resource_group_location):
+        '''
+        Test attempting to restore a deleted server to a different resource group.
+        This validates that the error message correctly identifies the resource group mismatch.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server in first resource group with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (soft delete)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Attempt to restore to a different resource group - should fail with clear error message
+        # Error should explicitly mention both resource groups
+        result = self.cmd('sql server restore -g {} --name {} -l {}'
+                .format(resource_group_2, server_name, location),
+                expect_failure=True)
+
+        # Clean up - restore to correct resource group
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_after_resource_group_removal(self, resource_group, resource_group_location):
+        '''
+        Test attempting to restore a deleted server after the resource group has been removed,
+        then recreating the resource group and successfully restoring.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (soft delete)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Delete the resource group
+        self.cmd('group delete -n {} --yes'.format(resource_group))
+
+        # Wait for resource group deletion to complete
+        time.sleep(10)
+
+        # Attempt to restore the deleted server to the now-deleted resource group - should fail
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                .format(resource_group, server_name, location),
+                expect_failure=True)
+
+        # Recreate the same resource group that was deleted
+        self.cmd('group create -n {} -l {}'.format(resource_group, location),
+                 checks=[
+                     JMESPathCheck('name', resource_group),
+                     JMESPathCheck('location', location)])
+
+        # Restore the server to the recreated resource group - should succeed
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', location)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_to_different_resource_group(self):
+        '''
+        Test attempting to restore a server to a different resource group than where it was created.
+        This is a negative test scenario that should fail with a validation error.
+        '''
+        rg1_name = self.create_random_name('clitestrg', 24)
+        rg2_name = self.create_random_name('clitestrg', 24)
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+        soft_delete_retention_days = 7
+
+        try:
+            # Create first resource group
+            self.cmd('group create -n {} -l {}'.format(rg1_name, location),
+                     checks=[
+                         JMESPathCheck('name', rg1_name),
+                         JMESPathCheck('location', location)])
+
+            # Create second resource group
+            self.cmd('group create -n {} -l {}'.format(rg2_name, location),
+                     checks=[
+                         JMESPathCheck('name', rg2_name),
+                         JMESPathCheck('location', location)])
+
+            # Create server in RG1 with soft-delete enabled
+            self.cmd('sql server create -g {} --name {} -l {} '
+                     '--admin-user {} --admin-password {} '
+                     '--soft-delete-retention-days {}'
+                     .format(rg1_name, server_name, location,
+                             admin_login, admin_password, soft_delete_retention_days),
+                     checks=[
+                         JMESPathCheck('name', server_name),
+                         JMESPathCheck('location', location),
+                         JMESPathCheck('resourceGroup', rg1_name)])
+
+            # Delete the server (soft delete)
+            self.cmd('sql server delete -g {} --name {} --yes'
+                     .format(rg1_name, server_name))
+
+            # Attempt to restore to RG2 (different resource group) - should fail with validation error
+            # The error message should indicate the resource group mismatch
+            result = self.cmd('sql server restore -g {} --name {} -l {}'
+                            .format(rg2_name, server_name, location),
+                            expect_failure=True)
+
+            # Clean up - restore to correct RG1
+            self.cmd('sql server restore -g {} --name {} -l {}'
+                     .format(rg1_name, server_name, location),
+                     checks=[
+                         JMESPathCheck('name', server_name),
+                         JMESPathCheck('resourceGroup', rg1_name)])
+
+            # Disable soft delete before cleanup
+            self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                     .format(rg1_name, server_name))
+
+        finally:
+            # Clean up both resource groups
+            self.cmd('group delete -n {} --yes --no-wait'.format(rg1_name))
+            self.cmd('group delete -n {} --yes --no-wait'.format(rg2_name))

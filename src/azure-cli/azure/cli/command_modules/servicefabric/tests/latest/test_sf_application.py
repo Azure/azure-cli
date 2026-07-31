@@ -58,7 +58,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
 
         self.cmd('az sf application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
                  '--health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
-                 '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
+                 '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('typeVersion', '{v2}'),
                          self.check('upgradePolicy.forceRestart', True),
@@ -84,7 +84,6 @@ class ServiceFabricApplicationTests(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}')
 
-    @unittest.skip("Cannot succeed in live run with sever failure 'ClusterChildResourceOperationFailed'")
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
     def test_application_related(self, key_vault, resource_group):
@@ -96,9 +95,9 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.sfpkg?sp=racwdyti&st=2024-01-18T23:07:27Z&se=2024-02-08T07:07:27Z&sv=2022-11-02&sr=b&sig=XYlcb4sW%2B8zbzl0yxt2%2BZGwA5Q9RMLeJO7MU0OJCCb8%3D',
+            'app_package_v1': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.sfpkg?sp=r&st=2025-08-04T20:27:02Z&se=2025-08-05T04:42:02Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-04T20:27:02Z&ske=2025-08-05T04:42:02Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=******',
             'v2': '2.0.0',
-            'app_package_v2': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-01-18T23:10:57Z&se=2024-02-08T07:10:57Z&sv=2022-11-02&sr=b&sig=HNAFsFsodk9XFU%2FA5lfTRyk45uAAFeOinGL3kgkjrpg%3D',
+            'app_package_v2': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.2.0.0.sfpkg?sp=r&st=2025-08-04T20:27:21Z&se=2025-08-05T04:42:21Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-04T20:27:21Z&ske=2025-08-05T04:42:21Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'service_type': 'VotingWebType'
         })

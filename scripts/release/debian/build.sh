@@ -15,13 +15,14 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.12.10"
+PYTHON_VERSION="3.14.6"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
 apt-get update
 # uuid-dev is used to build _uuid module: https://github.com/python/cpython/pull/3796
-apt-get install -y libssl-dev libffi-dev python3-dev zlib1g-dev uuid-dev wget debhelper
+# libbz2-dev is used to install bz2 module: https://github.com/Azure/azure-cli/pull/32163
+apt-get install -y libssl-dev libffi-dev python3-dev zlib1g-dev uuid-dev wget debhelper libbz2-dev
 # Git is not strictly necessary, but it would allow building an experimental package
 # with dependency which is currently only available in its git repo feature branch.
 apt-get install -y git
@@ -36,7 +37,8 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
+# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources); the CLI build relies on setup.py.
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip "setuptools<81"
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 

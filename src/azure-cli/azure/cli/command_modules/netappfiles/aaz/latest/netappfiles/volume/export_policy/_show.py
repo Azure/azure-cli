@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-05-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -181,7 +181,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -265,6 +265,9 @@ class _ShowHelper:
         volume_read.zones = AAZListType()
 
         properties = _schema_volume_read.properties
+        properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+            serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+        )
         properties.actual_throughput_mibps = AAZFloatType(
             serialized_name="actualThroughputMibps",
             flags={"read_only": True},
@@ -279,6 +282,9 @@ class _ShowHelper:
         properties.baremetal_tenant_id = AAZStrType(
             serialized_name="baremetalTenantId",
             flags={"read_only": True},
+        )
+        properties.breakthrough_mode = AAZStrType(
+            serialized_name="breakthroughMode",
         )
         properties.capacity_pool_resource_id = AAZStrType(
             serialized_name="capacityPoolResourceId",
@@ -322,6 +328,7 @@ class _ShowHelper:
         )
         properties.effective_network_features = AAZStrType(
             serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
@@ -341,6 +348,11 @@ class _ShowHelper:
         )
         properties.file_system_id = AAZStrType(
             serialized_name="fileSystemId",
+            flags={"read_only": True},
+        )
+        properties.inherited_size_in_bytes = AAZIntType(
+            serialized_name="inheritedSizeInBytes",
+            nullable=True,
             flags={"read_only": True},
         )
         properties.is_default_quota_enabled = AAZBoolType(
@@ -463,6 +475,9 @@ class _ShowHelper:
 
         data_protection = _schema_volume_read.properties.data_protection
         data_protection.backup = AAZObjectType()
+        data_protection.ransomware_protection = AAZObjectType(
+            serialized_name="ransomwareProtection",
+        )
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
@@ -480,6 +495,15 @@ class _ShowHelper:
             serialized_name="policyEnforced",
         )
 
+        ransomware_protection = _schema_volume_read.properties.data_protection.ransomware_protection
+        ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+            serialized_name="actualRansomwareProtectionState",
+            flags={"read_only": True},
+        )
+        ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+            serialized_name="desiredRansomwareProtectionState",
+        )
+
         replication = _schema_volume_read.properties.data_protection.replication
         replication.destination_replications = AAZListType(
             serialized_name="destinationReplications",
@@ -487,6 +511,23 @@ class _ShowHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_info = AAZStrType(
+            serialized_name="externalReplicationSetupInfo",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_status = AAZStrType(
+            serialized_name="externalReplicationSetupStatus",
+            flags={"read_only": True},
+        )
+        replication.mirror_state = AAZStrType(
+            serialized_name="mirrorState",
+            flags={"read_only": True},
+        )
+        replication.relationship_status = AAZStrType(
+            serialized_name="relationshipStatus",
+            flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(
             serialized_name="remotePath",

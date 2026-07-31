@@ -41,7 +41,8 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
                     app_insights=None, app_insights_key=None, disable_app_insights=None,
                     deployment_source_url=None, deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None, https_only=False):
+                    deployment_container_image_name=None, tags=None, https_only=False,
+                    auto_generated_domain_name_label_scope=None):
     # pylint: disable=too-many-statements, too-many-branches, too-many-locals
     runtime = None
     if not deployment_container_image_name:
@@ -57,7 +58,8 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
-    logicapp_def = Site(location=None, site_config=site_config, tags=tags, https_only=https_only)
+    logicapp_def = Site(location=None, site_config=site_config, tags=tags, https_only=https_only,
+                        auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
     if runtime is not None:

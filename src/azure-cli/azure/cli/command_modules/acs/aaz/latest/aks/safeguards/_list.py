@@ -25,10 +25,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards", "2025-07-01"],
         ]
     }
 
@@ -52,7 +51,7 @@ class List(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=True,
         )
         return cls._args_schema
 
@@ -70,8 +69,7 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance.value, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
@@ -80,8 +78,7 @@ class List(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
 
@@ -116,7 +113,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -185,6 +182,9 @@ class List(AAZCommand):
             )
             properties.level = AAZStrType(
                 flags={"required": True},
+            )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",

@@ -141,7 +141,7 @@ def get_serializer(level):
     '''
     Helper method that returns a serializer method called in formatting a string representation of a key-value.
     '''
-    source_modes = ("appconfig", "appservice", "file")
+    source_modes = ("appconfig", "appservice", "file", "aks")
     kvset_modes = ("kvset", "restore")
 
     if level not in source_modes and level not in kvset_modes:

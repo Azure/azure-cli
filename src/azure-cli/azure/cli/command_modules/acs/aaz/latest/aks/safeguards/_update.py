@@ -25,13 +25,21 @@ class Update(AAZCommand):
 
     :example: Update a DeploymentSafeguards resource by adding 2 new namespaces to ignore
         az aks safeguards update -g rg1 -n mc1 --excluded-ns ns1 ns2
+
+    :example: Update Pod Security Standards level to Restricted
+        az aks safeguards update --managed-cluster /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --pss-level Restricted
+
+    :example: Update PSS level to Baseline using -g/-n pattern
+        az aks safeguards update -g rg1 -n cluster1 --pss-level Baseline
+
+    :example: Update both safeguards level and PSS level
+        az aks safeguards update -g rg1 -n cluster1 --level Enforce --pss-level Restricted
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-07-01"],
         ]
     }
 
@@ -57,7 +65,7 @@ class Update(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=True,
         )
 
         # define Arg Group "Properties"
@@ -74,6 +82,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The deployment safeguards level. Possible values are Warn and Enforce",
             enum={"Enforce": "Enforce", "Warn": "Warn"},
+        )
+        _args_schema.pss_level = AAZStrArg(
+            options=["--pss-level"],
+            arg_group="Properties",
+            help="The pod security standards level. Possible values: Privileged (off), Baseline, Restricted.",
+            nullable=True,
+            enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
 
         excluded_namespaces = cls._args_schema.excluded_namespaces
@@ -109,8 +124,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsGet(AAZHttpOperation):
@@ -118,8 +132,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
 
@@ -154,7 +167,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -213,6 +226,9 @@ class Update(AAZCommand):
             properties.level = AAZStrType(
                 flags={"required": True},
             )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -255,8 +271,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
@@ -307,7 +322,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -378,6 +393,9 @@ class Update(AAZCommand):
             properties.level = AAZStrType(
                 flags={"required": True},
             )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -430,13 +448,11 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("excludedNamespaces",
-                                    AAZListType, ".excluded_namespaces")
-                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={
-                                    "flags": {"required": True}})
+                properties.set_prop("excludedNamespaces", AAZListType, ".excluded_namespaces")
+                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pss_level")
 
-            excluded_namespaces = _builder.get(
-                ".properties.excludedNamespaces")
+            excluded_namespaces = _builder.get(".properties.excludedNamespaces")
             if excluded_namespaces is not None:
                 excluded_namespaces.set_elements(AAZStrType, ".")
 

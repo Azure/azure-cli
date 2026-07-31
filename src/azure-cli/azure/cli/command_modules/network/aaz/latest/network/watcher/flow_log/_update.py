@@ -37,12 +37,15 @@ class Update(AAZCommand):
 
     :example: Update Workspace on another resource group
         az network watcher flow-log update --location westus --resource-group MyAnotherResourceGroup --name MyFlowLog --workspace MyAnotherLogAnalyticWorkspace
+
+    :example: Update flowlog with recordtypes filtering
+        az network watcher flow-log update --resource-group rg1 --network-watcher-name nw1 --name fl --location centraluseuap --target-resource-id /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/desmondcentral-nsg --storage-account /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/nwtest1mgvbfmqsigdxe --filtering-criteria srcIP=158.255.7.8 || dstPort=56891 --record-types B,E --enabled True --format JSON --log-version 1 --identity "{type:UserAssigned,user-assigned-identities:{/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1:{}}}"
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2025-03-01"],
         ]
     }
 
@@ -163,6 +166,12 @@ class Update(AAZCommand):
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
             help="Parameters that define the configuration of traffic analytics.",
+            nullable=True,
+        )
+        _args_schema.record_types = AAZStrArg(
+            options=["--record-types"],
+            arg_group="Properties",
+            help="Optional field to filter network traffic logs based on flow states. Value of this field could be any comma separated combination string of letters B,C,E or D. B represents Begin, when a flow is created. C represents Continue for an ongoing flow generated at every five-minute interval. E represents End, when a flow is terminated. D represents Deny, when a flow is denied. If not specified, all network traffic will be logged.",
             nullable=True,
         )
         _args_schema.retention_policy = AAZObjectArg(
@@ -299,7 +308,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -402,7 +411,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -480,6 +489,7 @@ class Update(AAZCommand):
                 properties.set_prop("enabledFilteringCriteria", AAZStrType, ".filtering_criteria")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
                 properties.set_prop("format", AAZObjectType)
+                properties.set_prop("recordTypes", AAZStrType, ".record_types")
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
                 properties.set_prop("storageId", AAZStrType, ".storage_account", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("targetResourceId", AAZStrType, ".target_resource_id", typ_kwargs={"flags": {"required": True}})
@@ -598,6 +608,9 @@ class _UpdateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.record_types = AAZStrType(
+            serialized_name="recordTypes",
         )
         properties.retention_policy = AAZObjectType(
             serialized_name="retentionPolicy",

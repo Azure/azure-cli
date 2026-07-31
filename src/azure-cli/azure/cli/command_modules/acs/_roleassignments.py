@@ -39,7 +39,7 @@ def resolve_role_id(role, scope, definitions_client):
         pass
     if not role_id:  # retrieve role id
         role_defs = list(definitions_client.list(
-            scope, "roleName eq '{}'".format(role)))
+            scope, filter="roleName eq '{}'".format(role)))
         if len(role_defs) == 0:
             raise AzCLIError("Role '{}' doesn't exist.".format(role))
         if len(role_defs) > 1:
@@ -100,6 +100,14 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None,
 
 def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True,
                         delay=2, scope=None, assignee_principal_type=None):
+    # Every caller of add_role_assignment targets either a service principal or a managed
+    # identity, both of which are represented as a ServicePrincipal in Microsoft Entra ID.
+    # Explicitly setting the principal type lets the Authorization RP skip the Entra ID
+    # existence check, which avoids PrincipalNotFound failures caused by replication delay
+    # for freshly created identities.
+    if assignee_principal_type is None:
+        assignee_principal_type = "ServicePrincipal"
+
     # AAD can have delays in propagating data, so sleep and retry
     hook = cmd.cli_ctx.get_progress_controller(True)
     hook.add(message="Waiting for AAD role to propagate", value=0, total_val=1.0)
@@ -118,15 +126,16 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             )
             break
         except HttpResponseError as ex:
-            if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
+            if isinstance(ex, ResourceExistsError) or ex.error.code == 'RoleAssignmentExists':
                 break
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
+        hook.end(message="AAD role propagation failed", value=1.0, total_val=1.0)
         return False
-    hook.add(message="AAD role propagation done", value=1.0, total_val=1.0)
+    hook.end(message="AAD role propagation done", value=1.0, total_val=1.0)
     logger.info("AAD role propagation done")
     return True
 
@@ -205,8 +214,9 @@ def delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=Non
             logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
+        hook.end(message="AAD role deletion failed", value=1.0, total_val=1.0)
         return False
-    hook.add(message="AAD role deletion done", value=1.0, total_val=1.0)
+    hook.end(message="AAD role deletion done", value=1.0, total_val=1.0)
     logger.info("AAD role deletion done")
     return True
 

@@ -33,11 +33,12 @@ from azure.cli.command_modules.backup._validators import datetime_type, validate
 from azure.cli.command_modules.backup._client_factory import protectable_containers_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf
+    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf, \
+    protected_items_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.command_modules.backup import custom
+from azure.cli.command_modules.backup import custom, custom_base
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
@@ -48,6 +49,80 @@ from azure.cli.core.profiles import ResourceType
 
 fabric_name = "Azure"
 logger = get_logger(__name__)
+
+
+def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
+                              new_vault_name, new_vault_rg,
+                              new_policy_name, workload_type, retain_as_per_policy, tenant_id):
+    """Reconfigure Azure Workload (SQL/HANA/ASE) protection to a new vault.
+
+    Steps:
+    1. Disable protection for the specific protected item (retain as per flag) in source vault.
+    2. If container has no remaining protected items, unregister it from source vault.
+    3. Register or re-register corresponding workload container in destination vault.
+    4. Discover protectable item in destination vault and enable protection with new policy.
+    5. Return newly protected item.
+    """
+    logger.warning("For Workload reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
+
+    # 1. Disable in source vault
+    items_client = protected_items_cf(cmd.cli_ctx)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
+
+    # 2. Unregister container if last item
+    _maybe_unregister_wl_container(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
+                                   item.properties.container_name, workload_type)
+
+    # 3. Register workload container in destination vault.
+    _register_wl_container_in_new_vault(cmd, item, new_vault_rg, new_vault_name, workload_type)
+
+    # 4. Discover protectable item in destination vault and enable
+    new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg,
+                                                          new_vault_name, new_policy_name,
+                                                          protectable_item_type="SQLDatabase",
+                                                          protectable_item_name=item.properties.friendly_name,
+                                                          server_name=item.properties.server_name,
+                                                          workload_type=workload_type)
+    return new_item
+
+
+def _register_wl_container_in_new_vault(cmd, item, resource_group_name, vault_name, workload_type):
+    # For workload items, container_name is something like: IaasVMContainer;iaasvmcontainerv2;rg;vmname or similar.
+    # We'll need the underlying resource id if present on item.properties.source_resource_id.
+    resource_id = getattr(item.properties, 'source_resource_id', None)
+    if resource_id is None:
+        raise CLIError('Cannot derive source resource id from workload item for reconfiguration.')
+
+    containers_client = protection_containers_cf(cmd.cli_ctx)
+    # Attempt register (if already registered enable step will proceed)
+    try:
+        register_wl_container(cmd, containers_client, vault_name, resource_group_name,
+                              workload_type, resource_id, "AzureWorkload")
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping container registration in new vault (may already exist): %s', str(ex))
+
+
+def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault_name, container_name, workload_type):
+    """Unregister workload container if no protected items remain."""
+
+    items = common.list_items(cmd, items_client, resource_group_name, vault_name,
+                              workload_type=workload_type, container_name=container_name,
+                              container_type="AzureWorkload")
+    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    if remaining:
+        raise ValidationError('Cannot unregister container as other items are still protected.')
+
+    try:
+        containers_client = protection_containers_cf(cmd.cli_ctx)
+        return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name,
+                                                container_name, "AzureWorkload")
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
+
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',

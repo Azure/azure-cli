@@ -85,12 +85,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @ResourceGroupPreparer(parameter_name='resource_group_2')
-    def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
-        self._test_server_mgmt('postgres', resource_group_1, resource_group_2)
-
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
@@ -370,20 +364,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
         # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
-        self._test_aad_admin(resource_group, server, database_engine)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer()
-    @ServerPreparer(engine_type='postgres')
-    def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
-        self._test_firewall_mgmt(resource_group, server, database_engine)
-        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
-        self._test_db_mgmt(resource_group, server, database_engine)
-        self._test_configuration_mgmt(resource_group, server, database_engine)
-        self._test_log_file_mgmt(resource_group, server, database_engine)
-        self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
-        self._test_private_endpoint_connection(resource_group, server, database_engine)
-        # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('postgres', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
@@ -991,115 +971,6 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
 
-class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
-
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_postgrsql_basic_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'B_Gen5_2', 'B_Gen5_2', True)
-
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_postgrsql_general_purpose_replica_mgmt(self, resource_group):
-        self._test_replica_mgmt(resource_group, 'GP_Gen5_2', 'GP_Gen5_4', False)
-
-    def _test_replica_mgmt(self, resource_group, skuName, testSkuName, isBasicTier):
-        database_engine = 'postgres'
-        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
-                    self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
-
-        # create a server
-        result = self.cmd('{} server create -g {} --name {} -l westus '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name {}'
-                          .format(database_engine, resource_group, server, skuName),
-                          checks=[
-                              JMESPathCheck('name', server),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', skuName),
-                              JMESPathCheck('replicationRole', 'None'),
-                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
-
-        if isBasicTier is False:
-            # enable replication support for  GP/MO servers
-            self.cmd('{} server configuration set -g {} -s {} -n azure.replication_support --value REPLICA'
-                     .format(database_engine, resource_group, server),
-                     checks=[
-                         JMESPathCheck('name', 'azure.replication_support'),
-                         JMESPathCheck('value', 'REPLICA')])
-            # restart server
-            self.cmd('{} server restart -g {} --name {}'
-                     .format(database_engine, resource_group, server), checks=NoneCheck())
-            time.sleep(120)
-
-        # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '
-                 '--source-server {}'
-                 .format(database_engine, resource_group, replicas[0], testSkuName, result['id']),
-                 checks=[
-                     JMESPathCheck('name', replicas[0]),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', testSkuName),
-                     JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
-
-        # test show server with replication info
-        self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, resource_group, server),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'Master'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
-
-        # test replica list
-        self.cmd('{} server replica list -g {} -s {}'
-                 .format(database_engine, resource_group, server),
-                 checks=[JMESPathCheck('length(@)', 1)])
-
-        # test replica delete
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-
-        # test show server with replication info, master becomes normal server
-        self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, resource_group, server),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
-
-        # test delete master server
-        self.cmd('{} server replica create -g {} -n {} '
-                 '--source-server {}'
-                 .format(database_engine, resource_group, replicas[1], result['id']),
-                 checks=[
-                     JMESPathCheck('name', replicas[1]),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
-
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group, server), checks=NoneCheck())
-
-        # test show server with replication info, replica was auto stopped after master server deleted
-        # self.cmd('{} server show -g {} --name {}'
-        #          .format(database_engine, resource_group, replicas[1]),
-        #          checks=[
-        #              JMESPathCheck('replicationRole', 'None'),
-        #              JMESPathCheck('masterServerId', ''),
-        #              JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
-
-        # clean up servers
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
-
-
 class ServerMgmtScenarioPublicParameterTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
@@ -1112,12 +983,6 @@ class ServerMgmtScenarioPublicParameterTest(ScenarioTest):
     @live_only()
     def test_mysql_server_mgmt_public_parameter(self, resource_group_1):
         self._test_server_mgmt_public_parameter('mysql', resource_group_1)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @live_only()
-    def test_postgres_server_mgmt_public_parameter(self, resource_group_1):
-        self._test_server_mgmt_public_parameter('postgres', resource_group_1)
 
     def _test_server_mgmt_public_parameter(self, database_engine, resource_group_1):
         servers = [self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),

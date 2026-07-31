@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2024-01-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-08-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2025-02-23T09:38:37.0603979Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-02-23T09:38:37.0603979Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2026-05-14T09:08:05.3079351Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-05-14T09:08:05.3079351Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 23 Feb 2025 09:39:06 GMT
+      - Thu, 14 May 2026 09:08:35 GMT
       expires:
       - '-1'
       pragma:
@@ -41,9 +41,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/73e874a9-be34-46d0-9deb-08abe354e4f6
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/a3fa5477-374c-4b71-a7fe-10c4ece4e343
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11975'
+      - '799'
+      x-ms-throttling-version:
+      - v1
     status:
       code: 200
       message: OK
@@ -63,11 +65,11 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:06 GMT
+      - Thu, 14 May 2026 09:08:35 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/con1000003?restype=container
   response:
@@ -77,15 +79,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sun, 23 Feb 2025 09:39:07 GMT
+      - Thu, 14 May 2026 09:08:37 GMT
       etag:
-      - '"0x8DD53EDEB8FBDF7"'
+      - '"0x8DEB19862F433AB"'
       last-modified:
-      - Sun, 23 Feb 2025 09:39:08 GMT
+      - Thu, 14 May 2026 09:08:38 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 201
       message: Created
@@ -103,21 +105,21 @@ interactions:
       ParameterSetName:
       - -n -g --container-delete-retention-days --enable-container-delete-retention
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2024-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '399'
+      - '433'
       content-type:
       - application/json
       date:
-      - Sun, 23 Feb 2025 09:39:08 GMT
+      - Thu, 14 May 2026 09:08:41 GMT
       expires:
       - '-1'
       pragma:
@@ -129,16 +131,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/a8939a9e-d937-4cd9-8f3e-5647c84444e2
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3749'
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/16950ade-519c-4b4b-a551-1f793a13e427
+      x-ms-throttling-version:
+      - v2
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"enabled":
-      false, "allowPermanentDelete": false}, "containerDeleteRetentionPolicy": {"enabled":
-      true, "days": 7}}}'
+    body: '{"properties": {"staticWebsite": {"enabled": false}, "cors": {"corsRules":
+      []}, "deleteRetentionPolicy": {"allowPermanentDelete": false, "enabled": false},
+      "containerDeleteRetentionPolicy": {"enabled": true, "days": 7}}}'
     headers:
       Accept:
       - application/json
@@ -149,27 +151,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '183'
+      - '220'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --container-delete-retention-days --enable-container-delete-retention
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-core/1.31.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2024-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"containerDeleteRetentionPolicy":{"enabled":true,"days":7},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"containerDeleteRetentionPolicy":{"enabled":true,"days":7},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '410'
+      - '444'
       content-type:
       - application/json
       date:
-      - Sun, 23 Feb 2025 09:39:11 GMT
+      - Thu, 14 May 2026 09:08:44 GMT
       expires:
       - '-1'
       pragma:
@@ -181,11 +185,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/283c5e9d-2d2d-4c7b-84d3-2de1dcd3fd90
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '2998'
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/dedb0e65-c678-4c3a-a17e-be9ce1c188fb
       x-ms-ratelimit-remaining-subscription-writes:
-      - '198'
+      - '199'
+      x-ms-throttling-version:
+      - v2
     status:
       code: 200
       message: OK
@@ -203,30 +207,30 @@ interactions:
       ParameterSetName:
       - --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:11 GMT
+      - Thu, 14 May 2026 09:08:45 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Sun,
-        23 Feb 2025 09:39:08 GMT</Last-Modified><Etag>\"0x8DD53EDEB8FBDF7\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
+        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Thu,
+        14 May 2026 09:08:38 GMT</Last-Modified><Etag>\"0x8DEB19862F433AB\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
         /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:13 GMT
+      - Thu, 14 May 2026 09:08:47 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -246,11 +250,11 @@ interactions:
       ParameterSetName:
       - -n --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:13 GMT
+      - Thu, 14 May 2026 09:08:48 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: DELETE
     uri: https://clitest000002.blob.core.windows.net/con1000003?restype=container
   response:
@@ -260,11 +264,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sun, 23 Feb 2025 09:39:14 GMT
+      - Thu, 14 May 2026 09:08:50 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -282,11 +286,11 @@ interactions:
       ParameterSetName:
       - --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:15 GMT
+      - Thu, 14 May 2026 09:08:51 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=
   response:
@@ -298,13 +302,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:15 GMT
+      - Thu, 14 May 2026 09:08:53 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -322,31 +326,31 @@ interactions:
       ParameterSetName:
       - --include-deleted --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:16 GMT
+      - Thu, 14 May 2026 09:08:54 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=deleted
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Deleted>true</Deleted><Version>01DB85D6C917E0C2</Version><Properties><Last-Modified>Sun,
-        23 Feb 2025 09:39:08 GMT</Last-Modified><Etag>\"0x8DD53EDEB8FBDF7\"</Etag><LeaseStatus>locked</LeaseStatus><LeaseState>leased</LeaseState><LeaseDuration>fixed</LeaseDuration><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled><DeletedTime>Sun,
-        23 Feb 2025 09:39:14 GMT</DeletedTime><RemainingRetentionDays>7</RemainingRetentionDays></Properties></Container></Containers><NextMarker
+        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Deleted>true</Deleted><Version>01DCE381407D4409</Version><Properties><Last-Modified>Thu,
+        14 May 2026 09:08:38 GMT</Last-Modified><Etag>\"0x8DEB19862F433AB\"</Etag><LeaseStatus>locked</LeaseStatus><LeaseState>leased</LeaseState><LeaseDuration>fixed</LeaseDuration><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled><DeletedTime>Thu,
+        14 May 2026 09:08:51 GMT</DeletedTime><RemainingRetentionDays>7</RemainingRetentionDays></Properties></Container></Containers><NextMarker
         /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:17 GMT
+      - Thu, 14 May 2026 09:08:57 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -364,31 +368,31 @@ interactions:
       ParameterSetName:
       - --include-deleted --query -o --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:47 GMT
+      - Thu, 14 May 2026 09:09:28 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=deleted
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Deleted>true</Deleted><Version>01DB85D6C917E0C2</Version><Properties><Last-Modified>Sun,
-        23 Feb 2025 09:39:08 GMT</Last-Modified><Etag>\"0x8DD53EDEB8FBDF7\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>expired</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled><DeletedTime>Sun,
-        23 Feb 2025 09:39:14 GMT</DeletedTime><RemainingRetentionDays>7</RemainingRetentionDays></Properties></Container></Containers><NextMarker
+        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Deleted>true</Deleted><Version>01DCE381407D4409</Version><Properties><Last-Modified>Thu,
+        14 May 2026 09:08:38 GMT</Last-Modified><Etag>\"0x8DEB19862F433AB\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>expired</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled><DeletedTime>Thu,
+        14 May 2026 09:08:51 GMT</DeletedTime><RemainingRetentionDays>7</RemainingRetentionDays></Properties></Container></Containers><NextMarker
         /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:48 GMT
+      - Thu, 14 May 2026 09:09:30 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -408,15 +412,15 @@ interactions:
       ParameterSetName:
       - -n --deleted-version --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:49 GMT
+      - Thu, 14 May 2026 09:09:30 GMT
       x-ms-deleted-container-name:
-      - con16esh5x3iw3f2boq6arr5
+      - con12mzmq4rvbv43aipessvb
       x-ms-deleted-container-version:
-      - 01DB85D6C917E0C2
+      - 01DCE381407D4409
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/con1000003?restype=container&comp=undelete
   response:
@@ -426,11 +430,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sun, 23 Feb 2025 09:39:50 GMT
+      - Thu, 14 May 2026 09:09:32 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 201
       message: Created
@@ -448,30 +452,30 @@ interactions:
       ParameterSetName:
       - --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:50 GMT
+      - Thu, 14 May 2026 09:09:33 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Sun,
-        23 Feb 2025 09:39:50 GMT</Last-Modified><Etag>\"0x8DD53EE04CDE637\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
+        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Thu,
+        14 May 2026 09:09:33 GMT</Last-Modified><Etag>\"0x8DEB198839D8D7E\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
         /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:51 GMT
+      - Thu, 14 May 2026 09:09:35 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -489,30 +493,30 @@ interactions:
       ParameterSetName:
       - --include-deleted --account-name --auth-mode
       User-Agent:
-      - AZURECLI/2.69.0 azsdk-python-storage-blob/12.16.0 Python/3.12.9 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Sun, 23 Feb 2025 09:39:52 GMT
+      - Thu, 14 May 2026 09:09:36 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://clitest000002.blob.core.windows.net/?comp=list&maxresults=5000&include=deleted
   response:
     body:
       string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Sun,
-        23 Feb 2025 09:39:50 GMT</Last-Modified><Etag>\"0x8DD53EE04CDE637\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
+        ServiceEndpoint=\"https://clitest000002.blob.core.windows.net/\"><MaxResults>5000</MaxResults><Containers><Container><Name>con1000003</Name><Properties><Last-Modified>Thu,
+        14 May 2026 09:09:33 GMT</Last-Modified><Etag>\"0x8DEB198839D8D7E\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><DefaultEncryptionScope>$account-encryption-key</DefaultEncryptionScope><DenyEncryptionScopeOverride>false</DenyEncryptionScopeOverride><HasImmutabilityPolicy>false</HasImmutabilityPolicy><HasLegalHold>false</HasLegalHold><ImmutableStorageWithVersioningEnabled>false</ImmutableStorageWithVersioningEnabled></Properties></Container></Containers><NextMarker
         /></EnumerationResults>"
     headers:
       content-type:
       - application/xml
       date:
-      - Sun, 23 Feb 2025 09:39:53 GMT
+      - Thu, 14 May 2026 09:09:38 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK

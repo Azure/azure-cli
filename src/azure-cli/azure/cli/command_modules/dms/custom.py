@@ -25,7 +25,9 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
-from azure.cli.command_modules.dms._client_factory import dms_cf_projects
+from azure.cli.command_modules.dms._client_factory import (dms_cf_projects,
+                                                           get_resource_groups_client,
+                                                           dms_cf_services)
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
                                                            get_migrate_postgresql_to_azuredbforpostgresql_sync_input,
                                                            get_migrate_mysql_to_azuredbformysql_offline_input,
@@ -42,14 +44,17 @@ def check_service_name_availability(client, service_name, location):
                                           parameters=parameters)
 
 
-def create_service(client,
+def create_service(cmd,
+                   client,
                    service_name,
                    resource_group_name,
-                   location,
                    subnet,
                    sku_name,
+                   location=None,
                    tags=None,
                    no_wait=False):
+    if location is None:
+        location = get_rg_location(cmd.cli_ctx, resource_group_name)
     parameters = DataMigrationService(location=location,
                                       virtual_subnet_id=subnet,
                                       sku=ServiceSku(name=sku_name),
@@ -102,11 +107,11 @@ def check_project_name_availability(client, resource_group_name, service_name, p
                                                    parameters=parameters)
 
 
-def create_or_update_project(client,
+def create_or_update_project(cmd,
+                             client,
                              project_name,
                              service_name,
                              resource_group_name,
-                             location,
                              source_platform,
                              target_platform,
                              tags=None):
@@ -114,6 +119,8 @@ def create_or_update_project(client,
     generally only helps in a GUI context--to guide the user more easily through creating a task. Since this info is
     necessary at the Task level, there is no need to include it at the Project level where for CLI it is more of a
     useless redundancy."""
+
+    location = get_dms_location(cmd.cli_ctx, resource_group_name, service_name)
 
     # Set inputs to lowercase
     source_platform = source_platform.lower()
@@ -472,6 +479,24 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
         scenario_type = ScenarioType.unknown
 
     return scenario_type
+
+
+def get_rg_location(ctx, resource_group_name, subscription_id=None):
+    groups = get_resource_groups_client(ctx, subscription_id=subscription_id)
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    rg = groups.get(resource_group_name)
+    if rg is None:
+        raise CLIError('Resource group {} not found.'.format(resource_group_name))
+    return rg.location
+
+
+def get_dms_location(ctx, resource_group_name, dms_name):
+    services = dms_cf_services(ctx)
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    service = services.get(group_name=resource_group_name, service_name=dms_name)
+    if service is None:
+        raise CLIError('Service {} not found.'.format(dms_name))
+    return service.location
 
 
 class ScenarioType(Enum):

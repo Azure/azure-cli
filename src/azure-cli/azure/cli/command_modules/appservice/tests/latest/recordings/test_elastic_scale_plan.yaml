@@ -5,7 +5,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan create
       Connection:
@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","test":"test_elastic_scale_plan","date":"2025-07-14T23:16:58Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","test":"test_elastic_scale_plan","date":"2026-05-08T15:49:23Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 14 Jul 2025 23:17:01 GMT
+      - Fri, 08 May 2026 15:49:26 GMT
       expires:
       - '-1'
       pragma:
@@ -41,48 +41,47 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 16B9DF96D6934757B926D70C2138AEAA Ref B: MWH011020806031 Ref C: 2025-07-14T23:17:01Z'
+      - 'Ref A: C7E350F6F72F4727A2B739A194491DCF Ref B: SN4AA2022304045 Ref C: 2026-05-08T15:49:26Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westeurope", "sku": {"name": "P1V2", "tier": "PREMIUMV2",
-      "capacity": 1}, "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant":
-      false}}'
+    body: '{"location": "westeurope", "properties": {"perSiteScaling": false}, "sku":
+      {"capacity": 1, "name": "P1V2", "tier": "PREMIUMV2"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan create
       Connection:
       - keep-alive
       Content-Length:
-      - '170'
+      - '128'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"westeurope","properties":{"serverFarmId":54385,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"westeurope","properties":{"serverFarmId":71772,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1679'
+      - '1771'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:12 GMT
+      - Fri, 08 May 2026 15:49:34 GMT
       etag:
-      - '"1DBF5156CF55F60"'
+      - 1DCDF024440D360
       expires:
       - '-1'
       pragma:
@@ -96,13 +95,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/westus2/460b89da-8126-47f8-a51d-b5e48cd4e095
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f338340e-ef13-48e1-aa76-6cde16f7c55f/southcentralus/b4107cbc-26f0-4dda-885c-fb6118b8c6dc
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
       - '800'
       x-msedge-ref:
-      - 'Ref A: 3897F4B1DBBE4DDA81A61F63FF09AB83 Ref B: MWH011020808062 Ref C: 2025-07-14T23:17:02Z'
+      - 'Ref A: 0B623D4F35444DF998C99DFFA1E778AF Ref B: SN4AA2022302051 Ref C: 2026-05-08T15:49:27Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -114,7 +113,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan show
       Connection:
@@ -122,23 +121,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.10.11 (Windows-10-10.0.26100-SP0) AZURECLI/2.75.0
+      - python/3.14.2 (Windows-11-10.0.26100-SP0) AZURECLI/2.86.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1592'
+      - '1684'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:13 GMT
+      - Fri, 08 May 2026 15:49:35 GMT
       expires:
       - '-1'
       pragma:
@@ -154,7 +153,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: C48A11A76B78419C914F727FB3BCE598 Ref B: MWH011020809060 Ref C: 2025-07-14T23:17:13Z'
+      - 'Ref A: C17430698A594C92804ABC62710D8A03 Ref B: SN4AA2022301051 Ref C: 2026-05-08T15:49:36Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -166,7 +165,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
@@ -174,23 +173,23 @@ interactions:
       ParameterSetName:
       - -g -n --elastic-scale
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1592'
+      - '1684'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:13 GMT
+      - Fri, 08 May 2026 15:49:37 GMT
       expires:
       - '-1'
       pragma:
@@ -206,51 +205,63 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: F2293927133343979F50A7E65DC58ACB Ref B: MWH011020807025 Ref C: 2025-07-14T23:17:13Z'
+      - 'Ref A: AE06DB24F2E84E93BE8B641F675624F9 Ref B: SN4AA2022301049 Ref C: 2026-05-08T15:49:37Z'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "app", "location": "West Europe", "sku": {"name": "P1v2", "tier":
-      "PremiumV2", "size": "P1v2", "family": "Pv2", "capacity": 1}, "properties":
-      {"perSiteScaling": false, "elasticScaleEnabled": true, "maximumElasticWorkerCount":
-      1, "isSpot": false, "reserved": false, "isXenon": false, "hyperV": false, "targetWorkerCount":
-      0, "targetWorkerSizeId": 0, "zoneRedundant": false, "asyncScalingEnabled": false}}'
+    body: '{"kind": "app", "location": "West Europe", "properties": {"serverFarmId":
+      71772, "name": "plan000002", "workerSize": "D1", "workerSizeId": 3, "workerTierName":
+      null, "currentWorkerSize": "D1", "currentWorkerSizeId": 3, "currentNumberOfWorkers":
+      1, "webSpace": "clitest.rg000001-WestEuropewebspace", "adminSiteName": null,
+      "hostingEnvironment": null, "hostingEnvironmentProfile": null, "planName": "VirtualDedicatedPlan",
+      "adminRuntimeSiteName": null, "computeMode": "Dedicated", "siteMode": null,
+      "perSiteScaling": false, "elasticScaleEnabled": true, "maximumElasticWorkerCount":
+      1, "hostingEnvironmentId": null, "isSpot": false, "spotExpirationTime": null,
+      "freeOfferExpirationTime": null, "tags": null, "kind": "app", "reserved": false,
+      "isXenon": false, "hyperV": false, "mdmId": "waws-prod-am2-105_71772", "targetWorkerCount":
+      0, "targetWorkerSizeId": 0, "targetWorkerSku": null, "webSiteId": null, "existingServerFarmIds":
+      null, "kubeEnvironmentProfile": null, "zoneRedundant": false, "maximumNumberOfZones":
+      1, "currentNumberOfZonesUtilized": 1, "migrateToVMSS": null, "vnetConnectionsUsed":
+      0, "vnetConnectionsMax": 2, "createdTime": "2026-05-08T15:49:33.2", "asyncScalingEnabled":
+      false, "isCustomMode": false, "powerState": "Running", "eligibleLogCategories":
+      ""}, "sku": {"name": "P1v2", "tier": "PremiumV2", "size": "P1v2", "family":
+      "Pv2", "capacity": 1}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
       - keep-alive
       Content-Length:
-      - '412'
+      - '1367'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --elastic-scale
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1674'
+      - '1764'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:19 GMT
+      - Fri, 08 May 2026 15:49:39 GMT
       expires:
       - '-1'
       pragma:
@@ -264,13 +275,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/francecentral/5800f2d9-abe4-4b17-abba-25602e6a6889
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f338340e-ef13-48e1-aa76-6cde16f7c55f/westeurope/d2c248c4-da24-4a8c-bc4a-029e9b53f949
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '12000'
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '800'
+      - '799'
       x-msedge-ref:
-      - 'Ref A: CCEEF841A0D242C19F81728008E7B65D Ref B: CO6AA3150220047 Ref C: 2025-07-14T23:17:14Z'
+      - 'Ref A: 9DEE7C01479D4B6FB96C0AF759180F5B Ref B: SN4AA2022303009 Ref C: 2026-05-08T15:49:38Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -282,7 +293,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan show
       Connection:
@@ -290,23 +301,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.10.11 (Windows-10-10.0.26100-SP0) AZURECLI/2.75.0
+      - python/3.14.2 (Windows-11-10.0.26100-SP0) AZURECLI/2.86.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1591'
+      - '1681'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:20 GMT
+      - Fri, 08 May 2026 15:49:40 GMT
       expires:
       - '-1'
       pragma:
@@ -322,7 +333,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: E32543892A564A2A84E1237F1FAAA294 Ref B: MWH011020806052 Ref C: 2025-07-14T23:17:20Z'
+      - 'Ref A: 18B6813CA4254C47A50B4CB070C67C4E Ref B: SN4AA2022304037 Ref C: 2026-05-08T15:49:40Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -334,7 +345,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
@@ -342,23 +353,23 @@ interactions:
       ParameterSetName:
       - -g -n --elastic-scale
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1591'
+      - '1681'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:21 GMT
+      - Fri, 08 May 2026 15:49:41 GMT
       expires:
       - '-1'
       pragma:
@@ -374,51 +385,63 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: F5204F96B6594BACA3BC99F952E101C9 Ref B: MWH011020808036 Ref C: 2025-07-14T23:17:20Z'
+      - 'Ref A: C77510CE981E4295B866CC438923ADA3 Ref B: SN4AA2022301031 Ref C: 2026-05-08T15:49:41Z'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "app", "location": "West Europe", "sku": {"name": "P1v2", "tier":
-      "PremiumV2", "size": "P1v2", "family": "Pv2", "capacity": 1}, "properties":
-      {"perSiteScaling": false, "elasticScaleEnabled": false, "maximumElasticWorkerCount":
-      1, "isSpot": false, "reserved": false, "isXenon": false, "hyperV": false, "targetWorkerCount":
-      0, "targetWorkerSizeId": 0, "zoneRedundant": false, "asyncScalingEnabled": false}}'
+    body: '{"kind": "app", "location": "West Europe", "properties": {"serverFarmId":
+      71772, "name": "plan000002", "workerSize": "D1", "workerSizeId": 3, "workerTierName":
+      null, "currentWorkerSize": "D1", "currentWorkerSizeId": 3, "currentNumberOfWorkers":
+      1, "webSpace": "clitest.rg000001-WestEuropewebspace", "adminSiteName": null,
+      "hostingEnvironment": null, "hostingEnvironmentProfile": null, "planName": "VirtualDedicatedPlan",
+      "adminRuntimeSiteName": null, "computeMode": "Dedicated", "siteMode": null,
+      "perSiteScaling": false, "elasticScaleEnabled": false, "maximumElasticWorkerCount":
+      1, "hostingEnvironmentId": null, "isSpot": false, "spotExpirationTime": null,
+      "freeOfferExpirationTime": null, "tags": null, "kind": "app", "reserved": false,
+      "isXenon": false, "hyperV": false, "mdmId": "waws-prod-am2-105_71772", "targetWorkerCount":
+      0, "targetWorkerSizeId": 0, "targetWorkerSku": "", "webSiteId": null, "existingServerFarmIds":
+      null, "kubeEnvironmentProfile": null, "zoneRedundant": false, "maximumNumberOfZones":
+      1, "currentNumberOfZonesUtilized": 1, "migrateToVMSS": null, "vnetConnectionsUsed":
+      0, "vnetConnectionsMax": 2, "createdTime": "2026-05-08T15:49:33.2", "asyncScalingEnabled":
+      false, "isCustomMode": false, "powerState": "Running", "eligibleLogCategories":
+      ""}, "sku": {"name": "P1v2", "tier": "PremiumV2", "size": "P1v2", "family":
+      "Pv2", "capacity": 1}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
       - keep-alive
       Content-Length:
-      - '413'
+      - '1366'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --elastic-scale
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1675'
+      - '1765'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:26 GMT
+      - Fri, 08 May 2026 15:49:45 GMT
       expires:
       - '-1'
       pragma:
@@ -432,13 +455,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/westus2/173c7481-63c9-48a6-bcf3-d8490d352166
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f338340e-ef13-48e1-aa76-6cde16f7c55f/westeurope/231d4dcd-8f3d-451a-9e1f-12dd8a0d5096
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '12000'
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '800'
+      - '799'
       x-msedge-ref:
-      - 'Ref A: 52760ABD509143D0BB0F2DCD9143FB36 Ref B: MWH011020807040 Ref C: 2025-07-14T23:17:21Z'
+      - 'Ref A: 83A25128002F475C95568D3C4102C995 Ref B: SN4AA2022301029 Ref C: 2026-05-08T15:49:42Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -450,7 +473,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan show
       Connection:
@@ -458,23 +481,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.10.11 (Windows-10-10.0.26100-SP0) AZURECLI/2.75.0
+      - python/3.14.2 (Windows-11-10.0.26100-SP0) AZURECLI/2.86.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1592'
+      - '1682'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:29 GMT
+      - Fri, 08 May 2026 15:49:46 GMT
       expires:
       - '-1'
       pragma:
@@ -490,7 +513,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: D07DD9B8305043209996FE1436F91311 Ref B: MWH011020806054 Ref C: 2025-07-14T23:17:27Z'
+      - 'Ref A: 6E1780D09E9F49808AF82078CE20FED3 Ref B: SN4AA2022301029 Ref C: 2026-05-08T15:49:45Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -502,7 +525,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
@@ -510,23 +533,23 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1592'
+      - '1682'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:30 GMT
+      - Fri, 08 May 2026 15:49:46 GMT
       expires:
       - '-1'
       pragma:
@@ -542,53 +565,65 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: EA60206B75D442C58C4FD0D62FD3CE3F Ref B: CO6AA3150217011 Ref C: 2025-07-14T23:17:30Z'
+      - 'Ref A: DDE588F346BC491D8EC7881F369A851A Ref B: SN4AA2022305045 Ref C: 2026-05-08T15:49:46Z'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "app", "location": "West Europe", "sku": {"name": "F1", "tier":
-      "FREE", "size": "P1v2", "family": "Pv2", "capacity": 1}, "properties": {"perSiteScaling":
-      false, "elasticScaleEnabled": false, "maximumElasticWorkerCount": 1, "isSpot":
-      false, "reserved": false, "isXenon": false, "hyperV": false, "targetWorkerCount":
-      0, "targetWorkerSizeId": 0, "zoneRedundant": false, "asyncScalingEnabled": false}}'
+    body: '{"kind": "app", "location": "West Europe", "properties": {"serverFarmId":
+      71772, "name": "plan000002", "workerSize": "D1", "workerSizeId": 3, "workerTierName":
+      null, "currentWorkerSize": "D1", "currentWorkerSizeId": 3, "currentNumberOfWorkers":
+      1, "webSpace": "clitest.rg000001-WestEuropewebspace", "adminSiteName": null,
+      "hostingEnvironment": null, "hostingEnvironmentProfile": null, "planName": "VirtualDedicatedPlan",
+      "adminRuntimeSiteName": null, "computeMode": "Dedicated", "siteMode": null,
+      "perSiteScaling": false, "elasticScaleEnabled": false, "maximumElasticWorkerCount":
+      1, "hostingEnvironmentId": null, "isSpot": false, "spotExpirationTime": null,
+      "freeOfferExpirationTime": null, "tags": null, "kind": "app", "reserved": false,
+      "isXenon": false, "hyperV": false, "mdmId": "waws-prod-am2-105_71772", "targetWorkerCount":
+      0, "targetWorkerSizeId": 0, "targetWorkerSku": "", "webSiteId": null, "existingServerFarmIds":
+      null, "kubeEnvironmentProfile": null, "zoneRedundant": false, "maximumNumberOfZones":
+      1, "currentNumberOfZonesUtilized": 1, "migrateToVMSS": null, "vnetConnectionsUsed":
+      0, "vnetConnectionsMax": 2, "createdTime": "2026-05-08T15:49:33.2", "asyncScalingEnabled":
+      false, "isCustomMode": false, "powerState": "Running", "eligibleLogCategories":
+      ""}, "sku": {"name": "F1", "tier": "FREE", "size": "P1v2", "family": "Pv2",
+      "capacity": 1}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
       - keep-alive
       Content-Length:
-      - '406'
+      - '1359'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0},"workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":"Limited","geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":0,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0},"workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":"Limited","geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":0,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1660'
+      - '1750'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:42 GMT
+      - Fri, 08 May 2026 15:49:55 GMT
       etag:
-      - '"1DBF5157AB210D0"'
+      - 1DCDF024D5A558B,1DCDF024D5A558B,1DCDF024D5A558B
       expires:
       - '-1'
       pragma:
@@ -602,13 +637,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/westus2/a1979d0b-7912-4379-804b-8e69eabfef8f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f338340e-ef13-48e1-aa76-6cde16f7c55f/westeurope/4ebdb073-fadb-459a-8b7a-e94025d35f70
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
       - '800'
       x-msedge-ref:
-      - 'Ref A: 5097AFB708C142C78A3B352E41524DE0 Ref B: CO6AA3150219025 Ref C: 2025-07-14T23:17:30Z'
+      - 'Ref A: 9C17ED3533054827AC869E87832DC7C2 Ref B: SN4AA2022301039 Ref C: 2026-05-08T15:49:48Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -620,7 +655,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - appservice plan update
       Connection:
@@ -628,23 +663,23 @@ interactions:
       ParameterSetName:
       - -g -n --elastic-scale
       User-Agent:
-      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2025-05-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        Europe","properties":{"serverFarmId":54385,"name":"plan000002","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":"Limited","geoRegion":"West
-        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-029_54385","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":0,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-07-14T23:17:09.593","asyncScalingEnabled":false},"sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0}}'
+        Europe","properties":{"serverFarmId":71772,"name":"plan000002","workerSize":"Small","workerSizeId":0,"workerTierName":null,"numberOfWorkers":0,"currentWorkerSize":"Small","currentWorkerSizeId":0,"currentNumberOfWorkers":0,"status":"Ready","webSpace":"clitest.rg000001-WestEuropewebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":1,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":"Limited","geoRegion":"West
+        Europe","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-am2-105_71772","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":0,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2026-05-08T15:49:33.2","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"F1","tier":"Free","size":"F1","family":"F","capacity":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1588'
+      - '1678'
       content-type:
       - application/json
       date:
-      - Mon, 14 Jul 2025 23:17:43 GMT
+      - Fri, 08 May 2026 15:49:56 GMT
       expires:
       - '-1'
       pragma:
@@ -660,7 +695,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 3ECD8C83165241CDB73FE8F96A43897E Ref B: MWH011020806034 Ref C: 2025-07-14T23:17:43Z'
+      - 'Ref A: 0BD34A04633C4E928EC8C30C0E3F35EB Ref B: SN4AA2022305047 Ref C: 2026-05-08T15:49:56Z'
       x-powered-by:
       - ASP.NET
     status:

@@ -22,12 +22,15 @@ class Update(AAZCommand):
 
     :example: Update a VPN connection.
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
+
+    :example: Update certificate authentication using JSON string
+        az network vpn-connection update -g MyResourceGroup -n MyConnection --certificate-authentication '{"outboundAuthCertificate":"https://{kv-name}.vault.azure.net/secrets/{secret-name}/{version}","inboundAuthCertificateChain":["MIIC+TCCAeG..."],"inboundAuthCertificateSubjectName":"CN=rootCert.com"}'
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections/{}", "2025-01-01"],
         ]
     }
 
@@ -100,10 +103,45 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.authentication_type = AAZStrArg(
+            options=["--auth-type", "--authentication-type"],
+            arg_group="Properties",
+            help="Gateway connection authentication type.",
+            nullable=True,
+            enum={"Certificate": "Certificate", "PSK": "PSK"},
+        )
+        _args_schema.certificate_authentication = AAZObjectArg(
+            options=["--cert-auth", "--certificate-authentication"],
+            arg_group="Properties",
+            help="Certificate Authentication information for a certificate based authentication connection.",
+            nullable=True,
+        )
         _args_schema.ipsec_policies = AAZListArg(
             options=["--ipsec-policies"],
             arg_group="Properties",
             help="The IPSec Policies to be considered by this connection.",
+            nullable=True,
+        )
+
+        certificate_authentication = cls._args_schema.certificate_authentication
+        certificate_authentication.inbound_auth_certificate_chain = AAZListArg(
+            options=["inbound-auth-certificate-chain"],
+            help="Inbound authentication certificate public keys.",
+            nullable=True,
+        )
+        certificate_authentication.inbound_auth_certificate_subject_name = AAZStrArg(
+            options=["inbound-auth-certificate-subject-name"],
+            help="Inbound authentication certificate subject name.",
+            nullable=True,
+        )
+        certificate_authentication.outbound_auth_certificate = AAZStrArg(
+            options=["outbound-auth-certificate"],
+            help="Keyvault secret ID for outbound authentication certificate.",
+            nullable=True,
+        )
+
+        inbound_auth_certificate_chain = cls._args_schema.certificate_authentication.inbound_auth_certificate_chain
+        inbound_auth_certificate_chain.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -159,6 +197,7 @@ class Update(AAZCommand):
     def _build_args_address_space_update(cls, _schema):
         if cls._args_address_space_update is not None:
             _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
             return
 
         cls._args_address_space_update = AAZObjectArg(
@@ -171,13 +210,36 @@ class Update(AAZCommand):
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
             nullable=True,
         )
+        address_space_update.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools allocating IP address prefixes.",
+            nullable=True,
+        )
 
         address_prefixes = cls._args_address_space_update.address_prefixes
         address_prefixes.Element = AAZStrArg(
             nullable=True,
         )
 
+        ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_address_space_update.ipam_pool_prefix_allocations.Element
+        _element.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+            nullable=True,
+        )
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
+            nullable=True,
+        )
+
         _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
 
     _args_bgp_settings_update = None
 
@@ -1057,7 +1119,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -1156,7 +1218,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -1219,12 +1281,24 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("authenticationType", AAZStrType, ".authentication_type")
+                properties.set_prop("certificateAuthentication", AAZObjectType, ".certificate_authentication")
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
                 properties.set_prop("expressRouteGatewayBypass", AAZBoolType, ".express_route_gateway_bypass")
                 properties.set_prop("ipsecPolicies", AAZListType, ".ipsec_policies")
                 properties.set_prop("routingWeight", AAZIntType, ".routing_weight")
-                properties.set_prop("sharedKey", AAZStrType, ".shared_key")
+                properties.set_prop("sharedKey", AAZStrType, ".shared_key", typ_kwargs={"flags": {"secret": True}})
                 properties.set_prop("usePolicyBasedTrafficSelectors", AAZBoolType, ".use_policy_based_traffic_selectors")
+
+            certificate_authentication = _builder.get(".properties.certificateAuthentication")
+            if certificate_authentication is not None:
+                certificate_authentication.set_prop("inboundAuthCertificateChain", AAZListType, ".inbound_auth_certificate_chain")
+                certificate_authentication.set_prop("inboundAuthCertificateSubjectName", AAZStrType, ".inbound_auth_certificate_subject_name")
+                certificate_authentication.set_prop("outboundAuthCertificate", AAZStrType, ".outbound_auth_certificate")
+
+            inbound_auth_certificate_chain = _builder.get(".properties.certificateAuthentication.inboundAuthCertificateChain")
+            if inbound_auth_certificate_chain is not None:
+                inbound_auth_certificate_chain.set_elements(AAZStrType, ".")
 
             ipsec_policies = _builder.get(".properties.ipsecPolicies")
             if ipsec_policies is not None:
@@ -1264,10 +1338,24 @@ class _UpdateHelper:
         if _builder is None:
             return
         _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
         address_prefixes = _builder.get(".addressPrefixes")
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
+
+        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
+        if ipam_pool_prefix_allocations is not None:
+            ipam_pool_prefix_allocations.set_elements(AAZObjectType, ".")
+
+        _elements = _builder.get(".ipamPoolPrefixAllocations[]")
+        if _elements is not None:
+            _elements.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+            _elements.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+        pool = _builder.get(".ipamPoolPrefixAllocations[].pool")
+        if pool is not None:
+            pool.set_prop("id", AAZStrType, ".id")
 
     @classmethod
     def _build_schema_bgp_settings_update(cls, _builder):
@@ -1447,7 +1535,7 @@ class _UpdateHelper:
             vpn_client_configuration.set_prop("aadIssuer", AAZStrType, ".aad_issuer")
             vpn_client_configuration.set_prop("aadTenant", AAZStrType, ".aad_tenant")
             vpn_client_configuration.set_prop("radiusServerAddress", AAZStrType, ".radius_server_address")
-            vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_server_secret")
+            vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_server_secret", typ_kwargs={"flags": {"secret": True}})
             vpn_client_configuration.set_prop("radiusServers", AAZListType, ".radius_servers")
             vpn_client_configuration.set_prop("vngClientConnectionConfigurations", AAZListType, ".vng_client_connection_configurations")
             vpn_client_configuration.set_prop("vpnAuthenticationTypes", AAZListType, ".vpn_authentication_types")
@@ -1465,7 +1553,7 @@ class _UpdateHelper:
         if _elements is not None:
             _elements.set_prop("radiusServerAddress", AAZStrType, ".radius_server_address", typ_kwargs={"flags": {"required": True}})
             _elements.set_prop("radiusServerScore", AAZIntType, ".radius_server_score")
-            _elements.set_prop("radiusServerSecret", AAZStrType, ".radius_server_secret")
+            _elements.set_prop("radiusServerSecret", AAZStrType, ".radius_server_secret", typ_kwargs={"flags": {"secret": True}})
 
         vng_client_connection_configurations = _builder.get(".properties.vpnClientConfiguration.vngClientConnectionConfigurations")
         if vng_client_connection_configurations is not None:
@@ -1543,6 +1631,7 @@ class _UpdateHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -1551,11 +1640,36 @@ class _UpdateHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_bgp_settings_read = None
 
@@ -1724,8 +1838,14 @@ class _UpdateHelper:
         )
 
         properties = _schema_virtual_network_gateway_connection_read.properties
+        properties.authentication_type = AAZStrType(
+            serialized_name="authenticationType",
+        )
         properties.authorization_key = AAZStrType(
             serialized_name="authorizationKey",
+        )
+        properties.certificate_authentication = AAZObjectType(
+            serialized_name="certificateAuthentication",
         )
         properties.connection_mode = AAZStrType(
             serialized_name="connectionMode",
@@ -1791,6 +1911,7 @@ class _UpdateHelper:
         )
         properties.shared_key = AAZStrType(
             serialized_name="sharedKey",
+            flags={"secret": True},
         )
         properties.traffic_selector_policies = AAZListType(
             serialized_name="trafficSelectorPolicies",
@@ -1817,6 +1938,20 @@ class _UpdateHelper:
             serialized_name="virtualNetworkGateway2",
         )
         cls._build_schema_virtual_network_gateway_read(properties.virtual_network_gateway2)
+
+        certificate_authentication = _schema_virtual_network_gateway_connection_read.properties.certificate_authentication
+        certificate_authentication.inbound_auth_certificate_chain = AAZListType(
+            serialized_name="inboundAuthCertificateChain",
+        )
+        certificate_authentication.inbound_auth_certificate_subject_name = AAZStrType(
+            serialized_name="inboundAuthCertificateSubjectName",
+        )
+        certificate_authentication.outbound_auth_certificate = AAZStrType(
+            serialized_name="outboundAuthCertificate",
+        )
+
+        inbound_auth_certificate_chain = _schema_virtual_network_gateway_connection_read.properties.certificate_authentication.inbound_auth_certificate_chain
+        inbound_auth_certificate_chain.Element = AAZStrType()
 
         egress_nat_rules = _schema_virtual_network_gateway_connection_read.properties.egress_nat_rules
         egress_nat_rules.Element = AAZObjectType()
@@ -2269,6 +2404,7 @@ class _UpdateHelper:
         )
         vpn_client_configuration.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
         vpn_client_configuration.radius_servers = AAZListType(
             serialized_name="radiusServers",
@@ -2309,6 +2445,7 @@ class _UpdateHelper:
         )
         _element.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
 
         vng_client_connection_configurations = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations

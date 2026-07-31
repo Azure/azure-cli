@@ -7,10 +7,11 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError
+import unittest
 
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_STRING_SIZE = "--service-level 'Premium' --size a"
-LOCATION = "eastus2euap"
+LOCATION = "eastus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -58,6 +59,56 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles account create --resource-group {rg} --account-name '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd("az netappfiles pool create --resource-group {rg} --account-name %s --pool-name %s -l %s %s " % (account_name, pool_name, LOCATION, POOL_DEFAULT_STRING_SIZE)).get_output_in_json()
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
+    def test_create_pool_nosize(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        tags = "Tag1=Value1 Tag2=Value2"
+
+
+        self.cmd("az netappfiles account create --resource-group {rg} --account-name '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
+        pool = self.cmd("az netappfiles pool create --resource-group {rg} --account-name %s --pool-name %s -l %s --service-level Premium --tags %s" % (account_name, pool_name, LOCATION, tags)).get_output_in_json()
+        assert pool['name'] == account_name + '/' + pool_name
+        assert pool['tags']['Tag1'] == 'Value1'
+        assert pool['tags']['Tag2'] == 'Value2'
+        assert pool['size'] == 4398046511104
+
+
+    @unittest.skip('Skip 0.5 TiB pool size tests until the preview (AFEC) feature is more widely available, then we can remove the skip')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
+    def test_create_pool_minimum_size(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+
+        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
+        # 0.5 TiB pools require the AFEC feature 'Microsoft.NetApp/ANFHalfTiBPoolSize' to be
+        # registered on the subscription. When it is not, the service returns InvalidValueReceivedFor
+        # and the CLI augments the error with a hint pointing to that feature.
+        try:
+            pool = self.cmd("az netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level Standard --size 0.5" % (account_name, pool_name, LOCATION)).get_output_in_json()
+            assert pool['size'] == 549755813888
+        except HttpResponseError as ex:
+            msg = str(ex)
+            assert 'InvalidValueReceivedFor' in msg or 'Pool.Size' in msg
+            assert 'ANFHalfTiBPoolSize' in msg, \
+                "AFEC hint was not appended to the service error: %s" % msg
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
+    def test_create_pool_size_in_bytes(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+
+        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
+        # See test_create_pool_minimum_size: 549755813888 bytes (512 GiB) needs the AFEC feature.
+        try:
+            pool = self.cmd("az netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level Standard --size-in-bytes 549755813888" % (account_name, pool_name, LOCATION)).get_output_in_json()
+            assert pool['size'] == 549755813888
+        except HttpResponseError as ex:
+            msg = str(ex)
+            assert 'InvalidValueReceivedFor' in msg or 'Pool.Size' in msg
+            assert 'ANFHalfTiBPoolSize' in msg, \
+                "AFEC hint was not appended to the service error: %s" % msg
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
     def test_list_pools(self):

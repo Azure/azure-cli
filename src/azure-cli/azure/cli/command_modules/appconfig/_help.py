@@ -36,6 +36,10 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Create an App Configuration store with a key-value revision retention period of one day (in seconds).
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --kv-revision-retention-period 86400
+  - name: Create an App Configuration store linked to an Azure Front Door profile.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --azure-front-door-profile /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCEGROUP>/providers/Microsoft.Cdn/profiles/<PROFILE_NAME>
+  - name: Create an App Configuration store with an Application Insights resource linked for telemetry collection.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
 """
 
 helps['appconfig list-deleted'] = """
@@ -238,6 +242,8 @@ examples:
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=
   - name: List all key-values with tag name "tag1" with null value
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
+  - name: List all key-values within a snapshot referenced by the key "MySnapshotRef".
+    text: az appconfig kv list -n MyAppConfiguration --key MySnapshotRef --resolve-snapshot-references
 """
 
 helps['appconfig kv lock'] = """
@@ -279,7 +285,7 @@ examples:
   - name: Set a key with null value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
-    text: az appconfig kv set --endpoint https://myappconfiguration.azconfig.io --key color --value red --auth-mode login
+    text: az appconfig kv set --endpoint https://contoso.azconfig.io --key color --value red --auth-mode login
 """
 
 helps['appconfig kv set-keyvault'] = """
@@ -290,6 +296,18 @@ examples:
     text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
   - name: Set a keyvault reference with null label and multiple tags using connection string.
     text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
+"""
+
+helps['appconfig kv set-snapshot-reference'] = """
+type: command
+short-summary: Set a snapshot reference.
+examples:
+  - name: Set a snapshot reference with label MyLabel.
+    text: az appconfig kv set-snapshot-reference -n MyAppConfiguration --key MySnapshotRef --label MyLabel --snapshot-name MySnapshot
+  - name: Set a snapshot reference using login-based authentication.
+    text: az appconfig kv set-snapshot-reference --endpoint https://contoso.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
+  - name: Set a snapshot reference with tags using connection string.
+    text: az appconfig kv set-snapshot-reference --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
 """
 
 helps['appconfig kv show'] = """
@@ -414,6 +432,14 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Update an App Configuration store to set a key-value revision retention period of one day (in seconds).
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --kv-revision-retention-period 86400
+  - name: Update an App Configuration store to link an Azure Front Door profile.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --azure-front-door-profile /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCEGROUP>/providers/Microsoft.Cdn/profiles/<PROFILE_NAME>
+  - name: Update an App Configuration store to unlink an Azure Front Door profile.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --azure-front-door-profile ""
+  - name: Link an Application Insights resource to an App Configuration store for telemetry collection.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
+  - name: Unlink Application Insights from an App Configuration store.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource ""
 """
 
 helps['appconfig feature'] = """
@@ -440,6 +466,12 @@ helps['appconfig feature set'] = """
         - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta" with tags "tag1=value1" and "tag2=value2".
           text:
             az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2
+        - name: Set a feature flag with telemetry enabled.
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature color --telemetry-enabled
+        - name: Disable telemetry on a feature flag.
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature color --telemetry-enabled false
     """
 
 helps['appconfig feature delete'] = """
@@ -664,6 +696,38 @@ helps['appconfig feature filter list'] = """
 helps['appconfig snapshot'] = """
     type: group
     short-summary: Manage snapshots associated with an app configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration'] = """
+    type: group
+    short-summary: Manage network security perimeter configurations for an App Configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration list'] = """
+    type: command
+    short-summary: List all network security perimeter configurations for an App Configuration store.
+    examples:
+        - name: List all network security perimeter configurations for an App Configuration store.
+          text:
+            az appconfig network-security-perimeter-configuration list --store-name MyAppConfiguration -g MyResourceGroup
+    """
+
+helps['appconfig network-security-perimeter-configuration show'] = """
+    type: command
+    short-summary: Show a specific network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Show a network security perimeter configuration by name.
+          text:
+            az appconfig network-security-perimeter-configuration show --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
+helps['appconfig network-security-perimeter-configuration reconcile'] = """
+    type: command
+    short-summary: Force a refresh of the specified network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Reconcile a network security perimeter configuration.
+          text:
+            az appconfig network-security-perimeter-configuration reconcile --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
     """
 
 helps['appconfig snapshot create'] = """

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.maps._client_factory import cf_accounts, cf_map, cf_creator
+from azure.cli.command_modules.maps._client_factory import cf_accounts, cf_map
 
 
 def load_command_table(self, _):
@@ -29,13 +29,3 @@ def load_command_table(self, _):
 
     with self.command_group('maps map', maps_map, client_factory=cf_map) as g:
         g.custom_command('list-operation', 'maps_map_list_operation')
-
-    maps_creator = CliCommandType(
-        operations_tmpl='azure.mgmt.maps.operations._creators_operations#CreatorsOperations.{}',
-        client_factory=cf_creator)
-    with self.command_group('maps creator', maps_creator, client_factory=cf_creator) as g:
-        g.custom_command('list', 'maps_creator_list')
-        g.custom_show_command('show', 'maps_creator_show')
-        g.custom_command('create', 'maps_creator_create')
-        g.custom_command('update', 'maps_creator_update')
-        g.custom_command('delete', 'maps_creator_delete', confirmation=True)

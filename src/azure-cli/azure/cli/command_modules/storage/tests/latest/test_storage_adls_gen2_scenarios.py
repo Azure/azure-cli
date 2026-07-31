@@ -8,13 +8,12 @@ import time
 from datetime import datetime, timedelta
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
-                               api_version_constraint, RoleBasedServicePrincipalPreparer)
+                               RoleBasedServicePrincipalPreparer)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
 class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -53,7 +52,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('permissions', permissions))
 
     @unittest.skip('AssertionError: 0 != 1')
-    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2')
     @RoleBasedServicePrincipalPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_access_recursive_scenarios(self, resource_group, sp_name, sp_password, storage_account):
@@ -266,7 +265,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem3)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind="StorageV2", hns=True, location="eastus2euap")
+    @StorageAccountPreparer(kind="StorageV2", hns=True, location="eastus2")
     def test_adls_fs_soft_delete(self, resource_group, storage_account_info):
         account_info = storage_account_info
         container = self.create_file_system(account_info)
@@ -290,19 +289,22 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs service-properties show',
                          account_info).assert_with_checks(JMESPathCheck('delete_retention_policy.enabled', True),
                                                           JMESPathCheck('delete_retention_policy.days', 2))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         # soft-delete and check
         self.storage_cmd('storage fs file delete -f {} -p {} -y', account_info, container, file_name)
         self.storage_cmd('storage fs directory delete -f {} -n {} -y', account_info, container, dir_name)
         self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
                                               account_info, container).get_output_in_json()), 0)
 
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
         result = self.storage_cmd('storage fs list-deleted-path -f {} --path-prefix {} ',
                                   account_info, container, dir_name).get_output_in_json()
         self.assertEqual(len(result), 1)
 
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
         result = self.storage_cmd('storage fs list-deleted-path -f {}', account_info, container) \
             .get_output_in_json()
         self.assertEqual(len(result), 2)
@@ -513,7 +515,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, expiry, file, filesystem)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
             .assert_with_checks(JMESPathCheck('exists', True))
-        time.sleep(7)
+        if self.is_live:
+            time.sleep(7)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
             .assert_with_checks(JMESPathCheck('exists', False))
 
@@ -524,7 +527,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, expiry, file, filesystem)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', True))
-        time.sleep(7)
+        if self.is_live:
+            time.sleep(7)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
@@ -592,6 +596,38 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        f = self.create_file_system(account_info)
+        file = self.create_random_name(prefix="file", length=12)
+        local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        fs_sas = self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
+                          '{} --user-delegation-tid {}'.format(
+            storage_account, f, expiry, logged_in_user, current_tenant)).output
+        self.assertIn('&sig=', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('sktid=', fs_sas)
+        self.assertIn('skt=', fs_sas)
+        self.assertIn('ske=', fs_sas)
+        self.assertIn('sks=', fs_sas)
+        self.assertIn('skv=', fs_sas)
+        self.assertIn('sduoid=', fs_sas)
+        self.assertIn('skdutid=', fs_sas)
+
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --overwrite --sas-token {} '
+                     '--auth-mode login'.format(storage_account, f, local_file, file, fs_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_storage_fs_directory_generate_sas_full_uri(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
@@ -636,6 +672,110 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=d', fs_sas)
         self.assertIn('sdd=2', fs_sas)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_directory_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = 'testdir/subdir'
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
+                          '{} --user-delegation-tid {}'.format(
+            storage_account, directory, filesystem, expiry, logged_in_user, current_tenant)).output
+        self.assertIn('&sig=', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('sktid=', fs_sas)
+        self.assertIn('skt=', fs_sas)
+        self.assertIn('ske=', fs_sas)
+        self.assertIn('sks=', fs_sas)
+        self.assertIn('skv=', fs_sas)
+        self.assertIn('sr=d', fs_sas)
+        self.assertIn('sdd=2', fs_sas)
+        self.assertIn('skoid=', fs_sas)
+        self.assertIn('skdutid=', fs_sas)
+
+        if self.is_live:
+            self.cmd('storage fs directory show --account-name {} -n {} -f {} --sas-token {} '
+                     '--auth-mode login'.format(storage_account, directory, filesystem, fs_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_file_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        local_file = self.create_temp_file(1024)
+        directory = 'testdir/subdir'
+        file_path = 'testdir/subdir/file1'
+
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+        self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions r '
+                     '--https-only --auth-mode login'.format(storage_account, file_path, filesystem, expiry))
+
+        file_sas = self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login'.format(storage_account, file_path,
+                                                                                   filesystem, expiry)).output
+        self.assertIn('&sig=', file_sas)
+        self.assertIn('skoid=', file_sas)
+        self.assertIn('sktid=', file_sas)
+        self.assertIn('skt=', file_sas)
+        self.assertIn('ske=', file_sas)
+        self.assertIn('sks=', file_sas)
+        self.assertIn('skv=', file_sas)
+        self.assertIn('sr=b', file_sas)
+
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" '
+                     '-p {} --sas-token {}'.format(storage_account, filesystem, local_file, file_path, file_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_storage_fs_file_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        file_path = 'testdir/subdir/file1'
+        local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
+
+        self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        file_sas = self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions '
+                          'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
+                          '{} --user-delegation-tid {}'.format(
+            storage_account, file_path, filesystem, expiry, logged_in_user, current_tenant)).output
+
+        self.assertIn('&sig=', file_sas)
+        self.assertIn('skoid=', file_sas)
+        self.assertIn('sktid=', file_sas)
+        self.assertIn('skt=', file_sas)
+        self.assertIn('ske=', file_sas)
+        self.assertIn('sks=', file_sas)
+        self.assertIn('skv=', file_sas)
+        self.assertIn('sr=b', file_sas)
+        self.assertIn('sduoid=', file_sas)
+        self.assertIn('skdutid=', file_sas)
+
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --sas-token {} '
+                     '--auth-mode login'.format(storage_account, filesystem, local_file, file_path, file_sas))
 
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()

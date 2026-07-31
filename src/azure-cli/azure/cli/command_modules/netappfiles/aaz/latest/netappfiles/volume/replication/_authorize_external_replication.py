@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class AuthorizeExternalReplication(AAZCommand):
     """Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVM have been peered a SnapMirror will be created
+
+    :example: Volumes_AuthorizeExternalReplication
+        az netappfiles volume replication authorize-external-replication --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/authorizeexternalreplication", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/authorizeexternalreplication", "2026-05-01"],
         ]
     }
 
@@ -107,7 +110,7 @@ class AuthorizeExternalReplication(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -116,7 +119,7 @@ class AuthorizeExternalReplication(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -167,7 +170,7 @@ class AuthorizeExternalReplication(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -200,7 +203,10 @@ class AuthorizeExternalReplication(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.svm_peering_command = AAZStrType(
+            _schema_on_200.properties = AAZObjectType()
+
+            properties = cls._schema_on_200.properties
+            properties.svm_peering_command = AAZStrType(
                 serialized_name="svmPeeringCommand",
             )
 

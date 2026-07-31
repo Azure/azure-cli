@@ -8,7 +8,7 @@
 from enum import Enum
 
 from knack.log import get_logger
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, MutuallyExclusiveArgumentError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
@@ -183,34 +183,227 @@ class ActiveDirectoryList(_ActiveDirectoryList):
 
 
 # region Pool
+# Allowed pool sizes per service: 512 GiB or any positive multiple of 1 TiB.
+_POOL_MIN_BYTES = 512 * gib_scale  # 549755813888
+_POOL_TIB_BYTES = tib_scale        # 1099511627776
+
+# AFEC feature gating the 512 GiB minimum pool size.
+_POOL_HALF_TIB_FEATURE = "Microsoft.NetApp/ANFHalfTiBPoolSize"
+_POOL_HALF_TIB_HINT = (
+    "Provisioning a 512 GiB (0.5 TiB) pool requires the AFEC feature "
+    "'{feature}' to be registered on your subscription. Register it with: "
+    "az feature register --namespace Microsoft.NetApp "
+    "--name ANFHalfTiBPoolSize"
+).format(feature=_POOL_HALF_TIB_FEATURE)
+
+
+def _augment_pool_size_error(error, requested_bytes):
+    """If the service rejected a sub-1-TiB pool size, append an AFEC hint to
+    the error message. Returns the (possibly mutated) error for the caller to raise."""
+    if requested_bytes is None or requested_bytes >= _POOL_TIB_BYTES:
+        return error
+    msg = str(getattr(error, "message", "")) or str(error)
+    # Idempotent: result() calls wait() internally, so both patched methods may
+    # see the same exception. Skip if the hint is already present.
+    if _POOL_HALF_TIB_FEATURE in msg:
+        return error
+    if "InvalidValueReceivedFor" in msg or "Pool.Size" in msg or "tebibyte" in msg.lower():
+        hint = " Hint: {}".format(_POOL_HALF_TIB_HINT)
+        new_msg = (msg + hint) if msg else hint
+        try:
+            error.message = new_msg
+        except AttributeError:
+            pass
+        # HttpResponseError.__str__ reads from args[0] (set by Exception.__init__),
+        # not from .message, so update args as well so the hint surfaces to users.
+        try:
+            if error.args:
+                error.args = (new_msg,) + tuple(error.args[1:])
+            else:
+                error.args = (new_msg,)
+        except (AttributeError, TypeError):
+            pass
+    return error
+
+
+def _wrap_pool_poller(poller, requested_bytes):
+    """Monkey-patch ``poller.result`` / ``poller.wait`` to augment AFEC-related
+    service errors with an actionable hint. Returns the same poller instance so
+    the CLI's ``isinstance(result, poller_classes())`` check still recognizes it."""
+    if poller is None:
+        return poller
+    original_result = poller.result
+    original_wait = poller.wait
+
+    def result(timeout=None):
+        try:
+            return original_result(timeout=timeout)
+        except Exception as ex:  # pylint: disable=broad-except
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
+
+    def wait(timeout=None):
+        try:
+            return original_wait(timeout=timeout)
+        except Exception as ex:  # pylint: disable=broad-except
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
+
+    poller.result = result
+    poller.wait = wait
+    return poller
+
+
+def _resolve_pool_size_bytes(args, default_bytes=None):
+    """Resolve and validate the pool size in bytes from --size (TiB float) or --size-in-bytes.
+
+    Returns the resolved byte value, or None if neither was supplied and no default provided.
+    Raises MutuallyExclusiveArgumentError if both are supplied, ValidationError if the
+    resulting bytes value is not 512 GiB and not a positive multiple of 1 TiB.
+    """
+    size_set = has_value(args.size_tib)
+    bytes_set = has_value(args.size_in_bytes)
+    if size_set and bytes_set:
+        raise MutuallyExclusiveArgumentError(
+            "Specify either --size (TiB) or --size-in-bytes, not both.")
+
+    if bytes_set:
+        bytes_val = int(args.size_in_bytes.to_serialized_data())
+    elif size_set:
+        bytes_val = int(round(float(args.size_tib.to_serialized_data()) * tib_scale))
+    elif default_bytes is not None:
+        bytes_val = default_bytes
+    else:
+        return None
+
+    if bytes_val != _POOL_MIN_BYTES and (bytes_val <= 0 or bytes_val % _POOL_TIB_BYTES != 0):
+        raise ValidationError(
+            "Invalid pool size {} bytes. Allowed values are 549755813888 (512 GiB) "
+            "or a positive multiple of 1099511627776 (1 TiB). When using --size, "
+            "valid values are 0.5 or any positive integer number of TiB.".format(bytes_val))
+
+    return bytes_val
+
+
+def _customize_pool_size_args(args_schema, *, on_update):
+    """Hide aaz int `size` from the CLI and expose user-facing `--size` (float TiB) and
+    `--size-in-bytes` (int). The aaz int `size` field is preserved for body serialization
+    and gets populated by pre_operations.
+    """
+
+    # TODO: 0.5 sized pools are currently preview only and gated by AFEC, so we are not advertising the float `--size` arg until
+    # the feature is more widely available. For now, users can use `--size-in-bytes 549755813888` to get a 512 GiB pool.
+    # When we do enable the `--size` arg, we should set its default to 4 (TiB) to preserve existing behavior where omitting size defaults to 4 TiB.
+
+    from azure.cli.core.aaz import AAZIntArg, AAZFloatArg, AAZFloatArgFormat
+
+    # # Keep aaz `size` AAZIntArg for body serialization but hide it from the CLI surface.
+    args_schema.size._registered = False
+    args_schema.size._required = False
+    # # Drop the alias so we can reuse --size for our float arg.
+    args_schema._fields_alias_map.pop("--size", None)
+
+    args_schema.size_tib = AAZFloatArg(
+        options=["--size"],
+        arg_group="Properties",
+        help="Provisioned size of the pool. Must be an integer number of tebibytes in multiples of 4. "
+             "Use either --size or --size-in-bytes, not both.",
+        nullable=on_update,
+        fmt=AAZFloatArgFormat(minimum=0.5),
+    )
+    args_schema.size_in_bytes = AAZIntArg(
+        options=["--size-in-bytes"],
+        arg_group="Properties",
+        help="Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiple of 1099511627776). "
+             "Use either --size or --size-in-bytes, not both.",
+        nullable=on_update,
+    )
+
+    # args_schema.size_tib = AAZFloatArg(
+    #     options=["--size"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in tebibytes (TiB). Use 0.5 for the 512 GiB minimum; "
+    #          "otherwise an integer multiple of 1 TiB. Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    #     fmt=AAZFloatArgFormat(minimum=0.5),
+    # )
+    # args_schema.size_in_bytes = AAZIntArg(
+    #     options=["--size-in-bytes"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in bytes. Allowed values: 549755813888 (512 GiB) "
+    #          "or any positive multiple of 1099511627776 (1 TiB). "
+    #          "Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    # )
+
+
+def _resolved_pool_bytes(cmd):
+    """Return the resolved aaz `size` value (bytes) from a Pool command instance,
+    or None if ctx/args have not been initialized yet or `size` is unset."""
+    ctx = getattr(cmd, "ctx", None)
+    if ctx is None or getattr(ctx, "args", None) is None:
+        return None
+    size_arg = getattr(ctx.args, "size", None)
+    if size_arg is None or not has_value(size_arg):
+        return None
+    return size_arg.to_serialized_data()
+
+
 class PoolCreate(_PoolCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-
+        _customize_pool_size_args(args_schema, on_update=False)
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
-        logger.debug("ANF log: PoolCreate: size: %s", args.size)
-        if has_value(args.size):
-            args.size = int(args.size.to_serialized_data()) * tib_scale
+        # RP expects bytes; CLI accepts TiB (float) via --size or raw bytes via --size-in-bytes.
+        logger.debug("ANF log: PoolCreate: size_tib: %s, size_in_bytes: %s",
+                     args.size_tib, args.size_in_bytes)
+        # Default to 4 TiB on create when nothing supplied (preserves prior behavior).
+        bytes_val = _resolve_pool_size_bytes(args, default_bytes=4 * tib_scale)
+        args.size = bytes_val
+
+    def _handler(self, command_args):
+        # super()._handler initializes self.ctx and (in --no-wait path) runs the
+        # first LRO step synchronously, so service rejections (e.g. AFEC-gated
+        # 0.5 TiB) can be raised here before we get a poller to wrap.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
+        if poller is None:
+            return poller  # --no-wait path (no exception)
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 
 class PoolUpdate(_PoolUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-
+        _customize_pool_size_args(args_schema, on_update=True)
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
-        logger.debug("ANF log: PoolUpdate: size: %s", args.size)
-        if has_value(args.size):
-            args.size = int(args.size.to_serialized_data()) * tib_scale
+        # RP expects bytes; CLI accepts TiB (float) via --size or raw bytes via --size-in-bytes.
+        logger.debug("ANF log: PoolUpdate: size_tib: %s, size_in_bytes: %s",
+                     args.size_tib, args.size_in_bytes)
+        # No default on update: only set args.size if the user supplied one of the two args.
+        bytes_val = _resolve_pool_size_bytes(args, default_bytes=None)
+        if bytes_val is not None:
+            args.size = bytes_val
+
+    def _handler(self, command_args):
+        # See PoolCreate._handler for why we wrap super() too.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
+        if poller is None:
+            return poller
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 # endregion
 
@@ -571,7 +764,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg, AAZIntArg, AAZDictArg, AAZBoolArg, AAZListArg, AAZStrArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        logger.debug("ANF log: ExportPolicyRemove _build_arguments_schema")
+        logger.debug("ANF log: VolumeGroup _build_arguments_schema")
 
         args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -786,6 +979,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             help="Throughput in MiB/s for shared volumes. If not provided size will automatically be calculated.",
             required=False,
         )
+        args_schema.shared_network_features = AAZStrArg(
+            options=["--shared-network-features", "--network-features"],
+            arg_group="Shared Volume",
+            help="Network features available to the volumes in the volume group.",
+            default="Basic",
+            enum={"Basic": "Basic", "Standard": "Standard"},
+        )
         # cmk
         args_schema.key_vault_private_endpoint_resource_id = AAZStrArg(
             options=["--kv-private-endpoint-id", "--key-vault-private-endpoint-resource-id"],
@@ -892,8 +1092,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         if has_value(args.database_throughput):
             database_throughput = args.database_throughput.to_serialized_data()
 
-        data_repl_skd = args.data_repl_skd.to_serialized_data()
-        data_src_id = args.data_src_id.to_serialized_data()
+        data_repl_skd = None
+        if has_value(args.data_repl_skd):
+            data_repl_skd = args.data_repl_skd.to_serialized_data()
+
+        data_src_id = None
+        if has_value(args.data_src_id):
+            data_src_id = args.data_src_id.to_serialized_data()
         if has_value(args.log_throughput):
             log_throughput = args.log_throughput.to_serialized_data()
         else:
@@ -911,8 +1116,17 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             shared_throughput = args.shared_throughput.to_serialized_data()
         else:
             shared_throughput = None
-        shared_repl_skd = args.shared_repl_skd.to_serialized_data()
-        shared_src_id = args.data_repl_skd.to_serialized_data()
+        if has_value(args.shared_network_features):
+            shared_network_features = args.shared_network_features.to_serialized_data()
+        else:
+            shared_network_features = None
+
+        shared_repl_skd = None
+        if has_value(args.shared_repl_skd):
+            shared_repl_skd = args.shared_repl_skd.to_serialized_data()
+        shared_src_id = None
+        if has_value(args.shared_src_id):
+            shared_src_id = args.shared_src_id.to_serialized_data()
         smb_access_based_enumeration = args.smb_access.to_serialized_data()
         smb_non_browsable = args.smb_browsable.to_serialized_data()
 
@@ -926,8 +1140,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             data_backup_throughput = None
 
         backup_nfsv3 = args.backup_nfsv3.to_serialized_data()
-        data_backup_repl_skd = args.data_backup_replication_schedule.to_serialized_data()
-        data_backup_src_id = args.data_backup_src_id.to_serialized_data()
+        data_backup_repl_skd = None
+        if has_value(args.data_backup_replication_schedule):
+            data_backup_repl_skd = args.data_backup_replication_schedule.to_serialized_data()
+
+        data_backup_src_id = None
+        if has_value(args.data_backup_src_id):
+            data_backup_src_id = args.data_backup_src_id.to_serialized_data()
 
         if has_value(args.data_backup_size):
             data_backup_size = args.data_backup_size.to_serialized_data()
@@ -938,8 +1157,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             log_backup_throughput = args.log_backup_throughput.to_serialized_data()
         else:
             log_backup_throughput = None
-        log_backup_repl_skd = args.log_backup_repl_skd.to_serialized_data()
-        log_backup_src_id = args.log_backup_src_id.to_serialized_data()
+
+        log_backup_repl_skd = None
+        if has_value(args.log_backup_repl_skd):
+            log_backup_repl_skd = args.log_backup_repl_skd.to_serialized_data()
+        log_backup_src_id = None
+        if has_value(args.log_backup_src_id):
+            log_backup_src_id = args.log_backup_src_id.to_serialized_data()
         if has_value(args.log_backup_size):
             log_backup_size = args.log_backup_size.to_serialized_data()
         else:
@@ -1026,7 +1250,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
                 data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory,
                                                                   add_snapshot_capacity, str(i), data_size, data_throughput,
                                                                   prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                  smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                  smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
 
             # Create log volume(s)
             log_volumes = []
@@ -1034,11 +1258,11 @@ class VolumeGroupCreate(_VolumeGroupCreate):
                 for i in range(start_host_id, start_host_id + number_of_hosts):
                     log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, str(i), log_size,
                                                                     log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                    smb_access_based_enumeration, smb_non_browsable, zones, database_throughput))
+                                                                    smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, shared_network_features))
             elif application_type == "ORACLE":
                 log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, 1, log_size,
                                                                 log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -1049,24 +1273,24 @@ class VolumeGroupCreate(_VolumeGroupCreate):
 
             args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                                                 shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
                                                                      data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                      smb_access_based_enumeration,
-                                                                     smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                     smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                                                     log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                                                     log_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                     smb_access_based_enumeration,
-                                                                    smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                    smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
 
 
 # pylint: disable=too-many-locals
 def create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, add_snap_capacity, host_id,
                                   data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
-                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
 
     throughput = data_throughput
     if application_type == "SAP-HANA":
@@ -1095,7 +1319,8 @@ def create_data_volume_properties(subnet_id, application_identifier, application
     if data_repl_skd is not None and data_src_id is not None:
         replication = ({"replication_schedule": data_repl_skd,
                         "remote_volume_resource_id": data_src_id})
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     data_volume = {
         "subnet_id": subnet_id,
@@ -1113,7 +1338,8 @@ def create_data_volume_properties(subnet_id, application_identifier, application
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return data_volume
@@ -1121,7 +1347,7 @@ def create_data_volume_properties(subnet_id, application_identifier, application
 
 def create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, host_id, log_size,
                                  log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
-                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
     throughput = log_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
@@ -1162,7 +1388,8 @@ def create_log_volume_properties(subnet_id, application_identifier, application_
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return log_volume
@@ -1172,7 +1399,7 @@ def create_log_volume_properties(subnet_id, application_identifier, application_
 def create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
                                     shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                    smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                    smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
     throughput = shared_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.SHARED.value
@@ -1203,7 +1430,8 @@ def create_shared_volume_properties(subnet_id, application_identifier, applicati
     if shared_repl_skd is not None and shared_src_id is not None:
         replication = {"replication_schedule": shared_repl_skd,
                        "remote_volume_resource_id": shared_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     shared_volume = {
         "subnet_id": subnet_id,
@@ -1221,7 +1449,8 @@ def create_shared_volume_properties(subnet_id, application_identifier, applicati
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return shared_volume
@@ -1232,8 +1461,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
                                          kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
-    logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale)
+                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
+    logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale,)
     throughput = data_backup_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.DATA_BACKUP.value
@@ -1264,7 +1493,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
     if data_backup_repl_skd is not None and data_backup_src_id is not None:
         replication = {"replication_schedule": data_backup_repl_skd,
                        "remote_volume_resource_id": data_backup_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     data_backup_volume = {
         "subnet_id": subnet_id,
@@ -1282,7 +1512,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return data_backup_volume
@@ -1291,7 +1522,7 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
 def create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                         log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                        smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                        smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
 
     throughput = log_backup_throughput
     if application_type == "SAP-HANA":
@@ -1322,7 +1553,8 @@ def create_log_backup_volume_properties(subnet_id, application_identifier, appli
     if log_backup_repl_skd is not None and log_backup_src_id is not None:
         replication = {"replication_schedule": log_backup_repl_skd,
                        "remote_volume_resource_id": log_backup_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     log_backup = {
         "subnet_id": subnet_id,
@@ -1340,7 +1572,8 @@ def create_log_backup_volume_properties(subnet_id, application_identifier, appli
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return log_backup

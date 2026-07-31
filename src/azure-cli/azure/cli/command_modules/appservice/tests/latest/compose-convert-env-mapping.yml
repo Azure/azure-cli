@@ -1,0 +1,21 @@
+# Environment variables in mapping format (dict)
+# Tests: env var extraction, inline values → app settings, mapping format parsing
+version: '3'
+services:
+  api:
+    image: "myacr.azurecr.io/api-server:latest"
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      API_KEY: "not-a-real-api-key"
+  db:
+    image: "postgres:15-alpine"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: "not-a-real-password"
+      POSTGRES_DB: myapp

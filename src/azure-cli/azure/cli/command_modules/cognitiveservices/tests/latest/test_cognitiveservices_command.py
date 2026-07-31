@@ -10,7 +10,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
 
 
-class CognitiveServicesTests(ScenarioTest):
+class CognitiveServicesCommandTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_cognitiveservices_crud(self, resource_group):
         sname = self.create_random_name(prefix='cog', length=12)
@@ -43,8 +43,8 @@ class CognitiveServicesTests(ScenarioTest):
 
         # test to list keys of a cogntive services account
         oldkeys = self.cmd('az cognitiveservices account keys list -n {sname} -g {rg}',
-                           checks=[self.check('length(key1)', 32),
-                                   self.check('length(key2)', 32)]).get_output_in_json()
+                           checks=[self.check('length(key1)', 84),
+                                   self.check('length(key2)', 84)]).get_output_in_json()
 
         # test to regenerate the keys of a cognitive services account
         newkeys = self.cmd('az cognitiveservices account keys regenerate -n {sname} -g {rg} --key-name Key1').get_output_in_json()  # pylint: disable=line-too-long

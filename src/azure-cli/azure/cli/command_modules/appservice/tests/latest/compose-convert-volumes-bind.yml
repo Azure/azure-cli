@@ -1,0 +1,23 @@
+# Volumes: bind mounts using ${WEBAPP_STORAGE_HOME}
+# Tests: bind mount → /home volumeSubPath mapping, multiple mounts per service
+version: '3'
+services:
+  wordpress:
+    image: "wordpress:6.4-php8.2-apache"
+    ports:
+      - "80:80"
+    volumes:
+      - "${WEBAPP_STORAGE_HOME}/site/wwwroot:/var/www/html"
+      - "${WEBAPP_STORAGE_HOME}/wordpress/uploads:/var/www/html/wp-content/uploads"
+    environment:
+      WORDPRESS_DB_HOST: localhost
+      WORDPRESS_DB_NAME: wordpress
+  mysql:
+    image: "mysql:8.0"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "${WEBAPP_STORAGE_HOME}/mysql/data:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: not-a-real-root-password
+      MYSQL_DATABASE: wordpress

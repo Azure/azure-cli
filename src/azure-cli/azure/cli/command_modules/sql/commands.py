@@ -10,6 +10,8 @@ from ._format import (
     db_transform,
     db_table_format,
     db_edition_table_format,
+    deleted_server_list_transform,
+    deleted_server_transform,
     elastic_pool_list_transform,
     elastic_pool_transform,
     elastic_pool_table_format,
@@ -40,6 +42,7 @@ from ._util import (
     get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
+    get_sql_deleted_servers_operations,
     get_sql_elastic_pools_operations,
     get_sql_elastic_pool_operations_operations,
     get_sql_encryption_protectors_operations,
@@ -348,6 +351,10 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
         g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('remove-time-based-immutability', 'remove_time_based_immutability', confirmation="Removing the time-based immutability has the effect of removing the immutability on the backup. The backup will continue to be available for the remainder of the configured duration as usual, without immutability. Are you sure you want to disable time-based immutability for the backup?")
+        g.custom_command('lock-time-based-immutability', 'lock_time_based_immutability', confirmation="Locking the time-based immutability enforces immutability for the duration of the configured retention. This action cannot be reversed. Are you sure you want to lock time-based immutability for the backup?")
+        g.custom_command('set-legal-hold-immutability', 'set_legal_hold_immutability', confirmation="When you enable Legal hold immutability on the backup, the backup will not be deleted until the legal hold is removed, even if the retention for the backup expires. Are you sure you want to enable legal hold for the backup?", is_preview=True)
+        g.custom_command('remove-legal-hold-immutability', 'remove_legal_hold_immutability', confirmation="Are you sure you want to disable legal hold for the backup?", is_preview=True)
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
@@ -568,6 +575,10 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_create',
                          table_transformer=server_table_format,
                          supports_no_wait=True)
+        g.custom_command('restore', 'server_restore',
+                         table_transformer=server_table_format,
+                         supports_no_wait=True,
+                         is_preview=True)
         g.command('delete', 'begin_delete',
                   confirmation=True)
         g.custom_show_command('show', 'server_get',
@@ -771,6 +782,23 @@ def load_command_table(self, _):
         g.custom_command('delete', 'server_trust_group_delete', confirmation=True, supports_no_wait=True)
         g.custom_show_command('show', 'server_trust_group_get')
         g.custom_command('list', 'server_trust_group_list')
+
+    ###############################################
+    #         sql server deleted-server           #
+    ###############################################
+
+    deleted_servers_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#DeletedServersOperations.{}',
+        client_factory=get_sql_deleted_servers_operations)
+
+    with self.command_group('sql server deleted-server', deleted_servers_operations,
+                            client_factory=get_sql_deleted_servers_operations) as g:
+        g.custom_show_command('show', 'deleted_server_show',
+                              transform=deleted_server_transform,
+                              is_preview=True)
+        g.custom_command('list', 'deleted_server_list',
+                         transform=deleted_server_list_transform,
+                         is_preview=True)
 
     ###############################################
     #                sql managed instance         #

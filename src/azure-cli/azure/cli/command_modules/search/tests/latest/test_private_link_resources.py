@@ -25,7 +25,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])

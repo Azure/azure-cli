@@ -25,13 +25,18 @@ class Create(AAZCommand):
 
     :example: Create a DeploymentSafeguards resource at Warn level with ignored namespaces
         az aks safeguards create -g rg1 -n mc1 --excluded-ns ns1 ns2 --level Warn
+
+    :example: Create a DeploymentSafeguards resource at Warn level with Pod Security Standards level set to Baseline
+        az aks safeguards create --managed-cluster /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn --pss-level Baseline
+
+    :example: Create a DeploymentSafeguards resource with PSS level set to Restricted using -g/-n pattern
+        az aks safeguards create -g rg1 -n cluster1 --level Enforce --pss-level Restricted
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-07-01"],
         ]
     }
 
@@ -55,7 +60,7 @@ class Create(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=True,
         )
 
         # define Arg Group "Properties"
@@ -71,6 +76,12 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The deployment safeguards level. Possible values are Warn and Enforce",
             enum={"Enforce": "Enforce", "Warn": "Warn"},
+        )
+        _args_schema.pss_level = AAZStrArg(
+            options=["--pss-level"],
+            arg_group="Properties",
+            help="The pod security standards level",
+            enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
 
         excluded_namespaces = cls._args_schema.excluded_namespaces
@@ -91,8 +102,7 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsCreate(AAZHttpOperation):
@@ -100,8 +110,7 @@ class Create(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
@@ -152,7 +161,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -175,20 +184,17 @@ class Create(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={
-                    "flags": {"required": True, "client_flatten": True}}
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("properties", AAZObjectType)
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("excludedNamespaces",
-                                    AAZListType, ".excluded_namespaces")
-                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={
-                                    "flags": {"required": True}})
+                properties.set_prop("excludedNamespaces", AAZListType, ".excluded_namespaces")
+                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pss_level")
 
-            excluded_namespaces = _builder.get(
-                ".properties.excludedNamespaces")
+            excluded_namespaces = _builder.get(".properties.excludedNamespaces")
             if excluded_namespaces is not None:
                 excluded_namespaces.set_elements(AAZStrType, ".")
 
@@ -237,6 +243,9 @@ class Create(AAZCommand):
             )
             properties.level = AAZStrType(
                 flags={"required": True},
+            )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",

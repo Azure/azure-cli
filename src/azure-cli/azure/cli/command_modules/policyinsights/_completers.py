@@ -5,6 +5,7 @@
 
 from azure.cli.core.decorators import Completer
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.resource._client_factory import _resource_policy_client_factory
 
 from ._client_factory import cf_policy_insights
 
@@ -33,3 +34,31 @@ def get_policy_metadata_completion_list(cmd, prefix, namespace, **kwargs):  # py
     query_options = QueryOptions(top=2000)
 
     return [metadata.name for metadata in client.list(query_options) if metadata.name.startswith(prefix)]
+
+
+@Completer
+def get_policy_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    result = policy_client.policy_definitions.list()
+    return [i.name for i in result]
+
+
+@Completer
+def get_policy_set_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    result = policy_client.policy_set_definitions.list()
+    return [i.name for i in result]
+
+
+@Completer
+def get_policy_assignment_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    result = policy_client.policy_assignments.list()
+    return [i.name for i in result]
+
+
+@Completer
+def get_policy_exemption_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    result = policy_client.policy_exemptions.list()
+    return [i.name for i in result]

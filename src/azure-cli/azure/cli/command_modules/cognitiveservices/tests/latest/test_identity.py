@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 
 
-class CognitiveServicesByoxTests(ScenarioTest):
+class CognitiveServicesIdentityTests(ScenarioTest):
     @serial_test()
     @ResourceGroupPreparer()
     def test_cognitiveservices_identity_assign_when_create(self, resource_group):

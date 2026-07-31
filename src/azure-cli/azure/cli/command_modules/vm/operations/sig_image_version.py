@@ -10,7 +10,7 @@ from ..aaz.latest.sig.image_version import Show as _SigImageVersionShow, ListSha
 logger = get_logger(__name__)
 
 
-def convert_show_result_to_sneak_case(result):
+def convert_show_result_to_snake_case(result):
     new_result = {}
     if "id" in result:
         new_result["id"] = result["id"]

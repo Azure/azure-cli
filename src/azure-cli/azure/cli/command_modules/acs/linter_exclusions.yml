@@ -1,6 +1,15 @@
 ---
 aks create:
   parameters:
+      system_node_subnet_id:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      node_subnet_id:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      enable_hosted_system:
+          rule_exclusions:
+          - missing_parameter_test_coverage
       appgw_watch_namespace:
           rule_exclusions:
           - option_length_too_long
@@ -43,6 +52,9 @@ aks create:
       enable_windows_recording_rules:
         rule_exclusions:
         - option_length_too_long
+      enable_azure_monitor_app_monitoring:
+        rule_exclusions:
+        - option_length_too_long
       node_os_upgrade_channel:
         rule_exclusions:
         - option_length_too_long
@@ -73,6 +85,15 @@ aks create:
       disable_acns_observability:
         rule_exclusions:
         - option_length_too_long
+      acns_advanced_networkpolicies:
+        rule_exclusions:
+          - option_length_too_long
+      acns_datapath_acceleration_mode:
+        rule_exclusions:
+          - option_length_too_long
+      acns_transit_encryption_type:
+        rule_exclusions:
+        - option_length_too_long
       nrg_lockdown_restriction_level:
         rule_exclusions:
         - option_length_too_long
@@ -86,6 +107,9 @@ aks create:
         rule_exclusions:
         - option_length_too_long
       enable_static_egress_gateway:
+        rule_exclusions:
+          - option_length_too_long
+      enable_container_network_logs:
         rule_exclusions:
           - option_length_too_long
 aks enable-addons:
@@ -155,6 +179,12 @@ aks update:
       enable_windows_recording_rules:
           rule_exclusions:
           - option_length_too_long
+      enable_azure_monitor_app_monitoring:
+        rule_exclusions:
+        - option_length_too_long
+      disable_azure_monitor_app_monitoring:
+        rule_exclusions:
+        - option_length_too_long
       node_os_upgrade_channel:
         rule_exclusions:
         - option_length_too_long
@@ -182,6 +212,15 @@ aks update:
       disable_acns_observability:
         rule_exclusions:
         - option_length_too_long
+      acns_advanced_networkpolicies:
+        rule_exclusions:
+          - option_length_too_long
+      acns_datapath_acceleration_mode:
+        rule_exclusions:
+          - option_length_too_long
+      acns_transit_encryption_type:
+        rule_exclusions:
+        - option_length_too_long
       nrg_lockdown_restriction_level:
         rule_exclusions:
         - option_length_too_long
@@ -196,11 +235,23 @@ aks update:
         - option_length_too_long
       disable_private_cluster:
         rule_exclusions:
-        - option_length_too_long 
+        - option_length_too_long
       enable_static_egress_gateway:
         rule_exclusions:
           - option_length_too_long
       disable_static_egress_gateway:
+        rule_exclusions:
+          - option_length_too_long
+      enable_container_network_logs:
+        rule_exclusions:
+          - option_length_too_long
+      disable_container_network_logs:
+        rule_exclusions:
+          - option_length_too_long
+      disable_http_proxy:
+        rule_exclusions:
+          - option_length_too_long
+      enable_http_proxy:
         rule_exclusions:
           - option_length_too_long
 aks nodepool add:
@@ -211,14 +262,33 @@ aks nodepool add:
       undrainable_node_behavior:
         rule_exclusions:
         - option_length_too_long
+      enable_artifact_streaming:
+        rule_exclusions:
+        - option_length_too_long
 aks nodepool update:
   parameters:
       undrainable_node_behavior:
         rule_exclusions:
         - option_length_too_long
+      enable_artifact_streaming:
+        rule_exclusions:
+        - option_length_too_long
+      disable_artifact_streaming:
+        rule_exclusions:
+        - option_length_too_long
 aks nodepool upgrade:
   parameters:
       undrainable_node_behavior:
+        rule_exclusions:
+        - option_length_too_long
+aks mesh enable:
+  parameters:
+      proxy_redirection_mechanism:
+        rule_exclusions:
+        - option_length_too_long
+aks identity-binding create:
+  parameters:
+      managed_identity_resource_id:
         rule_exclusions:
         - option_length_too_long
 ...

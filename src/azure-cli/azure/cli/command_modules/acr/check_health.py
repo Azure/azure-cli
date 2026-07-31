@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import json
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
@@ -23,8 +24,6 @@ ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more i
 MIN_HELM_VERSION = "2.11.0"
 HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
-RECOMMENDED_NOTARY_VERSION = "0.6.0"
-NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)')
 DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
 
 
@@ -73,11 +72,11 @@ def _subprocess_communicate(command_parts, shell=False):
 
 
 # Checks for the environment
-# Checks docker command, docker daemon, docker version and docker pull
+# Checks container command, daemon, version and image pull
 def _get_docker_status_and_version(ignore_errors, yes):
     from ._errors import DOCKER_DAEMON_ERROR, DOCKER_PULL_ERROR, DOCKER_VERSION_ERROR
 
-    # Docker command and docker daemon check
+    # Container command and daemon check
     docker_command, error = get_docker_command(is_diagnostics_context=True)
     docker_daemon_available = True
 
@@ -88,18 +87,31 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        logger.warning("Docker daemon status: available")
+        logger.warning("%s daemon status: available", docker_command.title())
 
     # Docker version check
-    output, warning, stderr, succeeded = _subprocess_communicate(
-        [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
-         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
+    output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "version", "--format", "json"])
     if not succeeded:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
             logger.warning(warning)
-        logger.warning("Docker version: %s", output)
+        try:
+            json_output = json.loads(output).get("Client")
+        except json.decoder.JSONDecodeError:
+            json_output = {}
+        version = json_output.get("Version", "unknown")
+        commit = json_output.get("GitCommit", "unknown")[:7]
+        if docker_command == "docker":
+            os = json_output.get("Os", "unknown")
+            arch = json_output.get("Arch", "unknown")
+        else:
+            try:
+                os, arch = json_output.get("OsArch", "unknown").split("/")
+            except ValueError:
+                os = "unknown"
+                arch = "unknown"
+        logger.warning("%s version: %s, build %s, platform %s/%s", docker_command.title(), version, commit, os, arch)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -114,14 +126,14 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
         if not succeeded:
             if stderr and DOCKER_PULL_WRONG_PLATFORM in stderr:
-                print_pass("Docker pull of '{}'".format(IMAGE))
+                print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
                 return
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
-            print_pass("Docker pull of '{}'".format(IMAGE))
+            print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
 
 
 # Get current CLI version
@@ -164,46 +176,6 @@ def _get_helm_version(ignore_errors):
         obsolete_ver_error = HELM_VERSION_ERROR.set_error_message(
             "Current Helm client version is not recommended. Please upgrade your Helm client to at least version {}."
             .format(MIN_HELM_VERSION))
-        _handle_error(obsolete_ver_error, ignore_errors)
-
-
-def _get_notary_version(ignore_errors):
-    from ._errors import NOTARY_VERSION_ERROR
-    from .notary import get_notary_command
-    from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
-
-    # Notary command check
-    notary_command, error = get_notary_command(is_diagnostics_context=True)
-
-    if error:
-        _handle_error(error, ignore_errors)
-        return
-
-    # Notary version check
-    output, warning, stderr, succeeded = _subprocess_communicate([notary_command, "version"])
-
-    if not succeeded:
-        _handle_error(NOTARY_VERSION_ERROR.append_error_message(stderr), ignore_errors)
-        return
-
-    if warning:
-        logger.warning(warning)
-
-    # Retrieve the notary version if regex pattern is found
-    match_obj = NOTARY_VERSION_REGEX.search(output)
-    if match_obj:
-        output = match_obj.group(1)
-
-    logger.warning("Notary version: %s", output)
-
-    # Display error if the current version does not match the recommended version
-    if match_obj and parse(output) != parse(RECOMMENDED_NOTARY_VERSION):
-        version_msg = "upgrade"
-        if parse(output) > parse(RECOMMENDED_NOTARY_VERSION):
-            version_msg = "downgrade"
-        obsolete_ver_error = NOTARY_VERSION_ERROR.set_error_message(
-            "Current notary version is not recommended. Please {} your notary client to version {}."
-            .format(version_msg, RECOMMENDED_NOTARY_VERSION))
         _handle_error(obsolete_ver_error, ignore_errors)
 
 
@@ -321,7 +293,6 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
 
 def _check_registry_health(cmd, registry_name, repository, ignore_errors):
-    from azure.cli.core.profiles import ResourceType
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
@@ -349,25 +320,24 @@ def _check_registry_health(cmd, registry_name, repository, ignore_errors):
             registry and registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
         _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, repository, ignore_errors)
 
-    if cmd.supported_api_version(min_api='2020-11-01-preview', resource_type=ResourceType.MGMT_CONTAINERREGISTRY):  # pylint: disable=too-many-nested-blocks
-        # CMK settings
-        if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
-            client_id = registry.encryption.key_vault_properties.identity
-            valid_identity = False
-            if registry.identity:
-                valid_identity = ((client_id == 'system') and
-                                  bool(registry.identity.principal_id))  # use system identity?
-                if not valid_identity and registry.identity.user_assigned_identities:
-                    for k, v in registry.identity.user_assigned_identities.items():
-                        if v.client_id == client_id:
-                            from azure.core.exceptions import HttpResponseError
-                            try:
-                                valid_identity = resolve_identity_client_id(cmd.cli_ctx, k) == client_id
-                            except HttpResponseError:
-                                pass
-            if not valid_identity:
-                from ._errors import CMK_MANAGED_IDENTITY_ERROR
-                _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
+    # CMK settings
+    if registry and registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+        client_id = registry.encryption.key_vault_properties.identity
+        valid_identity = False
+        if registry.identity:
+            valid_identity = ((client_id == 'system') and
+                              bool(registry.identity.principal_id))  # use system identity?
+            if not valid_identity and registry.identity.user_assigned_identities:
+                for k, v in registry.identity.user_assigned_identities.items():
+                    if v.client_id == client_id:
+                        from azure.core.exceptions import HttpResponseError
+                        try:
+                            valid_identity = resolve_identity_client_id(cmd.cli_ctx, k) == client_id
+                        except HttpResponseError:
+                            pass
+        if not valid_identity:
+            from ._errors import CMK_MANAGED_IDENTITY_ERROR
+            _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
 
 
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
@@ -469,6 +439,5 @@ def acr_check_health(cmd,  # pylint: disable useless-return
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)
-        _get_notary_version(ignore_errors)
 
     logger.warning(FAQ_MESSAGE)

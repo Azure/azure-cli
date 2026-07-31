@@ -5,9 +5,7 @@
 # pylint: disable=line-too-long, protected-access
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.commands.transform import _parse_id
-from azure.cli.command_modules.network.custom import _convert_to_snake_case
 from azure.cli.command_modules.monitor.util import gen_guid
 
 logger = get_logger(__name__)
@@ -15,8 +13,11 @@ CLONED_NAME = "cloned-{}-{}"
 
 
 def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
+    from azure.mgmt.core.tools import parse_resource_id
+    from azure.cli.command_modules.network.custom import _convert_to_snake_case
+
     subscription_id = parse_resource_id(source_resource)['subscription']
-    from ..aaz.latest.monitor.metrics.alert import List
+    from ..aaz.latest.monitor.metrics.alert._list import List
     alert_rules = List(cli_ctx=cmd.cli_ctx)(command_args={"subscription": subscription_id})
     alert_rules = _convert_to_snake_case(alert_rules)
     for alert_rule in alert_rules:
@@ -29,6 +30,8 @@ def _get_metrics_alert_rules_clone_list(cmd, source_resource, target_resource):
 
 
 def _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource):
+    from azure.mgmt.core.tools import parse_resource_id
+
     subscription_id = parse_resource_id(source_resource)['subscription']
     resource_group_name, name = _parse_id(alert_rule['id']).values()  # pylint: disable=unbalanced-dict-unpacking
     command_args = {
@@ -37,11 +40,13 @@ def _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource)
         "name": name,
         "scopes": alert_rule['scopes'] + [target_resource]
     }
-    from ..aaz.latest.monitor.metrics.alert import Update
+    from ..aaz.latest.monitor.metrics.alert._update import Update
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_group_mapping, target_resource):
+    from azure.mgmt.core.tools import parse_resource_id
+
     source_subscription_id = parse_resource_id(source_resource)['subscription']
     target_subscription_id = parse_resource_id(target_resource)['subscription']
     for index, action in enumerate(alert_rule['actions']):
@@ -49,14 +54,15 @@ def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_gro
             alert_rule['actions'][index] = action_group_mapping[action['action_group_id']][1]
         else:
             resource_group_name, name = _parse_id(action["action_group_id"]).values()  # pylint: disable=unbalanced-dict-unpacking
-            from ..aaz.latest.monitor.action_group import Show
+            from ..aaz.latest.monitor.action_group._show import Show
             action_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
                 'subscription': source_subscription_id,
                 "resource_group": resource_group_name,
                 "action_group_name": name,
             })
 
-            from .action_groups import ActionGroupCreate
+            from azure.cli.command_modules.monitor.operations.latest.monitor.action_group._create \
+                import ActionGroupCreate
             name = CLONED_NAME.format(name, gen_guid())
             resource_group_name, _ = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
             action_group["subscription"] = target_subscription_id
@@ -73,6 +79,8 @@ def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_gro
 
 
 def format_metrics_alert_req(alert_rule):
+    from azure.cli.command_modules.network.custom import _convert_to_snake_case
+
     all_of = alert_rule["criteria"]["all_of"]
     odata_type = alert_rule["criteria"]["odata.type"]
     otype = odata_type.split(".")[-1]
@@ -88,6 +96,8 @@ def format_metrics_alert_req(alert_rule):
 
 
 def _clone_alert_rule(cmd, alert_rule, target_resource):
+    from azure.mgmt.core.tools import parse_resource_id
+
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking
     name = CLONED_NAME.format(name, gen_guid())
@@ -96,7 +106,7 @@ def _clone_alert_rule(cmd, alert_rule, target_resource):
     alert_rule["resource_group"] = resource_group_name
     alert_rule["name"] = name
     format_metrics_alert_req(alert_rule)
-    from ..aaz.latest.monitor.metrics.alert import Create
+    from ..aaz.latest.monitor.metrics.alert._create import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=alert_rule)
 
 
@@ -126,6 +136,8 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
 
 
 def _is_resource_type_same_and_sub_same(source_resource, target_resource):
+    from azure.mgmt.core.tools import parse_resource_id
+
     source_dict = parse_resource_id(source_resource.lower())
     target_dict = parse_resource_id(target_resource.lower())
     same_rp = source_dict['namespace'] == target_dict['namespace'] and source_dict['type'] == target_dict['type']

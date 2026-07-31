@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2025-03-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -267,6 +267,9 @@ class Show(AAZCommand):
             )
             properties.enable_http2 = AAZBoolType(
                 serialized_name="enableHttp2",
+            )
+            properties.entra_jwt_validation_configs = AAZListType(
+                serialized_name="entraJWTValidationConfigs",
             )
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
@@ -415,6 +418,9 @@ class Show(AAZCommand):
             properties.cookie_based_affinity = AAZStrType(
                 serialized_name="cookieBasedAffinity",
             )
+            properties.dedicated_backend_connection = AAZBoolType(
+                serialized_name="dedicatedBackendConnection",
+            )
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -436,8 +442,17 @@ class Show(AAZCommand):
             properties.request_timeout = AAZIntType(
                 serialized_name="requestTimeout",
             )
+            properties.sni_name = AAZStrType(
+                serialized_name="sniName",
+            )
             properties.trusted_root_certificates = AAZListType(
                 serialized_name="trustedRootCertificates",
+            )
+            properties.validate_cert_chain_and_expiry = AAZBoolType(
+                serialized_name="validateCertChainAndExpiry",
+            )
+            properties.validate_sni = AAZBoolType(
+                serialized_name="validateSNI",
             )
 
             authentication_certificates = cls._schema_on_200.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -474,6 +489,9 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties.application_gateways.Element.properties.backend_settings_collection.Element.properties
+            properties.enable_l4_client_ip_preservation = AAZBoolType(
+                serialized_name="enableL4ClientIpPreservation",
+            )
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -500,6 +518,38 @@ class Show(AAZCommand):
             custom_error_configurations = cls._schema_on_200.properties.application_gateways.Element.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
             _ShowHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+
+            entra_jwt_validation_configs = cls._schema_on_200.properties.application_gateways.Element.properties.entra_jwt_validation_configs
+            entra_jwt_validation_configs.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.application_gateways.Element.properties.entra_jwt_validation_configs.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.properties.application_gateways.Element.properties.entra_jwt_validation_configs.Element.properties
+            properties.audiences = AAZListType()
+            properties.client_id = AAZStrType(
+                serialized_name="clientId",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+            )
+            properties.un_authorized_request_action = AAZStrType(
+                serialized_name="unAuthorizedRequestAction",
+            )
+
+            audiences = cls._schema_on_200.properties.application_gateways.Element.properties.entra_jwt_validation_configs.Element.properties.audiences
+            audiences.Element = AAZStrType()
 
             frontend_ip_configurations = cls._schema_on_200.properties.application_gateways.Element.properties.frontend_ip_configurations
             frontend_ip_configurations.Element = AAZObjectType()
@@ -842,6 +892,9 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties.application_gateways.Element.properties.probes.Element.properties
+            properties.enable_probe_proxy_protocol_header = AAZBoolType(
+                serialized_name="enableProbeProxyProtocolHeader",
+            )
             properties.host = AAZStrType()
             properties.interval = AAZIntType()
             properties.match = AAZObjectType()
@@ -955,6 +1008,10 @@ class Show(AAZCommand):
                 serialized_name="backendHttpSettings",
             )
             _ShowHelper._build_schema_sub_resource_read(properties.backend_http_settings)
+            properties.entra_jwt_validation_config = AAZObjectType(
+                serialized_name="entraJWTValidationConfig",
+            )
+            _ShowHelper._build_schema_sub_resource_read(properties.entra_jwt_validation_config)
             properties.http_listener = AAZObjectType(
                 serialized_name="httpListener",
             )
@@ -1166,6 +1223,9 @@ class Show(AAZCommand):
             )
 
             client_auth_configuration = cls._schema_on_200.properties.application_gateways.Element.properties.ssl_profiles.Element.properties.client_auth_configuration
+            client_auth_configuration.verify_client_auth_mode = AAZStrType(
+                serialized_name="verifyClientAuthMode",
+            )
             client_auth_configuration.verify_client_cert_issuer_dn = AAZBoolType(
                 serialized_name="verifyClientCertIssuerDN",
             )
@@ -2701,6 +2761,9 @@ class _ShowHelper:
         )
 
         properties = _schema_network_interface_read.properties.private_link_service.properties
+        properties.access_mode = AAZStrType(
+            serialized_name="accessMode",
+        )
         properties.alias = AAZStrType(
             flags={"read_only": True},
         )
@@ -2951,6 +3014,9 @@ class _ShowHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.record_types = AAZStrType(
+            serialized_name="recordTypes",
         )
         properties.retention_policy = AAZObjectType(
             serialized_name="retentionPolicy",

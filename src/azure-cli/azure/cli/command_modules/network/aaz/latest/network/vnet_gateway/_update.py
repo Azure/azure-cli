@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01"],
         ]
     }
 
@@ -195,6 +195,8 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "BgpSettings"
+
+        # define Arg Group "CustomRoutes"
 
         # define Arg Group "Identity"
 
@@ -416,6 +418,7 @@ class Update(AAZCommand):
     def _build_args_address_space_update(cls, _schema):
         if cls._args_address_space_update is not None:
             _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
             return
 
         cls._args_address_space_update = AAZObjectArg()
@@ -426,13 +429,36 @@ class Update(AAZCommand):
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
             nullable=True,
         )
+        address_space_update.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools allocating IP address prefixes.",
+            nullable=True,
+        )
 
         address_prefixes = cls._args_address_space_update.address_prefixes
         address_prefixes.Element = AAZStrArg(
             nullable=True,
         )
 
+        ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_address_space_update.ipam_pool_prefix_allocations.Element
+        _element.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+            nullable=True,
+        )
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
+            nullable=True,
+        )
+
         _schema.address_prefixes = cls._args_address_space_update.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
 
     _args_sub_resource_update = None
 
@@ -554,7 +580,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -653,7 +679,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -799,7 +825,7 @@ class Update(AAZCommand):
                 vpn_client_configuration.set_prop("aadIssuer", AAZStrType, ".aad_issuer")
                 vpn_client_configuration.set_prop("aadTenant", AAZStrType, ".aad_tenant")
                 vpn_client_configuration.set_prop("radiusServerAddress", AAZStrType, ".radius_server")
-                vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret")
+                vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret", typ_kwargs={"flags": {"secret": True}})
                 vpn_client_configuration.set_prop("vpnAuthenticationTypes", AAZListType, ".vpn_auth_type")
                 vpn_client_configuration.set_prop("vpnClientAddressPool", AAZObjectType)
                 vpn_client_configuration.set_prop("vpnClientIpsecPolicies", AAZListType, ".vpn_client_ipsec_policies")
@@ -873,10 +899,24 @@ class _UpdateHelper:
         if _builder is None:
             return
         _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
         address_prefixes = _builder.get(".addressPrefixes")
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
+
+        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
+        if ipam_pool_prefix_allocations is not None:
+            ipam_pool_prefix_allocations.set_elements(AAZObjectType, ".")
+
+        _elements = _builder.get(".ipamPoolPrefixAllocations[]")
+        if _elements is not None:
+            _elements.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+            _elements.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+        pool = _builder.get(".ipamPoolPrefixAllocations[].pool")
+        if pool is not None:
+            pool.set_prop("id", AAZStrType, ".id")
 
     @classmethod
     def _build_schema_sub_resource_update(cls, _builder):
@@ -896,6 +936,7 @@ class _UpdateHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -904,11 +945,36 @@ class _UpdateHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_sub_resource_read = None
 
@@ -1283,6 +1349,7 @@ class _UpdateHelper:
         )
         vpn_client_configuration.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
         vpn_client_configuration.radius_servers = AAZListType(
             serialized_name="radiusServers",
@@ -1323,6 +1390,7 @@ class _UpdateHelper:
         )
         _element.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
 
         vng_client_connection_configurations = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations

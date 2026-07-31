@@ -12,10 +12,18 @@ from azure.cli.core.auth.identity import get_environment_credential, AZURE_CLIEN
 RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
 SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
 
+# Pin the flexible server management API version. The SDK default advanced to a newer
+# preview; keep the CLI on the version the existing commands were built and recorded against.
+MYSQL_FLEXIBLE_API_VERSION = '2025-06-01-preview'
+# Fabric mirroring operations are only available from this newer API version.
+MYSQL_FLEXIBLE_FABRIC_MIRRORING_API_VERSION = '2025-12-01-preview'
 
-def get_mysql_flexible_management_client(cli_ctx, **_):
+
+def get_mysql_flexible_management_client(cli_ctx, api_version=None, **_):
     from os import getenv
     from azure.mgmt.mysqlflexibleservers import MySQLManagementClient
+
+    api_version = api_version or MYSQL_FLEXIBLE_API_VERSION
 
     # Allow overriding resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
@@ -32,9 +40,34 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
         return MySQLManagementClient(
             subscription_id=getenv(SUB_ID_OVERRIDE),
             base_url=rm_uri_override,
-            credential=credentials)
+            credential=credentials,
+            api_version=api_version)
     # Normal production scenario.
-    return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient, api_version=api_version)
+
+
+def get_mysql_flexible_management_client_by_sub(cli_ctx, subscription_id, **_):
+    from os import getenv
+    from azure.mgmt.mysqlflexibleservers import MySQLManagementClient
+
+    # Allow overriding resource manager URI using environment variable
+    rm_uri_override = getenv(RM_URI_OVERRIDE)
+    if rm_uri_override:
+        client_id = getenv(AZURE_CLIENT_ID)
+        if client_id:
+            credentials = get_environment_credential()
+        else:
+            from msrest.authentication import Authentication  # pylint: disable=import-error
+            credentials = Authentication()
+
+        return MySQLManagementClient(
+            subscription_id=subscription_id,
+            base_url=rm_uri_override,
+            credential=credentials,
+            api_version=MYSQL_FLEXIBLE_API_VERSION)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient, subscription_id=subscription_id,
+                                   api_version=MYSQL_FLEXIBLE_API_VERSION)
 
 
 def get_mysql_management_client(cli_ctx, **_):
@@ -139,6 +172,11 @@ def private_dns_link_client_factory(cli_ctx, subscription_id=None):
     from azure.mgmt.privatedns import PrivateDnsManagementClient
     return get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient,
                                    subscription_id=subscription_id).virtual_network_links
+
+
+def cf_mysql_flexible_fabric_mirroring_settings(cli_ctx, _):
+    return get_mysql_flexible_management_client(
+        cli_ctx, api_version=MYSQL_FLEXIBLE_FABRIC_MIRRORING_API_VERSION).fabric_mirroring_settings
 
 
 # Operations for single server

@@ -1,3 +1,7 @@
+# Pin setuptools<81 to stay aligned with the CLI-wide cap: homebrew-pypi-poet
+# (abandoned since 2018) uses pkg_resources, which was removed in setuptools 82+,
+# and 81 changes setup.py/distutils behavior. See https://github.com/Azure/azure-cli/issues/32800
+setuptools<81
 homebrew-pypi-poet~=0.10.0
 jinja2~=3.1.6
 requests>=2.20.0

@@ -23,15 +23,20 @@ from ..aaz.latest.storage.share_rm import Update as _ShareRmUpdate
 from ..aaz.latest.storage.share_rm import Delete as _ShareRmDelete
 from ..aaz.latest.storage.share_rm import Show as _ShareRmShow
 from ..aaz.latest.storage.share_rm import List as _ShareRmList
+from ..util import get_datetime_from_string
 
 logger = get_logger(__name__)
 
 
-def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
+def snapshot_share_rm(cmd, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                       enabled_protocols=None, root_squash=None, access_tier=None):
-    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
-                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
-                            access_tier=access_tier, snapshot=True)
+    ShareRmSnapshot = _ShareRmCreate(cmd.loader)
+    args = {
+        'resource_group': resource_group_name, 'storage_account': account_name, 'share_name': share_name,
+        'metadata': metadata, 'quota': share_quota, 'enabled_protocols': enabled_protocols,
+        'root_squash': root_squash, 'access_tier': access_tier, 'expand': 'snapshots'
+    }
+    return ShareRmSnapshot(args)
 
 
 def _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
@@ -93,11 +98,26 @@ def create_file_url(client, protocol=None, **kwargs):
 def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir=False, exclude_extended_info=False,
                      num_results=None, marker=None):
     from ..track2_util import list_generator
-    include = [] if exclude_extended_info else ["timestamps", "Etag", "Attributes", "PermissionKey"]
-    generator = client.list_directories_and_files(directory_name=directory_name, include=include,
-                                                  timeout=timeout, results_per_page=num_results)
-    pages = generator.by_page(continuation_token=marker)
-    results = list_generator(pages=pages, num_results=num_results)
+    # since get_share_properties requires share level read access, skip it, assume SMB share first
+    results = None
+    try:
+        include = [] if exclude_extended_info else ["timestamps", "Etag", "Attributes", "PermissionKey"]
+        generator = client.list_directories_and_files(directory_name=directory_name, include=include,
+                                                      timeout=timeout, results_per_page=num_results)
+        pages = generator.by_page(continuation_token=marker)
+        results = list_generator(pages=pages, num_results=num_results)
+    except HttpResponseError as ex:
+        if ex.error_code == "UnsupportedQueryParameter":
+            # try NFS share if include fails:
+            if exclude_extended_info:
+                logger.warning('--exclude-extended-info is not supported for NFS shares.')
+            include = None
+            generator = client.list_directories_and_files(directory_name=directory_name, include=include,
+                                                          timeout=timeout, results_per_page=num_results)
+            pages = generator.by_page(continuation_token=marker)
+            results = list_generator(pages=pages, num_results=num_results)
+        else:
+            raise ex
 
     if pages.continuation_token:
         logger.warning('Next Marker:')
@@ -184,7 +204,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
         dir_name = os.path.dirname(dst2)
         file_name = os.path.basename(dst2)
 
-        _make_directory_in_files_share(client, destination, dir_name, V2=True)
+        _make_directory_in_files_share(client, dir_name)
 
         logger.warning('uploading %s', src)
         storage_file_upload(client.get_file_client(dst2), src, content_settings, metadata, validate_content,
@@ -233,7 +253,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     Download files from file share to local directory in batch
     """
 
-    from azure.cli.command_modules.storage.util import glob_files_remotely_track2
+    from azure.cli.command_modules.storage.util import glob_files_remotely_track2, normalize_blob_file_path
 
     source_files = glob_files_remotely_track2(client, source, pattern, is_share_client=True)
 
@@ -255,12 +275,13 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     def _download_action(pair):
         path = os.path.join(*pair)
         local_path = os.path.join(destination, *pair)
+        path = normalize_blob_file_path(None, path)
         file_client = client.get_file_client(path)
 
         download_file(file_client, destination_path=local_path, max_connections=max_connections,
                       progress_callback=progress_callback, validate_content=validate_content)
 
-        return file_client.url.replace('%5C', '/')
+        return file_client.url
 
     return list(_download_action(f) for f in source_files)
 
@@ -298,6 +319,19 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set()
 
+        if source_client is None:
+            t_blob_service_client = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                            '_blob_service_client#BlobServiceClient')
+            account_url = '/'.join(client.url.replace('file', 'blob').split('/')[:-1])
+            if client.credential and client.credential.account_key:
+                credential = {
+                    "account_name": client.credential.account_name,
+                    "account_key": client.credential.account_key
+                }
+                source_client = t_blob_service_client(account_url=account_url, credential=credential)
+            else:
+                source_client = t_blob_service_client(account_url=account_url, credential=client.credential)
+
         # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
             if dryrun:
@@ -317,6 +351,12 @@ def storage_file_copy_batch(cmd, client, source_client, share_name=None, destina
         # the cache of existing directories in the destination file share. the cache helps to avoid
         # repeatedly create existing directory so as to optimize the performance.
         existing_dirs = set()
+
+        if source_client is None:
+            t_share_service = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                      '_share_service_client#ShareServiceClient')
+            account_url = '/'.join(client.url.split('/')[:-1])
+            source_client = t_share_service(account_url=account_url, credential=client.credential)
 
         # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):
@@ -339,9 +379,11 @@ def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeou
     """
     Delete files from file share in batch
     """
+    from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
     def delete_action(pair):
         path = os.path.join(*pair)
+        path = normalize_blob_file_path(None, path)
         file_client = client.get_file_client(path)
         return file_client.delete_file(timeout=timeout)
 
@@ -362,6 +404,7 @@ def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeou
         delete_action(f)
 
 
+# pylint: disable=too-many-locals
 def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share, container, sas, blob_name,
                                          destination_dir=None, metadata=None, timeout=None, existing_dirs=None):
     """
@@ -371,13 +414,29 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
     from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
     t_blob_client = cmd.get_models('_blob_client#BlobClient', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if sas is None:
+        t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                      '_shared_access_signature#generate_blob_sas')
+        t_blob_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                     '_models#BlobSasPermissions')
+        from datetime import datetime, timedelta
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(days=1)
+        source_sas = t_generate_blob_sas(account_name=blob_service.account_name, container_name=container,
+                                         blob_name=blob_name,
+                                         account_key=blob_service.credential.account_key,
+                                         permission=t_blob_permissions(read=True),
+                                         expiry=expiry, start=start)
+        from urllib.parse import quote
+        sas = quote(source_sas, safe='&%()$=\',~')
+
     source_client = t_blob_client(account_url=blob_service.url, container_name=container,
                                   blob_name=blob_name, credential=sas)
     blob_url = source_client.url
 
     full_path = normalize_blob_file_path(destination_dir, blob_name)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
+    _make_directory_in_files_share(file_service, dir_name, existing_dirs)
 
     try:
         file_client = file_service.get_file_client(full_path)
@@ -390,6 +449,7 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
         raise CLIError(error_template.format(blob_name, share))
 
 
+# pylint: disable=too-many-locals
 def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas,
                                          source_file_dir, source_file_name, destination_dir=None, metadata=None,
                                          timeout=None, existing_dirs=None):
@@ -403,6 +463,21 @@ def _create_file_and_directory_from_file(cmd, file_service, source_file_service,
     if source_file_dir:
         file_path = source_file_dir + '/' + file_path
     t_file_client = cmd.get_models('_file_client#ShareFileClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    if sas is None:
+        t_generate_share_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                       '_shared_access_signature#generate_share_sas')
+        t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                     '_models#FileSasPermissions')
+        from datetime import datetime, timedelta
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(days=1)
+        source_sas = t_generate_share_sas(account_name=source_file_service.account_name, share_name=source_share,
+                                          account_key=source_file_service.credential.account_key,
+                                          permission=t_file_permissions(read=True),
+                                          expiry=expiry, start=start)
+        from urllib.parse import quote
+        sas = quote(source_sas, safe='&%()$=\',~')
+
     source_client = t_file_client(account_url=source_file_service.url, share_name=source_share, file_path=file_path,
                                   credential=sas)
     file_url = source_client.url
@@ -410,7 +485,7 @@ def _create_file_and_directory_from_file(cmd, file_service, source_file_service,
     full_path = normalize_blob_file_path(destination_dir, os.path.join(source_file_dir, source_file_name))
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
-    _make_directory_in_files_share(file_service, share, dir_name, existing_dirs, V2=True)
+    _make_directory_in_files_share(file_service, dir_name, existing_dirs)
 
     try:
         file_client = file_service.get_file_client(full_path)
@@ -423,7 +498,7 @@ def _create_file_and_directory_from_file(cmd, file_service, source_file_service,
         raise CLIError(error_template.format(file_name, source_share, share))
 
 
-def _make_directory_in_files_share(file_service, file_share, directory_path, existing_dirs=None, V2=False):
+def _make_directory_in_files_share(file_service, directory_path, existing_dirs=None):
     """
     Create directories recursively.
     This method accept a existing_dirs set which serves as the cache of existing directory. If the
@@ -446,10 +521,7 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
             continue
 
         try:
-            if V2:
-                file_service.create_directory(directory_name=dir_name)
-            else:
-                file_service.create_directory(share_name=file_share, directory_name=dir_name, fail_on_exist=False)
+            file_service.create_directory(directory_name=dir_name)
         except ResourceExistsError:
             pass
         except AzureHttpError:
@@ -469,17 +541,32 @@ def _file_share_exists(client, resource_group_name, account_name, share_name):
 
 
 # pylint: disable=redefined-builtin
-def generate_sas_file(cmd, client, directory_name=None, file_name=None, permission=None, expiry=None, start=None,
-                      id=None, ip=None, protocol=None, **kwargs):
+def generate_sas_file(cmd, client, share_name=None, directory_name=None, file_name=None, permission=None, expiry=None,
+                      start=None, id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None,
+                      user_delegation_tid=None, **kwargs):
     t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                   '_shared_access_signature#generate_file_sas')
     file_path = file_name
     if directory_name:
         file_path = directory_name + '/' + file_path
     file_path = file_path.split('/')
-    sas_token = t_generate_file_sas(account_name=client.account_name, share_name=client.share_name, file_path=file_path,
-                                    account_key=client.credential.account_key, permission=permission, expiry=expiry,
-                                    start=start, policy_id=id, ip=ip, protocol=protocol, **kwargs)
+
+    account_key = None
+    user_delegation_key = None
+    if as_user:
+        from datetime import datetime
+        user_delegation_key = client.get_user_delegation_key(
+            start=get_datetime_from_string(start) if start else datetime.utcnow(),
+            expiry=get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
+    else:
+        account_key = client.credential.account_key
+
+    sas_token = t_generate_file_sas(account_name=client.account_name, share_name=share_name, file_path=file_path,
+                                    account_key=account_key, permission=permission, expiry=expiry,
+                                    start=start, policy_id=id, ip=ip, protocol=protocol,
+                                    user_delegation_key=user_delegation_key, user_delegation_oid=user_delegation_oid,
+                                    **kwargs)
     from urllib.parse import quote
     return quote(sas_token, safe='&%()$=\',~')
 
@@ -512,6 +599,7 @@ class ShareRmCreate(_ShareRmCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         _format_storage_account_id(args_schema)
+        args_schema.expand._registered = False
         return args_schema
 
     def pre_operations(self):

@@ -100,12 +100,12 @@ acr pack build:
       - no_positional_parameters
 acr replication create:
   parameters:
-    region_endpoint_enabled:
+    global_endpoint_routing:
       rule_exclusions:
       - option_length_too_long
 acr replication update:
   parameters:
-    region_endpoint_enabled:
+    global_endpoint_routing:
       rule_exclusions:
       - option_length_too_long
 acr run:
@@ -294,6 +294,9 @@ aks create:
     node_provisioning_default_pools:
       rule_exclusions:
         - option_length_too_long
+    container_storage_version:
+      rule_exclusions:
+        - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
@@ -378,6 +381,9 @@ aks update:
       rule_exclusions:
         - option_length_too_long
     node_provisioning_default_pools:
+      rule_exclusions:
+        - option_length_too_long
+    container_storage_version:
       rule_exclusions:
         - option_length_too_long
 aks update-credentials:
@@ -3251,6 +3257,14 @@ sf application update:
     upgrade_replica_set_check_timeout:
       rule_exclusions:
       - option_length_too_long
+sf managed-application update:
+  parameters:
+    instance_close_delay_duration:
+      rule_exclusions:
+      - option_length_too_long
+    service_type_health_policy_map:
+      rule_exclusions:
+      - option_length_too_long
 sf cluster certificate add:
   parameters:
     certificate_output_folder:
@@ -3950,6 +3964,9 @@ webapp update:
       rule_exclusions:
       - option_length_too_long
     force_dns_registration:
+      rule_exclusions:
+      - option_length_too_long
+    platform_release_channel:
       rule_exclusions:
       - option_length_too_long
     skip_custom_domain_verification:

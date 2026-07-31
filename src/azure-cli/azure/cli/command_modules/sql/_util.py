@@ -262,3 +262,7 @@ def get_sql_managed_database_ledger_digest_uploads_operations(cli_ctx, _):
 
 def get_sql_managed_database_move_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_database_move_operations
+
+
+def get_sql_deleted_servers_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).deleted_servers

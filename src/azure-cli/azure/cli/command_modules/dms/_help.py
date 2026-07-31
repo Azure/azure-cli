@@ -51,7 +51,7 @@ parameters:
 examples:
   - name: Create an instance of DMS.
     text: >
-        az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnetSubscriptionId}/resourceGroups/{vnetResourceGroup}/providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName} --tags tagName1=tagValue1 tagWithNoValue
+        az dms create -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnetSubscriptionId}/resourceGroups/{vnetResourceGroup}/providers/Microsoft.Network/virtualNetworks/{vnetName}/subnets/{subnetName} --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms delete'] = """
@@ -122,13 +122,13 @@ parameters:
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
-        az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
-        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a MySQL to AzureDbForMySQL project for a DMS instance.
     text: >
-        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
@@ -320,6 +320,8 @@ parameters:
                 // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
                 "DelayProgressUpdatesInStorageInterval": "00:00:30",
             },
+            // Optional setting to migrate the full server.
+            "migrate_full_server": "true|false",
             // Optional setting to set the source server read only.
             "make_source_server_read_only": "true|false",
             // Optional setting to enable consistent backup. True by default for the sync migration, unless lockless is enabled.
@@ -339,7 +341,7 @@ parameters:
             // Optional. If true, all users/grants will be migrated.
             "migrate_user_system_tables": "true|false",
             // Binlog position to start the migration from. Only applicable for the ReplicateChanges migration.
-            "binLogInfo": {
+            "binlog_info": {
                 "filename": "binlog.0004523",
                 "position": 283287
             }
@@ -376,7 +378,9 @@ parameters:
             "userName": "user name",    // if this is missing or null, you will be prompted
             "password": null,           // if this is missing or null (highly recommended) you will be prompted
             "serverName": "server name",
-            "port": 3306                // if this is missing, it will default to 3306
+            "port": 3306,               // if this is missing, it will default to 3306
+            "encryptConnection": true,  // highly recommended to leave as true
+            "trustServerCertificate": false  // highly recommended to leave as false
         }
   - name: --target-connection-json
     type: string

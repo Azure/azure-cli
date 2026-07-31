@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.netappfiles.aaz.latest.netappfiles import snapshot
 from azure.cli.core.azclierror import ValidationError
 from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
@@ -52,7 +53,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s "
                            "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s %s --rule-index %s "
-                           "--allowed-clients %s" %
+                           "--allowed-clients %s " %
                            (rg, account_name, pool_name, volume_name1, RG_LOCATION, volume_payload, file_path,
                             vnet_name, subnet_name, protocol_types, tag, rule_index, allowed_clients)).get_output_in_json()
 
@@ -184,7 +185,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg_r, vnet_name, subnet_name)
 
-        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --volume-type %s --endpoint-type %s --replication-schedule %s --remote-volume-resource-id %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, DP_RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id, "DataProtection", "dst", "_10minutely", src_volume['id'])).get_output_in_json()
+        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --volume-type %s --replication-schedule %s --remote-volume-resource-id %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, DP_RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id, "DataProtection", "_10minutely", src_volume['id'])).get_output_in_json()
         assert dst_volume['dataProtection'] is not None
         assert dst_volume['id'] is not None
 
@@ -447,16 +448,15 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
                           "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --smb-encryption %s "
                           "--smb-continuously-avl %s --encryption-key-source %s --ldap-enabled %s "
-                          "--is-def-quota-enabled %s --avs-data-store %s" %
+                          "--avs-data-store %s" %
                           (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
                            subnet_name, smb_encryption, smb_continuously_avl, encryption_key_source, ldap_enabled,
-                           is_default_quota_enabled, avs_data_store)).get_output_in_json()
+                           avs_data_store)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert volume['smbEncryption'] == smb_encryption
         assert volume['smbContinuouslyAvailable'] == smb_continuously_avl
         assert volume['encryptionKeySource'] == encryption_key_source
         assert volume['ldapEnabled'] == ldap_enabled
-        assert volume['isDefaultQuotaEnabled'] == is_default_quota_enabled
         assert volume['avsDataStore'] == avs_data_store
 
     @serial_test()
@@ -589,8 +589,10 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             'networkFeatures':'Standard'
         })
 
-        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
-    
+        assert networkSiblingSet is not None
+        # standar basic requres afec ANFBasicToStdNetworkFeaturesUpgrade
+        #networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
     def test_volume_size_8Tib(self):
@@ -629,8 +631,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
     def test_exernal_migration_volume_fails(self):
         # create source volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)        
-        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         rg = '{rg}'
         external_host_name = "externalHostName"
         external_server_name = "externalServerName"
@@ -639,15 +641,15 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         file_path = volume_name  # creation_token
         subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
-        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)        
+        # rg_r = self.create_random_name(prefix='cli-rg-', length=24)
         subs_id = self.current_subscription()
         volumeType = "Migration"
         self.setup_vnet(rg, vnet_name, subnet_name, '10.1.0.0', DP_RG_LOCATION)
         self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg, account_name, DP_RG_LOCATION)).get_output_in_json()
         self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % (rg, account_name, pool_name, DP_RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
 
-        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)        
-        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name)).get_output_in_json()
+        subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg, vnet_name, subnet_name)
+        dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --volume-type %s --network-features Standard --file-path %s --vnet %s --subnet %s --external-host-name %s --external-server-name %s --external-volume-name %s" % (rg, account_name, pool_name, volume_name, DP_RG_LOCATION, VOLUME_DEFAULT, volumeType, file_path, vnet_name, subnet_id, external_host_name, external_server_name, external_volume_name)).get_output_in_json()
         assert dst_volume['dataProtection'] is not None
         assert dst_volume['id'] is not None
 
@@ -657,29 +659,234 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # Peer external cluster
         peerIpAddresses = ["0.0.0.1","0.0.0.2","0.0.0.3","0.0.0.4","0.0.0.5","0.0.0.6"]
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))  
+            self.cmd("az netappfiles volume replication peer-external-cluster -g %s -a %s -p %s -v %s --peer-ip-addresses %s" % (rg, account_name, pool_name, volume_name, peerIpAddresses))
         # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
         #     cm.exception))
 
         # Authorize external cluster
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication authorize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('peer targeting', str(
            cm.exception))
 
         # Perform external cluster transfer
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication perform-replication-transfer -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('VolumeReplicationHasNotBeenCreated', str(
             cm.exception))
 
         # Finalize external cluster transfer
         with self.assertRaises(HttpResponseError) as cm:
-            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))        
+            self.cmd("az netappfiles volume replication finalize-external-replication -g %s -a %s -p %s -v %s " % (rg, account_name, pool_name, volume_name))
         self.assertIn('VolumeReplicationMissingFor', str(
             cm.exception))
 
 
         self.cmd("az netappfiles volume delete -g {rg} -a %s -p %s -v %s --yes" % (account_name, pool_name, volume_name))
-        
-        
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_split_clone_from_parent(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        clone_volume_name = self.create_random_name(prefix='cli-clonevol-', length=24)
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
+
+        self.kwargs.update({
+            'volume_name': volume_name,
+            'clone_volume_name': clone_volume_name,
+            'account_name': account_name,
+            'pool_name': pool_name,
+            'subnet': 'default',
+            'snapshot_name': snapshot_name,
+            'clone_volume_type' : 'ShortTermClone',
+            'loc': RG_LOCATION,
+            'accept_grow': 'Accepted'
+        })
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # create snapshot
+        snapshot = self.cmd("az netappfiles snapshot create -g {rg} -a {account_name} -p {pool_name} -v {volume_name} -s {snapshot_name} -l {loc} ").get_output_in_json()
+        assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
+        assert snapshot['created'] is not None
+
+        self.kwargs.update({
+            'snapshot_id': snapshot['id'],
+            'subnet_id': volume['subnetId']
+        })
+
+        snapshot
+        # create clone volume from snapshot
+        clone_volume = self.cmd("az netappfiles volume create -g {rg} -a {account_name} -p {pool_name} -v {clone_volume_name} -l {loc} --volume-type {clone_volume_type} --file-path {clone_volume_name} --subnet {subnet_id} --snapshot-id {snapshot_id} --grow-pool-clone-split {accept_grow}").get_output_in_json()
+
+        assert clone_volume['name'] == account_name + '/' + pool_name + '/' + clone_volume_name
+
+        self.cmd("az netappfiles volume splitclonefromparent -g {rg} -a {account_name} -p {pool_name} -v {clone_volume_name}")
+
+        # # call splitCloneFromParent
+        # with self.assertRaises(HttpResponseError) as cm:
+        #     self.cmd("az netappfiles volume splitclonefromparent -g {rg} -a %s -p %s -v %s --username %s" % (account_name, pool_name, volume_name))
+        # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
+        #     cm.exception))
+
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_ransomware_enabled(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Premium' --size 4"
+        volume_payload = "--service-level 'Premium' --usage-threshold 100 --desired-arp-state 'Enabled'"
+        ransom_location = "uksouth"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        # assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['dataProtection']['ransomwareProtection']['desiredRansomwareProtectionState'] == "Enabled"
+
+        # list ransomware reports for the volume
+        ransomware_reports = self.cmd("az netappfiles volume ransomware-report list -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert isinstance(ransomware_reports, list)
+
+        # show the current ransomware report - no active event expected on a fresh volume
+        with self.assertRaises(HttpResponseError):
+            self.cmd("az netappfiles volume ransomware-report show -g {rg} -a %s -p %s -v %s --ransomware-report-name current" % (account_name, pool_name, volume_name))
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_list_quota_report(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # call listQuotaReport - a fresh volume with no data or quotas should return an empty list
+        quota_report = self.cmd("az netappfiles volume list-quota-report -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert 'quotaReportRecords' in quota_report["properties"]
+        assert isinstance(quota_report["properties"]['quotaReportRecords'], list)
+        assert len(quota_report["properties"]['quotaReportRecords']) == 0
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_create_with_cmk(self):
+        # End-to-end CMK volume create flow:
+        #   1. VNet with a delegated NetApp subnet and a separate compute subnet for the KV PE.
+        #   2. UAMI for the ANF account.
+        #   3. Key Vault (purge-protection on, access-policy mode) + RSA key.
+        #   4. Private endpoint for the vault on the compute subnet, approved + waited.
+        #   5. Grant the UAMI wrap/unwrap on the key.
+        #   6. Single account create with --identity-type UserAssigned + UAMI dict + CMK params.
+        #   7. Pool + CMK volume create with --encryption-key-source Microsoft.KeyVault and
+        #      --kv-private-endpoint-id <pe id>.
+        self.kwargs.update({
+            'loc': RG_LOCATION,
+            'vnet_name': self.create_random_name(prefix='cli-vnet-', length=24),
+            'anf_subnet': self.create_random_name(prefix='cli-anf-sn-', length=20),
+            'compute_subnet': self.create_random_name(prefix='cli-cmp-sn-', length=20),
+            'uami_name': self.create_random_name(prefix='cli-id-', length=24),
+            'kv_name': self.create_random_name(prefix='clikv', length=20),
+            'key_name': self.create_random_name(prefix='clikey', length=20),
+            'pe_name': self.create_random_name(prefix='cli-pe-', length=24),
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'pool_name': self.create_random_name(prefix='cli-pool-', length=24),
+            'vol_name': self.create_random_name(prefix='cli-vol-', length=24),
+            'keySource': "Microsoft.KeyVault",
+        })
+
+        # 1. VNet + delegated NetApp subnet + compute subnet for the KV private endpoint
+        self.cmd("az network vnet create -g {rg} -n {vnet_name} -l {loc} --address-prefix 10.0.0.0/16")
+        self.cmd(
+            "az network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {anf_subnet} "
+            "--address-prefixes 10.0.1.0/24 --delegations Microsoft.NetApp/volumes"
+        )
+        self.cmd(
+            "az network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {compute_subnet} "
+            "--address-prefixes 10.0.2.0/24"
+        )
+
+        # 2. User-assigned managed identity
+        uami = self.cmd("az identity create -g {rg} -n {uami_name}").get_output_in_json()
+        self.kwargs.update({
+            'uami_id': uami['id'],
+            'uami_principal_id': uami['principalId'],
+        })
+
+        # 3. Key Vault + RSA key (access-policy mode required for set-policy)
+        kv = self.cmd(
+            "az keyvault create -g {rg} -n {kv_name} -l {loc} "
+            "--enable-purge-protection true --retention-days 7 --enable-rbac-authorization false"
+        ).get_output_in_json()
+        self.kwargs.update({
+            'kv_id': kv['id'],
+            'kv_uri': kv['properties']['vaultUri'],
+        })
+        self.cmd("az keyvault key create --vault-name {kv_name} -n {key_name} --kty RSA --protection software")
+
+        # 4. Private endpoint for the vault, then approve and wait for it to be ready
+        pe = self.cmd(
+            "az network private-endpoint create -g {rg} -l {loc} -n {pe_name} "
+            "--vnet-name {vnet_name} --subnet {compute_subnet} "
+            "--private-connection-resource-id {kv_id} --group-id vault --connection-name {pe_name}"
+        ).get_output_in_json()
+        self.kwargs.update({'pe_id': pe['id']})
+
+        self.cmd(
+            "az keyvault private-endpoint-connection approve -g {rg} --vault-name {kv_name} -n {pe_name}"
+        )
+        self.cmd(
+            "az keyvault private-endpoint-connection wait -g {rg} --vault-name {kv_name} -n {pe_name} --created"
+        )
+
+        # 5. Grant the UAMI permissions on the key
+        self.cmd(
+            "az keyvault set-policy -g {rg} -n {kv_name} --object-id {uami_principal_id} "
+            "--key-permissions get decrypt encrypt"
+        )
+
+        # 6. Account create with CMK + UAMI in a single call.
+        # Dict-shorthand key (the ARM ID) must be single-quoted because it contains '/'.
+        # Empty value object {} must be escaped as {{}} so str.format leaves a literal {}.
+        self.cmd(
+            "az netappfiles account create -g {rg} -a {acc_name} -l {loc} "
+            "--key-source {keySource} --identity-type UserAssigned "
+            "--user-assigned-identities \"'{uami_id}'={{}}\" "
+            "--user-assigned-identity {uami_id} "
+            "--key-vault-uri {kv_uri} --key-name {key_name} --keyvault-resource-id {kv_id}",
+            checks=[
+                self.check('name', '{acc_name}'),
+                self.check('encryption.keySource', '{keySource}'),
+                self.check('identity.type', 'UserAssigned'),
+            ])
+
+        # 7. Pool + CMK volume.
+        # Resolve the subnet ID at runtime: testsdk does not recursively expand placeholders
+        # inside kwarg VALUES, so a hand-built "/subscriptions/.../{rg}/.../{anf_subnet}" string
+        # would arrive at the service unsubstituted and cause InvalidSubnet.
+        self.cmd(
+            "az netappfiles pool create -g {rg} -a {acc_name} -p {pool_name} -l {loc} "
+            "--service-level Premium --size 4"
+        )
+        subnet = self.cmd(
+            "az network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {anf_subnet}"
+        ).get_output_in_json()
+        self.kwargs.update({'subnet_id': subnet['id']})
+
+        self.cmd(
+            "az netappfiles volume create -g {rg} -a {acc_name} -p {pool_name} -v {vol_name} -l {loc} "
+            "--service-level Premium --usage-threshold 100 --file-path {vol_name} "
+            "--vnet {vnet_name} --subnet {subnet_id} --protocol-types NFSv3 --network-features Standard "
+            "--encryption-key-source Microsoft.KeyVault --kv-private-endpoint-id {pe_id}",
+            checks=[
+                self.check('name', '{acc_name}/{pool_name}/{vol_name}'),
+                self.check('encryptionKeySource', 'Microsoft.KeyVault'),
+                self.check('keyVaultPrivateEndpointResourceId', '{pe_id}'),
+            ])

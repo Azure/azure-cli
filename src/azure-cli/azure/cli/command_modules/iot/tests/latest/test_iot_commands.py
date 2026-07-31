@@ -365,7 +365,8 @@ class IoTHubTest(ScenarioTest):
                          self.check('routes[0].properties.endpointNames[0]', endpoint_name)])
 
         # Test 'az iot hub route update'
-        routing_sources = [source.value for source in RoutingSource if source != RoutingSource.Invalid]
+        skipped_sources = (RoutingSource.Invalid, RoutingSource.Mqtt_Broker_Messages)
+        routing_sources = [source.value for source in RoutingSource if source not in skipped_sources]
         for new_source_type in routing_sources:
             self.cmd('iot hub route update --hub-name {0} -g {1} -n {2} -s {3}'.format(hub, rg, route_name, new_source_type),
                      checks=[self.check('length([*])', 1),

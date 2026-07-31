@@ -51,6 +51,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_NETWORK_PRIVATEDNS = ('azure.mgmt.privatedns', 'PrivateDnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
+    MGMT_CONTAINERREGISTRYTASKS = ('azure.mgmt.containerregistrytasks', 'ContainerRegistryTasksMgmtClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
@@ -89,7 +90,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
 
-    DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
     MGMT_MEDIA = ('azure.mgmt.media', None)
     MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
@@ -97,7 +97,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BATCHAI = ('azure.mgmt.batchai', None)
     MGMT_BILLING = ('azure.mgmt.billing', None)
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
-    MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
@@ -108,6 +107,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
+    MGMT_POSTGRESQL = ('azure.mgmt.postgresql', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)
@@ -116,11 +116,10 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
-    DATA_STORAGE = ('azure.multiapi.storage', None)
-    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
-    DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
-    DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
-    DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
+    DATA_STORAGE_BLOB = ('azure.storage.blob', None)
+    DATA_STORAGE_FILEDATALAKE = ('azure.storage.filedatalake', None)
+    DATA_STORAGE_FILESHARE = ('azure.storage.fileshare', None)
+    DATA_STORAGE_QUEUE = ('azure.storage.queue', None)
     DATA_STORAGE_TABLE = ('azure.data.tables', None)
     DATA_BATCH = ('azure.batch', None)
 
@@ -165,7 +164,6 @@ AZURE_API_PROFILES = {
             'snapshots': '2023-10-02',
             'galleries': '2021-10-01',
             'gallery_images': '2021-10-01',
-            'gallery_image_versions': '2024-03-03',
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
@@ -188,15 +186,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: None,
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
-            'agent_pools': '2025-03-01-preview',
-            'tasks': '2025-03-01-preview',
-            'task_runs': '2025-03-01-preview',
-            'runs': '2025-03-01-preview',
-            'network_rule': '2021-08-01-preview',
-            'cache_rules': '2023-01-01-preview',
-            'credential_sets': '2023-01-01-preview'
-        }),
+        ResourceType.MGMT_CONTAINERREGISTRY: None,
+        ResourceType.MGMT_CONTAINERREGISTRYTASKS: None,
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
@@ -206,22 +197,20 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
-        ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2022-11-02',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
-        ResourceType.DATA_STORAGE_FILESHARE: '2025-05-05',
-        ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
-        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.DATA_STORAGE_BLOB: None,
+        ResourceType.DATA_STORAGE_FILEDATALAKE: None,
+        ResourceType.DATA_STORAGE_FILESHARE: None,
+        ResourceType.DATA_STORAGE_QUEUE: None,
         ResourceType.DATA_STORAGE_TABLE: None,
         ResourceType.MGMT_SERVICEBUS: None,
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
-        ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2024-11-01',
-        ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
-        ResourceType.MGMT_IOTDPS: '2021-10-15',
-        ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
-        ResourceType.MGMT_ARO: '2023-11-22',
+        ResourceType.MGMT_MSI: '2024-11-30',
+        ResourceType.MGMT_APPSERVICE: None,
+        ResourceType.MGMT_IOTHUB: None,
+        ResourceType.MGMT_IOTDPS: None,
+        ResourceType.MGMT_IOTCENTRAL: None,
+        ResourceType.MGMT_ARO: None,
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
         ResourceType.MGMT_CONTAINERSERVICE: None,
@@ -236,18 +225,6 @@ AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_APPSERVICE: {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
-    },
-    ResourceType.MGMT_CONTAINERREGISTRY: {
-        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
-        'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
-        'VERSION_2019_06_01_PREVIEW': "2019-06-01-preview",
-        'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
-        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
-        'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
-        'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
-        'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
-        'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
-        'VERSION_2025_04_01': "2025-04-01"
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',

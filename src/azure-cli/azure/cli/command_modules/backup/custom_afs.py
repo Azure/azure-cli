@@ -18,8 +18,8 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
-    resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError
+    resources_cf, backup_protected_items_cf, protected_items_cf
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -30,6 +30,55 @@ logger = get_logger(__name__)
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
+
+
+def reconfigure_afs_protection(cmd, item, source_vault_name, source_vault_rg,
+                               new_vault_name, new_vault_rg,
+                               new_policy_name, retain_as_per_policy, tenant_id):
+    """Reconfigure Azure File Share protection to a new vault and policy.
+
+    Steps:
+    1. Disable protection (retain or stop based on flag) in source vault.
+    2. Unregister storage account container (if no remaining protected items) from source vault.
+    3. Ensure storage account is registered / refreshed in destination vault.
+    4. Enable protection for the same file share name in destination vault with new policy.
+    5. Return the newly protected item from destination vault.
+    """
+    logger.warning("For Storage reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
+
+    # 1. Disable in old vault (retain as per policy if requested)
+    items_client = protected_items_cf(cmd.cli_ctx)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
+
+    # 2. Unregister container in old vault only if this was the last protected item for that storage account
+    _maybe_unregister_storage_account(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
+                                      item.properties.container_name)
+
+    # 3. Enable protection in destination vault - also registers storage account in destination vault
+    new_item = enable_for_AzureFileShare(cmd, items_client, new_vault_rg, new_vault_name, item.name,
+                                         item.properties.container_name, new_policy_name)
+    return new_item
+
+
+def _maybe_unregister_storage_account(cmd, client, resource_group_name, vault_name, container_name):
+    """Unregister the storage account container if no more protected items exist in the source vault."""
+    items = common.list_items(cmd, client, resource_group_name, vault_name,
+                              workload_type=workload_type, container_name=container_name,
+                              container_type=backup_management_type)
+    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    if remaining:
+        raise ValidationError('Cannot unregister container as other items are still protected.')
+
+    # Attempt unregister
+    try:
+        containers_client = protection_containers_cf(cmd.cli_ctx)
+        unregister_afs_container(cmd, containers_client, vault_name, resource_group_name, container_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
 
 
 def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_name,
@@ -189,9 +238,27 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
-                                                                     item.properties.container_name.split(';')[-1],
-                                                                     item.properties.container_name.split(';')[-2])
+
+    # Try to get source resource ID from storage account first, fallback to item's source resource ID
+    try:
+        afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
+                                                                         item.properties.container_name.split(';')[-1],
+                                                                         item.properties.container_name.split(';')[-2])
+        # Check if source_resource_id is null or empty after assignment
+        if not afs_restore_request.source_resource_id:
+            raise CLIError("Source resource ID is null or empty after retrieval from storage account.")
+    except (CLIError) as e:
+        logger.warning(
+            "Failed to get storage account ID: %s. Falling back to source resource ID from protected item.",
+            str(e))
+        source_resource_id = _get_source_resource_id_from_item(item)
+        if source_resource_id:
+            afs_restore_request.source_resource_id = source_resource_id
+        else:
+            raise CLIError(
+                "Unable to retrieve source resource ID. The storage account might have been deleted "
+                "and no fallback source resource ID is available.") from e
+
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -418,6 +485,16 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
+
+
+def _get_source_resource_id_from_item(item):
+    """
+    Helper function to retrieve source resource ID from a protected item.
+    This is used as a fallback when the storage account is deleted.
+    """
+    if item and hasattr(item, 'properties') and hasattr(item.properties, 'source_resource_id'):
+        return item.properties.source_resource_id
+    return None
 
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,

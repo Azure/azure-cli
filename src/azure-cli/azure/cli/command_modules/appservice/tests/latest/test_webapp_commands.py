@@ -134,9 +134,38 @@ class WebappBasicE2ETest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_webapp_runtimes(self):
-        self.cmd('webapp list-runtimes')
-        self.cmd('webapp list-runtimes --os windows')
-        self.cmd('webapp list-runtimes --os linux')
+        # Validate default output structure
+        self.cmd('webapp list-runtimes', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@) > `0`', True),
+            JMESPathCheck('[0].os != `null`', True),
+            JMESPathCheck('[0].runtime != `null`', True),
+            JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck('[0].support != `null`', True),
+        ])
+        # Validate OS filter
+        self.cmd('webapp list-runtimes --os windows', checks=[
+            JMESPathCheck("length([?os != 'Windows'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --os linux', checks=[
+            JMESPathCheck("length([?os != 'Linux'])", 0),
+        ])
+        # Validate runtime filter
+        self.cmd('webapp list-runtimes --runtime python', checks=[
+            JMESPathCheck("length([?runtime != 'Python'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --runtime java')
+        # Validate support filter
+        self.cmd('webapp list-runtimes --support active', checks=[
+            JMESPathCheck("length([?support == 'EOL' || support == 'Near'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --support near', checks=[
+            JMESPathCheck("length([?support != 'Near'])", 0),
+        ])
+        # Validate combined filters
+        self.cmd('webapp list-runtimes --os linux --runtime dotnet --support near', checks=[
+            JMESPathCheck("length([?os != 'Linux'])", 0),
+        ])
 
 
 class WebappQuickCreateTest(ScenarioTest):
@@ -148,10 +177,12 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~20'),
+            JMESPathCheck('[0].value', '~22'),
         ])
 
     @AllowLargeResponse()
@@ -161,16 +192,20 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|20LTS"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|22LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~20'),
+            JMESPathCheck('[0].value', '~22'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -178,7 +213,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|20LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|22LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -186,7 +221,7 @@ class WebappQuickCreateTest(ScenarioTest):
         # verify the web page
         self.assertTrue('null' in str(r.content))
 
-    @ResourceGroupPreparer(location='canadacentral')
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_quick_create(self, resource_group):
         webapp_name = self.create_random_name(
             prefix='webapp-quick-linux', length=24)
@@ -231,7 +266,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick-linux-cd'
         self.cmd(
             'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts"'.format(resource_group, webapp_name,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts"'.format(resource_group, webapp_name,
                                                                                     plan, TEST_REPO_URL))
         # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(45)
@@ -326,7 +361,7 @@ class BackupRestoreTest(ScenarioTest):
         ])
         self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp), checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].namePropertiesName', backup_name)
+            JMESPathCheck("contains([0].blobName, '{}')".format(backup_name), True)
         ])
 
         slot_name = "slot"
@@ -337,7 +372,7 @@ class BackupRestoreTest(ScenarioTest):
         ])
         self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
             JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].namePropertiesName', slot_backup_name)
+            JMESPathCheck(f"contains([0].blobName, '{slot_backup_name}')", True)
         ])
 
     @AllowLargeResponse()
@@ -401,7 +436,7 @@ class BackupRestoreTest(ScenarioTest):
             while backup_status == 'InProgress':
                 list_backups_respone = self.cmd(command, checks=[
                     JMESPathCheck('length(@)', 1),
-                    JMESPathCheck('[0].namePropertiesName', backup_name)
+                    JMESPathCheck(f"contains([0].blobName, '{backup_name}')", True)
                 ]).get_output_in_json()
                 backup_status =  list_backups_respone[0]['status']
                 # Backup operation is still in progress, Sleep 30 seconds
@@ -472,7 +507,7 @@ class BackupRestoreTest(ScenarioTest):
 
         # Verify the updated backup configuration
         self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp}", checks=[
-            JMESPathCheck('[0].namePropertiesName', backup_name)
+            JMESPathCheck(f"contains([0].blobName, '{backup_name}')", True)
         ])
 
 
@@ -486,7 +521,7 @@ class AppServiceLogTest(ScenarioTest):
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd(f'appservice plan create -g {resource_group} -n {plan} -l eastus')
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|20LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|22LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -608,6 +643,45 @@ class AppServicePlanScenarioTest(ScenarioTest):
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_async_scaling_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} --number-of-workers 30 --async-scaling-enabled true --sku P3v2'.format(resource_group, plan, "eastus2euap"))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 30),
+            JMESPathCheck('properties.status', 'Ready'),
+            JMESPathCheck('sku.name', 'P3v2')])
+
+        self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_update_async_scaling_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} --async-scaling-enabled true --sku P3v2'.format(resource_group, plan, "eastus2euap"))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 1)])
+        
+        self.cmd('appservice plan update -g {} -n {} --number-of-workers 30'.format(resource_group, plan))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 30),
+            JMESPathCheck('properties.status', 'Ready'),
+            JMESPathCheck('sku.name', 'P3v2')])
+        
+        self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
 
 class WebappElasticScaleTest(ScenarioTest):
     @AllowLargeResponse()
@@ -769,7 +843,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         linux_plan = self.create_random_name(
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
@@ -880,16 +954,16 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),         
         ])
-        self.cmd('webapp config set -g {} -n {} --runtime NODE:20LTS'.format(resource_group, webapp_name))
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:22LTS'.format(resource_group, webapp_name))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~20"),
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~22"),
         ])
         #linux
-        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:11.0-java21'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "TOMCAT|11.0-java21"), 
+        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:10.1-java11'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java11"), 
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "TOMCAT|11.0-java21"),      
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java11"),      
         ])
         self.cmd('webapp config set -g {} -n {} --runtime PYTHON:3.12'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "PYTHON|3.12"),
@@ -909,11 +983,11 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
         ])        
-        self.cmd('webapp config set -g {} -n {} --runtime NODE:20-lts'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "NODE|20-lts"),
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:22-lts'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "NODE|22-lts"),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "NODE|20-lts"),  
+            JMESPathCheck("linuxFxVersion", "NODE|22-lts"),  
         ])                                  
 
     @AllowLargeResponse()
@@ -1223,7 +1297,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
@@ -1309,7 +1383,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         if platform.system() == "Windows":
             return
 
-        runtime = 'node|20-lts'
+        runtime = 'node|22-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -1328,7 +1402,7 @@ class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|20-lts'
+        runtime = 'node|22-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -1391,7 +1465,7 @@ class WebappACRScenarioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
@@ -2125,6 +2199,70 @@ class WebappUpdateTest(ScenarioTest):
             self.check('clientAffinityEnabled', True)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_platform_release_channel(self, resource_group):
+        webapp_name = self.create_random_name('webapp-prc-test', 40)
+        plan_name = self.create_random_name('webapp-prc-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
+        # JMESPathCheck is not used here since platformReleaseChannel is not returned in the response of webapp show/list commands and we just want to make sure the update command goes through without any errors
+        # Set platform release channel to Extended
+        self.cmd('webapp update -g {} -n {} --platform-release-channel Extended'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name)])
+
+        # Update platform release channel to Standard
+        self.cmd('webapp update -g {} -n {} --platform-release-channel Standard'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_e2e_encryption(self, resource_group):
+        webapp_name = self.create_random_name('webapp-e2e-test', 40)
+        plan_name = self.create_random_name('webapp-e2e-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
+        # Enable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} --end-to-end-encryption-enabled true'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name),
+                     JMESPathCheck('endToEndEncryptionEnabled', True)])
+
+        # Disable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} -e false'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('endToEndEncryptionEnabled', False)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_tls_settings(self, resource_group):
+        webapp_name = self.create_random_name('webapp-tls-test', 40)
+        plan_name = self.create_random_name('webapp-tls-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        # Create webapp with end-to-end encryption, min TLS version, and min TLS cipher suite
+        self.cmd('webapp create -g {} -n {} --plan {} --end-to-end-encryption-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_RSA_WITH_AES_128_CBC_SHA256'
+                 .format(resource_group, webapp_name, plan_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name),
+                     JMESPathCheck('endToEndEncryptionEnabled', True)])
+
+        # Verify the config settings
+        self.cmd('webapp config show -g {} -n {}'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('minTlsVersion', '1.0'),
+                     JMESPathCheck('minTlsCipherSuite', 'TLS_RSA_WITH_AES_128_CBC_SHA256')])
+
 
 class BasicAuthScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -2304,6 +2442,24 @@ class WebappListLocationsTest(ScenarioTest):
             JMESPathCheck('length(@) > `0`', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-managed-instance-enabled-test')
+    def test_webapp_list_locations_managed_instance_enabled(self, resource_group):
+        self.cmd('appservice list-locations --sku P1V4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P0V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1V3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV3 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+
 
 class ContainerWebappE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test', location='australiaeast')
@@ -2403,7 +2559,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             # this weird field means it is a linux
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.tier', 'LinuxFree')])
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts"'.format(resource_group, webapp_name, plan,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts"'.format(resource_group, webapp_name, plan,
                                                                                     TEST_REPO_URL))
         # verify alwaysOn
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
@@ -2485,7 +2641,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         plan = self.create_random_name(prefix='plan-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts" --assign-identity [system] --acr-use-identity --acr-identity [system]'
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts" --assign-identity [system] --acr-use-identity --acr-identity [system]'
                  .format(resource_group, system_identity_webapp_name, plan, TEST_REPO_URL), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', system_identity_webapp_name),
@@ -2494,7 +2650,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, system_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', None),
-            JMESPathCheck('linuxFxVersion', "NODE|20-lts"),
+            JMESPathCheck('linuxFxVersion', "NODE|22-lts"),
             JMESPathCheck('acrUseManagedIdentityCreds', True)
         ])
 
@@ -2502,7 +2658,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         identity_name = self.create_random_name('app-linux', 16)
         msi_result = self.cmd('identity create -g {} -n {}'.format(
             resource_group, identity_name)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts" --assign-identity {} --acr-use-identity --acr-identity {}'
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts" --assign-identity {} --acr-use-identity --acr-identity {}'
                  .format(resource_group, user_identity_webapp_name, plan, TEST_REPO_URL, msi_result['id'], msi_result['id']), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', user_identity_webapp_name),
@@ -2511,7 +2667,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, user_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', None),
-            JMESPathCheck('linuxFxVersion', "NODE|20-lts"),
+            JMESPathCheck('linuxFxVersion', "NODE|22-lts"),
             JMESPathCheck('acrUseManagedIdentityCreds', True),
             JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
         ])            
@@ -2539,8 +2695,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         self.cmd('webapp hybrid-connection add -g {} -n {} --namespace {} --hybrid-connection {}'.format(
             resource_group, webapp_name, namespace_name, hyco_name))
         self.cmd('webapp hybrid-connection list -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', hyco_name)
+            JMESPathCheck("length([?name=='{}'])".format(hyco_name), 1)
         ])
 
         self.cmd('webapp deployment slot create -g {} -n {} --slot {}'.format(
@@ -2993,7 +3148,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
@@ -3012,7 +3167,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
         
         self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
             JMESPathCheck('deployer', 'OneDeploy'),
@@ -3141,7 +3296,7 @@ class WebappSiteContainersTests(ScenarioTest):
             resource_group, webapp_name, plan_name, acr_registry_name, creds['username'], creds['passwords'][0]['value']
         ))
 
-        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {}'.
+        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {} --yes'.
                   format(resource_group, webapp_name))
         self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
                   format(webapp_name, resource_group)).assert_with_checks([
@@ -3165,7 +3320,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --track-status false --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'OneDeploy'),
@@ -3182,7 +3337,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
@@ -3202,7 +3357,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
@@ -3215,7 +3370,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
@@ -3228,7 +3383,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status false'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('complete', True)
@@ -3243,7 +3398,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
@@ -3263,7 +3418,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
@@ -3276,7 +3431,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
@@ -3395,7 +3550,7 @@ class WebappSlotTest(ScenarioTest):
         ])
 
 class WebappStackTest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_list_show_details(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-list-show-details', length=40)
@@ -3448,6 +3603,71 @@ class WebappDNLTests(ScenarioTest):
         app_name, hash_part, region = match.groups()
         self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
         self.assertIn('-', region, "Region part does not have '-' separator.")
+
+
+class WebappEnrichedErrorsScenarioTest(ScenarioTest):
+    """Scenario tests for --enriched-errors flag on az webapp deploy and az webapp up."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_enriched_errors_artifact_mismatch(self, resource_group):
+        """Deploy a .war to a Python app with --enriched-errors true — should get ArtifactStackMismatch."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku F1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaises(EnrichedDeploymentError) as cm:
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors true'.format(
+                resource_group, webapp_name, war_file))
+        self.assertIn('ArtifactStackMismatch', str(cm.exception))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_without_enriched_errors(self, resource_group):
+        """Deploy a .war to a Python app without --enriched-errors — should get original CLIError."""
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegex(CLIError, "Status Code: 400"):
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors false'.format(
+                resource_group, webapp_name, war_file))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
+        """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-up-enr', 40)
+        plan_name = self.create_random_name('webapp-up-enr-plan', 40)
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp config appsettings set -g {} -n {} --settings '
+                 'WEBSITE_RUN_FROM_PACKAGE="https://fake.blob.core.windows.net/c/fake.zip"'.format(
+                     resource_group, webapp_name))
+        src_dir = tempfile.mkdtemp()
+        with open(os.path.join(src_dir, 'requirements.txt'), 'w') as f:
+            f.write('flask')
+        with open(os.path.join(src_dir, 'app.py'), 'w') as f:
+            f.write('print("hello")')
+        original_dir = os.getcwd()
+        try:
+            os.chdir(src_dir)
+            with self.assertRaises(EnrichedDeploymentError):
+                self.cmd('webapp up -n {} -g {} --enriched-errors true'.format(
+                    webapp_name, resource_group))
+        finally:
+            os.chdir(original_dir)
+
 
 if __name__ == '__main__':
     unittest.main()

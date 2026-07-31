@@ -109,7 +109,7 @@ def load_arguments(self, _):
         c.argument('registry_pass', validator=validate_registry_pass, options_list=['--registry-password'], help="The password to log in to container registry. If stored as a secret, value must start with \'secretref:\' followed by the secret name.")
         c.argument('registry_user', validator=validate_registry_user, options_list=['--registry-username'], help="The username to log in to container registry.")
         c.argument('secrets', nargs='*', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app. Space-separated values in 'key=value' format.")
-        c.argument('registry_identity', help="A Managed Identity to authenticate with the registry server instead of username/password. Use a resource ID or 'system' for user-defined and system-defined identities, respectively. The registry must be an ACR. If possible, an 'acrpull' role assignemnt will be created for the identity automatically.")
+        c.argument('registry_identity', help="A Managed Identity to authenticate with the registry server instead of username/password. Use a resource ID or 'system' for user-defined and system-defined identities, respectively. The registry must be an ACR. If possible, an 'acrpull' role assignment will be created for the identity automatically.")
 
     # Ingress
     with self.argument_context('containerapp', arg_group='Ingress') as c:
@@ -165,6 +165,7 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp env', arg_group='Virtual Network') as c:
         c.argument('infrastructure_subnet_resource_id', options_list=['--infrastructure-subnet-resource-id', '-s'], help='Resource ID of a subnet for infrastructure components and user app containers.')
+        c.argument('infrastructure_resource_group', options_list=['--infrastructure-resource-group', '-i'], help='Name for resource group that will contain infrastructure resources. If not provided, a resource group name will be generated.')
         c.argument('docker_bridge_cidr', options_list=['--docker-bridge-cidr'], help='CIDR notation IP range assigned to the Docker bridge. It must not overlap with any Subnet IP ranges or the IP range defined in Platform Reserved CIDR, if defined', deprecate_info=Deprecated(self.cli_ctx, target='--docker-bridge-cidr', hide=True, message_func=lambda x: "Option '--docker-bridge-cidr' has been deprecated and will be removed in the Ignite 2024"))
         c.argument('platform_reserved_cidr', options_list=['--platform-reserved-cidr'], help='IP range in CIDR notation that can be reserved for environment infrastructure IP addresses. It must not overlap with any other Subnet IP ranges')
         c.argument('platform_reserved_dns_ip', options_list=['--platform-reserved-dns-ip'], help='An IP address from the IP range defined by Platform Reserved CIDR that will be reserved for the internal DNS server.')
@@ -449,10 +450,8 @@ def load_arguments(self, _):
         c.argument('name', name_type, metavar='NAME', id_part='name', help=f"The name of the Container Apps Job. A name must consist of lower case alphanumeric characters or '-', start with a letter, end with an alphanumeric character, cannot have '--', and must be less than {MAXIMUM_CONTAINER_APP_NAME_LENGTH} characters.")
         c.argument('cron_expression', help='Cron expression. Only supported for trigger type "Schedule"')
         c.argument('image', help="Container image, e.g. publisher/image-name:tag.")
-        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.')
         c.argument('replica_retry_limit', type=int, help='Maximum number of retries before the replica fails.')
         c.argument('replica_timeout', type=int, help='Maximum number of seconds a replica can execute.')
-        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.')
         c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
         c.argument('min_executions', type=int, help="Minimum number of job executions that are created for a trigger, default 0.")
         c.argument('max_executions', type=int, help="Maximum number of job executions that are created for a trigger, default 100.")
@@ -462,12 +461,18 @@ def load_arguments(self, _):
         c.argument('system_assigned', options_list=['--mi-system-assigned', c.deprecate(target='--system-assigned', redirect='--mi-system-assigned', hide=True)], help='Boolean indicating whether to assign system-assigned identity.', action='store_true')
         c.argument('trigger_type', help='Trigger type. Schedule | Event | Manual')
         c.argument('user_assigned', options_list=['--mi-user-assigned', c.deprecate(target='--user-assigned', redirect='--mi-user-assigned', hide=True)], nargs='+', help='Space-separated user identities to be assigned.')
+        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.', default=1)
+        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.', default=1)
 
     with self.argument_context('containerapp job', arg_group='Scale') as c:
         c.argument('min_executions', type=int, help="Minimum number of job executions to run per polling interval.")
         c.argument('max_executions', type=int, help="Maximum number of job executions to run per polling interval.")
         c.argument('polling_interval', type=int, help="Interval to check each event source in seconds. Defaults to 30s.")
         c.argument('scale_rule_type', options_list=['--scale-rule-type', '--srt'], help="The type of the scale rule.")
+
+    with self.argument_context('containerapp job update') as c:
+        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.')
+        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.')
 
     with self.argument_context('containerapp job stop') as c:
         c.argument('job_execution_name', help='name of the specific job execution which needs to be stopped.')
@@ -500,3 +505,16 @@ def load_arguments(self, _):
 
     with self.argument_context('containerapp job registry list') as c:
         c.argument('name', id_part=None)
+
+    with self.argument_context('containerapp env http-route-config') as c:
+        c.argument('http_route_config_name', options_list=['--http-route-config-name', '-r'], help="The name of the http route configuration.")
+        c.argument('yaml', help="The path to the YAML input file.")
+        c.argument('name', id_part=None)
+
+    with self.argument_context('containerapp env premium-ingress') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None)
+        c.argument('name', options_list=['--name', '-n'], help="The name of the managed environment.")
+        c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help="The workload profile to run ingress replicas on. This profile must not be shared with any container app or job.")
+        c.argument('termination_grace_period', options_list=['--termination-grace-period', '-t'], type=int, help="Time in seconds to drain requests during ingress shutdown. Default 500, minimum 0, maximum 3600.")
+        c.argument('request_idle_timeout', type=int, help="Timeout in minutes for idle requests. Default 4, minimum 4, maximum 30.")
+        c.argument('header_count_limit', type=int, help="Limit of http headers per request. Default 100, minimum 1.")

@@ -32,7 +32,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
-from cryptography.x509 import load_pem_x509_certificate
+from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 
 from knack.log import get_logger
 from knack.util import CLIError, todict
@@ -347,9 +347,9 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     params = VaultCreateOrUpdateParameters(location=location,
-                                           properties={'tenant_id': tenant_id,
+                                           properties={'tenantId': tenant_id,
                                                        'sku': Sku(name=SkuName.standard.value, family='A'),
-                                                       'create_mode': CreateMode.recover.value})
+                                                       'createMode': CreateMode.recover.value})
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -474,6 +474,8 @@ def create_vault_or_hsm(cmd, client,
                               sku=sku,
                               enable_purge_protection=enable_purge_protection,
                               retention_days=retention_days,
+                              network_acls_ips=network_acls_ips,
+                              public_network_access=public_network_access,
                               bypass=bypass,
                               default_action=default_action,
                               tags=tags,
@@ -493,6 +495,7 @@ def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
                retention_days=None,
+               network_acls_ips=None,
                public_network_access=None,
                bypass=None,
                default_action=None,
@@ -517,6 +520,14 @@ def create_hsm(cmd, client,
                                           operation_group='managed_hsms')
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
                                    operation_group='managed_hsms')
+    MHSMIPRule = cmd.get_models('MHSMIPRule', resource_type=ResourceType.MGMT_KEYVAULT,
+                                operation_group='managed_hsms')
+
+    network_acls = _create_network_rule_set(cmd, bypass, default_action)
+    network_acls.ip_rules = []
+    if network_acls_ips:
+        for ip in network_acls_ips:
+            network_acls.ip_rules.append(MHSMIPRule(value=ip))
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
@@ -525,7 +536,7 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      network_acls=network_acls,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
@@ -549,6 +560,13 @@ def create_hsm(cmd, client,
 
 def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+
+def wait_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    if vault_name:
+        return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
 def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
@@ -605,7 +623,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.all],
+        permissions = Permissions(keys_property=[KeyPermissions.all],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all],
                                   storage=[StoragePermissions.all])
@@ -631,6 +649,9 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
+                                 # Intentionally include this field in the request body to satisfy
+                                 # Azure Policy checks that require soft delete to be explicitly set.
+                                 enable_soft_delete=True,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days),
                                  public_network_access=public_network_access)
@@ -802,19 +823,19 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
             application_id=application_id,
-            permissions=Permissions(keys=key_permissions,
+            permissions=Permissions(keys_property=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
                                     storage=storage_permissions)))
     else:
         # Modify existing policy.
         # If key_permissions is not set, use prev. value (similarly with secret_permissions).
-        keys = policy.permissions.keys if key_permissions is None else key_permissions
+        keys = policy.permissions.keys_property if key_permissions is None else key_permissions
         secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
         certs = policy.permissions.certificates \
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
-        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
+        policy.permissions = Permissions(keys_property=keys, secrets=secrets, certificates=certs, storage=storage)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -825,10 +846,20 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                            properties=vault.properties))
 
 
-def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
-                     vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
-    """ Add a network rule to the network ACLs for a Key Vault. """
+def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
+                                      ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if vault_name:
+        return add_vault_network_rule(cmd, client, resource_group_name, vault_name,
+                                      ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return add_hsm_network_rule(cmd, hsm_client, resource_group_name, hsm_name,
+                                    ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
 
+
+def add_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
+                           vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
+    """ Add a network rule to the network ACLs for a Key Vault. """
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -884,8 +915,57 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                            properties=vault.properties))
 
 
-def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
-                        vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
+def add_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
+                         ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if subnet or vnet_name:
+        raise InvalidArgumentValueError("--subnet and --vnet-name are not supported for MHSM yet")
+
+    hsm = client.get(resource_group_name=resource_group_name, name=hsm_name)
+    hsm.properties.network_acls = hsm.properties.network_acls or _create_network_rule_set(cmd)
+    rules = hsm.properties.network_acls
+    IPRule = cmd.get_models('MHSMIPRule', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    to_update = False
+    if ip_address:
+        rules.ip_rules = rules.ip_rules or []
+        # if the rule already exists, don't add again
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    if not to_update:
+        return hsm
+
+    client.begin_create_or_update(resource_group_name=resource_group_name,
+                                  name=hsm_name,
+                                  parameters=hsm,
+                                  polling=not no_wait).result()
+    if not no_wait:
+        return client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+
+def remove_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
+                                         ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if vault_name:
+        return remove_vault_network_rule(cmd, client, resource_group_name, vault_name,
+                                         ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return remove_hsm_network_rule(hsm_client, resource_group_name, hsm_name,
+                                   ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+
+
+def remove_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None,
+                              subnet=None, vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -927,10 +1007,48 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
                            properties=vault.properties))
 
 
-def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
-    """ List the network rules from the network ACLs for a Key Vault. """
-    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
-    return vault.properties.network_acls
+def remove_hsm_network_rule(client, resource_group_name, hsm_name,
+                            ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if subnet or vnet_name:
+        raise InvalidArgumentValueError("--subnet and --vnet-name are not supported for MHSM yet")
+
+    hsm = client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+    if not hsm.properties.network_acls:
+        return hsm
+
+    rules = hsm.properties.network_acls
+
+    to_modify = False
+
+    if ip_address and rules.ip_rules:
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
+        to_modify |= len(new_rules) != len(rules.ip_rules)
+        if to_modify:
+            rules.ip_rules = new_rules
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_modify:
+        return hsm
+
+    # otherwise update
+    client.begin_create_or_update(resource_group_name=resource_group_name,
+                                  name=hsm_name,
+                                  parameters=hsm,
+                                  polling=not no_wait).result()
+    if not no_wait:
+        return client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+
+def list_network_rules(cmd, client, resource_group_name, vault_name=None, hsm_name=None):  # pylint: disable=unused-argument
+    """ List the network rules from the network ACLs for a Key Vault or a Managed HSM. """
+    if vault_name:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        return vault.properties.network_acls
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm = hsm_client.get(resource_group_name, name=hsm_name)
+    return hsm.properties.network_acls
 
 
 def delete_policy(cmd, client, resource_group_name, vault_name,
@@ -971,19 +1089,195 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 # region KeyVault Key
 def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None,
+               external_key_id=None):
 
-    return client.create_key(name=name,
-                             key_type=kty,
-                             size=key_size,
-                             key_operations=key_ops,
-                             enabled=not disabled,
-                             not_before=not_before,
-                             expires_on=expires,
-                             tags=tags,
-                             curve=curve,
-                             exportable=exportable,
-                             release_policy=release_policy)
+    # External keys are backed by an External Key Manager (EKM). They use a dedicated SDK method,
+    # and the service rejects client-specified key type/size/curve/operations for them.
+    if external_key_id:
+        from azure.keyvault.keys import ExternalKey
+        return client.create_external_key(
+            name=name,
+            external_key=ExternalKey(id=external_key_id),
+            enabled=not disabled,
+            not_before=not_before,
+            expires_on=expires,
+            tags=tags,
+            release_policy=release_policy)
+
+    return client.create_key(
+        name=name,
+        key_type=kty,
+        size=key_size,
+        curve=curve,
+        key_operations=key_ops,
+        enabled=not disabled,
+        not_before=not_before,
+        expires_on=expires,
+        tags=tags,
+        exportable=exportable,
+        release_policy=release_policy)
+
+
+# region KeyVault EKM Connection
+def get_ekm_connection(client):
+    return client.get_ekm_connection()
+
+
+def get_ekm_certificate(client):
+    certificate = client.get_ekm_certificate()
+
+    # Latest preview SDK mirrors the connection payload (subject_common_name + ca_certificates list).
+    subject_common_name = getattr(certificate, 'subject_common_name', None)
+    ca_certificates = getattr(certificate, 'ca_certificates', None)
+    if isinstance(ca_certificates, (list, tuple)) and ca_certificates:
+        encoded_certs = []
+        for cert_bytes in ca_certificates:
+            if isinstance(cert_bytes, (bytes, bytearray, memoryview)):
+                encoded_certs.append(base64.b64encode(bytes(cert_bytes)).decode('ascii'))
+        if encoded_certs or subject_common_name:
+            return {
+                'subjectCommonName': subject_common_name,
+                'caCertificates': encoded_certs
+            }
+
+    def _extract_der_bytes(obj):
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return bytes(obj)
+
+        # Known/likely shapes across SDK iterations.
+        for attr in ('cer', 'certificate', 'cert', 'der', 'value', 'data'):
+            if hasattr(obj, attr):
+                value = getattr(obj, attr)
+                if isinstance(value, (bytes, bytearray, memoryview)):
+                    return bytes(value)
+
+        if isinstance(obj, dict):
+            for key in ('cer', 'certificate', 'cert', 'der', 'value', 'data'):
+                value = obj.get(key)
+                if isinstance(value, (bytes, bytearray, memoryview)):
+                    return bytes(value)
+
+        return None
+
+    def _find_bytes_anywhere(obj, *, _seen=None, _depth=0, _max_depth=4):  # pylint: disable=too-many-return-statements
+        if obj is None:
+            return None
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return bytes(obj)
+        if _depth >= _max_depth:
+            return None
+
+        if _seen is None:
+            _seen = set()
+        obj_id = id(obj)
+        if obj_id in _seen:
+            return None
+        _seen.add(obj_id)
+
+        if isinstance(obj, dict):
+            for v in obj.values():
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+            return None
+
+        if isinstance(obj, (list, tuple, set)):
+            for v in obj:
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+            return None
+
+        # SDK model objects often keep fields in __dict__.
+        if hasattr(obj, '__dict__') and isinstance(obj.__dict__, dict):
+            for v in obj.__dict__.values():
+                found = _find_bytes_anywhere(v, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+                if found is not None:
+                    return found
+
+        # Last resort: materialize to dict and scan.
+        try:
+            as_dict = todict(obj)
+        except Exception:  # pylint: disable=broad-except
+            return None
+        return _find_bytes_anywhere(as_dict, _seen=_seen, _depth=_depth + 1, _max_depth=_max_depth)
+
+    def _json_safe(obj):
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            return base64.b64encode(bytes(obj)).decode('ascii')
+        if isinstance(obj, dict):
+            return {k: _json_safe(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple, set)):
+            return [_json_safe(v) for v in obj]
+
+        # Try to materialize SDK models into primitives.
+        try:
+            as_dict = todict(obj)
+        except Exception:  # pylint: disable=broad-except
+            return obj
+        return _json_safe(as_dict)
+
+    der_bytes = _extract_der_bytes(certificate)
+    if der_bytes is None:
+        der_bytes = _find_bytes_anywhere(certificate)
+
+    if der_bytes is None:
+        # Ensure we never return raw bytes anywhere in the payload.
+        return _json_safe(certificate)
+
+    pem = None
+    # Try to decode as PEM first (some services return PEM bytes).
+    try:
+        if der_bytes.lstrip().startswith(b'-----BEGIN CERTIFICATE-----'):
+            pem = der_bytes.decode('ascii', errors='strict')
+            der_bytes = load_pem_x509_certificate(der_bytes).public_bytes(Encoding.DER)
+        else:
+            pem = load_der_x509_certificate(der_bytes).public_bytes(Encoding.PEM).decode('ascii')
+    except Exception:  # pylint: disable=broad-except
+        # Bytes found, but not a certificate. Fall back to JSON-safe representation.
+        return _json_safe(certificate)
+
+    return {
+        'format': 'der',
+        'cer': base64.b64encode(der_bytes).decode('ascii'),
+        'pem': pem
+    }
+
+
+def check_ekm_connection(client):
+    return client.check_ekm_connection()
+
+
+def delete_ekm_connection(client):
+    return client.delete_ekm_connection()
+
+
+def create_ekm_connection(client, host, path_prefix=None, server_ca_certificates=None, server_subject_common_name=None):
+    from azure.keyvault.administration import KeyVaultEkmConnection
+
+    ekm_connection = KeyVaultEkmConnection(
+        host=host,
+        path_prefix=path_prefix,
+        server_ca_certificates=server_ca_certificates,
+        server_subject_common_name=server_subject_common_name
+    )
+    return client.create_ekm_connection(ekm_connection)
+
+
+def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certificates=None,
+                          server_subject_common_name=None):
+    existing = client.get_ekm_connection()
+    if host is not None:
+        existing.host = host
+    if path_prefix is not None:
+        existing.path_prefix = path_prefix
+    if server_ca_certificates is not None:
+        existing.server_ca_certificates = server_ca_certificates
+    if server_subject_common_name is not None:
+        existing.server_subject_common_name = server_subject_common_name
+    return client.update_ekm_connection(existing)
+# endregion
 
 
 def list_keys(client, maxresults=None, include_managed=False):

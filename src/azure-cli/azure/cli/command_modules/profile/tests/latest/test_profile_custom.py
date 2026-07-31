@@ -9,6 +9,7 @@ from unittest import mock
 from azure.cli.command_modules.profile.custom import (
     list_subscriptions, get_access_token, login, logout, account_clear, _remove_adal_token_cache)
 
+from azure.cli.core._profile import _TENANT_LEVEL_ACCOUNT_NAME
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
@@ -194,3 +195,187 @@ class ProfileCommandTest(unittest.TestCase):
             f.write("test_token_cache")
         assert _remove_adal_token_cache()
         assert not os.path.exists(adal_token_cache)
+
+
+class TestLoginSubscriptionFilter(unittest.TestCase):
+    """Tests for custom.login() with --skip-subscription-discovery and --subscription parameters."""
+
+    def test_skip_subscription_discovery_requires_tenant(self):
+        """--skip-subscription-discovery without --tenant raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "'--skip-subscription-discovery' requires '--tenant'"):
+            login(cmd, skip_subscription_discovery=True)
+
+    def test_skip_subscription_discovery_without_tenant_with_subscription(self):
+        """--skip-subscription-discovery --subscription S without --tenant raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "'--skip-subscription-discovery' requires '--tenant'"):
+            login(cmd, skip_subscription_discovery=True, subscription='sub-id')
+
+    def test_skip_subscription_discovery_with_name_rejects_non_guid(self):
+        """--skip-subscription-discovery --subscription 'My Sub' (a name, not GUID) raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "must be a subscription ID"):
+            login(cmd, tenant='tenant1', skip_subscription_discovery=True, subscription='My Subscription')
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_skip_subscription_discovery_bypasses_selector(self, profile_mock, selector_mock, sys_mock):
+        """--skip-subscription-discovery should bypass the interactive selector."""
+        tenant_id = 'test-tenant'
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [
+            {'id': tenant_id, 'name': _TENANT_LEVEL_ACCOUNT_NAME, 'isDefault': True,
+             'environmentName': 'AzureCloud', 'tenantId': tenant_id}
+        ]
+        profile_mock.return_value = profile_instance
+
+        # Simulate interactive TTY so selector would normally run
+        sys_mock.stdin.isatty.return_value = True
+        sys_mock.stdout.isatty.return_value = True
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2 = True
+
+        result = login(cmd, tenant=tenant_id, skip_subscription_discovery=True)
+
+        # Assert selector was never instantiated because --skip-subscription-discovery bypasses it
+        selector_mock.assert_not_called()
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_default_subscription_bypasses_selector(self, profile_mock, selector_mock, sys_mock):
+        """--subscription should bypass the interactive selector even without --skip-subscription-discovery."""
+        sub_id = 'target-sub-id'
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [
+            {'id': sub_id, 'name': 'Target Sub', 'isDefault': True,
+             'environmentName': 'AzureCloud', 'tenantId': 'tenant1'}
+        ]
+        profile_mock.return_value = profile_instance
+
+        # Simulate interactive TTY so selector would normally run
+        sys_mock.stdin.isatty.return_value = True
+        sys_mock.stdout.isatty.return_value = True
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+
+        # Interactive login (no username) with --subscription
+        result = login(cmd, tenant='tenant1', subscription=sub_id)
+
+        # Assert selector was never instantiated because --subscription bypasses it
+        selector_mock.assert_not_called()
+        assert result is not None
+        self.assertEqual(len(result), 1)
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_subscription_in_two_tenants_triggers_interactive_selector(self, profile_mock, selector_mock, sys_mock):
+        """--subscription matching 2 tenants triggers the interactive selector."""
+        sub_id = 'target-sub-id'
+        sub_home = {'id': sub_id, 'name': 'Shared Sub', 'isDefault': True,
+                    'environmentName': 'AzureCloud', 'tenantId': 'home-tenant'}
+        sub_delegated = {'id': sub_id, 'name': 'Shared Sub', 'isDefault': False,
+                         'environmentName': 'AzureCloud', 'tenantId': 'delegated-tenant'}
+
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [sub_home, sub_delegated]
+        profile_mock.return_value = profile_instance
+
+        # Simulate interactive TTY
+        sys_mock.stdin.isatty.return_value = True
+        sys_mock.stdout.isatty.return_value = True
+
+        # SubscriptionSelector returns the selected sub
+        selector_instance = mock.MagicMock()
+        selector_instance.return_value = sub_delegated
+        selector_mock.return_value = selector_instance
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+
+        # Interactive login (no username) with --subscription that matches 2 tenants
+        result = login(cmd, tenant='home-tenant', subscription=sub_id)
+
+        # Assert selector was called with the 2 matching subs
+        selector_mock.assert_called_once_with([sub_home, sub_delegated])
+        # Assert set_active_subscription was called with the selected sub
+        profile_instance.set_active_subscription.assert_called_once_with(sub_id)
+        # Interactive selector returns None (prints announcement instead)
+        self.assertIsNone(result)
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_single_filtered_subscription_bypasses_selector(self, profile_mock, selector_mock, sys_mock):
+        """--subscription with 1 match should not show interactive selector."""
+        sub_id = 'target-sub-id'
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [
+            {'id': sub_id, 'name': 'Target Sub', 'isDefault': True,
+             'environmentName': 'AzureCloud', 'tenantId': 'tenant1'}
+        ]
+        profile_mock.return_value = profile_instance
+
+        sys_mock.stdin.isatty.return_value = True
+        sys_mock.stdout.isatty.return_value = True
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+
+        result = login(cmd, tenant='tenant1', subscription=sub_id)
+
+        # Selector should not be shown for single filtered match
+        selector_mock.assert_not_called()
+        self.assertIsNotNone(result)
+        self.assertEqual(len(result), 1)
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_single_unfiltered_subscription_shows_selector(self, profile_mock, selector_mock, sys_mock):
+        """No --subscription with 1 sub should still show selector for backward compatibility."""
+        sub = {'id': 'sub-1', 'name': 'Only Sub', 'isDefault': True,
+               'environmentName': 'AzureCloud', 'tenantId': 'tenant1'}
+
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [sub]
+        profile_mock.return_value = profile_instance
+
+        sys_mock.stdin.isatty.return_value = True
+        sys_mock.stdout.isatty.return_value = True
+
+        selector_instance = mock.MagicMock()
+        selector_instance.return_value = sub
+        selector_mock.return_value = selector_instance
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+
+        # Interactive login, no --subscription
+        result = login(cmd)
+
+        # Selector should be shown even with 1 sub (backward compat)
+        selector_mock.assert_called_once_with([sub])
+        self.assertIsNone(result)

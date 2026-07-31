@@ -105,28 +105,35 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
     migration_level_settings = {}
     make_source_server_read_only = False
     migration_properties = {}
+    migrate_full_server = False
 
     if not isinstance(database_options_json, dict):
         raise ValidationError('Format of the database option file is wrong')
 
-    if 'selected_databases' not in database_options_json:
+    migrate_full_server = database_options_json.get('migrate_full_server', False)
+    if migrate_full_server:
+        set_optional(migration_properties, 'migrateFullServer', database_options_json, 'migrate_full_server')
+
+    if ('selected_databases' not in database_options_json) and (not migrate_full_server):
         raise ValidationError('Database option file should contain at least one selected database for migration')
 
     selected_databases = database_options_json.get('selected_databases')
 
-    for database in selected_databases:
-        if not isinstance(database, dict):
-            raise ValidationError('Format of the selected database file is wrong')
-        if 'name' not in database:
-            raise ValidationError('Selected database should have a name')
-        if 'target_database_name' not in database:
-            raise ValidationError('Selected database should have a target_database_name')
-        if 'table_map' in database and (not isinstance(database.get('table_map'), dict) or
-                                        len(database.get('table_map')) == 0):
-            raise ValidationError('table_map should be dictionary and non empty, to select all tables remove table_map')
+    if selected_databases is not None:
+        for database in selected_databases:
+            if not isinstance(database, dict):
+                raise ValidationError('Format of the selected database file is wrong')
+            if 'name' not in database:
+                raise ValidationError('Selected database should have a name')
+            if 'target_database_name' not in database:
+                raise ValidationError('Selected database should have a target_database_name')
+            if 'table_map' in database and (not isinstance(database.get('table_map'), dict) or
+                                            len(database.get('table_map')) == 0):
+                raise ValidationError(
+                    'table_map should be dictionary and non empty, to select all tables remove table_map')
 
-        db_input = create_db_input(database, has_schema_migration_options)
-        database_options.append(db_input)
+            db_input = create_db_input(database, has_schema_migration_options)
+            database_options.append(db_input)
 
     set_optional(migration_properties, 'sourceServerResourceId', database_options_json, 'source_server_resource_id')
     set_optional(migration_properties, 'targetServerResourceId', database_options_json, 'target_server_resource_id')

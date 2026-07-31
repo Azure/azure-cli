@@ -16,18 +16,20 @@ from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
 from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
 
-from ._validators import (validate_appservice_name_or_id, validate_sku, validate_snapshot_query_fields,
+from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_name_or_id,
+                          validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature, validate_feature_key,
-                          validate_identity, validate_auth_mode,
+                          validate_identity, validate_auth_mode, validate_snapshot_reference,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
-                          validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period)
+                          validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period,
+                          validate_public_network_args)
 
 
 def load_arguments(self, _):
@@ -163,11 +165,12 @@ def load_arguments(self, _):
         c.argument('top', arg_type=top_arg_type)
         c.argument('all_', options_list=['--all'], action='store_true', help="List all items.")
         c.argument('fields', arg_type=fields_arg_type)
-        c.argument('endpoint', help='If auth mode is "login", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
-        c.argument('auth_mode', arg_type=get_enum_type(['login', 'key']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
+        c.argument('endpoint', help='If auth mode is "login" or "anonymous", provide endpoint URL of the App Configuration store. The endpoint can be retrieved using "az appconfig show" command. You can configure the default endpoint using `az configure --defaults appconfig_endpoint=<endpoint>`', configured_default='appconfig_endpoint')
+        c.argument('auth_mode', arg_type=get_enum_type(['login', 'key', 'anonymous']), configured_default='appconfig_auth_mode', validator=validate_auth_mode,
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
                    'If the auth mode is "login", provide the `--endpoint` or `--name` and your "az login" credentials will be used for authorization. ' +
+                   'If the auth mode is "anonymous", provide the --endpoint that will be used for authorization. Anonymous mode is intended for custom endpoints only, such as the App Configuration emulator. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
                    'For more information, see https://learn.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
@@ -178,7 +181,12 @@ def load_arguments(self, _):
         c.argument('assign_identity', arg_type=identities_arg_type,
                    help='Space-separated list of managed identities to be assigned. Use "[system]" to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is provided without any value, system-assigned managed identity will be assigned by default. If this argument is not provided, no managed identities will be assigned to this App Configuration store.')
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
-                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.',
+                   deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
+        c.argument('public_network_access', options_list=['--public-network-access'],
+                   arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
+                   validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
@@ -187,18 +195,27 @@ def load_arguments(self, _):
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
+        c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store.', is_preview=True)
 
     with self.argument_context('appconfig update') as c:
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']))
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
-                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.',
+                   deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
+        c.argument('public_network_access', options_list=['--public-network-access'],
+                   arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
+                   validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
+        c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store. Pass "" to unlink a Front Door profile.', is_preview=True)
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
@@ -232,7 +249,7 @@ def load_arguments(self, _):
         c.argument('label', help="Imported KVs and feature flags will be assigned with this label. If no label specified, will assign null label.")
         c.argument('tags', nargs="*", help="Imported KVs and feature flags will be assigned with these tags. If no tags are specified, imported KVs and feature flags will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys. Prefix will be ignored for feature flags.")
-        c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
+        c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice', 'aks']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
@@ -255,7 +272,7 @@ def load_arguments(self, _):
         c.argument('src_label', help="Only keys with this label in source AppConfig will be imported. If no value specified, import keys with null label by default. Support star sign as filters, for instance * means all labels, abc* means labels with abc as prefix.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --label.")
         c.argument('src_endpoint', help='If --src-auth-mode is "login", provide endpoint URL of the source App Configuration store.')
-        c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key']),
+        c.argument('src_auth_mode', arg_type=get_enum_type(['login', 'key', 'anonymous']),
                    help='Auth mode for connecting to source App Configuration store. For details, refer to "--auth-mode" argument.')
         c.argument('src_snapshot', validator=validate_snapshot_import,
                    help='Import all keys in a given snapshot of the source App Configuration store. If no snapshot is specified, the keys currently in the store are imported based on the specified key and label filters.')
@@ -263,6 +280,11 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
+
+    with self.argument_context('appconfig kv import', arg_group='AKS') as c:
+        c.argument('aks_cluster', validator=validate_aks_cluster_name_or_id, help='ARM ID for AKS OR the name of the AKS, assuming it is in the same subscription and resource group as the App Configuration store. Required for AKS arguments')
+        c.argument('configmap_name', help='Name of the ConfigMap. Required for AKS arguments.')
+        c.argument('configmap_namespace', help='Namespace of the ConfigMap. default to "default" namespace if not specified.')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. When export destination is appconfig, or when export destination is file with `appconfig/kvset` profile, this argument supports asterisk and comma signs for label filtering, for instance, * means all labels, abc* means labels with abc as prefix, and abc,xyz means labels with abc or xyz.")
@@ -293,7 +315,7 @@ def load_arguments(self, _):
         c.argument('dest_label', help="Exported KVs will be labeled with this destination label. If neither --dest-label nor --preserve-labels is specified, will assign null label.")
         c.argument('preserve_labels', arg_type=get_three_state_flag(), help="Flag to preserve labels from source AppConfig. This argument should NOT be specified along with --dest-label.")
         c.argument('dest_endpoint', help='If --dest-auth-mode is "login", provide endpoint URL of the destination App Configuration store.')
-        c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key']),
+        c.argument('dest_auth_mode', arg_type=get_enum_type(['login', 'key', 'anonymous']),
                    help='Auth mode for connecting to the destination App Configuration store. For details, refer to "--auth-mode" argument.')
         c.argument('dest_tags', nargs="*", help="Exported KVs and feature flags will be assigned with these tags. If no tags are specified, exported KVs and features will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
 
@@ -315,6 +337,12 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
+    with self.argument_context('appconfig kv set-snapshot-reference') as c:
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
+        c.argument('label', help="If no label specified, set the key with null label by default")
+        c.argument('tags', arg_type=tags_type)
+        c.argument('snapshot_name', validator=validate_snapshot_reference, help='Name of the snapshot to reference. This is required.')
+
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
@@ -330,6 +358,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
+        c.argument('resolve_snapshot_references', arg_type=get_three_state_flag(), help="Resolve snapshot references and return the referenced snapshots' key-values.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
@@ -367,6 +396,7 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
         c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
                    help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of a feature.')
+        c.argument('telemetry_enabled', arg_type=get_three_state_flag(), help='Enable or disable telemetry for the feature flag.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appconfig feature delete') as c:
@@ -454,3 +484,12 @@ def load_arguments(self, _):
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration') as c:
+        c.argument('store_name', arg_type=store_name_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to show.', required=True)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration reconcile') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to reconcile.', required=True)

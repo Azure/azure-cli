@@ -19,8 +19,10 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
 from ._utils import (is_valid_connection_string,
                      resolve_store_metadata,
                      get_store_name_from_connection_string,
+                     get_store_endpoint_from_connection_string,
                      validate_feature_flag_name,
-                     validate_feature_flag_key)
+                     validate_feature_flag_key,
+                     is_http_endpoint)
 from ._models import QueryFields
 from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
@@ -64,11 +66,30 @@ Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xx
 
 def validate_auth_mode(namespace):
     auth_mode = namespace.auth_mode
+    endpoint = getattr(namespace, 'endpoint', None)
+    connection_string = getattr(namespace, 'connection_string', None)
+
+    if auth_mode != "anonymous":
+        # Disallow HTTP endpoints unless explicitly using anonymous mode.
+        if endpoint and is_http_endpoint(endpoint):
+            raise CLIError("HTTP endpoint is only supported when auth mode is 'anonymous'.")
+
+        if connection_string:
+            conn_endpoint = get_store_endpoint_from_connection_string(connection_string)
+            if is_http_endpoint(conn_endpoint):
+                raise CLIError("HTTP endpoint is only supported when auth mode is 'anonymous'.")
+
     if auth_mode == "login":
-        if not namespace.name and not namespace.endpoint:
+        if not namespace.name and not endpoint:
             raise CLIError("App Configuration name or endpoint should be provided if auth mode is 'login'.")
-        if namespace.connection_string:
+        if connection_string:
             raise CLIError("Auth mode should be 'key' when connection string is provided.")
+
+    if auth_mode == "anonymous":
+        if not endpoint:
+            raise RequiredArgumentMissingError("App Configuration endpoint should be provided if auth mode is 'anonymous'.")
+        if connection_string:
+            raise CLIError("Auth mode 'anonymous' only supports the '--endpoint' argument. Connection string is not supported.")
 
 
 def validate_import_depth(namespace):
@@ -105,6 +126,11 @@ def validate_import(namespace):
     elif source == 'appservice':
         if namespace.appservice_account is None:
             raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
+    elif source == 'aks':
+        if namespace.aks_cluster is None:
+            raise RequiredArgumentMissingError("Please provide '--aks-cluster' argument")
+        if namespace.configmap_name is None:
+            raise RequiredArgumentMissingError("Please provide '--configmap-name' argument")
 
 
 def validate_export(namespace):
@@ -143,6 +169,29 @@ def validate_appservice_name_or_id(cmd, namespace):
             }
         else:
             namespace.appservice_account = parse_resource_id(namespace.appservice_account)
+
+
+def validate_aks_cluster_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+    if namespace.aks_cluster:
+        if not is_valid_resource_id(namespace.aks_cluster):
+            config_store_name = ""
+            if namespace.name:
+                config_store_name = namespace.name
+            elif namespace.connection_string:
+                config_store_name = get_store_name_from_connection_string(namespace.connection_string)
+            else:
+                raise ArgumentUsageError("Please provide App Configuration name or connection string for fetching the AKS cluster details. Alternatively, you can provide a valid ARM ID for the AKS cluster.")
+
+            resource_group, _ = resolve_store_metadata(cmd, config_store_name)
+            namespace.aks_cluster = {
+                "subscription": get_subscription_id(cmd.cli_ctx),
+                "resource_group": resource_group,
+                "name": namespace.aks_cluster
+            }
+        else:
+            namespace.aks_cluster = parse_resource_id(namespace.aks_cluster)
 
 
 def validate_query_fields(namespace):
@@ -257,6 +306,11 @@ def validate_key(namespace):
     input_key = str(namespace.key).lower()
     if input_key == '.' or input_key == '..' or '%' in input_key:
         raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
+
+
+def validate_snapshot_reference(namespace):
+    if not namespace.snapshot_name or str(namespace.snapshot_name).isspace():
+        raise RequiredArgumentMissingError("--snapshot-name is required and cannot be empty.")
 
 
 def validate_resolve_keyvault(namespace):
@@ -392,6 +446,14 @@ def validate_snapshot_import(namespace):
             raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
         if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
             raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
+
+
+def validate_public_network_args(namespace):
+    if namespace.enable_public_network is not None and namespace.public_network_access is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+    if namespace.public_network_access is not None and namespace.public_network_access.lower() == 'securedbyperimeter':
+        logger.warning("The 'SecuredByPerimeter' value is currently in preview.")
 
 
 def validate_sku(namespace):

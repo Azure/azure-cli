@@ -12,12 +12,6 @@ def _resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def _compute_client_factory(cli_ctx, **_):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
-
-
 def _common_client_factory(cli_ctx, **_):
     from azure.mgmt.recoveryservices import RecoveryServicesClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -40,10 +34,6 @@ def _backup_passive_client_factory(cli_ctx, **_):
 
 
 # External Deps Client Factories
-def virtual_machines_cf(cli_ctx, *_):
-    return _compute_client_factory(cli_ctx).virtual_machines
-
-
 def resources_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resources
 
@@ -55,6 +45,10 @@ def resource_groups_cf(cli_ctx, *_):
 # Internal Deps Client Factories
 def vaults_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).vaults
+
+
+def deleted_vaults_cf(cli_ctx, *_):
+    return _common_client_factory(cli_ctx).deleted_vaults
 
 
 def registered_identities_cf(cli_ctx, *_):

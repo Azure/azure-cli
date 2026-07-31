@@ -57,7 +57,7 @@ class Wait(AAZWaitCommand):
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'",
+            help="Specify the $expand query. Example: '\"properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)\"'",
         )
         return cls._args_schema
 

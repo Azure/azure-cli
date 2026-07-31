@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2026-03-01-preview"],
         ]
     }
 
@@ -46,9 +46,12 @@ class Show(AAZCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure Cognitive Search service associated with the specified resource group.",
+            help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
+            ),
         )
         return cls._args_schema
 
@@ -117,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -153,7 +156,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -163,9 +166,12 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.sku = AAZObjectType(
-                flags={"required": True},
+            _schema_on_200.sku = AAZObjectType()
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
+            _ShowHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -183,20 +189,51 @@ class Show(AAZCommand):
             identity.type = AAZStrType(
                 flags={"required": True},
             )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.properties
             properties.auth_options = AAZObjectType(
                 serialized_name="authOptions",
             )
+            properties.compute_type = AAZStrType(
+                serialized_name="computeType",
+            )
+            properties.data_exfiltration_protections = AAZListType(
+                serialized_name="dataExfiltrationProtections",
+            )
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
                 nullable=True,
             )
+            properties.e_tag = AAZStrType(
+                serialized_name="eTag",
+                flags={"read_only": True},
+            )
             properties.encryption_with_cmk = AAZObjectType(
                 serialized_name="encryptionWithCmk",
             )
+            properties.endpoint = AAZStrType()
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
+            )
+            properties.knowledge_retrieval = AAZStrType(
+                serialized_name="knowledgeRetrieval",
+                nullable=True,
             )
             properties.network_rule_set = AAZObjectType(
                 serialized_name="networkRuleSet",
@@ -222,6 +259,10 @@ class Show(AAZCommand):
                 serialized_name="semanticSearch",
                 nullable=True,
             )
+            properties.service_upgraded_at = AAZStrType(
+                serialized_name="serviceUpgradedAt",
+                flags={"read_only": True},
+            )
             properties.shared_private_link_resources = AAZListType(
                 serialized_name="sharedPrivateLinkResources",
                 flags={"read_only": True},
@@ -232,6 +273,9 @@ class Show(AAZCommand):
             properties.status_details = AAZStrType(
                 serialized_name="statusDetails",
                 flags={"read_only": True},
+            )
+            properties.upgrade_available = AAZStrType(
+                serialized_name="upgradeAvailable",
             )
 
             auth_options = cls._schema_on_200.properties.auth_options
@@ -247,14 +291,58 @@ class Show(AAZCommand):
                 serialized_name="aadAuthFailureMode",
             )
 
+            data_exfiltration_protections = cls._schema_on_200.properties.data_exfiltration_protections
+            data_exfiltration_protections.Element = AAZStrType()
+
             encryption_with_cmk = cls._schema_on_200.properties.encryption_with_cmk
             encryption_with_cmk.encryption_compliance_status = AAZStrType(
                 serialized_name="encryptionComplianceStatus",
                 flags={"read_only": True},
             )
             encryption_with_cmk.enforcement = AAZStrType()
+            encryption_with_cmk.service_level_encryption_key = AAZObjectType(
+                serialized_name="serviceLevelEncryptionKey",
+            )
+
+            service_level_encryption_key = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key
+            service_level_encryption_key.access_credentials = AAZObjectType(
+                serialized_name="accessCredentials",
+            )
+            service_level_encryption_key.identity = AAZObjectType(
+                nullable=True,
+            )
+            service_level_encryption_key.key_vault_key_name = AAZStrType(
+                serialized_name="keyVaultKeyName",
+            )
+            service_level_encryption_key.key_vault_key_version = AAZStrType(
+                serialized_name="keyVaultKeyVersion",
+            )
+            service_level_encryption_key.key_vault_uri = AAZStrType(
+                serialized_name="keyVaultUri",
+            )
+
+            access_credentials = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key.access_credentials
+            access_credentials.application_id = AAZStrType(
+                serialized_name="applicationId",
+            )
+            access_credentials.application_secret = AAZStrType(
+                serialized_name="applicationSecret",
+            )
+
+            identity = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key.identity
+            identity.odata_type = AAZStrType(
+                serialized_name="@odata.type",
+                flags={"required": True},
+            )
+            identity.federated_identity_client_id = AAZStrType(
+                serialized_name="federatedIdentityClientId",
+            )
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
 
             network_rule_set = cls._schema_on_200.properties.network_rule_set
+            network_rule_set.bypass = AAZStrType()
             network_rule_set.ip_rules = AAZListType(
                 serialized_name="ipRules",
             )
@@ -276,6 +364,11 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -315,6 +408,11 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -338,9 +436,7 @@ class Show(AAZCommand):
             properties.status = AAZStrType()
 
             sku = cls._schema_on_200.sku
-            sku.name = AAZStrType(
-                flags={"required": True},
-            )
+            sku.name = AAZStrType()
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
@@ -350,6 +446,50 @@ class Show(AAZCommand):
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Show"]

@@ -8,10 +8,17 @@ from enum import Enum
 import calendar
 from datetime import datetime
 from dateutil.parser import parse
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
+)
+from azure.cli.core.azclierror import (
+    ResourceNotFoundError,
+    ValidationError,
+    AzCLIError,
+    RequiredArgumentMissingError
 )
 
 from azure.mgmt.sql.models import (
@@ -58,6 +65,7 @@ from azure.mgmt.sql.models import (
     SensitivityLabelSource,
     ServerAzureADOnlyAuthentication,
     ServerConnectionPolicy,
+    ServerCreateMode,
     ServerExternalAdministrator,
     ServerInfo,
     ServerKey,
@@ -92,6 +100,7 @@ from ._util import (
     get_sql_replication_links_operations,
     get_sql_elastic_pools_operations,
     get_sql_databases_operations,
+    get_sql_deleted_servers_operations,
 )
 
 
@@ -176,7 +185,78 @@ def _is_serverless_slo(sku_name):
     Returns True if the sku name is a serverless sku.
     '''
 
-    return "_S_" in sku_name
+    return "_S_" in sku_name if sku_name else False
+
+
+def _check_live_server_not_exists(client, server_name):
+    '''
+    Checks if a live server exists in the subscription and raises ValidationError if it does.
+    Searches across all servers in the subscription to find any server with the given name.
+    Raises ValidationError if server exists, returns if server doesn't exist.
+    '''
+    try:
+        # List all servers in the subscription
+        all_servers = list(client.list())
+    except HttpResponseError as ex:
+        # Handle 404 - treat as no servers exist
+        if ex.status_code == 404:
+            return
+        # Re-raise other HTTP errors
+        raise
+
+    # Check if any server matches the given server name (case-insensitive)
+    if any(server.name.lower() == server_name.lower() for server in all_servers):
+        raise ValidationError(
+            f'Live server "{server_name}" exists in the subscription. '
+            'Cannot restore to an existing server name.')
+
+
+def _validate_deleted_server_resource_group(cmd, location, server_name, resource_group_name):
+    '''
+    Validates that a deleted server exists and can be restored, and that the resource group
+    matches the original resource group from which the server was deleted.
+    '''
+    deleted_servers_client = get_sql_deleted_servers_operations(cmd.cli_ctx, None)
+
+    try:
+        deleted_server = deleted_servers_client.get(location, server_name)
+    except HttpResponseError as ex:
+        # Handle 404 - deleted server not found
+        if ex.status_code == 404:
+            raise ResourceNotFoundError(
+                f'Deleted server "{server_name}" not found in location "{location}". '
+                'The server may not have been deleted with soft delete enabled, the retention period '
+                'has expired, or it was deleted in a different location.',
+                [f'Use "az sql server deleted-server list --location {location}" to view all available '
+                 'deleted servers.',
+                 'Verify the server name and location are correct.']) from ex
+        # Handle other HTTP errors
+        raise AzCLIError(
+            f'Failed to retrieve deleted server "{server_name}" in location "{location}". {ex.message}') from ex
+    except Exception as ex:
+        raise ex
+
+    # Validate deleted server data
+    if not deleted_server or not deleted_server.original_id:
+        raise ResourceNotFoundError(
+            f'Deleted server "{server_name}" not found in location "{location}". '
+            'The server may not have been deleted with soft delete enabled, the retention period '
+            'has expired, or it was deleted in a different location.',
+            [f'Use "az sql server deleted-server list --location {location}" to view all available '
+             'deleted servers.',
+             'Verify the server name and location are correct.'])
+
+    # Parse resource group from original_id
+    # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{name}
+    parts = deleted_server.original_id.split('/')
+    original_resource_group = parts[4]
+
+    # Compare resource groups (case-insensitive)
+    if resource_group_name.lower() != original_resource_group.lower():
+        raise ValidationError(
+            f'The resource group "{resource_group_name}" does not match the deleted server\'s original '
+            f'resource group "{original_resource_group}". Server "{server_name}" must be restored to '
+            f'its original resource group.')
 
 
 def _get_default_server_version(location_capabilities):
@@ -606,6 +686,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
             name=argument_value)
 
     return argument_value
+
 
 ###############################################
 #                sql db                       #
@@ -1898,8 +1979,11 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
 
     # Finding out requesting compute_model
     if not compute_model:
+        # Determine compute model from the requested service objective if provided,
+        # otherwise infer from the current database SKU
+        sku_name_for_compute_model = service_objective if service_objective else instance.sku.name
         compute_model = (
-            ComputeModelType.serverless if _is_serverless_slo(instance.sku.name)
+            ComputeModelType.serverless if _is_serverless_slo(sku_name_for_compute_model)
             else ComputeModelType.provisioned)
 
     # Update sku
@@ -2117,7 +2201,7 @@ def _get_storage_key(
 
     # Choose storage key
     index = 1 if use_secondary_key else 0
-    return keys.keys[index].value  # pylint: disable=no-member
+    return keys.keys_property[index].value  # pylint: disable=no-member
 
 
 def _db_security_policy_update(
@@ -3104,7 +3188,9 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
-        make_backups_immutable=None,
+        time_based_immutability=None,
+        time_based_immutability_mode=None,
+        yes=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3115,12 +3201,26 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
-    if make_backups_immutable:
-        confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
-         You'll be charged for LTR backups for the full retention period.
-         Do you want to proceed?""")
-        if not confirmation:
-            return
+    if time_based_immutability and time_based_immutability.lower() == "true":
+        time_based_immutability = "Enabled"
+
+    if time_based_immutability and time_based_immutability.lower() == "false":
+        time_based_immutability = "Disabled"
+
+    if time_based_immutability and time_based_immutability.lower() == "enabled":
+        if not yes:
+            confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
+            You'll be charged for LTR backups for the full retention period.
+            Do you want to proceed?""")
+            if not confirmation:
+                return
+
+    if time_based_immutability_mode:
+        if not time_based_immutability or time_based_immutability.lower() != "enabled":
+            raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
+        if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
+            raise CLIError('Invalid value for time-based immutability mode. '
+                           'Valid values are "unlocked" or "locked".')
 
     kwargs['weekly_retention'] = weekly_retention
 
@@ -3130,7 +3230,8 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    kwargs['make_backups_immutable'] = make_backups_immutable
+    kwargs['time_based_immutability'] = time_based_immutability
+    kwargs['time_based_immutability_mode'] = time_based_immutability_mode
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3324,6 +3425,196 @@ def list_long_term_retention_backups(
             database_state)
 
     return backups
+
+
+def remove_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Removes time-based immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_remove_time_based_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_remove_time_based_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def lock_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Locks time-based immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+
+    if resource_group_name:
+        client.begin_lock_time_based_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_lock_time_based_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def set_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Sets legal hold immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_set_legal_hold_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_set_legal_hold_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def remove_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Removes legal hold immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_remove_legal_hold_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_remove_legal_hold_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def restore_long_term_retention_backup(
@@ -3631,7 +3922,6 @@ def db_sensitivity_label_update(
 
     # Get the information protection policy
     from azure.mgmt.security import SecurityCenter
-    from azure.core.exceptions import ResourceNotFoundError
 
     security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
 
@@ -4141,6 +4431,30 @@ def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
 
 
 ###############################################
+#       sql server deleted-server             #
+###############################################
+
+
+def deleted_server_show(
+        client,
+        location,
+        server_name):
+    '''
+    Gets a deleted server.
+    '''
+    return client.get(location, server_name)
+
+
+def deleted_server_list(
+        client,
+        location):
+    '''
+    Lists all deleted servers in a specific location.
+    '''
+    return client.list_by_location(location)
+
+
+###############################################
 #                sql server                   #
 ###############################################
 
@@ -4162,6 +4476,7 @@ def server_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        soft_delete_retention_days=None,
         **kwargs):
     '''
     Creates a server.
@@ -4207,11 +4522,65 @@ def server_create(
         azure_ad_only_authentication=ad_only,
         tenant_id=tenant_id)
 
+    kwargs['create_mode'] = ServerCreateMode.NORMAL
+
+    # Handle soft delete retention days
+    # If provided: 0 = disable, 1-7 = enable with retention days
+    # If not provided: don't send to backend API
+    if soft_delete_retention_days is not None:
+        kwargs['retention_days'] = soft_delete_retention_days
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=server_name,
                        resource_group_name=resource_group_name,
                        parameters=kwargs)
+
+
+def server_restore(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        location,
+        no_wait=False,
+        **kwargs):
+    '''
+    Restores a deleted server.
+    '''
+    # Validate that we have enough information to perform the restore
+    if not server_name or not location or not resource_group_name:
+        raise RequiredArgumentMissingError(
+            'Server name, location, and resource group are required for server restore.',
+            'Specify all required parameters: --name, --location, and --resource-group.')
+
+    # Validate location is valid and supported
+    # This will raise an error if location is invalid or not available
+    _get_location_capability(cmd.cli_ctx, location, CapabilityGroup.SUPPORTED_EDITIONS)
+
+    # Check if live server already exists
+    _check_live_server_not_exists(client, server_name)
+
+    # Validate deleted server exists in user provided location and resource group
+    _validate_deleted_server_resource_group(cmd, location, server_name, resource_group_name)
+
+    # Set required parameters for restore
+    kwargs['location'] = location
+    kwargs['create_mode'] = ServerCreateMode.RESTORE
+
+    # Create/restore the server
+    try:
+        return sdk_no_wait(no_wait, client.begin_create_or_update,
+                           server_name=server_name,
+                           resource_group_name=resource_group_name,
+                           parameters=kwargs)
+    except HttpResponseError as ex:
+        # Handle resource group not found error specifically
+        if ex.status_code == 404 and 'ResourceGroupNotFound' in str(ex):
+            raise ResourceNotFoundError(
+                f'Resource group "{resource_group_name}" not found.') from ex
+        # Re-raise other HTTP errors
+        raise
 
 
 def server_list(
@@ -4262,7 +4631,8 @@ def server_update(
         key_id=None,
         federated_client_id=None,
         identity_type=None,
-        user_assigned_identity_id=None):
+        user_assigned_identity_id=None,
+        soft_delete_retention_days=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -4299,6 +4669,14 @@ def server_update(
 
     instance.key_id = (key_id or instance.key_id)
     instance.federated_client_id = (federated_client_id or instance.federated_client_id)
+
+    # Handle soft delete retention days
+    # 0 = disable soft delete, 1-7 = enable with specified retention days
+    # If not specified, set to None to avoid sending existing value to API
+    if soft_delete_retention_days is not None:
+        instance.retention_days = soft_delete_retention_days
+    else:
+        instance.retention_days = None
 
     return instance
 
@@ -4599,16 +4977,29 @@ def _get_server_key_name_from_uri(uri):
     '''
     import re
 
-    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    match = re.match(r'^https://(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud|mdep.azure.net)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
 
     if match is None:
         raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
                        '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
-                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+                       'for versioned key or "https://YourVaultName.vault.azure.net/keys/YourKeyName" for a versionless key.')
 
     vault = uri.split('.')[0].split('/')[-1]
-    key = uri.split('/')[-2]
+
+    # uri.split('/') returns the output as ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', ''] for versionless key
+    # and ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', '01234567890123456789012345678901'] for versioned key
+    # In both cases, the value at index 4 is always the key name and index 5 is the key version.
+    key = uri.split('/')[4]
     version = uri.split('/')[-1]
+    isVersionlessKeyId = False
+
+    if version is None or version == "" or version == key:
+        isVersionlessKeyId = True
+
+    if isVersionlessKeyId:
+        return '{}_{}'.format(vault, key)
+
     return '{}_{}_{}'.format(vault, key, version)
 
 
@@ -5159,6 +5550,7 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         administrator_login_password=None,
         license_type=None,
         vcores=None,
+        memory_size_in_gb=None,
         storage_size_in_gb=None,
         storage_iops=None,
         assign_identity=False,
@@ -5215,6 +5607,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         license_type or instance.license_type)
     instance.v_cores = (
         vcores or instance.v_cores)
+    instance.memory_size_in_gb = (
+        memory_size_in_gb or instance.memory_size_in_gb)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.storage_iops = storage_iops
@@ -5245,6 +5639,10 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     if requested_backup_storage_redundancy is not None:
         instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
         instance.zone_redundant = None
+
+    # Have to set requested logical avail zone to none explicitly otherwise requests will fail
+    # as the default value is string 'NoPreference' which is invalid for update requests currently
+    instance.requested_logical_availability_zone = None
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled

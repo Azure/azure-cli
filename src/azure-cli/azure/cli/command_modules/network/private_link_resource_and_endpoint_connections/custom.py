@@ -44,8 +44,9 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/partnerNamespaces', '2021-06-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/namespaces', '2023-06-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
-    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
+    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2025-03-31', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
+    _register_one_provider('Microsoft.HorizonDB/clusters', '2026-01-20-preview', True)
     _register_one_provider("Microsoft.HybridCompute/privateLinkScopes", '2021-05-20', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
     _register_one_provider("Microsoft.HealthDataAiservices/deidservices", "2024-09-20", True)
@@ -86,6 +87,9 @@ def register_providers():
     _register_one_provider('Microsoft.App/managedEnvironments', '2024-02-02-preview', True)
     _register_one_provider('Microsoft.FluidRelay/fluidRelayServers', '2025-03-10-preview', True)
     _register_one_provider('Microsoft.VideoIndexer/accounts', '2025-04-01', True)
+    _register_one_provider('Microsoft.Security/privateLinks', '2025-09-01-preview', True)
+    _register_one_provider('Microsoft.Maps/accounts', '2023-12-01-preview', True)
+    _register_one_provider('Microsoft.DurableTask/schedulers', '2026-02-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

@@ -242,7 +242,9 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable true
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable Enabled
+  - name: Set long term retention for a database with time based immutability enabled and immutability mode locked.
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P0W" --monthly-retention "P0M" --yearly-retention "P0Y" --tb-immutability Enabled --tb-immutability-mode Locked
 """
 
 helps['sql db ltr-policy show'] = """
@@ -304,6 +306,38 @@ examples:
 helps['sql db ltr-backup wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the database is met.
+"""
+
+helps['sql db ltr-backup set-legal-hold-immutability'] = """
+type: command
+short-summary: Set a legal hold on the long term retention backup database.
+examples:
+  - name: Set legal hold on a long term retention backup for a database.
+    text: az sql db ltr-backup set-legal-hold-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup remove-legal-hold-immutability'] = """
+type: command
+short-summary: Remove a legal hold on the long term retention backup database.
+examples:
+  - name: remove a legal hold on a long term retention backup for a database.
+    text: az sql db ltr-backup remove-legal-hold-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup lock-time-based-immutability'] = """
+type: command
+short-summary: Lock the time based immutability on a long term retention backup to prevent deletion.
+examples:
+  - name: lock the long term retention backup for a database.
+    text: az sql db ltr-backup lock-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup remove-time-based-immutability'] = """
+type: command
+short-summary: disable the time based immutability on a long term retention backup.
+examples:
+  - name: disable a time based immutability on a long term retention backup for a database.
+    text: az sql db ltr-backup remove-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db geo-backup'] = """
@@ -910,6 +944,8 @@ examples:
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --am Windows
   - name: Create GPv2 managed instance with specified IOPS limit
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -e GeneralPurpose --gpv2 true -f Gen8IH -c 4 --storage 256GB --iops 3000
+  - name: Create managed instance with specified memory size in GB
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} -e GeneralPurpose --gpv2 true -f Gen8IM -c 4 --storage 256GB --iops 3000 --memory 40
 """
 
 helps['sql mi delete'] = """
@@ -1049,6 +1085,8 @@ examples:
     text: az sql mi update -g mygroup -n myinstance --am Windows
   - name: Update managed instance to GPv2 with specified IOPS limit
     text: az sql mi update -g mygroup -n myinstance -e GeneralPurpose --gpv2 true --iops 3000
+  - name: Update managed instance to use a specified memory size in GB
+    text: az sql mi update -g mygroup -n myinstance -e GeneralPurpose --memory 40
 """
 
 helps['sql midb'] = """
@@ -1563,8 +1601,14 @@ short-summary: Create a server.
 examples:
   - name: Create a server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword
+  - name: Create a server with tags.
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --tags key1=value1 key2=value2
   - name: Create a server with disabled public network access to server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword -e false
+  - name: Create a server with soft delete enabled with 7 days retention.
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --soft-delete-retention-days 7
+  - name: Create a server with soft delete protection (using short alias).
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --sdrd 5
   - name: Create a server without SQL Admin, with AD admin and AD Only enabled.
     text: az sql server create --enable-ad-only-auth --external-admin-principal-type User --external-admin-name myUserName --external-admin-sid c5e964e2-6bb2-1111-1111-3b16ec0e1234 -g myResourceGroup -n myServer
   - name: Create a server without SQL Admin, with AD admin, AD Only enabled, User ManagedIdenties and Identity Type is SystemAssigned,UserAssigned.
@@ -1577,6 +1621,45 @@ examples:
               --external-admin-sid c5e964e2-6bb2-1111-1111-3b16ec0e1234 -g myResourceGroup -n myServer -i \\
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\
               --identity-type UserAssigned --pid /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi
+"""
+
+helps['sql server restore'] = """
+type: command
+short-summary: Restore a deleted SQL server.
+long-summary: >
+    Restores a soft-deleted SQL server to the resource group where it was originally located.
+    The server must have been deleted with soft delete enabled and within the retention period.
+parameters:
+  - name: --name -n
+    short-summary: Name of the deleted server to restore.
+  - name: --resource-group -g
+    short-summary: Name of the resource group where the server was originally located.
+  - name: --location -l
+    short-summary: Location where the deleted server was originally located.
+examples:
+  - name: Restore a deleted server to its original resource group.
+    text: az sql server restore -g myresourcegroup -n myserver -l westus2
+"""
+
+helps['sql server deleted-server'] = """
+type: group
+short-summary: Gets details of deleted SQL servers.
+"""
+
+helps['sql server deleted-server show'] = """
+type: command
+short-summary: Get the details of a deleted SQL server in a specific location.
+examples:
+  - name: Get details of a deleted server by name and location.
+    text: az sql server deleted-server show --name myserver --location westus2
+"""
+
+helps['sql server deleted-server list'] = """
+type: command
+short-summary: List all deleted SQL servers in a specific location.
+examples:
+  - name: List all deleted servers in a specific location.
+    text: az sql server deleted-server list --location westus2
 """
 
 helps['sql server dns-alias'] = """
@@ -1764,6 +1847,12 @@ examples:
   - name: Update a server. (autogenerated)
     text: az sql server update --admin-password myadminpassword --name MyAzureSQLServer --resource-group MyResourceGroup
     crafted: true
+  - name: Enable soft delete protection with 7-day retention.
+    text: az sql server update --name MyAzureSQLServer --resource-group MyResourceGroup --soft-delete-retention-days 7
+  - name: Modify soft delete retention period (using short alias).
+    text: az sql server update -n MyAzureSQLServer -g MyResourceGroup --sdrd 3
+  - name: Disable soft delete protection.
+    text: az sql server update --name MyAzureSQLServer --resource-group MyResourceGroup --soft-delete-retention-days 0
   - name: Update a server with User Managed Identies and Identity Type is SystemAssigned,UserAssigned.
     text: az sql server update -g myResourceGroup -n myServer -i \\
               --user-assigned-identity-id /subscriptions/xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi \\

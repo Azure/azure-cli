@@ -531,3 +531,114 @@ def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, enc
                 raise InvalidArgumentValueError(f"Partition key path:{pkPath} is part of "
                                                 "Client Encryption policy with invalid encryption type. "
                                                 "Only deterministic encryption type is supported.")
+
+
+def validate_fleetspace_body(cmd, ns):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    import os
+
+    if ns.fleetspace_body is not None:
+        if os.path.exists(ns.fleetspace_body):
+            body = get_file_json(ns.fleetspace_body)
+        else:
+            body = shell_safe_json_parse(ns.fleetspace_body)
+
+        if not isinstance(body, dict):
+            raise InvalidArgumentValueError('Invalid fleetspace body. Must be a JSON object.')
+
+        props = body.get('properties', {})
+        if not isinstance(props, dict):
+            raise InvalidArgumentValueError('Missing or invalid "properties" field in fleetspace body.')
+
+        tp_config = props.get('throughputPoolConfiguration', {})
+        if not isinstance(tp_config, dict):
+            raise InvalidArgumentValueError('Missing or invalid "throughputPoolConfiguration" in properties.')
+
+        # Check for minThroughput and maxThroughput in throughputPoolConfiguration
+        for field in ['minThroughput', 'maxThroughput']:
+            if field not in tp_config:
+                raise InvalidArgumentValueError(f'Missing "{field}" in throughputPoolConfiguration.')
+
+        if not isinstance(tp_config['minThroughput'], int) or tp_config['minThroughput'] <= 0:
+            raise InvalidArgumentValueError('"minThroughput" must be a positive integer.')
+
+        if not isinstance(tp_config['maxThroughput'], int) or tp_config['maxThroughput'] <= 0:
+            raise InvalidArgumentValueError('"maxThroughput" must be a positive integer.')
+
+        # Check for serviceTier and dataRegions at base properties level
+        if 'serviceTier' in props:
+            if not isinstance(props['serviceTier'], str):
+                raise InvalidArgumentValueError('"serviceTier" must be a string.')
+
+        if 'dataRegions' in props:
+            if not isinstance(props['dataRegions'], list) or not all(isinstance(r, str) for r in props['dataRegions']):
+                raise InvalidArgumentValueError('"dataRegions" must be a list of strings.')
+
+        ns.fleetspace_body = body
+
+
+def validate_fleetspaceAccount_body(cmd, ns):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    import os
+
+    if ns.fleetspace_account_body is not None:
+        if os.path.exists(ns.fleetspace_account_body):
+            body = get_file_json(ns.fleetspace_account_body)
+        else:
+            body = shell_safe_json_parse(ns.fleetspace_account_body)
+
+        if not isinstance(body, dict):
+            raise InvalidArgumentValueError("Fleetspace Account body must be a valid JSON object.")
+
+        props = body.get("properties")
+        if not isinstance(props, dict):
+            raise InvalidArgumentValueError('Missing or invalid "properties" field.')
+
+        gdp = props.get("globalDatabaseAccountProperties")
+        if not isinstance(gdp, dict):
+            raise InvalidArgumentValueError('Missing or invalid "globalDatabaseAccountProperties".')
+
+        if "resourceId" not in gdp or not isinstance(gdp["resourceId"], str) or not gdp["resourceId"].startswith("/subscriptions/"):
+            raise InvalidArgumentValueError('"resourceId" must be a valid ARM resource ID string.')
+
+        if "armLocation" not in gdp or not isinstance(gdp["armLocation"], str):
+            raise InvalidArgumentValueError('"armLocation" must be a valid string.')
+
+        ns.fleetspace_account_body = body
+
+
+def _is_valid_guid(value):
+    """Check if a string is a valid GUID."""
+    import uuid
+    try:
+        return str(uuid.UUID(value)) == value.lower()
+    except ValueError:
+        return False
+
+
+def is_valid_network_acl_bypass_resource_id(resource_id):
+    """Validates a resource ID for network ACL bypass.
+
+    Supports standard Azure resource IDs and Fabric resource IDs with /tenants/ prefix.
+    Fabric format: /tenants/{tenantId}/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft.Fabric/workspaces/{workspaceGuid}
+
+    :param resource_id: The resource ID to validate.
+    :return: True if valid, False otherwise.
+    """
+    import re
+    from azure.mgmt.core.tools import is_valid_resource_id
+
+    if not resource_id:
+        return False
+
+    if is_valid_resource_id(resource_id):
+        return True
+
+    # Check for Fabric resource ID format - extract GUIDs and validate them
+    pattern = r'^/tenants/(.+)/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft\.Fabric/workspaces/(.+)$'
+    match = re.match(pattern, resource_id, re.IGNORECASE)
+
+    if not match:
+        return False
+
+    return _is_valid_guid(match.group(1)) and _is_valid_guid(match.group(2))

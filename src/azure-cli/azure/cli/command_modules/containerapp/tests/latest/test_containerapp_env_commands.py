@@ -7,11 +7,13 @@ import os
 import time
 import yaml
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
                                LogAnalyticsWorkspacePreparer)
 
 from .common import TEST_LOCATION
+from .custom_preparers import SubnetPreparer
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # flake8: noqa
@@ -49,6 +51,11 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env show -n {} -g {}'.format(env_name, resource_group), checks=[
             JMESPathCheck('name', env_name),
         ])
+
+        # before deleting, validate can't create a consumption only environment
+        with self.assertRaisesRegex(ValidationError,
+                                     f"Existing environment {env_name} uses workload profiles. If you want to use Consumption-Only environment, please create a new one."):
+            self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {} --tags "foo=bar" "key1=val1" --enable-workload-profiles false'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
 
         self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name))
 
@@ -144,15 +151,13 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_env_dapr_components(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_env_dapr_components(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
         dapr_comp_name = self.create_random_name(prefix='dapr-component', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(resource_group, env_name))
 
         import tempfile
 
@@ -690,6 +695,30 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         ])
         self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
+    @ResourceGroupPreparer(location="eastus")
+    @SubnetPreparer(location=TEST_LOCATION, vnet_address_prefixes='14.0.0.0/23', delegations='Microsoft.App/environments',
+                    subnet_address_prefixes='14.0.0.0/23')
+    def test_containerapp_env_infrastructure_rg(self, resource_group, subnet_id):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env = self.create_random_name(prefix='env', length=24)
+        infra_rg = self.create_random_name(prefix='irg', length=24)
+
+        self.cmd(
+            f'containerapp env create -g {resource_group} -n {env} -s {subnet_id} -i {infra_rg} --logs-destination none')
+
+        containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env}').get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() == "waiting":
+            time.sleep(5)
+            containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env}').get_output_in_json()
+
+        self.cmd(f'containerapp env show -n {env} -g {resource_group}', checks=[
+            JMESPathCheck('name', env),
+            JMESPathCheck('properties.infrastructureResourceGroup', infra_rg),
+        ])
+
+        self.cmd(f'containerapp env delete -n {env} -g {resource_group} --yes --no-wait')
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")

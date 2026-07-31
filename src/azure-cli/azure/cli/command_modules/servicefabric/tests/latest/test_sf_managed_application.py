@@ -18,13 +18,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.sfpkg?sp=racwdyti&st=2024-10-28T05:39:21Z&se=2024-11-09T14:39:21Z&sv=2022-11-02&sr=b&sig=%2Fla1dP9YB3rLuyi5Nb0i6XDtTZSWb16IiUA%2BA7PLy4Q%3D',
+            'app_package_v1': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.sfpkg?sp=r&st=2025-08-14T01:17:51Z&se=2025-08-14T09:32:51Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T01:17:51Z&ske=2025-08-14T09:32:51Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'v2': '2.0.0',
-            'app_package_v2': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-10-28T05:42:23Z&se=2024-11-09T14:42:23Z&sv=2022-11-02&sr=b&sig=hF2%2F2%2BoVNA6VX6Rsg50OPWJS%2FPcRSpuIPg%2BMdEyvRNc%3D',
+            'app_package_v2': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.2.0.0.sfpkg?sp=r&st=2025-08-14T01:18:28Z&se=2025-08-14T09:33:28Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T01:18:28Z&ske=2025-08-14T09:33:28Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'stateful_service_type': 'VotingDataType',
             'stateless_service_type': 'VotingWebType',
@@ -41,13 +41,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
                  checks=[self.is_empty()])
         # Create
         app_type = self.cmd('az sf managed-application-type create -g {rg} -c {cluster_name} --application-type-name {app_type_name} --tags {tags}',
-                            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+                            checks=[self.check('properties.provisioningState', 'Succeeded')]).get_output_in_json()
         # Show
         self.cmd('az sf managed-application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                  checks=[self.check('id', app_type['id']), self.check('tags', app_type['tags'])])
         # Update
         updated_app_type = self.cmd('az sf managed-application-type update -g {rg} -c {cluster_name} --application-type-name {app_type_name} --tags {new_tags}',
-                                    checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+                                    checks=[self.check('properties.provisioningState', 'Succeeded')]).get_output_in_json()
         # Show
         self.cmd('az sf managed-application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}',
                  checks=[self.check('id', updated_app_type['id']), self.check('tags', updated_app_type['tags'])])
@@ -63,13 +63,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.sfpkg?sp=racwdyti&st=2024-10-28T05:39:21Z&se=2024-11-09T14:39:21Z&sv=2022-11-02&sr=b&sig=%2Fla1dP9YB3rLuyi5Nb0i6XDtTZSWb16IiUA%2BA7PLy4Q%3D',
+            'app_package_v1': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.sfpkg?sp=r&st=2025-08-14T13:39:08Z&se=2025-08-14T21:54:08Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:39:08Z&ske=2025-08-14T21:54:08Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'v2': '2.0.0',
-            'app_package_v2': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-10-28T05:42:23Z&se=2024-11-09T14:42:23Z&sv=2022-11-02&sr=b&sig=hF2%2F2%2BoVNA6VX6Rsg50OPWJS%2FPcRSpuIPg%2BMdEyvRNc%3D',
+            'app_package_v2': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.2.0.0.sfpkg?sp=r&st=2025-08-14T13:40:25Z&se=2025-08-14T21:55:25Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:40:25Z&ske=2025-08-14T21:55:25Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'stateful_service_type': 'VotingDataType',
             'stateless_service_type': 'VotingWebType',
@@ -87,13 +87,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         # Create
         app_type_version = self.cmd('az sf managed-application-type version create -g {rg} -c {cluster_name} '
                                     '--application-type-name {app_type_name} --version {v1} --package-url {app_package_v1} --tags {tags}',
-                                    checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+                                    checks=[self.check('properties.provisioningState', 'Succeeded')]).get_output_in_json()
         # Show
         self.cmd('az sf managed-application-type version show -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}',
                  checks=[self.check('id', app_type_version['id']), self.check('tags', app_type_version['tags'])])
         # Update
-        updated_app_type_version = self.cmd('az sf managed-application-type version update -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1} --tags {new_tags}',
-                                            checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+        updated_app_type_version = self.cmd('az sf managed-application-type version update -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1} --package-url {app_package_v1} --tags {new_tags}',
+                                            checks=[self.check('properties.provisioningState', 'Succeeded')]).get_output_in_json()
         # Show
         self.cmd('az sf managed-application-type version show -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}',
                  checks=[self.check('id', updated_app_type_version['id']), self.check('tags', updated_app_type_version['tags'])])
@@ -110,13 +110,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.sfpkg?sp=racwdyti&st=2024-10-28T05:39:21Z&se=2024-11-09T14:39:21Z&sv=2022-11-02&sr=b&sig=%2Fla1dP9YB3rLuyi5Nb0i6XDtTZSWb16IiUA%2BA7PLy4Q%3D',
+            'app_package_v1': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.sfpkg?sp=r&st=2025-08-14T13:39:08Z&se=2025-08-14T21:54:08Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:39:08Z&ske=2025-08-14T21:54:08Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'v2': updated_version,
-            'app_package_v2': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-10-28T05:42:23Z&se=2024-11-09T14:42:23Z&sv=2022-11-02&sr=b&sig=hF2%2F2%2BoVNA6VX6Rsg50OPWJS%2FPcRSpuIPg%2BMdEyvRNc%3D',
+            'app_package_v2': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.2.0.0.sfpkg?sp=r&st=2025-08-14T13:40:25Z&se=2025-08-14T21:55:25Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:40:25Z&ske=2025-08-14T21:55:25Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'stateful_service_type': 'VotingDataType',
             'stateless_service_type': 'VotingWebType',
@@ -134,7 +134,7 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         # Create App
         app = self.cmd('az sf managed-application create -g {rg} -c {cluster_name} --application-name {app_name} '
                        '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1}',
-                       checks=[self.check('provisioningState', 'Succeeded')]).get_output_in_json()
+                       checks=[self.check('properties.provisioningState', 'Succeeded')]).get_output_in_json()
         # Show App
         self.cmd('az sf managed-application show -g {rg} -c {cluster_name} --application-name {app_name}',
                  checks=[self.check('id', app['id'])])
@@ -148,21 +148,21 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         # Create New App Type
         self.cmd('az sf managed-application-type version create -g {rg} -c {cluster_name} '
                  '--application-type-name {app_type_name} --version {v2} --package-url {app_package_v2}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
         # Update Application
         updated_app = self.cmd('az sf managed-application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
                                '--health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
-                               '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
-                               checks=[self.check('provisioningState', 'Succeeded'),
-                                       self.check('upgradePolicy.forceRestart', True),
-                                       self.check('upgradePolicy.upgradeReplicaSetCheckTimeout', '300'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckWaitDuration', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckStableDuration', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeTimeout', '01:56:40'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeDomainTimeout', '01:23:20'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.failureAction', 'Rollback')]).get_output_in_json()
-        assert updated_app['version'].endswith(updated_version)
+                               '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart',
+                               checks=[self.check('properties.provisioningState', 'Succeeded'),
+                                       self.check('properties.upgradePolicy.forceRestart', True),
+                                       self.check('properties.upgradePolicy.upgradeReplicaSetCheckTimeout', '300'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckWaitDuration', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckStableDuration', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeTimeout', '01:56:40'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeDomainTimeout', '01:23:20'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.failureAction', 'Rollback')]).get_output_in_json()
+        assert updated_app['properties']['version'].endswith(updated_version)
         # Delete Application
         self.cmd('az sf managed-application delete -g {rg} -c {cluster_name} --application-name {app_name}')
         # Delete Application Type
@@ -177,13 +177,13 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.sfpkg?sp=racwdyti&st=2024-10-28T05:39:21Z&se=2024-11-09T14:39:21Z&sv=2022-11-02&sr=b&sig=%2Fla1dP9YB3rLuyi5Nb0i6XDtTZSWb16IiUA%2BA7PLy4Q%3D',
+            'app_package_v1': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.sfpkg?sp=r&st=2025-08-14T13:39:08Z&se=2025-08-14T21:54:08Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:39:08Z&ske=2025-08-14T21:54:08Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'v2': '2.0.0',
-            'app_package_v2': 'https://sfmccliapptest.blob.core.windows.net/votingcont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-10-28T05:42:23Z&se=2024-11-09T14:42:23Z&sv=2022-11-02&sr=b&sig=hF2%2F2%2BoVNA6VX6Rsg50OPWJS%2FPcRSpuIPg%2BMdEyvRNc%3D',
+            'app_package_v2': 'https://sftestappstorage.blob.core.windows.net/managed-application-deployment/Voting.2.0.0.sfpkg?sp=r&st=2025-08-14T13:40:25Z&se=2025-08-14T21:55:25Z&skoid=d078218f-29d9-4be8-9eb5-7325194a81e9&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2025-08-14T13:40:25Z&ske=2025-08-14T21:55:25Z&sks=b&skv=2024-11-04&spr=https&sv=2024-11-04&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'stateful_service_type': 'VotingDataType',
             'stateless_service_type': 'VotingWebType',
@@ -204,7 +204,7 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         # Create App
         self.cmd('az sf managed-application create -g {rg} -c {cluster_name} --application-name {app_name} '
                  '--application-type-name {app_type_name} --application-type-version {v1} --package-url {app_package_v1}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
         # List Services
         self.cmd('az sf managed-service list -g {rg} -c {cluster_name} --application-name {app_name}',
                  checks=[self.is_empty()])

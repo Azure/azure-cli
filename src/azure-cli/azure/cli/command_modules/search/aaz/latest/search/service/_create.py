@@ -15,13 +15,13 @@ from azure.cli.core.aaz import *
     "search service create",
 )
 class Create(AAZCommand):
-    """Create a search service in the given resource group. If the search service already exists, all properties will be updated with the given values.
+    """Creates or updates a search service in the given resource group. If the search service already exists, all properties will be updated with the given values.
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2026-03-01-preview"],
         ]
     }
 
@@ -47,7 +47,7 @@ class Create(AAZCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure Cognitive Search service to create or update. Search service names must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and must be between 2 and 60 characters in length. Search service names must be globally unique since they are part of the service URI (`https://<name>.search.windows.net`). You cannot change the service name after the service is created.",
+            help="The name of the Azure AI Search service to create or update. Search service names must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and must be between 2 and 60 characters in length. Search service names must be unique since they are part of the service URI (https://`<name>`.search.windows.net). You cannot change the service name after the service is created.",
             required=True,
         )
 
@@ -74,10 +74,10 @@ class Create(AAZCommand):
             options=["--identity-type"],
             arg_group="Identity",
             help="The identity type.",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned"},
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned"},
         )
 
-        # define Arg Group "NetworkRuleSet"
+         # define Arg Group "NetworkRuleSet"
 
         _args_schema = cls._args_schema
         _args_schema.ip_rules_internal = AAZListArg(
@@ -95,14 +95,42 @@ class Create(AAZCommand):
             help="Value corresponding to a single IPv4 address (eg., 123.1.2.3) or an IP range in CIDR format (eg., 123.1.2.3/24) to be allowed.",
         )
 
+        _args_schema.bypass = AAZStrArg(
+            options=["--bypass"],
+            arg_group="NetworkRuleSet",
+            help="Possible origins of inbound traffic that can bypass the rules defined in the 'ipRules' section.",
+            enum={"AzureServices": "AzureServices", "None": "None"},
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.compute_type = AAZStrArg(
+            options=["--compute-type"],
+            arg_group="Properties",
+            help="Configure this property to support the search service using either the Default Compute or Azure Confidential Compute.",
+            enum={"confidential": "confidential", "default": "default"},
+        )
+        _args_schema.data_exfiltration_protections = AAZListArg(
+            options=["--data-exfiltration-protections", "--data--protections"],
+            arg_group="Properties",
+            help="A list of data exfiltration scenarios that are explicitly disallowed for the search service. Currently, the only supported value is 'All' to disable all possible data export scenarios with more fine grained controls planned for the future.",
+        )
         _args_schema.disable_local_auth = AAZBoolArg(
             options=["--disable-local-auth"],
             arg_group="Properties",
             help="When set to true, calls to the search service will not be permitted to utilize API keys for authentication. This cannot be set to true if 'dataPlaneAuthOptions' are defined.",
             nullable=True,
+        )
+        _args_schema.encryption_with_cmk = AAZObjectArg(
+            options=["--encryption-with-cmk"],
+            arg_group="Properties",
+            help="Specifies any policy regarding encryption of resources (such as indexes) using customer manager keys within a search service.",
+        )
+        _args_schema.endpoint = AAZStrArg(
+            options=["--endpoint"],
+            arg_group="Properties",
+            help="The endpoint of the Azure AI Search service.",
         )
         _args_schema.hosting_mode = AAZStrArg(
             options=["--hosting-mode"],
@@ -126,7 +154,7 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="This value can be set to 'enabled' to avoid breaking changes on existing customer resources and templates. If set to 'disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method.",
             default="enabled",
-            enum={"disabled": "disabled", "enabled": "enabled"},
+            enum={"disabled": "disabled", "enabled": "enabled", "securedByPerimeter": "securedByPerimeter"},
         )
         _args_schema.replica_count = AAZIntArg(
             options=["--replica-count"],
@@ -141,9 +169,87 @@ class Create(AAZCommand):
         _args_schema.semantic_search = AAZStrArg(
             options=["--semantic-search"],
             arg_group="Properties",
-            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure Cognitive Search SKUs in certain locations.",
+            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure AI Search SKUs in certain locations.",
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
+        )
+        _args_schema.knowledge_retrieval = AAZStrArg(
+            options=["--knowledge-retrieval"],
+            arg_group="Properties",
+            help="Specifies the billing plan for agentic retrieval on the Azure AI Search service.",
+            nullable=True,
+            enum={"free": "free", "standard": "standard"},
+        )
+        _args_schema.upgrade_available = AAZStrArg(
+            options=["--upgrade-available"],
+            arg_group="Properties",
+            help="Indicates if the search service has an upgrade available.",
+            enum={"available": "available", "notAvailable": "notAvailable"},
+        )
+
+        data_exfiltration_protections = cls._args_schema.data_exfiltration_protections
+        data_exfiltration_protections.Element = AAZStrArg(
+            enum={"BlockAll": "BlockAll"},
+        )
+
+        encryption_with_cmk = cls._args_schema.encryption_with_cmk
+        encryption_with_cmk.enforcement = AAZStrArg(
+            options=["enforcement"],
+            help="Describes how a search service should enforce compliance if it finds objects that aren't encrypted with the customer-managed key.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "Unspecified": "Unspecified"},
+        )
+        encryption_with_cmk.service_level_encryption_key = AAZObjectArg(
+            options=["service-level-encryption-key"],
+            help="Describes the customer-managed key configuration for encrypting the search service.",
+        )
+
+        service_level_encryption_key = cls._args_schema.encryption_with_cmk.service_level_encryption_key
+        service_level_encryption_key.access_credentials = AAZObjectArg(
+            options=["access-credentials"],
+            help="Optional Azure Active Directory credentials used for accessing your Azure Key Vault.",
+        )
+        service_level_encryption_key.identity = AAZObjectArg(
+            options=["identity"],
+            help="An explicit managed identity to use for this encryption key.",
+            nullable=True,
+        )
+        service_level_encryption_key.key_vault_key_name = AAZStrArg(
+            options=["key-vault-key-name"],
+            help="The name of your Azure Key Vault key to be used to encrypt your data at rest.",
+        )
+        service_level_encryption_key.key_vault_key_version = AAZStrArg(
+            options=["key-vault-key-version"],
+            help="The version of your Azure Key Vault key to be used to encrypt your data at rest.",
+        )
+        service_level_encryption_key.key_vault_uri = AAZStrArg(
+            options=["key-vault-uri"],
+            help="The URI of your Azure Key Vault that contains the key to be used to encrypt your data at rest.",
+        )
+
+        access_credentials = cls._args_schema.encryption_with_cmk.service_level_encryption_key.access_credentials
+        access_credentials.application_id = AAZStrArg(
+            options=["application-id"],
+            help="The application (client) ID of an App Registration in the tenant.",
+        )
+        access_credentials.application_secret = AAZPasswordArg(
+            options=["application-secret"],
+            help="An AAD client secret that was generated for the App Registration used to authenticate with Azure Key Vault.",
+        )
+
+        identity = cls._args_schema.encryption_with_cmk.service_level_encryption_key.identity
+        identity.odata_type = AAZStrArg(
+            options=["@odata.type"],
+            help="A URI fragment specifying the type of identity.",
+            required=True,
+            enum={"#Microsoft.Azure.Search.DataNoneIdentity": "#Microsoft.Azure.Search.DataNoneIdentity", "#Microsoft.Azure.Search.DataUserAssignedIdentity": "#Microsoft.Azure.Search.DataUserAssignedIdentity"},
+        )
+        identity.federated_identity_client_id = AAZStrArg(
+            options=["federated-identity-client-id"],
+            help="Optional multi-tenant app registration client ID configured to federate with the user-assigned identity.",
+        )
+        identity.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="The fully qualified Azure resource ID of a user-assigned managed identity assigned to the search service.",
         )
 
         # define Arg Group "Service"
@@ -157,6 +263,13 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Service",
+            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions. 'serverless': Serverless tier with auto-scaling capabilities.",
+            required=True,
+            enum={"basic": "basic", "free": "free", "serverless": "serverless", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Service",
@@ -165,17 +278,6 @@ class Create(AAZCommand):
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
-
-        # define Arg Group "Sku"
-
-        _args_schema = cls._args_schema
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            arg_group="Sku",
-            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
-            required=True,
-            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
-        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -259,7 +361,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -284,7 +386,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
@@ -297,13 +399,19 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("authOptions", AAZObjectType)
+                properties.set_prop("computeType", AAZStrType, ".compute_type")
+                properties.set_prop("dataExfiltrationProtections", AAZListType, ".data_exfiltration_protections")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth", typ_kwargs={"nullable": True})
+                properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
+                properties.set_prop("endpoint", AAZStrType, ".endpoint")
                 properties.set_prop("hostingMode", AAZStrType, ".hosting_mode")
+                properties.set_prop("knowledgeRetrieval", AAZStrType, ".knowledge_retrieval", typ_kwargs={"nullable": True})
                 properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
                 properties.set_prop("replicaCount", AAZIntType, ".replica_count")
                 properties.set_prop("semanticSearch", AAZStrType, ".semantic_search", typ_kwargs={"nullable": True})
+                properties.set_prop("upgradeAvailable", AAZStrType, ".upgrade_available")
 
             auth_options = _builder.get(".properties.authOptions")
             if auth_options is not None:
@@ -314,8 +422,37 @@ class Create(AAZCommand):
             if aad_or_api_key is not None:
                 aad_or_api_key.set_prop("aadAuthFailureMode", AAZStrType, ".aad_auth_failure_mode")
 
+            data_exfiltration_protections = _builder.get(".properties.dataExfiltrationProtections")
+            if data_exfiltration_protections is not None:
+                data_exfiltration_protections.set_elements(AAZStrType, ".")
+
+            encryption_with_cmk = _builder.get(".properties.encryptionWithCmk")
+            if encryption_with_cmk is not None:
+                encryption_with_cmk.set_prop("enforcement", AAZStrType, ".enforcement")
+                encryption_with_cmk.set_prop("serviceLevelEncryptionKey", AAZObjectType, ".service_level_encryption_key")
+
+            service_level_encryption_key = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey")
+            if service_level_encryption_key is not None:
+                service_level_encryption_key.set_prop("accessCredentials", AAZObjectType, ".access_credentials")
+                service_level_encryption_key.set_prop("identity", AAZObjectType, ".identity", typ_kwargs={"nullable": True})
+                service_level_encryption_key.set_prop("keyVaultKeyName", AAZStrType, ".key_vault_key_name")
+                service_level_encryption_key.set_prop("keyVaultKeyVersion", AAZStrType, ".key_vault_key_version")
+                service_level_encryption_key.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
+
+            access_credentials = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey.accessCredentials")
+            if access_credentials is not None:
+                access_credentials.set_prop("applicationId", AAZStrType, ".application_id")
+                access_credentials.set_prop("applicationSecret", AAZStrType, ".application_secret")
+
+            identity = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey.identity")
+            if identity is not None:
+                identity.set_prop("@odata.type", AAZStrType, ".odata_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("federatedIdentityClientId", AAZStrType, ".federated_identity_client_id")
+                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
+
             network_rule_set = _builder.get(".properties.networkRuleSet")
             if network_rule_set is not None:
+                network_rule_set.set_prop("bypass", AAZStrType, ".bypass")
                 network_rule_set.set_prop("ipRules", AAZListType, ".ip_rules_internal")
 
             ip_rules = _builder.get(".properties.networkRuleSet.ipRules")
@@ -357,7 +494,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -367,9 +504,12 @@ class Create(AAZCommand):
             _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200_201.sku = AAZObjectType(
-                flags={"required": True},
+            _schema_on_200_201.sku = AAZObjectType()
+            _schema_on_200_201.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
+            _CreateHelper._build_schema_system_data_read(_schema_on_200_201.system_data)
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
@@ -387,20 +527,51 @@ class Create(AAZCommand):
             identity.type = AAZStrType(
                 flags={"required": True},
             )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200_201.properties
             properties.auth_options = AAZObjectType(
                 serialized_name="authOptions",
             )
+            properties.compute_type = AAZStrType(
+                serialized_name="computeType",
+            )
+            properties.data_exfiltration_protections = AAZListType(
+                serialized_name="dataExfiltrationProtections",
+            )
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
                 nullable=True,
             )
+            properties.e_tag = AAZStrType(
+                serialized_name="eTag",
+                flags={"read_only": True},
+            )
             properties.encryption_with_cmk = AAZObjectType(
                 serialized_name="encryptionWithCmk",
             )
+            properties.endpoint = AAZStrType()
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
+            )
+            properties.knowledge_retrieval = AAZStrType(
+                serialized_name="knowledgeRetrieval",
+                nullable=True,
             )
             properties.network_rule_set = AAZObjectType(
                 serialized_name="networkRuleSet",
@@ -426,6 +597,10 @@ class Create(AAZCommand):
                 serialized_name="semanticSearch",
                 nullable=True,
             )
+            properties.service_upgraded_at = AAZStrType(
+                serialized_name="serviceUpgradedAt",
+                flags={"read_only": True},
+            )
             properties.shared_private_link_resources = AAZListType(
                 serialized_name="sharedPrivateLinkResources",
                 flags={"read_only": True},
@@ -436,6 +611,9 @@ class Create(AAZCommand):
             properties.status_details = AAZStrType(
                 serialized_name="statusDetails",
                 flags={"read_only": True},
+            )
+            properties.upgrade_available = AAZStrType(
+                serialized_name="upgradeAvailable",
             )
 
             auth_options = cls._schema_on_200_201.properties.auth_options
@@ -451,14 +629,58 @@ class Create(AAZCommand):
                 serialized_name="aadAuthFailureMode",
             )
 
+            data_exfiltration_protections = cls._schema_on_200_201.properties.data_exfiltration_protections
+            data_exfiltration_protections.Element = AAZStrType()
+
             encryption_with_cmk = cls._schema_on_200_201.properties.encryption_with_cmk
             encryption_with_cmk.encryption_compliance_status = AAZStrType(
                 serialized_name="encryptionComplianceStatus",
                 flags={"read_only": True},
             )
             encryption_with_cmk.enforcement = AAZStrType()
+            encryption_with_cmk.service_level_encryption_key = AAZObjectType(
+                serialized_name="serviceLevelEncryptionKey",
+            )
+
+            service_level_encryption_key = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key
+            service_level_encryption_key.access_credentials = AAZObjectType(
+                serialized_name="accessCredentials",
+            )
+            service_level_encryption_key.identity = AAZObjectType(
+                nullable=True,
+            )
+            service_level_encryption_key.key_vault_key_name = AAZStrType(
+                serialized_name="keyVaultKeyName",
+            )
+            service_level_encryption_key.key_vault_key_version = AAZStrType(
+                serialized_name="keyVaultKeyVersion",
+            )
+            service_level_encryption_key.key_vault_uri = AAZStrType(
+                serialized_name="keyVaultUri",
+            )
+
+            access_credentials = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key.access_credentials
+            access_credentials.application_id = AAZStrType(
+                serialized_name="applicationId",
+            )
+            access_credentials.application_secret = AAZStrType(
+                serialized_name="applicationSecret",
+            )
+
+            identity = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key.identity
+            identity.odata_type = AAZStrType(
+                serialized_name="@odata.type",
+                flags={"required": True},
+            )
+            identity.federated_identity_client_id = AAZStrType(
+                serialized_name="federatedIdentityClientId",
+            )
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
 
             network_rule_set = cls._schema_on_200_201.properties.network_rule_set
+            network_rule_set.bypass = AAZStrType()
             network_rule_set.ip_rules = AAZListType(
                 serialized_name="ipRules",
             )
@@ -480,6 +702,11 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _CreateHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -519,6 +746,11 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType()
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _CreateHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -554,6 +786,50 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Create"]

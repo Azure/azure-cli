@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-05-01"],
         ]
     }
 
@@ -222,7 +222,7 @@ class Update(AAZCommand):
             options=["service-level"],
             help="serviceLevel",
             nullable=True,
-            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _element.smb_access_based_enumeration = AAZStrArg(
             options=["smb-access-based-enumeration"],
@@ -294,6 +294,11 @@ class Update(AAZCommand):
             help="Backup Properties",
             nullable=True,
         )
+        data_protection.ransomware_protection = AAZObjectArg(
+            options=["ransomware-protection"],
+            help="Advanced Ransomware Protection settings",
+            nullable=True,
+        )
         data_protection.replication = AAZObjectArg(
             options=["replication"],
             help="Replication properties",
@@ -327,21 +332,18 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        replication = cls._args_schema.volumes.Element.data_protection.replication
-        replication.endpoint_type = AAZStrArg(
-            options=["endpoint-type"],
-            help="Indicates whether the local volume is the source or destination for the Volume Replication",
+        ransomware_protection = cls._args_schema.volumes.Element.data_protection.ransomware_protection
+        ransomware_protection.desired_ransomware_protection_state = AAZStrArg(
+            options=["desired-ransomware-protection-state"],
+            help="The desired value of the Advanced Ransomware Protection feature state available to the volume",
             nullable=True,
-            enum={"dst": "dst", "src": "src"},
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+
+        replication = cls._args_schema.volumes.Element.data_protection.replication
         replication.remote_volume_region = AAZStrArg(
             options=["remote-volume-region"],
             help="The remote region for the other end of the Volume Replication.",
-            nullable=True,
-        )
-        replication.remote_volume_resource_id = AAZStrArg(
-            options=["remote-volume-resource-id"],
-            help="The resource ID of the remote volume.",
             nullable=True,
         )
         replication.replication_schedule = AAZStrArg(
@@ -580,7 +582,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -627,7 +629,7 @@ class Update(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [201]:
@@ -636,7 +638,7 @@ class Update(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -683,7 +685,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -803,6 +805,7 @@ class Update(AAZCommand):
             data_protection = _builder.get(".properties.volumes[].properties.dataProtection")
             if data_protection is not None:
                 data_protection.set_prop("backup", AAZObjectType, ".backup")
+                data_protection.set_prop("ransomwareProtection", AAZObjectType, ".ransomware_protection")
                 data_protection.set_prop("replication", AAZObjectType, ".replication")
                 data_protection.set_prop("snapshot", AAZObjectType, ".snapshot")
                 data_protection.set_prop("volumeRelocation", AAZObjectType, ".volume_relocation")
@@ -813,11 +816,13 @@ class Update(AAZCommand):
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
 
+            ransomware_protection = _builder.get(".properties.volumes[].properties.dataProtection.ransomwareProtection")
+            if ransomware_protection is not None:
+                ransomware_protection.set_prop("desiredRansomwareProtectionState", AAZStrType, ".desired_ransomware_protection_state")
+
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.volumes[].properties.dataProtection.snapshot")
@@ -918,6 +923,7 @@ class _UpdateHelper:
             _schema.location = cls._schema_volume_group_details_read.location
             _schema.name = cls._schema_volume_group_details_read.name
             _schema.properties = cls._schema_volume_group_details_read.properties
+            _schema.system_data = cls._schema_volume_group_details_read.system_data
             _schema.type = cls._schema_volume_group_details_read.type
             return
 
@@ -933,6 +939,10 @@ class _UpdateHelper:
         )
         volume_group_details_read.properties = AAZObjectType(
             flags={"client_flatten": True},
+        )
+        volume_group_details_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
         )
         volume_group_details_read.type = AAZStrType(
             flags={"read_only": True},
@@ -988,6 +998,9 @@ class _UpdateHelper:
         _element.zones = AAZListType()
 
         properties = _schema_volume_group_details_read.properties.volumes.Element.properties
+        properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+            serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+        )
         properties.actual_throughput_mibps = AAZFloatType(
             serialized_name="actualThroughputMibps",
             flags={"read_only": True},
@@ -1002,6 +1015,9 @@ class _UpdateHelper:
         properties.baremetal_tenant_id = AAZStrType(
             serialized_name="baremetalTenantId",
             flags={"read_only": True},
+        )
+        properties.breakthrough_mode = AAZStrType(
+            serialized_name="breakthroughMode",
         )
         properties.capacity_pool_resource_id = AAZStrType(
             serialized_name="capacityPoolResourceId",
@@ -1045,6 +1061,7 @@ class _UpdateHelper:
         )
         properties.effective_network_features = AAZStrType(
             serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
@@ -1064,6 +1081,11 @@ class _UpdateHelper:
         )
         properties.file_system_id = AAZStrType(
             serialized_name="fileSystemId",
+            flags={"read_only": True},
+        )
+        properties.inherited_size_in_bytes = AAZIntType(
+            serialized_name="inheritedSizeInBytes",
+            nullable=True,
             flags={"read_only": True},
         )
         properties.is_default_quota_enabled = AAZBoolType(
@@ -1186,6 +1208,9 @@ class _UpdateHelper:
 
         data_protection = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection
         data_protection.backup = AAZObjectType()
+        data_protection.ransomware_protection = AAZObjectType(
+            serialized_name="ransomwareProtection",
+        )
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
@@ -1203,6 +1228,15 @@ class _UpdateHelper:
             serialized_name="policyEnforced",
         )
 
+        ransomware_protection = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.ransomware_protection
+        ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+            serialized_name="actualRansomwareProtectionState",
+            flags={"read_only": True},
+        )
+        ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+            serialized_name="desiredRansomwareProtectionState",
+        )
+
         replication = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication
         replication.destination_replications = AAZListType(
             serialized_name="destinationReplications",
@@ -1210,6 +1244,23 @@ class _UpdateHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_info = AAZStrType(
+            serialized_name="externalReplicationSetupInfo",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_status = AAZStrType(
+            serialized_name="externalReplicationSetupStatus",
+            flags={"read_only": True},
+        )
+        replication.mirror_state = AAZStrType(
+            serialized_name="mirrorState",
+            flags={"read_only": True},
+        )
+        replication.relationship_status = AAZStrType(
+            serialized_name="relationshipStatus",
+            flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(
             serialized_name="remotePath",
@@ -1352,10 +1403,31 @@ class _UpdateHelper:
         zones = _schema_volume_group_details_read.properties.volumes.Element.zones
         zones.Element = AAZStrType()
 
+        system_data = _schema_volume_group_details_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         _schema.id = cls._schema_volume_group_details_read.id
         _schema.location = cls._schema_volume_group_details_read.location
         _schema.name = cls._schema_volume_group_details_read.name
         _schema.properties = cls._schema_volume_group_details_read.properties
+        _schema.system_data = cls._schema_volume_group_details_read.system_data
         _schema.type = cls._schema_volume_group_details_read.type
 
 

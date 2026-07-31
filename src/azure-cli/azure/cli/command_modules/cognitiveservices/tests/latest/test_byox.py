@@ -5,21 +5,32 @@
 
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.testsdk.decorators import serial_test
 
 
 class CognitiveServicesByoxTests(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_cognitiveservices_user_owned_storage(self, resource_group):
+    @StorageAccountPreparer(parameter_name='storage_account', allow_shared_key_access=True)    
+    def test_cognitiveservices_user_owned_storage(self, resource_group, storage_account):
+        
+        # The subscription we are running in requires the byoxPreview feature registered.
+        # How to request it: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/bring-your-own-storage-speech-resource?tabs=azure-cli#request-access-to-byos-for-your-azure-subscriptions
+        reg = self.cmd('az feature show --name byoxPreview --namespace  Microsoft.CognitiveServices',
+                                    checks=[self.check('properties.state', 'Registered')])
+            
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
-        subscription_id = 'f9b96b36-1f5e-4021-8959-51527e26e6d3' if self.is_live else '00000000-0000-0000-0000-000000000000'
         self.kwargs.update({
             'sname': sname,
             'kind': 'SpeechServices',
             'sku': 'S0',
             'location': 'WESTEUROPE',
-            'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/' + subscription_id + '/resourceGroups/CS-Platform-UnitTest/providers/Microsoft.Storage/storageAccounts/sdkbyostest\\\"}]'
+            'stgname': storage_account,
+        })
+
+        stgacct = self.cmd('az storage account show -n {stgname} -g {rg}').get_output_in_json()
+        self.kwargs.update( {
+            'storageIds': '[{\\\"resourceId\\\":\\\"' + stgacct['id'] + '\\\"}]'
         })
 
         # test to create cognitive services account
@@ -34,7 +45,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertEqual(len(account['properties']['userOwnedStorage']), 1)
-        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/CS-Platform-UnitTest/providers/Microsoft.Storage/storageAccounts/sdkbyostest'.format(subscription_id))
+        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], stgacct['id'])
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')

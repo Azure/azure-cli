@@ -7,8 +7,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
     prepare_client_kwargs_track2
 from azure.cli.core.profiles import ResourceType, get_sdk
 
-from azure.cli.command_modules.storage.sdkutil import get_table_data_type
-
 MISSING_CREDENTIALS_ERROR_MESSAGE = """
 Missing credentials to access storage service. The following variations are accepted:
     (1) account name and key (--account-name and --account-key options or
@@ -32,85 +30,8 @@ def get_storage_data_service_client(cli_ctx, service, name=None, key=None, conne
                                    location_mode=location_mode)
 
 
-def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
-                                 socket_timeout=None, token_credential=None, location_mode=None):
-    try:
-        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
-                                               socket_timeout, token_credential, location_mode=location_mode)
-    except ValueError as val_exception:
-        _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                              'common._error#_ERROR_STORAGE_MISSING_INFO')
-        message = str(val_exception)
-        if message == _ERROR_STORAGE_MISSING_INFO:
-            message = MISSING_CREDENTIALS_ERROR_MESSAGE
-        from knack.util import CLIError
-        raise CLIError(message)
-
-
 def storage_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
-
-
-def file_data_service_factory(cli_ctx, kwargs):
-    t_file_svc = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'file#FileService')
-    return generic_data_service_factory(cli_ctx, t_file_svc, kwargs.pop('account_name', None),
-                                        kwargs.pop('account_key', None),
-                                        connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
-
-
-def page_blob_service_factory(cli_ctx, kwargs):
-    t_page_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob.pageblobservice#PageBlobService')
-    return generic_data_service_factory(cli_ctx, t_page_blob_service, kwargs.pop('account_name', None),
-                                        kwargs.pop('account_key', None),
-                                        connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None),
-                                        token_credential=kwargs.pop('token_credential', None))
-
-
-def blob_data_service_factory(cli_ctx, kwargs):
-    if 'encryption_scope' in kwargs and kwargs['encryption_scope']:
-        return cf_blob_client(cli_ctx, kwargs)
-    from azure.cli.command_modules.storage.sdkutil import get_blob_service_by_type
-    blob_type = kwargs.get('blob_type')
-    blob_service = get_blob_service_by_type(cli_ctx, blob_type) or get_blob_service_by_type(cli_ctx, 'block')
-
-    return generic_data_service_factory(cli_ctx, blob_service, kwargs.pop('account_name', None),
-                                        kwargs.pop('account_key', None),
-                                        connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None),
-                                        socket_timeout=kwargs.pop('socket_timeout', None),
-                                        token_credential=kwargs.pop('token_credential', None),
-                                        location_mode=kwargs.pop('location_mode', None))
-
-
-def table_data_service_factory(cli_ctx, kwargs):
-    return generic_data_service_factory(cli_ctx,
-                                        get_table_data_type(cli_ctx, 'table', 'TableService'),
-                                        kwargs.pop('account_name', None),
-                                        kwargs.pop('account_key', None),
-                                        connection_string=kwargs.pop('connection_string', None),
-                                        sas_token=kwargs.pop('sas_token', None))
-
-
-def queue_data_service_factory(cli_ctx, kwargs):
-    t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'queue#QueueService')
-    return generic_data_service_factory(
-        cli_ctx, t_queue_service,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None),
-        token_credential=kwargs.pop('token_credential', None))
-
-
-def cloud_storage_account_service_factory(cli_ctx, kwargs):
-    t_cloud_storage_account = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#CloudStorageAccount')
-    account_name = kwargs.pop('account_name', None)
-    account_key = kwargs.pop('account_key', None)
-    sas_token = kwargs.pop('sas_token', None)
-    kwargs.pop('connection_string', None)
-    return t_cloud_storage_account(account_name, account_key, sas_token)
 
 
 def multi_service_properties_factory(cli_ctx, kwargs):
@@ -170,10 +91,6 @@ def cf_mgmt_file_shares(cli_ctx, _):
     return storage_client_factory(cli_ctx).file_shares
 
 
-def cf_blob_data_gen_update(cli_ctx, kwargs):
-    return blob_data_service_factory(cli_ctx, kwargs.copy())
-
-
 def cf_private_link(cli_ctx, _):
     return storage_client_factory(cli_ctx).private_link_resources
 
@@ -224,7 +141,12 @@ def cf_blob_service(cli_ctx, kwargs):
                                                            'to get a valid connection string')
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
+
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
+
     if account_name and account_key:
         # For non-standard account URL such as Edge Zone, account_name can't be parsed from account_url. Use credential
         # dict instead.
@@ -234,26 +156,29 @@ def cf_blob_service(cli_ctx, kwargs):
                           connection_timeout=kwargs.pop('connection_timeout', None), **client_kwargs)
 
 
-def get_credential(kwargs):
+def get_credential(client_url, kwargs):
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
     credential = account_key or sas_token or token_credential
-    return credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        client_url = client_url + '?' + sas_token
+    return client_url, credential
 
 
 def cf_blob_client(cli_ctx, kwargs):
     # track2 partial migration
     if kwargs.get('blob_url'):
         t_blob_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
-        credential = get_credential(kwargs)
+        blob_url, credential = get_credential(kwargs.pop('blob_url'), kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')
         kwargs.pop('account_name')
         kwargs.pop('account_url')
         kwargs.pop('container_name')
         kwargs.pop('blob_name')
-        return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
+        return t_blob_client.from_blob_url(blob_url=blob_url,
                                            credential=credential,
                                            snapshot=kwargs.pop('snapshot', None),
                                            connection_timeout=kwargs.pop('connection_timeout', None))
@@ -303,6 +228,9 @@ def cf_adls_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
 
     return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
 
@@ -340,6 +268,9 @@ def cf_queue_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='queue')
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
 
     return t_queue_service(account_url=account_url, credential=credential, **client_kwargs)
 
@@ -412,6 +343,9 @@ def cf_share_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
 
     return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
 
@@ -434,7 +368,7 @@ def cf_share_file_client(cli_ctx, kwargs):
         token_intent = 'backup' if enable_file_backup_request_intent else None
         if token_credential is not None and not enable_file_backup_request_intent:
             raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
-        credential = get_credential(kwargs)
+        file_url, credential = get_credential(kwargs.pop('file_url'), kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')
         kwargs.pop('account_name')
@@ -455,7 +389,7 @@ def cf_share_file_client(cli_ctx, kwargs):
             if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
                 client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
 
-        return t_file_client.from_file_url(file_url=kwargs.pop('file_url'),
+        return t_file_client.from_file_url(file_url=file_url,
                                            credential=credential, token_intent=token_intent, **client_kwargs)
     if 'file_url' in kwargs:
         kwargs.pop('file_url')

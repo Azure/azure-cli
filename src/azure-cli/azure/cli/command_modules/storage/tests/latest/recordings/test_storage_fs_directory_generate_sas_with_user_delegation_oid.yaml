@@ -1,0 +1,348 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-08-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2026-05-17T10:04:34.6620798Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-05-17T10:04:34.6620798Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Sun, 17 May 2026 10:05:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=544a7a2e-697f-487c-b2b0-a13df7f346b6,objectId=7c1fae93-9490-4ea9-ad13-1c6792d577ec/eastus2euap/f4737f5f-8e8e-421a-849d-63db92c27505
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-ms-throttling-version:
+      - v1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-storage-dfs/12.24.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 17 May 2026 10:05:05 GMT
+      x-ms-version:
+      - '2026-04-06'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/filesystem000003?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 17 May 2026 10:05:06 GMT
+      etag:
+      - '"0x8DEB3FBC5CB8108"'
+      last-modified:
+      - Sun, 17 May 2026 10:05:06 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2026-04-06'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ad signed-in-user show
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.12.10 (Windows-10-10.0.19045-SP0) AZURECLI/2.86.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/me
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","businessPhones":[],"displayName":"Zhiyi
+        Huang","givenName":null,"jobTitle":null,"mail":"test@example.com","mobilePhone":null,"officeLocation":null,"preferredLanguage":null,"surname":null,"userPrincipalName":"test@example.com#EXT#@azclitools20260430.onmicrosoft.com","id":"7c1fae93-9490-4ea9-ad13-1c6792d577ec"}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - keep-alive
+      content-length:
+      - '388'
+      content-type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      date:
+      - Sun, 17 May 2026 10:05:10 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - 355945a4-f130-451c-b746-6f93513e0d28
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"001","RoleInstance":"SI2PEPF00000BC4"}}'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -f --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-storage-dfs/12.24.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 17 May 2026 10:05:10 GMT
+      x-ms-version:
+      - '2026-04-06'
+    method: PUT
+    uri: https://clitest000002.dfs.core.windows.net/filesystem000003/testdir/subdir?resource=directory
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Sun, 17 May 2026 10:05:12 GMT
+      etag:
+      - '"0x8DEB3FBC8EBF6A0"'
+      last-modified:
+      - Sun, 17 May 2026 10:05:12 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2026-04-06'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <KeyInfo><Start>2026-05-17T10:05:12Z</Start><Expiry>2026-05-17T11:05:00Z</Expiry><DelegatedUserTid>544a7a2e-697f-487c-b2b0-a13df7f346b6</DelegatedUserTid></KeyInfo>'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory generate-sas
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '203'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --account-name -n -f --expiry --permissions --https-only --as-user --auth-mode
+        --user-delegation-oid --user-delegation-tid
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 17 May 2026 10:05:12 GMT
+      x-ms-version:
+      - '2026-04-06'
+    method: POST
+    uri: https://clitest000002.blob.core.windows.net/?restype=service&comp=userdelegationkey
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>7c1fae93-9490-4ea9-ad13-1c6792d577ec</SignedOid><SignedTid>544a7a2e-697f-487c-b2b0-a13df7f346b6</SignedTid><SignedStart>2026-05-17T10:05:12Z</SignedStart><SignedExpiry>2026-05-17T11:05:00Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2026-04-06</SignedVersion><SignedDelegatedUserTid>544a7a2e-697f-487c-b2b0-a13df7f346b6</SignedDelegatedUserTid><Value>9+vjUx7qLry5vQxvTbzMz0e2SsyCkemtwr+A4Dj2xg4=</Value></UserDelegationKey>"
+    headers:
+      content-type:
+      - application/xml
+      date:
+      - Sun, 17 May 2026 10:05:14 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      transfer-encoding:
+      - chunked
+      x-ms-version:
+      - '2026-04-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -n -f --sas-token --auth-mode
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-storage-dfs/12.24.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 17 May 2026 10:05:15 GMT
+      x-ms-version:
+      - '2026-04-06'
+    method: HEAD
+    uri: https://clitest000002.blob.core.windows.net/filesystem000003/testdir/subdir?se=2026-05-17T11%3A05Z&sp=rwdlop&spr=https&sv=2026-04-06&sduoid=7c1fae93-9490-4ea9-ad13-1c6792d577ec&sr=d&sdd=2&skoid=7c1fae93-9490-4ea9-ad13-1c6792d577ec&sktid=544a7a2e-697f-487c-b2b0-a13df7f346b6&skt=2026-05-17T10%3A05%3A12Z&ske=2026-05-17T11%3A05%3A00Z&sks=b&skv=2026-04-06&skdutid=544a7a2e-697f-487c-b2b0-a13df7f346b6&sig=DTFJWhT2B4vHAbvNM0bky%2B7cCYckecJMT4RfbRLqkWs%3D
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '0'
+      content-type:
+      - application/octet-stream
+      date:
+      - Sun, 17 May 2026 10:05:16 GMT
+      etag:
+      - '"0x8DEB3FBC8EBF6A0"'
+      last-modified:
+      - Sun, 17 May 2026 10:05:12 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-acl:
+      - user::rwx,group::r-x,other::---
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Sun, 17 May 2026 10:05:12 GMT
+      x-ms-group:
+      - $superuser
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-meta-hdi_isfolder:
+      - 'true'
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rwxr-x---
+      x-ms-resource-type:
+      - directory
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2026-04-06'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage fs directory show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -n -f --sas-token --auth-mode
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-storage-dfs/12.24.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Sun, 17 May 2026 10:05:17 GMT
+      x-ms-version:
+      - '2026-04-06'
+    method: HEAD
+    uri: https://clitest000002.dfs.core.windows.net/filesystem000003/testdir/subdir?action=getAccessControl&upn=false&se=2026-05-17T11%3A05Z&sp=rwdlop&spr=https&sv=2026-04-06&sduoid=7c1fae93-9490-4ea9-ad13-1c6792d577ec&sr=d&sdd=2&skoid=7c1fae93-9490-4ea9-ad13-1c6792d577ec&sktid=544a7a2e-697f-487c-b2b0-a13df7f346b6&skt=2026-05-17T10%3A05%3A12Z&ske=2026-05-17T11%3A05%3A00Z&sks=b&skv=2026-04-06&skdutid=544a7a2e-697f-487c-b2b0-a13df7f346b6&sig=DTFJWhT2B4vHAbvNM0bky%2B7cCYckecJMT4RfbRLqkWs%3D
+  response:
+    body:
+      string: ''
+    headers:
+      date:
+      - Sun, 17 May 2026 10:05:17 GMT
+      etag:
+      - '"0x8DEB3FBC8EBF6A0"'
+      last-modified:
+      - Sun, 17 May 2026 10:05:12 GMT
+      server:
+      - Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-acl:
+      - user::rwx,group::r-x,other::---
+      x-ms-group:
+      - $superuser
+      x-ms-owner:
+      - $superuser
+      x-ms-permissions:
+      - rwxr-x---
+      x-ms-version:
+      - '2026-04-06'
+    status:
+      code: 200
+      message: OK
+version: 1

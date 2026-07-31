@@ -81,23 +81,6 @@ def string_dictionary_format(values):
     return result
 
 
-def resource_tag_format(values):
-    """Space-separated values in 'key=value' format."""
-    if not values:
-        raise ValueError("No values in resource tags. "
-                         "Argument values should be in the format a=b c=d")
-    result = {}
-    try:
-        for value in values.split(' '):
-            k, v = value.split('=')
-            result[k] = v
-    except ValueError:
-        message = ("Incorrectly formatted resource tags. "
-                   "Argument values should be in the format a=b c=d")
-        raise ValueError(message)
-    return result
-
-
 def environment_setting_format(value):
     """Space-separated values in 'key=value' format."""
     try:

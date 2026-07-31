@@ -67,6 +67,10 @@ def zip_contents_from_dir(dirPath, lang):
 
                 for filename in files:
                     absname = os.path.abspath(os.path.join(dirname, filename))
+
+                    if os.path.islink(absname):
+                        logger.info("Skipping symbolic link: %s", absname)
+                        continue
                     arcname = absname[len(abs_src) + 1:]
                     zf.write(absname, arcname)
 
@@ -323,8 +327,33 @@ def set_location(cmd, sku, location):
 
 def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
-    availability = client.check_name_availability(name, 'Site')
+    request = ResourceNameAvailabilityRequest(name=name, type='Site')
+    availability = client.check_name_availability(request)
+
+    # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
+    if "." in name:
+        availability.name_available = False
+        availability.reason = "Invalid"
+        availability.message = ("Site names only allow alphanumeric characters and hyphens, "
+                                "cannot start or end in a hyphen, and must be less than 64 chars.")
+    return availability
+
+
+def get_regional_site_availability(cmd, location, name, resource_group_name=None,  # pylint: disable=unused-argument
+                                   auto_generated_domain_name_label_scope=None):  # pylint: disable=unused-argument
+    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed
+      (regional check)"""
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
+    client = web_client_factory(cmd.cli_ctx)
+    # Note: In azure-mgmt-web 11.0.0+, resource_group_name and auto_generated_domain_name_label_scope
+    # are no longer supported parameters for ResourceNameAvailabilityRequest
+    request = ResourceNameAvailabilityRequest(
+        name=name,
+        type="Site"
+    )
+    availability = client.regional_check_name_availability(location, request)
 
     # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
     if "." in name:

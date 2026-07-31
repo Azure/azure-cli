@@ -1,0 +1,93 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import (
+    JMESPathCheck,
+    JMESPathCheckExists,
+    ResourceGroupPreparer,
+    ScenarioTest)
+from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
+
+PRECHECK_LOCATION = 'eastus'
+
+
+class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_postgres_flexible_server_upgrade_mgmt(self, resource_group):
+        self._test_flexible_server_upgrade_mgmt(resource_group)
+
+    def _test_flexible_server_upgrade_mgmt(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        current_version = '15'
+        new_version = '18'
+        location = DEFAULT_LOCATION
+
+        # Create server
+        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} --version {} --public-access none --yes'.format(
+            resource_group, server_name, location, current_version))
+
+        self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+                 checks=[JMESPathCheck('version', current_version)])
+
+        # Upgrade server
+        result = self.cmd('postgres flexible-server upgrade -g {} -n {} --version {} --yes'.format(resource_group, server_name, new_version)).get_output_in_json()
+        self.assertTrue(result['version'].startswith(new_version))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=PRECHECK_LOCATION)
+    def test_postgres_flexible_server_upgrade_validate_only_mgmt(self, resource_group):
+        self._test_flexible_server_upgrade_validate_only_mgmt(resource_group)
+
+    def _test_flexible_server_upgrade_validate_only_mgmt(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        current_version = '15'
+        target_version = '18'
+        location = PRECHECK_LOCATION
+
+        # Create server in the precheck-enabled region
+        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} '
+                 '--version {} --public-access none --yes'.format(
+                     resource_group, server_name, location, current_version))
+
+        self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+                 checks=[JMESPathCheck('version', current_version),
+                         JMESPathCheck('location', 'East US')])
+
+        # Run pre-upgrade validation. With --validate-only we poll until the
+        # precheck reaches a terminal status, so the returned status must be
+        # one of Succeeded / Failed / Canceled (never still Validating).
+        result = self.cmd(
+            'postgres flexible-server upgrade -g {} -n {} --version {} --validate-only'.format(
+                resource_group, server_name, target_version),
+            checks=[
+                JMESPathCheckExists('name'),
+                JMESPathCheckExists('properties.status'),
+            ]).get_output_in_json()
+
+        self.assertIn(result['properties']['status'], ['Succeeded', 'Failed', 'Canceled'])
+
+        # Server version must not change as a result of the precheck.
+        self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+                 checks=[JMESPathCheck('version', current_version)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_postgres_flexible_server_create_premiumv2_lrs_version_below_14(self, resource_group):
+        self._test_flexible_server_create_premiumv2_lrs_version_below_14(resource_group)
+
+    def _test_flexible_server_create_premiumv2_lrs_version_below_14(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '13'
+        location = DEFAULT_LOCATION
+
+        # creating a server with PremiumV2_LRS storage type and PG version < 14 should fail
+        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} '
+                 '--version {} --storage-type PremiumV2_LRS --iops 3000 --throughput 125 '
+                 '--public-access none --yes'.format(
+                     resource_group, server_name, location, version),
+                 expect_failure=True)

@@ -5,7 +5,10 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
-    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages
+    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
+    cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections, \
+    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule, \
+    cf_managed_compute_deployments, cf_computes
 
 
 def load_command_table(self, _):
@@ -39,6 +42,20 @@ def load_command_table(self, _):
         client_factory=cf_usages
     )
 
+    projects_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ProjectsOperations.{}',
+        client_factory=cf_projects
+    )
+
+    account_connections_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#AccountConnectionsOperations.{}',
+        client_factory=cf_account_connections
+    )
+    project_connections_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ProjectConnectionsOperations.{}',
+        client_factory=cf_project_connections
+    )
+
     with self.command_group('cognitiveservices account', accounts_type, client_factory=cf_accounts) as g:
         g.custom_command('create', 'create')
         g.command('delete', 'begin_delete')
@@ -61,7 +78,7 @@ def load_command_table(self, _):
         g.custom_command('list-kinds', 'list_kinds', client_factory=cf_resource_skus)
 
     with self.command_group('cognitiveservices account keys', accounts_type) as g:
-        g.command('regenerate', 'regenerate_key')
+        g.custom_command('regenerate', 'regenerate_key')
         g.command('list', 'list_keys')
 
     # deprecating this
@@ -103,3 +120,108 @@ def load_command_table(self, _):
 
     with self.command_group('cognitiveservices usage', usages_type) as g:
         g.command('list', 'list')
+
+    with self.command_group('cognitiveservices agent', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_command('create', 'agent_create')
+        g.custom_command('update', 'agent_update')
+        g.custom_command('stop', 'agent_stop')
+        g.custom_command('start', 'agent_start')
+        g.custom_show_command('status', 'agent_status')
+        g.custom_command('delete-deployment', 'agent_delete_deployment')
+        g.custom_command('delete', 'agent_delete')
+        g.custom_command('list', 'agent_list')
+        g.custom_command('list-versions', 'agent_versions_list')
+        g.custom_show_command('show', 'agent_show')
+
+    with self.command_group('cognitiveservices agent logs', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_show_command('show', 'agent_logs_show')
+
+    managed_network_settings_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ManagedNetworkSettingsOperations.{}',
+        client_factory=cf_managed_network_settings
+    )
+
+    outbound_rule_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#OutboundRuleOperations.{}',
+        client_factory=cf_outbound_rule
+    )
+
+    with self.command_group(
+            'cognitiveservices account managed-network', managed_network_settings_type,
+            client_factory=cf_managed_network_settings, is_preview=True) as g:
+        g.custom_command('create', 'managed_network_create')
+        g.custom_command('update', 'managed_network_update')
+        g.custom_show_command('show', 'managed_network_show')
+        g.custom_command('provision-network', 'managed_network_provision',
+                         client_factory=cf_managed_network_provisions)
+
+    with self.command_group(
+            'cognitiveservices account managed-network outbound-rule', outbound_rule_type,
+            client_factory=cf_outbound_rule, is_preview=True) as g:
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.custom_command('remove', 'outbound_rule_remove', confirmation=True)
+        g.custom_command('set', 'outbound_rule_set')
+        g.custom_command('bulk-set', 'outbound_rule_bulk_set')
+
+    with self.command_group(
+            'cognitiveservices account project', projects_type,
+            client_factory=cf_projects) as g:
+        g.custom_command('create', 'project_create')
+        g.custom_command('delete', 'project_delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('update', 'project_update')
+
+    with self.command_group(
+            'cognitiveservices account project connection', project_connections_type,
+            client_factory=cf_project_connections) as g:
+        g.custom_command('create', 'project_connection_create')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command(
+            'update',
+            setter_name='update',
+            setter_arg_name='connection',
+            custom_func_name='project_connection_update')
+
+    with self.command_group(
+            'cognitiveservices account connection', account_connections_type,
+            client_factory=cf_account_connections) as g:
+        g.custom_command('create', 'account_connection_create')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command(
+            'update',
+            setter_name='update',
+            setter_arg_name='connection',
+            custom_func_name='account_connection_update')
+
+    managed_compute_deployments_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ManagedComputeDeploymentsOperations.{}',
+        client_factory=cf_managed_compute_deployments
+    )
+
+    with self.command_group(
+            'cognitiveservices account managed-compute-deployment', managed_compute_deployments_type,
+            client_factory=cf_managed_compute_deployments, is_preview=True) as g:
+        g.custom_command('create', 'managed_compute_deployment_create')
+        g.custom_show_command('show', 'managed_compute_deployment_show')
+        g.custom_command('list', 'managed_compute_deployment_list')
+        g.custom_command('update', 'managed_compute_deployment_update')
+        g.custom_command('delete', 'managed_compute_deployment_delete')
+
+    computes_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ComputesOperations.{}',
+        client_factory=cf_computes
+    )
+
+    with self.command_group(
+            'cognitiveservices account compute', computes_type,
+            client_factory=cf_computes, is_preview=True) as g:
+        g.custom_command('create', 'compute_begin_create_or_update', supports_no_wait=True)
+        g.custom_command('delete', 'compute_delete', supports_no_wait=True)
+        g.custom_show_command('show', 'compute_show')
+        g.custom_command('list', 'compute_list')

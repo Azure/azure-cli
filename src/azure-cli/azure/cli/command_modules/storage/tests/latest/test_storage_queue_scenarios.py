@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
+from knack.util import CLIError
 from azure.cli.command_modules.storage.tests.storage_test_util import StorageScenarioMixin
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,)
 from azure.cli.testsdk.checkers import (JMESPathCheck, JMESPathCheckExists, JMESPathCheckNotExists, NoneCheck)
@@ -48,10 +50,12 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         sas = self.cmd('storage queue generate-sas -n {} --permissions r --start {} --expiry {}'
                        .format(queue, start, expiry)).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
-        # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage queue generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(queue, connection_string)).output
-        self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
+        # Test generate-sas with ip and https-only, should fail as expiry is required
+        # SDK new FIX, invalidate sas with no expiry component.
+        with self.assertRaisesRegex(ValueError, "'expiry' parameter must be provided when not using a "
+                                                "stored access policy."):
+            self.cmd('storage queue generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
+                     '--https-only --connection-string {}'.format(queue, connection_string)).output
 
         # Test delete
         self.cmd('storage queue delete -n {} --connection-string {}'.format(queue, connection_string),
@@ -133,6 +137,9 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         acl = self.cmd('storage queue policy list -q {} --connection-string {}'.format(queue, connection_string)) \
             .get_output_in_json().keys()
         self.assertSetEqual(set(acl), {'test1', 'test2', 'test3'})
+        # service slow
+        if self.is_live:
+            time.sleep(10)
         # policy show
         self.storage_cmd('storage queue policy show -n test1 -q {}', account_info, queue) \
             .assert_with_checks(JMESPathCheck('permission', 'raup'))
@@ -210,7 +217,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # get message, test `num_messages`
         import time
-        time.sleep(35)
+        if self.is_live:
+            time.sleep(35)
         result = self.storage_cmd('storage message get -q {} --num-messages 2', account_info,
                                   queue).get_output_in_json()
         self.assertEqual(len(result), 2)
@@ -237,7 +245,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         # delete message
         self.storage_cmd('storage message delete -q {} --id {} --pop-receipt {}',
                          account_info, queue, update_result.get('id'), update_result.get('popReceipt'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.storage_cmd('storage message peek -q {} --num-messages 2', account_info, queue) \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
@@ -254,6 +263,71 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         return self.cmd('storage account show-connection-string -n {} -g {} '
                         '--query connectionString -otsv'.format(name, group)).output.strip()
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_queue_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        queue = self.create_random_name('queue', 24)
+
+        self.cmd('storage queue create --account-name {} -n {}'.format(storage_account, queue))
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, queue, expiry))
+
+        queue_sas = self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions raup '
+                             '--https-only --as-user '
+                             '--auth-mode login'.format(storage_account, queue, expiry)).output
+        self.assertIn('&sig=', queue_sas)
+        self.assertIn('skoid=', queue_sas)
+        self.assertIn('sktid=', queue_sas)
+        self.assertIn('skt=', queue_sas)
+        self.assertIn('ske=', queue_sas)
+        self.assertIn('sks=', queue_sas)
+        self.assertIn('skv=', queue_sas)
+
+        if self.is_live:
+            self.cmd('storage message put --account-name {} --content {} -q {} '
+                     '--sas-token {}'.format(storage_account, "content", queue, queue_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_queue_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        queue = self.create_random_name('queue', 24)
+
+        self.cmd('storage queue create --account-name {} -n {}'.format(storage_account, queue))
+
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        queue_sas = self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions raup '
+                             '--https-only --as-user --user-delegation-oid {} '
+                             '--user-delegation-tid {} '
+                             '--auth-mode login'.format(storage_account, queue, expiry, logged_in_user,
+                                                        current_tenant)).output
+
+        self.assertIn('&sig=', queue_sas)
+        self.assertIn('skoid=', queue_sas)
+        self.assertIn('sktid=', queue_sas)
+        self.assertIn('skt=', queue_sas)
+        self.assertIn('ske=', queue_sas)
+        self.assertIn('sks=', queue_sas)
+        self.assertIn('skv=', queue_sas)
+        self.assertIn('sduoid=', queue_sas)
+        self.assertIn('skdutid=', queue_sas)
+
+        if self.is_live:
+            self.cmd('storage message put --account-name {} --content {} -q {} --auth-mode login '
+                     '--sas-token {}'.format(storage_account, "content", queue, queue_sas))
 
 if __name__ == '__main__':
     import unittest

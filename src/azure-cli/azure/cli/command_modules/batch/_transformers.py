@@ -23,6 +23,8 @@ class Transformer:
         new_dict = {}
         for key, value in result.items():
             new_key = self.transform_mapping[key] if key in self.transform_mapping else key
+            if new_key is None:
+                continue
             if isinstance(value, Mapping):
                 new_dict[new_key] = self.transform_result(value)
             else:
@@ -65,6 +67,10 @@ transform_map = {
     'userCPUTime': 'userCpuTime',
     'writeIOGiB': 'writeIoGiB',
     'writeIOps': 'writeIops',
+    # Deprecated properties
+    'targetNodeCommunicationMode': None,
+    'currentNodeCommunicationMode': None,
+    'resourceTags': None
 }
 
 batch_transformer = Transformer(transform_map)

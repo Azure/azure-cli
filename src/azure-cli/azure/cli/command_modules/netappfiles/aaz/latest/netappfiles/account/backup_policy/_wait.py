@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backuppolicies/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backuppolicies/{}", "2026-05-01"],
         ]
     }
 
@@ -129,7 +129,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -215,9 +215,7 @@ class Wait(AAZWaitCommand):
             )
 
             volume_backups = cls._schema_on_200.properties.volume_backups
-            volume_backups.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            volume_backups.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.volume_backups.Element
             _element.backups_count = AAZIntType(

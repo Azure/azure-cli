@@ -14,8 +14,6 @@ from azure.cli.core.azclierror import (
 )
 # from azure.cli.core._profile import Profile
 from ._resource_config import (
-    SOURCE_RESOURCES_USERTOKEN,
-    TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
 from azure.cli.core import get_default_cli
@@ -126,8 +124,9 @@ def set_user_token_header(client, cli_ctx):
 
 def set_user_token_by_source_and_target(client, cli_ctx, source, target):
     '''Set user token header to work around OBO according to source and target'''
-    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
-        return set_user_token_header(client, cli_ctx)
+    # deprecated
+    # if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+    #     return set_user_token_header(client, cli_ctx)
     return client
 
 
@@ -566,10 +565,49 @@ def get_aks_resource_name(linker):
             not (linker["targetService"]["resourceProperties"] is not None and
                  linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
         service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
-        return [secret_name, service_account_name]
-    return [secret_name]
+        return {'secret': secret_name, 'serviceAccount': service_account_name}
+    return {'secret': secret_name}
 
 
 def get_aks_resource_secret_name(connection_name):
     valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
     return f'sc-{valid_name}-secret'
+
+
+def compare_properties_changed(new_props, existing_props):
+    """
+    Deep comparison function that checks if there are meaningful differences
+    between new properties and existing properties, ignoring None values.
+    Returns True if there are differences that require an update.
+    """
+    def has_meaningful_changes(new_value, existing_value):
+        if new_value is None or new_value == "":
+            return False
+
+        if isinstance(new_value, dict) and isinstance(existing_value, dict):
+            for key, value in new_value.items():
+                if key == "mysql-identity-id" or key == 'user_object_id':
+                    continue
+                existing_props_key = key
+                if '_' in key:
+                    existing_props_key = to_camel_case(key)
+                existing_nested = existing_value.get(existing_props_key) if existing_value else None
+                if has_meaningful_changes(value, existing_nested):
+                    return True
+            return False
+        if isinstance(new_value, dict) and existing_value is None:
+            for value in new_value.values():
+                if value is not None and value != "":
+                    return True
+            return False
+
+        return new_value != existing_value
+
+    return has_meaningful_changes(new_props, existing_props)
+
+
+def to_camel_case(snake_str):
+    if not snake_str or '_' not in snake_str:
+        return snake_str
+    components = snake_str.split('_')
+    return components[0] + ''.join(word.capitalize() for word in components[1:])

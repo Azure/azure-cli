@@ -10,9 +10,9 @@ class DmsServiceTests(ScenarioTest):
     service_random_name_prefix = 'dmsclitest'
     location_name = 'centralus'
     sku_name = 'Premium_4vCores'
-    vsubnet_rg = 'ERNetwork'
-    vsubnet_vn = 'AzureDMS-CORP-USC-VNET-5044'
-    vsubnet_sn = 'Subnet-1'
+    vsubnet_rg = 'dmscli'
+    vsubnet_vn = 'dmsclinetwork'
+    vsubnet_sn = 'default'
     name_exists_checks = [JMESPathCheck('nameAvailable', False),
                           JMESPathCheck('reason', 'AlreadyExists')]
     name_available_checks = [JMESPathCheck('nameAvailable', True)]
@@ -118,7 +118,7 @@ class DmsServiceTests(ScenarioTest):
                          JMESPathCheck('tags.Cli', ''),
                          JMESPathCheck('tags.Type', 'test'),
                          JMESPathCheck('type', 'Microsoft.DataMigration/services/projects')]
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname1} --source-platform SQL --target-platform SQLDB --tags Type=test Cli', checks=create_checks)
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pname1} --source-platform SQL --target-platform SQLDB --tags Type=test Cli', checks=create_checks)
 
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pname1}', create_checks)
 
@@ -132,7 +132,7 @@ class DmsServiceTests(ScenarioTest):
                             JMESPathCheck('tags.Cli', ''),
                             JMESPathCheck('tags.Type', 'test'),
                             JMESPathCheck('type', 'Microsoft.DataMigration/services/projects')]
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags Type=test Cli', checks=create_checks_pg)
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags Type=test Cli', checks=create_checks_pg)
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pnamepg}', create_checks_pg)
 
         # Test MySQL project creation and deletion
@@ -146,12 +146,12 @@ class DmsServiceTests(ScenarioTest):
                                JMESPathCheck('tags.Type', 'test'),
                                JMESPathCheck('type', 'Microsoft.DataMigration/services/projects')]
         self.cmd(
-            'az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamemysql} --source-platform MySQL --target-platform AzureDbForMySQL --tags Type=test Cli',
+            'az dms project create -g {rg} --service-name {sname} -n {pnamemysql} --source-platform MySQL --target-platform AzureDbForMySQL --tags Type=test Cli',
             checks=create_checks_mysql)
         self.cmd('az dms project show -g {rg} --service-name {sname} -n {pnamemysql}', create_checks_mysql)
 
         create_checks_notags = [JMESPathCheck('tags', None)]
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname2} --source-platform SQL --target-platform SQLDB', checks=create_checks_notags)
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pname2} --source-platform SQL --target-platform SQLDB', checks=create_checks_notags)
 
         list_checks = [JMESPathCheck('length(@)', 4),
                        JMESPathCheck("length([?name == '{}'])".format(project_name1), 1)]
@@ -306,11 +306,15 @@ class DmsServiceTests(ScenarioTest):
             'tconnmysql': target_connection_info_mysql
         })
 
+        status_online_checks = [JMESPathCheck('status', 'Online'),
+                                JMESPathCheck('vmSize', 'Standard_F4')]
+
         # Set up container service and project
-        self.cmd('az dms create -l {lname} -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pname} --source-platform SQL --target-platform SQLDB')
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL')
-        self.cmd('az dms project create -g {rg} --service-name {sname} -l {lname} -n {pnamemysql} --source-platform MySql --target-platform AzureDbForMySQL')
+        self.cmd('az dms create -n {sname} -g {rg} --sku-name {skuname} --subnet {vnetid} --tags area=cli env=test')
+        self.cmd('az dms check-status -g {rg} -n {sname}', checks=status_online_checks)
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pname} --source-platform SQL --target-platform SQLDB')
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pnamepg} --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL')
+        self.cmd('az dms project create -g {rg} --service-name {sname} -n {pnamemysql} --source-platform MySql --target-platform AzureDbForMySQL')
 
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', expect_failure=True)
         self.cmd('az dms project task show -g {rg} --service-name {sname} --project-name {pnamepg} -n {tnamepg}', expect_failure=True)
@@ -356,6 +360,7 @@ class DmsServiceTests(ScenarioTest):
                                              'notarealtargetserver'),
                                JMESPathCheck('properties.input.targetConnectionInfo.encryptConnection', True),
                                JMESPathCheck('properties.taskType', 'Migrate.MySql.AzureDbForMySql')]
+
         # it does not really make sense to check all response attributes here as done above because the response
         # is hardcoded at the test_task_commands.yaml file, and it is not generated by any service
         create_checks_mysql2 = [JMESPathCheck('name', task_name_mysql2)]
@@ -375,8 +380,8 @@ class DmsServiceTests(ScenarioTest):
         self.cmd('az dms project task delete -g {rg} --service-name {sname} --project-name {pname} -n {tname1} --delete-running-tasks true -y')
         self.cmd('az dms project task check-name -g {rg} --service-name {sname} --project-name {pname} -n {tname1}', checks=self.name_available_checks)
 
-        list_checks = [JMESPathCheck('length(@)', 2),
-                       JMESPathCheck("length([?name == '{}'])".format(task_name1), 1)]
+        list_checks = [JMESPathCheck('length(@)', 1),
+                       JMESPathCheck("length([?name == '{}'])".format(task_name2), 1)]
         self.cmd('az dms project task list -g {rg} --service-name {sname} --project-name {pname} --task-type "Migrate.SqlServer.SqlDb"', checks=list_checks)
 
         # PG Tests

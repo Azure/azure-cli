@@ -15,7 +15,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.validators import (
     validate_loganalytics_workspace_search_table_name, validate_loganalytics_workspace_restore_table_name,
     validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
+    validate_metric_dimension, validate_storage_accounts_name_or_id)
 from azure.cli.command_modules.monitor.actions import get_date_midnight_type
 
 from knack.arguments import CLIArgumentType
@@ -87,14 +87,6 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))
-
-    with self.argument_context('monitor metrics alert update', arg_group='Action') as c:
-        c.argument('add_actions', options_list='--add-action', action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('add_actions'))
-        c.argument('remove_actions', nargs='+', validator=get_action_group_id_validator('remove_actions'))
-
-    with self.argument_context('monitor metrics alert update', arg_group='Condition') as c:
-        c.argument('add_conditions', options_list='--add-condition', action=MetricAlertConditionAction, nargs='+')
-        c.argument('remove_conditions', nargs='+')
 
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
         c.argument('dimension_name', options_list=['--name', '-n'],

@@ -15,8 +15,8 @@ from knack.util import StatusTag, color_map
 
 logger = get_logger()
 
-NEXT_BREAKING_CHANGE_RELEASE = '2.79.0'
-NEXT_BREAKING_CHANGE_DATE = 'Nov 2025'
+NEXT_BREAKING_CHANGE_RELEASE = '2.92.0'
+NEXT_BREAKING_CHANGE_DATE = 'Nov 2026'
 DEFAULT_BREAKING_CHANGE_TAG = '[Breaking Change]'
 
 
@@ -266,7 +266,7 @@ class BreakingChange(abc.ABC):
                 if not arg:
                     continue
                 arg.deprecate_info = self.appended_status_tag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
-                arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options['action'])
+                arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options.get('action'))
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:

@@ -61,6 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -227,7 +228,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               user_assigned_identity=None,
+                               user_assigned_identity=None, enable_fips=None,
                                enable_private_link=False,
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
@@ -301,7 +302,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, user_assigned_identity,
+        firewall_policy, max_capacity, user_assigned_identity, enable_fips,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)
@@ -1941,7 +1942,12 @@ class WAFCreate(_WAFCreate):
             options=["--type"],
             help="Type of the web application firewall rule set.",
             default="Microsoft_DefaultRuleSet",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
+            enum={
+                "Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet",
+                "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet",
+                "OWASP": "OWASP",
+                "Microsoft_HTTPDDoSRuleSet": "Microsoft_HTTPDDoSRuleSet"
+            },
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
@@ -2030,6 +2036,11 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         managed_rule_overrides = []
     else:
         managed_rule_overrides = rules
+
+    if rule_set_type.lower() == "microsoft_httpddosruleset":
+        for r in managed_rule_overrides:
+            if not r.get('sensitivity', None):
+                r['sensitivity'] = 'Medium'
 
     rule_group_override = None
     if rule_group_name is not None:
@@ -3858,7 +3869,6 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
-        args_schema.name._required = False
 
         return args_schema
 
@@ -5349,7 +5359,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_port=80, monitor_protocol="HTTP",
                                    profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Create
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
@@ -5372,6 +5383,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "timeout": timeout,
         "max_failures": max_failures
     }
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
@@ -5380,7 +5393,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Update
     args = {
         "name": traffic_manager_profile_name,
@@ -5412,6 +5426,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         args["timeout"] = timeout
     if max_failures is not None:
         args["max_failures"] = max_failures
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
@@ -5996,8 +6012,6 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.enable_bgp._registered = False
         args_schema.nat_rules.Element.external_mappings_ip._registered = False
         args_schema.nat_rules.Element.internal_mappings_ip._registered = False
-        args_schema.mi_system_assigned._registered = False
-        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -6019,6 +6033,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
                                            'private_ip_allocation_method': 'Dynamic',
                                            'name': 'vnetGatewayConfig{}'.format(i)}
                     args.ip_configurations.append(ip_configuration[i])
+            else:
+                ip_configuration = {'subnet': subnet,
+                                    'private_ip_allocation_method': 'Dynamic',
+                                    'name': 'vnetGatewayConfig'}
+                args.ip_configurations.append(ip_configuration)
+
         else:
             args.vpn_type = None
             args.sku = None
@@ -6234,7 +6254,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
                           authorization_key=None, enable_bgp=False, routing_weight=10,
                           connection_type=None, shared_key=None,
                           use_policy_based_traffic_selectors=False,
-                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None):
+                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None, auth_type=None, cert_auth=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
@@ -6248,7 +6268,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         cmd, connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
         connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
-        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule)
+        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule, auth_type, cert_auth)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
     if shared_key:
@@ -6705,3 +6725,40 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
         args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
 
         return args_schema
+
+
+def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
+                              detection_rule_name=None, detection_mode=None, traffic_type=None,
+                              packets_per_second=None, no_wait=None):
+    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
+    from ._template_builder import build_ddos_custom_policy
+
+    existing_policy = None
+
+    try:
+        existing_policy = DdosCustomPolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'ddos_custom_policy_name': ddos_custom_policy_name,
+            'resource_group': resource_group_name
+        })
+
+        existing_policy = convert_ddos_custom_policy_to_snake_case(existing_policy)
+    except ResourceNotFoundError:
+        # No existing DDoS custom policy; proceed with creation.
+        logger.debug("DDoS custom policy '%s' not found in resource group '%s'.",
+                     ddos_custom_policy_name, resource_group_name)
+    except Exception as err:  # pylint: disable=broad-except
+        # Log unexpected errors while preserving previous behavior of not failing the command.
+        logger.warning("Failed to retrieve existing DDoS custom policy '%s' in resource group '%s': %s",
+                       ddos_custom_policy_name, resource_group_name, err)
+
+    policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
+                                      packets_per_second, traffic_type)
+
+    if existing_policy:
+        policy = combine_old_and_new_custom_policy(existing_policy, policy)
+
+    policy['resource_group'] = resource_group_name
+    policy['no_wait'] = no_wait
+
+    return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)

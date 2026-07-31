@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/images/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/images/{}", "2024-11-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -170,6 +170,10 @@ class Wait(AAZWaitCommand):
             )
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
@@ -263,6 +267,26 @@ class Wait(AAZWaitCommand):
             _WaitHelper._build_schema_sub_resource_read(os_disk.snapshot)
             os_disk.storage_account_type = AAZStrType(
                 serialized_name="storageAccountType",
+            )
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.tags

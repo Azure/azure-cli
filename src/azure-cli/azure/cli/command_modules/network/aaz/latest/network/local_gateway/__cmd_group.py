@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage local gateways.
 
-    For more information on local gateways, visit:
+    For more information on local gateways, visit:\\
     https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli#localnet.
     """
     pass

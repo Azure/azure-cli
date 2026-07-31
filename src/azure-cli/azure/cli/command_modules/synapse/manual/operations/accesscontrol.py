@@ -158,7 +158,7 @@ def _get_object_stubs(graph_client, assignees):
 
 
 def _error_caused_by_role_assignment_exists(ex):
-    return getattr(ex, 'status_code', None) == 409 and 'role assignment already exists' in ex.message
+    return getattr(ex, 'status_code', None) == 409 and ex.error.code == 'RoleAssignmentExists'
 
 
 def _create_role_assignment(cmd, workspace_name, role, assignee, scope=None, item=None, item_type=None,

@@ -5,8 +5,10 @@
 
 import time
 
-from azure.cli.command_modules.role import graph_client_factory
-from azure.cli.command_modules.role import GraphError
+from azure.cli.command_modules.role import (
+    graph_client_factory,
+    GraphError
+)
 
 from knack.log import get_logger
 

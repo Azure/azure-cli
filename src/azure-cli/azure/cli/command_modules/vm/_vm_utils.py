@@ -7,10 +7,13 @@ import json
 import os
 import re
 import importlib
+from enum import Enum
 
 from urllib.parse import urlparse
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -32,7 +35,7 @@ def get_target_network_api(cli_ctx):
     if cli_ctx.cloud.profile == 'latest':
         version = '2022-01-01'
     else:
-        from azure.cli.core.profiles import get_api_version, ResourceType
+        from azure.cli.core.profiles import get_api_version
         version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
@@ -46,8 +49,6 @@ def read_content_if_is_file(string_or_file):
 
 
 def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
@@ -75,10 +76,8 @@ def log_pprint_template(template):
 def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None, static_version=None):
     # check for name or ID and set the type flags
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                               subscription_id=id_parts.get('subscription', None)).resources
@@ -94,9 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
 
-    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
-    if static_version:  # only for vnet
+    if static_version:
         api_version = static_version
+    else:
+        api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -133,7 +133,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 # pylint: disable=line-too-long
-def is_sku_available(cmd, sku_info, zone):
+def is_sku_available(sku_info, zone):
     """
     The SKU is unavailable in the following cases:
     1. regional restriction and the region is restricted
@@ -146,16 +146,12 @@ def is_sku_available(cmd, sku_info, zone):
     if not sku_info.get('restrictions', []):
         return is_available
     for restriction in sku_info['restrictions']:
-        if restriction.get('reason_code', '') == 'NotAvailableForSubscription':
-            # The attribute location_info is not supported in versions 2017-03-30 and earlier
-            if cmd.supported_api_version(max_api='2017-03-30'):
-                is_available = False
-                break
+        if restriction.get('reasonCode', '') == 'NotAvailableForSubscription':
             if restriction['type'] == 'Zone' and not (
-                    set(sku_info['location_info'][0].get('zones', []) or []) - set(restriction['restriction_info'].get('zones', []) or [])):
+                    set(sku_info['locationInfo'][0].get('zones', []) or []) - set(restriction['restrictionInfo'].get('zones', []) or [])):
                 is_restrict_zone = True
             if restriction['type'] == 'Location' and (
-                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []) or [])):
+                    sku_info['locationInfo'][0]['location'] in (restriction['restrictionInfo'].get('locations', []) or [])):
                 is_restrict_location = True
 
             if is_restrict_location or (is_restrict_zone and zone):
@@ -169,6 +165,7 @@ def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
+                        ephemeral_os_disk_enable_full_caching=None,
                         data_disk_delete_option=None, source_snapshots_or_disks=None,
                         source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
                         source_disk_restore_point_size_gb=None):
@@ -208,6 +205,8 @@ def normalize_disk_info(image_data_disks=None,
             os_disk_caching = 'ReadOnly'
         if ephemeral_os_disk_placement:
             info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
+        if ephemeral_os_disk_enable_full_caching is not None:
+            info['os']['diffDiskSettings']['enableFullCaching'] = ephemeral_os_disk_enable_full_caching
 
     # add managed image data disks
     for data_disk in image_data_disks:
@@ -375,26 +374,34 @@ def update_disk_caching(model, caching_settings):
             _update(model, lun, value)
 
 
+def update_disk_caching_by_aaz(model, caching_settings):
+    def _update(model, lun, value):
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
+                               .format(lun_item, list(model.keys())))
+            model[lun_item]['caching'] = value
+
+    if len(caching_settings) == 1 and '=' not in caching_settings[0]:
+        _update(model, None, caching_settings[0])
+    else:
+        for x in caching_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+            lun, value = x.split('=', 1)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
+            _update(model, lun, value)
+
+
 def update_write_accelerator_settings(model, write_accelerator_settings):
     def _update(model, lun, value):
-        if isinstance(model, dict):
-            luns = model.keys() if lun is None else [lun]
-            for lun_item in luns:
-                if lun_item not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
-                model[lun_item]['writeAcceleratorEnabled'] = value
-        else:
-            if lun is None:
-                disks = [model.os_disk] + (model.data_disks or [])
-            elif lun == 'os':
-                disks = [model.os_disk]
-            else:
-                disk = next((d for d in model.data_disks if d.lun == lun), None)
-                if not disk:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
-                disks = [disk]
-            for disk in disks:
-                disk.write_accelerator_enabled = value
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
+            model[lun_item]['write_accelerator_enabled'] = value
 
     if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
         _update(model, None, write_accelerator_settings[0].lower() == 'true')
@@ -410,8 +417,6 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
 
 
 def get_storage_blob_uri(cli_ctx, storage):
-    from azure.cli.core.profiles._shared import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     if urlparse(storage).scheme:
         storage_uri = storage
     else:
@@ -618,6 +623,12 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def raise_unsupported_error_for_flex_vmss_by_aaz(vmss, error_message):
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
@@ -655,7 +666,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         logger.warning(UPGRADE_SECURITY_HINT)
         return
 
-    security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
+    security_type = disk_security_profile.get('securityType')
     if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
@@ -753,3 +764,81 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         f.write(public_bytes)
 
     return public_bytes.decode()
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
+
+
+def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
+    from azure.cli.core.commands.arm import create_role_assignment
+
+    # get
+    resource = getter()
+    resource = setter(resource)
+
+    # create role assignment:
+    if identity_scope:
+        principal_id = resource.get('identity', {}).get('principalId') or resource.get('identity', {}).get('principal_id')
+        create_role_assignment(cli_ctx, principal_id, identity_role, identity_scope)
+    return resource
+
+
+class IdentityType(Enum):
+    SYSTEM_ASSIGNED = 'SystemAssigned'
+    USER_ASSIGNED = 'UserAssigned'
+    SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
+    NONE = 'None'
+
+
+class RebootSetting(Enum):
+    ALWAYS = 'Always'
+    IF_REQUIRED = 'IfRequired'
+    NEVER = 'Never'
+
+
+class VMGuestPatchClassificationWindows(Enum):
+    CRITICAL = 'Critical'
+    DEFINITION = 'Definition'
+    FEATURE_PACK = 'FeaturePack'
+    SECURITY = 'Security'
+    SERVICE_PACK = 'ServicePack'
+    TOOLS = 'Tools'
+    UPDATES = 'Updates'
+    UPDATE_ROLL_UP = 'UpdateRollUp'
+
+
+class VMGuestPatchClassificationLinux(Enum):
+    CRITICAL = 'Critical'
+    OTHER = 'Other'
+    SECURITY = 'Security'
+
+
+class CachingTypes(Enum):
+    NONE = 'None'
+    READ_ONLY = 'ReadOnly'
+    READ_WRITE = 'ReadWrite'
+
+
+class DiskCreateOptionTypes(Enum):
+    ATTACH = 'Attach'
+    COPY = 'Copy'
+    EMPTY = 'Empty'
+    FROM_IMAGE = 'FromImage'
+    RESTORE = 'Restore'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'
+
+
+class OrchestrationServiceNames(Enum):
+    AUTOMATIC_REPAIRS = 'AutomaticRepairs'
+
+
+class OrchestrationServiceStateAction(Enum):
+    RESUME = 'Resume'
+    SUSPEND = 'Suspend'

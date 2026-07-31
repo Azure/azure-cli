@@ -7,13 +7,15 @@
 
 import json
 import os
+
+from unittest import TestCase
 import yaml
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig._constants import AIConfigConstants, FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -22,12 +24,14 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_json_content_type(self, resource_group, location):
-        src_config_store_prefix = get_resource_name_prefix('Source')
-        dest_config_store_prefix = get_resource_name_prefix('Destination')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_json_content_type(self):
+        src_config_store_prefix = get_resource_name_prefix('source')
+        dest_config_store_prefix = get_resource_name_prefix('destination')
         src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
         dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
@@ -35,27 +39,18 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         sku = 'standard'
         self.kwargs.update({
             'config_store_name': src_config_store_name,
+            'src_endpoint': 'https://' + src_config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': resource_group,
+            'rg': get_test_resource_group(),
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
-        # Get src connection string
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
-            'src_connection_string': credential_list[0]['connectionString'],
-            'config_store_name': dest_config_store_name
+            'config_store_name': dest_config_store_name,
+            'dest_endpoint': 'https://' + dest_config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
-
-        # Get dest connection string
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'dest_connection_string': credential_list[0]['connectionString']
-        })
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         """
         Test Scenario 1: Create settings with JSON Content Type
@@ -72,7 +67,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_01
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_01)])
@@ -86,7 +81,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_02
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_02)])
@@ -99,7 +94,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_03
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('contentType', json_content_type_03)])
@@ -112,7 +107,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_04
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('contentType', json_content_type_04)])
@@ -126,7 +121,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_05
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_05)])
@@ -138,7 +133,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'key': entry_key,
             'value': entry_value
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_05)])
@@ -151,7 +146,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_07
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('contentType', json_content_type_07)])
@@ -164,7 +159,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_08
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('contentType', json_content_type_08)])
@@ -178,7 +173,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_09
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_09)])
@@ -192,7 +187,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_10
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_10)])
@@ -207,7 +202,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'appconfig_value': appconfig_value,
             'content_type': json_content_type_11
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', '{appconfig_value}'),
                          self.check('contentType', json_content_type_11)])
@@ -220,7 +215,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'appconfig_value': appconfig_value
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', '{appconfig_value}'),
                          self.check('contentType', json_content_type_11)])
@@ -233,7 +228,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'key': entry_key,
             'content_type': json_content_type_13
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', appconfig_value),
                          self.check('contentType', json_content_type_13)])
@@ -247,30 +242,74 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'content_type': json_content_type_01
         })
         with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
-            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': '[abc,def]'
         })
         with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
-            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': 'True'
         })
         with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
-            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
 
         # Create a non-JSON key-value and update its content type in subsequent command
         self.kwargs.update({
             'value': entry_value
         })
-        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} -y',
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} -y',
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
         with self.assertRaisesRegex(CLIError, "Set the value again in valid JSON format."):
-            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --content-type {content_type} -y')
+
+        # Create a JSON value with both single-line and multiline comments and confirm it can be successfully set though sanitized
+        entry_key = "Key15"
+
+        json_with_comments = """{"key1": "value1 is of the type \\"string\\"",// single-line comment\n"key2": "value2"
+/* multiline 
+ comment */}"""
+
+        self.kwargs.update({
+            'key': entry_key,
+            'value': json.dumps(json_with_comments).replace('\\n', '\n'), # Escape quotes again to pass as input to CLI command template
+            'content_type': json_content_type_01
+        })
+
+        self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', f"{{{json_with_comments}}}"),
+                         self.check('contentType', json_content_type_01)])
+        
+        # Ensure this request fails with keyvault content type
+        self.kwargs.update({
+            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
+
+        # Ensure this request fails with Feature flag content type
+        self.kwargs.update({
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
+        
+
+        # Ensure this request fails with AI Chat Completion content type
+        self.kwargs.update({
+            'content_type': AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --endpoint {src_endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} -y')
+
 
         """
         Test Scenario 2: AppConfig <--> AppConfig Import/Export
@@ -297,7 +336,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         self.kwargs.update({
             'feature': entry_feature
         })
-        self.cmd('appconfig feature set --connection-string {src_connection_string} --feature {feature} -y',
+        self.cmd('appconfig feature set --endpoint {src_endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -313,7 +352,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'key': keyvault_key,
             'secret_identifier': keyvault_id
         })
-        self.cmd('appconfig kv set-keyvault --connection-string {src_connection_string} --key {key} --secret-identifier {secret_identifier} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {src_endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
@@ -323,7 +362,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'import_source': 'appconfig'
         })
         self.cmd(
-            'appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --content-type {content_type} -y')
+            'appconfig kv import --endpoint {dest_endpoint} --auth-mode login -s {import_source} --src-endpoint {src_endpoint} --src-auth-mode login --content-type {content_type} -y')
 
         # Export to JSON file from src config store
         exported_src_file_path = os.path.join(TEST_DIR, 'json_export_src.json')
@@ -334,7 +373,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_src_file_path,
         })
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
 
         # Export to JSON file from dest config store
         exported_dest_file_path = os.path.join(TEST_DIR, 'json_export_dest.json')
@@ -342,7 +381,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_dest_file_path
         })
         self.cmd(
-            'appconfig kv export --connection-string {dest_connection_string} -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {dest_endpoint} --auth-mode login -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
         with open(exported_src_file_path) as json_file:
             src_kvs = json.load(json_file)
         with open(exported_dest_file_path) as json_file:
@@ -356,11 +395,11 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'key': any_key_pattern,
             'label': any_label_pattern
         })
-        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y')
+        self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y')
 
         # Test EXPORT function by exporting all settings from src config store to dest config store
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --dest-endpoint {dest_endpoint} --dest-auth-mode login -y')
 
         # Export to JSON file from src config store
         exported_src_file_path = os.path.join(TEST_DIR, 'json_export_src.json')
@@ -371,7 +410,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_src_file_path,
         })
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
 
         # Export to JSON file from dest config store
         exported_dest_file_path = os.path.join(TEST_DIR, 'json_export_dest.json')
@@ -379,7 +418,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_dest_file_path
         })
         self.cmd(
-            'appconfig kv export --connection-string {dest_connection_string} -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {dest_endpoint} --auth-mode login -d {export_dest} --path "{exported_file_path}" --format {export_format} --separator {separator} -y')
         with open(exported_src_file_path) as json_file:
             src_kvs = json.load(json_file)
         with open(exported_dest_file_path) as json_file:
@@ -389,8 +428,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         os.remove(exported_src_file_path)
 
         # Delete all settings from both config stores
-        self.cmd('appconfig kv delete --connection-string {src_connection_string} --key {key} --label {label} -y')
-        self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --label {label} -y')
+        self.cmd('appconfig kv delete --endpoint {src_endpoint} --auth-mode login --key {key} --label {label} -y')
+        self.cmd('appconfig kv delete --endpoint {dest_endpoint} --auth-mode login --key {key} --label {label} -y')
 
         """
         Test Scenario 3: File <--> AppConfig Import/Export
@@ -411,9 +450,9 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_file_path
         })
         self.cmd(
-            'appconfig kv import --connection-string {src_connection_string} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
+            'appconfig kv import --endpoint {src_endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         with open(exported_file_path) as json_file:
             exported_file = json.load(json_file)
         with open(imported_file_path) as json_file:
@@ -436,10 +475,10 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'exported_file_path': exported_yaml_file_path
         })
         with self.assertRaisesRegex(CLIError, "Please provide JSON file format to match your content type."):
-            self.cmd('appconfig kv import --connection-string {src_connection_string} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
+            self.cmd('appconfig kv import --endpoint {src_endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
 
         self.cmd(
-            'appconfig kv export --connection-string {src_connection_string} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+            'appconfig kv export --endpoint {src_endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         exported_yaml_file = {}
         exported_json_file = {}
         with open(exported_yaml_file_path) as yaml_file:
@@ -450,3 +489,18 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_json_file
         os.remove(exported_yaml_file_path)
         os.remove(exported_file_path)
+
+class AppConfigJsonCommentsTest(TestCase):
+    def test_azconfig_strip_json_comments(self):
+        from azure.cli.command_modules.appconfig._json import parse_json_with_comments
+
+        json_with_comments_file_path = os.path.join(TEST_DIR, 'json_with_comments.json')
+        clean_json_file_path = os.path.join(TEST_DIR, 'json_with_comments_stripped.json')
+
+        with open(json_with_comments_file_path) as json_file:
+            parsed_json = parse_json_with_comments(json_file.read())
+
+        with open(clean_json_file_path) as json_file:
+            expected_json = json.load(json_file)
+
+        self.assertEqual(parsed_json, expected_json)

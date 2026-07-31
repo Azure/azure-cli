@@ -16,7 +16,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-CURRENT_API_VERSION = "2025-01-01"
+CURRENT_API_VERSION = "2025-07-01"
 POLLING_TIMEOUT = 1200  # how many seconds before exiting
 POLLING_SECONDS = 2  # how many seconds between requests
 POLLING_TIMEOUT_FOR_MANAGED_CERTIFICATE = 1500  # how many seconds before exiting
@@ -1458,3 +1458,91 @@ class SubscriptionClient:
 
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return r.json()
+
+
+class HttpRouteConfigClient:
+    api_version = CURRENT_API_VERSION
+
+    @classmethod
+    def create(cls, cmd, resource_group_name, name, http_route_config_name, http_route_config_envelope):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/httpRouteConfigs/{}?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            http_route_config_name,
+            cls.api_version)
+
+        r = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=json.dumps(http_route_config_envelope))
+        return r.json()
+
+    @classmethod
+    def update(cls, cmd, resource_group_name, name, http_route_config_name, http_route_config_envelope):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/httpRouteConfigs/{}?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            http_route_config_name,
+            cls.api_version)
+
+        r = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=json.dumps(http_route_config_envelope))
+        return r.json()
+
+    @classmethod
+    def list(cls, cmd, resource_group_name, name):
+        route_list = []
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/httpRouteConfigs?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            cls.api_version)
+
+        r = send_raw_request(cmd.cli_ctx, "GET", request_url, body=None)
+        j = r.json()
+        for route in j["value"]:
+            route_list.append(route)
+        return route_list
+
+    @classmethod
+    def show(cls, cmd, resource_group_name, name, http_route_config_name):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/httpRouteConfigs/{}?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            http_route_config_name,
+            cls.api_version)
+
+        r = send_raw_request(cmd.cli_ctx, "GET", request_url, body=None)
+        return r.json()
+
+    @classmethod
+    def delete(cls, cmd, resource_group_name, name, http_route_config_name):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/managedEnvironments/{}/httpRouteConfigs/{}?api-version={}"
+        request_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name,
+            http_route_config_name,
+            cls.api_version)
+
+        send_raw_request(cmd.cli_ctx, "DELETE", request_url, body=None)
+        # API doesn't return JSON (it returns no content)
+        return

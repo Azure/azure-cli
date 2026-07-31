@@ -19,8 +19,6 @@ from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 
-from ._client_factory import _compute_client_factory
-
 from .generated.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
     from .manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
@@ -81,7 +79,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
             return
         if offer:
             offers = [o for o in offers if _matched(offer, o['name'])]
-        for o in offers:
+        for o in offers:  # pylint: disable=too-many-nested-blocks
             try:
                 if edge_zone is not None:
                     skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
@@ -113,6 +111,20 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'sku': s['name'],
                             'expand': expand,
                         })
+                        for i in images:
+                            image_info = {
+                                'publisher': publisher,
+                                'offer': o['name'],
+                                'sku': s['name'],
+                                'version': i['name'],
+                                'architecture': i.get("properties", {}).get("architecture", ""),
+                                'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", "")
+                            }
+                            if edge_zone is not None:
+                                image_info['edge_zone'] = edge_zone
+                            if architecture and architecture != image_info['architecture']:
+                                continue
+                            all_images.append(image_info)
                     else:
                         images = VMImageList(cli_ctx=cli_ctx)(command_args={
                             'location': location,
@@ -121,23 +133,23 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'sku': s['name'],
                             'expand': expand,
                         })
+                        for i in images:
+                            image_info = {
+                                'publisher': publisher,
+                                'offer': o['name'],
+                                'sku': s['name'],
+                                'version': i['name'],
+                                'architecture': i.get("architecture", ""),
+                                'imageDeprecationStatus': i.get("imageDeprecationStatus", "")
+                            }
+                            if edge_zone is not None:
+                                image_info['edge_zone'] = edge_zone
+                            if architecture and architecture != image_info['architecture']:
+                                continue
+                            all_images.append(image_info)
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
-                for i in images:
-                    image_info = {
-                        'publisher': publisher,
-                        'offer': o['name'],
-                        'sku': s['name'],
-                        'version': i['name'],
-                        'architecture': i.get("properties", {}).get("architecture", None) or "",
-                        'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", {}) or ""
-                    }
-                    if edge_zone is not None:
-                        image_info['edge_zone'] = edge_zone
-                    if architecture and architecture != image_info['architecture']:
-                        continue
-                    all_images.append(image_info)
 
     if edge_zone is not None:
         publishers = VMImageEdgeZoneListPublishers(cli_ctx=cli_ctx)(command_args={
@@ -179,7 +191,12 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
         try:
             response = requests.get(target_url, verify=not should_disable_connection_verify())
             if response.status_code == 200:
-                dic = json.loads(response.content.decode())
+                try:
+                    dic = json.loads(response.content.decode())
+                except json.JSONDecodeError as ex:
+                    logger.warning("Failed to parse image alias doc '%s'. Error: '%s'. Use local copy instead.",
+                                   target_url, ex)
+                    dic = json.loads(alias_json)
             else:
                 logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
                                target_url, response)
@@ -284,7 +301,10 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
 
 
 def get_vm_sizes(cli_ctx, location):
-    return list(_compute_client_factory(cli_ctx).virtual_machine_sizes.list(location))
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cli_ctx)(command_args={
+        'location': location
+    })
 
 
 def _matched(pattern, string, partial_match=True):
@@ -303,23 +323,35 @@ def _create_image_instance(publisher, offer, sku, version):
     }
 
 
-def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zone=None):
+def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, edge_zone=None):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     if edge_zone is not None:
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.cli.core.profiles import ResourceType
-        edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        top_one = edge_zone_client.list(location, edge_zone, publisher, offer, sku, top=1, orderby='name desc')
+        from .aaz.latest.vm.image.edge_zone import List as VmImageEdgeZoneList
+        command_args = {
+            'edge_zone': edge_zone,
+            'location': location,
+            'offer': offer,
+            'publisher': publisher,
+            'sku': sku,
+            'orderby': 'name desc',
+            'top': 1,
+        }
+        top_one = VmImageEdgeZoneList(cli_ctx=cli_ctx)(command_args=command_args)
         if not top_one:
             raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}:{}'"
                                             .format(publisher, offer, sku, edge_zone))
     else:
-        top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
-                                                                               publisher,
-                                                                               offer,
-                                                                               sku,
-                                                                               top=1,
-                                                                               orderby='name desc')
+        from .aaz.latest.vm.image import List as VmImageList
+        command_args = {
+            'location': location,
+            'offer': offer,
+            'publisher': publisher,
+            'sku': sku,
+            'orderby': 'name desc',
+            'top': 1,
+            'expand': 'properties'
+        }
+        top_one = VmImageList(cli_ctx=cli_ctx)(command_args=command_args)
         if not top_one:
             raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
-    return top_one[0].name
+    return top_one[0].get('name')

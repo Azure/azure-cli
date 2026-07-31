@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-01-01", "properties.activeDirectories"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-05-01", "properties.activeDirectories"],
         ]
     }
 
@@ -72,7 +72,7 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -134,7 +134,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -198,7 +198,7 @@ class _ListHelper:
         net_app_account_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        net_app_account_read.identity = AAZObjectType()
+        net_app_account_read.identity = AAZIdentityObjectType()
         net_app_account_read.location = AAZStrType(
             flags={"required": True},
         )

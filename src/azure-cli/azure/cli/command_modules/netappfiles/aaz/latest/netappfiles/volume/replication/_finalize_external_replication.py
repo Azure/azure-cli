@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class FinalizeExternalReplication(AAZCommand):
     """Finalizes the migration of an external volume by releasing the replication and breaking the external cluster peering if no other migration is active.
+
+    :example: Volumes_FinalizeExternalReplication
+        az netappfiles volume replication finalize-external-replication --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/finalizeexternalreplication", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/finalizeexternalreplication", "2026-05-01"],
         ]
     }
 
@@ -154,7 +157,7 @@ class FinalizeExternalReplication(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }

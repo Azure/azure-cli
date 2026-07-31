@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance list"
+    "network virtual-appliance list",
 )
 class List(AAZCommand):
     """List all Azure network virtual appliance.
@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networkvirtualappliances", "2023-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/networkvirtualappliances", "2024-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances", "2024-10-01"],
         ]
     }
 
@@ -51,12 +51,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.NetworkVirtualAppliancesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.NetworkVirtualAppliancesList(ctx=self.ctx)()
+        if condition_1:
+            self.NetworkVirtualAppliancesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +72,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class NetworkVirtualAppliancesListByResourceGroup(AAZHttpOperation):
+    class NetworkVirtualAppliancesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,7 +86,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkVirtualAppliances",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/networkVirtualAppliances",
                 **self.url_parameters
             )
 
@@ -102,10 +102,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -116,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -162,7 +158,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.id = AAZStrType()
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
@@ -234,11 +230,18 @@ class List(AAZCommand):
             properties.network_profile = AAZObjectType(
                 serialized_name="networkProfile",
             )
+            properties.nva_interface_configurations = AAZListType(
+                serialized_name="nvaInterfaceConfigurations",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
             properties.partner_managed_resource = AAZObjectType(
                 serialized_name="partnerManagedResource",
+            )
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIpAddress",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -327,6 +330,20 @@ class List(AAZCommand):
 
             properties = cls._schema_on_200.value.Element.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
             properties.primary = AAZBoolType()
+
+            nva_interface_configurations = cls._schema_on_200.value.Element.properties.nva_interface_configurations
+            nva_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element
+            _element.name = AAZStrType()
+            _element.subnet = AAZObjectType()
+            _element.type = AAZListType()
+
+            subnet = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element.subnet
+            subnet.id = AAZStrType()
+
+            type = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element.type
+            type.Element = AAZStrType()
 
             nva_sku = cls._schema_on_200.value.Element.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(
@@ -387,7 +404,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class NetworkVirtualAppliancesList(AAZHttpOperation):
+    class NetworkVirtualAppliancesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -401,7 +418,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/networkVirtualAppliances",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkVirtualAppliances",
                 **self.url_parameters
             )
 
@@ -417,6 +434,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -427,7 +448,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -473,7 +494,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.id = AAZStrType()
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType()
             _element.name = AAZStrType(
                 flags={"read_only": True},
@@ -545,11 +566,18 @@ class List(AAZCommand):
             properties.network_profile = AAZObjectType(
                 serialized_name="networkProfile",
             )
+            properties.nva_interface_configurations = AAZListType(
+                serialized_name="nvaInterfaceConfigurations",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
             properties.partner_managed_resource = AAZObjectType(
                 serialized_name="partnerManagedResource",
+            )
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIpAddress",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -638,6 +666,20 @@ class List(AAZCommand):
 
             properties = cls._schema_on_200.value.Element.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
             properties.primary = AAZBoolType()
+
+            nva_interface_configurations = cls._schema_on_200.value.Element.properties.nva_interface_configurations
+            nva_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element
+            _element.name = AAZStrType()
+            _element.subnet = AAZObjectType()
+            _element.type = AAZListType()
+
+            subnet = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element.subnet
+            subnet.id = AAZStrType()
+
+            type = cls._schema_on_200.value.Element.properties.nva_interface_configurations.Element.type
+            type.Element = AAZStrType()
 
             nva_sku = cls._schema_on_200.value.Element.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(

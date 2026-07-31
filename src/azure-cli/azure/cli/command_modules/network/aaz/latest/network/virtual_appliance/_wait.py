@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2024-10-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -160,7 +160,7 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
             _schema_on_200.id = AAZStrType()
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -232,11 +232,18 @@ class Wait(AAZWaitCommand):
             properties.network_profile = AAZObjectType(
                 serialized_name="networkProfile",
             )
+            properties.nva_interface_configurations = AAZListType(
+                serialized_name="nvaInterfaceConfigurations",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
             properties.partner_managed_resource = AAZObjectType(
                 serialized_name="partnerManagedResource",
+            )
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIpAddress",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -325,6 +332,20 @@ class Wait(AAZWaitCommand):
 
             properties = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
             properties.primary = AAZBoolType()
+
+            nva_interface_configurations = cls._schema_on_200.properties.nva_interface_configurations
+            nva_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.nva_interface_configurations.Element
+            _element.name = AAZStrType()
+            _element.subnet = AAZObjectType()
+            _element.type = AAZListType()
+
+            subnet = cls._schema_on_200.properties.nva_interface_configurations.Element.subnet
+            subnet.id = AAZStrType()
+
+            type = cls._schema_on_200.properties.nva_interface_configurations.Element.type
+            type.Element = AAZStrType()
 
             nva_sku = cls._schema_on_200.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(

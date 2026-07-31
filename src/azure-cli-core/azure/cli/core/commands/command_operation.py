@@ -462,7 +462,7 @@ class WaitCommandOperation(BaseCommandOperation):
 
     @staticmethod
     def _get_provisioning_state(instance):
-        from knack.util import todict
+        from azure.cli.core.util import todict
         result = todict(instance)
         provisioning_state = result.get('provisioning_state', result.get('provisioningState', None))
         if not provisioning_state:

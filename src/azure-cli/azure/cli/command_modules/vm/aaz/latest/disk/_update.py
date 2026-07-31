@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-04-02",
+        "version": "2025-01-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2023-04-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2025-01-02"],
         ]
     }
 
@@ -64,6 +64,17 @@ class Update(AAZCommand):
             help="Underlying storage SKU.",
             nullable=True,
             enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "StandardSSD_LRS": "StandardSSD_LRS", "StandardSSD_ZRS": "StandardSSD_ZRS", "Standard_LRS": "Standard_LRS", "UltraSSD_LRS": "UltraSSD_LRS"},
+        )
+
+        # define Arg Group "AvailabilityPolicy"
+
+        _args_schema = cls._args_schema
+        _args_schema.action_on_disk_delay = AAZStrArg(
+            options=["--action-on-disk-delay"],
+            arg_group="AvailabilityPolicy",
+            help="Determine on how to handle disks with slow I/O.",
+            nullable=True,
+            enum={"AutomaticReattach": "AutomaticReattach", "None": "None"},
         )
 
         # define Arg Group "Disk"
@@ -175,6 +186,13 @@ class Update(AAZCommand):
             help="CPU architecture supported by an OS disk.",
             nullable=True,
             enum={"Arm64": "Arm64", "x64": "x64"},
+        )
+        _args_schema.supported_security_option = AAZStrArg(
+            options=["--security-option", "--supported-security-option"],
+            arg_group="SupportedCapabilities",
+            help="Refer to the security capability of the disk supported to create a Trusted launch or Confidential VM",
+            nullable=True,
+            enum={"TrustedLaunchAndConfidentialVMSupported": "TrustedLaunchAndConfidentialVMSupported", "TrustedLaunchSupported": "TrustedLaunchSupported"},
         )
         return cls._args_schema
 
@@ -293,7 +311,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -317,7 +335,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -364,7 +382,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -373,7 +391,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -392,7 +410,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -416,7 +434,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -479,6 +497,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("availabilityPolicy", AAZObjectType)
                 properties.set_prop("burstingEnabled", AAZBoolType, ".bursting_enabled")
                 properties.set_prop("dataAccessAuthMode", AAZStrType, ".data_access_auth_mode")
                 properties.set_prop("diskAccessId", AAZStrType, ".disk_access_id")
@@ -493,6 +512,10 @@ class Update(AAZCommand):
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
                 properties.set_prop("supportedCapabilities", AAZObjectType)
 
+            availability_policy = _builder.get(".properties.availabilityPolicy")
+            if availability_policy is not None:
+                availability_policy.set_prop("actionOnDiskDelay", AAZStrType, ".action_on_disk_delay")
+
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
                 encryption.set_prop("diskEncryptionSetId", AAZStrType, ".disk_encryption_set_id")
@@ -502,6 +525,7 @@ class Update(AAZCommand):
             if supported_capabilities is not None:
                 supported_capabilities.set_prop("acceleratedNetwork", AAZBoolType, ".accelerated_network")
                 supported_capabilities.set_prop("architecture", AAZStrType, ".architecture")
+                supported_capabilities.set_prop("supportedSecurityOption", AAZStrType, ".supported_security_option")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -549,6 +573,7 @@ class _UpdateHelper:
             _schema.name = cls._schema_disk_read.name
             _schema.properties = cls._schema_disk_read.properties
             _schema.sku = cls._schema_disk_read.sku
+            _schema.system_data = cls._schema_disk_read.system_data
             _schema.tags = cls._schema_disk_read.tags
             _schema.type = cls._schema_disk_read.type
             _schema.zones = cls._schema_disk_read.zones
@@ -581,6 +606,10 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
         disk_read.sku = AAZObjectType()
+        disk_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         disk_read.tags = AAZDictType()
         disk_read.type = AAZStrType(
             flags={"read_only": True},
@@ -598,6 +627,9 @@ class _UpdateHelper:
         properties.last_ownership_update_time = AAZStrType(
             serialized_name="LastOwnershipUpdateTime",
             flags={"read_only": True},
+        )
+        properties.availability_policy = AAZObjectType(
+            serialized_name="availabilityPolicy",
         )
         properties.bursting_enabled = AAZBoolType(
             serialized_name="burstingEnabled",
@@ -698,6 +730,11 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        availability_policy = _schema_disk_read.properties.availability_policy
+        availability_policy.action_on_disk_delay = AAZStrType(
+            serialized_name="actionOnDiskDelay",
+        )
+
         creation_data = _schema_disk_read.properties.creation_data
         creation_data.create_option = AAZStrType(
             serialized_name="createOption",
@@ -714,14 +751,23 @@ class _UpdateHelper:
             serialized_name="imageReference",
         )
         cls._build_schema_image_disk_reference_read(creation_data.image_reference)
+        creation_data.instant_access_duration_minutes = AAZIntType(
+            serialized_name="instantAccessDurationMinutes",
+        )
         creation_data.logical_sector_size = AAZIntType(
             serialized_name="logicalSectorSize",
         )
         creation_data.performance_plus = AAZBoolType(
             serialized_name="performancePlus",
         )
+        creation_data.provisioned_bandwidth_copy_speed = AAZStrType(
+            serialized_name="provisionedBandwidthCopySpeed",
+        )
         creation_data.security_data_uri = AAZStrType(
             serialized_name="securityDataUri",
+        )
+        creation_data.security_metadata_uri = AAZStrType(
+            serialized_name="securityMetadataUri",
         )
         creation_data.source_resource_id = AAZStrType(
             serialized_name="sourceResourceId",
@@ -834,11 +880,34 @@ class _UpdateHelper:
         supported_capabilities.disk_controller_types = AAZStrType(
             serialized_name="diskControllerTypes",
         )
+        supported_capabilities.supported_security_option = AAZStrType(
+            serialized_name="supportedSecurityOption",
+        )
 
         sku = _schema_disk_read.sku
         sku.name = AAZStrType()
         sku.tier = AAZStrType(
             flags={"read_only": True},
+        )
+
+        system_data = _schema_disk_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
         )
 
         tags = _schema_disk_read.tags
@@ -855,6 +924,7 @@ class _UpdateHelper:
         _schema.name = cls._schema_disk_read.name
         _schema.properties = cls._schema_disk_read.properties
         _schema.sku = cls._schema_disk_read.sku
+        _schema.system_data = cls._schema_disk_read.system_data
         _schema.tags = cls._schema_disk_read.tags
         _schema.type = cls._schema_disk_read.type
         _schema.zones = cls._schema_disk_read.zones

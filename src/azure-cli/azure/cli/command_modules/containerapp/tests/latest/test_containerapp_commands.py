@@ -2070,3 +2070,57 @@ class ContainerappOtherPropertyTests(ScenarioTest):
         self.cmd(f'containerapp create -g {resource_group} -n {app} --image {image} --ingress external --target-port 80 --environment {env} --termination-grace-period {terminationGracePeriodSeconds}')
 
         self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[JMESPathCheck("properties.template.terminationGracePeriodSeconds", terminationGracePeriodSeconds)])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="westeurope")
+    def test_containerapp_env_premium_ingress_commands(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_name = self.create_random_name(prefix='containerapp-env', length=24)
+        self.cmd(f'containerapp env create -g {resource_group} -n {env_name} --logs-destination none')
+
+        containerapp_env = self.cmd(f'containerapp env show -g {resource_group} -n {env_name}').get_output_in_json()
+
+        self.cmd(f'az containerapp env workload-profile add -g {resource_group} -n {env_name} -w wp-ingress --min-nodes 2 --max-nodes 5 --workload-profile-type D4'.format(env_name, resource_group))
+
+        self.cmd(f'containerapp env premium-ingress show -g {resource_group} -n {env_name}', checks=[
+            JMESPathCheck('message', 'No premium ingress configuration found for this environment, using default values.'),
+        ])
+
+        self.cmd(f'containerapp env premium-ingress add -g {resource_group} -n {env_name} -w wp-ingress', checks=[
+            JMESPathCheck('workloadProfileName', 'wp-ingress'),
+            JMESPathCheck('terminationGracePeriodSeconds', None),
+            JMESPathCheck('requestIdleTimeout', None),
+            JMESPathCheck('headerCountLimit', None),
+        ])
+        
+        self.cmd(f'containerapp env premium-ingress show -g {resource_group} -n {env_name}', checks=[
+            JMESPathCheck('workloadProfileName', 'wp-ingress'),
+            JMESPathCheck('terminationGracePeriodSeconds', None),
+            JMESPathCheck('requestIdleTimeout', None),
+            JMESPathCheck('headerCountLimit', None),
+        ])
+        
+        self.cmd(f'containerapp env premium-ingress update -g {resource_group} -n {env_name} --termination-grace-period 45 --request-idle-timeout 6 --header-count-limit 40', checks=[
+            JMESPathCheck('workloadProfileName', 'wp-ingress'),
+            JMESPathCheck('terminationGracePeriodSeconds', 45),
+            JMESPathCheck('requestIdleTimeout', 6),
+            JMESPathCheck('headerCountLimit', 40),
+        ])
+
+        # set removes unspecified optional parameters
+        self.cmd(f'containerapp env premium-ingress add -g {resource_group} -n {env_name} -w wp-ingress --request-idle-timeout 11', checks=[
+            JMESPathCheck('workloadProfileName', 'wp-ingress'),
+            JMESPathCheck('requestIdleTimeout', 11),
+            JMESPathCheck('terminationGracePeriodSeconds', None),
+            JMESPathCheck('headerCountLimit', None),
+        ])
+
+        self.cmd(f'containerapp env premium-ingress remove -g {resource_group} -n {env_name} -y')
+    
+        self.cmd(f'containerapp env premium-ingress show -g {resource_group} -n {env_name}', checks=[
+            JMESPathCheck('message', 'No premium ingress configuration found for this environment, using default values.'),
+        ])
+
+        # Clean up
+        self.cmd(f'containerapp env delete -g {resource_group} -n {env_name} --yes --no-wait')

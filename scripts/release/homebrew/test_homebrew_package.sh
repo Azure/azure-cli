@@ -8,6 +8,12 @@ echo == Remove pre-installed azure-cli ==
 brew uninstall azure-cli
 
 echo == Install azure-cli.rb formula ==
+# TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
+# The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
+# Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
+# (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
+# form for the local test install only; the generated/submitted formula stays upstream-faithful.
+sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
 AZ_BASE=/usr/local/Cellar/azure-cli/$CLI_VERSION/libexec

@@ -71,7 +71,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
                                        custom_error_pages, firewall_policy, max_capacity,
-                                       user_assigned_identity,
+                                       user_assigned_identity, enable_fips,
                                        enable_private_link=False,
                                        private_link_name=None,
                                        private_link_ip_address=None,
@@ -270,6 +270,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'sslCertificates': [ssl_cert]})
     if enable_http2:
         ag_properties.update({'enableHttp2': enable_http2})
+    if enable_fips is not None:
+        ag_properties.update({'enableFips': enable_fips})
     if min_capacity:
         if 'autoscaleConfiguration' not in ag_properties:
             ag_properties['autoscaleConfiguration'] = {}
@@ -462,7 +464,8 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
 
 def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2, vpn_type, authorization_key,
                                   enable_bgp, routing_weight, shared_key, use_policy_based_traffic_selectors,
-                                  express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule):
+                                  express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule,
+                                  auth_type, cert_auth):
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'enableBgp': enable_bgp,
@@ -498,13 +501,50 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
     if egress_nat_rule:
         vpn_properties['egressNatRules'] = [{'id': rule} for rule in egress_nat_rule]
 
+    if auth_type:
+        vpn_properties['authenticationType'] = auth_type
+
+    if cert_auth:
+        vpn_properties['certificateAuthentication'] = cert_auth
+
     vpn_connection = {
         'type': 'Microsoft.Network/connections',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2025-01-01',
         'dependsOn': [],
         'properties': vpn_properties if vpn_type != 'VpnClient' else {}
     }
     return vpn_connection
+
+
+def build_ddos_custom_policy(cmd, ddos_custom_policy_name, location=None, tags=None, detection_rule_name=None,
+                             detection_mode=None, packets_per_second=None, traffic_type=None):
+    policy = {'ddos_custom_policy_name': ddos_custom_policy_name}
+
+    if location:
+        policy['location'] = location
+
+    if tags:
+        policy['tags'] = tags
+
+    detection_rules = {}
+    traffic_detection_rule = {}
+
+    if detection_rule_name:
+        detection_rules['name'] = detection_rule_name
+
+    if detection_mode:
+        detection_rules['detection_mode'] = detection_mode
+
+    if packets_per_second:
+        traffic_detection_rule['packets_per_second'] = packets_per_second
+
+    if traffic_type:
+        traffic_detection_rule['traffic_type'] = traffic_type
+
+    detection_rules['traffic_detection_rule'] = traffic_detection_rule
+    policy['detection_rules'] = [detection_rules]
+
+    return policy

@@ -18,7 +18,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-WINDOWS_ASP_LOCATION_WEBAPP = 'northeurope'
+WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 STAGE1_ASP_LOCATION_WEBAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
@@ -48,7 +48,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
-            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', None),
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
@@ -449,7 +449,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
-            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', None),
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 

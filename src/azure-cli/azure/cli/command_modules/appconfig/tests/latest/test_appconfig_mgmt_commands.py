@@ -12,7 +12,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -352,6 +352,56 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_appinsights(self, resource_group, location):
+        """Test linking Application Insights to App Configuration store."""
+        appinsights_prefix = get_resource_name_prefix('AppInsightsTest')
+        config_store_name = self.create_random_name(prefix=appinsights_prefix, length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'retention_days': 1
+        })
+
+        # Use a fake Application Insights resource ID because the application-insights extension
+        # cannot be installed in recording/playback mode — the extension index response exceeds
+        app_insights_prefix = get_resource_name_prefix('appinsights')
+        app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
+        app_insights_resource_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(resource_group, app_insights_name)
+        self.kwargs.update({
+            'app_insights_resource_id': app_insights_resource_id
+        })
+
+        # Create App Configuration store with Application Insights linked
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days} --appinsights-resource {app_insights_resource_id}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('telemetry.resourceId', app_insights_resource_id)])
+
+        # Verify App Insights is linked by showing the store
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('telemetry.resourceId', app_insights_resource_id)])
+
+        # Unlink App Insights by passing an empty string for appinsights-resource-id
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource ""',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('telemetry.resourceId', None)])
+
+        # Verify App Insights is unlinked
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('telemetry.resourceId', None)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
         disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
         config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=24)
@@ -397,6 +447,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
+        """Test public network access via the deprecated --enable-public-network flag and the
+        new --public-network-access parameter (Enabled, Disabled, SecuredByPerimeter)."""
         pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
         config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
@@ -443,6 +495,49 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
+
+        # Test the new --public-network-access parameter with Enabled, Disabled and SecuredByPerimeter values.
+        new_param_prefix = get_resource_name_prefix('PubNetAccess')
+
+        # Test create with --public-network-access Enabled
+        enabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
+        self.kwargs.update({
+            'config_store_name': enabled_store
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --public-network-access Enabled --retention-days {retention_days}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        # Test update with --public-network-access Disabled
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --public-network-access Disabled',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        # Test create with --public-network-access Disabled
+        disabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
+        self.kwargs.update({
+            'config_store_name': disabled_store
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --public-network-access Disabled --retention-days {retention_days}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        # Test update with --public-network-access SecuredByPerimeter
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --public-network-access SecuredByPerimeter',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('publicNetworkAccess', 'SecuredByPerimeter')])
+
+        # Test that --enable-public-network and --public-network-access cannot be used together
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "Cannot specify both '--enable-public-network' and '--public-network-access'"):
+            self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network true --public-network-access Disabled')
 
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -504,7 +599,76 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig create -n {store_name} -g {rg} -l {location} --sku {sku} --kv-revision-retention-period {retention_period}',
                  checks=[self.check('sku.name', dev_sku),
                          self.check('defaultKeyValueRevisionRetentionPeriodInSeconds', dev_retention_period)])
-                        
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse()
+    def test_azconfig_azure_front_door_profile(self, resource_group, location):
+        """Test Azure Front Door profile linking/unlinking for App Configuration store."""
+        mgmt_prefix = get_resource_name_prefix('AFDTest')
+
+        # Create store with Front Door profile
+        config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
+        front_door_profile_name = self.create_random_name(prefix='afdprofile', length=24)
+        standard_sku = 'standard'
+        location = 'eastus'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': standard_sku,
+            'front_door_profile_name': front_door_profile_name,
+            'retention_days': 1
+        })
+
+        # Create Azure Front Door profile first
+        front_door_profile = self.cmd('resource create -g {rg} -n {front_door_profile_name} --resource-type Microsoft.Cdn/profiles --api-version 2025-06-01 --is-full-object --properties \'{{"location": "global", "sku": {{"name": "Standard_AzureFrontDoor"}}}}\'').get_output_in_json()
+        front_door_profile_id = front_door_profile['id']
+
+        self.kwargs.update({
+            'front_door_profile_id': front_door_profile_id
+        })
+
+        # Create App Configuration store with Front Door profile linked
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days} --azure-front-door-profile {front_door_profile_id}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', standard_sku),
+                         self.check('azureFrontDoor.resourceId', front_door_profile_id)])
+
+        # Verify Front Door profile is linked by showing the store
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('azureFrontDoor.resourceId', front_door_profile_id)])
+
+        # Update store without specifying --azure-front-door-profile and verify profile is preserved
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags key=value',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('azureFrontDoor.resourceId', front_door_profile_id),
+                         self.check('tags.key', 'value')])
+
+        # Update store to unlink Front Door profile (pass empty string)
+        self.kwargs.update({
+            'empty_front_door_id': ''
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile "{empty_front_door_id}"',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('azureFrontDoor.resourceId', None)])
+
+        # Update store to link Front Door profile again
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile {front_door_profile_id}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('azureFrontDoor.resourceId', front_door_profile_id)])
+
 
 def _setup_key_vault(test, kwargs):
     key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-rbac-authorization false --enable-purge-protection --retention-days 7').get_output_in_json()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -23,7 +24,7 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
-    cf_mysql_firewall_rules
+    cf_mysql_firewall_rules, get_mysql_flexible_management_client_by_sub
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
@@ -277,7 +278,8 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
+        # Setting to None omits created_time from the serialized output (matches prior behavior).
+        f.created_time = None
         files.append(f)
 
     return files
@@ -294,23 +296,30 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     if instance.sku.tier == 'Burstable':
         raise CLIError("Major version update is not supported for the Burstable pricing tier.")
 
-    current_version = int(instance.version.split('.')[0])
-    if current_version >= int(version):
-        raise CLIError("The version to upgrade to must be greater than the current version.")
-
     replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
     mysql_version_map = {
         '8': '8.0.21',
+        '8.4': '8.4'
     }
     version_mapped = mysql_version_map[version]
+
+    current_major_version = int(instance.version.split('.')[0])
+    current_minor_version = int(instance.version.split('.')[1])
+
+    target_major_version = int(version_mapped.split('.')[0])
+    target_minor_version = int(version_mapped.split('.')[1])
+
+    if current_major_version > target_major_version or (current_major_version == target_major_version and current_minor_version >= target_minor_version):
+        raise CLIError("The version to upgrade to must be greater than the current version.")
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
 
     for replica in replicas:
-        current_replica_version = int(replica.version.split('.')[0])
-        if current_replica_version < int(version):
+        current_replica_major_version = int(replica.version.split('.')[0])
+        current_replica_minor_version = int(replica.version.split('.')[1])
+        if current_replica_major_version < target_major_version or (current_replica_major_version == target_major_version and current_replica_minor_version < target_minor_version):
             raise CLIError("Primary server version must not be greater than replica server version. "
-                           "First upgrade {} server version to {} and try again.".format(replica.name, version))
+                           "First upgrade {} server version to {} and try again.".format(replica.name, version_mapped))
 
     parameters = {
         'version': version_mapped
@@ -337,7 +346,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None, storage_redundancy=None,
+                           iops=None, auto_grow=None, auto_scale_iops=None, accelerated_logs=None,
                            geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            backup_interval=None, maintenance_policy_patch_strategy=None, yes=False):
     # Generate missing parameters
@@ -409,8 +418,7 @@ def flexible_server_create(cmd, client,
                              iops=iops,
                              auto_grow=auto_grow,
                              auto_io_scaling=auto_scale_iops,
-                             log_on_disk=accelerated_logs,
-                             storage_redundancy=storage_redundancy)
+                             log_on_disk=accelerated_logs)
 
     backup = models.Backup(backup_retention_days=backup_retention, backup_interval_hours=backup_interval, geo_redundant_backup=geo_redundant_backup)
 
@@ -705,8 +713,8 @@ def flexible_server_import_replica_stop(client, resource_group_name, server_name
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None, database_port=None,
-                            storage_gb=None, auto_grow=None, accelerated_logs=None, faster_restore=None, storage_redundancy=None,
-                            backup_retention=None, geo_redundant_backup=None, tags=None):
+                            storage_gb=None, auto_grow=None, accelerated_logs=None, faster_restore=None, backup_retention=None,
+                            geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -727,7 +735,9 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         location = ''.join(source_server_object.location.lower().split())
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
@@ -764,9 +774,6 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             auto_io_scaling = _determine_auto_io_scaling_by_faster_restore(faster_restore)
 
-        if not storage_redundancy:
-            storage_redundancy = source_server_object.storage.storage_redundancy
-
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -790,7 +797,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=auto_io_scaling,
-                                 log_on_disk=accelerated_logs, storage_redundancy=storage_redundancy)
+                                 log_on_disk=accelerated_logs,
+                                 storage_redundancy=source_server_object.storage.storage_redundancy)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -834,27 +842,36 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             parameters.network = source_server_object.network
 
-    except Exception as e:
-        raise ResourceNotFoundError(e)
+    except HttpResponseError as exc:
+        raise ResourceNotFoundError(exc) from exc
 
-    resolve_poller(
-        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        'Restore Server')
+    def _begin_network_update():
+        restore_server_object = client.get(resource_group_name, server_name)
+        restore_server_network = restore_server_object.network
+        restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
+        update_parameter = models.ServerForUpdate(network=restore_server_network)
+        return client.begin_update(resource_group_name, server_name, update_parameter)
 
-    restore_server_object = client.get(resource_group_name, server_name)
-    restore_server_network = restore_server_object.network
-    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
-    update_parameter = models.ServerForUpdate(network=restore_server_network)
+    create_poller = sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    if no_wait:
+        def _post_create_update(poller):
+            try:
+                _begin_network_update()
+            except (HttpResponseError, CLIError) as ex:
+                logger.warning('Skipping post-restore network update: %s', ex)
 
-    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
+        create_poller.add_done_callback(_post_create_update)
+        return create_poller
+
+    resolve_poller(create_poller, cmd.cli_ctx, 'Restore Server')
+    return sdk_no_wait(no_wait, _begin_network_update)
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None, no_wait=False,
                                subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None, tags=None,
                                private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                               storage_gb=None, auto_grow=None, accelerated_logs=None, storage_redundancy=None,
-                               backup_retention=None, geo_redundant_backup=None):
+                               storage_gb=None, auto_grow=None, accelerated_logs=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -873,7 +890,9 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
         if not tier:
@@ -901,9 +920,6 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         else:
             mysql_accelerated_logs_validator(accelerated_logs, tier)
 
-        if not storage_redundancy:
-            storage_redundancy = source_server_object.storage.storage_redundancy
-
         if not backup_retention:
             backup_retention = source_server_object.backup.backup_retention_days
         else:
@@ -930,7 +946,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs, storage_redundancy=storage_redundancy)
+                                 log_on_disk=accelerated_logs,
+                                 storage_redundancy=source_server_object.storage.storage_redundancy)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -991,7 +1008,8 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
                                        high_availability=None, standby_availability_zone=None, maintenance_window=None,
                                        tags=None, replication_role=None, byok_identity=None, backup_byok_identity=None,
                                        byok_key=None, backup_byok_key=None, disable_data_encryption=False,
-                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None):
+                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None,
+                                       maintenance_batch=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1049,14 +1067,22 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
     if backup_interval:
         instance.backup.backup_interval_hours = backup_interval
 
+    if maintenance_batch and not maintenance_window:
+        raise CLIError('--maintenance-batch can only be used together with an enabled --maintenance-window.')
+
     if maintenance_window:
         # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
+            if maintenance_batch:
+                raise CLIError('--maintenance-batch cannot be used when disabling the maintenance window.')
             day_of_week = start_hour = start_minute = 0
             custom_window = "Disabled"
+            instance.maintenance_window.batch_of_maintenance = None
         else:
             day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
             custom_window = "Enabled"
+            if maintenance_batch:
+                instance.maintenance_window.batch_of_maintenance = maintenance_batch
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
@@ -1306,15 +1332,25 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
         value=configurations
     )
 
-    return client.begin_batch_update(resource_group_name, server_name, parameters)
+    # The batch update is a long-running operation whose final response body is empty with the
+    # current SDK, so surface the operation status to keep the command output meaningful.
+    poller = client.begin_batch_update(resource_group_name, server_name, parameters)
+    poller.result()
+    return {'status': poller.status()}
+
+
+def flexible_backup_delete(client, resource_group_name, server_name, backup_name):
+    # Invoke the operation as a bound method so the SDK api-version validation decorator
+    # receives the client as its first positional argument.
+    return client.begin_delete(resource_group_name, server_name, backup_name)
 
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None, sku_name=None,
                             private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False,
-                            storage_gb=None, iops=None, storage_redundancy=None, faster_provisioning=None, geo_redundant_backup=None,
-                            backup_retention=None, tier=None, database_port=None):
+                            storage_gb=None, iops=None, faster_provisioning=None, geo_redundant_backup=None, backup_retention=None,
+                            tier=None, database_port=None):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -1333,7 +1369,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
-        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, source_server_id_parts['subscription']).servers
+        source_server_object = source_client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
         validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
@@ -1369,8 +1406,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     storage = models.Storage(storage_size_gb=storage_gb,
                              iops=iops,
                              auto_grow="Enabled",
-                             auto_io_scaling=auto_io_scaling,
-                             storage_redundancy=storage_redundancy)
+                             auto_io_scaling=auto_io_scaling)
 
     backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -1669,7 +1705,7 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
             accelerated_logs = "Enabled"
         else:
             accelerated_logs = "Disabled"
-    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
+    if tier == "Burstable" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
     return accelerated_logs
 
@@ -1968,7 +2004,7 @@ def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup
     if not storage_gb:
         storage_gb = 32
     if not version:
-        allowed_versions = ['5.7', '8.0.21']
+        allowed_versions = ['5.7', '8.0.21', '8.4']
         raise CLIError('--version is a required parameter for external migrations. Allowed values: {}'.format(allowed_versions))
     if not auto_grow:
         auto_grow = 'Enabled'
@@ -2014,6 +2050,51 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
                              start_ip=rule.start_ip_address,
                              end_ip=rule.end_ip_address,
                              firewall_rule_name=rule.name)
+
+
+def _fm_settings_payload(state, uami=None):
+    """
+    Build the ARM request body for a FabricMirroringSetting ('Default').
+    The 1.1.0b3 SDK model is nested: properties.state / properties.identityResourceId.
+    """
+    # Build the ARM request body. In SDK 1.1.0b3 the model is nested
+    # (properties.state / properties.identityResourceId), NOT flattened. A plain dict is
+    # accepted by the (typespec-generated) SDK and avoids the model-name/flatten mismatch.
+    props = {'state': state}
+    if uami:
+        props['identityResourceId'] = uami
+    return {'properties': props}
+
+
+def flexible_server_mirroring_enable(cmd, client, resource_group_name, server_name, identity_resource_id):
+    """
+    'Enable' translates to PUT the 'Default' FabricMirroringSettings with state=Enabled and UAMI.
+    The Swagger limits settings name to 'Default'.
+    """
+    if not identity_resource_id:
+        raise RequiredArgumentMissingError(
+            "Parameter --identity-resource-id is required when enabling fabric mirroring."
+        )
+
+    payload = _fm_settings_payload(state='Enabled', uami=identity_resource_id)
+
+    # Long-running operation
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Enable Fabric mirroring')
+
+
+def flexible_server_mirroring_disable(cmd, client, resource_group_name, server_name):
+    """
+    'Disable' translates to PUT the 'Default' FabricMirroringSettings with state=Disabled.
+    identityResourceId can be omitted when disabling<97>service will deactivate/clean bindings.
+    """
+    payload = _fm_settings_payload(state='Disabled', uami=None)
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Disable Fabric mirroring')
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods

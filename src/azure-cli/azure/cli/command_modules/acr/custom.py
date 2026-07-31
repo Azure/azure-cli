@@ -7,6 +7,7 @@
 
 import os
 import re
+import shutil
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
@@ -28,6 +29,9 @@ SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 DENY_ACTION = 'Deny'
 DOMAIN_NAME_LABEL_SCOPE_UNSECURE = 'Unsecure'
 DOMAIN_NAME_LABEL_SCOPE_RESOURCE_GROUP_REUSE = 'ResourceGroupReuse'
+REGIONAL_ENDPOINTS_NOT_SUPPORTED = "Regional endpoints are only supported for managed registries in Premium SKU."
+REGIONAL_ENDPOINTS_NOT_SUPPORTED_FOR_DCT = "Regional endpoints cannot be enabled when Content Trust is enabled. " \
+                                           "Please disable Content Trust and try again."
 
 
 def acr_check_name(cmd, client, registry_name, resource_group_name=None, dnl_scope=DOMAIN_NAME_LABEL_SCOPE_UNSECURE):
@@ -72,7 +76,11 @@ def acr_create(cmd,
                tags=None,
                allow_metadata_search=None,
                dnl_scope=None,
-               role_assignment_mode=None):
+               role_assignment_mode=None,
+               regional_endpoints=None,
+               data_endpoint_enabled=None,
+               endpoint_protocol=None,
+               writable_cache_repos=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -105,6 +113,18 @@ def acr_create(cmd,
 
     if role_assignment_mode is not None:
         _configure_role_assignment_mode(cmd, registry, role_assignment_mode)
+
+    if regional_endpoints is not None:
+        _configure_regional_endpoints(cmd, registry, sku, regional_endpoints)
+
+    if data_endpoint_enabled is not None:
+        registry.data_endpoint_enabled = data_endpoint_enabled
+
+    if endpoint_protocol is not None:
+        registry.endpoint_protocol = endpoint_protocol
+
+    if writable_cache_repos is not None:
+        registry.writable_cache_repos = writable_cache_repos
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -151,7 +171,10 @@ def acr_update_custom(cmd,
                       allow_exports=None,
                       tags=None,
                       allow_metadata_search=None,
-                      role_assignment_mode=None):
+                      role_assignment_mode=None,
+                      regional_endpoints=None,
+                      endpoint_protocol=None,
+                      writable_cache_repos=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -179,6 +202,15 @@ def acr_update_custom(cmd,
 
     if role_assignment_mode is not None:
         _configure_role_assignment_mode(cmd, instance, role_assignment_mode)
+
+    if regional_endpoints is not None:
+        _configure_regional_endpoints(cmd, instance, sku, regional_endpoints)
+
+    if endpoint_protocol is not None:
+        instance.endpoint_protocol = endpoint_protocol
+
+    if writable_cache_repos is not None:
+        instance.writable_cache_repos = writable_cache_repos
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -242,6 +274,27 @@ def acr_update_set(cmd,
 
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
+    # Determine the effective SKU (new SKU if being updated, otherwise current SKU)
+    sku = parameters.sku.name if parameters.sku else registry.sku.name
+
+    RegionalEndpoints = cmd.get_models('RegionalEndpoints')
+    if parameters.regional_endpoints == RegionalEndpoints.ENABLED:
+        # Regional endpoints require Premium SKU, validate registry tier compatibility
+        if sku not in get_premium_sku(cmd):
+            raise CLIError(REGIONAL_ENDPOINTS_NOT_SUPPORTED)
+
+        # Regional endpoints are incompatible with Docker Content Trust (DCT), check for conflicts
+        if registry.policies and registry.policies.trust_policy and registry.policies.trust_policy.status == 'enabled':
+            raise CLIError(REGIONAL_ENDPOINTS_NOT_SUPPORTED_FOR_DCT)
+
+        # Recommend enabling data endpoints for optimal performance when using regional endpoints
+        if registry.data_endpoint_enabled is False:
+            logger.warning(
+                "It is recommended to also enable dedicated data endpoints "
+                "(--enable-data-endpoint) for optimal in-region performance "
+                "when using regional endpoints."
+            )
+
     return client.begin_update(resource_group_name, registry_name, parameters)
 
 
@@ -277,6 +330,15 @@ def acr_show_endpoints(cmd,
                 'endpoint': '*.blob.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
             })
 
+    RegionalEndpoints = cmd.get_models('RegionalEndpoints')
+    if registry.regional_endpoints == RegionalEndpoints.ENABLED:
+        info['regionalEndpoints'] = []
+        for host in registry.regional_endpoint_host_names:
+            info['regionalEndpoints'].append({
+                'region': host.split('.')[1],
+                'endpoint': host,
+            })
+
     return info
 
 
@@ -286,10 +348,14 @@ def acr_login(cmd,
               tenant_suffix=None,
               username=None,
               password=None,
-              expose_token=False):
+              expose_token=False,
+              endpoint=None):
     if expose_token:
         if username or password:
             raise CLIError("`--expose-token` cannot be combined with `--username` or `--password`.")
+
+        if endpoint:
+            raise CLIError("`--expose-token` cannot be combined with `--endpoint`.")
 
         login_server, _, password = get_login_credentials(
             cmd=cmd,
@@ -345,41 +411,77 @@ def acr_login(cmd,
         logger.warning('Uppercase characters are detected in the registry name. When using its server url in '
                        'docker commands, to avoid authentication errors, use all lowercase.')
 
-    from subprocess import PIPE, Popen
-    logger.debug("Invoking '%s login --username %s --password <redacted> %s'",
-                 docker_command, username, login_server)
-    p = Popen([docker_command, "login",
-               "--username", username,
-               "--password", password,
-               login_server], stderr=PIPE)
-    _, stderr = p.communicate()
-    return_code = p.returncode
+    if endpoint:
+        registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+        matching_endpoint = None
 
-    if stderr or return_code != 0:  # when docker command process returns non-zero
+        RegionalEndpoints = cmd.get_models('RegionalEndpoints')
+        if registry.regional_endpoints == RegionalEndpoints.ENABLED and registry.regional_endpoint_host_names:
+            # Build the expected regional endpoint prefix: registryname.region.geo.
+            # Use login_server hostname (before the first dot) to account for the DNL suffix if set.
+            login_server_name = registry.login_server.split('.')[0]
+            regional_endpoint_prefix = f"{login_server_name}.{endpoint}.geo.".lower()
+            matching_endpoint = next(
+                (url for url in registry.regional_endpoint_host_names
+                 if url.lower().strip().startswith(regional_endpoint_prefix)), None)
+
+        if matching_endpoint:
+            logger.warning("Logging in to regional endpoint: %s", matching_endpoint)
+            _perform_registry_login(matching_endpoint, docker_command, username, password)
+        else:
+            raise CLIError(
+                "Regional endpoint for '{}' not found. Aborting login. "
+                "Run 'az acr show-endpoints -n {}' to list available regional endpoints.".format(
+                    endpoint, registry_name)
+            )
+    else:
+        _perform_registry_login(login_server, docker_command, username, password)
+
+    return None
+
+
+def _perform_registry_login(login_server, docker_command, username, password):
+    from subprocess import PIPE, Popen
+    logger.debug("Invoking '%s login --username %s --password-stdin %s'",
+                 docker_command, username, login_server)
+    stdin_error_msg = (
+        "Failed to pass credentials to '{cmd}' via stdin. "
+        "Please ensure '{cmd}' supports --password-stdin.".format(cmd=docker_command)
+    )
+    try:
+        p = Popen([docker_command, "login",
+                   "--username", username,
+                   "--password-stdin",
+                   login_server], stdin=PIPE, stderr=PIPE)
+        _, stderr = p.communicate(input=password.encode())
+        return_code = p.returncode
+    except (BrokenPipeError, OSError):
+        raise CLIError(stdin_error_msg)
+
+    if stderr or return_code != 0:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            p = Popen([docker_command, "login",
-                       "--username", username,
-                       "--password", password,
-                       login_server])
-            p.wait()
-        else:
-            stderr_messages = stderr.decode()
-            # Dismiss the '--password-stdin' warning
-            if b'--password-stdin' in stderr:
-                errors = [err for err in stderr_messages.split('\n') if err and '--password-stdin' not in err]
-                # Will not raise CLIError if there is no error other than '--password-stdin'
-                if not errors:
-                    return None
-                stderr_messages = '\n'.join(errors)
-            logger.warning(stderr_messages)
-
-            # Raise error only if docker returns non-zero
-            if return_code != 0:
+            try:
+                p = Popen([docker_command, "login",
+                           "--username", username,
+                           "--password-stdin",
+                           login_server], stdin=PIPE, stderr=PIPE)
+                _, retry_stderr = p.communicate(input=password.encode())
+            except (BrokenPipeError, OSError):
+                raise CLIError(stdin_error_msg)
+            if p.returncode != 0:
+                if retry_stderr:
+                    logger.warning(retry_stderr.decode())
                 raise CLIError('Login failed.')
+            return
 
-    return None
+        stderr_messages = stderr.decode()
+        logger.warning(stderr_messages)
+
+        # Raise error only if docker returns non-zero
+        if return_code != 0:
+            raise CLIError('Login failed.')
 
 
 def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
@@ -390,12 +492,97 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
     return client.list_usages(resource_group_name, registry_name)
 
 
-def get_docker_command(is_diagnostics_context=False):
-    from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
+def _validate_command_path(docker_command, is_diagnostics_context=False):
+    """Validate that the resolved binary is not located in the current working directory."""
+    resolved_path = shutil.which(docker_command)
+    if resolved_path:
+        try:
+            cwd = os.path.abspath(os.getcwd())
+
+            # Check pre-symlink path (where PATH found the entry)
+            resolved_dir = os.path.dirname(os.path.abspath(resolved_path))
+            # Check post-symlink path (where it ultimately points)
+            real_dir = os.path.dirname(os.path.realpath(resolved_path))
+
+            def _is_same_dir(dir1, dir2):
+                """Use samefile to compare directories by filesystem identity, not string path.
+                This handles cases where the same directory has different path representations
+                (e.g., short names like PROGRA~1, junctions, or mapped drives)."""
+                try:
+                    return os.path.samefile(dir1, dir2)
+                except (OSError, ValueError):
+                    return (os.path.normcase(os.path.normpath(dir1)) ==
+                            os.path.normcase(os.path.normpath(dir2)))
+
+            if _is_same_dir(resolved_dir, cwd) or _is_same_dir(real_dir, cwd):
+                resolved_real = os.path.realpath(resolved_path)
+                msg = (
+                    "Refusing to use '{}' resolved at '{}' because it is located in the current "
+                    "working directory. Set the DOCKER_COMMAND environment variable "
+                    "to an absolute path of the trusted binary to override."
+                ).format(docker_command, resolved_real)
+                if is_diagnostics_context:
+                    logger.warning(msg)
+                    return True
+                raise CLIError(msg)
+        except (ValueError, OSError):
+            # Cannot verify path safety — fail closed
+            if is_diagnostics_context:
+                logger.warning("Unable to verify binary path safety.")
+                return True
+            raise CLIError("Unable to verify binary path safety.")
+    return False
+
+
+def _resolve_docker_command(is_diagnostics_context=False):
+    """Resolve the docker/podman command name and validate it is not in CWD."""
+    from ._errors import DOCKER_COMMAND_ERROR
     if os.getenv('DOCKER_COMMAND'):
         docker_command = os.getenv('DOCKER_COMMAND')
+        if not os.path.isabs(docker_command):
+            if _validate_command_path(docker_command, is_diagnostics_context):
+                return None, DOCKER_COMMAND_ERROR
     else:
         docker_command = 'docker'
+        if not shutil.which('docker') and shutil.which('podman'):
+            docker_command = 'podman'
+        if _validate_command_path(docker_command, is_diagnostics_context):
+            return None, DOCKER_COMMAND_ERROR
+    return docker_command, None
+
+
+def _try_wsl_exe_fallback(docker_command, is_diagnostics_context):
+    """Retry with .exe suffix for WSL environments where the binary is not directly discoverable."""
+    from subprocess import PIPE, Popen, CalledProcessError
+    from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
+    docker_command = f'{docker_command}.exe'
+    if _validate_command_path(docker_command, is_diagnostics_context):
+        return None, DOCKER_COMMAND_ERROR
+    try:
+        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+        _, stderr = p.communicate()
+    except OSError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
+        if is_diagnostics_context:
+            return None, DOCKER_COMMAND_ERROR
+        raise CLIError(DOCKER_COMMAND_ERROR.get_error_message())
+    except CalledProcessError as e:
+        logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
+        if is_diagnostics_context:
+            return docker_command, DOCKER_DAEMON_ERROR
+        raise CLIError(DOCKER_DAEMON_ERROR.get_error_message())
+    if stderr:
+        if is_diagnostics_context:
+            return None, DOCKER_COMMAND_ERROR.set_error_message(stderr.decode())
+        raise CLIError(DOCKER_COMMAND_ERROR.set_error_message(stderr.decode()).get_error_message())
+    return docker_command, None
+
+
+def get_docker_command(is_diagnostics_context=False):
+    from ._errors import DOCKER_COMMAND_ERROR, DOCKER_DAEMON_ERROR
+    docker_command, error = _resolve_docker_command(is_diagnostics_context)
+    if error:
+        return docker_command, error
 
     from subprocess import PIPE, Popen, CalledProcessError
     try:
@@ -404,20 +591,7 @@ def get_docker_command(is_diagnostics_context=False):
     except OSError as e:
         logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         # The executable may not be discoverable in WSL so retry *.exe once
-        try:
-            docker_command = 'docker.exe'
-            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
-            _, stderr = p.communicate()
-        except OSError as inner:
-            logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
-            if is_diagnostics_context:
-                return None, DOCKER_COMMAND_ERROR
-            raise CLIError(DOCKER_COMMAND_ERROR.get_error_message())
-        except CalledProcessError as inner:
-            logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(inner))
-            if is_diagnostics_context:
-                return docker_command, DOCKER_DAEMON_ERROR
-            raise CLIError(DOCKER_DAEMON_ERROR.get_error_message())
+        return _try_wsl_exe_fallback(docker_command, is_diagnostics_context)
     except CalledProcessError as e:
         logger.debug("Could not run '%s' command. Exception: %s", docker_command, str(e))
         if is_diagnostics_context:
@@ -687,3 +861,12 @@ def _configure_role_assignment_mode(cmd, registry, role_assignment_mode):
             "'--source-registry-auth-id' flag in 'az acr task update'. Please refer to "
             "https://aka.ms/acr/auth/abac for more details.")
     registry.role_assignment_mode = mode
+
+
+def _configure_regional_endpoints(cmd, registry, sku, regional_endpoints):
+    RegionalEndpoints = cmd.get_models('RegionalEndpoints')
+
+    if regional_endpoints == RegionalEndpoints.ENABLED and sku and sku not in get_premium_sku(cmd):
+        raise CLIError(REGIONAL_ENDPOINTS_NOT_SUPPORTED)
+
+    registry.regional_endpoints = regional_endpoints

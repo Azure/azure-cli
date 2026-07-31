@@ -19,10 +19,7 @@ class StorageScenarioMixin:
         return self.profile
 
     def get_account_key(self, group, name):
-        if self.get_current_profile() == '2017-03-09-profile':
-            template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
-        else:
-            template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
+        template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
 
         return self.cmd(template.format(name, group)).output
 
