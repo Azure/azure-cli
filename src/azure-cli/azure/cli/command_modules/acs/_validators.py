@@ -45,17 +45,10 @@ def validate_ssh_key(namespace):
     if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
         return
     # Automatic SKU clusters use a fully managed system node pool that rejects any SSH key
-    # configuration. Skip reading/generating an SSH key so users don't need --no-ssh-key.
+    # configuration. Do not generate/read a key; if the user explicitly asked for one, error.
     if getattr(namespace, 'sku', None) is not None and \
             namespace.sku.lower() == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
-        # ssh_key_value defaults to "~/.ssh/id_rsa.pub" (expanded to an absolute path by
-        # the arg's file_type); only treat a non-default value as an explicit user request.
-        default_ssh_key_value = os.path.expanduser(os.path.join("~", ".ssh", "id_rsa.pub"))
-        explicit_ssh_key = (
-            namespace.ssh_key_value and
-            os.path.expanduser(namespace.ssh_key_value) != default_ssh_key_value
-        )
-        if namespace.generate_ssh_keys or explicit_ssh_key:
+        if namespace.generate_ssh_keys or namespace.ssh_key_value:
             raise MutuallyExclusiveArgumentError(
                 'SSH key configuration is not supported for the Automatic SKU. '
                 'Do not specify "--ssh-key-value" or "--generate-ssh-keys" when using "--sku automatic".'
