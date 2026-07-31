@@ -56,6 +56,10 @@ class Show(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="Expands referenced resources.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -122,6 +126,9 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2025-07-01",
                     required=True,
