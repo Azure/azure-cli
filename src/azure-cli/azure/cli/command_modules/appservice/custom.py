@@ -44,7 +44,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
+from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
