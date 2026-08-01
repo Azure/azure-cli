@@ -797,7 +797,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('login_with_github', help='Interactively log in with GitHub to retrieve the Personal Access Token', action='store_true')
 
     with self.argument_context('webapp deployment github-actions add')as c:
-        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
+        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework:Version, e.g. "PHP:5.6". Use "az webapp list-runtimes" for available list.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
 
     with self.argument_context('webapp deployment source config-zip')as c:

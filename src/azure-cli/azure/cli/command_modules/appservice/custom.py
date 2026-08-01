@@ -7719,7 +7719,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 'os': stack.os,
                 'runtime': stack.runtime_family,
                 'version': stack.version_label or '',
-                'config': stack.display_name,
+                'config': stack.display_name.replace(self.DEFAULT_DELIMETER, ':'),
                 'support': support_status,
                 'end_of_life': stack.eol_date or '-',
             })
