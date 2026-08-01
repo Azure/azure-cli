@@ -16,7 +16,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
                                        AzureResponseError,
-                                       ResourceNotFoundError)
+                                       ResourceNotFoundError,
+                                       UnclassifiedUserFault)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -41,7 +42,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_startup_logs,
                                                          show_startup_log,
                                                          troubleshoot_status,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         list_triggered_webjobs)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -2163,6 +2165,49 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         runtimes = _StackRuntimeHelper._get_java_runtimes_from_container_settings(settings)
         self.assertEqual({name for name, _, _ in runtimes}, self.EXPECTED)
         self.assertTrue(all(is_auto for _, _, is_auto in runtimes))
+
+
+class TestListTriggeredWebjobs(unittest.TestCase):
+    def _build_http_response_error(self, status_code, body_text):
+        """Build an HttpResponseError with the given status code and response body text."""
+        response_mock = mock.MagicMock()
+        response_mock.text.return_value = body_text
+        error = HttpResponseError(message="Operation returned an invalid status '{}'".format(status_code))
+        error.status_code = status_code
+        error.response = response_mock
+        return error
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_list_triggered_webjobs_409_surfaces_kudu_error(self, generic_op_mock):
+        """list_triggered_webjobs raises UnclassifiedUserFault with the Kudu body on HTTP 409."""
+        kudu_message = ("The web app is not configured to run the web job. "
+                        "Please enable running web jobs before calling the API.")
+        body = '{{"error": "{}"}}'.format(kudu_message)
+        generic_op_mock.side_effect = self._build_http_response_error(409, body)
+
+        cmd = _get_test_cmd()
+        with self.assertRaises(UnclassifiedUserFault) as ctx:
+            list_triggered_webjobs(cmd, 'rg', 'myapp')
+
+        self.assertIn('web job', str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_list_triggered_webjobs_non_409_reraises(self, generic_op_mock):
+        """list_triggered_webjobs re-raises HttpResponseError when status is not 409."""
+        generic_op_mock.side_effect = self._build_http_response_error(500, '{"error": "Internal Server Error"}')
+
+        cmd = _get_test_cmd()
+        with self.assertRaises(HttpResponseError):
+            list_triggered_webjobs(cmd, 'rg', 'myapp')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_list_triggered_webjobs_409_fallback_when_body_unparseable(self, generic_op_mock):
+        """list_triggered_webjobs raises UnclassifiedUserFault even when body is not valid JSON."""
+        generic_op_mock.side_effect = self._build_http_response_error(409, 'not json at all')
+
+        cmd = _get_test_cmd()
+        with self.assertRaises(UnclassifiedUserFault):
+            list_triggered_webjobs(cmd, 'rg', 'myapp')
 
 
 if __name__ == '__main__':
