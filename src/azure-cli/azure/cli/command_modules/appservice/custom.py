@@ -3975,9 +3975,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     result = {}
     for s in generic_configurations:
         try:
-            json_object = get_json_object(s)
+            json_object = shell_safe_json_parse(s)
             for config_name in json_object:
-                if config_name.lower() == 'ip_security_restrictions':
+                if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
                     updating_ip_security_restrictions = True
             result.update(json_object)
         except CLIError:
@@ -3985,9 +3985,17 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             result[config_name] = value
 
     for config_name, value in result.items():
-        if config_name.lower() == 'ip_security_restrictions':
+        if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
             updating_ip_security_restrictions = True
-        setattr(configs, config_name, value)
+        # In azure-mgmt-web 11.0.0+, SiteConfig is a MutableMapping with camelCase REST API keys.
+        # setattr works for known snake_case SDK property aliases (e.g., 'request_tracing_enabled'),
+        # but silently creates a Python attribute (not a dict entry) for unknown properties.
+        # Use dict-style assignment for camelCase property names so they are always included
+        # in the API request body (e.g., 'webJobsEnabled' which is not in the SDK model).
+        if any(c.isupper() for c in config_name):
+            configs[config_name] = value
+        else:
+            setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)

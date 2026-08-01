@@ -233,6 +233,44 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(site_config.java_container, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config_generic_configurations_camelcase(self, is_centauri_functionapp_mock, site_op_mock):
+        """Verify that camelCase properties in --generic-configurations (e.g. webJobsEnabled)
+        are correctly passed to the API via the SiteConfig MutableMapping dict interface,
+        not silently dropped by setattr (GitHub issue #33823)."""
+        cmd_mock = _get_test_cmd()
+        SiteConfig = cmd_mock.get_models('SiteConfig')
+        site_config = SiteConfig()
+        site_op_mock.return_value = site_config
+
+        is_centauri_functionapp_mock.return_value = False
+        # action: pass webJobsEnabled (camelCase, not a named SDK property) via generic_configurations
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['webJobsEnabled=false'])
+        # assert: the property must be present in the underlying MutableMapping so that
+        # the SDK includes it in the API request body
+        self.assertIn('webJobsEnabled', dict(site_config))
+        self.assertEqual(site_config['webJobsEnabled'], 'false')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config_generic_configurations_camelcase_json(self, is_centauri_functionapp_mock, site_op_mock):
+        """Verify that camelCase properties in --generic-configurations provided as JSON
+        (e.g. {"webJobsEnabled": false}) are correctly passed to the API."""
+        cmd_mock = _get_test_cmd()
+        SiteConfig = cmd_mock.get_models('SiteConfig')
+        site_config = SiteConfig()
+        site_op_mock.return_value = site_config
+
+        is_centauri_functionapp_mock.return_value = False
+        # action: pass webJobsEnabled as a JSON object
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['{"webJobsEnabled": false}'])
+        # assert: the property must be in the underlying MutableMapping
+        self.assertIn('webJobsEnabled', dict(site_config))
+        self.assertEqual(site_config['webJobsEnabled'], False)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_list_publish_profiles_on_slots(self, site_op_mock):
         site_op_mock.return_value = [b'<publishData><publishProfile publishUrl="ftp://123"/><publishProfile publishUrl="ftp://1234"/></publishData>']
         # action
