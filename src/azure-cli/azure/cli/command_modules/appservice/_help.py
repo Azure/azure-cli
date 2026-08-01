@@ -48,10 +48,10 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
   - name: Create a Windows app service plan.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux false
   - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1 --is-linux false
   - name: Create a Linux app service plan with four Linux workers.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3

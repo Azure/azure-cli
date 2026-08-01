@@ -1438,6 +1438,52 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_is_linux_none_defaults_to_linux(self, mock_location, mock_client_factory):
+        """When is_linux is omitted (None) and hyper_v is False, plan defaults to Linux (reserved=True).
+        This matches the documented default: '--is-linux' defaults to true unless --hyper-v is specified.
+        Windows plans must explicitly pass --is-linux false."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_app_service_plan_cls = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock_app_service_plan_cls)
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=None, hyper_v=False)
+        except Exception:
+            pass
+
+        # AppServicePlan should be constructed with reserved=True (Linux)
+        mock_app_service_plan_cls.assert_called()
+        call_kwargs = mock_app_service_plan_cls.call_args
+        self.assertIn('reserved=True', str(call_kwargs))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_is_linux_false_creates_windows_plan(self, mock_location, mock_client_factory):
+        """When is_linux=False is explicitly passed, plan is created as Windows (reserved=False)."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_app_service_plan_cls = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock_app_service_plan_cls)
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=False, hyper_v=False)
+        except Exception:
+            pass
+
+        # AppServicePlan should be constructed with reserved=False (Windows)
+        mock_app_service_plan_cls.assert_called()
+        call_kwargs = mock_app_service_plan_cls.call_args
+        self.assertIn('reserved=False', str(call_kwargs))
+
 
 class TestOneDeployScmCache(unittest.TestCase):
     """Tests for the per-invocation SCM URL / SCM headers cache on OneDeployParams.
