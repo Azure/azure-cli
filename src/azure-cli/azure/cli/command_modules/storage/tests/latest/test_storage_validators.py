@@ -21,8 +21,6 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services, as_user_validator,
                                                            get_not_none_validator)
-
-
 class MockCLI(CLI):
     def __init__(self):
         super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
@@ -182,7 +180,6 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         validate_arg(cmd, Namespace(arg=0))
         validate_arg(cmd, Namespace(arg=False))
-
 
 class TestEncryptionValidators(unittest.TestCase):
     def setUp(self):
