@@ -72,7 +72,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.max_replication_lag_duration_in_seconds = AAZIntArg(
-            options=["--max-replication-lag-duration-in-seconds"],
+            options=["--max-replication-lag-duration-in-seconds","--max-lag"],
             arg_group="GeoDataReplication",
             help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed. The allowed values are 0 and 5 minutes to 1 day.",
             nullable=True,

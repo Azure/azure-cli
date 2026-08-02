@@ -31,11 +31,11 @@ def load_command_table(self, _):
 
 # Rules Region
     with self.command_group('servicebus topic subscription rule', custom_command_type=sb_namespace_custom) as g:
-        g.custom_command('create', 'sb_rule_create', supports_no_wait=True)
+        g.custom_command('create', 'sb_rule_create')
 
 # DisasterRecoveryConfigs Region
     with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom) as g:
-        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
+        g.custom_command('set', 'set_georecovery_alias')
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule-set ip-rule', custom_command_type=sb_network_custom) as g:
