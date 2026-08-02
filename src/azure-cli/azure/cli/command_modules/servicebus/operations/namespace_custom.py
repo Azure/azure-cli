@@ -39,8 +39,8 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
                                 disable_local_auth=None, alternate_name=None, public_network_access=None,
                                 require_infrastructure_encryption=None, premium_messaging_partitions=None,
                                 max_replication_lag_duration_in_seconds=None,
-                                geo_data_replication_config=None
-                                ):
+                                geo_data_replication_config=None,
+                                ip_address_type=None):
 
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
@@ -61,7 +61,8 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
         "disable_local_auth": disable_local_auth,
         "alternate_name": alternate_name,
         "public_network_access": public_network_access,
-        "premium_messaging_partitions": premium_messaging_partitions
+        "premium_messaging_partitions": premium_messaging_partitions,
+        "ip_address_type": ip_address_type
     }
 
     if mi_system_assigned:
