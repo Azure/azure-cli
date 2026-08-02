@@ -33,6 +33,7 @@ def create_replica_location_object(col):
     return replica_location_object
 
 
+# pylint: disable=too-many-locals
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                                 capacity=None, zone_redundant=None, mi_user_assigned=None,
                                 mi_system_assigned=None, encryption_config=None, minimum_tls_version=None,
