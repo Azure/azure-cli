@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2026-01-01"],
         ]
     }
 
@@ -46,6 +46,7 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -74,14 +75,12 @@ class Create(AAZCommand):
         _args_schema.schema_compatibility = AAZStrArg(
             options=["--schema-compatibility"],
             arg_group="Properties",
-            help="Compatibility of Schema.",
             enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
-            help="Type of Schema.",
-            enum={"Avro": "Avro", "Unknown": "Unknown"},
+            enum={"Avro": "Avro", "Json": "Json", "ProtoBuf": "ProtoBuf", "Unknown": "Unknown"},
         )
 
         group_properties = cls._args_schema.group_properties
@@ -157,7 +156,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }

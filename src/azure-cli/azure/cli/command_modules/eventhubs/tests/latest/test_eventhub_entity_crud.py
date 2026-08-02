@@ -21,7 +21,7 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_create_update(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
+            'loc': 'eastus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -152,6 +152,9 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.kwargs.update({'id2': identity2['id']})
         self.kwargs.update({'id3': identity2['principalId']})
 
+        # Wait for identity to propagate to Microsoft Graph
+        time.sleep(120)
+
         storage_account2 = self.cmd(
             'storage account create -n {storageaccount2} -g {rg} -l westus --sku Standard_RAGRS ').get_output_in_json()
 
@@ -160,8 +163,12 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         container = self.cmd(
             'storage container create -n {containername2} -g {rg} --account-name {storageaccount2}').get_output_in_json()
 
-        '''self.cmd(
-            'az role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')'''
+        # Grant Storage Blob Data Contributor role to the managed identity
+        self.cmd(
+            'role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')
+
+        # Wait for role assignment to propagate
+        time.sleep(60)
 
         self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium '

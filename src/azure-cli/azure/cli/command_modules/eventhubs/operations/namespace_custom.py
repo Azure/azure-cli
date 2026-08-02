@@ -13,7 +13,11 @@ from azure.cli.command_modules.eventhubs.constants import USER
 
 def create_keyvault_object(col):
     vault_object = {}
-    if 'userAssignedIdentity' in col:
+    # Handle nested identity structure in API 2026-01-01
+    if 'identity' in col and col['identity'] and 'userAssignedIdentity' in col['identity']:
+        vault_object['user_assigned_identity'] = col['identity']['userAssignedIdentity']
+    # Fallback for direct userAssignedIdentity (older API versions or command input)
+    elif 'userAssignedIdentity' in col:
         vault_object['user_assigned_identity'] = col['userAssignedIdentity']
 
     vault_object.update({
@@ -43,7 +47,8 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                               maximum_throughput_units=None, require_infrastructure_encryption=None,
                               is_kafka_enabled=None, is_auto_inflate_enabled=None, alternate_name=None,
                               public_network_access=None, cluster_arm_id=None, max_replication_lag_duration_in_seconds=None,
-                              geo_data_replication_config=None):
+                              geo_data_replication_config=None,
+                              ip_address_type=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
 
     user_assigned_identity = {}
@@ -68,7 +73,8 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
         "disable_local_auth": disable_local_auth,
         "alternate_name": alternate_name,
         "public_network_access": public_network_access,
-        "cluster_arm_id": cluster_arm_id
+        "cluster_arm_id": cluster_arm_id,
+        "ip_address_type": ip_address_type
     }
 
     if mi_system_assigned:

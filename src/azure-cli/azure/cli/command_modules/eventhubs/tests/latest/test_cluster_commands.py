@@ -35,7 +35,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         # Create Cluster
         # Created test-migration resource group for cluster cmdlets to monitor the cluster to save the cost.
         # Same resource group can be used to rerun the test or you can change the resource-group by replacing test-migration.
-        self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location eastus --tags {tags}',
+        self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location westus --tags {tags}',
                  checks=[self.check('name', self.kwargs['clustername'])])
 
         # Get Cluster
@@ -45,7 +45,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({'clusterid': getresponse['id']})
 
         # Create Namespace in cluster
-        self.cmd('eventhubs namespace create --resource-group test-migration --name {namespacename} --location eastus --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
+        self.cmd('eventhubs namespace create --resource-group test-migration --name {namespacename} --location westus --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
 
         # Get namespaces created in the cluster
         listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group test-migration --name {clustername}').output
@@ -66,7 +66,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_eh_self_serve_cluster(self):
         self.kwargs.update({
-            'loc': 'eastus',
+            'loc': 'westus',
             'rg': self.create_random_name(prefix='rg-cluster-', length=20),
             'clustername': self.create_random_name(prefix='eventhubs-selfserve-', length=24),
             'namespacename': self.create_random_name(prefix='eventhubs-ns1-', length=20),
@@ -115,4 +115,4 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')
+        # self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')

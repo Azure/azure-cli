@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2026-01-01"],
         ]
     }
 
@@ -61,7 +61,6 @@ class Create(AAZCommand):
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Parameters",
             help="Resource location.",
-            required=True,
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
@@ -78,15 +77,31 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.provisioning_state = AAZStrArg(
-            options=["--provisioning-state"],
+        _args_schema.platform_capabilities = AAZObjectArg(
+            options=["--platform-capabilities"],
             arg_group="Properties",
-            help="Provisioning state of the Cluster.",
         )
         _args_schema.supports_scaling = AAZBoolArg(
             options=["--supports-scaling"],
             arg_group="Properties",
             help="A value that indicates whether Scaling is Supported.",
+        )
+        _args_schema.zone_redundant = AAZBoolArg(
+            options=["--zone-redundant"],
+            arg_group="Properties",
+            help="A value that indicates whether the cluster is zone redundant.",
+        )
+
+        platform_capabilities = cls._args_schema.platform_capabilities
+        platform_capabilities.confidential_compute = AAZObjectArg(
+            options=["confidential-compute"],
+        )
+
+        confidential_compute = cls._args_schema.platform_capabilities.confidential_compute
+        confidential_compute.mode = AAZStrArg(
+            options=["mode"],
+            help="Setting to Enable or Disable Confidential Compute",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Sku"
@@ -139,7 +154,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -148,7 +163,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -191,7 +206,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -216,15 +231,24 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
+                properties.set_prop("platformCapabilities", AAZObjectType, ".platform_capabilities")
                 properties.set_prop("supportsScaling", AAZBoolType, ".supports_scaling")
+                properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
+
+            platform_capabilities = _builder.get(".properties.platformCapabilities")
+            if platform_capabilities is not None:
+                platform_capabilities.set_prop("confidentialCompute", AAZObjectType, ".confidential_compute")
+
+            confidential_compute = _builder.get(".properties.platformCapabilities.confidentialCompute")
+            if confidential_compute is not None:
+                confidential_compute.set_prop("mode", AAZStrType, ".mode")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -284,8 +308,12 @@ class Create(AAZCommand):
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
+                flags={"read_only": True},
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},
@@ -297,6 +325,17 @@ class Create(AAZCommand):
                 serialized_name="updatedAt",
                 flags={"read_only": True},
             )
+            properties.zone_redundant = AAZBoolType(
+                serialized_name="zoneRedundant",
+            )
+
+            platform_capabilities = cls._schema_on_200_201.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200_201.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             sku = cls._schema_on_200_201.sku
             sku.capacity = AAZIntType()

@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-01-01"],
         ]
     }
 
@@ -55,7 +55,7 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -134,16 +134,6 @@ class Create(AAZCommand):
             help="ARM ID of Managed User Identity. This property is required is the type is UserAssignedIdentity. If type is SystemAssigned, then the System Assigned Identity Associated with the namespace will be used.",
         )
 
-        # define Arg Group "MessageTimestampDescription"
-
-        _args_schema = cls._args_schema
-        _args_schema.timestamp_type = AAZStrArg(
-            options=["--timestamp-type"],
-            arg_group="MessageTimestampDescription",
-            help="Denotes the type of timestamp the message will hold.Two types of timestamp types - \"AppendTime\" and \"CreateTime\". AppendTime refers the time in which message got appended inside broker log. CreateTime refers to the time in which the message was generated on source side and producers can set this timestamp while sending the message. Default value is AppendTime. If you are using AMQP protocol, CreateTime equals AppendTime and its behavior remains the same.",
-            enum={"Create": "Create", "LogAppend": "LogAppend"},
-        )
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -154,6 +144,11 @@ class Create(AAZCommand):
             fmt=AAZIntArgFormat(
                 minimum=1,
             ),
+        )
+        _args_schema.message_timestamp_description = AAZObjectArg(
+            options=["--message-timestamp-description"],
+            arg_group="Properties",
+            help="Properties of MessageTimestamp Description",
         )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
@@ -175,6 +170,13 @@ class Create(AAZCommand):
             help="Gets and Sets Metadata of User.",
         )
 
+        message_timestamp_description = cls._args_schema.message_timestamp_description
+        message_timestamp_description.timestamp_type = AAZStrArg(
+            options=["timestamp-type"],
+            help="Denotes the type of timestamp the message will hold.Two types of timestamp types - \"AppendTime\" and \"CreateTime\". AppendTime refers the time in which message got appended inside broker log. CreateTime refers to the time in which the message was generated on source side and producers can set this timestamp while sending the message. Default value is AppendTime. If you are using AMQP protocol, CreateTime equals AppendTime and its behavior remains the same.",
+            enum={"Create": "Create", "LogAppend": "LogAppend"},
+        )
+
         # define Arg Group "RetentionDescription"
 
         _args_schema = cls._args_schema
@@ -185,7 +187,7 @@ class Create(AAZCommand):
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
         _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
-            options=["--min-lag", "--min-compaction-lag-in-mins"],
+            options=["--min-compaction-lag-time-in-minutes"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
         )
@@ -270,7 +272,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -301,7 +303,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
                 properties.set_prop("messageRetentionInDays", AAZIntType, ".message_retention_in_days")
-                properties.set_prop("messageTimestampDescription", AAZObjectType)
+                properties.set_prop("messageTimestampDescription", AAZObjectType, ".message_timestamp_description")
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")

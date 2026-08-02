@@ -19,17 +19,16 @@ class Failover(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/failover", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/failover", "2026-01-01"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return None
 
     _args_schema = None
 
@@ -48,7 +47,7 @@ class Failover(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -74,7 +73,7 @@ class Failover(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.NamespacesFailover(ctx=self.ctx)()
+        self.NamespacesFailover(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -85,34 +84,14 @@ class Failover(AAZCommand):
     def post_operations(self):
         pass
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
     class NamespacesFailover(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
@@ -153,7 +132,7 @@ class Failover(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -164,9 +143,6 @@ class Failover(AAZCommand):
             parameters = {
                 **self.serialize_header_param(
                     "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
                 ),
             }
             return parameters
@@ -188,34 +164,7 @@ class Failover(AAZCommand):
             return self.serialize_content(_content_value)
 
         def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-
-            properties = cls._schema_on_200_201.properties
-            properties.force = AAZBoolType()
-            properties.primary_location = AAZStrType(
-                serialized_name="primaryLocation",
-            )
-
-            return cls._schema_on_200_201
+            pass
 
 
 class _FailoverHelper:

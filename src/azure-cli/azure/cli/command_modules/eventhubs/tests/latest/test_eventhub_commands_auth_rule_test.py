@@ -21,7 +21,7 @@ class EHNamespaceAUTHRULECURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_authorization_rule(self, resource_group):
         self.kwargs.update({
-            'loc': 'southcentralus',
+            'loc': 'eastus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'eventhub1': self.create_random_name(prefix='eventhubnm', length=18),

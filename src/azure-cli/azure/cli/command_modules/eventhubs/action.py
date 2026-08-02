@@ -201,6 +201,6 @@ class AlertAddlocation(argparse._AppendAction):
             raise CLIError('location-name and role-type are mandatory properties')
 
         if "cluster_arm_id" not in LocationObject:
-            LocationObject["cluster_arm_id"] = ''
+            LocationObject["cluster_arm_id"] = None
 
         return LocationObject
