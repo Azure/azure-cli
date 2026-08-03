@@ -352,12 +352,12 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux 4.0 ${{ arch.name }}:
+        Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux4.0-${{ arch.value }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
           dockerfile: azure-linux.dockerfile
-          packageArtifactName: rpm-azurelinux4.0-${{ arch.value }}
-          image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
+          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
   pool:
     name: $(pool)
   steps:
@@ -396,9 +396,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux 4.0 ${{ arch.name }}:
+        Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux4.0-${{ arch.value }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -776,9 +776,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux 4.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
-          artifact: rpm-azurelinux4.0-${{ arch.value }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
           pool: ${{ arch.pool }}
   pool:
     name: $(pool)
@@ -822,9 +822,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux 4.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
-          artifact: rpm-azurelinux4.0-${{ arch.value }}
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
           pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
