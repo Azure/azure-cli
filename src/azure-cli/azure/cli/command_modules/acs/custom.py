@@ -3647,6 +3647,120 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
     )
 
 
+def aks_agentpool_auto_scale_add(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 nodepool_name,
+                                 node_vm_size,
+                                 min_count,
+                                 max_count,
+                                 no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot add autoscale profile to a non-virtualmachines node pool.")
+
+    AutoScaleProfile = cmd.get_models(
+        "AutoScaleProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    new_autoscale_profile = AutoScaleProfile(
+        size=node_vm_size,
+        min_count=int(min_count),
+        max_count=int(max_count),
+    )
+    if instance.virtual_machines_profile.scale.autoscale is None:
+        instance.virtual_machines_profile.scale.autoscale = []
+    instance.virtual_machines_profile.scale.autoscale.append(new_autoscale_profile)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_update(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    node_vm_size=None,
+                                    min_count=None,
+                                    max_count=None,
+                                    no_wait=False):
+    if node_vm_size is None and min_count is None and max_count is None:
+        raise RequiredArgumentMissingError(
+            "specify --node-vm-size, --min-count, or --max-count (or a combination)."
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot update autoscale profile in a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            if node_vm_size is not None:
+                a.size = node_vm_size
+            if min_count is not None:
+                a.min_count = int(min_count)
+            if max_count is not None:
+                a.max_count = int(max_count)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_delete(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot delete autoscale profile from a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            instance.virtual_machines_profile.scale.autoscale.remove(a)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
