@@ -507,6 +507,25 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    if getattr(item.properties, 'is_scheduled_for_deferred_delete', None) is not True:
+        raise ValidationError("Azure File Share item is not in soft-deleted state.")
+
+    container_uri = helper.get_protection_container_uri_from_id(item.id)
+    item_uri = helper.get_protected_item_uri_from_id(item.id)
+
+    afs_item_properties = AzureFileshareProtectedItem()
+    afs_item_properties.policy_id = ''
+    afs_item_properties.protection_state = ProtectionState.protection_stopped
+    afs_item_properties.source_resource_id = item.properties.source_resource_id
+    afs_item_properties.is_rehydrate = True
+    afs_item = ProtectedItemResource(properties=afs_item_properties)
+
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
+    return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
 def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 

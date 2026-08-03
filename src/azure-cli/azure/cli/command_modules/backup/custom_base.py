@@ -632,10 +632,13 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
+    if item.properties.backup_management_type.lower() == "azurestorage":
+        return custom_afs.undelete_protection(cmd, client, resource_group_name, vault_name, item)
+
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
-    return None
+    raise ValidationError("Undelete is not supported for this backup management type.")
 
 
 def list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,
