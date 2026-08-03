@@ -1514,9 +1514,10 @@ def get_secret_store(cli_ctx, name):
 
 
 def should_encrypt_token_cache(cli_ctx):
-    # Only enable encryption for Windows (for now).
-    fallback = sys.platform.startswith('win32')
+    # Encryption enabled by default
+    fallback = True
 
+    # TODO: Remove the config and always enable encryption
     # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
     # encrypt_token_cache affects both MSAL token cache and service principal entries.
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
