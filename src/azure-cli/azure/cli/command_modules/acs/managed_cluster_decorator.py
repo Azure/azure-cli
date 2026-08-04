@@ -6649,7 +6649,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # Automatic SKU clusters use a fully managed system node pool that rejects any SSH
         # key configuration, so never attach a linux profile for them.
-        if self.context.get_sku_name() == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+        if (self.context.get_sku_name() or "").lower() == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             return mc
 
         ssh_key_value, no_ssh_key = self.context.get_ssh_key_value_and_no_ssh_key()
