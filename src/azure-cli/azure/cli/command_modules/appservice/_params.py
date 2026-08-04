@@ -852,6 +852,13 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp log startup show') as c:
         c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
+    with self.argument_context('webapp troubleshoot status') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)

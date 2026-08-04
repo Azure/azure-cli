@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_advanced_threat_protection,
@@ -17,7 +16,8 @@ from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_flexible_backups,
     cf_mysql_flexible_adadmin,
     cf_mysql_flexible_export,
-    cf_mysql_flexible_maintenances)
+    cf_mysql_flexible_maintenances,
+    cf_mysql_flexible_fabric_mirroring_settings)
 from ._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
@@ -93,6 +93,11 @@ def load_command_table(self, _):
     mysql_flexible_maintenance_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#MaintenancesOperations.{}',
         client_factory=cf_mysql_flexible_maintenances
+    )
+
+    mysql_flexible_fabric_mirroring_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.mysqlflexibleservers.operations#FabricMirroringSettingsOperations.{}',
+        client_factory=cf_mysql_flexible_fabric_mirroring_settings
     )
 
     # MERU COMMANDS
@@ -192,9 +197,10 @@ def load_command_table(self, _):
         g.custom_command('download', 'flexible_server_log_download')
 
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backup_sdk,
+                            custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_backup) as g:
         g.command('create', 'begin_create')
-        g.command('delete', 'begin_delete')
+        g.custom_command('delete', 'flexible_backup_delete')
 
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backups_sdk,
                             client_factory=cf_mysql_flexible_backups) as g:
@@ -236,3 +242,10 @@ def load_command_table(self, _):
         g.custom_command('reschedule', 'flexible_server_maintenance_reschedule')
         g.custom_command('list', 'flexible_server_maintenance_list')
         g.custom_show_command('show', 'flexible_server_maintenance_show')
+
+    with self.command_group('mysql flexible-server mirroring',
+                            mysql_flexible_fabric_mirroring_settings_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_fabric_mirroring_settings) as g:
+        g.custom_command('enable', 'flexible_server_mirroring_enable')
+        g.custom_command('disable', 'flexible_server_mirroring_disable')
