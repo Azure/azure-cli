@@ -61,6 +61,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
+    CONST_NODEPOOL_MODE_MACHINES,
     CONST_NODEPOOL_MODE_USER,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_ROTATION_POLL_INTERVAL,
@@ -1320,6 +1321,10 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is using AvailabilitySet. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets or VirtualMachines cluster.')
+            # Skip Machines mode pools to avoid a known client-side error: these pools are containers of individual machines and do not support node image version upgrade.
+            if (agent_pool_profile.mode or "").lower() == CONST_NODEPOOL_MODE_MACHINES.lower():
+                logger.warning("Skipping node image upgrade for agent pool '%s': Machines mode pools do not support node image version upgrade.", agent_pool_profile.name)
+                continue
             agent_pool_client = cf_agent_pools(cmd.cli_ctx)
             _upgrade_single_nodepool_image_version(True, agent_pool_client,
                                                    resource_group_name, name, agent_pool_profile.name)
@@ -1381,6 +1386,10 @@ def aks_upgrade(cmd,
 
     if upgrade_all:
         for agent_profile in (instance.agent_pool_profiles or []):
+            # Skip Machines mode pools to avoid a known client-side error: these pools are containers of individual machines and do not support Kubernetes version upgrade.
+            if (agent_profile.mode or "").lower() == CONST_NODEPOOL_MODE_MACHINES.lower():
+                logger.warning("Skipping Kubernetes version upgrade for agent pool '%s': Machines mode pools do not support Kubernetes version upgrade.", agent_profile.name)
+                continue
             agent_profile.orchestrator_version = kubernetes_version
             agent_profile.creation_data = None
 
@@ -3161,9 +3170,12 @@ def aks_agentpool_rollback(
         getattr(auto_upgrade_profile, "node_os_upgrade_channel", None) if auto_upgrade_profile else None
     )
 
-    upgrade_channel_enabled = upgrade_channel and str(upgrade_channel).lower() != "none"
+    upgrade_channel_value = getattr(upgrade_channel, "value", upgrade_channel)
+    node_os_upgrade_channel_value = getattr(node_os_upgrade_channel, "value", node_os_upgrade_channel)
+
+    upgrade_channel_enabled = upgrade_channel_value and str(upgrade_channel_value).lower() != "none"
     node_os_channel_enabled = (
-        node_os_upgrade_channel and str(node_os_upgrade_channel).lower() not in ["none", "unmanaged"]
+        node_os_upgrade_channel_value and str(node_os_upgrade_channel_value).lower() not in ["none", "unmanaged"]
     )
 
     if upgrade_channel_enabled or node_os_channel_enabled:
@@ -3171,8 +3183,8 @@ def aks_agentpool_rollback(
             "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s, nodeOSUpgradeChannel=%s). "
             "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
             cluster_name,
-            upgrade_channel or "none",
-            node_os_upgrade_channel or "Unmanaged",
+            upgrade_channel_value or "none",
+            node_os_upgrade_channel_value or "Unmanaged",
         )
 
     logger.info("Fetching the most recent rollback version...")
@@ -3635,6 +3647,120 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
     )
 
 
+def aks_agentpool_auto_scale_add(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 nodepool_name,
+                                 node_vm_size,
+                                 min_count,
+                                 max_count,
+                                 no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot add autoscale profile to a non-virtualmachines node pool.")
+
+    AutoScaleProfile = cmd.get_models(
+        "AutoScaleProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    new_autoscale_profile = AutoScaleProfile(
+        size=node_vm_size,
+        min_count=int(min_count),
+        max_count=int(max_count),
+    )
+    if instance.virtual_machines_profile.scale.autoscale is None:
+        instance.virtual_machines_profile.scale.autoscale = []
+    instance.virtual_machines_profile.scale.autoscale.append(new_autoscale_profile)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_update(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    node_vm_size=None,
+                                    min_count=None,
+                                    max_count=None,
+                                    no_wait=False):
+    if node_vm_size is None and min_count is None and max_count is None:
+        raise RequiredArgumentMissingError(
+            "specify --node-vm-size, --min-count, or --max-count (or a combination)."
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot update autoscale profile in a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            if node_vm_size is not None:
+                a.size = node_vm_size
+            if min_count is not None:
+                a.min_count = int(min_count)
+            if max_count is not None:
+                a.max_count = int(max_count)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_delete(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot delete autoscale profile from a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            instance.virtual_machines_profile.scale.autoscale.remove(a)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
@@ -3791,6 +3917,50 @@ def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, clus
 
 def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
     return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_identity_binding_create(cmd, client, resource_group_name, cluster_name, name,
+                                managed_identity_resource_id, no_wait=False):
+    IdentityBinding, IdentityBindingProperties, IdentityBindingManagedIdentityProfile = cmd.get_models(
+        "IdentityBinding",
+        "IdentityBindingProperties",
+        "IdentityBindingManagedIdentityProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="identity_bindings",
+    )
+    instance = IdentityBinding(
+        properties=IdentityBindingProperties(
+            managed_identity=IdentityBindingManagedIdentityProfile(
+                resource_id=managed_identity_resource_id,
+            )
+        )
+    )
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        name,
+        instance,
+    )
+
+
+def aks_identity_binding_delete(cmd, client, resource_group_name, cluster_name, name, no_wait=False):  # pylint: disable=unused-argument
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        name,
+    )
+
+
+def aks_identity_binding_show(cmd, client, resource_group_name, cluster_name, name):  # pylint: disable=unused-argument
+    return client.get(resource_group_name, cluster_name, name)
+
+
+def aks_identity_binding_list(cmd, client, resource_group_name, cluster_name):  # pylint: disable=unused-argument
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
 
 
 def aks_mesh_enable(

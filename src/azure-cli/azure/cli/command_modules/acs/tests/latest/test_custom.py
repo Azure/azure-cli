@@ -25,11 +25,15 @@ from azure.cli.command_modules.acs.addonconfiguration import (
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_agentpool_auto_scale_add,
+    aks_agentpool_auto_scale_delete,
+    aks_agentpool_auto_scale_update,
     aks_agentpool_get_rollback_versions,
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
     aks_enable_addons,
     aks_stop,
+    aks_upgrade,
     is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
@@ -56,7 +60,9 @@ from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
 from azure.cli.core.azclierror import (
+    ClientRequestError,
     InvalidArgumentValueError,
+    RequiredArgumentMissingError,
 )
 
 
@@ -970,6 +976,214 @@ class TestAKSCommand(unittest.TestCase):
             return_value=None
         )
         self.assertEqual(aks_stop(self.cmd, self.client, "rg", "name", False), None)
+
+    def test_aks_upgrade_node_image_only_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during --node-image-only to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+
+        self.client.get = mock.Mock(return_value=mc)
+
+        with mock.patch("azure.cli.command_modules.acs.custom.cf_agent_pools") as mock_cf, \
+             mock.patch("azure.cli.command_modules.acs.custom._upgrade_single_nodepool_image_version") as mock_upgrade:
+            mock_cf.return_value = mock.Mock()
+
+            aks_upgrade(self.cmd, self.client, "rg", "name", node_image_only=True, yes=True)
+
+            # Only the VMSS pool should be upgraded; the Machines mode pool must be skipped.
+            upgraded_pools = [call.args[4] for call in mock_upgrade.call_args_list]
+            self.assertNotIn("machinespool", upgraded_pools)
+            self.assertIn("nodepool1", upgraded_pools)
+
+    def test_aks_upgrade_kubernetes_version_skips_machines_mode_pool(self):
+        """Machines mode pools must be skipped during Kubernetes version upgrade to avoid a known client-side error."""
+        machines_pool = self.models.ManagedClusterAgentPoolProfile(name="machinespool", mode="Machines", type="VirtualMachines")
+        vmss_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1", mode="User", type="VirtualMachineScaleSets")
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.agent_pool_profiles = [machines_pool, vmss_pool]
+        mc.pod_identity_profile = None
+        mc.kubernetes_version = "1.24.0"
+        mc.provisioning_state = "Succeeded"
+        mc.max_agent_pools = 10
+        mc.service_principal_profile = None
+
+        self.client.get = mock.Mock(return_value=mc)
+        self.client.begin_create_or_update = mock.Mock(return_value=None)
+
+        aks_upgrade(self.cmd, self.client, "rg", "name", kubernetes_version="1.25.0", yes=True)
+
+        # Machines mode pool must not have orchestrator_version set; VMSS pool must be upgraded.
+        self.assertIsNone(machines_pool.orchestrator_version)
+        self.assertEqual(vmss_pool.orchestrator_version, "1.25.0")
+
+    @staticmethod
+    def _build_vms_agentpool(
+        pool_type="VirtualMachines",
+        manual_profiles=None,
+        autoscale_profiles=None,
+    ):
+        if manual_profiles is None:
+            manual_profiles = []
+        instance = mock.Mock()
+        instance.properties = mock.Mock()
+        instance.properties.type_properties_type = pool_type
+        instance.type_properties_type = pool_type
+        instance.virtual_machines_profile = mock.Mock()
+        instance.virtual_machines_profile.scale = mock.Mock()
+        instance.virtual_machines_profile.scale.manual = manual_profiles
+        instance.virtual_machines_profile.scale.autoscale = autoscale_profiles
+        return instance
+
+    def test_aks_agentpool_auto_scale_add_success(self):
+        class AutoScaleProfile:
+            def __init__(self, size, min_count, max_count):
+                self.size = size
+                self.min_count = min_count
+                self.max_count = max_count
+
+        instance = self._build_vms_agentpool(autoscale_profiles=None)
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+        self.cmd.get_models = mock.Mock(return_value=AutoScaleProfile)
+
+        result = aks_agentpool_auto_scale_add(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D4s_v3",
+            2,
+            5,
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(len(instance.virtual_machines_profile.scale.autoscale), 1)
+        profile = instance.virtual_machines_profile.scale.autoscale[0]
+        self.assertEqual(profile.size, "Standard_D4s_v3")
+        self.assertEqual(profile.min_count, 2)
+        self.assertEqual(profile.max_count, 5)
+
+    def test_aks_agentpool_auto_scale_add_non_vms_pool(self):
+        instance = self._build_vms_agentpool(pool_type="VirtualMachineScaleSets", autoscale_profiles=[])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaises(ClientRequestError):
+            aks_agentpool_auto_scale_add(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+                1,
+                3,
+            )
+
+    def test_aks_agentpool_auto_scale_update_missing_required(self):
+        with self.assertRaises(RequiredArgumentMissingError):
+            aks_agentpool_auto_scale_update(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D2s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_update_profile_not_found(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "doesn't exist"):
+            aks_agentpool_auto_scale_update(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+                min_count=2,
+            )
+
+    def test_aks_agentpool_auto_scale_update_success(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+
+        result = aks_agentpool_auto_scale_update(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D2s_v3",
+            node_vm_size="Standard_D8s_v3",
+            min_count=2,
+            max_count=6,
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(profile.size, "Standard_D8s_v3")
+        self.assertEqual(profile.min_count, 2)
+        self.assertEqual(profile.max_count, 6)
+
+    def test_aks_agentpool_auto_scale_delete_non_vms_pool(self):
+        instance = self._build_vms_agentpool(pool_type="VirtualMachineScaleSets", autoscale_profiles=[])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaises(ClientRequestError):
+            aks_agentpool_auto_scale_delete(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D2s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_delete_profile_not_found(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "doesn't exist"):
+            aks_agentpool_auto_scale_delete(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_delete_success(self):
+        profile_1 = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        profile_2 = mock.Mock(size="Standard_D4s_v3", min_count=2, max_count=5)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile_1, profile_2])
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+
+        result = aks_agentpool_auto_scale_delete(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D4s_v3",
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(len(instance.virtual_machines_profile.scale.autoscale), 1)
+        self.assertEqual(instance.virtual_machines_profile.scale.autoscale[0].size, "Standard_D2s_v3")
 
 
 class TestRunCommand(unittest.TestCase):
