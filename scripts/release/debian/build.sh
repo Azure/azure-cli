@@ -15,7 +15,7 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.14.5"
+PYTHON_VERSION="3.14.6"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages

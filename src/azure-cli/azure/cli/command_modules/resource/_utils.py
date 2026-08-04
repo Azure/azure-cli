@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import typing as t
 import re
 import json
 
@@ -12,6 +13,10 @@ _management_group_pattern = (
 _subscription_pattern = r"^\/?subscriptions\/(?P<subscription_id>[a-f0-9-]+)"
 _resource_group_pattern = r"^\/resourceGroups\/(?P<resource_group_name>[-\w\._\(\)]+)"
 _relative_resource_id_pattern = r"^\/providers/(?P<relative_resource_id>.+$)"
+
+
+def str_lower_eq(str1: t.Optional[str], str2: t.Optional[str]):
+    return str1.lower() == str2.lower() if str1 and str2 else False
 
 
 def split_resource_id(resource_id):
