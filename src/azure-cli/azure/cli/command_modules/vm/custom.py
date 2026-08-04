@@ -201,10 +201,23 @@ def _get_disk_lun_by_aaz(data_disks):
     return len(existing_luns)
 
 
+def _get_account_keys_list(keys_list_result):
+    """Returns the list of storage account keys from a list_keys result.
+
+    In azure-mgmt-storage 25.0.0 the `keys` attribute was renamed to `keys_property` because the model
+    now inherits from MutableMapping, where `keys` is a method.
+    """
+    account_keys = getattr(keys_list_result, 'keys_property', None)
+    if account_keys is None:
+        account_keys = keys_list_result.keys
+    return account_keys
+
+
 def _get_private_config(cli_ctx, resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client(cli_ctx)
     # pylint: disable=no-member
-    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys_property
+    keys = _get_account_keys_list(
+        storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account))
 
     private_config = {
         'storageAccountName': storage_account,
@@ -2300,7 +2313,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Get account key
     keys = storage_mgmt_client.storage_accounts.list_keys(rg, storage_account.name)
 
-    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys_property[0].value)
+    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=_get_account_keys_list(keys)[0].value)
 
     # our streamwriter not seekable, so no parallel.
     downloader = blob_client.download_blob(max_concurrency=1)

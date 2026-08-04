@@ -160,14 +160,24 @@ def _get_storage_account_key(cli_ctx, account_name, account_key):
         raise CLIError('Cannot find "{0}" storage account.'.format(account_name))
     resource_group = parse_resource_id(account[0])['resource_group']
     keys_list_result = storage_client.storage_accounts.list_keys(resource_group, account_name)
-    if not keys_list_result or not keys_list_result.keys_property:
+    account_keys = _get_account_keys_list(keys_list_result)
+    if not account_keys:
         raise CLIError('Cannot find a key for "{0}" storage account.'.format(account_name))
-    key_value = None
-    try:
-        key_value = keys_list_result.keys_property[0].value
-    except AttributeError:
-        key_value = keys_list_result.keys[0].value
-    return key_value
+    return account_keys[0].value
+
+
+def _get_account_keys_list(keys_list_result):
+    """Returns the list of storage account keys from a list_keys result.
+
+    In azure-mgmt-storage 25.0.0 the `keys` attribute was renamed to `keys_property` because the model
+    now inherits from MutableMapping, where `keys` is a method.
+    """
+    if not keys_list_result:
+        return None
+    account_keys = getattr(keys_list_result, 'keys_property', None)
+    if account_keys is None:
+        account_keys = keys_list_result.keys
+    return account_keys
 
 
 def _get_effective_storage_account_name_and_key(cli_ctx, account_name, account_key):
