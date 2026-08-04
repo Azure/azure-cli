@@ -12,8 +12,8 @@ type: command
 short-summary: Log in to Azure.
 long-summary: >-
     By default, this command logs in with a user account.
-    Azure CLI uses Web Account Manager (WAM) on Windows, and browser-based login on Linux and macOS by default.
-    If WAM or a web browser is not available, Azure CLI will fall back to device code login.
+    Azure CLI uses the native authentication broker on Windows, macOS, Linux, and WSL when available,
+    and browser-based login otherwise. If neither is available, Azure CLI will fall back to device code login.
 
 
     [WARNING] Authentication with username and password in the command line is strongly discouraged.

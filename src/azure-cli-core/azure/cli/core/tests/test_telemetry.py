@@ -8,6 +8,22 @@ from unittest import mock
 
 
 class TestCoreTelemetry(unittest.TestCase):
+    def test_set_broker_info(self):
+        from azure.cli.core import telemetry
+
+        session = mock.MagicMock()
+        with mock.patch.object(telemetry, '_session', session):
+            telemetry.set_broker_info(
+                enable_broker_on_windows=True,
+                enable_broker_on_mac=False,
+                enable_broker_on_linux=True,
+                enable_broker_on_wsl=False)
+
+        self.assertTrue(session.enable_broker_on_windows)
+        self.assertFalse(session.enable_broker_on_mac)
+        self.assertTrue(session.enable_broker_on_linux)
+        self.assertFalse(session.enable_broker_on_wsl)
+
     def test_suppress_all_exceptions(self):
         self._impl(Exception, 'fallback')
         self._impl(Exception, None)
@@ -79,4 +95,3 @@ class TestCoreTelemetry(unittest.TestCase):
         self.assertEqual(session.command, "")
         self.assertEqual(session.parameters, ["--version"])
         self.assertIsNone(session.raw_command)
-

@@ -45,6 +45,25 @@ with open(TEST_CERT) as f:
 
 class TestIdentity(unittest.TestCase):
 
+    def test_msal_public_app_kwargs_include_all_broker_options(self):
+        identity = Identity(
+            'https://login.microsoftonline.com',
+            enable_broker_on_windows=True,
+            enable_broker_on_mac=False,
+            enable_broker_on_linux=True,
+            enable_broker_on_wsl=False)
+
+        with mock.patch.object(Identity, '_msal_app_kwargs', new_callable=mock.PropertyMock,
+                               return_value={'base_option': 'value'}):
+            assert identity._msal_public_app_kwargs == {
+                'base_option': 'value',
+                'enable_broker_on_windows': True,
+                'enable_broker_on_mac': False,
+                'enable_broker_on_linux': True,
+                'enable_broker_on_wsl': False,
+                'enable_pii_log': True,
+            }
+
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
     @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)

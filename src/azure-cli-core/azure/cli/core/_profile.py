@@ -5,6 +5,8 @@
 
 import os
 import os.path
+import platform
+import sys
 from copy import deepcopy
 from enum import Enum
 
@@ -12,7 +14,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces
+from azure.cli.core.util import in_cloud_console, can_launch_browser, is_github_codespaces, is_wsl
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -60,6 +62,20 @@ _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+
+def _is_linux_broker_available():
+    if platform.machine().lower() not in ('amd64', 'x86_64'):
+        return False
+
+    from ctypes.util import find_library
+    required_libraries = ('secret-1', 'webkit2gtk-4.1')
+    missing_libraries = [library for library in required_libraries if not find_library(library)]
+    if missing_libraries:
+        logger.debug("Native authentication broker is unavailable; missing libraries: %s",
+                     ', '.join(missing_libraries))
+        return False
+    return True
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -973,10 +989,27 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
 
-    # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
-    enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
+    broker_options = {
+        'enable_broker_on_windows': False,
+        'enable_broker_on_mac': False,
+        'enable_broker_on_linux': False,
+        'enable_broker_on_wsl': False,
+    }
+    if sys.platform == 'win32':
+        broker_option = 'enable_broker_on_windows'
+    elif sys.platform == 'darwin':
+        broker_option = 'enable_broker_on_mac'
+    elif sys.platform == 'linux' and _is_linux_broker_available():
+        broker_option = 'enable_broker_on_wsl' if is_wsl() else 'enable_broker_on_linux'
+    else:
+        broker_option = None
+
+    if broker_option:
+        # Use core.enable_broker_on_<platform>=false to disable the native authentication broker.
+        broker_options[broker_option] = cli_ctx.config.getboolean('core', broker_option, fallback=True)
+
     from .telemetry import set_broker_info
-    set_broker_info(enable_broker_on_windows)
+    set_broker_info(**broker_options)
 
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
@@ -984,5 +1017,5 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     return Identity(authority, tenant_id=tenant_id, client_id=client_id,
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
-                    enable_broker_on_windows=enable_broker_on_windows,
+                    **broker_options,
                     instance_discovery=instance_discovery)

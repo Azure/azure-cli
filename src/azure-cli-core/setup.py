@@ -57,7 +57,10 @@ DEPENDENCIES = [
     'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.3.1',
     'msal[broker]==1.36.0; sys_platform == "win32"',
-    'msal==1.36.0; sys_platform != "win32"',
+    'msal[broker]==1.36.0; sys_platform == "darwin"',
+    'msal[broker]==1.36.0; sys_platform == "linux" and platform_machine == "x86_64"',
+    'msal==1.36.0; sys_platform == "linux" and platform_machine != "x86_64"',
+    'msal==1.36.0; sys_platform != "win32" and sys_platform != "darwin" and sys_platform != "linux"',
     'packaging>=20.9',
     # pkginfo>=1.12.0 reads the spec-defined wheel METADATA / unpacked .dist-info
     # layout produced by modern wheel/setuptools (no metadata.json). Required so

@@ -12,7 +12,7 @@ from copy import deepcopy
 from unittest import mock
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
-                                      _transform_subscription_for_multiapi,
+                                      _create_identity_instance, _transform_subscription_for_multiapi,
                                       _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.auth.util import AccessToken
@@ -105,6 +105,47 @@ class ManagedIdentityCredentialStub:
 
 
 class TestProfile(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_encrypt_token_cache', return_value=False)
+    @mock.patch('azure.cli.core.telemetry.set_broker_info')
+    @mock.patch('azure.cli.core.auth.identity.Identity')
+    def test_create_identity_instance_enables_broker_for_current_platform(
+            self, identity_mock, set_broker_info_mock, _):
+        cases = [
+            ('win32', False, True, 'enable_broker_on_windows'),
+            ('darwin', False, True, 'enable_broker_on_mac'),
+            ('linux', False, True, 'enable_broker_on_linux'),
+            ('linux', True, True, 'enable_broker_on_wsl'),
+            ('linux', False, False, None),
+            ('linux', True, False, None),
+        ]
+
+        cli_ctx = mock.MagicMock()
+        cli_ctx.config.getboolean.side_effect = lambda _section, _option, fallback=None: fallback
+
+        for platform_name, running_in_wsl, linux_broker_available, enabled_option in cases:
+            with self.subTest(platform=platform_name, running_in_wsl=running_in_wsl), \
+                    mock.patch('azure.cli.core._profile.sys.platform', platform_name), \
+                    mock.patch('azure.cli.core._profile.is_wsl', return_value=running_in_wsl), \
+                    mock.patch('azure.cli.core._profile._is_linux_broker_available',
+                               return_value=linux_broker_available):
+                identity_mock.reset_mock()
+                set_broker_info_mock.reset_mock()
+
+                _create_identity_instance(cli_ctx, 'https://login.microsoftonline.com')
+
+                expected_broker_options = {
+                    'enable_broker_on_windows': False,
+                    'enable_broker_on_mac': False,
+                    'enable_broker_on_linux': False,
+                    'enable_broker_on_wsl': False,
+                }
+                if enabled_option:
+                    expected_broker_options[enabled_option] = True
+                identity_kwargs = identity_mock.call_args.kwargs
+                for option, expected_value in expected_broker_options.items():
+                    assert identity_kwargs[option] is expected_value
+                set_broker_info_mock.assert_called_once_with(**expected_broker_options)
 
     @classmethod
     def setUpClass(cls):
