@@ -309,6 +309,37 @@ class AppConfigKVScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
             self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --endpoint {endpoint} --auth-mode login --key {key} --label {label} --dry-run -y')
 
+        # Description property: set with --description, verify it is returned, preserved on edit, and overwritten
+        self.kwargs.update({
+            'key': "DescKey",
+            'value': "Red",
+            'description': "The theme color"
+        })
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --description "{description}" -y',
+                 checks=[self.check('key', "DescKey"),
+                         self.check('value', "Red"),
+                         self.check('description', "The theme color")])
+
+        # Description is returned by show
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
+                 checks=[self.check('description', "The theme color")])
+
+        # Description is selectable via --fields
+        partial_kv = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --fields description').get_output_in_json()
+        self.assertEqual(partial_kv[0]['description'], "The theme color")
+        self.assertNotIn('value', partial_kv[0])
+
+        # Updating another property without --description preserves the existing description
+        self.kwargs.update({'value': "Green"})
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
+                 checks=[self.check('value', "Green"),
+                         self.check('description', "The theme color")])
+
+        # Explicitly updating the description overwrites it
+        self.kwargs.update({'description': "The updated theme color"})
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --description "{description}" -y',
+                 checks=[self.check('description', "The updated theme color")])
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
@@ -519,70 +550,4 @@ class AppConfigKVScenarioTest(ScenarioTest):
         revisions = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3
 
-    @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_kv_description(self):
-        # Lowercase store-name prefix so the HTTP-lowercased '<name>.azconfig.io' host matches the
-        # name registered with the recording name-replacer, keeping cassettes scrubbed for playback.
-        config_store_prefix = get_resource_name_prefix('kvdesctest')
-        config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
-
-        location = 'eastus'
-        sku = 'standard'
-        self.kwargs.update({
-            'config_store_name': config_store_name,
-            'rg_loc': location,
-            'rg': get_test_resource_group(),
-            'sku': sku,
-            'endpoint': 'https://' + config_store_name + '.azconfig.io'
-        })
-        create_config_store(self, self.kwargs, disable_local_auth=True)
-
-        entry_key = "Color"
-        entry_value = "Red"
-        entry_description = "The theme color"
-
-        self.kwargs.update({
-            'key': entry_key,
-            'value': entry_value,
-            'description': entry_description
-        })
-
-        # Set a key-value with a description
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --description "{description}" -y',
-                 checks=[self.check('key', entry_key),
-                         self.check('value', entry_value),
-                         self.check('description', entry_description)])
-
-        # Show the key-value and verify the description is returned
-        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
-                 checks=[self.check('key', entry_key),
-                         self.check('value', entry_value),
-                         self.check('description', entry_description)])
-
-        # List with only the description field selected
-        partial_kv = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --fields description').get_output_in_json()
-        self.assertEqual(partial_kv[0]['description'], entry_description)
-        self.assertNotIn('value', partial_kv[0])
-
-        # Updating another property without --description should preserve the existing description
-        updated_value = "Green"
-        self.kwargs.update({
-            'value': updated_value
-        })
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
-                 checks=[self.check('key', entry_key),
-                         self.check('value', updated_value),
-                         self.check('description', entry_description)])
-
-        # Explicitly updating the description should overwrite the previous value
-        updated_description = "The updated theme color"
-        self.kwargs.update({
-            'description': updated_description
-        })
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --description "{description}" -y',
-                 checks=[self.check('key', entry_key),
-                         self.check('value', updated_value),
-                         self.check('description', updated_description)])
 

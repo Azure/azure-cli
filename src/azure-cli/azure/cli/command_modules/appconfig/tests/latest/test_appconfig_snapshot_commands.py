@@ -92,24 +92,32 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'retention_period': retention_period
         })
 
-        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
+        snapshot_description = "Snapshot of Test key-values"
+        self.kwargs.update({
+            'snapshot_description': snapshot_description
+        })
+
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1 --description "{snapshot_description}"',
                  checks=[self.check('itemsCount', 2),
-                         self.check('status', 'ready')])
+                         self.check('status', 'ready'),
+                         self.check('description', snapshot_description)])
 
 
         # Test showing created snapshot
-        created_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
+        created_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields name status items_count filters description').get_output_in_json()
 
         self.assertEqual(created_snapshot['items_count'], 2)
         self.check(created_snapshot['status'], 'ready')
         self.assertDictEqual(created_snapshot['filters'][0], filter_dict)
+        self.assertEqual(created_snapshot['description'], snapshot_description)
         self.assertRaises(KeyError, lambda: created_snapshot['created'])
 
         # Test listing snapshots
-        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --endpoint {endpoint} --auth-mode login --fields name status items_count filters').get_output_in_json()
+        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --endpoint {endpoint} --auth-mode login --fields name status items_count filters description').get_output_in_json()
         self.assertEqual(created_snapshots[0]['items_count'], 2)
         self.assertEqual(created_snapshots[0]['status'], 'ready')
         self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
+        self.assertEqual(created_snapshots[0]['description'], snapshot_description)
 
         # Test snapshot archive
         archived_snapshot = self.cmd('appconfig snapshot archive --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name}').get_output_in_json()
@@ -357,72 +365,4 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])
 
-
-    @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_snapshot_description(self):
-        store_name_prefix = get_resource_name_prefix('snapshotdesc')
-        config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
-        snapshot_name = "DescriptionSnapshot"
-        snapshot_description = "Snapshot of Test key-values"
-        store_location = 'francecentral'
-        sku = 'standard'
-
-        self.kwargs.update({
-            'config_store_name': config_store_name,
-            'snapshot_name': snapshot_name,
-            'snapshot_description': snapshot_description,
-            'rg_loc': store_location,
-            'rg': get_test_resource_group(),
-            'sku': sku,
-            'retention_days': 1,
-            'enable_purge_protection': False,
-            'endpoint': 'https://' + config_store_name + '.azconfig.io'
-        })
-
-        create_config_store(self, self.kwargs, disable_local_auth=True)
-
-        # Create a couple of key-values to include in the snapshot
-        self.kwargs.update({
-            'key': "TestKey1",
-            'value': "TestValue1",
-        })
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
-                 checks=[self.check('key', "TestKey1"),
-                         self.check('value', "TestValue1")])
-
-        self.kwargs.update({
-            'key': "TestKey2",
-            'value': "TestValue2",
-        })
-        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
-                 checks=[self.check('key', "TestKey2"),
-                         self.check('value', "TestValue2")])
-
-        # Create a snapshot with a description
-        filter_dict = {"key": "Test*"}
-        self.kwargs.update({
-            'filter': '\'{}\''.format(json.dumps(filter_dict)),
-            'retention_period': 3600
-        })
-
-        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --description "{snapshot_description}"',
-                 checks=[self.check('itemsCount', 2),
-                         self.check('status', 'ready'),
-                         self.check('description', snapshot_description)])
-
-        # Show the snapshot and verify the description is returned
-        self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name}',
-                 checks=[self.check('name', snapshot_name),
-                         self.check('description', snapshot_description)])
-
-        # Show only the description field
-        partial_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields description').get_output_in_json()
-        self.assertEqual(partial_snapshot['description'], snapshot_description)
-        self.assertRaises(KeyError, lambda: partial_snapshot['name'])
-
-        # List snapshots and verify the description is returned
-        listed_snapshots = self.cmd('appconfig snapshot list --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name}').get_output_in_json()
-        self.assertEqual(listed_snapshots[0]['description'], snapshot_description)
 
