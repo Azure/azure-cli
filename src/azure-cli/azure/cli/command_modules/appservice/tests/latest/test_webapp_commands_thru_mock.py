@@ -1476,6 +1476,20 @@ class TestOneDeployScmCache(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._populate_cached_scm_headers')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    def test_get_ondeploy_headers_zip_content_type_is_case_insensitive(
+            self, get_scm_site_headers_mock, _populate_cached_headers_mock):
+        from azure.cli.command_modules.appservice.custom import _get_ondeploy_headers
+        params = self._make_params()
+        params.src_path = '/tmp/package.zip'
+        params.artifact_type = 'ZIP'
+
+        _get_ondeploy_headers(params)
+
+        sent_additional_headers = get_scm_site_headers_mock.call_args.kwargs['additional_headers']
+        self.assertEqual(sent_additional_headers['Content-Type'], 'application/zip')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._populate_cached_scm_headers')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
     def test_get_ondeploy_headers_keeps_octet_stream_for_non_zip_artifact(
             self, get_scm_site_headers_mock, _populate_cached_headers_mock):
         from azure.cli.command_modules.appservice.custom import _get_ondeploy_headers
