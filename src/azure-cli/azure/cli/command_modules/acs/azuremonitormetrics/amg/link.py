@@ -69,11 +69,12 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             }
         }
         try:
-            resources.begin_create_or_update_by_id(
+            poller = resources.begin_create_or_update_by_id(
                 roleAssignmentResourceId,
                 GRAFANA_ROLE_ASSIGNMENT_API,
                 association_body
             )
+            poller.result()
         except HttpResponseError as e:
             # If already exists (RoleAssignmentExists), warn and continue, else print error
             if e.error and e.error.code == "RoleAssignmentExists":
@@ -109,11 +110,12 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
         targetGrafanaArmPayload["properties"]["grafanaIntegrations"]["azureMonitorWorkspaceIntegrations"].append({
             "azureMonitorWorkspaceResourceId": azure_monitor_workspace_resource_id
         })
-        resources.begin_create_or_update_by_id(
+        poller = resources.begin_create_or_update_by_id(
             grafana_resource_id,
             GRAFANA_API,
             targetGrafanaArmPayload
         )
+        poller.result()
     except CLIError as e:
         raise CLIError(e)
     return GrafanaLink.SUCCESS
