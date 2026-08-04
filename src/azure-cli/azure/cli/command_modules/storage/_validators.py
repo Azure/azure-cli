@@ -2102,9 +2102,10 @@ def validate_share_close_handle(namespace):
 
 def validate_upload_blob(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    if namespace.file_path and namespace.data:
+    has_data = namespace.data is not None
+    if namespace.file_path and has_data:
         raise InvalidArgumentValueError("usage error: please only specify one of --file and --data to upload.")
-    if not namespace.file_path and not namespace.data:
+    if not namespace.file_path and not has_data:
         raise InvalidArgumentValueError("usage error: please specify one of --file and --data to upload.")
 
 

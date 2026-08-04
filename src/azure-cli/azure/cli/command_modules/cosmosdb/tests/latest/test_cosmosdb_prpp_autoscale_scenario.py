@@ -26,7 +26,7 @@ class Cosmosdb_EnablePerRegionPerPartitionAutoscaleScenarioTest(ScenarioTest):
         })
 
         #create enablePerRegionPerPartitionAutoscale enabled account
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true --enable-prpp-autoscale true')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-prpp-autoscale true')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enablePerRegionPerPartitionAutoscale', True),
         ])

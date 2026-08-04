@@ -10,13 +10,13 @@ import unittest
 import time
 import random
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
+from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
+    KeyVaultPreparer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
-    DESPreparer, KeyPreparer, RGPreparer
+    DESPreparer, KeyPreparer, ResourceGroupPreparer, StorageAccountPreparer
 
 
 def _get_vm_version(vm_type):
@@ -116,7 +116,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled'),
-            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled'),
+            self.check('properties.costManagementSettings.granularityLevel', 'VaultLevel')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
@@ -204,6 +205,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault update -n {vault4} -g {rg} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
             self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
             self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'PermanentlyDisabled')
+        ])
+
+        # Cost management settings testing.
+        self.cmd('backup vault update -n {vault3} -g {rg} --cost-management-granularity ProtectedItemWithParentTag', checks=[
+            self.check('properties.costManagementSettings.granularityLevel', 'ProtectedItemWithParentTag')
+        ])
+
+        self.cmd('backup vault update -n {vault4} -g {rg} --cost-management-granularity ProtectedItemLevel', checks=[
+            self.check('properties.costManagementSettings.granularityLevel', 'ProtectedItemLevel')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)
@@ -1520,7 +1530,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    @KeyVaultPreparer(additional_params='--enable-rbac-authorization false')
+    @KeyVaultPreparer(additional_params='--enable-rbac-authorization true')
     def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
             'loc' : resource_group_location,
@@ -1542,7 +1552,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs["user_principal_id"] = user_principal_id
         self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
             subscription, resource_group, key_vault)
-        # Uncomment during live runs
+        # Uncomment during live runs (key vault is RBAC-authorization enabled)
         # self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
 
         self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
@@ -1596,19 +1606,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key1_id'] = key1_json['key']['kid']
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        # Uncomment during live runs
+        # Uncomment during live runs (key vault is RBAC-authorization enabled)
         # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
         # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id) 
-
+        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
         # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
         # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
-
         # rbac3_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
         # self.assertEqual(rbac3_json['roleDefinitionId'], role_id)
-
         # rbac4_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
         # self.assertEqual(rbac4_json['roleDefinitionId'], role_id)
+        # time.sleep(300)  # let RBAC role assignments propagate before Backup accesses the key
 
         self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault1}"')
 
@@ -1696,12 +1704,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # associate vault with an already present resource guard
         self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 9)
+            self.check('length(properties.resourceGuardOperationDetails)', 14)
         ])
 
         self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 9)
+            self.check('length(properties.resourceGuardOperationDetails)', 14)
         ])
 
         time.sleep(300)
