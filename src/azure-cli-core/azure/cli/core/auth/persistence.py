@@ -8,6 +8,7 @@
 
 import json
 import sys
+import time
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
@@ -35,10 +36,16 @@ class AzureCliTokenCache(PersistedTokenCache):
             super()._reload_if_necessary()
         except json.JSONDecodeError as ex:
             # The token cache file may be corrupted due to incomplete or concurrent writes.
-            # Reset to a fresh empty cache so that the current operation can continue.
+            # Reset the in-memory cache to empty so that the current operation can continue.
+            # The subsequent modify() call will persist this empty cache, overwriting the
+            # corrupted file on disk.
             logger.warning("Failed to deserialize token cache '%s': %s. "
-                           "The cache will be reset.", self._persistence.get_location(), ex)
+                           "The in-memory cache will be reset to empty.",
+                           self._persistence.get_location(), ex)
             self.deserialize(None)
+            # Update the sync marker so we don't keep retrying to reload the same
+            # corrupted file on every subsequent call until it's overwritten.
+            self._last_sync = time.time()
 
 
 def load_persisted_token_cache(location, encrypt):
@@ -87,5 +94,5 @@ class SecretStore:
             return []
         except json.JSONDecodeError as ex:
             logger.warning("Failed to deserialize service principal entries '%s': %s. "
-                           "The entries will be reset.", self._persistence.get_location(), ex)
+                           "The entries will be treated as empty.", self._persistence.get_location(), ex)
             return []
