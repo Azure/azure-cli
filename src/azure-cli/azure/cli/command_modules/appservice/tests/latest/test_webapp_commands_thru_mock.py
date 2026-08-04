@@ -2209,6 +2209,26 @@ class TestListTriggeredWebjobs(unittest.TestCase):
         with self.assertRaises(UnclassifiedUserFault):
             list_triggered_webjobs(cmd, 'rg', 'myapp')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_list_triggered_webjobs_409_raised_during_pager_iteration(self, generic_op_mock):
+        """list_triggered_webjobs catches 409 raised lazily when the pager is enumerated."""
+        kudu_message = ("The web app is not configured to run the web job. "
+                        "Please enable running web jobs before calling the API.")
+        body = '{{"error": "{}"}}'.format(kudu_message)
+        ex = self._build_http_response_error(409, body)
+
+        def _raising_iter():
+            raise ex
+            yield  # make this a generator (never reached)
+
+        generic_op_mock.return_value = _raising_iter()
+
+        cmd = _get_test_cmd()
+        with self.assertRaises(UnclassifiedUserFault) as ctx:
+            list_triggered_webjobs(cmd, 'rg', 'myapp')
+
+        self.assertIn('web job', str(ctx.exception))
+
 
 if __name__ == '__main__':
     unittest.main()

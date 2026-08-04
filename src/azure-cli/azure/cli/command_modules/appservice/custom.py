@@ -10450,19 +10450,23 @@ def remove_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=N
 
 
 def list_triggered_webjobs(cmd, resource_group_name, name, slot=None):
+    def _handle_409(ex):
+        try:
+            response_text = ex.response.text()
+        except TypeError:
+            response_text = ex.response.text
+        try:
+            message = json.loads(response_text).get('error') or str(ex)
+        except (ValueError, AttributeError):
+            message = str(ex)
+        raise UnclassifiedUserFault(message)
+
     try:
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+        pager = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+        return list(pager)
     except HttpResponseError as ex:
         if ex.status_code == 409:
-            try:
-                response_text = ex.response.text()
-            except TypeError:
-                response_text = ex.response.text
-            try:
-                message = json.loads(response_text).get('error') or str(ex)
-            except (ValueError, AttributeError):
-                message = str(ex)
-            raise UnclassifiedUserFault(message)
+            _handle_409(ex)
         raise
 
 
