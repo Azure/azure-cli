@@ -2179,17 +2179,23 @@ class TestListTriggeredWebjobs(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_list_triggered_webjobs_409_surfaces_kudu_error(self, generic_op_mock):
-        """list_triggered_webjobs raises UnclassifiedUserFault with the Kudu body on HTTP 409."""
+        """list_triggered_webjobs raises UnclassifiedUserFault with the Kudu body on HTTP 409.
+
+        The live response body is a JSON-encoded string whose value is the JSON object,
+        e.g. the raw text is: '"{\"error\":\"The web app is not configured...\"}"'
+        """
         kudu_message = ("The web app is not configured to run the web job. "
                         "Please enable running web jobs before calling the API.")
-        body = '{{"error": "{}"}}'.format(kudu_message)
+        # Simulate the production response shape: body is a JSON-encoded string of the JSON object.
+        import json as _json
+        body = _json.dumps(_json.dumps({"error": kudu_message}))
         generic_op_mock.side_effect = self._build_http_response_error(409, body)
 
         cmd = _get_test_cmd()
         with self.assertRaises(UnclassifiedUserFault) as ctx:
             list_triggered_webjobs(cmd, 'rg', 'myapp')
 
-        self.assertIn('web job', str(ctx.exception))
+        self.assertEqual(str(ctx.exception), kudu_message)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_list_triggered_webjobs_non_409_reraises(self, generic_op_mock):
@@ -2214,7 +2220,8 @@ class TestListTriggeredWebjobs(unittest.TestCase):
         """list_triggered_webjobs catches 409 raised lazily when the pager is enumerated."""
         kudu_message = ("The web app is not configured to run the web job. "
                         "Please enable running web jobs before calling the API.")
-        body = '{{"error": "{}"}}'.format(kudu_message)
+        import json as _json
+        body = _json.dumps(_json.dumps({"error": kudu_message}))
         ex = self._build_http_response_error(409, body)
 
         def _raising_iter():
@@ -2227,7 +2234,7 @@ class TestListTriggeredWebjobs(unittest.TestCase):
         with self.assertRaises(UnclassifiedUserFault) as ctx:
             list_triggered_webjobs(cmd, 'rg', 'myapp')
 
-        self.assertIn('web job', str(ctx.exception))
+        self.assertEqual(str(ctx.exception), kudu_message)
 
 
 if __name__ == '__main__':

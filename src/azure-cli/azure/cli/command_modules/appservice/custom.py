@@ -10456,7 +10456,11 @@ def list_triggered_webjobs(cmd, resource_group_name, name, slot=None):
         except TypeError:
             response_text = ex.response.text
         try:
-            message = json.loads(response_text).get('error') or str(ex)
+            parsed = json.loads(response_text)
+            # Live responses encode the JSON object as a JSON string; decode again if needed.
+            if isinstance(parsed, str):
+                parsed = json.loads(parsed)
+            message = parsed.get('error') or str(ex)
         except (ValueError, AttributeError):
             message = str(ex)
         raise UnclassifiedUserFault(message)
