@@ -743,7 +743,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # In interactive/delegated auth, `az ad signed-in-user show` returns the signed-in user.
             user = self.cmd('ad signed-in-user show').get_output_in_json()
             caller_object_id = user['id']
-        except CLIError:
+        except (CLIError, HttpResponseError):
             # `az ad signed-in-user show` calls Graph /me which is delegated-only. Under
             # service-principal/OIDC auth (as used in live-test CI pipelines), the Graph API
             # returns an HTTP 400. The role module's graph_err_handler converts the raw

@@ -62,7 +62,7 @@ def mysql_table_transform_output_list_skus(result):
                     new_entry['Max Disk IOPS'] = key['supportedIops']
                     table_result.append(new_entry)
             except (KeyError, IndexError, TypeError):
-                raise CLIError("There is no sku available for this location.")
+                raise CLIError("No SKUs are available for this location.")
 
     return table_result
 
