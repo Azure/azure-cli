@@ -474,6 +474,7 @@ def set_key(cmd,
             content_type=None,
             tags=None,
             value=None,
+            description=None,
             yes=False,
             connection_string=None,
             auth_mode="key",
@@ -520,10 +521,12 @@ def set_key(cmd,
                                           label=label,
                                           value="" if value is None else value,
                                           content_type="" if content_type is None else content_type,
-                                          tags=tags)
+                                          tags=tags,
+                                          description=description)
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
+            description = retrieved_kv.description if description is None else description
             if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON and strip comments if needed.
@@ -536,14 +539,16 @@ def set_key(cmd,
                                           content_type=content_type,
                                           tags=retrieved_kv.tags if tags is None else tags,
                                           read_only=retrieved_kv.read_only,
-                                          etag=retrieved_kv.etag)
+                                          etag=retrieved_kv.etag,
+                                          description=description)
 
         verification_kv = {
             "key": set_kv.key,
             "label": set_kv.label,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
-            "tags": set_kv.tags
+            "tags": set_kv.tags,
+            "description": set_kv.description
         }
 
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
@@ -576,6 +581,7 @@ def set_keyvault(cmd,
                  name=None,
                  label=None,
                  tags=None,
+                 description=None,
                  yes=False,
                  connection_string=None,
                  auth_mode="key",
@@ -608,22 +614,26 @@ def set_keyvault(cmd,
                                           label=label,
                                           value=keyvault_ref_value,
                                           content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
-                                          tags=tags)
+                                          tags=tags,
+                                          description=description)
         else:
+            description = retrieved_kv.description if description is None else description
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
                                           value=keyvault_ref_value,
                                           content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
                                           tags=retrieved_kv.tags if tags is None else tags,
                                           read_only=retrieved_kv.read_only,
-                                          etag=retrieved_kv.etag)
+                                          etag=retrieved_kv.etag,
+                                          description=description)
 
         verification_kv = {
             "key": set_kv.key,
             "label": set_kv.label,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
-            "tags": set_kv.tags
+            "tags": set_kv.tags,
+            "description": set_kv.description
         }
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
         confirmation_message = "Are you sure you want to set the keyvault reference: \n" + entry + "\n"
@@ -655,6 +665,7 @@ def set_snapshot_reference(cmd,
                            name=None,
                            label=None,
                            tags=None,
+                           description=None,
                            yes=False,
                            connection_string=None,
                            auth_mode="key",
@@ -687,22 +698,26 @@ def set_snapshot_reference(cmd,
                                           label=label,
                                           value=snapshot_ref_value,
                                           content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
-                                          tags=tags)
+                                          tags=tags,
+                                          description=description)
         else:
+            description = retrieved_kv.description if description is None else description
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
                                           value=snapshot_ref_value,
                                           content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
                                           tags=retrieved_kv.tags if tags is None else tags,
                                           read_only=retrieved_kv.read_only,
-                                          etag=retrieved_kv.etag)
+                                          etag=retrieved_kv.etag,
+                                          description=description)
 
         verification_kv = {
             "key": set_kv.key,
             "label": set_kv.label,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
-            "tags": set_kv.tags
+            "tags": set_kv.tags,
+            "description": set_kv.description
         }
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
         confirmation_message = "Are you sure you want to set the snapshot reference: \n" + entry + "\n"
