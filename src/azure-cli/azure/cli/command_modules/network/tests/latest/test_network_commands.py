@@ -9845,6 +9845,68 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
 
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_pip', location='eastus')
+    def test_ddos_custom_policy_attach_to_public_ip(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'policy_name2': 'policy2',
+            'pip_name': 'pip1',
+        })
+
+        dcp = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} '
+                       '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                       '--traffic-type Tcp --packets-per-second 1000000', checks=[
+            self.check('name', '{policy_name}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id'] = dcp['id']
+
+        dcp2 = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name2} '
+                        '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                        '--traffic-type Tcp --packets-per-second 2000000', checks=[
+            self.check('name', '{policy_name2}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id2'] = dcp2['id']
+
+        # A DDoS custom policy can only be attached to an instance-level public IP,
+        # i.e. a public IP associated with a NIC's IP configuration. Create the public
+        # IP and associate it with a NIC to make it eligible.
+        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard '
+                 '--allocation-method Static', checks=[
+            self.check('publicIp.name', '{pip_name}'),
+            self.check('publicIp.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n nic1 --vnet-name vnet1 --subnet subnet1 '
+                 '--public-ip-address {pip_name}')
+
+        # Attach the DDoS custom policy to the (now instance-level) public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {pip_name}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        # Replace the attached policy on the existing public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id2}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id2}'),
+        ])
+
+        # Remove the policy from the public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy null', checks=[
+            self.check('ddosSettings.ddosCustomPolicy', None),
+        ])
+
+        self.cmd('network nic delete -g {rg} -n nic1')
+        self.cmd('network public-ip delete -g {rg} -n {pip_name}')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name2} -y')
+
 
 class NetworkPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_ip_version_type', location='eastus2euap')
