@@ -53,14 +53,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def cmd(self, command, checks=None, expect_failure=False):
         # Live-only retry adapter: when AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK
-        # is set during a live run, poll provisioningState until terminal so an
-        # Azure Policy race can't fail the test on a stale 'Updating' body.
+        # is set during a live run, retry AKS operation conflicts and poll
+        # provisioningState until terminal so asynchronous service operations
+        # can't fail the test on a transient conflict or stale 'Updating' body.
         # Recordings made with the flag enabled must NOT be committed; the
         # replay pipeline runs with the flag off and would assert against the
         # initial pre-poll response.
-        if (checks and self.is_live and
+        if (self.is_live and
             os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
-            normalized_checks = checks if isinstance(checks, (list, tuple)) else [checks]
+            if checks is None:
+                normalized_checks = []
+            elif isinstance(checks, (list, tuple)):
+                normalized_checks = checks
+            else:
+                normalized_checks = [checks]
             return self._cmd_with_retry(command, normalized_checks, expect_failure)
         return super().cmd(command, checks=checks, expect_failure=expect_failure)
 
@@ -85,6 +91,72 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             return False, None
         return True, data['id']
 
+    @staticmethod
+    def _is_transient_operation_conflict(ex):
+        message = str(ex)
+        return (
+            "Another operation is in progress" in message or
+            "in-progress PutExtensionAddonHandler.PUT operation" in message
+        )
+
+    def _execute_with_transient_conflict_retry(self, command, expect_failure):
+        from azure.cli.testsdk.base import execute
+        import logging
+
+        max_retries = max(1, int(os.environ.get('AZURE_CLI_TEST_OPERATION_MAX_RETRIES', '10')))
+        base_delay = float(os.environ.get('AZURE_CLI_TEST_OPERATION_BASE_DELAY', '5.0'))
+        max_delay = float(os.environ.get('AZURE_CLI_TEST_OPERATION_MAX_DELAY', '60.0'))
+
+        for attempt in range(max_retries):
+            try:
+                return execute(self.cli_ctx, command, expect_failure=expect_failure)
+            except (HttpResponseError, CLIError) as ex:
+                if (
+                    expect_failure or
+                    not self._is_transient_operation_conflict(ex) or
+                    attempt == max_retries - 1
+                ):
+                    raise
+                delay = min(base_delay * (2 ** attempt), max_delay) + random.uniform(0, 1)
+                logging.warning(
+                    "AKS operation is still in progress; retrying command in %.1f seconds (%d/%d)",
+                    delay,
+                    attempt + 1,
+                    max_retries,
+                )
+                time.sleep(delay)
+
+        raise AssertionError("unreachable")
+
+    def _refetch_settled_aks_result(self, resource_id, fallback_result):
+        from azure.cli.testsdk.base import execute
+
+        resource_parts = resource_id.strip('/').split('/')
+        normalized_parts = [part.lower() for part in resource_parts]
+        try:
+            resource_group = resource_parts[normalized_parts.index('resourcegroups') + 1]
+            cluster_index = normalized_parts.index('managedclusters')
+            cluster_name = resource_parts[cluster_index + 1]
+        except (ValueError, IndexError):
+            return fallback_result
+
+        remaining_parts = normalized_parts[cluster_index + 2:]
+        if not remaining_parts:
+            show_command = f'aks show --resource-group {resource_group} --name {cluster_name}'
+        elif len(remaining_parts) == 2 and remaining_parts[0] == 'agentpools':
+            try:
+                nodepool_name = resource_parts[normalized_parts.index('agentpools') + 1]
+            except IndexError:
+                return fallback_result
+            show_command = (
+                f'aks nodepool show --resource-group {resource_group} '
+                f'--cluster-name {cluster_name} --name {nodepool_name}'
+            )
+        else:
+            return fallback_result
+
+        return execute(self.cli_ctx, show_command, expect_failure=False)
+
     def _cmd_with_retry(self, command, checks, expect_failure):
         from azure.cli.testsdk.base import execute
         import logging
@@ -92,7 +164,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # Apply kwargs substitution (e.g. {resource_group}) before executing,
         # matching what ScenarioTest.cmd() does internally.
         command = self._apply_kwargs(command)
-        result = execute(self.cli_ctx, command, expect_failure=expect_failure)
+        result = self._execute_with_transient_conflict_retry(command, expect_failure)
 
         # Split checks into provisioning vs everything else
         provisioning_checks = [c for c in (checks or []) if self._is_provisioning_state_check(c)]
@@ -126,6 +198,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     last_seen_etag = current_etag
 
                     if current_provisioning_state == 'Succeeded':
+                        result = self._refetch_settled_aks_result(resource_id, result)
                         break
                     elif current_provisioning_state in {'Failed', 'Canceled'}:
                         raise AssertionError(
@@ -140,13 +213,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                         f"provisioningState did not reach 'Succeeded' after {max_retries} retries. "
                         f"Final state: {current_provisioning_state}{final_etag_msg}"
                     )
-                # Polled to 'Succeeded'; don't re-check `result` (stale body).
-            else:
-                # Did not poll (already Succeeded, or missing id/state).
-                # Run the assertion anyway so it can't be silently dropped.
-                result.assert_with_checks(provisioning_checks)
+            # Validate the terminal response. This also keeps missing id/state
+            # failures loud when polling cannot start.
+            result.assert_with_checks(provisioning_checks)
 
-        # Run all non-provisioning checks against the original result
+        # After polling, validate and return the settled resource rather than
+        # the stale response that triggered the retry.
         if other_checks:
             result.assert_with_checks(other_checks)
 
@@ -1534,6 +1606,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @unittest.skip("Basic Load Balancer was retired on September 30, 2025")
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
@@ -2709,7 +2782,12 @@ spec:
             )
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix='clitest',
+        location='westus2',
+        preserve_default_location=True,
+    )
     def test_aks_machine_cmds(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -5213,6 +5291,7 @@ spec:
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @unittest.skip("Basic Load Balancer was retired on September 30, 2025")
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_blb_vmas_msi(self, resource_group, resource_group_location):
@@ -7734,7 +7813,10 @@ spec:
     @live_only()  # live only due to workspace is not mocked correctly and role assignment is not mocked
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="westus2"
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+        preserve_default_location=True,
     )
     def test_aks_automatic_sku(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -11253,7 +11335,8 @@ spec:
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--pod-cidr 172.126.0.0/16 --service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
                      '--pod-cidrs 172.126.0.0/16,2001:abcd:1234::/64 --service-cidrs 172.56.0.0/16,2001:ffff::/108 ' \
-                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ipv6-count 2 ' \
+                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ip-count 1 ' \
+                     '--load-balancer-managed-outbound-ipv6-count 2 ' \
                      '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
         self.cmd(create_cmd, checks=[
@@ -13305,7 +13388,10 @@ spec:
     @live_only()
     @AllowLargeResponse(99999)
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="uksouth"
+        random_name_length=17,
+        name_prefix="clitest",
+        location="uksouth",
+        preserve_default_location=True,
     )
     def test_aks_create_with_azurecontainerstorage(self, resource_group, resource_group_location):
 
@@ -14684,8 +14770,10 @@ spec:
         random_name_length=17,
         name_prefix="clitest",
         location="eastus2euap",
+        preserve_default_location=True,
     )
     def test_aks_network_isolated_cluster(self, resource_group, resource_group_location):
+        k8s_version = self._get_latest_non_lts_version(resource_group_location)
         vnet_name = self.create_random_name("clitest", 16)
         aks_subnet_name = "aks-subnet"
         acr_subnet_name = "acr-subnet"
@@ -14709,6 +14797,7 @@ spec:
                 "kubelet_identity_name": kubelet_identity_name,
                 "acr_name": acr_name,
                 "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": k8s_version,
             }
         )
 
@@ -14871,7 +14960,7 @@ spec:
         # create AKS cluster to enable network isolated cluster with BYO ACR and outbound type none
         create_cmd_1 = (
             "aks create --resource-group {resource_group} --name {aks_name_1} -c 1 --ssh-key-value={ssh_key_value} "
-            "-k 1.30 "
+            "-k {k8s_version} "
             "--enable-private-cluster "
             "--network-plugin azure --vnet-subnet-id {vnet_id}/subnets/{aks_subnet_name} "
             "--assign-identity {cluster_identity_id} "
@@ -14890,7 +14979,7 @@ spec:
         # create AKS cluster to use Direct as artifact source
         create_cmd_2 = (
             "aks create --resource-group {resource_group} --name {aks_name_2} -c 1 --ssh-key-value={ssh_key_value} "
-            "-k 1.30 "
+            "-k {k8s_version} "
             "--enable-private-cluster "
             "--network-plugin azure --vnet-subnet-id {vnet_id}/subnets/{aks_subnet_name} "
             "--assign-identity {cluster_identity_id} "
@@ -14918,7 +15007,7 @@ spec:
         # create AKS cluster to enable network isolated cluster with managed ACR and outbound type none
         create_cmd_3 = (
             "aks create --resource-group {resource_group} --name {aks_name_3} -c 1 --ssh-key-value={ssh_key_value} "
-            "-k 1.30 "
+            "-k {k8s_version} "
             "--enable-private-cluster "
             "--network-plugin azure "
             "--outbound-type=none "
@@ -15321,7 +15410,100 @@ spec:
             ],
         )
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    def test_aks_create_autoscaler_then_update_vms_pool(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'nodepool_name': "vmspool",
+            "location": resource_group_location,
+            'node_vm_size1': "standard_d2s_v3",
+            'node_vm_size2': "standard_d4s_v3",
+            'ssh_key_value': self.generate_ssh_keys()
+        })
 
+        # create cluster with autoscaler enabled
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} ' \
+                     '--vm-set-type VirtualMachines ' \
+                     '--enable-cluster-autoscaler ' \
+                     '--node-vm-size={node_vm_size1} ' \
+                     '--min-count 1 --max-count 3'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check("agentPoolProfiles[0].type", "VirtualMachines"),
+            self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].size', 'standard_d2s_v3'),
+            self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].minCount', 1),
+            self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
+        ])
+
+        # add another vms nodepool with autoscaler enabled
+        add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                           '--vm-set-type VirtualMachines --mode user ' \
+                           '--node-vm-size {node_vm_size1} ' \
+                           '--enable-cluster-autoscaler ' \
+                           '--min-count 0 --max-count 3'
+        self.cmd(add_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].size', 'standard_d2s_v3'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 0),
+            self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
+        ])
+
+        # update an existing autoscale profile using auto-scale update
+        update_autoscale_cmd = 'aks nodepool auto-scale update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                               '--current-node-vm-size {node_vm_size1} ' \
+                               '--node-vm-size {node_vm_size2} ' \
+                               '--min-count 1 --max-count 5'
+        self.cmd(update_autoscale_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].size', 'standard_d4s_v3'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
+            self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 5),
+        ])
+
+        # add a second autoscale profile
+        add_autoscale_cmd = 'aks nodepool auto-scale add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                            '--node-vm-size {node_vm_size1} ' \
+                            '--min-count 1 --max-count 3'
+        self.cmd(add_autoscale_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachinesProfile.scale.autoscale[1].size', 'standard_d2s_v3'),
+            self.check('virtualMachinesProfile.scale.autoscale[1].minCount', 1),
+            self.check('virtualMachinesProfile.scale.autoscale[1].maxCount', 3),
+        ])
+
+        # delete the second autoscale profile
+        delete_autoscale_cmd = 'aks nodepool auto-scale delete -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                               '--current-node-vm-size {node_vm_size1} --yes'
+        np = self.cmd(delete_autoscale_cmd).get_output_in_json()
+        assert len(np["virtualMachinesProfile"]["scale"]["autoscale"]) == 1
+
+        # disable autoscaler (auto to manual)
+        disable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                                 '--disable-cluster-autoscaler'
+        self.cmd(disable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachinesProfile.scale.manual[0].size', 'standard_d4s_v3'),
+        ])
+
+        # enable autoscaler (manual to auto)
+        enable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
+                                '--enable-cluster-autoscaler --min-count 1 --max-count 3'
+        self.cmd(enable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].size', 'standard_d4s_v3'),
+            self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
+            self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+
+    @unittest.skip("Basic Load Balancer was retired on September 30, 2025")
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
@@ -15519,9 +15701,18 @@ spec:
             checks=[self.is_empty()],
         )
 
+    # LocalDNS requires a currently supported Kubernetes version, which cannot
+    # be kept stable in a recording as regional version support advances.
+    @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+        preserve_default_location=True,
+    )
     def test_aks_nodepool_add_with_localdns_config(self, resource_group, resource_group_location):
+        k8s_version = self._get_latest_non_lts_version(resource_group_location)
         aks_name = self.create_random_name("cliakstest", 16)
         nodepool_name = self.create_random_name("np", 6)
         localdns_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "localdnsconfig", "localdnsconfig.json")
@@ -15532,13 +15723,14 @@ spec:
             "ssh_key_value": self.generate_ssh_keys(),
             "localdns_config": localdns_config_path,
             "location": resource_group_location,
+            "k8s_version": k8s_version,
         })
 
         # Create AKS cluster
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--node-count 1 --ssh-key-value={ssh_key_value} --generate-ssh-keys "
-            "--kubernetes-version 1.33.0"  # k8s version > 1.33 to support localDNS
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
@@ -15547,7 +15739,7 @@ spec:
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
             "--name={nodepool_name} --node-count 1 --localdns-config={localdns_config} "
             "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/LocalDNSPreview "
-            "--kubernetes-version 1.33.0"  # k8s version > 1.33 to support localDNS
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(add_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
@@ -15566,9 +15758,16 @@ spec:
             checks=[self.is_empty()],
         )
 
+    @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+        preserve_default_location=True,
+    )
     def test_aks_nodepool_update_with_localdns_config(self, resource_group, resource_group_location):
+        k8s_version = self._get_latest_non_lts_version(resource_group_location)
         aks_name = self.create_random_name("cliakstest", 16)
         nodepool_name = self.create_random_name("np", 6)
         localdns_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "localdnsconfig", "localdnsconfig.json")
@@ -15577,14 +15776,15 @@ spec:
             "name": aks_name,
             "nodepool_name": nodepool_name,
             "ssh_key_value": self.generate_ssh_keys(),
-            "localdns_config": localdns_config_path
+            "localdns_config": localdns_config_path,
+            "k8s_version": k8s_version,
         })
 
         # Create AKS cluster
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
             "--node-count 1 --ssh-key-value={ssh_key_value} --generate-ssh-keys "
-            "--kubernetes-version 1.33.0" # k8s version > 1.33 to support localDNS
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
@@ -15592,7 +15792,7 @@ spec:
         add_cmd = (
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
             "--name={nodepool_name} --node-count 1 "
-            "--kubernetes-version 1.33.0"  # k8s version > 1.33 to support localDNS
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(add_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
@@ -15619,9 +15819,16 @@ spec:
             checks=[self.is_empty()],
         )
 
+    @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="westus2")
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+        preserve_default_location=True,
+    )
     def test_aks_nodepool_add_with_localdns_required_mode(self, resource_group, resource_group_location):
+        k8s_version = self._get_latest_non_lts_version(resource_group_location)
         aks_name = self.create_random_name("cliakstest", 16)
         nodepool_name = self.create_random_name("np", 6)
         required_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "localdnsconfig", "required_mode_only.json")
@@ -15630,14 +15837,15 @@ spec:
             "name": aks_name,
             "nodepool_name": nodepool_name,
             "ssh_key_value": self.generate_ssh_keys(),
-            "required_config": required_config_path
+            "required_config": required_config_path,
+            "k8s_version": k8s_version,
         })
 
         # Create AKS cluster
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
             "--node-count 1 --ssh-key-value={ssh_key_value} --generate-ssh-keys "
-            "--kubernetes-version 1.33.0"
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
@@ -15646,7 +15854,7 @@ spec:
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
             "--name={nodepool_name} --node-count 1 --localdns-config={required_config} "
             "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/LocalDNSPreview "
-            "--kubernetes-version 1.33.0"
+            "--kubernetes-version {k8s_version}"
         )
         self.cmd(add_cmd, checks=[self.check("provisioningState", "Succeeded")])
 

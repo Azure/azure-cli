@@ -34,7 +34,7 @@ def create_default_mac(cmd, cluster_subscription, cluster_region):
     else:
         resource_groups.create_or_update(default_resource_group_name, {"location": default_mac_region})
     try:
-        resources.begin_create_or_update_by_id(
+        poller = resources.begin_create_or_update_by_id(
             azure_monitor_workspace_resource_id,
             MAC_API,
             {
@@ -42,6 +42,7 @@ def create_default_mac(cmd, cluster_subscription, cluster_region):
                 "properties": {}
             }
         )
+        poller.result()
         return azure_monitor_workspace_resource_id, default_mac_region
     except Exception as e:
         raise CLIError(e)
