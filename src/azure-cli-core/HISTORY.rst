@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.89.0
+++++++
+* Minor fixes
+
 2.88.0
 ++++++
 * Resolve CVE-2026-48526 (#33562)
