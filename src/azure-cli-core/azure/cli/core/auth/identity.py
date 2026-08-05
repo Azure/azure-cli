@@ -211,7 +211,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app.remove_account(account)
 
         # Also remove token cache file
-        for e in file_extensions.values():
+        for e in file_extensions:
             _try_remove(self._token_cache_file + e)
 
     def logout_service_principal(self, client_id):
@@ -229,7 +229,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # remove service principal secrets
         # TODO: As MSAL provides no interface to get all service principals in its token cache, this method can't
         #   clear all service principals' access tokens from MSAL token cache.
-        for e in file_extensions.values():
+        for e in file_extensions:
             _try_remove(self._secret_file + e)
 
     def get_user(self, user=None):
