@@ -204,6 +204,9 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         namespace = self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename3} '
                              '--location {loc3} --sku Premium --geo-data-replication-config role-type=Primary location-name={loc3} ').get_output_in_json()
 
+        # Wait for primary namespace to fully provision before adding secondary replica
+        time.sleep(600)
+
         namespace = self.cmd('eventhubs namespace replica add --resource-group {rg} --name {namespacename3} '
                              '--geo-data-replication-config role-type=Secondary location-name={loc2} ').get_output_in_json()
 

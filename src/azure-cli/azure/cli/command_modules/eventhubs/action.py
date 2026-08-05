@@ -189,7 +189,13 @@ class AlertAddlocation(argparse._AppendAction):
             if k == 'location-name':
                 LocationObject["location_name"] = v
             elif k == 'role-type':
-                LocationObject["role_type"] = v
+                # Normalize to match enum values: Primary or Secondary
+                if v.lower() == 'primary':
+                    LocationObject["role_type"] = 'Primary'
+                elif v.lower() == 'secondary':
+                    LocationObject["role_type"] = 'Secondary'
+                else:
+                    LocationObject["role_type"] = v
             elif k == 'cluster-arm-id':
                 LocationObject["cluster_arm_id"] = v
             else:

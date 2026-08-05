@@ -34,7 +34,7 @@ def create_replica_location_object(col):
         "location_name": col['locationName'],
         "role_type": col['roleType']
     })
-    if 'clusterArmId' in col:
+    if 'clusterArmId' in col and col['clusterArmId']:
         replica_location_object.update({
             "cluster_arm_id": col['clusterArmId']
         })
@@ -108,8 +108,12 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
             }})
 
     list_replication_object = []
+
     if geo_data_replication_config:
         for val in geo_data_replication_config:
+            # Remove cluster_arm_id if it's None to avoid sending null in JSON
+            if 'cluster_arm_id' in val and val['cluster_arm_id'] is None:
+                val = {k: v for k, v in val.items() if k != 'cluster_arm_id'}
             list_replication_object.append(val)
         command_args_dict.update({
             "geo_data_replication": {
@@ -351,6 +355,9 @@ def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replicat
     })
     location_object = []
     for col in geo_data_replication_config:
+        # Remove cluster_arm_id if it's None to avoid sending null in JSON
+        if 'cluster_arm_id' in col and col['cluster_arm_id'] is None:
+            col = {k: v for k, v in col.items() if k != 'cluster_arm_id'}
         location_object.append(col)
 
     if 'geoDataReplication' in eventhubsnm:
@@ -359,11 +366,17 @@ def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replicat
             if replica_object not in location_object:
                 location_object.append(replica_object)
 
-    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+    # Preserve max_replication_lag_duration_in_seconds from existing namespace
+    command_args = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
         "locations": location_object
-    })
+    }
+
+    if 'geoDataReplication' in eventhubsnm and 'maxReplicationLagDurationInSeconds' in eventhubsnm['geoDataReplication']:
+        command_args["max_replication_lag_duration_in_seconds"] = eventhubsnm['geoDataReplication']['maxReplicationLagDurationInSeconds']
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
@@ -381,10 +394,11 @@ def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_repli
         replica_object = create_replica_location_object(col)
         replica_location_object.append(replica_object)
     for col in geo_data_replication_config:
-        print(col)
+        # Remove cluster_arm_id if it's None to match against existing replicas
+        if 'cluster_arm_id' in col and col['cluster_arm_id'] is None:
+            col = {k: v for k, v in col.items() if k != 'cluster_arm_id'}
         if col in replica_location_object:
             replica_location_object.remove(col)
-    print(replica_location_object)
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
