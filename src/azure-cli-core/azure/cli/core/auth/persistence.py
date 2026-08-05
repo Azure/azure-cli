@@ -25,22 +25,22 @@ file_extension_plaintext = '.json'
 file_extension_signal = '.sig'
 file_extensions = [file_extension_encrypted, file_extension_plaintext, file_extension_signal]
 
-KEYCHAIN_SERVICE_NAME = 'Microsoft Azure CLI MSAL Token Cache'
-LIBSECRET_SCHEMA_NAME = 'Microsoft Azure CLI MSAL Token Cache'
+KEYCHAIN_SERVICE_NAME = 'Microsoft Azure CLI'
+LIBSECRET_SCHEMA_NAME = 'Microsoft Azure CLI'
 
 def load_persisted_token_cache(location, encrypt):
-    persistence = build_persistence(location, encrypt)
+    persistence = build_persistence(location, encrypt, type="Token cache")
     return PersistedTokenCache(persistence)
 
 
 def load_secret_store(location, encrypt):
-    persistence = build_persistence(location, encrypt)
+    persistence = build_persistence(location, encrypt, type="Secret store")
     return SecretStore(persistence)
 
 
-def build_persistence(location, encrypt):
+def build_persistence(location, encrypt, type=None):
     """Build a suitable persistence instance based your current OS"""
-    logger.debug("build_persistence: location=%r, encrypt=%r", location, encrypt)
+    logger.debug("build_persistence: location=%r, encrypt=%r, type=%r", location, encrypt, type)
     if encrypt:
         if sys.platform.startswith('win'):
             # For FilePersistenceWithDataProtection, location is where the credential is stored.
@@ -54,7 +54,7 @@ def build_persistence(location, encrypt):
             # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/103
             path = location + file_extension_signal
             logger.debug("Initializing KeychainPersistence: location=%r", path)
-            return KeychainPersistence(path, service_name=KEYCHAIN_SERVICE_NAME)
+            return KeychainPersistence(path, service_name=KEYCHAIN_SERVICE_NAME, account_name=type)
         if sys.platform.startswith('linux'):
             # For LibsecretPersistence, location is only used as a signal for the credential's last modified time.
             # The credential is stored in libsecret identified by (schema_name, attributes) combination.
@@ -62,10 +62,11 @@ def build_persistence(location, encrypt):
             path = location + file_extension_signal
             logger.debug("Initializing LibsecretPersistence: location=%r", path)
             try:
+                attributes = {"type": type} if type else {}
                 return LibsecretPersistence(
                     path,
                     schema_name=LIBSECRET_SCHEMA_NAME,
-                    attributes={}
+                    attributes=attributes
                 )
             except Exception as e:
                 # Warn the user and continue with FilePersistence.
