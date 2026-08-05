@@ -34,7 +34,7 @@ from azure.cli.command_modules.acs._consts import CONST_WORKLOAD_RUNTIME_KATA_VM
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import BadRequestError, ClientRequestError, CLIInternalError, InvalidArgumentValueError
 from azure.core.exceptions import HttpResponseError
-from azure.cli.testsdk import ScenarioTest, live_only
+from azure.cli.testsdk import ScenarioTest, live_only, record_only
 from azure.cli.testsdk.checkers import (StringCheck, StringContainCheck,
                                         StringContainCheckIgnoreCase)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -315,6 +315,34 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ).get_output_in_json()
         sorted_supported_versions = sorted(supported_versions, key=version_to_tuple, reverse=True)
         return sorted_supported_versions[0] if sorted_supported_versions else None
+
+    def _create_container_insights_workspace(self, resource_group, location):
+        workspace_name = self.create_random_name("cliaksworkspace", 24)
+        workspace = self.cmd(
+            "monitor log-analytics workspace create "
+            f"--resource-group {resource_group} --name {workspace_name} --location {location}"
+        ).get_output_in_json()
+        workspace_id = workspace["id"]
+        solution_name = f"Containers({workspace_name})"
+        solution_id = (
+            f"{workspace_id.rsplit('/providers/', 1)[0]}/providers/"
+            f"Microsoft.OperationsManagement/solutions/{solution_name}"
+        )
+        solution = {
+            "location": location,
+            "properties": {"workspaceResourceId": workspace_id},
+            "plan": {
+                "name": solution_name,
+                "publisher": "Microsoft",
+                "product": "OMSGallery/Containers",
+                "promotionCode": "",
+            },
+        }
+        self.cmd(
+            f"resource create --id {solution_id} --api-version 2015-11-01-preview "
+            f"--is-full-object --properties '{json.dumps(solution)}'"
+        )
+        return workspace_id
 
     def _get_lower_lts_version(self, location, version):
         """Return the highest LTS version that is lower than the given version."""
@@ -7836,18 +7864,23 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="westus2",
+        location="centralus",
         preserve_default_location=True,
     )
     def test_aks_automatic_sku(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         aks_name = self.create_random_name("cliakstest", 16)
+        workspace_id = self._create_container_insights_workspace(
+            resource_group, resource_group_location
+        )
         self.kwargs.update(
             {
                 "resource_group": resource_group,
                 "name": aks_name,
                 "location": resource_group_location,
+                "workspace_id": workspace_id,
+                "node_vm_size": "Standard_D4ads_v5",
             }
         )
 
@@ -7856,6 +7889,8 @@ spec:
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--sku automatic "
             "--no-ssh-key "
+            "--node-vm-size {node_vm_size} "
+            "--workspace-resource-id {workspace_id} "
             "--aks-custom-header AKSHTTPCustomFeatures=Microsoft.ContainerService/AutomaticSKUPreview"
         )
         self.cmd(
@@ -11626,6 +11661,7 @@ spec:
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @record_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
@@ -11747,6 +11783,7 @@ spec:
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @record_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
@@ -12928,7 +12965,7 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus",
+        location="westcentralus",
         preserve_default_location=True,
     )
     def test_aks_approuting_update_with_monitoring_addon_enabled(self, resource_group, resource_group_location):
@@ -12939,6 +12976,9 @@ spec:
 
         aks_name = self.create_random_name("cliakstest", 16)
         kv_name = self.create_random_name("cliakstestkv", 16)
+        workspace_id = self._create_container_insights_workspace(
+            resource_group, resource_group_location
+        )
 
         self.kwargs.update(
             {
@@ -12947,6 +12987,7 @@ spec:
                 "kv_name": kv_name,
                 "location": resource_group_location,
                 "ssh_key_value": self.generate_ssh_keys(),
+                "workspace_id": workspace_id,
             }
         )
 
@@ -12967,7 +13008,8 @@ spec:
         # create cluster with app routing and monitoring addon enabled
         create_cmd = (
             "aks create --resource-group={resource_group} --name={aks_name} --location={location} "
-            "--ssh-key-value={ssh_key_value} --enable-app-routing --enable-addons monitoring"
+            "--ssh-key-value={ssh_key_value} --enable-app-routing --enable-addons monitoring "
+            "--workspace-resource-id={workspace_id}"
         )
         self.cmd(
             create_cmd,
@@ -14834,6 +14876,7 @@ spec:
                 "aks_name_1": aks_name_1,
                 "aks_name_2": aks_name_2,
                 "aks_name_3": aks_name_3,
+                "system_nodepool_name": "nodepool1",
                 "vnet_name": vnet_name,
                 "aks_subnet_name": aks_subnet_name,
                 "acr_subnet_name": acr_subnet_name,
@@ -15024,6 +15067,7 @@ spec:
         create_cmd_2 = (
             "aks create --resource-group {resource_group} --name {aks_name_2} -c 1 --ssh-key-value={ssh_key_value} "
             "-k {k8s_version} "
+            "--nodepool-name {system_nodepool_name} "
             "--enable-private-cluster "
             "--network-plugin azure --vnet-subnet-id {vnet_id}/subnets/{aks_subnet_name} "
             "--assign-identity {cluster_identity_id} "
@@ -15034,19 +15078,37 @@ spec:
             self.check("provisioningState", "Succeeded"),
         ])
 
-        # update AKS cluster to use Cache as artifact source
-        update_cmd = (
+        # Migrate the cluster to cached artifacts and reimage before changing
+        # outbound connectivity, as required by network-isolated migration.
+        update_cache_cmd = (
             "aks update --resource-group {resource_group} --name {aks_name_2} "
-            "--outbound-type=none "
             "--bootstrap-artifact-source Cache --bootstrap-container-registry-resource-id {acr_id} "
             "-o json"
         )
-        self.cmd(update_cmd, checks=[
+        self.cmd(update_cache_cmd, checks=[
             self.check("provisioningState", "Succeeded"),
-            self.check("networkProfile.outboundType", "none"),
             self.check("bootstrapProfile.artifactSource", "Cache"),
             self.check("bootstrapProfile.containerRegistryId", acr_id),
         ])
+        self.cmd(
+            "aks upgrade --resource-group {resource_group} --name {aks_name_2} "
+            "--node-image-only --yes",
+            checks=[self.check("provisioningState", "Succeeded")],
+        )
+        self.cmd(
+            "aks nodepool wait --resource-group {resource_group} "
+            "--cluster-name {aks_name_2} --name {system_nodepool_name} "
+            "--updated --interval 30 --timeout 3600",
+            checks=[self.is_empty()],
+        )
+        self.cmd(
+            "aks update --resource-group {resource_group} --name {aks_name_2} "
+            "--outbound-type=none -o json",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.outboundType", "none"),
+            ],
+        )
 
         # create AKS cluster to enable network isolated cluster with managed ACR and outbound type none
         create_cmd_3 = (
