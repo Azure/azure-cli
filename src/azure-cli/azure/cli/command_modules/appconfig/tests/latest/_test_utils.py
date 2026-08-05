@@ -33,7 +33,7 @@ def get_test_resource_group():
     # is disabled. The recording principal must already hold "App Configuration Data Owner" at a
     # scope covering the store, so tests target a fixed resource group with that standing role
     # instead of an ephemeral @ResourceGroupPreparer group. Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    return os.environ.get("AZURE_CLI_APPCONFIG_TEST_RG", "mametcal-python")
+    return os.environ.get("AZURE_CLI_APPCONFIG_TEST_RG")
 
 
 def _case_insensitive_query_matcher(r1, r2):
