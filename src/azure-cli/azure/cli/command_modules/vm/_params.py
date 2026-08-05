@@ -1169,9 +1169,12 @@ def load_arguments(self, _):
         c.argument('lifecycle_hook_event_name', options_list=['--name', '-n'], id_part='child_name_1',
                    help='The name of the VMScaleSetLifecycleHookEvent.')
         c.argument('instance_ids', nargs='+',
-                   help='Space-separated list of target resources to act on. For Uniform scale sets use decimal '
-                        'instance ids (e.g. 0 1 2); for Flexible scale sets use VM names. When omitted, the action '
-                        'is applied to all target resources of the event.')
+                   help='Space-separated list of identifiers for target resources in the lifecycle hook event. '
+                        'For a scale-set-level event such as UpgradeAutoOSScheduling, specify the VM scale set name. '
+                        'For an instance-level event such as UpgradeAutoOSRollingBatchStarting, specify decimal '
+                        'instance IDs for a Uniform scale set (e.g. 0 1 2) or VM names for a Flexible scale set. '
+                        'Each identifier must correspond to a target resource listed by the event. When omitted, '
+                        'the action is applied to all target resources of the event.')
         c.ignore('target_resource_ids')
 
     with self.argument_context('vmss lifecycle-hook-event update') as c:
