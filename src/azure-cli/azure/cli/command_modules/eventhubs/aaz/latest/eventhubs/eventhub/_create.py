@@ -185,7 +185,7 @@ class Create(AAZCommand):
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
         _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
-            options=["--min-lag", "--min-compaction-lag-time-in-minutes"],
+            options=["--min-lag", "--min-compaction-lag-in-mins"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
         )
