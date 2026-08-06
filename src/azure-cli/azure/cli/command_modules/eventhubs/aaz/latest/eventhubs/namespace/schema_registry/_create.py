@@ -76,11 +76,13 @@ class Create(AAZCommand):
             options=["--schema-compatibility"],
             arg_group="Properties",
             enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
+            help="Compatibility of Schema.",
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
             enum={"Avro": "Avro", "Json": "Json", "ProtoBuf": "ProtoBuf", "Unknown": "Unknown"},
+            help="Type of Schema.",
         )
 
         group_properties = cls._args_schema.group_properties
