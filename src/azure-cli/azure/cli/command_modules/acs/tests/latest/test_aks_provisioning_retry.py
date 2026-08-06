@@ -130,6 +130,39 @@ class TestCreateContainerInsightsWorkspace(unittest.TestCase):
         self.assertNotIn('{"location"', solution_command)
 
 
+class TestWaitForClusterUpdate(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance(is_live=False, in_recording=False):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.is_live = is_live
+        instance.in_recording = in_recording
+        instance.cmd = MagicMock()
+        instance.is_empty = MagicMock(return_value='empty-check')
+        return instance
+
+    def test_replay_does_not_issue_wait_request(self):
+        instance = self._make_instance()
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_not_called()
+
+    def test_live_run_waits_for_cluster_update(self):
+        instance = self._make_instance(is_live=True)
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_called_once_with(
+            'aks wait --resource-group={resource_group} --name={name} '
+            '--updated --interval 30 --timeout 1800',
+            checks=['empty-check'],
+        )
+
+
 class TestCmdWithRetry(unittest.TestCase):
 
     def _make_instance(self):

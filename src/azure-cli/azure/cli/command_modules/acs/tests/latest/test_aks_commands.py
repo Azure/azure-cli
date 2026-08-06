@@ -345,6 +345,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
         return workspace_id
 
+    def _wait_for_cluster_update(self):
+        if self.is_live or self.in_recording:
+            self.cmd(
+                'aks wait --resource-group={resource_group} --name={name} '
+                '--updated --interval 30 --timeout 1800',
+                checks=[self.is_empty()],
+            )
+
     def _get_lower_lts_version(self, location, version):
         """Return the highest LTS version that is lower than the given version."""
         lts_versions = self._get_lts_versions(location)
@@ -15549,8 +15557,7 @@ spec:
             self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
-        wait_cmd = 'aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 1800'
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # add another vms nodepool with autoscaler enabled
         add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15564,7 +15571,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 0),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # update an existing autoscale profile using auto-scale update
         update_autoscale_cmd = 'aks nodepool auto-scale update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15577,7 +15584,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 5),
         ])
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # add a second autoscale profile
         add_autoscale_cmd = 'aks nodepool auto-scale add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15589,14 +15596,14 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[1].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[1].maxCount', 3),
         ])
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # delete the second autoscale profile
         delete_autoscale_cmd = 'aks nodepool auto-scale delete -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
                                '--current-node-vm-size {node_vm_size1} --yes'
         np = self.cmd(delete_autoscale_cmd).get_output_in_json()
         assert len(np["virtualMachinesProfile"]["scale"]["autoscale"]) == 1
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # disable autoscaler (auto to manual)
         disable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15605,7 +15612,7 @@ spec:
             self.check('provisioningState', 'Succeeded'),
             self.check('virtualMachinesProfile.scale.manual[0].size', 'standard_d4s_v3'),
         ])
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # enable autoscaler (manual to auto)
         enable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15616,7 +15623,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
-        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self._wait_for_cluster_update()
 
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
