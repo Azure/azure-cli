@@ -4551,7 +4551,6 @@ spec:
 
     # the availability of features is controlled by a toggle and cannot be fully tested yet,
     # however, existing test results show that the client side works as expected, so exclude it at this moment
-    @unittest.skip("Artifact streaming is not enabled in the live-test subscription")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
@@ -4610,7 +4609,6 @@ spec:
 
     # the availability of features is controlled by a toggle and cannot be fully tested yet,
     # however, existing test results show that the client side works as expected, so exclude it at this moment
-    @unittest.skip("Artifact streaming is not enabled in the live-test subscription")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
@@ -8678,7 +8676,6 @@ spec:
             self.is_empty(),
         ])
 
-    @unittest.skip("Control plane metrics is not enabled in the live-test subscription")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
@@ -8729,7 +8726,6 @@ spec:
         self.cmd('aks delete --resource-group={resource_group} --name={name} --yes --no-wait',
                  checks=[self.is_empty()])
 
-    @unittest.skip("Control plane metrics is not enabled in the live-test subscription")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
