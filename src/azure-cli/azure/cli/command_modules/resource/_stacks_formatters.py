@@ -22,7 +22,8 @@ ALL_WHAT_IF_TOP_LEVEL_CHANGE_TYPES = [
     StackModels.DeploymentStacksWhatIfChangeType.MODIFY,
     StackModels.DeploymentStacksWhatIfChangeType.DELETE,
     StackModels.DeploymentStacksWhatIfChangeType.NO_CHANGE,
-    StackModels.DeploymentStacksWhatIfChangeType.DETACH
+    StackModels.DeploymentStacksWhatIfChangeType.DETACH,
+    StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT
 ]
 
 
@@ -38,7 +39,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksWhatIfChangeType.DETACH: 'v',
             StackModels.DeploymentStacksWhatIfChangeType.MODIFY: '~',
             StackModels.DeploymentStacksWhatIfChangeType.NO_CHANGE: '=',
-            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT: '=',
+            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT: 'x',
             StackModels.DeploymentStacksWhatIfChangeType.UNSUPPORTED: '!',
         })
 
@@ -48,7 +49,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksWhatIfChangeType.CREATE: Color.GREEN,
             StackModels.DeploymentStacksWhatIfChangeType.DELETE: Color.RED,
             StackModels.DeploymentStacksWhatIfChangeType.DETACH: Color.BLUE,
-            StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE
+            StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE,
+            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT: Color.GRAY,
         })
 
     CHANGE_CERTAINTY_PRIORITIES = CaseInsensitiveDict(
@@ -481,9 +483,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             return False
 
         change_type = primitive_change.change_type if hasattr(primitive_change, "change_type") else None
-        change_type = (change_type or (StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT
-                                       if primitive_change.before == primitive_change.after
-                                       else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY))
+        change_type = change_type or StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY
 
         property_path = self._get_change_path(primitive_change, parent_path)
         symbol, color = self._get_change_type_formatting(change_type)
