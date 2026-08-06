@@ -100,6 +100,36 @@ class TestCmdRetryDispatch(unittest.TestCase):
         instance._cmd_with_retry.assert_called_once_with('aks delete', [], False)
 
 
+class TestCreateContainerInsightsWorkspace(unittest.TestCase):
+
+    def test_solution_payload_is_passed_as_registered_kwarg(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.kwargs = {}
+        instance.create_random_name = MagicMock(return_value='workspace')
+        workspace_result = MockExecutionResult({
+            'id': (
+                '/subscriptions/sub/resourceGroups/rg/providers/'
+                'Microsoft.OperationalInsights/workspaces/workspace'
+            )
+        })
+        solution_result = MockExecutionResult({})
+        instance.cmd = MagicMock(side_effect=[workspace_result, solution_result])
+
+        workspace_id = instance._create_container_insights_workspace('rg', 'westus2')
+
+        self.assertEqual(workspace_result.get_output_in_json()['id'], workspace_id)
+        self.assertEqual(
+            json.loads(instance.kwargs['container_insights_solution'])['location'],
+            'westus2',
+        )
+        solution_command = instance.cmd.call_args_list[1].args[0]
+        self.assertIn("'{container_insights_solution}'", solution_command)
+        self.assertNotIn('{"location"', solution_command)
+
+
 class TestCmdWithRetry(unittest.TestCase):
 
     def _make_instance(self):
