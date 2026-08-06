@@ -17,15 +17,23 @@ Required environment variables:
 
 import json
 import os
+import subprocess
+import sys
 import unittest
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.auth.persistence import (file_extension_encrypted, file_extension_plaintext,
+from azure.cli.core.auth.persistence import (KEYCHAIN_SERVICE_NAME, LIBSECRET_SCHEMA_NAME,
+                                             file_extension_encrypted, file_extension_plaintext,
                                              file_extension_signal)
 from azure.cli.testsdk import LiveScenarioTest
 
 TOKEN_CACHE = 'msal_token_cache'
 SECRET_STORE = 'service_principal_entries'
+
+# The persistence type names that identify each credential inside the OS credential store,
+# passed by load_persisted_token_cache and load_secret_store.
+TOKEN_CACHE_TYPE = 'Token cache'
+SECRET_STORE_TYPE = 'Secret store'
 
 SP_NAME = os.environ.get('AZURE_CLI_TEST_DEV_SP_NAME')
 SP_PASSWORD = os.environ.get('AZURE_CLI_TEST_DEV_SP_PASSWORD')
@@ -188,6 +196,59 @@ class CredentialEncryptionScenarioTest(LiveScenarioTest):
 
         self.assertTrue(cache.find(cache.CredentialType.ACCESS_TOKEN),
                         'token cache returned no access token')
+
+    @sp_configured
+    def test_credentials_are_stored_in_the_os_credential_store(self):
+        """Look the credentials up in the OS store directly, rather than through the CLI.
+
+        The other tests read back through the same persistence code that wrote the data, so a key
+        that is wrong but self-consistent would still pass. This pins the actual (service, account)
+        on macOS and (schema, attributes) on Linux that the credentials must be filed under.
+        """
+        self._skip_without_encryption()
+        self._login_sp()
+
+        if sys.platform.startswith('darwin'):
+            found = {t: self._keychain_lookup(t) for t in (TOKEN_CACHE_TYPE, SECRET_STORE_TYPE)}
+        elif sys.platform.startswith('linux'):
+            found = {t: self._libsecret_lookup(t) for t in (TOKEN_CACHE_TYPE, SECRET_STORE_TYPE)}
+        else:
+            # Windows DPAPI has no credential store to query: the ciphertext is the .bin file.
+            self.skipTest('no OS credential store to query on this platform')
+
+        for persistence_type, content in found.items():
+            self.assertTrue(content, f'no entry found in the OS credential store for {persistence_type}')
+
+        # Each entry must hold its own payload. Identical content would mean both credentials share
+        # one entry, which is the collision that made the secret store return token cache JSON.
+        self.assertNotEqual(found[TOKEN_CACHE_TYPE], found[SECRET_STORE_TYPE],
+                            'token cache and secret store share a single credential store entry')
+
+        token_cache = json.loads(found[TOKEN_CACHE_TYPE])
+        self.assertIn('AccessToken', token_cache)
+
+        entries = json.loads(found[SECRET_STORE_TYPE])
+        self.assertTrue(any(e.get('client_id') == SP_NAME for e in entries))
+
+    @staticmethod
+    def _keychain_lookup(persistence_type):
+        """Read a generic password from the macOS Keychain."""
+        result = subprocess.run(
+            ['security', 'find-generic-password',
+             '-s', KEYCHAIN_SERVICE_NAME, '-a', persistence_type, '-w'],
+            capture_output=True, text=True, check=False)
+        return result.stdout.strip() if result.returncode == 0 else None
+
+    @staticmethod
+    def _libsecret_lookup(persistence_type):
+        """Read a secret from libsecret, bypassing msal-extensions."""
+        import gi
+        gi.require_version('Secret', '1')
+        from gi.repository import Secret
+
+        schema = Secret.Schema.new(LIBSECRET_SCHEMA_NAME, Secret.SchemaFlags.NONE,
+                                   {'type': Secret.SchemaAttributeType.STRING})
+        return Secret.password_lookup_sync(schema, {'type': persistence_type}, None)
 
     @sp_configured
     def test_opt_out_of_encryption(self):
