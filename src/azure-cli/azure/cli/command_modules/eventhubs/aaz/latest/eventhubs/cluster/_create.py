@@ -55,6 +55,16 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "ConfidentialCompute"
+
+        _args_schema = cls._args_schema
+        _args_schema.confidential_compute_mode = AAZStrArg(
+            options=["--mode", "--confidential-compute-mode"],
+            arg_group="ConfidentialCompute",
+            help="Setting to Enable or Disable Confidential Compute",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
@@ -77,9 +87,10 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.platform_capabilities = AAZObjectArg(
-            options=["--platform-capabilities"],
+        _args_schema.provisioning_state = AAZStrArg(
+            options=["--provisioning-state"],
             arg_group="Properties",
+            help="Provisioning state of the Cluster.",
         )
         _args_schema.supports_scaling = AAZBoolArg(
             options=["--supports-scaling"],
@@ -90,18 +101,6 @@ class Create(AAZCommand):
             options=["--zone-redundant"],
             arg_group="Properties",
             help="A value that indicates whether the cluster is zone redundant.",
-        )
-
-        platform_capabilities = cls._args_schema.platform_capabilities
-        platform_capabilities.confidential_compute = AAZObjectArg(
-            options=["confidential-compute"],
-        )
-
-        confidential_compute = cls._args_schema.platform_capabilities.confidential_compute
-        confidential_compute.mode = AAZStrArg(
-            options=["mode"],
-            help="Setting to Enable or Disable Confidential Compute",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Sku"
@@ -238,17 +237,18 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("platformCapabilities", AAZObjectType, ".platform_capabilities")
+                properties.set_prop("platformCapabilities", AAZObjectType)
+                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
                 properties.set_prop("supportsScaling", AAZBoolType, ".supports_scaling")
                 properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
 
             platform_capabilities = _builder.get(".properties.platformCapabilities")
             if platform_capabilities is not None:
-                platform_capabilities.set_prop("confidentialCompute", AAZObjectType, ".confidential_compute")
+                platform_capabilities.set_prop("confidentialCompute", AAZObjectType)
 
             confidential_compute = _builder.get(".properties.platformCapabilities.confidentialCompute")
             if confidential_compute is not None:
-                confidential_compute.set_prop("mode", AAZStrType, ".mode")
+                confidential_compute.set_prop("mode", AAZStrType, ".confidential_compute_mode")
 
             sku = _builder.get(".sku")
             if sku is not None:

@@ -150,15 +150,20 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "MessageTimestampDescription"
+
+        _args_schema = cls._args_schema
+        _args_schema.timestamp_type = AAZStrArg(
+            options=["--timestamp-type"],
+            arg_group="MessageTimestampDescription",
+            help="Denotes the type of timestamp the message will hold.Two types of timestamp types - \"AppendTime\" and \"CreateTime\". AppendTime refers the time in which message got appended inside broker log. CreateTime refers to the time in which the message was generated on source side and producers can set this timestamp while sending the message. Default value is AppendTime. If you are using AMQP protocol, CreateTime equals AppendTime and its behavior remains the same.",
+            nullable=True,
+            enum={"Create": "Create", "LogAppend": "LogAppend"},
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.message_timestamp_description = AAZObjectArg(
-            options=["--message-timestamp-description"],
-            arg_group="Properties",
-            help="Properties of MessageTimestamp Description",
-            nullable=True,
-        )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
@@ -182,14 +187,6 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        message_timestamp_description = cls._args_schema.message_timestamp_description
-        message_timestamp_description.timestamp_type = AAZStrArg(
-            options=["timestamp-type"],
-            help="Denotes the type of timestamp the message will hold.Two types of timestamp types - \"AppendTime\" and \"CreateTime\". AppendTime refers the time in which message got appended inside broker log. CreateTime refers to the time in which the message was generated on source side and producers can set this timestamp while sending the message. Default value is AppendTime. If you are using AMQP protocol, CreateTime equals AppendTime and its behavior remains the same.",
-            nullable=True,
-            enum={"Create": "Create", "LogAppend": "LogAppend"},
-        )
-
         # define Arg Group "RetentionDescription"
 
         _args_schema = cls._args_schema
@@ -201,7 +198,7 @@ class Update(AAZCommand):
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
         _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
-            options=["--min-compaction-lag-time-in-minutes"],
+            options=["--min-lag", "--min-compaction-lag-time-in-minutes"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
             nullable=True,
@@ -452,7 +449,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
-                properties.set_prop("messageTimestampDescription", AAZObjectType, ".message_timestamp_description")
+                properties.set_prop("messageTimestampDescription", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")
