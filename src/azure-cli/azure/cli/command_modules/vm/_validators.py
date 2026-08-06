@@ -2923,14 +2923,32 @@ def _resolve_vmss_lifecycle_hook_event_target_resources(cmd, namespace):
     target_resources = event.get('properties', {}).get('targetResources') or []
 
     identifier_to_id = {}
+    target_name_to_id = {}
     for target in target_resources:
         resource_id = target.get('resource', {}).get('id')
         if resource_id:
-            identifier_to_id[resource_id.rsplit('/', 1)[-1].lower()] = resource_id
+            target_name = resource_id.rsplit('/', 1)[-1].lower()
+            identifier_to_id[target_name] = resource_id
+            target_name_to_id[target_name] = resource_id
 
     if not namespace.instance_ids:
         namespace.target_resource_ids = list(identifier_to_id.values())
         return
+
+    requested_identifiers = {instance_id.lower() for instance_id in namespace.instance_ids}
+    if not requested_identifiers.issubset(identifier_to_id):
+        from .operations.vmss import VMSSListInstances
+        instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': namespace.resource_group_name,
+            'virtual_machine_scale_set_name': namespace.vmss_name,
+        })
+        for instance in instances:
+            instance_name = instance.get('name')
+            instance_id = instance.get('instanceId')
+            if instance_name and instance_id is not None:
+                target_resource_id = target_name_to_id.get(instance_name.lower())
+                if target_resource_id:
+                    identifier_to_id[str(instance_id).lower()] = target_resource_id
 
     resolved_ids = []
     unknown_ids = []
