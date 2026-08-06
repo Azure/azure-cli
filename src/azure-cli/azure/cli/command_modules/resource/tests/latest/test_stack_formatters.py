@@ -85,8 +85,8 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
 
 Azure
   {Color.PURPLE}~{Color.RESET} {Color.PURPLE}/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.Web/sites/web-gwfjnc7423h2a/providers/Microsoft.Insights/diagnosticSettings/diag-web-gwfjnc7423h2a [2021-05-01-preview]{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"managed"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"none"{Color.RESET} => {Color.PURPLE}"none"{Color.RESET}
+    = Management Status: "managed"
+    = Deny Status: "none"
     {Color.PURPLE}~{Color.RESET} properties.nestedArrays:
       {Color.GREEN}+{Color.RESET} 0:
           {Color.GREEN}[]{Color.RESET}
@@ -154,12 +154,12 @@ Azure
           {Color.GREEN}  }}{Color.RESET}
           {Color.GREEN}}}{Color.RESET}
   {Color.PURPLE}~{Color.RESET} {Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA [2021-05-01]{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
+    = Management Status: "Managed"
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} properties.properties1: {Color.PURPLE}"resourceA-before"{Color.RESET} => {Color.PURPLE}"resourceA-after"{Color.RESET}
     {Color.GRAY}x{Color.RESET} sku.tier: {Color.GRAY}"Standard"{Color.RESET}
   = /subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testB/resourceB [2021-05-01]
-    {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
+    = Management Status: "Managed"
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD [2021-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"NotManaged"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
@@ -167,17 +167,17 @@ Azure
 
   >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
   {Color.CYAN}?{Color.RESET}{Color.PURPLE}~{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC [2021-05-01]{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
+    = Management Status: "Managed"
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} properties.properties1: {Color.PURPLE}"resourceC-before"{Color.RESET} => {Color.PURPLE}"resourceC-potential-after"{Color.RESET}
   {Color.CYAN}?{Color.RESET}{Color.RED}-{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.RED}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"NotManaged"{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"None"{Color.RESET}
+    = Deny Status: "None"
 
 Contoso@2.0.0
   {Color.PURPLE}~{Color.RESET} {Color.PURPLE}Contoso/example name="abcResource" [v1]{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"NotSupported"{Color.RESET} => {Color.PURPLE}"NotSupported"{Color.RESET}
+    = Management Status: "Managed"
+    = Deny Status: "NotSupported"
     {Color.PURPLE}~{Color.RESET} properties.properties1: {Color.PURPLE}"resourceA-before"{Color.RESET} => {Color.PURPLE}"resourceA-after"{Color.RESET}
     {Color.GREEN}+{Color.RESET} properties.someConfig: {Color.GREEN}{{{Color.RESET}
       {Color.GREEN}  "type": "object",{Color.RESET}
@@ -243,6 +243,7 @@ INFO: [InfoCode]
   {Color.GREEN}+{Color.RESET} Create              ! Unsupported
   {Color.PURPLE}~{Color.RESET} Modify              {Color.RED}-{Color.RESET} Delete
   = NoChange            {Color.BLUE}v{Color.RESET} Detach
+  {Color.GRAY}x{Color.RESET} NoEffect            
 
 {Color.DARK_YELLOW}Changes to Managed Resources:{Color.RESET}
 

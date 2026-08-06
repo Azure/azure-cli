@@ -474,8 +474,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
     def _format_primitive_change(
         self,
-        primitive_change: t.Optional[
-            t.Union[StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksWhatIfPropertyChange]],
+        primitive_change: t.Optional[t.Union[
+            StackModels.DeploymentStacksChangeBase,
+            StackModels.DeploymentStacksWhatIfPropertyChange,
+            StackModels.DeploymentStacksChangeBaseDenyStatusMode,
+            StackModels.DeploymentStacksChangeBaseDeploymentStacksManagementStatus]],
         parent_path: t.Optional[str] = None,
         is_array_item: bool = False
     ) -> bool:
@@ -483,7 +486,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             return False
 
         change_type = primitive_change.change_type if hasattr(primitive_change, "change_type") else None
-        change_type = change_type or StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY
+        change_type = (change_type or (StackModels.DeploymentStacksWhatIfChangeType.NO_CHANGE
+                                       if primitive_change.before == primitive_change.after
+                                       else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY))
 
         property_path = self._get_change_path(primitive_change, parent_path)
         symbol, color = self._get_change_type_formatting(change_type)
