@@ -98,6 +98,9 @@ helps['redis firewall-rules create'] = """
 type: command
 short-summary: Create a redis cache firewall rule.
 long-summary: Usage example - az redis firewall-rules create --name testCacheName --resource-group testResourceGroup  --start-ip 10.10.10.10 --end-ip 20.20.20.20 --rule-name 10to20
+examples:
+    - name: Create a redis cache firewall rule
+      text: az redis firewall-rules create -n cachename -g rg --start-ip 127.0.0.1 --end-ip 127.0.0.1 --rule-name rulename
 """
 
 helps['redis firewall-rules update'] = """
@@ -134,6 +137,9 @@ helps['redis patch-schedule create'] = """
 type: command
 short-summary: Create patching schedule for Redis cache.
 long-summary: Usage example - az redis patch-schedule create --name testCacheName --resource-group testResourceGroup --schedule-entries '[{"dayOfWeek":"Tuesday","startHourUtc":"00","maintenanceWindow":"PT5H"}]'
+examples:
+    - name: Create patching schedule for Redis cache
+      text: az redis patch-schedule create -n cachename -g rg --schedule-entries '[{"dayOfWeek":"Monday","startHourUtc":"00","maintenanceWindow":"PT5H"}]'
 """
 
 helps['redis patch-schedule update'] = """
@@ -150,7 +156,9 @@ short-summary: Manage Redis server links.
 helps['redis server-link create'] = """
 type: command
 short-summary: Adds a server link to the Redis cache (requires Premium SKU).
-long-summary: Usage example - az redis server-link create --name testCacheName --resource-group testResourceGroup --cache-to-link secondTestCacheName --replication-role Secondary
+examples:
+    - name: Adds a server link to the Redis cache (requires Premium SKU)
+      text: az redis server-link create -n cachename -g rg --replication-role Secondary --server-to-link cliredissec
 """
 
 helps['redis update'] = """
