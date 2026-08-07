@@ -100,6 +100,69 @@ class TestCmdRetryDispatch(unittest.TestCase):
         instance._cmd_with_retry.assert_called_once_with('aks delete', [], False)
 
 
+class TestCreateContainerInsightsWorkspace(unittest.TestCase):
+
+    def test_solution_payload_is_passed_as_registered_kwarg(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.kwargs = {}
+        instance.create_random_name = MagicMock(return_value='workspace')
+        workspace_result = MockExecutionResult({
+            'id': (
+                '/subscriptions/sub/resourceGroups/rg/providers/'
+                'Microsoft.OperationalInsights/workspaces/workspace'
+            )
+        })
+        solution_result = MockExecutionResult({})
+        instance.cmd = MagicMock(side_effect=[workspace_result, solution_result])
+
+        workspace_id = instance._create_container_insights_workspace('rg', 'westus2')
+
+        self.assertEqual(workspace_result.get_output_in_json()['id'], workspace_id)
+        self.assertEqual(
+            json.loads(instance.kwargs['container_insights_solution'])['location'],
+            'westus2',
+        )
+        solution_command = instance.cmd.call_args_list[1].args[0]
+        self.assertIn("'{container_insights_solution}'", solution_command)
+        self.assertNotIn('{"location"', solution_command)
+
+
+class TestWaitForClusterUpdate(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance(is_live=False, in_recording=False):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.is_live = is_live
+        instance.in_recording = in_recording
+        instance.cmd = MagicMock()
+        instance.is_empty = MagicMock(return_value='empty-check')
+        return instance
+
+    def test_replay_does_not_issue_wait_request(self):
+        instance = self._make_instance()
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_not_called()
+
+    def test_live_run_waits_for_cluster_update(self):
+        instance = self._make_instance(is_live=True)
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_called_once_with(
+            'aks wait --resource-group={resource_group} --name={name} '
+            '--updated --interval 30 --timeout 1800',
+            checks=['empty-check'],
+        )
+
+
 class TestCmdWithRetry(unittest.TestCase):
 
     def _make_instance(self):
