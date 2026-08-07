@@ -14,7 +14,8 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import get_extension, build_extension_path
 from azure.cli.core.extension.operations import (add_extension_to_path, list_extensions, add_extension,
                                                  show_extension, remove_extension, update_extension,
-                                                 list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION,
+                                                 list_available_extensions, _install_deps_for_psycopg2,
+                                                 OUT_KEY_NAME, OUT_KEY_VERSION,
                                                  OUT_KEY_METADATA, OUT_KEY_PATH)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
 from azure.cli.core.mock import DummyCli
@@ -480,6 +481,42 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertSequenceEqual(old_path_0, list(sys.path))
         self.assertSequenceEqual(old_path_1, list(azure.__path__))
         self.assertSequenceEqual(old_path_2, list(azure.mgmt.__path__))
+
+    def test_install_psycopg2_deps_uses_azl4_packages(self):
+        with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
+                mock.patch('platform.system', return_value='Linux'), \
+                mock.patch('azure.cli.core.util.get_linux_distro', return_value=('Azure Linux', '4.0')), \
+                mock.patch.dict('os.environ', {'AZ_INSTALLER': 'RPM'}), \
+                mock.patch('shutil.which', side_effect=lambda cmd: '/usr/bin/tdnf' if cmd == 'tdnf' else None), \
+                mock.patch('os.geteuid', return_value=0, create=True), \
+                mock.patch('subprocess.call', return_value=0) as subprocess_call:
+            _install_deps_for_psycopg2()
+
+        azure_linux_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
+        subprocess_call.assert_any_call(['tdnf', 'install', '-y'] + azure_linux_packages)
+        self.assertNotIn(mock.call(['yum', 'install', '-y'] + azure_linux_packages),
+                         subprocess_call.call_args_list)
+
+    def test_install_psycopg2_deps_preserves_azl3_rpm_behavior(self):
+        with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
+                mock.patch('platform.system', return_value='Linux'), \
+                mock.patch('azure.cli.core.util.get_linux_distro', return_value=('Azure Linux', '3.0')), \
+                mock.patch.dict('os.environ', {'AZ_INSTALLER': 'RPM'}), \
+                mock.patch('subprocess.call') as subprocess_call:
+            _install_deps_for_psycopg2()
+
+        subprocess_call.assert_not_called()
+
+    def test_install_psycopg2_deps_reports_rpm_install_failure(self):
+        with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
+                mock.patch('platform.system', return_value='Linux'), \
+                mock.patch('azure.cli.core.util.get_linux_distro', return_value=('Azure Linux', '4.0')), \
+                mock.patch.dict('os.environ', {'AZ_INSTALLER': 'RPM'}), \
+                mock.patch('shutil.which', side_effect=lambda cmd: '/usr/bin/tdnf' if cmd == 'tdnf' else None), \
+                mock.patch('os.geteuid', return_value=0, create=True), \
+                mock.patch('subprocess.call', return_value=1):
+            with self.assertRaisesRegex(CLIError, 'Failed to install required system dependencies for psycopg2'):
+                _install_deps_for_psycopg2()
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()

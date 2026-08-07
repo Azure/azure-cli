@@ -215,8 +215,9 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 '/usr/local/opt/openssl/lib/'
             ])
     elif system == 'Linux':
-        distname, _ = get_linux_distro()
+        distname, distversion = get_linux_distro()
         distname = distname.lower().strip()
+        is_azure_linux_4 = 'azure linux' in distname and distversion.startswith('4.')
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if exit_code != 0:
@@ -230,7 +231,7 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 if exit_code == 0:
                     logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
                     subprocess.call(apt_install_cmd, True)
-        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']) or is_azure_linux_4:
             if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
                 yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
                 if os.geteuid() != 0:  # pylint: disable=no-member
@@ -249,6 +250,22 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 if exit_code == 0:
                     logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
                     subprocess.call(zypper_install_cmd)
+            elif is_azure_linux_4:
+                rpm_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
+                rpm_install_cmd = ['tdnf', 'install', '-y'] + rpm_packages
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    rpm_install_cmd.insert(0, 'sudo')
+                logger.debug("Install dependencies with '%s'", " ".join(rpm_install_cmd))
+                logger.warning(
+                    'This extension depends on %s and they will be installed first if not exist.',
+                    ' '.join(rpm_packages)
+                )
+                exit_code = subprocess.call(rpm_install_cmd)
+                if exit_code != 0:
+                    raise CLIError(
+                        'Failed to install required system dependencies for psycopg2: {}.'
+                        .format(' '.join(rpm_packages))
+                    )
         elif installer == 'DOCKER' or any(x in distname for x in ['alpine linux']):
             apk_install_cmd = 'apk add --no-cache libpq-dev'.split()
             logger.debug("Install dependencies with '%s'", " ".join(apk_install_cmd))

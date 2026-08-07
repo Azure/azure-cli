@@ -17,7 +17,12 @@ docker build --target build-env -f ./scripts/release/rpm/fedora.dockerfile -t az
 _Azure Linux:_
 
 ```bash
+# Build against Azure Linux 4.0 (Beta) - the default in the dockerfile
 docker build --target build-env -f ./scripts/release/rpm/azurelinux.dockerfile -t azure/azure-cli:azurelinux-builder .
+
+# Or build against Azure Linux 3.0 explicitly
+docker build --target build-env --build-arg image=mcr.microsoft.com/azurelinux/base/core:3.0 \
+    -f ./scripts/release/rpm/azurelinux.dockerfile -t azure/azure-cli:azurelinux3-builder .
 ```
 
 After several minutes, this will have created a Docker image named `azure/azure-cli:centos7-builder` containing an
@@ -36,7 +41,11 @@ docker run azure/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure
 
 _Azure Linux:_
 ```bash
+# AZL4 output path (rpmbuild default topdir is /root/rpmbuild)
 docker run azure/azure-cli:azurelinux-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.azl4.x86_64.rpm > ./bin/azure-cli-dev-1.azl4.x86_64.rpm
+
+# AZL3 output path (rpmbuild default topdir is /usr/src/azl)
+docker run azure/azure-cli:azurelinux3-builder cat /usr/src/azl/RPMS/x86_64/azure-cli-dev-1.azl3.x86_64.rpm > ./bin/azure-cli-dev-1.azl3.x86_64.rpm
 ```
 
 This launches a container running from the image built and tagged by the previous command, prints the contents of the
