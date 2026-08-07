@@ -22,7 +22,14 @@ short-summary: Manage Microsoft Entra applications.
 helps['ad app create'] = """
 type: command
 short-summary: Create an application.
-long-summary: For more detailed documentation, see https://learn.microsoft.com/graph/api/resources/application
+long-summary: >-
+    WARNING: The "az ad app create" command can modify an existing application if
+    another object shares the same display name. Display names aren't unique and can change, which
+    could result in credential loss or incorrect RBAC assignments.
+    For more details, see https://go.microsoft.com/fwlink/?linkid=2342455.
+
+
+    For more detailed documentation on Microsoft Entra application, see https://learn.microsoft.com/graph/api/resources/application
 examples:
   - name: Create an application.
     text: |
@@ -520,6 +527,12 @@ short-summary: >
     Create an application and its associated service principal, optionally configure the service principal's
     RBAC role assignments.
 long-summary: >-
+    WARNING: The "az ad sp create-for-rbac" command can modify an existing application or service principal if
+    another object shares the same display name. Display names aren't unique and can change, which
+    could result in credential loss or incorrect RBAC assignments.
+    For more details, see https://go.microsoft.com/fwlink/?linkid=2342455.
+
+
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an alternative, consider using
     [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
