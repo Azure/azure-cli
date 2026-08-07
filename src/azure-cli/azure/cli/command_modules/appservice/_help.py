@@ -1971,6 +1971,64 @@ examples:
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp exec'] = """
+type: command
+short-summary: Open an interactive shell session or run a command in a Linux web app container.
+long-summary: |
+    Interact with your Linux web app container in two modes:
+    - 'shell' (default): open an interactive shell session in your main app container.
+    - 'execute': fire-and-forget a command in your main app container; returns immediately, no output.
+
+    Only supported for Linux App Service plans.
+
+    'shell' mode: Open an interactive shell in your app's main container.
+    A session ends automatically after 3 hours of inactivity,
+    and may also end if the underlying instance is reimaged or platform components are updated.
+
+    'execute' mode: Fire-and-forget a command in the main app container. A 'succeeded' result means the command was accepted.
+    It does not confirm the command ran or completed, and no logs, output, or exit code are returned. For immediate output, use 'shell' mode.
+    The CLI reports failure only if the command (or the shell) could not be started.
+    This makes execute mode well-suited to background or long-running work.
+    The process runs detached and lives for the lifetime of the container (or until it finishes on its own).
+    Use --command to run a single program, e.g. "npm start".
+    Use --shell-command to run a shell command line where shell operators (|, &&, >, etc.) work, e.g. "cat log.txt | grep error > out.txt".
+    Check the parameters and examples below, including how to capture output to a file.
+examples:
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+  - name: Start an interactive shell session using a specific shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
+  - name: Run a direct command in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
+  - name: Run a shell command and redirect output to a file
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell-command "echo hello > /home/LogFiles/out.txt 2>&1"
+  - name: Run a command in a specific working directory
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --cwd /home/site --command "touch newfile.txt"
+  - name: Run a Python script in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "python3 /home/site/wwwroot/script.py"
+  - name: Run a shell command with a non-default shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell /bin/sh --shell-command "echo hi | grep h"
+  - name: Execute a command on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance MyInstanceId
+  - name: Execute a command on all instances
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance all
+  - name: Execute a command on a deployment slot
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command "touch newfile.txt"
+"""
+
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
@@ -2430,6 +2488,54 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
   - name: Show the latest startup log for a specific worker instance
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
+helps['webapp troubleshoot'] = """
+type: group
+short-summary: Diagnose common Linux web app problems.
+long-summary: >
+    Preview command group that pairs built-in configuration checks (from
+    KuduLite on the worker) with per-instance runtime status and startup
+    summaries from ARM. Use when a Linux app is failing to start, returning
+    HTTP 502/503, or exhibiting other post-deployment misbehavior.
+"""
+
+helps['webapp troubleshoot status'] = """
+type: command
+short-summary: Show site runtime status and recent startup summary for a Linux web app.
+long-summary: |
+    Aggregates two data sources:
+
+      - Site Runtime Status
+      - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
+        successful and failed startup attempts in the last 24h, plus the
+        most recent success and failure timestamps).
+
+    Use --instance to scope both to a single worker. By default the command
+    returns a structured payload so the standard `-o json/yaml/table` formatters
+    handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Show status for all instances of a web app (JSON by default)
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Show status scoped to a single worker instance
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --instance 7c2d9
+parameters:
+  - name: --instance
+    short-summary: Scope the report to a single worker instance.
+    long-summary: >
+        Accepts either the hex instanceId (from `az webapp list-instances`) or the
+        machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of
+        every instance seen in the last 24 hours.
+  - name: --report
+    short-summary: Print a human-readable, color-coded report instead of returning structured data.
+    long-summary: >
+        When set, the command writes a formatted report (overview table plus
+        per-instance Last runtime status and Startup summary) to stdout and
+        returns no machine-readable output. Omit --report to keep the default
+        structured payload that works with `-o json`, `-o yaml`, and `-o table`.
 """
 
 helps['functionapp log'] = """

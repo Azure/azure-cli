@@ -14,6 +14,7 @@ from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from binascii import hexlify
+from collections.abc import Mapping
 from os import urandom
 import datetime
 import json
@@ -60,7 +61,8 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
-    raise_enriched_deployment_error, EnrichedDeploymentError
+    raise_enriched_deployment_error, EnrichedDeploymentError,
+    raise_enriched_plan_error, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -389,7 +391,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                         multicontainer_config_type, sitecontainers_app,
                                         deployment_source_url, deployment_local_git]):
         logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    _log_webapp_troubleshoot_status_tip(name, resource_group_name, is_linux)
     return webapp
+
+
+def _log_webapp_troubleshoot_status_tip(name, resource_group_name, is_linux):
+    # Per-instance runtime status (siteStatus) is a Linux App Service feature,
+    # so only surface the tip for Linux webapps.
+    if not is_linux:
+        return
+    logger.warning("Tip: run 'az webapp troubleshoot status --name %s --resource-group %s' "
+                   "to see per-instance runtime status and recent startup summary.",
+                   name, resource_group_name)
 
 
 def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
@@ -884,7 +897,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -2458,6 +2471,18 @@ def show_app(cmd, resource_group_name, name, slot=None):
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
         _remove_list_duplicates(app)
     return app
+
+
+def _extract_webapp_status_items(result):
+    # The siteStatus response holds per-instance status under 'properties':
+    # a list for /siteStatus, a single object for /siteStatus/{instanceId}.
+    # Normalize both shapes into a list for uniform formatting.
+    properties = result.get('properties')
+    if isinstance(properties, list):
+        return properties
+    if isinstance(properties, dict):
+        return [properties]
+    return []
 
 
 def _list_app(cli_ctx, resource_group_name=None, show_details=False):
@@ -5003,12 +5028,47 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
+def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+    message_parts = []
+    top_message = getattr(ex, 'message', None)
+    if top_message:
+        message_parts.append(str(top_message))
+    inner_message = getattr(getattr(ex, 'error', None), 'message', None)
+    if inner_message:
+        message_parts.append(str(inner_message))
+    response = getattr(ex, 'response', None)
+    if response is not None:
+        try:
+            body = response.text()
+            if body:
+                message_parts.append(body)
+        except Exception:  # pylint: disable=broad-except
+            pass
+    error_message = "\n".join(message_parts) if message_parts else str(ex)
+
+    status_code = getattr(ex, 'status_code', None)
+    if status_code is None:
+        status_code = getattr(response, 'status_code', None)
+    if status_code is None:
+        status_code = extract_status_code_from_message(error_message)
+    raise_enriched_plan_error(
+        resource_group_name=resource_group_name,
+        plan_name=name,
+        location=location,
+        sku=sku,
+        status_code=status_code,
+        error_message=error_message,
+        last_known_step="App Service Plan create (control-plane request)"
+    )
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
-                            registry_adapters=None, install_scripts=None, storage_mounts=None):
+                            registry_adapters=None, install_scripts=None, storage_mounts=None,
+                            enriched_errors=False):
     if is_linux is None:
         is_linux = not hyper_v
     elif is_linux and hyper_v:
@@ -5106,44 +5166,51 @@ has been deployed ".format(app_service_environment)
     os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
     logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
 
-    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": name,
-        "resource_group": resource_group_name,
-        "location": location,
-        "tags": tags,
-        "sku": sku_def.as_dict(),
-        "reserved": plan_def.reserved,
-        "hyper_v": plan_def.hyper_v,
-        "per_site_scaling": plan_def.per_site_scaling,
-        "hosting_environment_profile": hosting_environment_profile,
-        "async_scaling_enabled": plan_def.async_scaling_enabled,
-        "zone_redundant": zone_redundant if zone_redundant else None,
-        "is_custom_mode": is_managed_instance,
-        "network": {
-            "virtual_network_subnet_id": subnet_resource_id,
-        } if subnet_resource_id else None,
-        "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
-        "mi_user_assigned": mi_user_assigned,
-        "plan_default_identity": plan_default_identity,
-        "registry_adapters": registry_adapters,
-        "install_scripts": install_scripts,
-        "storage_mounts": storage_mounts,
-    })
+    try:
+        poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": name,
+            "resource_group": resource_group_name,
+            "location": location,
+            "tags": tags,
+            "sku": sku_def.as_dict(),
+            "reserved": plan_def.reserved,
+            "hyper_v": plan_def.hyper_v,
+            "per_site_scaling": plan_def.per_site_scaling,
+            "hosting_environment_profile": hosting_environment_profile,
+            "async_scaling_enabled": plan_def.async_scaling_enabled,
+            "zone_redundant": zone_redundant if zone_redundant else None,
+            "is_custom_mode": is_managed_instance,
+            "network": {
+                "virtual_network_subnet_id": subnet_resource_id,
+            } if subnet_resource_id else None,
+            "rdp_enabled": rdp_enabled,
+            "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+            "mi_user_assigned": mi_user_assigned,
+            "plan_default_identity": plan_default_identity,
+            "registry_adapters": registry_adapters,
+            "install_scripts": install_scripts,
+            "storage_mounts": storage_mounts,
+        })
 
-    if no_wait:
-        return poller.result()
+        if no_wait:
+            return poller.result()
 
-    # Check if this is an asynchronous operation
-    is_async = is_async_response(poller)
+        # Check if this is an asynchronous operation
+        is_async = is_async_response(poller)
 
-    if not is_async:
-        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
-        return poller.result()
+        if not is_async:
+            # for synchronous operations, or if we are unable to get the initial response, directly return poller result
+            return poller.result()
 
-    # Asynchronous operation (202 response), use custom progress bar
-    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
-    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+        # Asynchronous operation (202 response), use custom progress bar
+        progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+        return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if not (enriched_errors and is_linux):
+            raise
+        _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku)
 
 
 def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_service_plan):
@@ -6412,6 +6479,11 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
 
 
 def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp log startup'")
+
+
+def _ensure_linux_webapp(cmd, resource_group, name, slot=None, command_label='This command'):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         app = client.web_apps.get_slot(resource_group, name, slot)
@@ -6419,7 +6491,7 @@ def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
         app = client.web_apps.get(resource_group, name)
     if app is None or not is_linux_webapp(app):
         raise ArgumentUsageError(
-            "'az webapp log startup' is only supported for Linux web apps.")
+            "{} is only supported for Linux web apps.".format(command_label))
 
 
 def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
@@ -6514,6 +6586,252 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
         return metadata
 
     return response.json()
+
+
+# ---------------------------------------------------------------------------
+# az webapp troubleshoot status
+# ---------------------------------------------------------------------------
+
+def _map_arm_instance_ids(cmd, subscription_id, resource_group, name, slot_segment, api_version):
+    """Fetch ARM /instances and build hex-instanceId <-> machineName mappings.
+    Returns (id_to_machine, machine_to_id). Both are empty on failure — the caller
+    can still proceed using the ARM hex form on --instance."""
+    instances_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/instances?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, ver=api_version)
+    id_to_machine = {}
+    machine_to_id = {}
+    try:
+        instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
+        for entry in instances_payload.get('value') or []:
+            entry_name = entry.get('name')
+            machine = (entry.get('properties') or {}).get('machineName')
+            if entry_name and machine:
+                id_to_machine[entry_name] = machine
+                machine_to_id[machine] = entry_name
+    except HttpResponseError as ex:
+        logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Unexpected error retrieving machine names from '%s': %s", instances_url, ex)
+    return id_to_machine, machine_to_id
+
+
+def _resolve_arm_instance_id(instance, id_to_machine, machine_to_id):
+    """Resolve --instance (ARM hex id OR machineName) to the ARM hex id used by /siteStatus.
+    Raises ResourceNotFoundError when the value matches neither known form and we have
+    a non-empty mapping to compare against."""
+    if not instance:
+        return None
+    if instance in machine_to_id:
+        return machine_to_id[instance]
+    if instance not in id_to_machine and machine_to_id:
+        raise ResourceNotFoundError(
+            "Instance '{}' was not found for this webapp. "
+            "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+    return instance
+
+
+def _fetch_site_runtime_items(cmd, subscription_id, resource_group, name, slot_segment,
+                              arm_instance_id, api_version, instance, id_to_machine):
+    """Call ARM /siteStatus[/{instanceId}] and return the normalized list of runtime items,
+    each enriched with machineName looked up from id_to_machine."""
+    instance_segment = '/{}'.format(arm_instance_id) if arm_instance_id else ''
+    arm_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/siteStatus{inst_seg}?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, inst_seg=instance_segment, ver=api_version)
+    try:
+        arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
+    except HttpResponseError as ex:
+        if instance and getattr(ex, 'status_code', None) == 404:
+            raise ResourceNotFoundError(
+                "Instance '{}' was not found for this webapp. "
+                "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+        raise
+
+    runtime_items = _extract_webapp_status_items(arm_response)
+    for item in runtime_items:
+        machine = id_to_machine.get(item.get('instanceId'))
+        if machine:
+            item['machineName'] = machine
+    return runtime_items
+
+
+def _parse_startup_summary_body(body, target_machine):
+    """Parse the JSON body returned by KuduLite /api/startuplogs/summary.
+    Returns (startup_by_machine, plaintext_notice_or_None)."""
+    startup_by_machine = {}
+    if isinstance(body, list):
+        for entry in body:
+            if not isinstance(entry, dict):
+                continue
+            # KuduLite serializes its C# POCO with default PascalCase settings
+            # (InstanceId, Startup, ...). Update these keys if the contract flips
+            # to camelCase in a future KuduLite release.
+            key = entry.get('InstanceId')
+            if not key:
+                continue
+            startup_by_machine[key] = entry.get('Startup') or entry
+        return startup_by_machine, None
+    if isinstance(body, dict):
+        # Tolerate a single-object response (older KuduLite shape).
+        inner = body.get('Startup') or body
+        key = body.get('InstanceId') or target_machine
+        if key:
+            startup_by_machine[key] = inner
+        return startup_by_machine, None
+    return startup_by_machine, None
+
+
+def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_items):
+    """Call KuduLite /api/startuplogs/summary once for the app. When --instance is set
+    and we have a matching runtime item, forward the machine filter so KuduLite only
+    walks that worker's log directory. Returns (startup_by_machine, app_wide_fetch_status)."""
+    import requests
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    target_machine = None
+    if instance and len(runtime_items) == 1:
+        target_machine = runtime_items[0].get('machineName')
+
+    summary_url = '{}/api/startuplogs/summary'.format(scm_url)
+    if target_machine:
+        summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
+
+    startup_by_machine = {}
+    try:
+        summary_response = requests.get(summary_url, headers=headers, timeout=30)
+    except requests.RequestException as ex:
+        logger.warning("Failed to call '%s': %s", summary_url, ex)
+        return startup_by_machine, (
+            "Failed to reach SCM startup summary endpoint ({}: {}).".format(
+                ex.__class__.__name__, ex))
+
+    if summary_response.status_code != 200:
+        # Common non-200s:
+        #   * 404: newer KuduLite doesn't recognize /summary yet in this region/stamp.
+        #   * 400 "Invalid startup log filename.": older KuduLite treats 'summary' as a filename.
+        #   * 5xx / auth: transient or config problem.
+        return startup_by_machine, (
+            "Startup summary is not available for this app. "
+            "This feature requires a platform version that has "
+            "not rolled out to your app's region yet."
+        )
+
+    try:
+        body = summary_response.json()
+    except ValueError:
+        body = None
+
+    if body is None:
+        # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice) —
+        # applies app-wide, hoist to instance-level SummaryFetchStatus later.
+        text = (summary_response.text or '').strip()
+        return startup_by_machine, (text or None)
+
+    startup_by_machine, notice = _parse_startup_summary_body(body, target_machine)
+    return startup_by_machine, notice
+
+
+def _correlate_startups_with_runtime(runtime_items, startup_by_machine, app_wide_fetch_status):
+    """Pair SCM startup entries with ARM runtime items in-place. ARM's machineName is the
+    worker-slot identity; KuduLite's InstanceId is the per-container identity, so they
+    don't always agree. Strategy: match by machineName first; if we end up with exactly
+    one unmatched item on each side (common single-instance case), pair them. Anything
+    still unmatched is returned as orphan_startups for the renderer's own section."""
+    remaining_keys = set(startup_by_machine.keys())
+    unmatched_items = []
+    for item in runtime_items:
+        machine = item.get('machineName')
+        per_instance = startup_by_machine.get(machine) if machine else None
+        if per_instance is not None and machine in remaining_keys:
+            remaining_keys.discard(machine)
+        if per_instance is None:
+            unmatched_items.append(item)
+        else:
+            item['startup'] = per_instance
+
+    if len(unmatched_items) == 1 and len(remaining_keys) == 1:
+        only_key = next(iter(remaining_keys))
+        unmatched_items[0]['startup'] = startup_by_machine[only_key]
+        unmatched_items[0]['startupInstanceId'] = only_key
+        remaining_keys.discard(only_key)
+        unmatched_items = []
+
+    for item in unmatched_items:
+        if app_wide_fetch_status:
+            item['startup'] = {'SummaryFetchStatus': app_wide_fetch_status}
+        else:
+            item['startup'] = None
+
+    return [
+        {'InstanceId': k, 'Startup': startup_by_machine[k]}
+        for k in sorted(remaining_keys)
+    ]
+
+
+def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, report=False):
+    """Fetch runtime + startup status for a Linux web app.
+
+    Data sources:
+      * Site Runtime Status comes from ARM:
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
+            /sites/{name}[/slots/{slot}]/siteStatus[/{instanceId}]?api-version=...
+      * Startup summary comes from KuduLite (SCM):
+        GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
+
+    By default returns the structured payload (list of instances + startup
+    summary) so the standard `-o json/yaml/tsv/table` formatters handle output.
+    Pass --report to print the human-readable report to stdout instead.
+    """
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp troubleshoot status'")
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Pin to a version validated against /siteStatus and /instances (2024-11-01
+    # is what the appsettings/list call in this module also targets). Using a
+    # literal here avoids depending on client._config.api_version, which is
+    # protected and can shift when the SDK bumps its default.
+    api_version = '2024-11-01'
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+
+    id_to_machine, machine_to_id = _map_arm_instance_ids(
+        cmd, subscription_id, resource_group, name, slot_segment, api_version)
+
+    arm_instance_id = _resolve_arm_instance_id(instance, id_to_machine, machine_to_id)
+
+    runtime_items = _fetch_site_runtime_items(
+        cmd, subscription_id, resource_group, name, slot_segment,
+        arm_instance_id, api_version, instance, id_to_machine)
+
+    startup_by_machine, app_wide_fetch_status = _fetch_startup_summaries(
+        cmd, resource_group, name, slot, instance, runtime_items)
+
+    orphan_startups = _correlate_startups_with_runtime(
+        runtime_items, startup_by_machine, app_wide_fetch_status)
+
+    payload = {
+        'name': name,
+        'resourceGroup': resource_group,
+        'instances': runtime_items,
+    }
+    if orphan_startups:
+        payload['orphanStartups'] = orphan_startups
+    if report:
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report
+        _troubleshoot_status_report.render_report(payload)
+        return None
+    return payload
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
@@ -6923,6 +7241,29 @@ def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, r
                        'Ensure the app\'s managed identity has the permission on the Key Vault.')
 
 
+def _get_app_service_certificate_kv_secret_name(cmd, subscription_id, key_vault_certificate_name):
+    # App Service Certificate orders are exposed by the Microsoft.CertificateRegistration resource provider,
+    # which the WebSiteManagementClient SDK no longer surfaces, so query the ARM REST API directly.
+    management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+    request_url = "{}/subscriptions/{}/providers/Microsoft.CertificateRegistration/certificateOrders" \
+                  "?api-version={}".format(management_hostname.strip('/'), subscription_id, VERSION_2022_09_01)
+    try:
+        while request_url:
+            response = send_raw_request(cmd.cli_ctx, method='get', url=request_url).json()
+            for asc in response.get('value', []):
+                if asc.get('name') == key_vault_certificate_name:
+                    certificates = asc.get('properties', {}).get('certificates') or {}
+                    cert = certificates.get(key_vault_certificate_name)
+                    if cert:
+                        return cert.get('keyVaultSecretName')
+            request_url = response.get('nextLink')
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Unable to check App Service Certificate orders (%s). If '%s' is an App Service "
+                       "Certificate, the import may not resolve the correct Key Vault secret name.",
+                       str(ex), key_vault_certificate_name)
+    return None
+
+
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
                     load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
@@ -6965,28 +7306,14 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
 
-    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
-    # subscription
+    # If in the public cloud, check if certificate is an app service certificate in the same or a different
+    # subscription. App Service Certificate orders belong to the Microsoft.CertificateRegistration provider,
+    # which is no longer exposed by the WebSiteManagementClient SDK, so the ARM REST API is queried directly.
     kv_secret_name = None
     cloud_type = cmd.cli_ctx.cloud.name
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
-        if kv_subscription.lower() != subscription_id.lower():
-            cert_orders_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                         subscription_id=kv_subscription)
-        else:
-            cert_orders_client = client
-
-        if hasattr(cert_orders_client, 'app_service_certificate_orders'):
-            ascs = cert_orders_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
-            for asc in ascs:
-                if asc.name == key_vault_certificate_name:
-                    kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
-        else:
-            logger.warning("Unable to check App Service Certificate orders. "
-                           "If '%s' is an App Service Certificate, the import may not resolve "
-                           "the correct Key Vault secret name.", key_vault_certificate_name)
+        kv_secret_name = _get_app_service_certificate_kv_secret_name(cmd, kv_subscription,
+                                                                     key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     kv_secret_name = kv_secret_name or key_vault_certificate_name
@@ -7733,63 +8060,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return 0
 
     @staticmethod
-    def _get_java_versions_from_minor_versions(minor_versions):
-        """Dynamically extract unique Java versions from minor version values.
-        Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
-        Returns versions sorted in descending order (newest first)."""
-        java_versions = set()
-        for minor in minor_versions:
-            # minor.value is like "25.0.0", "21.0.0", "17.0.0", "11.0.0", "8.0.0" or "1.8.0"
-            value = minor.value
-            if value:
-                # Handle both "1.8" format and newer "25", "21" formats
-                if value.startswith("1.8"):
-                    java_versions.add("1.8")
-                else:
-                    # Extract major version number (e.g., "25" from "25.0.0")
-                    major_ver = value.split('.')[0]
-                    if major_ver.isdigit():
-                        java_versions.add(major_ver)
-        # Sort descending (newest versions first)
-        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
-
-    @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
         """Dynamically extract Java versions from Windows container settings.
-        Looks at the 'runtimes' array in additional_properties or directly on the object.
+        Looks at the 'runtimes' array exposed by the container settings.
         Returns versions sorted in descending order (newest first)."""
         java_versions = set()
-        runtimes_array = []
-
-        # Handle both dict and object representations of container_settings
-        if isinstance(container_settings, dict):
-            runtimes_array = container_settings.get('runtimes', [])
-        else:
-            # Try multiple ways to access the runtimes array
-            # 1. Check additional_properties (where SDK puts unknown fields)
-            additional_props = getattr(container_settings, 'additional_properties', None)
-            if additional_props and isinstance(additional_props, dict):
-                runtimes_array = additional_props.get('runtimes', [])
-
-            # 2. Try direct attribute access (in case SDK exposes it directly)
-            if not runtimes_array:
-                runtimes_array = getattr(container_settings, 'runtimes', None) or []
-
-            # 3. Try as_dict() if available (converts SDK model to dict)
-            if not runtimes_array and hasattr(container_settings, 'as_dict'):
-                try:
-                    settings_dict = container_settings.as_dict()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
-
-            # 4. Try serialize() if available
-            if not runtimes_array and hasattr(container_settings, 'serialize'):
-                try:
-                    settings_dict = container_settings.serialize()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        runtimes_array = data.get('runtimes') or []
 
         for runtime_info in runtimes_array:
             if isinstance(runtime_info, dict):
@@ -7805,18 +8082,47 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
 
     @staticmethod
+    def _get_container_settings_data(container_settings):
+        """Return a dict of a container settings object's raw (camelCase) API fields.
+
+        The azure-mgmt-web SDK returns typespec models that behave like a read-only
+        ``Mapping`` and preserve API fields the SDK does not explicitly model -- e.g.
+        ``java17Runtime``/``java21Runtime``/``java25Runtime`` and the ``runtimes`` array.
+        Older msrest-based models instead expose such unknown fields via
+        ``additional_properties``. Reading only the SDK-typed attributes (which cover just
+        ``java8Runtime``/``java11Runtime``) or only ``additional_properties`` silently drops
+        newer Java versions, so consult every representation.
+        """
+        if container_settings is None:
+            return {}
+        if isinstance(container_settings, dict):
+            return container_settings
+        data = {}
+        # Legacy msrest models: unknown fields land in additional_properties.
+        additional = getattr(container_settings, 'additional_properties', None)
+        if isinstance(additional, dict):
+            data.update(additional)
+        # Typespec _Model instances are Mappings keyed by the raw camelCase field names.
+        if isinstance(container_settings, Mapping):
+            data.update(dict(container_settings))
+        return data
+
+    @staticmethod
     def _get_java_runtimes_from_container_settings(container_settings):
         """Dynamically extract Java runtimes from container settings.
         Prefers the 'runtimes' array from the API when available (most future-proof),
-        falls back to individual java*Runtime properties in additional_properties,
-        and finally SDK-defined properties (java8_runtime, java11_runtime).
+        falls back to individual java*Runtime fields, and finally to the SDK-typed
+        java8_runtime/java11_runtime attributes.
         Returns list of tuples: (runtime_name, version, is_auto_update)"""
         runtimes = []
-        is_auto_update = getattr(container_settings, 'is_auto_update', False)
-        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        is_auto_update = data.get('isAutoUpdate')
+        if is_auto_update is None:
+            is_auto_update = getattr(container_settings, 'is_auto_update', False)
+        is_auto_update = bool(is_auto_update)
 
         # Prefer the 'runtimes' array if available (cleanest, most future-proof)
-        runtimes_array = additional_props.get('runtimes', [])
+        runtimes_array = data.get('runtimes') or []
         if runtimes_array:
             for runtime_info in runtimes_array:
                 runtime_name = runtime_info.get('runtime')
@@ -7824,17 +8130,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if runtime_name and version:
                     runtimes.append((runtime_name, version, is_auto_update))
         else:
-            # Fallback: Get runtimes from additional_properties (java*Runtime keys)
-            for key, value in additional_props.items():
+            # Fallback: Get runtimes from the raw java*Runtime fields
+            for key, value in data.items():
                 # Match pattern like "java25Runtime", "java21Runtime", etc.
                 match = re.match(r'^java(\d+)Runtime$', key)
                 if match and value:
                     version = match.group(1)
                     runtimes.append((value, version, is_auto_update))
 
-            # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
+            # Also get runtimes from SDK-typed properties (java8_runtime, java11_runtime)
             if getattr(container_settings, 'java11_runtime', None):
-                # Avoid duplicates if already found in additional_properties
+                # Avoid duplicates if already found above
                 if not any(v == "11" for _, v, _ in runtimes):
                     runtimes.append((container_settings.java11_runtime, "11", is_auto_update))
             if getattr(container_settings, 'java8_runtime', None):
@@ -7946,13 +8252,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         minor_java_container_versions = self._get_valid_minor_versions(
             major_version, linux=True, java=True, include_eol=self._include_eol)
         if "SE" in major_version.display_text:
-            # Dynamically get Java versions from the available minor versions
-            java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
-            se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
-            for java in java_versions:
-                se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers
-            minor_java_container_versions = se_containers
+            # The displayed Java SE runtimes are the "friendly" auto-update names (e.g.
+            # JAVA|21-java21) carried by a single aggregate auto-update container, whose
+            # 'runtimes' array enumerates every available Java major version. Select that
+            # container by its is_auto_update flag instead of by position, which the API
+            # does not guarantee. The per-patch containers (e.g. JAVA|21.0.9) are
+            # non-auto-update and are filtered out of the table output downstream. Fall
+            # back to the first minor version if no auto-update container is present.
+            auto_update_containers = []
+            for container in minor_java_container_versions:
+                container_settings = container.stack_settings.linux_container_settings
+                settings_data = self._get_container_settings_data(container_settings)
+                if settings_data.get('isAutoUpdate') or getattr(container_settings, 'is_auto_update', False):
+                    auto_update_containers.append(container)
+            if auto_update_containers:
+                minor_java_container_versions = auto_update_containers
+            elif minor_java_container_versions:
+                minor_java_container_versions = [minor_java_container_versions[0]]
         if minor_java_container_versions:
             for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
@@ -9931,6 +10247,7 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     time_elapsed = 0
     deployment_status = None
     response_body = None
+    status_tip_logged = False
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
@@ -9945,12 +10262,19 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
         logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
+                status_tip_logged = True
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
                         deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
             break
         if deployment_status == "RuntimeFailed":
+            if not status_tip_logged:
+                _log_webapp_troubleshoot_status_tip(webapp_name, resource_group_name, True)
             error_text = ""
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
@@ -10633,7 +10957,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=False):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -10833,6 +11157,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
+
+    _log_webapp_troubleshoot_status_tip(name, rg_name, _is_linux)
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)
@@ -11074,7 +11400,7 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=False):
+                             enriched_errors=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11135,7 +11461,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
-        self.enriched_errors = False
+        self.enriched_errors = True
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -11588,6 +11914,8 @@ def _make_onedeploy_request(params):
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
+        if not (poll_async_deployment_for_debugging and params.track_status):
+            _log_webapp_troubleshoot_status_tip(params.webapp_name, params.resource_group_name, params.is_linux_webapp)
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 

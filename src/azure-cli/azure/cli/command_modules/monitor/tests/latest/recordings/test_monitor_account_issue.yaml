@@ -1,0 +1,171 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_issue000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_issue000001","name":"cli_test_monitor_account_issue000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_account_issue","date":"2026-05-08T17:55:56Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:55:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CD25809B527C49F29CBD4D2146CD022A Ref B: CO6AA3150220025 Ref C: 2026-05-08T17:55:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_issue000001/providers/Microsoft.Monitor/accounts/ac000002?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"accountId":"fdf16d14-840d-42c3-a45a-3256a8d15aed","metrics":{"prometheusQueryEndpoint":"https://ac000002-cqe5bxg5erfjhhew.westus.prometheus.monitor.azure.com","internalId":"mac_fdf16d14-840d-42c3-a45a-3256a8d15aed","enableAccessUsingResourcePermissions":true},"provisioningState":"Succeeded","defaultIngestionSettings":{"dataCollectionRuleResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionRules/ac000002","dataCollectionEndpointResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionEndpoints/ac000002","dataCollectionRuleImmutableId":"dcr-8ac761dde6bd487090b75bee352e799f","ingestionEndpoints":{"metrics":"https://ac000002-9ire.westus-1.metrics.ingest.monitor.azure.com"}},"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_issue000001/providers/microsoft.monitor/accounts/ac000002","name":"ac000002","type":"Microsoft.Monitor/accounts","etag":"\"2400ae77-0000-0700-0000-69fe23bd0000\"","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:56:00.9917976Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:56:00.9917976Z"}}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2021-06-03-preview, 2023-04-01, 2023-04-03, 2023-06-01-preview,
+        2024-04-01-preview, 2024-04-03-preview, 2024-10-01-preview, 2024-10-03-preview,
+        2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '1423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:56:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus2/5224101e-7898-4783-9166-8f2bebd8d7ef
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: 63BD80BD9545492FAADC0EF573FE99F5 Ref B: CO6AA3150217023 Ref C: 2026-05-08T17:56:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"severity": "Low", "status": "New", "title": "Test Issue"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account issue create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '75'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n --title --severity --status
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_issue000001/providers/Microsoft.Monitor/accounts/ac000002/issues/issue000003?api-version=2025-10-03
+  response:
+    body:
+      string: '{"error":{"code":"NoRegisteredProviderFound","message":"No registered
+        resource provider found for location ''westus'' and API version ''2025-10-03''
+        for type ''accounts/issues''. The supported api-versions are ''2025-05-03-preview,
+        2025-10-03-preview''. The supported locations are ''australiacentral, australiaeast,
+        australiasoutheast, brazilsouth, canadacentral, canadaeast, centralindia,
+        centralus, chilecentral, eastasia, eastus, eastus2, francecentral, germanywestcentral,
+        indonesiacentral, israelcentral, italynorth, japaneast, japanwest, koreacentral,
+        koreasouth, malaysiawest, mexicocentral, newzealandnorth, northcentralus,
+        northeurope, norwayeast, polandcentral, southafricanorth, southcentralus,
+        southindia, southeastasia, spaincentral, swedencentral, switzerlandnorth,
+        uaenorth, uksouth, ukwest, westcentralus, westeurope, westus, westus2, westus3,
+        eastus2euap, swedensouth''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '881'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:56:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: 3AE174978F5C42308CE2E1004FD78F9E Ref B: CO1AA3060815062 Ref C: 2026-05-08T17:56:14Z'
+    status:
+      code: 400
+      message: Bad Request
+version: 1

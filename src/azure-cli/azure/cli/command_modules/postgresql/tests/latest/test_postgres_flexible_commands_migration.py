@@ -19,11 +19,11 @@ class MigrationScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_postgres_flexible_server_migration(self):
-        self._test_server_migration("b36ac3bb-4813-44bc-bd5f-0b614fbd384d")
+        self._test_server_migration("28a8040d-4599-4e87-9c9e-bbab9fad6417")
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise(True, "eeb19e1a-a1c8-4468-b546-d353d3c30ebf")
-        self._test_server_migration_onpremise(False, "5ae97496-406f-4a73-a7e2-61a970267167")
+        self._test_server_migration_onpremise(True, "179c42a8-d048-41ca-8ae0-c64b8ce5634c")
+        self._test_server_migration_onpremise(False, "57dbbd67-5201-469b-b1a9-5dc5d108ff27")
 
     def _test_server_migration(self, migration_name=None):
         # Set this to True or False depending on whether we are in live mode or test mode
@@ -38,7 +38,7 @@ class MigrationScenarioTest(ScenarioTest):
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
 
-        target_resource_group_name = "autobot-resourcegroup-pg-canadacentral"
+        target_resource_group_name = "autobot-resourcegroup"
         target_server_name = "autobot-e2e-pg-fs-canadacentral"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
@@ -94,7 +94,7 @@ class MigrationScenarioTest(ScenarioTest):
         if validateOnly:
             migration_option = "Validate"
 
-        target_resource_group_name = "autobot-resourcegroup-pg-canadacentral"
+        target_resource_group_name = "autobot-resourcegroup"
         target_server_name = "autobot-e2e-pg-fs-canadacentral"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationOnPremise.json').replace('\\', '\\\\')

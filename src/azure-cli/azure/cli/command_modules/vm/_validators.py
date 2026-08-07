@@ -1612,7 +1612,7 @@ def _resolve_role_id(cli_ctx, role, scope):
         except ValueError:
             pass
         if not role_id:  # retrieve role id
-            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(client.list(scope, filter="roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
             if len(role_defs) > 1:

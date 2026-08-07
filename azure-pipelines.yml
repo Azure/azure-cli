@@ -689,6 +689,11 @@ jobs:
       # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
       # form for the local test install only; the generated/submitted formula stays upstream-faithful.
       sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      
+      # Homebrew 6.0.0+ requires non-official taps to be explicitly trusted before it will
+      # load their Ruby code (see https://docs.brew.sh/Tap-Trust). Trust this local dev tap
+      # that we just created so the generated formula can be installed in CI.
+      brew trust dev/azure-cli
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==

@@ -111,7 +111,7 @@ def load_arguments(self, _):
                    help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
-        c.argument('managed_instance_enabled', action='store_true', is_preview=True,
+        c.argument('managed_instance_enabled', action='store_true',
                    help='get regions which support hosting web apps on Managed Instance workers')
         c.argument('sku', arg_type=sku_arg_type)
 
@@ -145,25 +145,28 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
-        c.argument('mi_system_assigned', is_preview=True,
+        c.argument('is_managed_instance', action='store_true', help='host web app on managed instance')
+        c.argument('mi_system_assigned',
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")
-        c.argument('mi_user_assigned', is_preview=True,
+        c.argument('mi_user_assigned',
                    nargs='+', help="Enable user-assigned managed identities for this app service plan. "
                    "Accepts space-separated list of identity resource IDs.")
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, Linux App Service plan creation failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. This flag only applies to Linux plans and has no effect on Windows or Hyper-V plans.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type,
@@ -173,17 +176,17 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan delete') as c:
@@ -849,6 +852,13 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp log startup show') as c:
         c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
+    with self.argument_context('webapp troubleshoot status') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
@@ -1054,8 +1064,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
-                   arg_type=get_three_state_flag())
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
+                   arg_type=get_three_state_flag(), default=True)
         c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
 
     with self.argument_context('webapp ssh') as c:
@@ -1098,8 +1108,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
-                   arg_type=get_three_state_flag())
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
+                   arg_type=get_three_state_flag(), default=True)
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
@@ -1605,3 +1615,33 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('environment_name', help="Name of the environment of static site")
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)
+    with self.argument_context('webapp exec') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the web app.')
+        c.argument('exec_command', options_list=['--command'],
+                   help='[Execute mode] A command to run directly in the container, without a shell. '
+                   'Quote the whole command (e.g. --command "python /home/site/app.py --port 8080"). '
+                   'Shell operators (>, |, &&, etc.) are not interpreted - use --shell-command for those. '
+                   'Mutually exclusive with --shell-command.')
+        c.argument('shell_command', options_list=['--shell-command'],
+                   help='[Execute mode] A command line to run through a shell, so shell operators (|, &&, >, etc.) work '
+                   '(e.g. --shell-command "echo hi > /home/LogFiles/out.txt"). '
+                   'Runs as `<shell> -c <command>`; the shell defaults to '
+                   '/bin/bash and can be overridden with --shell. Mutually exclusive with --command.')
+        c.argument('mode',
+                   help="Execution mode. 'shell' (default): Starts an interactive shell session with the main "
+                   "web app container. 'execute': Starts command execution and returns immediately without "
+                   "returning command output.",
+                   arg_type=get_enum_type(['shell', 'execute']), default='shell')
+        c.argument('working_directory', options_list=['--working-directory', '--cwd'],
+                   help="[Execute mode] Absolute working directory for command execution. "
+                   "Defaults to the container's working directory.")
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Webapp instance(s) to target. Specify a comma-separated list of instance IDs '
+                   '(use "az webapp list-instances" to get IDs) or "all" for all instances. Defaults to a random instance. '
+                   'Specifying multiple instances (a comma-separated list or "all") is supported only in \'execute\' mode.')
+        c.argument('shell', options_list=['--shell'],
+                   help="Absolute path of the shell to use (e.g. /bin/sh); defaults to /bin/bash. "
+                   "In 'shell' mode it is the interactive shell to launch; in 'execute' mode it is "
+                   "the shell used to run --shell-command.")
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Default to the production slot if not specified.')
