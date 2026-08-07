@@ -1697,6 +1697,10 @@ class TestStackRuntimeNodeStandardization(unittest.TestCase):
         self.assertEqual(helper.resolve('NODE|26', linux=True).configs['linux_fx_version'], 'NODE|26-lts')
         self.assertEqual(
             helper.resolve('NODE|26', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
+        self.assertEqual(
+            helper.resolve('NODE|26-lts', linux=True).configs['linux_fx_version'], 'NODE|26-lts')
+        self.assertEqual(
+            helper.resolve('NODE|26LTS', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
 
     def test_older_node_identifiers_remain_unchanged(self):
         helper = self._new_helper()

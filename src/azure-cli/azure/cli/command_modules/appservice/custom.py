@@ -7618,7 +7618,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        display_name = display_name.lower()
+        display_name = self._standardize_node_runtime_name(display_name).lower()
         stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
