@@ -18,10 +18,12 @@ from azure.cli.command_modules.appservice.custom import (
     config_source_control,
     validate_app_settings_in_scm,
     update_container_settings_functionapp,
-    list_function_keys)
+    list_function_keys,
+    migrate_consumption_to_flex)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import (ResourceNotFoundError, MutuallyExclusiveArgumentError,
+                                        RequiredArgumentMissingError, ValidationError)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -889,3 +891,105 @@ class TestFunctionappMocked(unittest.TestCase):
         self.assertEqual(result, {'default': 'abc'})
         client_mock.web_apps.list_function_keys_slot.assert_called_once_with('rg', 'app', 'httpget', 'staging')
         client_mock.web_apps.list_function_keys.assert_not_called()
+
+
+class TestFlexMigrationInPlaceMocked(unittest.TestCase):
+    """Unit tests for the --in-place flag on flex-migration start."""
+
+    def test_in_place_rejects_target_name_arg(self):
+        """--in-place with --name should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group=None,
+                                        name='target-app',
+                                        in_place=True)
+
+    def test_in_place_rejects_target_resource_group_arg(self):
+        """--in-place with --resource-group should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name=None,
+                                        in_place=True)
+
+    def test_in_place_rejects_both_target_args(self):
+        """--in-place with both --name and --resource-group should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name='target-app',
+                                        in_place=True)
+
+    def test_side_by_side_requires_name(self):
+        """Side-by-side (no --in-place) without --name should raise RequiredArgumentMissingError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(RequiredArgumentMissingError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name=None,
+                                        in_place=False)
+
+    def test_side_by_side_requires_resource_group(self):
+        """Side-by-side (no --in-place) without --resource-group should raise RequiredArgumentMissingError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(RequiredArgumentMissingError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group=None,
+                                        name='target-app',
+                                        in_place=False)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=True)
+    def test_in_place_rejects_already_flex(self, is_flex_mock, list_locations_mock, get_client_mock):
+        """--in-place on an already-Flex app should raise ValidationError."""
+        cmd_mock = _get_test_cmd()
+        # Mock the web client to return a site
+        client_mock = mock.MagicMock()
+        site_mock = mock.MagicMock()
+        site_mock.kind = 'functionapp,linux'
+        site_mock.name = 'src-app'
+        client_mock.web_apps.get.return_value = site_mock
+        get_client_mock.return_value = client_mock
+
+        with self.assertRaises(ValidationError) as ctx:
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        in_place=True)
+        self.assertIn('already on Flex Consumption', str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._is_linux_consumption_function_app', return_value=False)
+    def test_in_place_rejects_non_consumption(self, is_linux_consumption_mock, is_flex_mock,
+                                               list_locations_mock, get_client_mock):
+        """--in-place on a non-Consumption app should raise ValidationError."""
+        cmd_mock = _get_test_cmd()
+        client_mock = mock.MagicMock()
+        site_mock = mock.MagicMock()
+        site_mock.kind = 'functionapp'
+        site_mock.name = 'src-app'
+        client_mock.web_apps.get.return_value = site_mock
+        get_client_mock.return_value = client_mock
+
+        with self.assertRaises(ValidationError) as ctx:
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        in_place=True)
+        self.assertIn('not on a Linux Dynamic (Consumption) plan', str(ctx.exception))
