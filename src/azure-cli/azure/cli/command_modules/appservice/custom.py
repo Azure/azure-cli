@@ -1279,6 +1279,8 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
                                 skip_access_restrictions=False, skip_storage_mount=False, skip_hostnames=False,
                                 skip_cors=False):
 
+    print(f"Starting migration of function app '{source_name}' from Consumption to Flex Consumption...")
+
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
 
     # Validate that the app is eligible for Flex Consumption migration
