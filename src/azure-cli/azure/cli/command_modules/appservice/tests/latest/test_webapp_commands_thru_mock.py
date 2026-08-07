@@ -1643,6 +1643,70 @@ class _TypespecContainerSettings(Mapping):
         return len(self._data)
 
 
+class TestStackRuntimeNodeStandardization(unittest.TestCase):
+    @staticmethod
+    def _new_helper():
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._linux = True
+        helper._windows = True
+        helper._include_eol = False
+        helper._stacks = []
+        helper.windows_config_mappings = {'node': 'WEBSITE_NODE_DEFAULT_VERSION'}
+        return helper
+
+    @staticmethod
+    def _node_stack(version, display_text, linux_runtime):
+        git_hub_action_settings = types.SimpleNamespace(is_supported=True, supported_version="{}.x".format(version))
+        linux_settings = types.SimpleNamespace(
+            runtime_version=linux_runtime,
+            is_hidden=False,
+            is_deprecated=False,
+            end_of_life_date=None,
+            git_hub_action_settings=git_hub_action_settings,
+        )
+        windows_settings = types.SimpleNamespace(
+            runtime_version="~{}".format(version),
+            is_hidden=False,
+            is_deprecated=False,
+            end_of_life_date=None,
+            git_hub_action_settings=git_hub_action_settings,
+        )
+        minor = types.SimpleNamespace(
+            display_text=display_text,
+            stack_settings=types.SimpleNamespace(
+                linux_container_settings=None,
+                linux_runtime_settings=linux_settings,
+                windows_container_settings=None,
+                windows_runtime_settings=windows_settings,
+            ),
+        )
+        major = types.SimpleNamespace(display_text=display_text, minor_versions=[minor])
+        return types.SimpleNamespace(display_text='Node', major_versions=[major])
+
+    def test_node_26_uses_standard_identifier_on_both_platforms(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('26', 'Node 26 LTS', 'NODE|26-lts')])
+
+        self.assertEqual(
+            [(runtime.os, runtime.display_name) for runtime in helper._stacks],
+            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
+        self.assertEqual(
+            [(row['os'], row['config']) for row in helper.get_stacks_as_table(runtime_filter='node')],
+            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
+        self.assertEqual(helper.resolve('NODE|26', linux=True).configs['linux_fx_version'], 'NODE|26-lts')
+        self.assertEqual(
+            helper.resolve('NODE|26', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
+
+    def test_older_node_identifiers_remain_unchanged(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('24', 'Node 24 LTS', 'NODE|24-lts')])
+
+        self.assertEqual(
+            [(runtime.os, runtime.display_name) for runtime in helper._stacks],
+            [('Linux', 'NODE|24-lts'), ('Windows', 'NODE|24LTS')])
+
+
 class TestStackRuntimeJavaSELinux(unittest.TestCase):
     """Regression tests for `az webapp list-runtimes` Linux Java SE parsing.
 

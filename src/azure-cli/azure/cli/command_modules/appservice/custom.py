@@ -7707,6 +7707,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
 
+    @staticmethod
+    def _standardize_node_runtime_name(runtime_name):
+        match = re.fullmatch(r'node\|(\d+)(?:-?lts)?', runtime_name, re.IGNORECASE)
+        if match and int(match.group(1)) >= 26:
+            return "NODE|{}".format(match.group(1))
+        return runtime_name
+
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
         # Using datetime module imported at the top level
@@ -7908,6 +7915,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
+                    runtime_name = self._standardize_node_runtime_name(runtime_name)
 
                     runtime = self.Runtime(display_name=runtime_name, linux=False,
                                            os="Windows", runtime_family=runtime_family,
@@ -8019,9 +8027,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
-                runtime_name = settings.runtime_version
+                runtime_name = self._standardize_node_runtime_name(settings.runtime_version)
                 runtime = self.Runtime(display_name=runtime_name,
-                                       configs={"linux_fx_version": runtime_name},
+                                       configs={"linux_fx_version": settings.runtime_version},
                                        linux=True,
                                        os="Linux",
                                        runtime_family=runtime_family,
