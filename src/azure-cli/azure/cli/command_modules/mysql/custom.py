@@ -123,11 +123,10 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
                            end_ip_address)
 
-    parameters = {
-        'name': firewall_rule_name,
-        'start_ip_address': start_ip_address,
-        'end_ip_address': end_ip_address
-    }
+    parameters = models.FirewallRule(
+        start_ip_address=start_ip_address,
+        end_ip_address=end_ip_address
+    )
 
     return client.begin_create_or_update(
         resource_group_name,
