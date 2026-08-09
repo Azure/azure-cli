@@ -412,6 +412,10 @@ def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_repli
         replica_object = create_replica_location_object(col)
         replica_location_object.append(replica_object)
     for col in geo_data_replication_config:
+        if col.get('cluster_arm_id', None) in (None, ''):
+            col.pop('cluster_arm_id', None)
+        if 'role_type' in col and isinstance(col['role_type'], str):
+            col['role_type'] = col['role_type'].capitalize()
         if col in replica_location_object:
             replica_location_object.remove(col)
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
