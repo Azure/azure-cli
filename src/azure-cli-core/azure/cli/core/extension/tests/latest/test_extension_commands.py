@@ -518,6 +518,15 @@ class TestExtensionCommands(unittest.TestCase):
             with self.assertRaisesRegex(CLIError, 'Failed to install required system dependencies for psycopg2'):
                 _install_deps_for_psycopg2()
 
+    def test_install_psycopg2_deps_fails_if_tdnf_missing(self):
+        with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
+                mock.patch('platform.system', return_value='Linux'), \
+                mock.patch('azure.cli.core.util.get_linux_distro', return_value=('Azure Linux', '4.0')), \
+                mock.patch.dict('os.environ', {'AZ_INSTALLER': 'RPM'}), \
+                mock.patch('shutil.which', return_value=None):
+            with self.assertRaisesRegex(CLIError, 'tdnf package manager not found'):
+                _install_deps_for_psycopg2()
+
     def _setup_cmd(self):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()

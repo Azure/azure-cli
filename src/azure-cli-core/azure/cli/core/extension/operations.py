@@ -252,6 +252,13 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements, too-ma
                     logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
                     subprocess.call(zypper_install_cmd)
             elif is_azure_linux_4:
+                from shutil import which
+                if which('tdnf') is None:
+                    raise CLIError(
+                        'tdnf package manager not found. This extension requires Azure Linux 4 with tdnf '
+                        'to install required system dependencies: gcc, libpq-devel, python3-devel, binutils, '
+                        'glibc-devel, kernel-headers.'
+                    )
                 rpm_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
                 rpm_install_cmd = ['tdnf', 'install', '-y'] + rpm_packages
                 if os.geteuid() != 0:  # pylint: disable=no-member
