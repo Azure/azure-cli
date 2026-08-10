@@ -494,8 +494,11 @@ class TestExtensionCommands(unittest.TestCase):
 
         azure_linux_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
         subprocess_call.assert_any_call(['tdnf', 'install', '-y'] + azure_linux_packages)
-        self.assertNotIn(mock.call(['yum', 'install', '-y'] + azure_linux_packages),
-                         subprocess_call.call_args_list)
+        # Ensure no yum/sudo yum calls were made
+        for call in subprocess_call.call_args_list:
+            args = call.args[0] if call.args else []
+            self.assertFalse(any(cmd in args for cmd in ['yum', 'zypper']),
+                             f"Unexpected package manager call: {args}")
 
     def test_install_psycopg2_deps_preserves_azl3_rpm_behavior(self):
         with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
@@ -526,6 +529,20 @@ class TestExtensionCommands(unittest.TestCase):
                 mock.patch('shutil.which', return_value=None):
             with self.assertRaisesRegex(CLIError, 'tdnf package manager not found'):
                 _install_deps_for_psycopg2()
+
+    def test_install_psycopg2_deps_recognizes_azl4_without_dot_version(self):
+        # Regression test: VERSION_ID may be "4" (no dot) instead of "4.0"
+        with mock.patch('azure.cli.core.util.in_cloud_console', return_value=False), \
+                mock.patch('platform.system', return_value='Linux'), \
+                mock.patch('azure.cli.core.util.get_linux_distro', return_value=('Azure Linux', '4')), \
+                mock.patch.dict('os.environ', {'AZ_INSTALLER': 'RPM'}), \
+                mock.patch('shutil.which', side_effect=lambda cmd: '/usr/bin/tdnf' if cmd == 'tdnf' else None), \
+                mock.patch('os.geteuid', return_value=0, create=True), \
+                mock.patch('subprocess.call', return_value=0) as subprocess_call:
+            _install_deps_for_psycopg2()
+
+        azure_linux_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
+        subprocess_call.assert_any_call(['tdnf', 'install', '-y'] + azure_linux_packages)
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()
