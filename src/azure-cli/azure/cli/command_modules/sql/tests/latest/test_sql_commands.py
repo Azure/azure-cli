@@ -8159,8 +8159,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_mgmt(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
@@ -8168,7 +8168,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         database_name = 'CLI1'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8243,15 +8243,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_planned_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8310,15 +8310,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_forced_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8378,15 +8378,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_box_first_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
         partner_ag_name = 'AG_PS4'
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8454,8 +8454,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_error_handling(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
@@ -8463,7 +8463,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
         empty_databases = "[]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8592,7 +8592,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
             self.cmd(
                 'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
         except Exception as e:
-            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            expected_message = "A planned failover of Azure SQL Managed Instance link cannot be initiated from the secondary instance. Initiate failover from the primary instance for this link."
             if expected_message in str(e):
                 pass
             else:
