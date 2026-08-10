@@ -1,0 +1,92 @@
+# Linux tarball build jobs for the Homebrew Cask release.
+
+parameters:
+  - name: PythonVersion
+    type: string
+    default: '3.14'
+  - name: LinuxArm64Pool
+    type: string
+    default: 'pool-ubuntu-latest-arm64'
+  - name: LinuxX64Pool
+    type: string
+    default: 'pool-ubuntu-2204'
+  - name: condition
+    type: string
+    default: 'succeeded()'
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+- job: BuildLinuxCli
+  displayName: 'Linux | Build and verify CLI'
+  condition: ${{ parameters.condition }}
+  dependsOn: ${{ parameters.dependsOn }}
+  strategy:
+    matrix:
+      ARM64:
+        Architecture: 'arm64'
+        PoolName: ${{ parameters.LinuxArm64Pool }}
+      X64:
+        Architecture: 'x86_64'
+        PoolName: ${{ parameters.LinuxX64Pool }}
+  pool:
+    name: $(PoolName)
+  timeoutInMinutes: 60
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - bash: |
+      set -euo pipefail
+
+      brew install python@${{ parameters.PythonVersion }}
+      PYTHON_PATH="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      "$PYTHON_PATH" --version
+      echo "##vso[task.setvariable variable=PythonPath]$PYTHON_PATH"
+    displayName: 'Install Homebrew Python'
+
+  - bash: |
+      set -euo pipefail
+
+      ARCH="$(Architecture)"
+      OUTPUT_DIR="$(Build.ArtifactStagingDirectory)/cli-build"
+      "$(PythonPath)" scripts/release/macos/build_binary_tar_gz.py \
+        --platform-tag "linux-$ARCH" \
+        --output-dir "$OUTPUT_DIR"
+
+      SOURCE_TARBALL=$(find "$OUTPUT_DIR" -name "azure-cli-*-linux-$ARCH-nopython.tar.gz" -print -quit)
+      VERSION=$(basename "$SOURCE_TARBALL" | sed -E "s/^azure-cli-(.*)-linux-$ARCH-nopython\.tar\.gz$/\1/")
+      RELEASE_TARBALL="$OUTPUT_DIR/azure-cli-$VERSION-linux-$ARCH.tar.gz"
+      cp "$SOURCE_TARBALL" "$RELEASE_TARBALL"
+      sha256sum "$RELEASE_TARBALL" > "$RELEASE_TARBALL.sha256"
+      rm "$SOURCE_TARBALL" "$SOURCE_TARBALL.sha256"
+
+      echo "Release tarball: $RELEASE_TARBALL"
+      cat "$RELEASE_TARBALL.sha256"
+    displayName: 'Build release tarball'
+    env:
+      PYTHON_MAJOR_MINOR: ${{ parameters.PythonVersion }}
+
+  - bash: |
+      set -euo pipefail
+
+      ARCH="$(Architecture)"
+      TARBALL=$(find "$(Build.ArtifactStagingDirectory)/cli-build" -name "azure-cli-*-linux-$ARCH.tar.gz" -print -quit)
+      EXTRACT_DIR=$(mktemp -d)
+      trap 'rm -rf "$EXTRACT_DIR"' EXIT
+
+      tar -xzf "$TARBALL" -C "$EXTRACT_DIR"
+      export AZ_PYTHON="$(PythonPath)"
+      "$EXTRACT_DIR/bin/az" version
+    displayName: 'Smoke test release tarball'
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'Generate SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/cli-build
+
+  - publish: $(Build.ArtifactStagingDirectory)/cli-build
+    artifact: 'linux-cli-final-$(Architecture)'
+    displayName: 'Publish Linux CLI ($(Architecture))'

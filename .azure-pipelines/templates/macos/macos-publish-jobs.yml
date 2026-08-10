@@ -16,7 +16,8 @@
 #   - dependsOn: Jobs this depends on (typically test jobs)
 #
 # Requires:
-#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64, macos-cask-definition
+#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64,
+#     linux-cli-final-arm64, linux-cli-final-x86_64, macos-cask-definition
 #   - Repository resource: homebrewtap (for Homebrew cask updates)
 
 parameters:
@@ -79,6 +80,14 @@ jobs:
     - download: current
       artifact: 'macos-cli-signed-notarized-x86_64'
       displayName: 'Download signed tarball (Intel)'
+
+    - download: current
+      artifact: 'linux-cli-final-arm64'
+      displayName: 'Download Linux tarball (ARM64)'
+
+    - download: current
+      artifact: 'linux-cli-final-x86_64'
+      displayName: 'Download Linux tarball (x86_64)'
     
     - task: CopyFiles@2
       displayName: 'Copy ARM64 release files'
@@ -94,6 +103,26 @@ jobs:
       displayName: 'Copy Intel release files'
       inputs:
         SourceFolder: '$(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64'
+        Contents: |
+          azure-cli-*.tar.gz
+          azure-cli-*.tar.gz.sha256
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/release'
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: 'Copy Linux ARM64 release files'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/linux-cli-final-arm64'
+        Contents: |
+          azure-cli-*.tar.gz
+          azure-cli-*.tar.gz.sha256
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/release'
+        flattenFolders: true
+
+    - task: CopyFiles@2
+      displayName: 'Copy Linux x86_64 release files'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/linux-cli-final-x86_64'
         Contents: |
           azure-cli-*.tar.gz
           azure-cli-*.tar.gz.sha256
@@ -131,18 +160,19 @@ jobs:
         target: 'main'
         tagSource: 'userSpecifiedTag'
         tag: '$(ReleaseTag)'
-        title: 'Azure CLI $(AzureCliVersion) - macOS (Homebrew Python)'
+        title: 'Azure CLI $(AzureCliVersion) - Homebrew Cask'
         releaseNotesSource: 'inline'
         releaseNotesInline: |
-          ## Azure CLI $(AzureCliVersion) - macOS (Homebrew Python)
+          ## Azure CLI $(AzureCliVersion) - Homebrew Cask
           
           ### Available Architectures
           - **Apple Silicon (arm64)**: azure-cli-$(AzureCliVersion)-macos-arm64.tar.gz
           - **Intel (x86_64)**: azure-cli-$(AzureCliVersion)-macos-x86_64.tar.gz
+          - **Linux ARM64**: azure-cli-$(AzureCliVersion)-linux-arm64.tar.gz
+          - **Linux x86_64**: azure-cli-$(AzureCliVersion)-linux-x86_64.tar.gz
           
           ### Requirements
-          - macOS 11+ (Big Sur or later)
-          - Homebrew Python ${{ parameters.PythonVersion }}
+          - Homebrew Python ${{ parameters.PythonVersion }} on macOS or Linux
           
           ### Installation via Homebrew Cask
           ```bash

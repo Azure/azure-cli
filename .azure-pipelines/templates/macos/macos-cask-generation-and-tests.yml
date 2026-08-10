@@ -13,7 +13,8 @@
 #   - dependsOn: Jobs this depends on (typically CreateFinalTarball)
 #
 # Requires:
-#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64
+#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64,
+#     linux-cli-final-arm64, linux-cli-final-x86_64
 #
 # Produces:
 #   - Artifact: macos-cask-definition (contains azure-cli.rb with GitHub URLs)
@@ -72,6 +73,14 @@ jobs:
     artifact: 'macos-cli-signed-notarized-x86_64'
     displayName: 'Download signed tarball (Intel)'
 
+  - download: current
+    artifact: 'linux-cli-final-arm64'
+    displayName: 'Download Linux tarball (ARM64)'
+
+  - download: current
+    artifact: 'linux-cli-final-x86_64'
+    displayName: 'Download Linux tarball (x86_64)'
+
   - bash: |
       echo "=== Environment Info ($(Architecture)) ==="
       echo "HOMEBREW_CASK_OPTS: $HOMEBREW_CASK_OPTS"
@@ -101,18 +110,22 @@ jobs:
       # Get tarballs
       ARM64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-arm64 -name "azure-cli-*-macos-arm64.tar.gz" | head -1)
       X86_64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64 -name "azure-cli-*-macos-x86_64.tar.gz" | head -1)
+      ARM64_LINUX_TARBALL=$(find $(Pipeline.Workspace)/linux-cli-final-arm64 -name "azure-cli-*-linux-arm64.tar.gz" | head -1)
+      X86_64_LINUX_TARBALL=$(find $(Pipeline.Workspace)/linux-cli-final-x86_64 -name "azure-cli-*-linux-x86_64.tar.gz" | head -1)
       
       VERSION=$(basename "$ARM64_TARBALL" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-z0-9]+)?' | head -1)
       
-      ARM64_SHA256=$(cat ${ARM64_TARBALL}.sha256 | cut -d' ' -f1)
-      X86_64_SHA256=$(cat ${X86_64_TARBALL}.sha256 | cut -d' ' -f1)
+      ARM64_MACOS_SHA256=$(cat ${ARM64_TARBALL}.sha256 | cut -d' ' -f1)
+      X86_64_MACOS_SHA256=$(cat ${X86_64_TARBALL}.sha256 | cut -d' ' -f1)
+      ARM64_LINUX_SHA256=$(cat ${ARM64_LINUX_TARBALL}.sha256 | cut -d' ' -f1)
+      X86_64_LINUX_SHA256=$(cat ${X86_64_LINUX_TARBALL}.sha256 | cut -d' ' -f1)
       
       echo "=== Generating Cask using template ==="
       echo "Version: $VERSION"
       echo "ARM64 tarball: $ARM64_TARBALL"
-      echo "ARM64 SHA256: $ARM64_SHA256"
+      echo "macOS ARM64 SHA256: $ARM64_MACOS_SHA256"
       echo "x86_64 tarball: $X86_64_TARBALL"
-      echo "x86_64 SHA256: $X86_64_SHA256"
+      echo "macOS x86_64 SHA256: $X86_64_MACOS_SHA256"
       
       # Resolve repo root
       REPO_NAME="$(Build.Repository.Name)"
@@ -137,8 +150,10 @@ jobs:
       mkdir -p $(Pipeline.Workspace)/macos-cask-definition
       python3 "$REPO_ROOT/scripts/release/macos/cask_generate.py" \
         --version "$VERSION" \
-        --arm64-sha "$ARM64_SHA256" \
-        --x86-64-sha "$X86_64_SHA256" \
+        --arm64-macos-sha "$ARM64_MACOS_SHA256" \
+        --x86-64-macos-sha "$X86_64_MACOS_SHA256" \
+        --arm64-linux-sha "$ARM64_LINUX_SHA256" \
+        --x86-64-linux-sha "$X86_64_LINUX_SHA256" \
         --github-repo "${{ parameters.GitHubRepo }}" \
         --python-version "${{ parameters.PythonVersion }}" \
         --template "$REPO_ROOT/scripts/release/macos/templates/azure-cli.rb.in" \
