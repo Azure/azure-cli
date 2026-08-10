@@ -6,14 +6,14 @@
 """Generate the Homebrew cask from a template.
 
 Usage:
-    python3 scripts/release/macos/cask_generate.py \
+    python3 scripts/release/standalone/cask_generate.py \
         --version "2.x.y" \
         --arm64-macos-sha "<macos arm64 sha256>" \
         --x86-64-macos-sha "<macos x86_64 sha256>" \
         --arm64-linux-sha "<linux arm64 sha256>" \
         --x86-64-linux-sha "<linux x86_64 sha256>" \
         --github-repo "Azure/azure-cli" \
-        --template "scripts/release/macos/templates/azure-cli.rb.in" \
+        --template "scripts/release/standalone/templates/azure-cli.rb.in" \
         --output "azure-cli.rb"
 
 Environment variable fallbacks (used when a CLI flag is omitted):
@@ -25,7 +25,7 @@ import argparse
 import os
 from pathlib import Path
 
-DEFAULT_TEMPLATE = "scripts/release/macos/templates/azure-cli.rb.in"
+DEFAULT_TEMPLATE = "scripts/release/standalone/templates/azure-cli.rb.in"
 DEFAULT_OUTPUT = "azure-cli.rb"
 
 

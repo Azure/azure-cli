@@ -148,7 +148,7 @@ jobs:
       
       # Generate cask using template with GitHub URLs (for publishing)
       mkdir -p $(Pipeline.Workspace)/macos-cask-definition
-      python3 "$REPO_ROOT/scripts/release/macos/cask_generate.py" \
+      python3 "$REPO_ROOT/scripts/release/standalone/cask_generate.py" \
         --version "$VERSION" \
         --arm64-macos-sha "$ARM64_MACOS_SHA256" \
         --x86-64-macos-sha "$X86_64_MACOS_SHA256" \
@@ -156,7 +156,7 @@ jobs:
         --x86-64-linux-sha "$X86_64_LINUX_SHA256" \
         --github-repo "${{ parameters.GitHubRepo }}" \
         --python-version "${{ parameters.PythonVersion }}" \
-        --template "$REPO_ROOT/scripts/release/macos/templates/azure-cli.rb.in" \
+        --template "$REPO_ROOT/scripts/release/standalone/templates/azure-cli.rb.in" \
         --output "$(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb"
       
       echo "=== Generated Cask (GitHub URLs - for publishing) ==="

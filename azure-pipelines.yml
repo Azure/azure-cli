@@ -763,6 +763,14 @@ jobs:
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
+- template: .azure-pipelines/templates/linux/linux-build-jobs.yml
+  parameters:
+    PythonVersion: $(macos_cask_python_version)
+    LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+    LinuxX64Pool: ${{ variables.ubuntu_pool }}
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+    dependsOn: ['ExtractMetadata']
+
 # Phase 2: Sign and notarize via ESRP
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
@@ -784,7 +792,7 @@ jobs:
       PythonVersion: $(macos_cask_python_version)
       GitHubRepo: $(Build.Repository.Name)
       Debug: false
-      dependsOn: ['CreateFinalTarball']
+      dependsOn: ['CreateFinalTarball', 'BuildLinuxCli']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
