@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.88.0"
+VERSION = "2.89.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,14 +52,14 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.7.2',
+    'azure-appconfiguration~=1.8.0',
     'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=1.0.1',
-    'azure-keyvault-administration==4.8.0b1',
+    'azure-keyvault-administration==4.8.0b2',
     'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.12.0b2',
     'azure-keyvault-secrets==4.7.0',
@@ -75,12 +75,12 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=15.0.0b2',
+    'azure-mgmt-cognitiveservices~=15.0.0b4',
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
-    'azure-mgmt-containerregistry==15.1.0b1',
+    'azure-mgmt-containerregistry==15.1.0b2',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
-    'azure-mgmt-containerservice~=41.3.0',
+    'azure-mgmt-containerservice~=41.5.0',
     'azure-mgmt-cosmosdb==9.9.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -106,9 +106,9 @@ DEPENDENCIES = [
     'azure-mgmt-postgresqlflexibleservers==3.0.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
-    'azure-mgmt-mysqlflexibleservers==1.1.0b2',
+    'azure-mgmt-mysqlflexibleservers==1.1.0b3',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
-    'azure-mgmt-recoveryservices~=4.0.0',
+    'azure-mgmt-recoveryservices~=4.1.0',
     'azure-mgmt-redhatopenshift~=3.0.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==24.0.0',

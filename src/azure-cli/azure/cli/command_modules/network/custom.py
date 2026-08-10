@@ -5209,7 +5209,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
                      allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
-                     protection_mode=None, ddos_protection_plan=None):
+                     protection_mode=None, ddos_protection_plan=None, ddos_custom_policy=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -5266,6 +5266,16 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['ddos_protection_mode'] = protection_mode
     if ddos_protection_plan:
         public_ip_args['ddos_protection_plan'] = ddos_protection_plan
+    if ddos_custom_policy:
+        if not is_valid_resource_id(ddos_custom_policy):
+            ddos_custom_policy = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='ddosCustomPolicies',
+                name=ddos_custom_policy,
+            )
+        public_ip_args['ddos_custom_policy'] = {'id': ddos_custom_policy}
 
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
@@ -5320,6 +5330,8 @@ class PublicIPUpdate(_PublicIPUpdate):
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
             instance.properties.ddos_settings.ddos_protection_plan = None
+        if not has_value(instance.properties.ddos_settings.ddos_custom_policy.id):
+            instance.properties.ddos_settings.ddos_custom_policy = None
 
 
 class PublicIpPrefixCreate(_PublicIpPrefixCreate):

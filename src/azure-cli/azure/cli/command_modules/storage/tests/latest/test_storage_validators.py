@@ -20,7 +20,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            get_source_file_or_blob_service_client_track2,
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services, as_user_validator,
-                                                           get_not_none_validator)
+                                                           get_not_none_validator, validate_upload_blob)
 
 
 class MockCLI(CLI):
@@ -182,6 +182,19 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         validate_arg(cmd, Namespace(arg=0))
         validate_arg(cmd, Namespace(arg=False))
+
+    def test_validate_upload_blob(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        validate_upload_blob(Namespace(file_path=None, data=''))
+        validate_upload_blob(Namespace(file_path=None, data='test data'))
+        validate_upload_blob(Namespace(file_path='test.txt', data=None))
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'please only specify one of --file and --data'):
+            validate_upload_blob(Namespace(file_path='test.txt', data=''))
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'please specify one of --file and --data'):
+            validate_upload_blob(Namespace(file_path=None, data=None))
 
 
 class TestEncryptionValidators(unittest.TestCase):

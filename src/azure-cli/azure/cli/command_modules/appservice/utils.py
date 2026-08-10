@@ -126,7 +126,7 @@ def get_sku_name(tier):
 
 def is_sku_tier_enabled_for_managed_instance(sku_tier):
     sku_tier = sku_tier.upper()
-    enabled_skus = ['PREMIUMV4', 'PREMIUMMV4']
+    enabled_skus = ['PREMIUM0V3', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUMV4', 'PREMIUMMV4']
     return sku_tier in enabled_skus
 
 
