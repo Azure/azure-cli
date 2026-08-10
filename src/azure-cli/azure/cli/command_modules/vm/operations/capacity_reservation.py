@@ -5,7 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from azure.cli.core.aaz import register_command, has_value, AAZBoolArg, AAZDictType, AAZIntType
+from azure.cli.core.aaz import register_command, has_value, AAZBoolArg
 from ..aaz.latest.capacity.reservation import Update as _CapacityReservationUpdate, Show as _CapacityReservationShow
 
 logger = get_logger(__name__)
@@ -45,13 +45,6 @@ class CapacityReservationShow(_CapacityReservationShow):
         az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup --instance-view
     """
 
-    _aaz_info = {
-        "version": "2026-04-01",
-        "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2026-04-01"],
-        ]
-    }
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -68,27 +61,3 @@ class CapacityReservationShow(_CapacityReservationShow):
         args = self.ctx.args
         if has_value(args.instance_view) and args.instance_view.to_serialized_data() is True:
             args.expand = 'instanceView'
-
-    class CapacityReservationsGet(_CapacityReservationShow.CapacityReservationsGet):
-        _schema_on_200 = None
-
-        @property
-        def query_parameters(self):
-            parameters = super().query_parameters
-            parameters.update(self.serialize_query_param(
-                "api-version", "2026-04-01", required=True))
-            return parameters
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = super()._build_schema_on_200()
-            utilization_info = cls._schema_on_200.properties.instance_view.utilization_info
-            utilization_info.used_reserved_count_by_subscription = AAZDictType(
-                serialized_name="usedReservedCountBySubscription",
-                flags={"read_only": True},
-            )
-            utilization_info.used_reserved_count_by_subscription.Element = AAZIntType()
-            return cls._schema_on_200
