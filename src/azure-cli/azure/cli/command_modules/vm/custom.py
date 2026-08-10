@@ -6336,14 +6336,15 @@ def gallery_application_version_update(client,
 
 
 def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None, sharing_profile=None):
+                                      tags=None, zones=None, sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
         'location': location,
         'tags': tags,
-        'zones': zones
+        'zones': zones,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:
@@ -6356,12 +6357,13 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
 
 
 def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
-                                      sharing_profile=None):
+                                      sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
-        'tags': tags
+        'tags': tags,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:

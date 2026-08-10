@@ -2932,6 +2932,8 @@ examples:
     text: |
         az capacity reservation group create -n ReservationGroupName -l centraluseuap \\
             -g MyResourceGroup --tags key=val --zones 1 2
+  - name: Create an open capacity reservation group.
+    text: az capacity reservation group create -n ReservationGroupName -g MyResourceGroup --reservation-type Open
 """
 
 helps['capacity reservation group update'] = """
@@ -2940,6 +2942,8 @@ short-summary: Update capacity reservation group.
 examples:
   - name: Update a capacity reservation group.
     text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
+  - name: Update an open capacity reservation group.
+    text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --reservation-type Open
 """
 
 helps['capacity reservation group show'] = """
