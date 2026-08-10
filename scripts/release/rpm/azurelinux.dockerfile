@@ -29,7 +29,7 @@ RUN --mount=type=secret,id=PIP_INDEX_URL export PIP_INDEX_URL=$(cat /run/secrets
     dos2unix ./scripts/release/rpm/azure-cli.spec && \
     REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=python3 PYTHON_CMD=python3 \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
-    RPM_PATH=$(find /usr/src/azl/RPMS /root/rpmbuild/RPMS -type f -name "azure-cli-${cli_version}-1.*.rpm" 2>/dev/null | head -n 1) || RPM_PATH="" && \
+    RPM_PATH=$(find /usr/src/azl/RPMS /root/rpmbuild/RPMS -type f -name "azure-cli-${cli_version}-1.*.rpm" 2>/dev/null | head -n 1) && \
     if [ -z "$RPM_PATH" ]; then echo "ERROR: No RPM found in expected directories. Contents:"; ls -la /usr/src/azl/RPMS 2>/dev/null || echo "  /usr/src/azl/RPMS not found"; ls -la /root/rpmbuild/RPMS 2>/dev/null || echo "  /root/rpmbuild/RPMS not found"; exit 1; fi && \
     cp "$RPM_PATH" /azure-cli-dev.rpm && \
     mkdir /out && cp "$RPM_PATH" /out/
