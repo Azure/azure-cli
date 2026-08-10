@@ -216,7 +216,8 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements, too-ma
             ])
     elif system == 'Linux':
         distname, distversion = get_linux_distro()
-        distname = distname.lower().strip()
+        distname = (distname or '').lower().strip()
+        distversion = distversion or ''
         is_azure_linux_4 = 'azure linux' in distname and distversion.startswith('4.')
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -257,7 +258,7 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements, too-ma
                     rpm_install_cmd.insert(0, 'sudo')
                 logger.debug("Install dependencies with '%s'", " ".join(rpm_install_cmd))
                 logger.warning(
-                    'This extension depends on %s and they will be installed first if not exist.',
+                    'This extension depends on %s and they will be installed first if not present.',
                     ' '.join(rpm_packages)
                 )
                 exit_code = subprocess.call(rpm_install_cmd)
