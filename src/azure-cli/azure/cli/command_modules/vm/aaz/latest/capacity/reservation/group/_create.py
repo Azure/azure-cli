@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2026-04-01"],
         ]
     }
 
@@ -78,6 +78,12 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.reservation_type = AAZStrArg(
+            options=["--reservation-type"],
+            arg_group="Properties",
+            help="Indicates the type of capacity reservation. Allowed values are 'Block' for block capacity reservations that enable a VM to consume capacity only from this capacity block when it is associated using a capacity reservation group, 'Targeted' for reservations that enable a VM to consume capacity from an explicitly associated capacity reservation group and fall back to the publicly available capacity if the reservation is full, and 'Open' for reservations that a VM consumes when it is eligible from an implicitly associated capacity reservation group with the matching VM size and zone without associating that capacity reservation group and fall back to the publicly available capacity if the reservation is full. The reservation type is immutable and cannot be changed after the capacity reservation group is created.",
+            enum={"Block": "Block", "Open": "Open", "Targeted": "Targeted"},
+        )
         _args_schema.sharing_profile = AAZObjectArg(
             options=["--sharing-profile"],
             arg_group="Properties",
@@ -165,7 +171,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -197,6 +203,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("reservationType", AAZStrType, ".reservation_type")
                 properties.set_prop("sharingProfile", AAZObjectType, ".sharing_profile")
 
             sharing_profile = _builder.get(".properties.sharingProfile")
@@ -270,6 +277,9 @@ class Create(AAZCommand):
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
+            properties.reservation_type = AAZStrType(
+                serialized_name="reservationType",
+            )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",
             )
@@ -321,10 +331,17 @@ class Create(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
+
+            used_reserved_count_by_subscription = cls._schema_on_200_201.properties.instance_view.capacity_reservations.Element.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
 
             virtual_machines_allocated = cls._schema_on_200_201.properties.instance_view.capacity_reservations.Element.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
