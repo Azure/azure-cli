@@ -198,6 +198,7 @@ jobs:
       
       # Create a temporary tap (named distinctly to avoid conflict with real Azure/homebrew-azure-cli)
       brew tap-new test/azure-cli-pipeline-test
+      brew trust test/azure-cli-pipeline-test
       
       # Get tap path
       TAP_PATH="$(brew --repository)/Library/Taps/test/homebrew-azure-cli-pipeline-test"
@@ -225,6 +226,11 @@ jobs:
       set -ev
       
       echo "=== Installing Cask from Temporary Tap ($(Architecture)) ==="
+
+      # Ensure neither the formula nor an existing cask can provide az.
+      brew uninstall azure-cli 2>/dev/null || true
+      brew uninstall --cask azure-cli 2>/dev/null || true
+      hash -r
       
       # Ensure Python is available
       if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
@@ -237,6 +243,8 @@ jobs:
       
       # Verify installation
       echo "=== Verifying Installation ==="
+      brew info --cask azure-cli
+      brew info --cask azure-cli | grep -F "$TAP_PATH/Casks/azure-cli.rb"
       which az
       az --version
       
@@ -315,6 +323,7 @@ jobs:
       git config --global user.email "test@pipeline.local"
       git config --global user.name "Test Pipeline"
       brew tap-new test/azure-cli-pipeline-test
+      brew trust test/azure-cli-pipeline-test
       TAP_PATH="$(brew --repository)/Library/Taps/test/homebrew-azure-cli-pipeline-test"
       mkdir -p "$TAP_PATH/Casks"
       cp "$(Pipeline.Workspace)/cask-staging/azure-cli.rb" "$TAP_PATH/Casks/"
@@ -324,6 +333,8 @@ jobs:
 
       brew install python@${{ parameters.PythonVersion }}
       brew install --cask test/azure-cli-pipeline-test/azure-cli
+      brew info --cask azure-cli
+      brew info --cask azure-cli | grep -F "$TAP_PATH/Casks/azure-cli.rb"
       az version
     displayName: 'Install and test Linux cask'
 
