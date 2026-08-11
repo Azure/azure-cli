@@ -289,6 +289,8 @@ jobs:
   steps:
   - checkout: none
 
+  - template: ../linux/setup-homebrew.yml
+
   - download: current
     artifact: 'cask-definition'
     displayName: 'Download cask definition'
@@ -423,6 +425,8 @@ jobs:
 
   steps:
   - checkout: none
+
+  - template: ../linux/setup-homebrew.yml
 
   - download: current
     artifact: 'linux-cli-final-$(Architecture)'
