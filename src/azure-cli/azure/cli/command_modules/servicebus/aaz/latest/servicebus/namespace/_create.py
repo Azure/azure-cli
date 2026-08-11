@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2026-01-01"],
         ]
     }
 
@@ -52,6 +52,10 @@ class Create(AAZCommand):
             options=["-n", "--name", "--namespace-name"],
             help="The namespace name.",
             required=True,
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=6,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -85,15 +89,28 @@ class Create(AAZCommand):
         )
 
         identity = cls._args_schema.identity
+        identity.mi_system_assigned = AAZStrArg(
+            options=["system-assigned", "mi-system-assigned"],
+            help="Set the system managed identity.",
+            blank="True",
+        )
         identity.type = AAZStrArg(
             options=["type"],
             help="Type of managed service identity.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
+        identity.mi_user_assigned = AAZListArg(
+            options=["user-assigned", "mi-user-assigned"],
+            help="Set the user managed identities.",
+            blank=[],
+        )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="Properties for User Assigned Identities",
         )
+
+        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -143,11 +160,21 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Geo Data Replication settings for the namespace",
         )
+        _args_schema.ip_address_type = AAZStrArg(
+            options=["--ip-address-type"],
+            arg_group="Properties",
+            help="The IP address type for the namespace. Determines whether the namespace supports IPv4 only or both IPv4 and IPv6 (dual stack).",
+            enum={"DualStack": "DualStack", "IPv4": "IPv4"},
+        )
         _args_schema.minimum_tls_version = AAZStrArg(
             options=["--minimum-tls-version"],
             arg_group="Properties",
             help="The minimum TLS version for the cluster to support, e.g. '1.2'",
-            enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2"},
+            enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2", "1.3": "1.3"},
+        )
+        _args_schema.platform_capabilities = AAZObjectArg(
+            options=["--platform-capabilities"],
+            arg_group="Properties",
         )
         _args_schema.premium_messaging_partitions = AAZIntArg(
             options=["--premium-partitions", "--premium-messaging-partitions"],
@@ -215,7 +242,7 @@ class Create(AAZCommand):
             help="A list of regions where replicas of the namespace are maintained.",
         )
         geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntArg(
-            options=["max-lag", "max-replication-lag-duration-in-seconds"],
+            options=["max-replication-lag-duration-in-seconds", "--max-lag"],
             help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed. The allowed values are 0 and 5 minutes to 1 day.",
         )
 
@@ -223,10 +250,6 @@ class Create(AAZCommand):
         locations.Element = AAZObjectArg()
 
         _element = cls._args_schema.geo_data_replication.locations.Element
-        _element.cluster_arm_id = AAZStrArg(
-            options=["cluster-arm-id"],
-            help="Optional property that denotes the ARM ID of the Cluster. This is required, if a namespace replica should be placed in a Dedicated Event Hub Cluster",
-        )
         _element.location_name = AAZStrArg(
             options=["location-name"],
             help="Azure regions where a replica of the namespace is maintained",
@@ -235,6 +258,18 @@ class Create(AAZCommand):
             options=["role-type"],
             help="GeoDR Role Types",
             enum={"Primary": "Primary", "Secondary": "Secondary"},
+        )
+
+        platform_capabilities = cls._args_schema.platform_capabilities
+        platform_capabilities.confidential_compute = AAZObjectArg(
+            options=["confidential-compute"],
+        )
+
+        confidential_compute = cls._args_schema.platform_capabilities.confidential_compute
+        confidential_compute.mode = AAZStrArg(
+            options=["mode"],
+            help="Setting to Enable or Disable Confidential Compute",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -302,7 +337,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -311,7 +346,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -354,7 +389,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -379,7 +414,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -389,10 +424,16 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".type")
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -400,7 +441,9 @@ class Create(AAZCommand):
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("geoDataReplication", AAZObjectType, ".geo_data_replication")
+                properties.set_prop("ipAddressType", AAZStrType, ".ip_address_type")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
+                properties.set_prop("platformCapabilities", AAZObjectType, ".platform_capabilities")
                 properties.set_prop("premiumMessagingPartitions", AAZIntType, ".premium_messaging_partitions")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -438,9 +481,16 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.geoDataReplication.locations[]")
             if _elements is not None:
-                _elements.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 _elements.set_prop("locationName", AAZStrType, ".location_name")
                 _elements.set_prop("roleType", AAZStrType, ".role_type")
+
+            platform_capabilities = _builder.get(".properties.platformCapabilities")
+            if platform_capabilities is not None:
+                platform_capabilities.set_prop("confidentialCompute", AAZObjectType, ".confidential_compute")
+
+            confidential_compute = _builder.get(".properties.platformCapabilities.confidentialCompute")
+            if confidential_compute is not None:
+                confidential_compute.set_prop("mode", AAZStrType, ".mode")
 
             private_endpoint_connections = _builder.get(".properties.privateEndpointConnections")
             if private_endpoint_connections is not None:
@@ -498,7 +548,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -561,12 +611,18 @@ class Create(AAZCommand):
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
             )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
+            )
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.premium_messaging_partitions = AAZIntType(
                 serialized_name="premiumMessagingPartitions",
@@ -637,15 +693,20 @@ class Create(AAZCommand):
             locations.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.geo_data_replication.locations.Element
-            _element.cluster_arm_id = AAZStrType(
-                serialized_name="clusterArmId",
-            )
             _element.location_name = AAZStrType(
                 serialized_name="locationName",
             )
             _element.role_type = AAZStrType(
                 serialized_name="roleType",
             )
+
+            platform_capabilities = cls._schema_on_200_201.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200_201.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200_201.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()
