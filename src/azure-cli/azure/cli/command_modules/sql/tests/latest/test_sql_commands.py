@@ -8688,9 +8688,8 @@ class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
             JMESPathCheck('partnerEndpoint', partner_endpoint),
         ]).get_output_in_json()
 
-        link_id = link['id']
         self.kwargs.update({
-            'link_id': link_id + '/distributedAvailabilityGroups/' + link_name
+            'link_id': link['id']
         })
 
         # show command with --ids parameter
@@ -8715,7 +8714,7 @@ class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
 
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
-                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+                 checks=[JMESPathCheck('length(@)', 0)])
 
     @AllowLargeResponse()
     @record_only()
@@ -8797,7 +8796,7 @@ class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
 
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
-                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+                 checks=[JMESPathCheck('length(@)', 0)])
 
     @AllowLargeResponse()
     @record_only()
@@ -8894,7 +8893,7 @@ class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
 
         # list 0 instance links
         self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
-                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+                 checks=[JMESPathCheck('length(@)', 0)])
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
