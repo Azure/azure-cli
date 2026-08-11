@@ -77,10 +77,11 @@ jobs:
       ARCH="$(Architecture)"
       TARBALL=$(find "$(Build.ArtifactStagingDirectory)/cli-build" -name "azure-cli-*-linux-$ARCH.tar.gz" -print -quit)
       EXTRACT_DIR=$(mktemp -d)
-      trap 'rm -rf "$EXTRACT_DIR"' EXIT
+      trap 'rm -rf "$EXTRACT_DIR" || true' EXIT
 
       tar -xzf "$TARBALL" -C "$EXTRACT_DIR"
       export AZ_PYTHON="$(PythonPath)"
+      export AZURE_CORE_COLLECT_TELEMETRY=False
       "$EXTRACT_DIR/bin/az" version
     displayName: 'Smoke test release tarball'
 
