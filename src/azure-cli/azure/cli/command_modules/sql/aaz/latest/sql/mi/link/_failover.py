@@ -248,6 +248,9 @@ class Failover(AAZCommand):
             properties.instance_link_role = AAZStrType(
                 serialized_name="instanceLinkRole",
             )
+            properties.link_mode = AAZStrType(
+                serialized_name="linkMode",
+            )
             properties.partner_availability_group_name = AAZStrType(
                 serialized_name="partnerAvailabilityGroupName",
             )

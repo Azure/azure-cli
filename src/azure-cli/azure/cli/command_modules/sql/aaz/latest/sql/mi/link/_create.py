@@ -84,6 +84,12 @@ class Create(AAZCommand):
             help="Managed instance side link role",
             enum={"Primary": "Primary", "Secondary": "Secondary"},
         )
+        _args_schema.link_mode = AAZStrArg(
+            options=["--link-mode"],
+            arg_group="Properties",
+            help="Specifies whether the link operates in single-database or multi-database mode.",
+            enum={"MultiDatabase": "MultiDatabase", "SingleDatabase": "SingleDatabase"},
+        )
         _args_schema.partner_availability_group_name = AAZStrArg(
             options=["--partner-ag-name", "--partner-availability-group-name"],
             arg_group="Properties",
@@ -230,6 +236,7 @@ class Create(AAZCommand):
                 properties.set_prop("failoverMode", AAZStrType, ".failover_mode")
                 properties.set_prop("instanceAvailabilityGroupName", AAZStrType, ".instance_availability_group_name")
                 properties.set_prop("instanceLinkRole", AAZStrType, ".instance_link_role")
+                properties.set_prop("linkMode", AAZStrType, ".link_mode")
                 properties.set_prop("partnerAvailabilityGroupName", AAZStrType, ".partner_availability_group_name")
                 properties.set_prop("partnerEndpoint", AAZStrType, ".partner_endpoint")
                 properties.set_prop("seedingMode", AAZStrType, ".seeding_mode")
@@ -293,6 +300,9 @@ class Create(AAZCommand):
             )
             properties.instance_link_role = AAZStrType(
                 serialized_name="instanceLinkRole",
+            )
+            properties.link_mode = AAZStrType(
+                serialized_name="linkMode",
             )
             properties.partner_availability_group_name = AAZStrType(
                 serialized_name="partnerAvailabilityGroupName",
