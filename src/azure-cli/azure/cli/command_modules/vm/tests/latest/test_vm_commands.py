@@ -13253,6 +13253,82 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='westus')
+    def test_open_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_open_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_open_reservation_', 40),
+            'vm': self.create_random_name('cli-open-vm-', 20),
+            'sku': 'Standard_DS1_v2',
+            'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} '
+                 '--reservation-type Targeted',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('reservationType', 'Targeted')
+                 ])
+
+        self.cmd('capacity reservation group update -n {reservation_group} -g {rg} --reservation-type Open',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('reservationType', 'Open')
+                 ])
+
+        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg}')
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --reservation-type Open',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('reservationType', 'Targeted')
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 1),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('vm create -g {rg} -n {vm} --image {image} --size {sku} '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --nsg-rule None '
+                 '--disable-capacity-reservation-assignment true')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment false', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', False)
+        ])
+        self.cmd('vm start -g {rg} -n {vm}')
+
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('instanceView.capacityReservationType', 'Open')
+        ])
+
+        utilization = self.cmd(
+            'capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} --instance-view',
+            checks=[
+                self.exists('instanceView.utilizationInfo.usedReservedCountBySubscription')
+            ]).get_output_in_json()['instanceView']['utilizationInfo']['usedReservedCountBySubscription']
+        self.assertEqual(1, len(utilization))
+        self.assertEqual(1, next(iter(utilization.values())))
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment true', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
+
     @record_only()  # Some special subscriptions can test it.
     @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
     def test_capacity_reservation_sharing_profile(self, resource_group):
