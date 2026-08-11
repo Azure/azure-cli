@@ -1159,6 +1159,9 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VM that is not associated with any capacity reservation.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204 --disable-capacity-reservation-assignment true
 """
 
 helps['vm diagnostics'] = """
@@ -2147,6 +2150,8 @@ examples:
         az vm deallocate -n name -g group
         az vm update -n name -g group --host-group my-host-group
         az vm start -n name -g group
+  - name: Opt out a VM from being associated with any capacity reservation.
+    text: az vm update -n name -g group --disable-capacity-reservation-assignment true
 """
 
 helps['vm user'] = """
