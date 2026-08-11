@@ -12,8 +12,8 @@ from copy import deepcopy
 from unittest import mock
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
-                                      _transform_subscription_for_multiapi,
-                                      _TENANT_LEVEL_ACCOUNT_NAME)
+                                     _transform_subscription_for_multiapi,
+                                     _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.azclierror import AuthenticationError
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
@@ -75,10 +75,12 @@ credential_mock = MsalCredentialStub()
 class CloudShellCredentialStub:
     def __init__(self):
         self.acquire_token_scopes = None
+        self.acquire_token_data = None
         super().__init__()
 
     def acquire_token(self, scopes, **kwargs):
         self.acquire_token_scopes = scopes
+        self.acquire_token_data = kwargs.get('data')
         return {
             'access_token': TestProfile.test_cloud_shell_access_token,
             'token_type': 'Bearer',
@@ -1361,15 +1363,16 @@ class TestProfile(unittest.TestCase):
         profile._set_subscriptions(consolidated)
 
         with self.assertRaisesRegex(AuthenticationError,
-                                    "VM SSH currently doesn't support managed identity or Cloud Shell."):
+                                    "VM SSH currently doesn't support managed identity."):
             profile.get_msal_token(['https://pas.windows.net/CheckMyAccess/Linux/.default'],
                                    {'token_type': 'ssh-cert'})
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
     @mock.patch('azure.cli.core.auth.msal_credentials.CloudShellCredential', autospec=True)
-    def test_get_msal_token_cloud_shell_unsupported(self, cloud_shell_credential_mock, mock_in_cloud_console):
+    def test_get_msal_token_cloud_shell(self, cloud_shell_credential_mock, mock_in_cloud_console):
         mock_in_cloud_console.return_value = True
-        cloud_shell_credential_mock.return_value = CloudShellCredentialStub()
+        credential_stub = CloudShellCredentialStub()
+        cloud_shell_credential_mock.return_value = credential_stub
 
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
@@ -1378,14 +1381,19 @@ class TestProfile(unittest.TestCase):
                                                     self.display_name1, self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(self.user1,
                                                      [cloud_shell_subscription],
-                                                     True)
+                                                     False)
         consolidated[0]['user']['cloudShellID'] = True
         profile._set_subscriptions(consolidated)
 
-        with self.assertRaisesRegex(AuthenticationError,
-                                    "VM SSH currently doesn't support managed identity or Cloud Shell."):
-            profile.get_msal_token(['https://pas.windows.net/CheckMyAccess/Linux/.default'],
-                                   {'token_type': 'ssh-cert'})
+        scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
+        data = {'token_type': 'ssh-cert', 'key_id': 'test_key_id', 'req_cnf': 'test_req_cnf'}
+        _, certificate_string = profile.get_msal_token(scopes, data)
+
+        # The certificate request must reach the credential intact, since dropping `data` is what
+        # turns the SSH certificate into an ordinary access token.
+        assert credential_stub.acquire_token_scopes == scopes
+        assert credential_stub.acquire_token_data == data
+        assert certificate_string == TestProfile.test_cloud_shell_access_token
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_service_principal')
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
