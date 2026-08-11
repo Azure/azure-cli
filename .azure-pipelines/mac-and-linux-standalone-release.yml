@@ -78,6 +78,7 @@ variables:
   - template: templates/variables.yml
   - ${{ if eq(variables['System.TeamProject'], 'release') }}:
     - group: 'AME ESRP Variable Group'
+    - group: 'esrp-signing-codes'
   
   - name: GitHubRepo
     value: ${{ parameters.GitHubRepo }}
