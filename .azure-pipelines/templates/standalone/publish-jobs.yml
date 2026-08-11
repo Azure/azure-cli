@@ -1,4 +1,4 @@
-# macOS Publish Jobs Template
+# Standalone Publish Jobs Template
 #
 # Purpose: Publish signed tarballs to GitHub and update Homebrew cask
 # Usage: Called after test jobs pass
@@ -11,13 +11,15 @@
 #   - HomebrewTapRepo: Homebrew tap repository
 #   - MacosArm64Image: VM image for ARM64 tests
 #   - MacosIntelImage: VM image for Intel tests
+#   - LinuxArm64Pool: pool for ARM64 Linux tests
+#   - LinuxX64Pool: pool for x86_64 Linux tests
 #   - PythonVersion: Homebrew Python version for testing
 #   - Debug: Enable debug diagnostics
 #   - dependsOn: Jobs this depends on (typically test jobs)
 #
 # Requires:
 #   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64,
-#     linux-cli-final-arm64, linux-cli-final-x86_64, macos-cask-definition
+#     linux-cli-final-arm64, linux-cli-final-x86_64, cask-definition
 #   - Repository resource: homebrewtap (for Homebrew cask updates)
 
 parameters:
@@ -45,6 +47,12 @@ parameters:
   - name: MacosIntelImage
     type: string
     default: 'macos-15'
+  - name: LinuxArm64Pool
+    type: string
+    default: 'pool-ubuntu-latest-arm64'
+  - name: LinuxX64Pool
+    type: string
+    default: 'pool-ubuntu-2204'
   - name: PythonVersion
     type: string
     default: '3.14'
@@ -56,7 +64,7 @@ parameters:
     default: 'succeeded()'
   - name: dependsOn
     type: object
-    default: ['TestTempTapCask', 'TestOfflineInstall']
+    default: ['TestMacOSTempTapCask', 'TestLinuxTempTapCask', 'TestMacOSOfflineInstall', 'TestLinuxOfflineInstall']
 
 jobs:
 # ============================================================================
@@ -64,7 +72,7 @@ jobs:
 # ============================================================================
 - ${{ if eq(parameters.PublishToGitHub, true) }}:
   - job: CreateGitHubRelease
-    displayName: 'macOS | Create GitHub Release'
+    displayName: 'Standalone | Create GitHub Release'
     dependsOn: ${{ parameters.dependsOn }}
     condition: succeeded()
     pool:
@@ -187,7 +195,7 @@ jobs:
 # ============================================================================
 - ${{ if eq(parameters.UpdateHomebrew, true) }}:
   - job: UpdateHomebrewCask
-    displayName: 'macOS | Update Homebrew Cask'
+    displayName: 'Standalone | Update Homebrew Cask'
     dependsOn:
     - ${{ parameters.dependsOn }}
     - ${{ if eq(parameters.PublishToGitHub, true) }}:
@@ -202,7 +210,7 @@ jobs:
       path: homebrew-tap
     
     - download: current
-      artifact: 'macos-cask-definition'
+      artifact: 'cask-definition'
       displayName: 'Download cask definition'
     
     - bash: |
@@ -221,7 +229,7 @@ jobs:
         mkdir -p "$CASK_DIR"
         
         # Copy the pre-generated cask from artifact
-        cp $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb "$CASK_DIR/azure-cli.rb"
+        cp $(Pipeline.Workspace)/cask-definition/azure-cli.rb "$CASK_DIR/azure-cli.rb"
         
         echo "=== Cask Definition ==="
         cat "$CASK_DIR/azure-cli.rb"
@@ -304,11 +312,41 @@ jobs:
         brew uninstall --cask azure-cli
       displayName: 'Test published cask install'
 
+  - job: TestPublishedLinuxCask
+    displayName: 'Linux | Test Published Cask'
+    dependsOn: UpdateHomebrewCask
+    condition: succeeded()
+    strategy:
+      matrix:
+        ARM64:
+          Architecture: 'arm64'
+          PoolName: ${{ parameters.LinuxArm64Pool }}
+        X64:
+          Architecture: 'x86_64'
+          PoolName: ${{ parameters.LinuxX64Pool }}
+    pool:
+      name: $(PoolName)
+
+    steps:
+    - checkout: none
+
+    - bash: |
+        set -euo pipefail
+
+        brew uninstall azure-cli 2>/dev/null || true
+        brew uninstall --cask azure-cli 2>/dev/null || true
+        brew install python@${{ parameters.PythonVersion }}
+        brew tap ${{ parameters.HomebrewTapRepo }}
+        brew install --cask azure-cli
+        az version
+        brew uninstall --cask azure-cli
+      displayName: 'Test published Linux cask install'
+
 # ============================================================================
 # JOB: PRINT SUMMARY
 # ============================================================================
 - job: PrintSummary
-  displayName: 'macOS | Print Summary'
+  displayName: 'Standalone | Print Summary'
   dependsOn:
   - ${{ parameters.dependsOn }}
   - ${{ if eq(parameters.PublishToGitHub, true) }}:
@@ -317,6 +355,7 @@ jobs:
     - UpdateHomebrewCask
   - ${{ if and(eq(parameters.TestAfterPublish, true), eq(parameters.UpdateHomebrew, true)) }}:
     - TestPublishedCask
+    - TestPublishedLinuxCask
   condition: always()
   pool:
     vmImage: 'ubuntu-latest'
@@ -326,7 +365,7 @@ jobs:
   
   - bash: |
       echo "╔══════════════════════════════════════════════════════════════════╗"
-      echo "║      AZURE CLI MACOS PUBLISH SUMMARY                             ║"
+      echo "║    AZURE CLI STANDALONE PUBLISH SUMMARY                          ║"
       echo "╠══════════════════════════════════════════════════════════════════╣"
       echo "║ Architectures:  ARM64 (Apple Silicon) + x86_64 (Intel)           ║"
       echo "║ GitHub Release: ${{ parameters.PublishToGitHub }}                                           ║"
@@ -337,6 +376,8 @@ jobs:
       echo "╠══════════════════════════════════════════════════════════════════╣"
       echo "║ • macos-cli-signed-notarized-arm64 (tarballs)                          ║"
       echo "║ • macos-cli-signed-notarized-x86_64 (tarballs)                         ║"
-      echo "║ • macos-cask-definition (azure-cli.rb)                                 ║"
+      echo "║ • linux-cli-final-arm64 (tarballs)                                     ║"
+      echo "║ • linux-cli-final-x86_64 (tarballs)                                    ║"
+      echo "║ • cask-definition (azure-cli.rb)                                       ║"
       echo "╚══════════════════════════════════════════════════════════════════╝"
     displayName: 'Print Summary'
