@@ -8,7 +8,6 @@
 #   - UpdateHomebrew: Whether to update Homebrew cask
 #   - TestAfterPublish: Whether to test installation after publishing
 #   - GitHubRepo: GitHub repository (owner/repo)
-#   - GitHubTargetBranch: Branch or commit to tag for the release
 #   - HomebrewTapRepo: Homebrew tap repository
 #   - MacosArm64Image: VM image for ARM64 tests
 #   - MacosIntelImage: VM image for Intel tests
@@ -36,9 +35,6 @@ parameters:
   - name: GitHubRepo
     type: string
     default: ''
-  - name: GitHubTargetBranch
-    type: string
-    default: 'main'
   - name: GitHubServiceConnection
     type: string
     default: 'Azure'
@@ -169,7 +165,7 @@ jobs:
         gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
         repositoryName: '${{ parameters.GitHubRepo }}'
         action: 'create'
-        target: '${{ parameters.GitHubTargetBranch }}'
+        target: 'main'
         tagSource: 'userSpecifiedTag'
         tag: '$(ReleaseTag)'
         title: 'Azure CLI $(AzureCliVersion) - Homebrew Cask'
