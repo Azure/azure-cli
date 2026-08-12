@@ -2096,7 +2096,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     rule_group_override = {
         "rule_group_name": rule_group_name,
         "rules": managed_rule_overrides
-    } if managed_rule_overrides else None
+    } if rule_group_name is not None else None
 
     if rule_group_override is None:
         rule_group_overrides = []

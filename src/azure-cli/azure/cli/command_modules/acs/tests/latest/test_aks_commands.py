@@ -338,11 +338,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "promotionCode": "",
             },
         }
+        self.kwargs["container_insights_solution"] = json.dumps(solution)
         self.cmd(
             f"resource create --id {solution_id} --api-version 2015-11-01-preview "
-            f"--is-full-object --properties '{json.dumps(solution)}'"
+            "--is-full-object --properties '{container_insights_solution}'"
         )
         return workspace_id
+
+    def _wait_for_cluster_update(self):
+        if self.is_live or self.in_recording:
+            self.cmd(
+                'aks wait --resource-group={resource_group} --name={name} '
+                '--updated --interval 30 --timeout 1800',
+                checks=[self.is_empty()],
+            )
 
     def _get_lower_lts_version(self, location, version):
         """Return the highest LTS version that is lower than the given version."""
@@ -5255,19 +5264,23 @@ spec:
     def test_aks_create_default_service_with_monitoring_addon_msi(self, resource_group, resource_group_location):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
+        workspace_id = self._create_container_insights_workspace(
+            resource_group, resource_group_location
+        )
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys(),
             'location': resource_group_location,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'workspace_id': workspace_id,
         })
 
         # create cluster with monitoring-addon
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--enable-addons monitoring'
+                     '--enable-addons monitoring --workspace-resource-id={workspace_id}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -15544,6 +15557,7 @@ spec:
             self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('agentPoolProfiles[0].virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
+        self._wait_for_cluster_update()
 
         # add another vms nodepool with autoscaler enabled
         add_nodepool_cmd = 'aks nodepool add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15557,6 +15571,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 0),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
+        self._wait_for_cluster_update()
 
         # update an existing autoscale profile using auto-scale update
         update_autoscale_cmd = 'aks nodepool auto-scale update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15569,6 +15584,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 5),
         ])
+        self._wait_for_cluster_update()
 
         # add a second autoscale profile
         add_autoscale_cmd = 'aks nodepool auto-scale add -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15580,12 +15596,14 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[1].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[1].maxCount', 3),
         ])
+        self._wait_for_cluster_update()
 
         # delete the second autoscale profile
         delete_autoscale_cmd = 'aks nodepool auto-scale delete -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
                                '--current-node-vm-size {node_vm_size1} --yes'
         np = self.cmd(delete_autoscale_cmd).get_output_in_json()
         assert len(np["virtualMachinesProfile"]["scale"]["autoscale"]) == 1
+        self._wait_for_cluster_update()
 
         # disable autoscaler (auto to manual)
         disable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15594,6 +15612,7 @@ spec:
             self.check('provisioningState', 'Succeeded'),
             self.check('virtualMachinesProfile.scale.manual[0].size', 'standard_d4s_v3'),
         ])
+        self._wait_for_cluster_update()
 
         # enable autoscaler (manual to auto)
         enable_autoscaler_cmd = 'aks nodepool update -g {resource_group} --cluster-name {name} -n {nodepool_name} ' \
@@ -15604,6 +15623,7 @@ spec:
             self.check('virtualMachinesProfile.scale.autoscale[0].minCount', 1),
             self.check('virtualMachinesProfile.scale.autoscale[0].maxCount', 3),
         ])
+        self._wait_for_cluster_update()
 
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

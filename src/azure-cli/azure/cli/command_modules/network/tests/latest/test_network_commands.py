@@ -3360,6 +3360,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'policy_type': 'OWASP',
             'policy_version': 3.2,
             'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
+            'empty_rule_group_name': 'REQUEST-920-PROTOCOL-ENFORCEMENT',
             'rule_id': '921120'
         })
 
@@ -3420,6 +3421,19 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--version {policy_version} '
                  '--group-name {rule_group_name}',
                  checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {empty_rule_group_name}',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 0),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):

@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2026-01-01"],
         ]
     }
 
@@ -55,7 +55,6 @@ class Show(AAZCommand):
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="The resourceGroup name",
             required=True,
         )
         return cls._args_schema
@@ -125,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -161,7 +160,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -221,12 +220,21 @@ class Show(AAZCommand):
                 serialized_name="disableLocalAuth",
             )
             properties.encryption = AAZObjectType()
+            properties.geo_data_replication = AAZObjectType(
+                serialized_name="geoDataReplication",
+            )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
+            )
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.premium_messaging_partitions = AAZIntType(
                 serialized_name="premiumMessagingPartitions",
@@ -286,6 +294,31 @@ class Show(AAZCommand):
             identity.user_assigned_identity = AAZStrType(
                 serialized_name="userAssignedIdentity",
             )
+
+            geo_data_replication = cls._schema_on_200.properties.geo_data_replication
+            geo_data_replication.locations = AAZListType()
+            geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+                serialized_name="maxReplicationLagDurationInSeconds",
+            )
+
+            locations = cls._schema_on_200.properties.geo_data_replication.locations
+            locations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.geo_data_replication.locations.Element
+            _element.location_name = AAZStrType(
+                serialized_name="locationName",
+            )
+            _element.role_type = AAZStrType(
+                serialized_name="roleType",
+            )
+
+            platform_capabilities = cls._schema_on_200.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()
