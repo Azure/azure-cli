@@ -1,0 +1,184 @@
+# Temporary manual recovery pipeline for publishing artifacts from a completed
+# macOS and Linux standalone validation run.
+trigger: none
+pr: none
+
+parameters:
+  - name: SourceBuildId
+    displayName: 'Source standalone build ID'
+    type: string
+    default: ''
+  - name: SourcePipelineDefinition
+    displayName: 'Source pipeline definition'
+    type: string
+    default: 'naga_mac-and-linux-standalone-release'
+  - name: GitHubRepo
+    displayName: 'GitHub release repository'
+    type: string
+    default: 'naga-nandyala/azure-cli'
+  - name: GitHubTargetBranch
+    displayName: 'GitHub release target branch'
+    type: string
+    default: 'dev'
+  - name: GitHubServiceConnection
+    displayName: 'GitHub service connection'
+    type: string
+    default: 'github.com_naga-nandyala'
+
+resources:
+  repositories:
+  - repository: homebrewtap
+    type: github
+    endpoint: 'github.com_naga-nandyala'
+    name: naga-nandyala/homebrew-mycli-app
+    ref: main
+
+name: standalone-publish-recovery-$(Build.BuildId)
+
+jobs:
+- job: CreateGitHubRelease
+  displayName: 'Standalone | Create GitHub Release'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+  - checkout: none
+
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download macOS ARM64 release files'
+    inputs:
+      buildType: 'specific'
+      project: 'release'
+      definition: '${{ parameters.SourcePipelineDefinition }}'
+      buildVersionToDownload: 'specific'
+      buildId: '${{ parameters.SourceBuildId }}'
+      artifactName: 'macos-cli-signed-notarized-arm64'
+      targetPath: '$(Pipeline.Workspace)/macos-cli-signed-notarized-arm64'
+
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download macOS x86_64 release files'
+    inputs:
+      buildType: 'specific'
+      project: 'release'
+      definition: '${{ parameters.SourcePipelineDefinition }}'
+      buildVersionToDownload: 'specific'
+      buildId: '${{ parameters.SourceBuildId }}'
+      artifactName: 'macos-cli-signed-notarized-x86_64'
+      targetPath: '$(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64'
+
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download Linux ARM64 release files'
+    inputs:
+      buildType: 'specific'
+      project: 'release'
+      definition: '${{ parameters.SourcePipelineDefinition }}'
+      buildVersionToDownload: 'specific'
+      buildId: '${{ parameters.SourceBuildId }}'
+      artifactName: 'linux-cli-final-arm64'
+      targetPath: '$(Pipeline.Workspace)/linux-cli-final-arm64'
+
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download Linux x86_64 release files'
+    inputs:
+      buildType: 'specific'
+      project: 'release'
+      definition: '${{ parameters.SourcePipelineDefinition }}'
+      buildVersionToDownload: 'specific'
+      buildId: '${{ parameters.SourceBuildId }}'
+      artifactName: 'linux-cli-final-x86_64'
+      targetPath: '$(Pipeline.Workspace)/linux-cli-final-x86_64'
+
+  - task: CopyFiles@2
+    displayName: 'Collect release files'
+    inputs:
+      SourceFolder: '$(Pipeline.Workspace)'
+      Contents: |
+        macos-cli-signed-notarized-arm64/azure-cli-*.tar.gz
+        macos-cli-signed-notarized-arm64/azure-cli-*.tar.gz.sha256
+        macos-cli-signed-notarized-x86_64/azure-cli-*.tar.gz
+        macos-cli-signed-notarized-x86_64/azure-cli-*.tar.gz.sha256
+        linux-cli-final-arm64/azure-cli-*.tar.gz
+        linux-cli-final-arm64/azure-cli-*.tar.gz.sha256
+        linux-cli-final-x86_64/azure-cli-*.tar.gz
+        linux-cli-final-x86_64/azure-cli-*.tar.gz.sha256
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/release'
+      flattenFolders: true
+
+  - bash: |
+      set -euo pipefail
+
+      ARM64_TARBALL=$(find "$(Build.ArtifactStagingDirectory)/release" -name 'azure-cli-*-macos-arm64.tar.gz' -print -quit)
+      VERSION=$(basename "$ARM64_TARBALL" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-z0-9]+)?' | head -1)
+
+      echo "Source build: ${{ parameters.SourceBuildId }}"
+      echo "Release version: $VERSION"
+      ls -lh "$(Build.ArtifactStagingDirectory)/release"
+      echo "##vso[task.setvariable variable=ReleaseTag]azure-cli-$VERSION"
+      echo "##vso[task.setvariable variable=AzureCliVersion]$VERSION"
+    displayName: 'Prepare release files'
+
+  - task: GitHubRelease@1
+    displayName: 'Delete existing release if present'
+    continueOnError: true
+    inputs:
+      gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
+      repositoryName: '${{ parameters.GitHubRepo }}'
+      action: 'delete'
+      tag: '$(ReleaseTag)'
+
+  - task: GitHubRelease@1
+    displayName: 'Create GitHub Release'
+    inputs:
+      gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
+      repositoryName: '${{ parameters.GitHubRepo }}'
+      action: 'create'
+      target: '${{ parameters.GitHubTargetBranch }}'
+      tagSource: 'userSpecifiedTag'
+      tag: '$(ReleaseTag)'
+      title: 'Azure CLI $(AzureCliVersion) - Homebrew Cask'
+      releaseNotesSource: 'inline'
+      releaseNotesInline: 'Recovery publication from standalone build ${{ parameters.SourceBuildId }}.'
+      assets: '$(Build.ArtifactStagingDirectory)/release/*'
+      addChangeLog: false
+
+- job: UpdateHomebrewCask
+  displayName: 'Standalone | Update Homebrew Cask'
+  dependsOn: CreateGitHubRelease
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+  - checkout: homebrewtap
+    persistCredentials: true
+    path: homebrew-tap
+
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download generated Cask definition'
+    inputs:
+      buildType: 'specific'
+      project: 'release'
+      definition: '${{ parameters.SourcePipelineDefinition }}'
+      buildVersionToDownload: 'specific'
+      buildId: '${{ parameters.SourceBuildId }}'
+      artifactName: 'cask-definition'
+      targetPath: '$(Pipeline.Workspace)/cask-definition'
+
+  - bash: |
+      set -euo pipefail
+
+      cd "$(Pipeline.Workspace)/homebrew-tap"
+      git fetch origin main
+      git reset --hard origin/main
+
+      CASK_DIR='Casks/a'
+      mkdir -p "$CASK_DIR"
+      cp "$(Pipeline.Workspace)/cask-definition/azure-cli.rb" "$CASK_DIR/azure-cli.rb"
+
+      VERSION=$(grep -oP 'version "\K[^"]+' "$CASK_DIR/azure-cli.rb" | head -1)
+      git config user.name 'Azure Pipeline'
+      git config user.email 'azure-pipeline@microsoft.com'
+      git add "$CASK_DIR/azure-cli.rb"
+      git commit -m "Update azure-cli to $VERSION" || echo 'No Cask changes'
+      git push origin HEAD:main
+    displayName: 'Push Cask to Homebrew tap'
