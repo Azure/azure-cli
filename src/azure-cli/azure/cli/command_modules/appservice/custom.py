@@ -1504,6 +1504,12 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     # NOTE: serverFarmId is deliberately left unchanged (existing CV1 plan id).
     # The orchestrator (SkuTransitionResolver) owns FC server-farm creation on the same stamp.
 
+    # Clear CV1-specific siteConfig properties that are invalid for Flex Consumption.
+    # The GET returns the existing site with these set; the server rejects them on a Flex PUT.
+    if site.site_config is not None:
+        site.site_config.linux_fx_version = None
+        site.site_config.function_app_scale_limit = None
+
     # Add deployment storage connection string app setting if using connection string auth
     if app_settings_to_add:
         from azure.mgmt.web.models import NameValuePair
