@@ -1316,7 +1316,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_post.return_value = token_response
 
         # get_login_credentials should succeed via the ARM token fallback
-        login_server, username, password = get_login_credentials(cmd, test_registry)
+        login_server, username, [REDACTED:credential], test_registry)
 
         self.assertEqual(login_server, test_login_server)
         self.assertEqual(username, EMPTY_GUID)
