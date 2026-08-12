@@ -21,7 +21,7 @@ class EHNamespaceSchemaRegistry(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eventhub_schema_registry(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
+            'loc': 'eastus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'schemagroup1': self.create_random_name(prefix='schema-nscli1', length=20),

@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations/{}", "2025-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations/{}", "2026-01-01"],
         ]
     }
 
@@ -47,7 +47,7 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -132,7 +132,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -162,9 +162,7 @@ class Show(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZObjectType(
-                flags={"read_only": True},
-            )
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.id = AAZStrType(
@@ -177,7 +175,11 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True, "read_only": True},
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -206,6 +208,7 @@ class Show(AAZCommand):
             )
             properties.provisioning_issues = AAZListType(
                 serialized_name="provisioningIssues",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -232,9 +235,7 @@ class Show(AAZCommand):
             profile.name = AAZStrType()
 
             access_rules = cls._schema_on_200.properties.profile.access_rules
-            access_rules.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            access_rules.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.profile.access_rules.Element
             _element.id = AAZStrType()
@@ -266,23 +267,17 @@ class Show(AAZCommand):
             fully_qualified_domain_names.Element = AAZStrType()
 
             network_security_perimeters = cls._schema_on_200.properties.profile.access_rules.Element.properties.network_security_perimeters
-            network_security_perimeters.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            network_security_perimeters.Element = AAZObjectType()
             _ShowHelper._build_schema_network_security_perimeter_read(network_security_perimeters.Element)
 
             subscriptions = cls._schema_on_200.properties.profile.access_rules.Element.properties.subscriptions
-            subscriptions.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            subscriptions.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.profile.access_rules.Element.properties.subscriptions.Element
             _element.id = AAZStrType()
 
             provisioning_issues = cls._schema_on_200.properties.provisioning_issues
-            provisioning_issues.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            provisioning_issues.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.provisioning_issues.Element
             _element.name = AAZStrType()
@@ -301,6 +296,26 @@ class Show(AAZCommand):
                 serialized_name="accessMode",
             )
             resource_association.name = AAZStrType()
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             return cls._schema_on_200
 
