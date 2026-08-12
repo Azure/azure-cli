@@ -583,6 +583,18 @@ class TestActions(unittest.TestCase):
         self.assertEqual(target_regions_objs[3]["regional_replica_count"], 2)
         self.assertEqual(target_regions_objs[3]["storage_account_type"], "standard_lrs")
 
+        # three-part region=replica=storage_type must accept mixed-case storage types
+        # the same way the two-part region=storage_type form does
+        target_regions_list = ["southeastasia=1=Standard_LRS", "westus2=Premium_LRS"]
+        np.target_regions = target_regions_list
+        process_gallery_image_version_namespace(cmd, np)
+        target_regions_objs = np.target_regions
+        self.assertEqual(target_regions_objs[0]["name"], "southeastasia")
+        self.assertEqual(target_regions_objs[0]["regional_replica_count"], 1)
+        self.assertEqual(target_regions_objs[0]["storage_account_type"], "Standard_LRS")
+        self.assertEqual(target_regions_objs[1]["name"], "westus2")
+        self.assertEqual(target_regions_objs[1]["storage_account_type"], "Premium_LRS")
+
         # handle invalid storage account / replica count
         with self.assertRaises(CLIError):
             target_regions_list = ["westus=f"]

@@ -2366,7 +2366,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 try:
                     replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[2]
-                    if storage_account_type not in storage_account_types_list:
+                    if storage_account_type.lower() not in storage_account_types_list:
                         raise ArgumentUsageError(
                             "usage error: {} is an invalid target region argument. "
                             "The third part is not a valid storage account type. "
@@ -2499,7 +2499,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 try:
                     replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[3]
-                    if storage_account_type not in storage_account_types_list:
+                    if storage_account_type.lower() not in storage_account_types_list:
                         raise ArgumentUsageError(
                             "usage error: {} is an invalid target edge zone argument. "
                             "The forth part is not a valid storage account type. "
