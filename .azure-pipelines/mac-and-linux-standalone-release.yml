@@ -40,6 +40,10 @@ parameters:
     displayName: 'GitHub Repository (owner/repo)'
     type: string
     default: 'naga-nandyala/azure-cli'
+  - name: GitHubTargetBranch
+    displayName: 'GitHub Release Target Branch'
+    type: string
+    default: 'dev'
   
   - name: UpdateHomebrew
     displayName: 'Update Homebrew cask after release'
@@ -189,6 +193,7 @@ jobs:
       UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
       TestAfterPublish: false
       GitHubRepo: $(GitHubRepo)
+      GitHubTargetBranch: ${{ parameters.GitHubTargetBranch }}
       GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
       HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
