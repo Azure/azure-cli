@@ -15,15 +15,7 @@ parameters:
   - name: GitHubRepo
     displayName: 'GitHub release repository'
     type: string
-    default: 'Azure/azclips'
-  - name: ReleaseTagPrefix
-    displayName: 'GitHub release tag prefix'
-    type: string
-    default: 'standalone-publish-test'
-  - name: UpdateHomebrew
-    displayName: 'Update Homebrew Cask after release'
-    type: boolean
-    default: false
+    default: 'Azure/homebrew-azure-cli'
 
 resources:
   repositories:
@@ -123,7 +115,7 @@ jobs:
       echo "Source build: ${{ parameters.SourceBuildId }}"
       echo "Release version: $VERSION"
       ls -lh "$(Build.ArtifactStagingDirectory)/release"
-      echo "##vso[task.setvariable variable=ReleaseTag]${{ parameters.ReleaseTagPrefix }}-$(Build.BuildId)"
+      echo "##vso[task.setvariable variable=ReleaseTag]azure-cli-$VERSION"
       echo "##vso[task.setvariable variable=AzureCliVersion]$VERSION"
     displayName: 'Prepare release files'
 
@@ -133,12 +125,12 @@ jobs:
       release_tag='$(ReleaseTag)'
       repository='${{ parameters.GitHubRepo }}'
 
+      gh release delete "$release_tag" --repo "$repository" --yes || true
       gh release create "$release_tag" "$(Build.ArtifactStagingDirectory)/release/"* \
         --repo "$repository" \
         --target main \
-        --latest=false \
-        --title "Standalone publish test $(Build.BuildId)" \
-        --notes "Temporary standalone publishing test using artifacts from build ${{ parameters.SourceBuildId }}."
+        --title "Azure CLI $(AzureCliVersion) - Homebrew Cask" \
+        --notes "Recovery publication from standalone build ${{ parameters.SourceBuildId }}."
     displayName: 'Create GitHub Release with PAT'
     env:
       GH_TOKEN: $(GH_TOKEN)
@@ -146,7 +138,7 @@ jobs:
 - job: UpdateHomebrewCask
   displayName: 'Standalone | Update Homebrew Cask'
   dependsOn: CreateGitHubRelease
-  condition: and(succeeded(), eq('${{ parameters.UpdateHomebrew }}', true))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-latest'
 
