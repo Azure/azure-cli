@@ -794,7 +794,9 @@ jobs:
       PythonVersion: $(standalone_python_version)
       GitHubRepo: $(Build.Repository.Name)
       Debug: false
-      dependsOn: ['CreateFinalTarball', 'BuildLinuxCli']
+      CaskDependsOn: ['CreateMacOSFinalTarball', 'BuildLinuxCli']
+      MacosDependsOn: ['CreateMacOSFinalTarball']
+      LinuxDependsOn: ['BuildLinuxCli']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package

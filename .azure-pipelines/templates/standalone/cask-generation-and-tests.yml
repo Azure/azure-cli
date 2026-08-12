@@ -12,7 +12,9 @@
 #   - PythonVersion: Homebrew Python version for testing
 #   - GitHubRepo: GitHub repository (for cask generation)
 #   - Debug: Enable debug diagnostics
-#   - dependsOn: Jobs this depends on (typically CreateFinalTarball)
+#   - CaskDependsOn: Jobs required to generate the cross-platform Cask
+#   - MacosDependsOn: Jobs required by macOS offline-install tests
+#   - LinuxDependsOn: Jobs required by Linux offline-install tests
 #
 # Requires:
 #   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64,
@@ -46,9 +48,15 @@ parameters:
   - name: condition
     type: string
     default: 'succeeded()'
-  - name: dependsOn
+  - name: CaskDependsOn
     type: object
-    default: ['CreateFinalTarball']
+    default: ['CreateMacOSFinalTarball', 'BuildLinuxCli']
+  - name: MacosDependsOn
+    type: object
+    default: ['CreateMacOSFinalTarball']
+  - name: LinuxDependsOn
+    type: object
+    default: ['BuildLinuxCli']
 
 jobs:
 # ============================================================================
@@ -56,7 +64,7 @@ jobs:
 # ============================================================================
 - job: TestMacOSTempTapCask
   displayName: 'macOS | Generate Cask and Test'
-  dependsOn: ${{ parameters.dependsOn }}
+  dependsOn: ${{ parameters.CaskDependsOn }}
   condition: ${{ parameters.condition }}
   strategy:
     matrix:
@@ -244,7 +252,7 @@ jobs:
       # Verify installation
       echo "=== Verifying Installation ==="
       brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "$TAP_PATH/Casks/azure-cli.rb"
+      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       which az
       az --version
       
@@ -334,7 +342,7 @@ jobs:
       brew install python@${{ parameters.PythonVersion }}
       brew install --cask test/azure-cli-pipeline-test/azure-cli
       brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "$TAP_PATH/Casks/azure-cli.rb"
+      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       az version
     displayName: 'Install and test Linux cask'
 
@@ -349,7 +357,7 @@ jobs:
 # ============================================================================
 - job: TestMacOSOfflineInstall
   displayName: 'macOS | Test Offline Installation'
-  dependsOn: ${{ parameters.dependsOn }}
+  dependsOn: ${{ parameters.MacosDependsOn }}
   condition: ${{ parameters.condition }}
   strategy:
     matrix:
@@ -421,7 +429,7 @@ jobs:
 # ============================================================================
 - job: TestLinuxOfflineInstall
   displayName: 'Linux | Test Offline Installation'
-  dependsOn: ${{ parameters.dependsOn }}
+  dependsOn: ${{ parameters.LinuxDependsOn }}
   condition: ${{ parameters.condition }}
   strategy:
     matrix:
@@ -448,10 +456,11 @@ jobs:
 
       TARBALL=$(find "$(Pipeline.Workspace)/linux-cli-final-$(Architecture)" -name "azure-cli-*-linux-$(Architecture).tar.gz" -print -quit)
       TEST_DIR=$(mktemp -d)
-      trap 'rm -rf "$TEST_DIR"' EXIT
+      trap 'rm -rf "$TEST_DIR" || true' EXIT
 
       tar -xzf "$TARBALL" -C "$TEST_DIR"
       brew install python@${{ parameters.PythonVersion }}
       export AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      export AZURE_CORE_COLLECT_TELEMETRY=False
       "$TEST_DIR/bin/az" version
     displayName: 'Test Linux offline install'

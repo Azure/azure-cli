@@ -149,7 +149,7 @@ jobs:
 # - SignBinaries (matrix: ARM64 + Intel)
 # - CreateNotarizeBundle (matrix: ARM64 + Intel)
 # - Notarize (matrix: ARM64 + Intel)
-# - CreateFinalTarball (matrix: ARM64 + Intel)
+# - CreateMacOSFinalTarball (matrix: ARM64 + Intel)
 # Artifacts: cli-signed-notarized-arm64, cli-signed-notarized-x86_64
 
 # ============================================================================
@@ -165,8 +165,12 @@ jobs:
       PythonVersion: ${{ parameters.PythonVersion }}
       GitHubRepo: $(GitHubRepo)
       Debug: ${{ parameters.Debug }}
-      dependsOn:
-      - CreateFinalTarball
+      CaskDependsOn:
+      - CreateMacOSFinalTarball
+      - BuildLinuxCli
+      MacosDependsOn:
+      - CreateMacOSFinalTarball
+      LinuxDependsOn:
       - BuildLinuxCli
 
 # Jobs included:
