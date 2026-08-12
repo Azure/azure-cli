@@ -16,10 +16,6 @@ parameters:
     displayName: 'GitHub release repository'
     type: string
     default: 'Azure/homebrew-azure-cli'
-  - name: GitHubServiceConnection
-    displayName: 'GitHub service connection'
-    type: string
-    default: 'Azure'
 
 resources:
   repositories:
@@ -28,6 +24,10 @@ resources:
     endpoint: 'Azure'
     name: Azure/homebrew-azure-cli
     ref: main
+
+variables:
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - group: 'get-github-pat-token'
 
 name: standalone-publish-recovery-$(Build.BuildId)
 
@@ -39,6 +39,12 @@ jobs:
 
   steps:
   - checkout: none
+
+  - template: templates/standalone/get-github-pat-token.yml
+    parameters:
+      azureSubscription: $(AzureSubscription)
+      keyVaultName: $(GitHubPatKeyVault)
+      secretName: $(GitHubPatSecretName)
 
   - task: DownloadPipelineArtifact@2
     displayName: 'Download macOS ARM64 release files'
@@ -113,29 +119,21 @@ jobs:
       echo "##vso[task.setvariable variable=AzureCliVersion]$VERSION"
     displayName: 'Prepare release files'
 
-  - task: GitHubRelease@1
-    displayName: 'Delete existing release if present'
-    continueOnError: true
-    inputs:
-      gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
-      repositoryName: '${{ parameters.GitHubRepo }}'
-      action: 'delete'
-      tag: '$(ReleaseTag)'
+  - bash: |
+      set -euo pipefail
 
-  - task: GitHubRelease@1
-    displayName: 'Create GitHub Release'
-    inputs:
-      gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
-      repositoryName: '${{ parameters.GitHubRepo }}'
-      action: 'create'
-      target: 'main'
-      tagSource: 'userSpecifiedTag'
-      tag: '$(ReleaseTag)'
-      title: 'Azure CLI $(AzureCliVersion) - Homebrew Cask'
-      releaseNotesSource: 'inline'
-      releaseNotesInline: 'Recovery publication from standalone build ${{ parameters.SourceBuildId }}.'
-      assets: '$(Build.ArtifactStagingDirectory)/release/*'
-      addChangeLog: false
+      release_tag='$(ReleaseTag)'
+      repository='${{ parameters.GitHubRepo }}'
+
+      gh release delete "$release_tag" --repo "$repository" --yes || true
+      gh release create "$release_tag" "$(Build.ArtifactStagingDirectory)/release/"* \
+        --repo "$repository" \
+        --target main \
+        --title "Azure CLI $(AzureCliVersion) - Homebrew Cask" \
+        --notes "Recovery publication from standalone build ${{ parameters.SourceBuildId }}."
+    displayName: 'Create GitHub Release with PAT'
+    env:
+      GH_TOKEN: $(GH_TOKEN)
 
 - job: UpdateHomebrewCask
   displayName: 'Standalone | Update Homebrew Cask'
