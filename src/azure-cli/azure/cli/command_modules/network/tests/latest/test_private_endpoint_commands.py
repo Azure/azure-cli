@@ -4731,7 +4731,7 @@ class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
                  '--name {phsm_name} '
                  '-g {rg} '
                  '--type {type}',
-                 checks=self.check('@[0].properties.groupId', 'management'))
+                 checks=[self.check('length(@)', 2), self.check("length([?properties.groupId == 'management'])", 1)])
         self.cmd('resource delete --name {phsm_name} -g {rg} --resource-type {type}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_phsm_pe')
@@ -4780,7 +4780,7 @@ class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
         # Show the private endpoint connection
         result = self.cmd('network private-endpoint-connection list --name {phsm_name} -g {rg} --type {type}',
                           checks=self.check('length(@)', 1)).get_output_in_json()
-        print(result)
+
         self.kwargs['hsm_pe_id'] = result[0]['id']
 
         self.cmd('network private-endpoint-connection show '
@@ -4791,7 +4791,7 @@ class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
                  '--resource-name {phsm_name} '
                  '-g {rg} '
                  '--name {hsm_pe_name} '
-                 '--type Microsoft.HardwareSecurityModules/paymentHsmClusters',
+                 '--type {type}',
                  checks=self.check('name', '{hsm_pe_name}'))
 
         # Test approval/rejection
@@ -4832,6 +4832,7 @@ class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
 
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        time.sleep(60)
         self.cmd('az resource delete --name {phsm_name} -g {rg} --resource-type {type}')
 
 class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
