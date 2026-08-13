@@ -11416,8 +11416,7 @@ spec:
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--pod-cidr 172.126.0.0/16 --service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
                      '--pod-cidrs 172.126.0.0/16,2001:abcd:1234::/64 --service-cidrs 172.56.0.0/16,2001:ffff::/108 ' \
-                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ip-count 1 ' \
-                     '--load-balancer-managed-outbound-ipv6-count 2 ' \
+                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ipv6-count 2 ' \
                      '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
         self.cmd(create_cmd, checks=[
