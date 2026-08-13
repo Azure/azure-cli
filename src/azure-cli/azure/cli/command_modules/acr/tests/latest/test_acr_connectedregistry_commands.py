@@ -234,3 +234,76 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+    @AllowLargeResponse(size_kb=99999)
+    @record_only()
+    def test_acr_connectedregistry_managed_identity(self):
+        # Managed-identity auth mode for connected registries. Recorded scenario is
+        # intentionally minimal (create + show + get-settings + delete) so the cassette
+        # does not depend on the SyncToken<->ManagedIdentity migration round-trip.
+        # Client-side validation, the migration state machine, and MI-mode delete cleanup
+        # are covered by mock-based unit tests in test_acr_connected_registry_mi_unit.py.
+        # Note: This test does NOT import from azure.mgmt.containerregistry so the
+        # recording remains valid across future SDK model-namespace changes.
+        #
+        # Recording status:
+        #   * @record_only() keeps this test in playback-only mode in CI.
+        #   * Cassette pending: MI is currently deployed only to dogfood, and the dogfood
+        #     control-plane / ARM has been broadly 500-flaky (see repro notes in the
+        #     ship-todo doc). Re-record against prod once the preview API is deployed
+        #     there. To re-record: remove @record_only, run with
+        #     AZURE_TEST_RUN_LIVE=True against the target cloud, sanitize, restore
+        #     @record_only, commit both the test and the cassette.
+        # Preparer bypass: to avoid the sub-wide RG-quota / ARM LIST flake, this test is
+        # pinned to a pre-existing shared RG (adjust `rg` below when re-recording).
+        self.kwargs.update({
+            'rg': 'shaoren-rg',
+            'registry_name': self.create_random_name('clireg', 20),
+            'cr_mi_name': 'crmiscen',
+            'rg_loc': 'australiaeast',
+            'sku': 'Premium',
+            'identity_name': self.create_random_name('cr-mi-id', 20),
+        })
+
+        # Registry + data endpoint (required for connected-registry).
+        # Pass -g on every acr command: without it, the CLI falls back to
+        # `Microsoft.Resources/resources` sub-wide LIST which is currently 500-flaky in
+        # dogfood ARM. -g routes straight to the RP.
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('sku.name', '{sku}'),
+                         self.check('provisioningState', 'Succeeded')])
+        self.cmd('acr update -n {registry_name} -g {rg} --data-endpoint-enabled true',
+                 checks=self.check('dataEndpointEnabled', True))
+
+        # User-assigned identity.
+        result = self.cmd('identity create --name {identity_name} -g {rg}').get_output_in_json()
+        self.kwargs['identity_id'] = result['id']
+
+        # --- Create with ManagedIdentity ---
+        self.cmd('acr connected-registry create -n {cr_mi_name} -r {registry_name} -g {rg} '
+                 '-m ReadOnly --auth-type ManagedIdentity --identity {identity_id}',
+                 checks=[self.check('name', '{cr_mi_name}'),
+                         self.check('mode', 'ReadOnly'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('parent.syncProperties.authType', 'ManagedIdentity'),
+                         self.check('identity.type', 'UserAssigned')])
+
+        # --- Show reflects MI ---
+        self.cmd('acr connected-registry show -n {cr_mi_name} -r {registry_name} -g {rg}',
+                 checks=[self.check('parent.syncProperties.authType', 'ManagedIdentity'),
+                         self.check('identity.type', 'UserAssigned')])
+
+        # --- get-settings returns MI-flavored connection string ---
+        settings = self.cmd('acr connected-registry get-settings -n {cr_mi_name} -r {registry_name} '
+                            '-g {rg} --parent-protocol https').get_output_in_json()
+        self.assertIn('ACR_MANAGED_IDENTITY_CLIENT_ID', settings)
+        self.assertIn('ACR_MANAGED_IDENTITY_RESOURCE_ID', settings)
+        self.assertIn('ManagedIdentityClientId=', settings['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SYNC_TOKEN_USER', settings)
+
+        # --- MI-mode delete (no sync token / scope map cleanup path) ---
+        self.cmd('acr connected-registry delete -n {cr_mi_name} -r {registry_name} -g {rg} -y')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+        # Shared RG: clean up the user-assigned identity too.
+        self.cmd('identity delete --name {identity_name} -g {rg}')

@@ -1655,6 +1655,11 @@ examples:
         az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
             --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
+  - name: Create a connected registry that authenticates with its parent using a user-assigned managed identity.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<msi>
 """
 
 helps['acr connected-registry delete'] = """
@@ -1724,6 +1729,15 @@ examples:
     text: |
         az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
+  - name: Migrate an offline connected registry from SyncToken to ManagedIdentity authentication.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<msi>
+  - name: Migrate an offline connected registry from ManagedIdentity back to SyncToken authentication.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type SyncToken --sync-token mySyncTokenName
 """
 
 helps['acr connected-registry get-settings'] = """
@@ -1740,7 +1754,7 @@ examples:
 
 helps['acr connected-registry permissions'] = """
 type: group
-short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Manage the repository permissions accross multiple connected registries. Only supported for connected registries configured with SyncToken authentication (output is derived from the sync-token scope map). Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry permissions update'] = """

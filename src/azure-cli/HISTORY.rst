@@ -3,6 +3,17 @@
 Release History
 ===============
 
+Upcoming
+++++++++
+
+**ACR**
+
+* `az acr connected-registry create/update`: Add ``--auth-type`` (``SyncToken`` | ``ManagedIdentity``) and ``--identity`` to support user-assigned managed identity authentication between a connected registry and its parent.
+* `az acr connected-registry update`: Support migrating between ``SyncToken`` and ``ManagedIdentity`` auth modes. Registry must be in ``Offline`` state; same-mode credential rotation is not supported.
+* `az acr connected-registry get-settings`: Emit a ``ManagedIdentity``-flavored connection string (``ACR_MANAGED_IDENTITY_CLIENT_ID``, ``ACR_MANAGED_IDENTITY_RESOURCE_ID``) when the target is configured with ``ManagedIdentity`` auth.
+* `az acr connected-registry permissions`: Reject with a clear error when invoked against a ``ManagedIdentity``-mode connected registry (sync-token scope map is not applicable in that mode).
+* Bump ``azure-mgmt-containerregistry`` to ``15.1.0b3`` for the preview api-version that exposes the connected-registry managed-identity contract.
+
 2.89.1
 ++++++
 
