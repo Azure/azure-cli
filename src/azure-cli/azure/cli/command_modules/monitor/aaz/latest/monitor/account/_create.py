@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-04-03",
+        "version": "2025-10-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2023-04-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03"],
         ]
     }
 
@@ -56,11 +56,49 @@ class Create(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "AzureMonitorWorkspaceProperties"
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
+
+        # define Arg Group "Metrics"
+
+        _args_schema = cls._args_schema
+        _args_schema.enable_access_using_resource_permissions = AAZBoolArg(
+            options=["--enable-access-using-resource-permissions", "--enable-res-perm"],
+            arg_group="Metrics",
+            help="Flag that indicates whether to enable access using resource permissions.",
+        )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.public_network_access = AAZStrArg(
+            options=["--public-network-access"],
+            arg_group="Properties",
+            help="Gets or sets allow or disallow public network access to Azure Monitor Workspace",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        # define Arg Group "Resource"
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            arg_group="AzureMonitorWorkspaceProperties",
+            arg_group="Resource",
             help="The geo-location where the resource lives",
             required=True,
             fmt=AAZResourceLocationArgFormat(
@@ -69,7 +107,7 @@ class Create(AAZCommand):
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="AzureMonitorWorkspaceProperties",
+            arg_group="Resource",
             help="Resource tags.",
         )
 
@@ -79,7 +117,7 @@ class Create(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AzureMonitorWorkspacesCreate(ctx=self.ctx)()
+        self.AzureMonitorWorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -94,7 +132,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class AzureMonitorWorkspacesCreate(AAZHttpOperation):
+    class AzureMonitorWorkspacesCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -142,7 +180,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -167,8 +205,28 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("properties", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("metrics", AAZObjectType)
+                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+
+            metrics = _builder.get(".properties.metrics")
+            if metrics is not None:
+                metrics.set_prop("enableAccessUsingResourcePermissions", AAZBoolType, ".enable_access_using_resource_permissions")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -194,12 +252,10 @@ class Create(AAZCommand):
             cls._schema_on_200_201 = AAZObjectType()
 
             _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.etag = AAZStrType(
-                flags={"read_only": True},
-            )
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -219,6 +275,37 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200_201.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200_201.properties
             properties.account_id = AAZStrType(
                 serialized_name="accountId",
@@ -228,9 +315,7 @@ class Create(AAZCommand):
                 serialized_name="defaultIngestionSettings",
                 flags={"read_only": True},
             )
-            properties.metrics = AAZObjectType(
-                flags={"read_only": True},
-            )
+            properties.metrics = AAZObjectType()
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
                 flags={"read_only": True},
@@ -241,7 +326,6 @@ class Create(AAZCommand):
             )
             properties.public_network_access = AAZStrType(
                 serialized_name="publicNetworkAccess",
-                flags={"read_only": True},
             )
 
             default_ingestion_settings = cls._schema_on_200_201.properties.default_ingestion_settings
@@ -249,12 +333,28 @@ class Create(AAZCommand):
                 serialized_name="dataCollectionEndpointResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.data_collection_rule_immutable_id = AAZStrType(
+                serialized_name="dataCollectionRuleImmutableId",
+                flags={"read_only": True},
+            )
             default_ingestion_settings.data_collection_rule_resource_id = AAZStrType(
                 serialized_name="dataCollectionRuleResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.ingestion_endpoints = AAZObjectType(
+                serialized_name="ingestionEndpoints",
+                flags={"read_only": True},
+            )
+
+            ingestion_endpoints = cls._schema_on_200_201.properties.default_ingestion_settings.ingestion_endpoints
+            ingestion_endpoints.metrics = AAZStrType(
+                flags={"read_only": True},
+            )
 
             metrics = cls._schema_on_200_201.properties.metrics
+            metrics.enable_access_using_resource_permissions = AAZBoolType(
+                serialized_name="enableAccessUsingResourcePermissions",
+            )
             metrics.internal_id = AAZStrType(
                 serialized_name="internalId",
                 flags={"read_only": True},

@@ -852,6 +852,13 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp log startup show') as c:
         c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
+    with self.argument_context('webapp troubleshoot status') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
@@ -1608,3 +1615,33 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('environment_name', help="Name of the environment of static site")
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)
+    with self.argument_context('webapp exec') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the web app.')
+        c.argument('exec_command', options_list=['--command'],
+                   help='[Execute mode] A command to run directly in the container, without a shell. '
+                   'Quote the whole command (e.g. --command "python /home/site/app.py --port 8080"). '
+                   'Shell operators (>, |, &&, etc.) are not interpreted - use --shell-command for those. '
+                   'Mutually exclusive with --shell-command.')
+        c.argument('shell_command', options_list=['--shell-command'],
+                   help='[Execute mode] A command line to run through a shell, so shell operators (|, &&, >, etc.) work '
+                   '(e.g. --shell-command "echo hi > /home/LogFiles/out.txt"). '
+                   'Runs as `<shell> -c <command>`; the shell defaults to '
+                   '/bin/bash and can be overridden with --shell. Mutually exclusive with --command.')
+        c.argument('mode',
+                   help="Execution mode. 'shell' (default): Starts an interactive shell session with the main "
+                   "web app container. 'execute': Starts command execution and returns immediately without "
+                   "returning command output.",
+                   arg_type=get_enum_type(['shell', 'execute']), default='shell')
+        c.argument('working_directory', options_list=['--working-directory', '--cwd'],
+                   help="[Execute mode] Absolute working directory for command execution. "
+                   "Defaults to the container's working directory.")
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Webapp instance(s) to target. Specify a comma-separated list of instance IDs '
+                   '(use "az webapp list-instances" to get IDs) or "all" for all instances. Defaults to a random instance. '
+                   'Specifying multiple instances (a comma-separated list or "all") is supported only in \'execute\' mode.')
+        c.argument('shell', options_list=['--shell'],
+                   help="Absolute path of the shell to use (e.g. /bin/sh); defaults to /bin/bash. "
+                   "In 'shell' mode it is the interactive shell to launch; in 'execute' mode it is "
+                   "the shell used to run --shell-command.")
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Default to the production slot if not specified.')

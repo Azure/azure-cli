@@ -180,9 +180,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
-        from .operations.vm import VMCapture, VMDeallocate
+        from .operations.vm import VMCapture
         self.command_table['vm capture'] = VMCapture(loader=self)
-        self.command_table['vm deallocate'] = VMDeallocate(loader=self)
 
     with self.command_group('vm availability-set') as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
@@ -358,7 +357,7 @@ def load_command_table(self, _):
         from .operations.sig_image_definition import SigImageDefinitionListShared
         self.command_table['sig image-definition list-shared'] = SigImageDefinitionListShared(loader=self)
 
-    with self.command_group('sig image-version', operation_group='gallery_image_versions') as g:
+    with self.command_group('sig image-version') as g:
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
         g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, validator=process_image_version_undelete_namespace, is_preview=True)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)

@@ -1954,6 +1954,24 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_force_deallocate_', location='centralus')
+    def test_vm_force_deallocate(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vm': self.create_random_name('vm', 15),
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} -l {loc} --image Ubuntu2204 --zone 1 '
+                 '--zone-movement true --storage-sku Premium_ZRS '
+                 '--tags useNRPDeallocateOnFabricFailure=true --admin-username azureuser '
+                 '--admin-password Test123456789# --authentication-type password --nsg-rule NONE '
+                 '--size Standard_D2s_v3', checks=[
+                     self.check('zones', '1'),
+                 ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --force-deallocate')
+        self._check_vm_power_state('PowerState/deallocated')
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_')
     def test_vm_user_update_win(self, resource_group):

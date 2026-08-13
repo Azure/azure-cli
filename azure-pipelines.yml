@@ -38,6 +38,20 @@ parameters:
     value: arm64
     pool: pool-ubuntu-latest-arm64
 
+# Azure Linux versions to build in parallel. AZL3 is the current stable release;
+# AZL4 is being onboarded (currently beta) to pick up the patched OpenSSL and
+# resolve the S360 vulnerability. Both are built and published side-by-side
+# until AZL4 reaches GA and AZL3 is deprecated.
+- name: azureLinuxVersions
+  type: object
+  default:
+  - name: '3.0'
+    tag: '3.0'
+    image: mcr.microsoft.com/azurelinux/base/core:3.0
+  - name: '4.0 (Beta)'
+    tag: '4.0'
+    image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
+
 jobs:
 - job: CheckPullRequest
   displayName: "Check the Format of Pull Request Title and Content"
@@ -351,13 +365,14 @@ jobs:
   dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
-          dockerfile: azure-linux.dockerfile
-          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
+            dockerfile: azure-linux.dockerfile
+            packageArtifactName: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            image: ${{ azl.image }}
   pool:
     name: $(pool)
   steps:
@@ -395,10 +410,11 @@ jobs:
     - ExtractMetadata
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -689,6 +705,11 @@ jobs:
       # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
       # form for the local test install only; the generated/submitted formula stays upstream-faithful.
       sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      
+      # Homebrew 6.0.0+ requires non-official taps to be explicitly trusted before it will
+      # load their Ruby code (see https://docs.brew.sh/Tap-Trust). Trust this local dev tap
+      # that we just created so the generated formula can be installed in CI.
+      brew trust dev/azure-cli
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
@@ -770,11 +791,12 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -816,11 +838,12 @@ jobs:
     name: $(pool)
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'

@@ -1231,6 +1231,20 @@ def load_arguments(self, _):
     with self.argument_context("aks nodepool manual-scale delete") as c:
         c.argument("current_vm_sizes")
 
+    with self.argument_context("aks nodepool auto-scale add") as c:
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale update") as c:
+        c.argument("current_node_vm_size")
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale delete") as c:
+        c.argument("current_node_vm_size")
+
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
                    "--command", "-c"], help='the command to run')
