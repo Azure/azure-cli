@@ -43,6 +43,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          troubleshoot_status,
                                                          create_webapp)
 from azure.cli.command_modules.appservice.utils import _rename_server_farm_props, get_site_server_farm_id
+from azure.cli.command_modules.appservice.commands import (transform_rename_server_farm_id,
+                                                            transform_rename_server_farm_id_list)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -64,52 +66,40 @@ class TestWebappMocked(unittest.TestCase):
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
-    def test_rename_server_farm_props_handles_mutable_mapping(self):
-        site = {
-            'location': 'westus',
-            'serverFarmId': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
-        }
-
-        _rename_server_farm_props(site)
-
-        self.assertEqual(site['appServicePlanId'], '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
-        self.assertNotIn('serverFarmId', site.keys())
-        self.assertEqual(get_site_server_farm_id(site),
-                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
-
-    def test_rename_server_farm_props_handles_flattened_mutable_mapping(self):
-        site = {
-            'properties': {
-                'serverFarmId': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
-            }
-        }
-
-        _rename_server_farm_props(site)
-
-        self.assertEqual(site['properties']['appServicePlanId'],
-                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
-        self.assertNotIn('serverFarmId', site['properties'])
-        self.assertEqual(site['appServicePlanId'],
-                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
-        self.assertEqual(get_site_server_farm_id(site),
-                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
-
-    def test_rename_server_farm_props_removes_root_server_farm_id(self):
-        # Reproduces the az webapp list regression: newer SDK serializes serverFarmId directly
-        # at the root level (no "properties" wrapper), so it must be replaced there.
+    def test_transform_rename_server_farm_id_renames_key(self):
+        # Verifies the post-serialisation transformer renames serverFarmId -> appServicePlanId
         farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
-        site = {
-            'location': 'australiaeast',
-            'name': 'mywebapp',
+        web = {
+            'location': 'westus',
             'serverFarmId': farm_id,
-            'kind': 'app',
         }
 
-        _rename_server_farm_props(site)
+        result = transform_rename_server_farm_id(web)
 
-        self.assertNotIn('serverFarmId', site)
-        self.assertEqual(site['appServicePlanId'], farm_id)
-        self.assertEqual(get_site_server_farm_id(site), farm_id)
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result)
+
+    def test_transform_rename_server_farm_id_noop_when_already_renamed(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        web = {'appServicePlanId': farm_id}
+
+        result = transform_rename_server_farm_id(web)
+
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result)
+
+    def test_transform_rename_server_farm_id_list(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        webs = [
+            {'serverFarmId': farm_id, 'name': 'app1'},
+            {'appServicePlanId': farm_id, 'name': 'app2'},
+        ]
+
+        results = transform_rename_server_farm_id_list(webs)
+
+        for r in results:
+            self.assertNotIn('serverFarmId', r)
+            self.assertEqual(r['appServicePlanId'], farm_id)
 
     def test_rename_server_farm_props_handles_object_attributes(self):
         site = types.SimpleNamespace(

@@ -256,31 +256,20 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 
 def _rename_server_farm_props(webapp):
-    # Should be renamed in SDK in a future release
-    server_farm_id = get_site_server_farm_id(webapp)
-    if isinstance(webapp, MutableMapping):
-        properties = webapp.get("properties")
-        if isinstance(properties, MutableMapping):
-            # Newer SDK: properties are nested under "properties"; update there and also
-            # remove any root-level serverFarmId that may be present in the serialized form.
-            properties["appServicePlanId"] = server_farm_id
-            properties.pop("serverFarmId", None)
-        # Always remove serverFarmId from root and set appServicePlanId there too,
-        # because some SDK versions expose it flat (no "properties" wrapper).
-        webapp.pop("serverFarmId", None)
-        webapp["appServicePlanId"] = server_farm_id
-        try:
-            setattr(webapp, 'app_service_plan_id', server_farm_id)
-        except (AttributeError, TypeError):
-            pass
-    else:
+    # Newer SDK models (MutableMapping-based) are handled by the command-level
+    # transform (transform_rename_server_farm_id / _list) which operates on the
+    # already-serialised dict. Here we only need to cover the legacy attribute-style
+    # objects so that downstream code (e.g. get_site_server_farm_id) can still read
+    # app_service_plan_id from older SDK models.
+    if not isinstance(webapp, MutableMapping):
+        server_farm_id = get_site_server_farm_id(webapp)
         setattr(webapp, 'app_service_plan_id', server_farm_id)
-    # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
-    if hasattr(webapp, 'server_farm_id'):
-        try:
-            del webapp.server_farm_id
-        except (AttributeError, TypeError):
-            pass
+        # Remove server_farm_id attribute for old SDK compatibility
+        if hasattr(webapp, 'server_farm_id'):
+            try:
+                del webapp.server_farm_id
+            except (AttributeError, TypeError):
+                pass
     return webapp
 
 
