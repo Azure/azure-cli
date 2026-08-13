@@ -54,13 +54,16 @@ def get_site_server_farm_id(site):
     In azure-mgmt-web 11.0.0+, models use hybrid dict/model nature with camelCase keys.
     This helper provides backward compatibility.
     """
-    # Try new SDK dictionary-style access with camelCase
-    try:
-        return site["serverFarmId"]
-    except (KeyError, TypeError):
-        pass
+    # Try new SDK dictionary-style access with camelCase. The generated Site
+    # model stores flattened properties under "properties".
+    for source in (site, getattr(site, 'properties', None)):
+        if not isinstance(source, MutableMapping):
+            continue
+        for property_name in ('serverFarmId', 'appServicePlanId'):
+            if property_name in source:
+                return source[property_name]
     # Fall back to old SDK attribute access
-    return getattr(site, 'server_farm_id', None)
+    return getattr(site, 'server_farm_id', getattr(site, 'app_service_plan_id', None))
 
 
 def str2bool(v):
@@ -251,8 +254,14 @@ def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
     server_farm_id = get_site_server_farm_id(webapp)
     if isinstance(webapp, MutableMapping):
-        webapp["appServicePlanId"] = server_farm_id
-        webapp.pop("serverFarmId", None)
+        properties = webapp.get("properties")
+        target = properties if isinstance(properties, MutableMapping) else webapp
+        target["appServicePlanId"] = server_farm_id
+        target.pop("serverFarmId", None)
+        try:
+            setattr(webapp, 'app_service_plan_id', server_farm_id)
+        except (AttributeError, TypeError):
+            pass
     else:
         setattr(webapp, 'app_service_plan_id', server_farm_id)
     # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)

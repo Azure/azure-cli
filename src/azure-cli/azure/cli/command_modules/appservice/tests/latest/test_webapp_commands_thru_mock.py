@@ -40,7 +40,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_startup_logs,
                                                          show_startup_log,
                                                          create_webapp)
-from azure.cli.command_modules.appservice.utils import _rename_server_farm_props
+from azure.cli.command_modules.appservice.utils import _rename_server_farm_props, get_site_server_farm_id
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -72,6 +72,23 @@ class TestWebappMocked(unittest.TestCase):
 
         self.assertEqual(site['appServicePlanId'], '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
         self.assertNotIn('serverFarmId', site.keys())
+        self.assertEqual(get_site_server_farm_id(site),
+                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+
+    def test_rename_server_farm_props_handles_flattened_mutable_mapping(self):
+        site = {
+            'properties': {
+                'serverFarmId': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+            }
+        }
+
+        _rename_server_farm_props(site)
+
+        self.assertEqual(site['properties']['appServicePlanId'],
+                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+        self.assertNotIn('serverFarmId', site['properties'])
+        self.assertEqual(get_site_server_farm_id(site),
+                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
 
     def test_rename_server_farm_props_handles_object_attributes(self):
         site = types.SimpleNamespace(
