@@ -129,6 +129,7 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
             getaliasafterbreak = self.cmd(
                 'servicebus georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
+        time.sleep(300)
         # Create alias
         secondary_alias = self.cmd(
             'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}').get_output_in_json()

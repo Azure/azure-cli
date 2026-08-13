@@ -4593,7 +4593,7 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
     def test_chsm_private_link_resource(self, resource_group):
         # Define Params
         self.kwargs.update({
-            'chsm_name': self.create_random_name('cli-test-chsm-plr-', 24),
+            'chsm_name': self.create_random_name('cli-test-chsm-plr-', 22),
             'loc': 'ukwest',
             'rg': resource_group,
             'type': 'Microsoft.HardwareSecurityModules/cloudHsmClusters',
@@ -4615,7 +4615,7 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
     def test_chsm_private_endpoint_connection(self, resource_group):
         # Define Params
         self.kwargs.update({
-            'chsm_name': self.create_random_name('cli-test-chsm-pe-', 24),
+            'chsm_name': self.create_random_name('cli-test-chsm-pe-', 22),
             'loc': 'ukwest',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),

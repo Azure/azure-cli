@@ -44,7 +44,7 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/partnerNamespaces', '2021-06-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/namespaces', '2023-06-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
-    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
+    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2025-03-31', True)
     _register_one_provider('Microsoft.HardwareSecurityModules/paymentHsmClusters', '2025-12-01-preview', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
     _register_one_provider('Microsoft.HorizonDB/clusters', '2026-01-20-preview', True)

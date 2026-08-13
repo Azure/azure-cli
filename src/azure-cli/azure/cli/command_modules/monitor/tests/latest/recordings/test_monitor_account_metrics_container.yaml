@@ -1,0 +1,521 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001","name":"cli_test_monitor_account_mc000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_account_metrics_container","date":"2026-05-08T17:58:16Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FCADCB5710E946CEA57E604EC9D1472F Ref B: CO6AA3150218037 Ref C: 2026-05-08T17:58:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"accountId":"14e21a3b-a68e-4626-873e-6539bd54fc63","metrics":{"prometheusQueryEndpoint":"https://ac000002-g2a5gpe2eecga6gf.westus.prometheus.monitor.azure.com","internalId":"mac_14e21a3b-a68e-4626-873e-6539bd54fc63","enableAccessUsingResourcePermissions":true},"provisioningState":"Succeeded","defaultIngestionSettings":{"dataCollectionRuleResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionRules/ac000002","dataCollectionEndpointResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionEndpoints/ac000002","dataCollectionRuleImmutableId":"dcr-9ef0dccd9267493699b55b77942fc26b","ingestionEndpoints":{"metrics":"https://ac000002-4yha.westus-1.metrics.ingest.monitor.azure.com"}},"publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001/providers/microsoft.monitor/accounts/ac000002","name":"ac000002","type":"Microsoft.Monitor/accounts","etag":"\"24009d7b-0000-0700-0000-69fe244e0000\"","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:58:22.6069291Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:58:22.6069291Z"}}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2021-06-03-preview, 2023-04-01, 2023-04-03, 2023-06-01-preview,
+        2024-04-01-preview, 2024-04-03-preview, 2024-10-01-preview, 2024-10-03-preview,
+        2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '1420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westcentralus/4deb1619-61d1-43a8-a8a0-8a9f238cad14
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: B64147E738D140E4BE1D66119E00072D Ref B: CO1AA3060818042 Ref C: 2026-05-08T17:58:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"error":{"code":"DependencyFailure","message":"Failed to update the
+        Metrics Ingestion limits. Please follow the instructions here: https://go.microsoft.com/fwlink/?linkid=2270124"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json
+      date:
+      - Fri, 08 May 2026 17:58:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/c404eaff-363d-4e68-a8b6-f8a3638dee66
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 4A67D892BCCF4C799758E4410471BF73 Ref B: CO6AA3150219009 Ref C: 2026-05-08T17:58:39Z'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"error":{"code":"DependencyFailure","message":"Failed to update the
+        Metrics Ingestion limits. Please follow the instructions here: https://go.microsoft.com/fwlink/?linkid=2270124"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json
+      date:
+      - Fri, 08 May 2026 17:58:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/73b4e29b-66dc-4c87-a605-5754e8dd19be
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 4A6043B19EF641B4B575F56853BC3B38 Ref B: CO6AA3150219039 Ref C: 2026-05-08T17:58:41Z'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"error":{"code":"DependencyFailure","message":"Failed to update the
+        Metrics Ingestion limits. Please follow the instructions here: https://go.microsoft.com/fwlink/?linkid=2270124"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json
+      date:
+      - Fri, 08 May 2026 17:58:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/b53fcffb-551b-428f-8135-82cab62489c5
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 78880A78BBFE4F1F86EFB7D0EA40C00A Ref B: CO1AA3060814042 Ref C: 2026-05-08T17:58:43Z'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"version":"1.0"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001/providers/microsoft.monitor/accounts/ac000002/metricscontainers/default","name":"default","type":"Microsoft.Monitor/accounts/metricsContainers","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:58:49.0008255Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:58:49.0008255Z"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/2a83dc62-818c-4088-abfd-4694cb9b8072
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 18217992EAE7425CB12BD867DDB32CEE Ref B: CO1AA3060820029 Ref C: 2026-05-08T17:58:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"version":"1.0"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001/providers/microsoft.monitor/accounts/ac000002/metricscontainers/default","name":"default","type":"Microsoft.Monitor/accounts/metricsContainers","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:58:49.0008255Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:58:49.0008255Z"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/54ef2f86-748b-4b4d-bdc0-8d6ed789837a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 5B749FDA6D8043F085600907BB0A761D Ref B: MWH011020806031 Ref C: 2026-05-08T17:58:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"version":"1.0"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001/providers/microsoft.monitor/accounts/ac000002/metricscontainers/default","name":"default","type":"Microsoft.Monitor/accounts/metricsContainers","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:58:49.0008255Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:58:49.0008255Z"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/a069eb74-8033-4c13-9533-75e837db6efe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 48E6E2F5F3794BCE97DAF818337CC8D7 Ref B: CO1AA3060813031 Ref C: 2026-05-08T17:58:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"version": "1.0"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account metrics-container update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '34'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --azure-monitor-workspace-name -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_mc000001/providers/Microsoft.Monitor/accounts/ac000002/metricsContainers/default?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"version":"1.0"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_mc000001/providers/microsoft.monitor/accounts/ac000002/metricscontainers/default","name":"default","type":"Microsoft.Monitor/accounts/metricsContainers","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-08T17:58:49Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-08T17:58:53.1970664Z"}}'
+    headers:
+      api-supported-versions:
+      - 2025-05-01-preview, 2025-05-03-preview, 2025-10-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '499'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 08 May 2026 17:58:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:74683e7d-3ee8-4856-bfe7-e63c83b6737e
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=1820de50-3eca-48a8-b72f-01a509abc8fe/westus/239c3f9b-dc0a-4a46-828e-212f6d3572ce
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 789AC1F4E95C4A65ACAE8138344A3E5A Ref B: CO6AA3150218017 Ref C: 2026-05-08T17:58:52Z'
+    status:
+      code: 200
+      message: OK
+version: 1

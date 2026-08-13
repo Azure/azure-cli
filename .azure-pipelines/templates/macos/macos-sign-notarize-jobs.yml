@@ -220,7 +220,7 @@ jobs:
       
     displayName: 'Create ZIP for each binary ($(Architecture))'
   
-  - task: EsrpCodeSigning@5
+  - task: EsrpCodeSigning@6
     displayName: 'ESRP - Sign binaries (Developer ID Application)'
     inputs:
       ConnectedServiceName: '${{ parameters.ESRPServiceConnection }}'
@@ -439,7 +439,7 @@ jobs:
       
     displayName: 'Prepare for notarization ($(Architecture))'
   
-  - task: EsrpCodeSigning@5
+  - task: EsrpCodeSigning@6
     displayName: 'ESRP - Notarize with Apple ($(Architecture))'
     inputs:
       ConnectedServiceName: '${{ parameters.ESRPServiceConnection }}'
