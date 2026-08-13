@@ -2631,7 +2631,7 @@ parameters:
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
   - name: --endpoint -e
     type: string
-    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
+    short-summary: The endpoint type to be used for an Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
