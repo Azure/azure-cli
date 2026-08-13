@@ -16,7 +16,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
                                        AzureResponseError,
-                                       ResourceNotFoundError)
+                                       ResourceNotFoundError,
+                                       ValidationError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -1437,6 +1438,28 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = sku_description_cls.call_args
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
+
+    def test_update_to_isolated_v4_sku_requires_ase(self):
+        from azure.cli.command_modules.appservice.custom import update_app_service_plan
+        instance = mock.MagicMock()
+        instance.hosting_environment_profile = None
+        instance.zone_redundant = False
+
+        with self.assertRaises(ValidationError):
+            update_app_service_plan(mock.MagicMock(), instance, sku='I1V4')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._enable_managed_instance_properties')
+    def test_update_to_isolated_v4_sku_on_ase(self, _):
+        from azure.cli.command_modules.appservice.custom import update_app_service_plan
+        instance = mock.MagicMock()
+        instance.hosting_environment_profile = mock.MagicMock()
+        instance.zone_redundant = False
+        instance.sku.capacity = 1
+
+        result = update_app_service_plan(mock.MagicMock(), instance, sku='I1MV4')
+
+        self.assertEqual(result.sku.name, 'I1MV4')
+        self.assertEqual(result.sku.tier, 'IsolatedV4')
 
 
 class TestOneDeployScmCache(unittest.TestCase):

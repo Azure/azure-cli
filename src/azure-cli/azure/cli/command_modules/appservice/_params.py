@@ -1057,7 +1057,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 or Isolated V4 sku')
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())

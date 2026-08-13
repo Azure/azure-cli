@@ -26,6 +26,11 @@ class ValidateAppServicePlanSkuTest(unittest.TestCase):
                 self.assertEqual(get_sku_tier(sku), 'IsolatedV4')
                 _validate_asp_sku(sku, app_service_environment='ase', zone_redundant=False)
 
+    def test_isolated_v4_skus_support_zone_redundancy(self):
+        for sku in ISOLATED_V4_SKUS:
+            with self.subTest(sku=sku):
+                _validate_asp_sku(sku, app_service_environment='ase', zone_redundant=True)
+
     def test_isolated_v4_skus_require_ase(self):
         for sku in ISOLATED_V4_SKUS:
             with self.subTest(sku=sku):
