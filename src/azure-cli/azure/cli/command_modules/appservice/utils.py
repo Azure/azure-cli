@@ -56,7 +56,12 @@ def get_site_server_farm_id(site):
     """
     # Try new SDK dictionary-style access with camelCase. The generated Site
     # model stores flattened properties under "properties".
-    for source in (site, getattr(site, 'properties', None)):
+    # For hybrid SDK objects, site.properties is an attribute; for plain dicts, fall back
+    # to the "properties" key so that unit-test fixtures (plain dicts) also work.
+    properties_source = getattr(site, 'properties', None)
+    if properties_source is None and isinstance(site, MutableMapping):
+        properties_source = site.get('properties')
+    for source in (site, properties_source):
         if not isinstance(source, MutableMapping):
             continue
         for property_name in ('serverFarmId', 'appServicePlanId'):
@@ -255,9 +260,15 @@ def _rename_server_farm_props(webapp):
     server_farm_id = get_site_server_farm_id(webapp)
     if isinstance(webapp, MutableMapping):
         properties = webapp.get("properties")
-        target = properties if isinstance(properties, MutableMapping) else webapp
-        target["appServicePlanId"] = server_farm_id
-        target.pop("serverFarmId", None)
+        if isinstance(properties, MutableMapping):
+            # Newer SDK: properties are nested under "properties"; update there and also
+            # remove any root-level serverFarmId that may be present in the serialized form.
+            properties["appServicePlanId"] = server_farm_id
+            properties.pop("serverFarmId", None)
+        # Always remove serverFarmId from root and set appServicePlanId there too,
+        # because some SDK versions expose it flat (no "properties" wrapper).
+        webapp.pop("serverFarmId", None)
+        webapp["appServicePlanId"] = server_farm_id
         try:
             setattr(webapp, 'app_service_plan_id', server_farm_id)
         except (AttributeError, TypeError):

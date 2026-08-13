@@ -87,8 +87,27 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(site['properties']['appServicePlanId'],
                          '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
         self.assertNotIn('serverFarmId', site['properties'])
+        self.assertEqual(site['appServicePlanId'],
+                         '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
         self.assertEqual(get_site_server_farm_id(site),
                          '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+
+    def test_rename_server_farm_props_removes_root_server_farm_id(self):
+        # Reproduces the az webapp list regression: newer SDK serializes serverFarmId directly
+        # at the root level (no "properties" wrapper), so it must be replaced there.
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        site = {
+            'location': 'australiaeast',
+            'name': 'mywebapp',
+            'serverFarmId': farm_id,
+            'kind': 'app',
+        }
+
+        _rename_server_farm_props(site)
+
+        self.assertNotIn('serverFarmId', site)
+        self.assertEqual(site['appServicePlanId'], farm_id)
+        self.assertEqual(get_site_server_farm_id(site), farm_id)
 
     def test_rename_server_farm_props_handles_object_attributes(self):
         site = types.SimpleNamespace(
