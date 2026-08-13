@@ -105,8 +105,8 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
                                   "https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
-            raise ValidationError("Only pricing tiers 'IsolatedV2', 'IsolatedMV2', and 'IsolatedV4' are allowed in this "
-                                  "app service plan. Use this link to "
+            raise ValidationError("Only pricing tiers 'IsolatedV2', 'IsolatedMV2', and 'IsolatedV4' are allowed "
+                                  "in this app service plan. Use this link to "
                                   "learn more: https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
