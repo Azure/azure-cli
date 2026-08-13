@@ -34,7 +34,6 @@ Release History
 
 **App Service**
 
-* `az appservice plan create/update`: Add Isolated V4 SKU support (`I1-6V4`, `I1-5MV4`)
 * `az appservice plan`: Remove preview flag for managed instance app service plans (#33690)
 * `az appservice plan`: Add Premium V3 SKU support (`P0V3`, `P1-3V3`, `P1-5MV3`) for managed instances (#33690)
 * `az webapp troubleshoot status`: Provide latest application startup attempt data (#33673)
