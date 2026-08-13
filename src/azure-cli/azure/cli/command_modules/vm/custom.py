@@ -913,7 +913,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
+              v_cpus_available=None, v_cpus_per_core=None, processor_mode=None, accept_term=None,
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
@@ -1144,6 +1144,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
+        processor_mode=processor_mode,
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
@@ -1757,7 +1758,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, processor_mode=None,
+              disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
               scheduled_events_api_version=None, enable_all_instance_down=None,
@@ -1987,6 +1989,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm["hardware_profile"].get("vm_size_properties", None) is None:
             vm["hardware_profile"]["vm_size_properties"] = {}
         vm["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
+
+    if processor_mode is not None:
+        if vm.get("hardware_profile", None) is None:
+            vm["hardware_profile"] = {}
+        vm["hardware_profile"]["processor_mode"] = processor_mode
 
     if ephemeral_os_disk_placement is not None:
         if vm.get("storage_profile", {}).get("os_disk", {}).get("diff_disk_settings", None) is not None:
@@ -3717,7 +3724,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
+                v_cpus_available=None, v_cpus_per_core=None, processor_mode=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
                 enable_integrity_monitoring=False, enable_auto_os_upgrade=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
@@ -4035,7 +4042,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
-            v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
+            v_cpus_per_core=v_cpus_per_core, processor_mode=processor_mode,
+            os_disk_security_encryption_type=os_disk_security_encryption_type,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
@@ -4581,6 +4589,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
+                processor_mode=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
@@ -4705,6 +4714,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available  # pylint: disable=line-too-long
         if v_cpus_per_core is not None:
             vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core  # pylint: disable=line-too-long
+
+    if processor_mode is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("hardware_profile", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"] = {}
+        vmss["virtual_machine_profile"]["hardware_profile"]["processor_mode"] = processor_mode
 
     if capacity_reservation_group is not None:
         if vmss.get("virtual_machine_profile", None) is None:

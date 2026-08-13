@@ -580,6 +580,9 @@ def convert_show_result_to_snake_case(result):
             protected_settings_from_key_vault.pop("sourceVault")
 
     hardware_profile = virtual_machine_profile.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSizeProperties" in hardware_profile:
         hardware_profile["vm_size_properties"] = hardware_profile["vmSizeProperties"]
         hardware_profile.pop("vmSizeProperties")

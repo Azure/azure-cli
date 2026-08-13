@@ -71,6 +71,7 @@ def load_arguments(self, _):
     OSTypes = ['Windows', 'Linux']
     PatchMode = ['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']
     Priority = ['Regular', 'Low', 'Spot']
+    ProcessorMode = ['Deterministic', 'Opportunistic']
     ProxyAgentMode = ['Audit', 'Enforce']
     PublicIPAddressAllocationMethod = ['dynamic', 'static']
     PublicNetworkAccess = ['Disabled', 'Enabled']
@@ -1370,6 +1371,10 @@ def load_arguments(self, _):
                        help='The ID or name of the capacity reservation group that is used to allocate. Pass in "None" to disassociate the capacity reservation group. Please note that if you want to delete a VM/VMSS that has been associated with capacity reservation group, you need to disassociate the capacity reservation group first.')
             c.argument('v_cpus_available', type=int, help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
+            c.argument('processor_mode', arg_type=get_enum_type(ProcessorMode),
+                       help='Specifies the processor mode for the virtual machine or virtual machine scale set. '
+                            'Optional; if omitted, the platform default applies (currently Deterministic). '
+                            'This property can be updated on a running VM or VMSS without deallocation or reboot.')
             c.argument('disk_controller_type', disk_controller_type)
             c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), help='Specify whether metadata security protoco (proxy agent) feature should be enabled on the virtual machine or virtual machine scale set.')
             c.argument('proxy_agent_mode', deprecate_info=c.deprecate(target='--proxy-agent-mode', redirect='--wire-server-mode'), arg_type=get_enum_type(ProxyAgentMode), help='Specify the mode that proxy agent will execute on if the feature is enabled.')
