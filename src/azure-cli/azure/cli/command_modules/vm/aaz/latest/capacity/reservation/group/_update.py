@@ -288,9 +288,17 @@ class Update(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             _element.statuses = AAZListType()
             _element.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.statuses
