@@ -5,8 +5,9 @@
 
 import json
 import os
+import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, PropertyMock
 
 from azure.cli.testsdk.checkers import JMESPathCheck
 from knack.util import CLIError
@@ -85,6 +86,42 @@ class TestShouldRetryForProvisioningState(unittest.TestCase):
 
 
 class TestCmdRetryDispatch(unittest.TestCase):
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
+    @patch(
+        'azure.cli.testsdk.scenario_tests.config.TestConfig.record_mode',
+        new_callable=PropertyMock,
+        return_value=True,
+    )
+    def test_retry_enabled_live_instance_disables_recording(self, _record_mode):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = AzureKubernetesServiceScenarioTest('runTest')
+
+        self.assertTrue(instance.disable_recording)
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
+    @patch(
+        'azure.cli.testsdk.scenario_tests.config.TestConfig.record_mode',
+        new_callable=PropertyMock,
+        return_value=True,
+    )
+    def test_retry_enabled_live_instance_never_saves_cassette(self, _record_mode):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = AzureKubernetesServiceScenarioTest('runTest')
+        instance.cassette = MagicMock()
+        instance.cassette.dirty = True
+        fd, temp_recording_file = tempfile.mkstemp()
+        os.close(fd)
+        instance.temp_recording_file = temp_recording_file
+
+        instance._save_recording_file()
+
+        self.assertFalse(instance.cassette.dirty)
+        self.assertFalse(os.path.exists(temp_recording_file))
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
     def test_live_command_without_checks_uses_retry_path(self):

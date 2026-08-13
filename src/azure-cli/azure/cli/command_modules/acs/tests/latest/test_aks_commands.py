@@ -50,15 +50,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
+        self._retry_live_without_recording = (
+            self.is_live and
+            os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'
+        )
+        if self._retry_live_without_recording:
+            # Poll/refetch requests are incompatible with normal replay.
+            self.disable_recording = True
+
+    def _save_recording_file(self, *args):
+        if self._retry_live_without_recording:
+            # Preparers can temporarily override disable_recording.
+            self.cassette.dirty = False
+            if os.path.exists(self.temp_recording_file):
+                os.remove(self.temp_recording_file)
+            return
+        return super()._save_recording_file(*args)
 
     def cmd(self, command, checks=None, expect_failure=False):
         # Live-only retry adapter: when AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK
         # is set during a live run, retry AKS operation conflicts and poll
         # provisioningState until terminal so asynchronous service operations
         # can't fail the test on a transient conflict or stale 'Updating' body.
-        # Recordings made with the flag enabled must NOT be committed; the
-        # replay pipeline runs with the flag off and would assert against the
-        # initial pre-poll response.
         if (self.is_live and
             os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
             if checks is None:
