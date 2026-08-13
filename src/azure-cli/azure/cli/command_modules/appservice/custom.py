@@ -1521,8 +1521,14 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         for setting in app_settings_to_add:
             site.site_config.app_settings.append(NameValuePair(name=setting['name'], value=setting['value']))
 
+    # The SkuTransitionResolver reads from a top-level "sku" object (siteEnvelope.Sku.Name),
+    # not from properties.sku. The SDK Site model doesn't expose a top-level sku field,
+    # so we serialize to dict and inject it manually.
+    site_dict = site.as_dict()
+    site_dict['sku'] = {'name': 'FlexConsumption'}
+
     print(f"Submitting upgrade request for '{source_name}'...")
-    poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, site)
+    poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, site_dict)
     LongRunningOperation(cmd.cli_ctx)(poller)
 
     print(f"\nUpgrade complete. Function app '{source_name}' is now on Flex Consumption."
