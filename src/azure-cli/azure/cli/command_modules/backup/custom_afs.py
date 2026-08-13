@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
+import azure.cli.command_modules.backup.custom as custom_module
 # pylint: disable=too-many-locals
 # pylint: disable=import-error
 # pylint: disable=unused-argument
@@ -313,7 +314,6 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     # CRR path: route through passive stamp (secondary region endpoint)
     if use_secondary_region:
         vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
-        import azure.cli.command_modules.backup.custom as custom_module
         azure_region = custom_module.secondary_region_map[vault.location]
 
         aad_client = aad_properties_cf(cmd.cli_ctx)
@@ -329,12 +329,13 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
         # land in additional_properties — enable sending them so the backend gets them.
         crr_access_token.enable_additional_properties_sending()
 
-        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        crr_restore_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_crr_request = CrossRegionRestoreRequest(
             cross_region_restore_access_details=crr_access_token,
             restore_request=afs_restore_request)
-        result = crr_client.begin_trigger(azure_region, trigger_crr_request,
-                                          cls=helper.get_pipeline_response, polling=False).result()
+        result = crr_restore_client.begin_trigger(
+            azure_region, trigger_crr_request,
+            cls=helper.get_pipeline_response, polling=False).result()
         return helper.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
@@ -374,9 +375,10 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     filter_string = helper.get_filter_string({'startDate': query_start_date, 'endDate': query_end_date})
 
     if use_secondary_region:
-        crr_client = recovery_points_crr_cf(cmd.cli_ctx)
-        recovery_points = crr_client.list(vault_name, resource_group_name, fabric_name,
-                                          container_uri, item_uri, filter_string)
+        crr_recovery_points_client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = crr_recovery_points_client.list(
+            vault_name, resource_group_name, fabric_name,
+            container_uri, item_uri, filter_string)
         paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
     else:
         # Get recovery points
