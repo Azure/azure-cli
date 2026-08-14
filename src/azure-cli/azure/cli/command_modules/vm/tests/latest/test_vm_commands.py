@@ -12787,6 +12787,45 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', False),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_wire_server_local_rules_', location='eastus2')
+    def test_vm_vmss_wire_server_use_local_file_rules(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        vnet = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
+
+        self.cmd('vm create -g {rg} -n {vm} --location eastus2 '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --enable-proxy-agent '
+                 '--wire-server-mode Audit --wire-server-use-local-file-rules --size Standard_D2s_v3 '
+                 '--subnet {subnet_id} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE '
+                 '--add-proxy-agent-extension true')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', True)
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --wire-server-use-local-file-rules false', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', False)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --location eastus2 '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --nsg {nsg} '
+                 '--enable-proxy-agent --wire-server-mode Audit --wire-server-use-local-file-rules '
+                 '--vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-username azureuser '
+                 '--generate-ssh-keys --add-proxy-agent-extension true --subnet {subnet_id}', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --wire-server-use-local-file-rules false', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', False)
+        ])
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='eastus2')
     def test_vm_vmss_proxy_agent_control_profile_reference(self, resource_group):
