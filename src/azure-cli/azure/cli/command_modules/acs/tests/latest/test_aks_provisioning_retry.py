@@ -561,5 +561,79 @@ class TestSupportedVersionSelection(unittest.TestCase):
         )
 
 
+class TestCreateAzureMonitorWorkspace(unittest.TestCase):
+
+    def _make_instance(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        return object.__new__(AzureKubernetesServiceScenarioTest)
+
+    def test_creates_dedicated_workspace_and_returns_its_id(self):
+        instance = self._make_instance()
+        instance.create_random_name = MagicMock(return_value='cliaksamwabc123')
+        expected_id = (
+            '/subscriptions/sub/resourceGroups/rg/providers/'
+            'Microsoft.Monitor/accounts/cliaksamwabc123'
+        )
+        instance.cmd = MagicMock(
+            return_value=MockExecutionResult({'id': expected_id, 'name': 'cliaksamwabc123'})
+        )
+
+        workspace_id = instance._create_azure_monitor_workspace('rg', 'westus2')
+
+        self.assertEqual(workspace_id, expected_id)
+        instance.create_random_name.assert_called_once_with('cliaksamw', 24)
+        instance.cmd.assert_called_once_with(
+            'monitor account create --resource-group rg --name cliaksamwabc123 --location westus2'
+        )
+
+
+class TestCmdOrSkipIfUnsupported(unittest.TestCase):
+
+    def _make_instance(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        return object.__new__(AzureKubernetesServiceScenarioTest)
+
+    def test_returns_result_when_command_succeeds(self):
+        instance = self._make_instance()
+        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+        instance.cmd = MagicMock(return_value=expected)
+
+        result = instance._cmd_or_skip_if_unsupported('aks update ...', checks=[])
+
+        self.assertIs(result, expected)
+        instance.cmd.assert_called_once_with('aks update ...', checks=[])
+
+    def test_skips_test_when_error_matches_unsupported_marker(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError('Control plane metrics configuration is not supported yet.')
+        )
+        instance.skipTest = MagicMock(side_effect=unittest.SkipTest('skipped'))
+
+        with self.assertRaises(unittest.SkipTest):
+            instance._cmd_or_skip_if_unsupported(
+                'aks update --enable-control-plane-metrics',
+                skip_reason='Control Plane Metrics toggle is not yet available',
+            )
+
+        instance.skipTest.assert_called_once_with(
+            'Control Plane Metrics toggle is not yet available'
+        )
+
+    def test_reraises_when_error_does_not_match_marker(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(side_effect=CLIError('Some unrelated failure'))
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'Some unrelated failure'):
+            instance._cmd_or_skip_if_unsupported('aks update --enable-control-plane-metrics')
+
+        instance.skipTest.assert_not_called()
+
+
 if __name__ == '__main__':
     unittest.main()
