@@ -4736,6 +4736,107 @@ class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
                  self.check("length([?properties.groupId == 'application'])", 1)])
         self.cmd('resource delete --name {phsm_name} -g {rg} --resource-type {type}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_phsm_pe')
+    def test_phsm_private_endpoint_connection(self, resource_group):
+        # Define Params
+        self.kwargs.update({
+            'phsm_name': self.create_random_name('cli-phsm-pe-', 21),
+            'loc': 'eastus2euap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'rg': resource_group,
+            'type': 'Microsoft.HardwareSecurityModules/paymentHsmClusters',
+            'properties': '{\\"sku\\": { \\"family\\": \\"B\\", \\"name\\": \\"Payments_v2\\" }, \\"location\\": \\"eastus2euap\\", \\"properties\\": { }, \\"tags\\": { \\"UseMockHfc\\": \\"true\\" } }'
+        })
+
+        # Prepare phsm and network
+        hsm = self.cmd('resource create -g {rg} -n {phsm_name} --resource-type {type} --location {loc} --is-full-object --properties "{properties}"').get_output_in_json()
+        self.kwargs['hsm_id'] = hsm['id']
+        self.cmd('network vnet create '
+                 '-n {vnet} '
+                 '-g {rg} '
+                 '-l {loc} '
+                 '--subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update '
+                 '-n {subnet} '
+                 '--vnet-name {vnet} '
+                 '-g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create '
+                      '-g {rg} '
+                      '-n {pe} '
+                      '--vnet-name {vnet} '
+                      '--subnet {subnet} '
+                      '-l {loc} '
+                      '--connection-name {pe_connection} '
+                      '--private-connection-resource-id {hsm_id} '
+                      '--group-id management').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the private endpoint connection
+        result = self.cmd('network private-endpoint-connection list --name {phsm_name} -g {rg} --type {type}',
+                          checks=self.check('length(@)', 1)).get_output_in_json()
+
+        self.kwargs['hsm_pe_id'] = result[0]['id']
+
+        self.cmd('network private-endpoint-connection show '
+                 '--id {hsm_pe_id}',
+                 checks=self.check('id', '{hsm_pe_id}'))
+        self.kwargs['hsm_pe_name'] = self.kwargs['hsm_pe_id'].split('/')[-1]
+        self.cmd('network private-endpoint-connection show  '
+                 '--resource-name {phsm_name} '
+                 '-g {rg} '
+                 '--name {hsm_pe_name} '
+                 '--type {type}',
+                 checks=self.check('name', '{hsm_pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+
+        self.cmd('network private-endpoint-connection approve '
+                 '--resource-name {phsm_name} '
+                 '--name {hsm_pe_name} '
+                 '-g {rg} '
+                 '--type Microsoft.HardwareSecurityModules/paymentHsmClusters '
+                 '--description "{approval_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded', False))
+
+        self.cmd('network private-endpoint-connection reject '
+                 '--id {hsm_pe_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded', False))
+
+        self.cmd('network private-endpoint-connection list --id {hsm_id}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network private-endpoint-connection delete --id {hsm_pe_id} -y')
+
+        # clear resources
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        time.sleep(60)
+        self.cmd('az resource delete --name {phsm_name} -g {rg} --resource-type {type}')
+
 class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pg')
