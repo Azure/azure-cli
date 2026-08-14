@@ -4711,6 +4711,31 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
         self.cmd('az resource delete --name {chsm_name} -g {rg} --resource-type {type}')
 
+class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_phsm_plr_rg')
+    def test_phsm_private_link_resource(self, resource_group):
+        # Define Params
+        self.kwargs.update({
+            'phsm_name': self.create_random_name('cli-phsm-pl-', 21),
+            'loc': 'eastus2euap',
+            'rg': resource_group,
+            'type': 'Microsoft.HardwareSecurityModules/paymentHsmClusters',
+            'properties': '{ \\"sku\\": { \\"family\\": \\"B\\", \\"name\\": \\"Payments_v2\\" }, \\"location\\": \\"eastus2euap\\", \\"properties\\": { }, \\"tags\\": { \\"UseMockHfc\\": \\"true\\" } }'
+        })
+
+        # Create PHSM Resource
+        self.cmd('resource create -g {rg} -n {phsm_name} --resource-type {type} --location {loc} --is-full-object --properties "{properties}"')
+
+        # Show resource was created
+        self.cmd('network private-link-resource list '
+                 '--name {phsm_name} '
+                 '-g {rg} '
+                 '--type {type}',
+             checks=[self.check('length(@)', 2),
+                 self.check("length([?properties.groupId == 'management'])", 1),
+                 self.check("length([?properties.groupId == 'application'])", 1)])
+        self.cmd('resource delete --name {phsm_name} -g {rg} --resource-type {type}')
+
 class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pg')
