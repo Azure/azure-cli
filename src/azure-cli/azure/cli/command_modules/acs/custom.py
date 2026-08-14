@@ -3178,13 +3178,20 @@ def aks_agentpool_rollback(
         node_os_upgrade_channel_value and str(node_os_upgrade_channel_value).lower() not in ["none", "unmanaged"]
     )
 
-    if upgrade_channel_enabled or node_os_channel_enabled:
+    if upgrade_channel_enabled:
         logger.warning(
-            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s, nodeOSUpgradeChannel=%s). "
+            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s). "
             "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
             cluster_name,
             upgrade_channel_value or "none",
-            node_os_upgrade_channel_value or "Unmanaged",
+        )
+    elif node_os_channel_enabled:
+        logger.warning(
+            "nodeOSUpgradeChannel is enabled on cluster '%s' (nodeOSUpgradeChannel=%s). "
+            "The orchestrator version rollback will proceed, but the node image rollback "
+            "will not succeed. Please disable nodeOSUpgradeChannel if you want to roll back the node image.",
+            cluster_name,
+            node_os_upgrade_channel_value,
         )
 
     logger.info("Fetching the most recent rollback version...")

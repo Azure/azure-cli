@@ -6,7 +6,10 @@ set -exv
 
 : "${BUILD_STAGINGDIRECTORY:?BUILD_STAGINGDIRECTORY environment variable not set.}"
 
-# IMAGE should be Azure Linux docker image url, such as mcr.microsoft.com/azurelinux/base/core:3.0
+# IMAGE should be Azure Linux docker image url. The CI pipeline runs this script once per
+# matrix row (Azure Linux 3.0 and Azure Linux 4.0 Beta, each x86_64/aarch64), passing in the
+# appropriate image, e.g. mcr.microsoft.com/azurelinux/base/core:3.0 or
+# mcr.microsoft.com/azurelinux-beta/base/core:4.0
 : "${IMAGE:?IMAGE environment variable not set.}"
 
 CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`

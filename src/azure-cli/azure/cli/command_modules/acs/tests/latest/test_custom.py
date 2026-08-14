@@ -1788,6 +1788,66 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
 
         mock_sdk_no_wait.assert_not_called()
 
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_warns_node_image_only_for_node_os_channel(
+        self, mock_sdk_no_wait, mock_cf_managed_clusters
+    ):
+        rollback_version = mock.Mock(
+            orchestrator_version="1.34.8",
+            node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
+            timestamp=datetime.datetime(2026, 8, 5),
+        )
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])
+        client.get.return_value = mock.Mock()
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(
+            auto_upgrade_profile=mock.Mock(
+                upgrade_channel=mock.Mock(value="none"),
+                node_os_upgrade_channel=mock.Mock(value="NodeImage"),
+            )
+        )
+
+        with mock.patch("azure.cli.command_modules.acs.custom.logger.warning") as mock_warning:
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_warning.assert_called_once()
+        warning = mock_warning.call_args.args[0]
+        self.assertIn("The orchestrator version rollback will proceed", warning)
+        self.assertIn("the node image rollback will not succeed", warning)
+        self.assertNotIn("Rollback will not succeed until auto-upgrade is disabled", warning)
+        mock_sdk_no_wait.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_prioritizes_upgrade_channel_warning(
+        self, mock_sdk_no_wait, mock_cf_managed_clusters
+    ):
+        rollback_version = mock.Mock(
+            orchestrator_version="1.34.8",
+            node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
+            timestamp=datetime.datetime(2026, 8, 5),
+        )
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])
+        client.get.return_value = mock.Mock()
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(
+            auto_upgrade_profile=mock.Mock(
+                upgrade_channel=mock.Mock(value="stable"),
+                node_os_upgrade_channel=mock.Mock(value="NodeImage"),
+            )
+        )
+
+        with mock.patch("azure.cli.command_modules.acs.custom.logger.warning") as mock_warning:
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_warning.assert_called_once()
+        warning = mock_warning.call_args.args[0]
+        self.assertIn("Rollback will not succeed until auto-upgrade is disabled", warning)
+        self.assertNotIn("nodeOSUpgradeChannel", warning)
+        self.assertNotIn("The orchestrator version rollback will proceed", warning)
+        mock_sdk_no_wait.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()
