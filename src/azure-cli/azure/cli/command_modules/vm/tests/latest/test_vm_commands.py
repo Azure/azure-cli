@@ -13255,6 +13255,7 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
     # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
     # Provide private package for service team to test it out.
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='eastus2euap')
     def test_open_capacity_reservation(self, resource_group):
 
