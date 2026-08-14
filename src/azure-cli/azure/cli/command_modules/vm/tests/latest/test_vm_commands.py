@@ -13253,11 +13253,14 @@ class CapacityReservationScenarioTest(ScenarioTest):
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='westus')
+    # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
+    # Provide private package for service team to test it out.
+    @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='eastus2euap')
     def test_open_capacity_reservation(self, resource_group):
 
         self.kwargs.update({
             'rg': resource_group,
+            'location': 'eastus2euap',
             'reservation_group': self.create_random_name('cli_open_reservation_group_', 40),
             'reservation_name': self.create_random_name('cli_open_reservation_', 40),
             'vm': self.create_random_name('cli-open-vm-', 20),
@@ -13266,25 +13269,11 @@ class CapacityReservationScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
-        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} '
-                 '--reservation-type Targeted',
-                 checks=[
-                     self.check('name', '{reservation_group}'),
-                     self.check('reservationType', 'Targeted')
-                 ])
-
-        self.cmd('capacity reservation group update -n {reservation_group} -g {rg} --reservation-type Open',
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} -l {location} '
+                 '--reservation-type Open',
                  checks=[
                      self.check('name', '{reservation_group}'),
                      self.check('reservationType', 'Open')
-                 ])
-
-        self.cmd('capacity reservation group delete -n {reservation_group} -g {rg}')
-
-        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --reservation-type Open',
-                 checks=[
-                     self.check('name', '{reservation_group}'),
-                     self.check('reservationType', 'Targeted')
                  ])
 
         self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
@@ -13296,10 +13285,9 @@ class CapacityReservationScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
-        self.cmd('vm create -g {rg} -n {vm} --image {image} --size {sku} '
-                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
-                 '--public-ip-address "" --nsg-rule None '
-                 '--disable-capacity-reservation-assignment true')
+        self.cmd('vm create -g {rg} -n {vm} -l {location} --image {image} --size {sku} '
+                 '--admin-username azureuser '
+                 '--ssh-key-value "{ssh_key}" --public-ip-address "" --nsg-rule None --no-capacity-reservation true')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -13316,9 +13304,9 @@ class CapacityReservationScenarioTest(ScenarioTest):
             self.check('instanceView.capacityReservationType', 'Open')
         ])
 
-        utilization = self.cmd(
-            'capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} --instance-view',
-            checks=[
+        utilization = \
+            self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                     '--instance-view', checks=[
                 self.exists('instanceView.utilizationInfo.usedReservedCountBySubscription')
             ]).get_output_in_json()['instanceView']['utilizationInfo']['usedReservedCountBySubscription']
         self.assertEqual(1, len(utilization))
