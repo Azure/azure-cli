@@ -634,6 +634,40 @@ class TestCmdOrSkipIfUnsupported(unittest.TestCase):
 
         instance.skipTest.assert_not_called()
 
+    def test_reraises_unrelated_vm_size_not_supported_error(self):
+        # This message satisfies the generic "is not supported" condition marker, but has no
+        # Control Plane Metrics context, so it must NOT be treated as this feature being
+        # unavailable and must propagate as a real failure instead of being skipped.
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError(
+                '(VMSizeNotSupported) The VM size Standard_Foo is not supported in this region.'
+            )
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'VMSizeNotSupported'):
+            instance._cmd_or_skip_if_unsupported(
+                'aks create --node-vm-size Standard_Foo',
+                skip_reason='Control Plane Metrics toggle is not yet available',
+            )
+
+        instance.skipTest.assert_not_called()
+
+    def test_reraises_generic_unrelated_not_supported_error(self):
+        # A generic "not supported" failure with no feature-specific context at all (not even
+        # a recognizable resource type) must also propagate rather than being skipped.
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError('BadRequest: this configuration is not supported.')
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'BadRequest'):
+            instance._cmd_or_skip_if_unsupported('aks update --enable-defender')
+
+        instance.skipTest.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

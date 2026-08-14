@@ -383,34 +383,62 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 checks=[self.is_empty()],
             )
 
-    # Substrings observed when a feature's server-side rollout/toggle is not yet available in a
-    # given subscription/region, distinct from a genuine client or configuration bug. Kept narrow
-    # and explicit so unrelated regressions are never silently swallowed.
-    _FEATURE_TOGGLE_UNAVAILABLE_MARKERS = (
+    # Substrings identifying an "unsupported/unavailable" condition (as opposed to e.g. a
+    # value/quota/permission validation error). On their own these are too generic to trigger a
+    # skip safely, since many unrelated errors (invalid VM size, bad SKU, etc.) also contain
+    # phrases like "is not supported".
+    _UNSUPPORTED_CONDITION_MARKERS = (
         "is not supported",
         "is not enabled",
         "not yet supported",
         "not currently supported",
         "feature is not available",
+        "not available",
         "featurenotsupported",
         "notsupported",
+        "unsupported",
     )
 
-    def _cmd_or_skip_if_unsupported(self, command, checks=None, skip_reason=None):
-        """Run ``command``; if it fails with a "feature toggle not available" style error,
-        skip the test with a clear message instead of failing it outright.
+    # Feature-specific context markers scoped to Control Plane Metrics. A skip is only ever
+    # triggered when the failure text contains BOTH one of these AND one of the generic
+    # condition markers above, so a generic "<unrelated field> is not supported" error (e.g. an
+    # invalid/unsupported VM size or SKU) is never mistaken for this feature being unavailable.
+    _CONTROL_PLANE_METRICS_CONTEXT_MARKERS = (
+        "control plane metric",
+        "controlplanemetric",
+        "control-plane-metric",
+        "azuremonitorprofile.metrics.controlplane",
+    )
+
+    def _cmd_or_skip_if_unsupported(
+        self, command, checks=None, skip_reason=None, context_markers=None, condition_markers=None
+    ):
+        """Run ``command``; if it fails with an "unsupported feature/toggle" style error that is
+        ALSO specific to Control Plane Metrics, skip the test with a clear message instead of
+        failing it outright.
 
         Use this only for commands that exercise a feature whose server-side availability is
         known to vary by subscription/region/rollout-wave (e.g. a preview or newly-GA'd
-        capability), and only when the failure text matches one of
-        ``_FEATURE_TOGGLE_UNAVAILABLE_MARKERS``. Any other failure re-raises unchanged so real
-        regressions are never masked.
+        capability). A skip requires BOTH:
+          * at least one substring from ``context_markers`` (defaults to
+            ``_CONTROL_PLANE_METRICS_CONTEXT_MARKERS``), confirming the failure is actually about
+            the feature under test, and
+          * at least one substring from ``condition_markers`` (defaults to
+            ``_UNSUPPORTED_CONDITION_MARKERS``), confirming it's an availability/support
+            condition rather than some other kind of failure.
+        Any failure that doesn't satisfy both conditions re-raises unchanged, so unrelated
+        regressions (e.g. an unsupported VM size/SKU, quota, or permission error) are never
+        masked.
         """
+        context_markers = context_markers or self._CONTROL_PLANE_METRICS_CONTEXT_MARKERS
+        condition_markers = condition_markers or self._UNSUPPORTED_CONDITION_MARKERS
         try:
             return self.cmd(command, checks=checks)
         except Exception as ex:  # pylint: disable=broad-except
             message = str(ex).lower()
-            if any(marker in message for marker in self._FEATURE_TOGGLE_UNAVAILABLE_MARKERS):
+            has_context = any(marker in message for marker in context_markers)
+            has_condition = any(marker in message for marker in condition_markers)
+            if has_context and has_condition:
                 self.skipTest(
                     skip_reason or
                     f"Skipping: feature toggle appears unavailable in this environment "
