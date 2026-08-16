@@ -2502,7 +2502,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     if storage_account_type.lower() not in storage_account_types_list:
                         raise ArgumentUsageError(
                             "usage error: {} is an invalid target edge zone argument. "
-                            "The forth part is not a valid storage account type. "
+                            "The fourth part is not a valid storage account type. "
                             "Storage account types must be one of {}.".format(t, storage_account_types_str))
                 except ValueError:
                     raise ArgumentUsageError(

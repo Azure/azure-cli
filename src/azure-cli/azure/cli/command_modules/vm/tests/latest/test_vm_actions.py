@@ -595,6 +595,25 @@ class TestActions(unittest.TestCase):
         self.assertEqual(target_regions_objs[1]["name"], "westus2")
         self.assertEqual(target_regions_objs[1]["storage_account_type"], "Premium_LRS")
 
+        # four-part region=edgeZone=replica=storage_type must accept mixed-case storage types
+        np.target_regions = None
+        np.target_edge_zones = [
+            "westus=microsoftlosangeles1=1=Standard_LRS",
+            "eastus=microsoftlosangeles1=2=Premium_LRS",
+        ]
+        process_gallery_image_version_namespace(cmd, np)
+        target_edge_zone_objs = np.target_edge_zones
+        self.assertEqual(target_edge_zone_objs[0]["name"], "westus")
+        self.assertEqual(target_edge_zone_objs[0]["extended_location"]["name"], "microsoftlosangeles1")
+        self.assertEqual(target_edge_zone_objs[0]["extended_location_replica_count"], 1)
+        self.assertEqual(target_edge_zone_objs[0]["storage_account_type"], "Standard_LRS")
+        self.assertEqual(target_edge_zone_objs[1]["name"], "eastus")
+        self.assertEqual(target_edge_zone_objs[1]["extended_location_replica_count"], 2)
+        self.assertEqual(target_edge_zone_objs[1]["storage_account_type"], "Premium_LRS")
+
+        # restore target_regions for the remaining invalid-input cases
+        np.target_edge_zones = None
+
         # handle invalid storage account / replica count
         with self.assertRaises(CLIError):
             target_regions_list = ["westus=f"]
