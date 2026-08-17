@@ -19,11 +19,11 @@ from azure.cli.core.azclierror import (
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from knack.log import get_logger
-from azext_aro._validators import validate_vnet, validate_cidr
-from azext_aro._rbac import has_role_assignment_on_resource
-from azext_aro.aaz.latest.network.vnet.subnet import Show as subnet_show
-from azext_aro.aaz.latest.network.vnet import Show as vnet_show
-import azext_aro.custom
+from azure.cli.command_modules.aro._validators import validate_vnet, validate_cidr
+from azure.cli.command_modules.aro._rbac import has_role_assignment_on_resource
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
+from azure.cli.command_modules.aro.aaz.latest.network.vnet import Show as vnet_show
+import azure.cli.command_modules.aro.custom
 
 
 logger = get_logger(__name__)
@@ -334,7 +334,7 @@ def dyn_validate_version():
         if namespace.location is None:
             get_default_location_from_resource_group(cmd, namespace)
 
-        versions = azext_aro.custom.aro_get_versions(namespace.client, namespace.location)
+        versions = azure.cli.command_modules.aro.custom.aro_get_versions(namespace.client, namespace.location)
 
         found = False
         for version in versions:

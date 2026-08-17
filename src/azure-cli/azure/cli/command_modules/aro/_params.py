@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azext_aro._actions import AROPlatformWorkloadIdentityAddAction
-from azext_aro._validators import (
+from azure.cli.command_modules.aro._actions import AROPlatformWorkloadIdentityAddAction
+from azure.cli.command_modules.aro._validators import (
     validate_cidr,
     validate_client_id,
     validate_client_secret,

@@ -15,7 +15,7 @@ import typing
 
 from base64 import b64decode
 
-import azext_aro.vendored_sdks.azure.mgmt.redhatopenshift.models as openshiftcluster
+import azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.models as openshiftcluster
 
 from azure.cli.command_modules.role import GraphError
 from azure.cli.core.commands import LongRunningOperation
@@ -40,8 +40,8 @@ from azure.mgmt.core.tools import (
     resource_id,
     parse_resource_id
 )
-from azext_aro._aad import AADManager
-from azext_aro._rbac import (
+from azure.cli.command_modules.aro._aad import AADManager
+from azure.cli.command_modules.aro._rbac import (
     ROLE_NETWORK_CONTRIBUTOR,
     ROLE_READER,
     create_identity,
@@ -50,10 +50,10 @@ from azext_aro._rbac import (
     print_identity_create_cmd,
     print_role_assignment_create_cmd,
 )
-from azext_aro._validators import validate_subnets
-from azext_aro._dynamic_validators import validate_cluster_create, validate_cluster_delete
-from azext_aro.aaz.latest.identity import Delete as identity_delete
-from azext_aro.aaz.latest.network.vnet.subnet import Show as subnet_show
+from azure.cli.command_modules.aro._validators import validate_subnets
+from azure.cli.command_modules.aro._dynamic_validators import validate_cluster_create, validate_cluster_delete
+from azure.cli.command_modules.aro.aaz.latest.identity import Delete as identity_delete
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 
 from knack.log import get_logger
 

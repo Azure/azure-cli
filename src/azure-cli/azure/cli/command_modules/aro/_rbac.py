@@ -6,8 +6,8 @@
 import typing
 import uuid
 
-from azext_aro.aaz.latest.identity import Create as _create_identity
-from azext_aro.aaz.latest.role.assignment import Create as _role_assignment_create
+from azure.cli.command_modules.aro.aaz.latest.identity import Create as _create_identity
+from azure.cli.command_modules.aro.aaz.latest.role.assignment import Create as _role_assignment_create
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id

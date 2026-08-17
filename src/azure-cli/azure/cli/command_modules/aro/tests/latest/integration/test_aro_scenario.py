@@ -10,7 +10,7 @@ from unittest import mock
 
 
 from knack.log import get_logger
-from azext_aro.tests.latest.custom_preparers import AROClusterServicePrincipalPreparer
+from azure.cli.command_modules.aro.tests.latest.custom_preparers import AROClusterServicePrincipalPreparer
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.checkers import StringContainCheck
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -69,11 +69,11 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --private-link-service-network-policies Disabled')
 
         # aro validate
-        with mock.patch('azext_aro._rbac._gen_uuid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
             self.cmd('aro validate -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription}')
 
         # aro create
-        with mock.patch('azext_aro._rbac._gen_uuid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
             self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
                 self.check('tags.test', 'create'),
                 self.check('name', '{name}'),
@@ -160,7 +160,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd("network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false")
         self.cmd("network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {master_subnet} --private-link-service-network-policies Disabled")
 
-        with mock.patch("azext_aro._rbac._gen_uuid", side_effect=self.create_guid):
+        with mock.patch("azure.cli.command_modules.aro._rbac._gen_uuid", side_effect=self.create_guid):
 
             # aro create
             self.cmd('aro create -g {rg} -n {name} --enable-mi --version {version} --vnet {vnet_name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[

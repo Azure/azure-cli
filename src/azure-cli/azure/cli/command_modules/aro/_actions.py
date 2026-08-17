@@ -5,7 +5,7 @@
 
 import argparse
 
-from azext_aro.vendored_sdks.azure.mgmt.redhatopenshift.models import PlatformWorkloadIdentity
+from azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.models import PlatformWorkloadIdentity
 from azure.cli.core.azclierror import CLIError
 
 

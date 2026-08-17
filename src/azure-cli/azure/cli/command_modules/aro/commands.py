@@ -4,18 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azext_aro._client_factory import cf_aro
-from azext_aro._format import (
+from azure.cli.command_modules.aro._client_factory import cf_aro
+from azure.cli.command_modules.aro._format import (
     aro_show_table_format,
     aro_list_table_format,
     aro_version_table_format
 )
-from azext_aro._help import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-import
 
 
 def load_command_table(loader, _):
     aro_sdk = CliCommandType(
-        operations_tmpl='azext_aro.vendored_sdks.azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
+        operations_tmpl='azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
         client_factory=cf_aro)
 
     with loader.command_group('aro', aro_sdk, client_factory=cf_aro) as g:
