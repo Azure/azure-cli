@@ -13288,7 +13288,7 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
         self.cmd('vm create -g {rg} -n {vm} -l {location} --image {image} --size {sku} '
                  '--admin-username azureuser '
-                 '--ssh-key-value "{ssh_key}" --public-ip-address "" --nsg-rule None --no-capacity-reservation true')
+                 '--ssh-key-value "{ssh_key}" --public-ip-address "" --nsg-rule None --no-cap-reservation true')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),

@@ -500,7 +500,7 @@ def load_arguments(self, _):
             c.argument('key_incarnation_id', type=int, help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
             c.argument('security_type', arg_type=get_enum_type(SecurityType, default=None), help='Specify the security type of the virtual machine.')
             c.argument('zone_movement', arg_type=get_three_state_flag(), help='Indicates if zone movement is enabled. By default isEnabled is set to false i.e VM can\'t be moved from one zone to another.')
-            c.argument('disable_capacity_reservation_assignment', options_list=['--disable-capacity-reservation-assignment', '--no-capacity-reservation'], arg_type=get_three_state_flag(), help='Explicitly opt out the VM from being associated with any capacity reservation. The VM will consume publicly available capacity.')
+            c.argument('disable_capacity_reservation_assignment', options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'], arg_type=get_three_state_flag(), help='Explicitly opt out the VM from being associated with any capacity reservation. The VM will consume publicly available capacity.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
