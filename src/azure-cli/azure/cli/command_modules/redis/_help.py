@@ -107,10 +107,10 @@ short-summary: Update a redis cache firewall rule.
 
 helps['redis import'] = """
 type: command
-short-summary: Import data into a Redis cache.
+short-summary: Import data into a Redis cache. Deletes all preexisting cache data, and the cache is inaccessible to clients during the import.
 examples:
   - name: Use managed identity to import cache data
-    text: az redis import -n testCacheName -g testResourceGroup --files blobUrl --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id 1a6574ss-ddad-1111-a111-8d756312d1dd
+    text: az redis import -n testCacheName -g testResourceGroup --files blobUrl --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id 1a6574ss-ddad-1111-a111-8d756312d1dd -y
     crafted: true
 """
 
@@ -193,7 +193,7 @@ long-summary: Usage example - az redis force-reboot --name testCacheName --resou
 
 helps['redis import-method'] = """
 type: command
-short-summary: Import data into Redis cache.
+short-summary: Import data into Redis cache. Deletes all preexisting cache data, and the cache is inaccessible to clients during the import.
 long-summary: Usage example - az redis import-method --name testCacheName --resource-group testResourceGroup --files [--file-format]
 """
 
