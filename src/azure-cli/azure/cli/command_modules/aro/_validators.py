@@ -10,18 +10,18 @@ import uuid
 from os.path import exists
 from collections import Counter
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
     MutuallyExclusiveArgumentError
 )
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
+from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 from knack.log import get_logger
-from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 
 logger = get_logger(__name__)
 
