@@ -1274,6 +1274,18 @@ def get_storage_account_from_functionapp(cmd, resource_group_name, name):
                                 .format(storage_account_name, name))
 
 
+def _validate_flex_migration_target_arguments(in_place, name, resource_group):
+    if in_place:
+        if name or resource_group:
+            raise MutuallyExclusiveArgumentError(
+                "'--in-place' cannot be used with '--name' or '--resource-group'. "
+                "In-place upgrade operates on the source app directly.")
+    elif not name or not resource_group:
+        raise RequiredArgumentMissingError(
+            "'--name' and '--resource-group' are required for side-by-side migration. "
+            "Use '--in-place' to upgrade the source app directly.")
+
+
 def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resource_group=None, name=None,
                                 storage_account=None,
                                 maximum_instance_count=None, skip_managed_identities=False,
@@ -1283,17 +1295,7 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
                                 deployment_storage_name=None, deployment_storage_container_name=None,
                                 deployment_storage_auth_type=None, deployment_storage_auth_value=None):
 
-    # Validate --in-place mutual exclusions
-    if in_place:
-        if name or resource_group:
-            raise MutuallyExclusiveArgumentError(
-                "'--in-place' cannot be used with '--name' or '--resource-group'. "
-                "In-place upgrade operates on the source app directly.")
-    else:
-        if not name or not resource_group:
-            raise RequiredArgumentMissingError(
-                "'--name' and '--resource-group' are required for side-by-side migration. "
-                "Use '--in-place' to upgrade the source app directly.")
+    _validate_flex_migration_target_arguments(in_place, name, resource_group)
 
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
 
@@ -1409,7 +1411,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
                                           instance_memory, maximum_instance_count, always_ready_instances):
     """Upgrade an existing CV1 Linux Consumption function app to Flex Consumption in place."""
     from azure.mgmt.web.models import SiteProperties
-    from ._validators import validate_and_convert_to_int
 
     print(f"\nUpgrading function app '{source_name}' to Flex Consumption in place...")
 
