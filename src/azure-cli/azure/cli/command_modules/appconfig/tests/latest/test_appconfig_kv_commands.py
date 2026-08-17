@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -23,6 +23,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
@@ -366,8 +367,9 @@ class AppConfigKVScenarioTest(ScenarioTest):
         os.remove(exported_file_path)
 
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    # Uses Entra ID auth (store created with local auth disabled). For live runs set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a resource group where the recording principal holds
+    # "App Configuration Data Owner"; ResourceGroupNameReplacer scrubs that name out of recordings.
     def test_azconfig_kv_revision_list(self):
         # Use an all-lowercase store name prefix. The data-plane endpoint is '<name>.azconfig.io'
         # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)

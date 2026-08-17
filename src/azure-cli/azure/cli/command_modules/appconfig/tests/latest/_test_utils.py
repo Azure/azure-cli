@@ -8,6 +8,7 @@ import os
 
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
+from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.core.util import shell_safe_json_parse
 
 def create_config_store(test, kwargs, disable_local_auth=False):
@@ -28,12 +29,22 @@ def get_resource_name_prefix(prefix):
     resource_prefix = _get_local_test_resource_prefix()
     return prefix if resource_prefix is None else resource_prefix + prefix
 
+# Value the reused live test resource group (AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME) is rewritten to
+# in recordings by ResourceGroupNameReplacer, and returned by get_test_resource_group() during
+# playback so requests match the sanitized cassettes. Matches the default ResourceGroupPreparer() moniker.
+SANITIZED_TEST_RESOURCE_GROUP = "clitest.rg000001"
+
 def get_test_resource_group():
-    # Data-plane tests use Microsoft Entra ID (--auth-mode login) against a store whose local auth
-    # is disabled. The recording principal must already hold "App Configuration Data Owner" at a
-    # scope covering the store, so tests target a fixed resource group with that standing role
-    # instead of an ephemeral @ResourceGroupPreparer group. Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    return os.environ.get("AZURE_CLI_APPCONFIG_TEST_RG", "mametcal-python")
+    resource_group = os.environ.get("AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME")
+    if resource_group:
+        return resource_group
+    # The stub only exists inside sanitized recordings; a live run needs a real group where the
+    # recording principal holds "App Configuration Data Owner".
+    if os.environ.get("AZURE_TEST_RUN_LIVE"):
+        raise CliTestError(
+            "Set AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a resource group where you hold "
+            "'App Configuration Data Owner' to record App Configuration data-plane tests.")
+    return SANITIZED_TEST_RESOURCE_GROUP
 
 
 def _case_insensitive_query_matcher(r1, r2):
@@ -86,9 +97,43 @@ class OperationLocationSanitizer(RecordingProcessor):
         return response
 
 
+class ResourceGroupNameReplacer(RecordingProcessor):
+    """ Scrub the reused live test resource group name from recordings.
+
+    Data-plane tests reuse a pre-provisioned resource group (AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME)
+    that holds a standing "App Configuration Data Owner" role. That name is never registered with the
+    base name-replacer, so rewrite it to the value get_test_resource_group() returns during playback.
+    """
+
+    def __init__(self):
+        self._real_rg = os.environ.get("AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME")
+
+    def _scrub(self, value):
+        if self._real_rg and value:
+            return value.replace(self._real_rg, SANITIZED_TEST_RESOURCE_GROUP)
+        return value
+
+    def process_request(self, request):
+        request.uri = self._scrub(request.uri)
+        if isinstance(request.body, bytes):
+            try:
+                request.body = self._scrub(request.body.decode('utf-8')).encode('utf-8')
+            except UnicodeDecodeError:
+                pass
+        elif request.body:
+            request.body = self._scrub(request.body)
+        return request
+
+    def process_response(self, response):
+        if response.get('body', {}).get('string'):
+            response['body']['string'] = self._scrub(response['body']['string'])
+        return response
+
+
 def register_appconfig_recording_processors(test):
     """ Register App Configuration-specific recording processors on the test. """
     test.recording_processors.append(OperationLocationSanitizer(test.name_replacer))
+    test.recording_processors.append(ResourceGroupNameReplacer())
 
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):

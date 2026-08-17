@@ -15,7 +15,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenario
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import AzureInternalError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -25,6 +25,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
@@ -757,6 +758,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
@@ -998,7 +1000,9 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
-    
+        register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
+
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
     # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
