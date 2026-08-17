@@ -1012,6 +1012,13 @@ jobs:
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
+        Resolute ${{ arch.name }}:
+          # 26.04
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+
         # https://wiki.debian.org/DebianReleases
         Bullseye ${{ arch.name }}:
           # 11
@@ -1062,6 +1069,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
+        Resolute ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
