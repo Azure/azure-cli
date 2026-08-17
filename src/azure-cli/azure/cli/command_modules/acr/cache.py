@@ -8,6 +8,7 @@ from ._utils import get_resource_group_name_by_registry_name
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.core.serialization import NULL as AzureCoreNull
+from knack.log import get_logger
 from azure.mgmt.containerregistry.models import (
     CacheRule,
     CacheRuleProperties,
@@ -16,6 +17,8 @@ from azure.mgmt.containerregistry.models import (
     IdentityProperties,
     UserIdentityProperties
 )
+
+logger = get_logger(__name__)
 
 
 def acr_cache_show(cmd,
@@ -66,6 +69,7 @@ def acr_cache_create(cmd,
                      identity=None):
 
     rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
+    logger.warning("If cache rule '%s' already exists, it will be overwritten.", name)
 
     # Handle credential set
     if cred_set:

@@ -51,6 +51,7 @@ from azure.cli.command_modules.acr._docker_utils import (
 )
 from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
 from azure.cli.command_modules.acr._constants import ACR_AUDIENCE_RESOURCE_NAME
+from azure.cli.command_modules.acr.cache import acr_cache_create
 from azure.cli.core.mock import DummyCli
 
 
@@ -63,6 +64,26 @@ TEST_REPOSITORY = 'testrepository'
 
 
 class AcrMockCommandsTests(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.acr.cache.logger.warning')
+    @mock.patch('azure.cli.command_modules.acr.cache.get_resource_group_name_by_registry_name')
+    def test_cache_create_warns_that_existing_rule_is_overwritten(
+            self, mock_get_resource_group, mock_warning):
+        cmd = self._setup_cmd()
+        client = mock.MagicMock()
+        mock_get_resource_group.return_value = 'testresourcegroup'
+
+        acr_cache_create(
+            cmd=cmd,
+            client=client,
+            registry_name='testregistry',
+            name='testcache',
+            source_repo='mcr.microsoft.com/mcr/hello-world',
+            target_repo='hello-world')
+
+        mock_warning.assert_called_once_with(
+            "If cache rule '%s' already exists, it will be overwritten.",
+            'testcache')
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
