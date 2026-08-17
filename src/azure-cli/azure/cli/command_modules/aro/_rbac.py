@@ -3,19 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import typing
 import uuid
 
+from azext_aro.aaz.latest.identity import Create as _create_identity
+from azext_aro.aaz.latest.role.assignment import Create as _role_assignment_create
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id
 )
-from azure.cli.core.profiles import (
-    get_sdk,
-    ResourceType
-)
+from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import ResourceExistsError
 from azure.mgmt.core.tools import resource_id
 from knack.log import get_logger
-from msrest.exceptions import ValidationError
 
 ROLE_NETWORK_CONTRIBUTOR = '4d97b98b-1d4f-4787-a291-c67834d212e7'
 ROLE_READER = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
@@ -23,46 +23,40 @@ ROLE_READER = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 logger = get_logger(__name__)
 
 
-def _gen_uuid():
+# UUID/GUID generation is extracted into a function to aid in testing.
+def _gen_uuid() -> uuid.UUID:
     return uuid.uuid4()
 
 
-def _create_role_assignment(auth_client, resource, params):
-    # retry "ValidationError: A hash conflict was encountered for the role Assignment ID. Please use a new Guid."
-    max_retries = 3
-    retries = 0
-    while True:
-        try:
-            return auth_client.role_assignments.create(resource, _gen_uuid(), params)
-        except ValidationError as ex:
-            if retries >= max_retries:
-                raise
-            retries += 1
-            logger.warning("%s; retry %d of %d", ex, retries, max_retries)
+def create_identity(cmd, location, group, name) -> typing.Any:
+    create = _create_identity(cli_ctx=cmd.cli_ctx)
+
+    # idempotent
+    return create(command_args={
+        "location": location,
+        "resource_group": group,
+        "resource_name": name,
+    })
 
 
-def assign_role_to_resource(cli_ctx, resource, object_id, role_name):
-    auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
-
-    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                             'RoleAssignmentCreateParameters', mod='models',
-                                             operation_group='role_assignments')
-
-    role_definition_id = resource_id(
-        subscription=get_subscription_id(cli_ctx),
-        namespace='Microsoft.Authorization',
-        type='roleDefinitions',
-        name=role_name,
-    )
-
-    _create_role_assignment(auth_client, resource, RoleAssignmentCreateParameters(
-        role_definition_id=role_definition_id,
-        principal_id=object_id,
-        principal_type='ServicePrincipal',
-    ))
+def create_role_assignment(cli_ctx, principal_id, role_definition_id, scope) -> typing.Any | None:
+    create = _role_assignment_create(cli_ctx=cli_ctx)
+    try:
+        return create(command_args={
+            "principal_id": principal_id,
+            "principal_type": "ServicePrincipal",
+            "role_definition_id": role_definition_id,
+            "scope": scope,
+            "role_assignment_name": str(_gen_uuid()),
+        })
+    except ResourceExistsError:
+        logger.warning("Role Assignment already exists for "
+                       "{ principal: %s, role definition: %s, scope: %s }.",
+                       principal_id, role_definition_id, scope)
+        return None
 
 
-def has_role_assignment_on_resource(cli_ctx, resource, object_id, role_name):
+def has_role_assignment_on_resource(cli_ctx, resource, object_id, role_name) -> bool:
     auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
 
     role_definition_id = resource_id(
@@ -78,3 +72,19 @@ def has_role_assignment_on_resource(cli_ctx, resource, object_id, role_name):
             return True
 
     return False
+
+
+def print_identity_create_cmd(group, name, location) -> None:
+    msg = f"    az identity create -g '{group}' -n '{name}' -l '{location}'"
+    logger.warning(msg)
+
+
+def print_role_assignment_create_cmd(assignee, role, scope) -> None:
+    msg = [
+        "    az role assignment create",
+        f'--assignee-object-id "{assignee}"',
+        "--assignee-principal-type ServicePrincipal",
+        f"--role '{role}'",
+        f'--scope "{scope}"',
+    ]
+    logger.warning(" ".join(msg))

@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 class __CMDGroup(AAZCommandGroup):
-    """Manage Managed Identity
+    """Manage Azure role-based access control (Azure RBAC)
     """
     pass
 

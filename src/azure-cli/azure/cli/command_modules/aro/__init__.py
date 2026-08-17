@@ -3,17 +3,22 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
-
-import azure.cli.command_modules.aro._help  # pylint: disable=unused-import
+from azext_aro._client_factory import cf_aro
+from azext_aro._params import load_arguments
+from azext_aro.commands import load_command_table
+from azure.cli.core import (
+    AzCommandsLoader,
+    ModExtensionSuppress
+)
+from azure.cli.core.commands import CliCommandType
+from azure.cli.core.aaz import load_aaz_command_table
+from . import aaz
 
 
 class AroCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-        from azure.cli.command_modules.aro._client_factory import cf_aro
         aro_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.aro.custom#{}',
+            operations_tmpl='azext_aro.custom#{}',
             client_factory=cf_aro)
         suppress = ModExtensionSuppress(__name__, 'aro', '1.0.0',
                                         reason='Its functionality is included in the core az CLI.',
@@ -23,23 +28,15 @@ class AroCommandsLoader(AzCommandsLoader):
                          custom_command_type=aro_custom)
 
     def load_command_table(self, args):
-        from azure.cli.command_modules.aro.commands import load_command_table
-        from azure.cli.core.aaz import load_aaz_command_table
-        try:
-            from . import aaz
-        except ImportError:
-            aaz = None
-        if aaz:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz.__name__,
-                args=args
-            )
+        load_aaz_command_table(
+            loader=self,
+            aaz_pkg_name=aaz.__name__,
+            args=args
+        )
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        from azure.cli.command_modules.aro._params import load_arguments
         load_arguments(self, command)
 
 
