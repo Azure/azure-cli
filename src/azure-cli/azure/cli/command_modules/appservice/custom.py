@@ -1510,16 +1510,10 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         site.site_config.linux_fx_version = None
         site.site_config.function_app_scale_limit = None
 
-    # Add deployment storage connection string app setting if using connection string auth
-    if app_settings_to_add:
-        from azure.mgmt.web.models import NameValuePair
-        if site.site_config is None:
-            from azure.mgmt.web.models import SiteConfig
-            site.site_config = SiteConfig()
-        if site.site_config.app_settings is None:
-            site.site_config.app_settings = []
-        for setting in app_settings_to_add:
-            site.site_config.app_settings.append(NameValuePair(name=setting['name'], value=setting['value']))
+    # Do NOT add app_settings_to_add to site.site_config.app_settings for the PUT.
+    # The GET returns site_config.app_settings as None (settings live in /config/appsettings).
+    # If we set them here, the server treats it as the full list and drops existing settings.
+    # Instead, we merge them via a separate update_app_settings call after the upgrade completes.
 
     # The SkuTransitionResolver reads from a top-level "sku" object (siteEnvelope.Sku.Name),
     # not from properties.sku. The SDK Site model doesn't expose a top-level sku field,
@@ -1530,6 +1524,17 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     print(f"Submitting upgrade request for '{source_name}'...")
     poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, site_dict)
     LongRunningOperation(cmd.cli_ctx)(poller)
+
+    # After upgrade completes, merge new app settings (e.g. DEPLOYMENT_STORAGE_CONNECTION_STRING)
+    # into the existing settings via the dedicated appsettings API. This preserves existing settings.
+    if app_settings_to_add:
+        existing_settings = flex_client.web_apps.list_application_settings(source_resource_group, source_name)
+        settings_dict = existing_settings.properties or {}
+        for setting in app_settings_to_add:
+            settings_dict[setting['name']] = setting['value']
+        from azure.mgmt.web.models import StringDictionary
+        flex_client.web_apps.update_application_settings(
+            source_resource_group, source_name, StringDictionary(properties=settings_dict))
 
     print(f"\nUpgrade complete. Function app '{source_name}' is now on Flex Consumption."
           f"\nNote: The app may take a few moments to become fully operational on Flex infrastructure."
