@@ -2947,8 +2947,6 @@ short-summary: Update capacity reservation group.
 examples:
   - name: Update a capacity reservation group.
     text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --tags key=val
-  - name: Update an open capacity reservation group.
-    text: az capacity reservation group update -n ReservationGroupName -g MyResourceGroup --reservation-type Open
 """
 
 helps['capacity reservation group show'] = """
