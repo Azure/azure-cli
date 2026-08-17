@@ -1413,7 +1413,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
 
     print(f"\nUpgrading function app '{source_name}' to Flex Consumption in place...")
 
-    # Resolve deployment storage (same logic as create)
     if not storage_account:
         storage_account = get_storage_account_from_functionapp(cmd, source_resource_group, source_name)
     storage_account_name = parse_resource_id(storage_account)['name'] if is_valid_resource_id(storage_account) \
@@ -1432,7 +1431,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     endpoints = deployment_storage.primary_endpoints
     deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
 
-    # Build deployment storage auth config
     deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
 
     if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
@@ -1444,7 +1442,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
 
     deployment_storage_auth_config = {"type": deployment_storage_auth_type}
 
-    # Handle auth type-specific configuration
     app_settings_to_add = []
     if deployment_storage_auth_type == 'UserAssignedIdentity':
         deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
@@ -1458,7 +1455,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         deployment_storage_auth_value = conn_string_app_setting
         deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
-    # Build functionAppConfig
     function_app_config = {}
     function_app_config["deployment"] = {
         "storage": {
@@ -1468,7 +1464,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         }
     }
 
-    # Resolve runtime from the source app's existing runtime
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, source.location, source_runtime, source_runtime_version)
     matched_runtime = runtime_helper.resolve(source_runtime, source_runtime_version)
     flex_sku = matched_runtime.sku
@@ -1477,7 +1472,6 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     version = flex_sku['functionAppConfigProperties']['runtime']['version']
     function_app_config["runtime"] = {"name": runtime, "version": version}
 
-    # Scale and concurrency
     always_ready_dict = _parse_key_value_pairs(always_ready_instances)
     always_ready_config = []
     for key, value in always_ready_dict.items():
@@ -1493,7 +1487,7 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         "alwaysReady": always_ready_config
     }
 
-    # GET-mutate-PUT against the EXISTING site (no new plan, no new app)
+    # GET-mutate-PUT the existing site
     flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
     site = flex_client.web_apps.get(source_resource_group, source_name)
 
@@ -1501,40 +1495,31 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         site.properties = SiteProperties()
     site.properties.function_app_config = function_app_config
     site.properties.sku = "FlexConsumption"
-    # NOTE: serverFarmId is deliberately left unchanged (existing CV1 plan id).
-    # The orchestrator (SkuTransitionResolver) owns FC server-farm creation on the same stamp.
+    # serverFarmId left unchanged; the orchestrator creates the FC plan on the same stamp.
 
-    # Clear CV1-specific siteConfig properties that are invalid for Flex Consumption.
-    # The GET returns the existing site with these set; the server rejects them on a Flex PUT.
+    # Clear CV1 siteConfig properties that the server rejects on a Flex PUT.
     if site.site_config is not None:
         site.site_config.linux_fx_version = None
         site.site_config.function_app_scale_limit = None
 
-    # Do NOT add app_settings_to_add to site.site_config.app_settings for the PUT.
-    # The GET returns site_config.app_settings as None (settings live in /config/appsettings).
-    # If we set them here, the server treats it as the full list and drops existing settings.
-    # Instead, we merge them via a separate update_app_settings call after the upgrade completes.
+    # Set app settings via dedicated API BEFORE the PUT — the orchestrator's
+    # MigrateDeploymentAsync reads from the appsettings store, not from the PUT body.
+    if app_settings_to_add:
+        from azure.mgmt.web.models import StringDictionary
+        existing_settings = flex_client.web_apps.list_application_settings(source_resource_group, source_name)
+        settings_dict = existing_settings.properties or {}
+        for setting in app_settings_to_add:
+            settings_dict[setting['name']] = setting['value']
+        flex_client.web_apps.update_application_settings(
+            source_resource_group, source_name, StringDictionary(properties=settings_dict))
 
-    # The SkuTransitionResolver reads from a top-level "sku" object (siteEnvelope.Sku.Name),
-    # not from properties.sku. The SDK Site model doesn't expose a top-level sku field,
-    # so we serialize to dict and inject it manually.
+    # SkuTransitionResolver reads top-level sku.name, not properties.sku — inject manually.
     site_dict = site.as_dict()
     site_dict['sku'] = {'name': 'FlexConsumption'}
 
     print(f"Submitting upgrade request for '{source_name}'...")
     poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, site_dict)
     LongRunningOperation(cmd.cli_ctx)(poller)
-
-    # After upgrade completes, merge new app settings (e.g. DEPLOYMENT_STORAGE_CONNECTION_STRING)
-    # into the existing settings via the dedicated appsettings API. This preserves existing settings.
-    if app_settings_to_add:
-        existing_settings = flex_client.web_apps.list_application_settings(source_resource_group, source_name)
-        settings_dict = existing_settings.properties or {}
-        for setting in app_settings_to_add:
-            settings_dict[setting['name']] = setting['value']
-        from azure.mgmt.web.models import StringDictionary
-        flex_client.web_apps.update_application_settings(
-            source_resource_group, source_name, StringDictionary(properties=settings_dict))
 
     print(f"\nUpgrade complete. Function app '{source_name}' is now on Flex Consumption."
           f"\nNote: The app may take a few moments to become fully operational on Flex infrastructure."
