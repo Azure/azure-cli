@@ -58,7 +58,6 @@ class TestBicep(unittest.TestCase):
         ):
             _run_command("bicep", ["snapshot", "main.bicepparam", "--mode", "Validate"])
 
-
     @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
     @mock.patch("azure.cli.command_modules.resource._bicep.set_use_binary_from_path_config")
     @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
