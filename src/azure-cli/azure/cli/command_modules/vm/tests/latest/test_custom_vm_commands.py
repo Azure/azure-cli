@@ -178,6 +178,23 @@ class TestVMBootLog(unittest.TestCase):
 
         # we are good once we are here
 
+    @mock.patch('azure.cli.command_modules.vm.custom.logger.warning')
+    def test_vm_boot_log_writer_returns_written_length(self, logger_warning__mock):
+        # The storage SDK's `readinto` adds the return value of `write` to its offsets,
+        # so it must always be the number of bytes consumed.
+        import io
+
+        class NonUnicodeStream(io.StringIO):
+            def write(self, content):
+                if any(ord(c) > 127 for c in content):
+                    raise UnicodeEncodeError('charmap', content, 0, 1, 'unsupported')
+                return super().write(content)
+
+        payload = u'hello \u54c8'.encode('utf8')
+        self.assertEqual(BootLogStreamWriter(io.StringIO()).write(payload), len(payload))
+        self.assertEqual(BootLogStreamWriter(NonUnicodeStream()).write(payload), len(payload))
+        self.assertEqual(BootLogStreamWriter(io.StringIO()).write(b''), 0)
+
     @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
     def test_vm_boot_log_init_storage_sdk(self, get_sdk_mock):
 

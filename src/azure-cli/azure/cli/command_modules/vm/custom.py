@@ -2264,6 +2264,9 @@ class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
             self.out.write(ascii_content.decode())
             logger.warning("A few unicode characters have been ignored because the shell is not able to display. "
                            "To see the full log, use a shell with unicode capacity")
+        # The storage SDK's `readinto` tracks its progress with the value returned by `write`, so
+        # always report the number of bytes consumed, regardless of what was actually displayed.
+        return len(str_or_bytes)
 
 
 def get_boot_log(cmd, resource_group_name, vm_name):
