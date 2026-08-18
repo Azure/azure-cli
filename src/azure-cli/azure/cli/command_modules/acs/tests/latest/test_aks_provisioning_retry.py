@@ -100,6 +100,69 @@ class TestCmdRetryDispatch(unittest.TestCase):
         instance._cmd_with_retry.assert_called_once_with('aks delete', [], False)
 
 
+class TestCreateContainerInsightsWorkspace(unittest.TestCase):
+
+    def test_solution_payload_is_passed_as_registered_kwarg(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.kwargs = {}
+        instance.create_random_name = MagicMock(return_value='workspace')
+        workspace_result = MockExecutionResult({
+            'id': (
+                '/subscriptions/sub/resourceGroups/rg/providers/'
+                'Microsoft.OperationalInsights/workspaces/workspace'
+            )
+        })
+        solution_result = MockExecutionResult({})
+        instance.cmd = MagicMock(side_effect=[workspace_result, solution_result])
+
+        workspace_id = instance._create_container_insights_workspace('rg', 'westus2')
+
+        self.assertEqual(workspace_result.get_output_in_json()['id'], workspace_id)
+        self.assertEqual(
+            json.loads(instance.kwargs['container_insights_solution'])['location'],
+            'westus2',
+        )
+        solution_command = instance.cmd.call_args_list[1].args[0]
+        self.assertIn("'{container_insights_solution}'", solution_command)
+        self.assertNotIn('{"location"', solution_command)
+
+
+class TestWaitForClusterUpdate(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance(is_live=False, in_recording=False):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.is_live = is_live
+        instance.in_recording = in_recording
+        instance.cmd = MagicMock()
+        instance.is_empty = MagicMock(return_value='empty-check')
+        return instance
+
+    def test_replay_does_not_issue_wait_request(self):
+        instance = self._make_instance()
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_not_called()
+
+    def test_live_run_waits_for_cluster_update(self):
+        instance = self._make_instance(is_live=True)
+
+        instance._wait_for_cluster_update()
+
+        instance.cmd.assert_called_once_with(
+            'aks wait --resource-group={resource_group} --name={name} '
+            '--updated --interval 30 --timeout 1800',
+            checks=['empty-check'],
+        )
+
+
 class TestCmdWithRetry(unittest.TestCase):
 
     def _make_instance(self):
@@ -138,6 +201,33 @@ class TestCmdWithRetry(unittest.TestCase):
         ]
         self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
         self.assertEqual(mock_execute.call_count, 4)
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_retries_generic_arm_response_until_nested_state_succeeds(
+        self, mock_execute, _mock_random, _mock_sleep
+    ):
+        resource_id = '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/mc'
+        initial_result = self._result({'id': resource_id, 'provisioningState': 'Updating'})
+        settled_result = self._result({'id': resource_id, 'provisioningState': 'Succeeded'})
+        mock_execute.side_effect = [
+            initial_result,
+            self._result({'properties': {'provisioningState': 'Updating'}}),
+            self._result({'properties': {'provisioningState': 'Succeeded'}}),
+        ]
+        instance = self._make_instance()
+        instance._refetch_settled_aks_result = MagicMock(return_value=settled_result)
+
+        result = instance._cmd_with_retry(
+            'aks update',
+            [JMESPathCheck('provisioningState', 'Succeeded')],
+            False,
+        )
+
+        self.assertIs(result, settled_result)
+        instance._refetch_settled_aks_result.assert_called_once_with(resource_id, initial_result)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
     @patch('time.sleep', return_value=None)
@@ -295,17 +385,25 @@ class TestExecuteWithTransientConflictRetry(unittest.TestCase):
     @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
     def test_retries_transient_operation_conflict(self, mock_execute, _mock_random, mock_sleep):
-        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
-        mock_execute.side_effect = [
-            CLIError('Operation is not allowed: Another operation is in progress.'),
-            expected,
+        messages = [
+            'Operation is not allowed: Another operation is in progress.',
+            "Operation is not allowed because there's an in-progress update managed cluster operation",
+            'Operation is not allowed: in-progress PutExtensionAddonHandler.PUT operation',
+            'The managed cluster test is in Updating state, please wait for it to succeed.',
+            'ProvisioningState of extension: Updating',
         ]
+        for message in messages:
+            with self.subTest(message=message):
+                expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+                mock_execute.reset_mock()
+                mock_sleep.reset_mock()
+                mock_execute.side_effect = [CLIError(message), expected]
 
-        result = self._make_instance()._execute_with_transient_conflict_retry('aks update', False)
+                result = self._make_instance()._execute_with_transient_conflict_retry('aks update', False)
 
-        self.assertIs(result, expected)
-        self.assertEqual(mock_execute.call_count, 2)
-        mock_sleep.assert_called_once()
+                self.assertIs(result, expected)
+                self.assertEqual(mock_execute.call_count, 2)
+                mock_sleep.assert_called_once()
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3'})
     @patch('time.sleep', return_value=None)
@@ -406,6 +504,24 @@ class TestRefetchSettledAksResult(unittest.TestCase):
 
         self.assertIs(result, original)
         mock_execute.assert_not_called()
+
+
+class TestSupportedVersionSelection(unittest.TestCase):
+
+    def test_latest_official_version_allows_versions_that_also_support_lts(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        result = MockExecutionResult(['1.35.6', '1.36.2'])
+        instance.cmd = MagicMock(return_value=result)
+
+        version = instance._get_latest_official_version('westus2')
+
+        self.assertEqual(version, '1.36.2')
+        instance.cmd.assert_called_once_with(
+            '''az aks get-versions -l westus2 --query "values[?contains(capabilities.supportPlan, 'KubernetesOfficial')].patchVersions.keys(@)[]"'''
+        )
 
 
 if __name__ == '__main__':

@@ -180,7 +180,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     return extension_name
 
 
-def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
+def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements, too-many-branches
     # If we are in Cloud Shell, dependencies should have already been installed.
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
@@ -215,8 +215,17 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 '/usr/local/opt/openssl/lib/'
             ])
     elif system == 'Linux':
-        distname, _ = get_linux_distro()
-        distname = distname.lower().strip()
+        distname, distversion = get_linux_distro()
+        distname = (distname or '').lower().strip()
+        distversion = (distversion or '').strip()
+        # Extract major version from VERSION_ID (e.g., "4", "4.0", "4.0.1" all map to major=4)
+        azl_major_version = None
+        if 'azure linux' in distname and distversion:
+            try:
+                azl_major_version = int(distversion.partition('.')[0])
+            except ValueError:
+                pass
+        is_azure_linux_4 = azl_major_version == 4
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if exit_code != 0:
@@ -230,7 +239,7 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 if exit_code == 0:
                     logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
                     subprocess.call(apt_install_cmd, True)
-        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']) or is_azure_linux_4:
             if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
                 yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
                 if os.geteuid() != 0:  # pylint: disable=no-member
@@ -249,6 +258,29 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
                 if exit_code == 0:
                     logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
                     subprocess.call(zypper_install_cmd)
+            elif is_azure_linux_4:
+                from shutil import which
+                if which('tdnf') is None:
+                    raise CLIError(
+                        'tdnf package manager not found. This extension requires Azure Linux 4 with tdnf '
+                        'to install required system dependencies: gcc, libpq-devel, python3-devel, binutils, '
+                        'glibc-devel, kernel-headers.'
+                    )
+                rpm_packages = ['gcc', 'libpq-devel', 'python3-devel', 'binutils', 'glibc-devel', 'kernel-headers']
+                rpm_install_cmd = ['tdnf', 'install', '-y'] + rpm_packages
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    rpm_install_cmd.insert(0, 'sudo')
+                logger.debug("Install dependencies with '%s'", " ".join(rpm_install_cmd))
+                logger.warning(
+                    'This extension depends on %s and will now be installed.',
+                    ' '.join(rpm_packages)
+                )
+                exit_code = subprocess.call(rpm_install_cmd)
+                if exit_code != 0:
+                    raise CLIError(
+                        'Failed to install required system dependencies for psycopg2: {}.'
+                        .format(' '.join(rpm_packages))
+                    )
         elif installer == 'DOCKER' or any(x in distname for x in ['alpine linux']):
             apk_install_cmd = 'apk add --no-cache libpq-dev'.split()
             logger.debug("Install dependencies with '%s'", " ".join(apk_install_cmd))
