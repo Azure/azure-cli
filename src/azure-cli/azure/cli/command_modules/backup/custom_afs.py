@@ -453,10 +453,14 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     afs_item_properties.policy_id = policy.id
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
-    if is_critical_operation:
+
+    existing_policy = None
+    if item.properties.policy_id:
         existing_policy_name = item.properties.policy_id.split('/')[-1]
         existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
                                              existing_policy_name)
+
+    if is_critical_operation and existing_policy:
         if helper.is_retention_duration_decreased(existing_policy, policy, "AzureStorage"):
             # update the payload with critical operation and add auxiliary header for cross tenant case
             if tenant_id is not None:
@@ -465,11 +469,9 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
 
-    # Validate existing & new policy
-    existing_policy_name = item.properties.policy_id.split('/')[-1]
-    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                         existing_policy_name)
-    helper.validate_update_policy_request(existing_policy, policy, yes)
+    # An undeleted item has no policy association, so there is no existing policy to compare.
+    if existing_policy:
+        helper.validate_update_policy_request(existing_policy, policy, yes)
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
@@ -529,6 +531,8 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
 
 
 def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
+    if item.properties.protection_state != ProtectionState.protection_stopped:
+        raise CLIError("Azure File Share is already protected")
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
 
