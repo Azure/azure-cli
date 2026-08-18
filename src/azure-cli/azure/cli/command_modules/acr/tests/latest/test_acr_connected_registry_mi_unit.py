@@ -325,12 +325,9 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
 
 class TestConnectedRegistryDeleteMI(unittest.TestCase):
 
-    def test_mi_mode_skips_token_and_scope_map_cleanup(self):
+    def _invoke(self, cleanup):
         client = mock.MagicMock()
-        # begin_delete returns a poller whose .result() we don't care about.
         client.begin_delete.return_value.result.return_value = None
-        # No children.
-        client.list.return_value = []
         cr = _fake_cr(has_identity=True)
         cr.parent.id = None
 
@@ -340,17 +337,32 @@ class TestConnectedRegistryDeleteMI(unittest.TestCase):
                         return_value=cr), \
              mock.patch(UPDATE_MODULE + '.get_token_from_id') as p_get_tok, \
              mock.patch(UPDATE_MODULE + '.cf_acr_tokens') as p_tok_client, \
-             mock.patch(UPDATE_MODULE + '.cf_acr_scope_maps') as p_sm_client:
+             mock.patch(UPDATE_MODULE + '.cf_acr_scope_maps') as p_sm_client, \
+             mock.patch(UPDATE_MODULE + '._update_ancestor_permissions') as p_anc:
             acr_connected_registry_delete(
                 cmd=_make_cmd(), client=client,
                 connected_registry_name=TEST_CR, registry_name=TEST_REGISTRY,
-                cleanup=True, yes=True, resource_group_name=TEST_RG)
+                cleanup=cleanup, yes=True, resource_group_name=TEST_RG)
 
-        # The MI-mode branch must NOT resolve the sync token or instantiate the
-        # token / scope-map clients.
+        return client, p_get_tok, p_tok_client, p_sm_client, p_anc
+
+    def test_mi_mode_skips_token_and_scope_map_cleanup(self):
+        # MI-mode must not resolve the sync token, instantiate token/scope-map
+        # clients, walk ancestors, or list siblings for cleanup.
+        client, p_get_tok, p_tok_client, p_sm_client, p_anc = self._invoke(cleanup=True)
         p_get_tok.assert_not_called()
         p_tok_client.assert_not_called()
         p_sm_client.assert_not_called()
+        p_anc.assert_not_called()
+        client.list.assert_not_called()
+
+    def test_mi_mode_delete_without_cleanup_is_noop_beyond_begin_delete(self):
+        client, p_get_tok, p_tok_client, p_sm_client, p_anc = self._invoke(cleanup=False)
+        p_get_tok.assert_not_called()
+        p_tok_client.assert_not_called()
+        p_sm_client.assert_not_called()
+        p_anc.assert_not_called()
+        client.list.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

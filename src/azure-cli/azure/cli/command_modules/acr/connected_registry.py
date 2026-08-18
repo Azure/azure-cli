@@ -252,7 +252,7 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    # --- Auth migration validation (per spec: SyncToken <-> ManagedIdentity, no same-mode rotation) ---
+    # --- Auth migration validation (SyncToken <-> ManagedIdentity, no same-mode rotation) ---
     current_auth_type = _get_current_auth_type(current_connected_registry)
     identity_update = None
     sync_auth_type_update = None
@@ -407,19 +407,13 @@ def acr_connected_registry_delete(cmd,
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
         result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
-        # Managed-identity connected registries have no sync token / scope map to clean up.
+        # ManagedIdentity-mode connected registries have no sync token or scope map, so there is
+        # nothing to clean up. --cleanup, if passed, is a no-op in this mode.
         if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
             if cleanup:
-                # Only remove gateway access from ancestors (no sync-token/scope-map to delete).
-                connected_registry_list = list(client.list(resource_group_name, registry_name))
-                family_tree, _ = _get_family_tree(connected_registry_list, None)
-                _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name,
-                                             connected_registry.parent.id, connected_registry_name,
-                                             remove_access=True)
-            else:
                 logger.warning(
-                    "Connected registry '%s' deleted (ManagedIdentity mode: no sync token or scope map "
-                    "to clean up).", connected_registry_name)
+                    "'--cleanup' has no effect on ManagedIdentity-mode connected registry '%s' "
+                    "(no sync token or scope map exists).", connected_registry_name)
             return result
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
