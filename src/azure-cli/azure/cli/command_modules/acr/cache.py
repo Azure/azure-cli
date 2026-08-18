@@ -9,7 +9,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.core.exceptions import ResourceNotFoundError
 from azure.core.serialization import NULL as AzureCoreNull
-from knack.log import get_logger
 from azure.mgmt.containerregistry.models import (
     CacheRule,
     CacheRuleProperties,
@@ -18,6 +17,7 @@ from azure.mgmt.containerregistry.models import (
     IdentityProperties,
     UserIdentityProperties
 )
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
