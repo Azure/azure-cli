@@ -4651,7 +4651,7 @@ def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=No
             args += ["--location", location]
         if resource_group:
             args += ["--resource-group", resource_group]
-        if deployment_name:
+        if deployment_name and not re.fullmatch(r'azurecli\d+\.\d+', deployment_name):
             args += ["--deployment-name", deployment_name]
 
         output = run_bicep_command(cmd.cli_ctx, args)

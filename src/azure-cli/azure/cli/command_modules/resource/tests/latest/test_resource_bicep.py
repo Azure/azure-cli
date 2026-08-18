@@ -333,6 +333,19 @@ class TestBicepSnapshot(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
     @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_snapshot_bicep_file_ignores_generated_deployment_name(
+        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
+    ):
+        bicep_version_check_mock.return_value = True
+        run_bicep_command_mock.return_value = ""
+
+        snapshot_bicep_file(self.cmd, "main.bicepparam", deployment_name="azurecli123.456789")
+
+        run_bicep_command_mock.assert_called_once_with(self.cli_ctx, ["snapshot", "main.bicepparam"])
+
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
     def test_snapshot_bicep_file_passes_all_optional_args(
         self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
     ):
