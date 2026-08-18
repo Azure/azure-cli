@@ -1015,7 +1015,7 @@ def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids) -> None:
                     role_definition_id = resource_id(
                         subscription=get_subscription_id(cli_ctx),
                         namespace="Microsoft.Authorization",
-                        type="roleDefinition",
+                        type="roleDefinitions",
                         name=role,
                     )
                     create_role_assignment(cli_ctx, sp_id, role_definition_id, resource)
