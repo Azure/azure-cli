@@ -1005,7 +1005,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    # recording principal holds "App Configuration Data Owner". For live runs set AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME.
     def test_appconfig_to_appconfig_import_export(self):
         src_config_store_prefix = get_resource_name_prefix('source')
         dest_config_store_prefix = get_resource_name_prefix('destination')
