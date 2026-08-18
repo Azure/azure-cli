@@ -82,12 +82,8 @@ class AcrMockCommandsTests(unittest.TestCase):
             source_repo='mcr.microsoft.com/mcr/hello-world',
             target_repo='hello-world')
 
-        client.get.assert_called_once_with(
-            resource_group_name='testresourcegroup',
-            registry_name='testregistry',
-            cache_rule_name='testcache')
         mock_warning.assert_called_once_with(
-            "A cache rule named '%s' already exists. The existing cache rule will be overwritten.",
+            "If cache rule '%s' already exists, it will be overwritten.",
             'testcache')
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)

@@ -7,7 +7,6 @@ from ._constants import CREDENTIAL_SET_RESOURCE_ID_TEMPLATE
 from ._utils import get_resource_group_name_by_registry_name
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.core.exceptions import ResourceNotFoundError
 from azure.core.serialization import NULL as AzureCoreNull
 from azure.mgmt.containerregistry.models import (
     CacheRule,
@@ -70,15 +69,7 @@ def acr_cache_create(cmd,
                      identity=None):
 
     rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    try:
-        client.get(resource_group_name=rg,
-                   registry_name=registry_name,
-                   cache_rule_name=name)
-        logger.warning(
-            "A cache rule named '%s' already exists. The existing cache rule will be overwritten.",
-            name)
-    except ResourceNotFoundError:
-        pass
+    logger.warning("If cache rule '%s' already exists, it will be overwritten.", name)
 
     # Handle credential set
     if cred_set:
