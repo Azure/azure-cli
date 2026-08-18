@@ -195,7 +195,11 @@ long-summary: Usage example - az redis force-reboot --name testCacheName --resou
 helps['redis import-method'] = """
 type: command
 short-summary: Import data into Redis cache. Deletes all preexisting cache data.
-long-summary: The cache is inaccessible to clients during the import. Usage example - az redis import-method --name testCacheName --resource-group testResourceGroup --files [--file-format]
+long-summary: The cache is inaccessible to clients during the import.
+examples:
+  - name: Import data into a Redis cache
+    text: az redis import-method --name testCacheName --resource-group testResourceGroup --files blobUrl -y
+    crafted: true
 """
 
 helps['redis patch-schedule delete'] = """
