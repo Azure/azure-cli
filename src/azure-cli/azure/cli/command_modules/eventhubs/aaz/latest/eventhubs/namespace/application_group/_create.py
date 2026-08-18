@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an ApplicationGroup for a Namespace.
+
+    :example: ApplicationGroupCreate
+        az eventhubs namespace application-group create --resource-group contosotest --namespace-name contoso-ua-test-eh-system-1 --application-group-name appGroup1 --client-app-group-identifier SASKeyName=KeyName --is-enabled True --policies "[{metricId:IncomingMessages,rateLimitThreshold:7912,throttling-policy:{name:ThrottlingPolicy1,metric-id:IncomingMessages,rate-limit-threshold:7912},name:ThrottlingPolicy1},{metricId:IncomingBytes,rateLimitThreshold:3951729,throttling-policy:{name:ThrottlingPolicy2,metric-id:IncomingBytes,rate-limit-threshold:3951729},name:ThrottlingPolicy2},{metricId:OutgoingBytes,rateLimitThreshold:245175,throttling-policy:{name:ThrottlingPolicy3,metric-id:OutgoingBytes,rate-limit-threshold:245175},name:ThrottlingPolicy3}]"
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -179,7 +182,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
