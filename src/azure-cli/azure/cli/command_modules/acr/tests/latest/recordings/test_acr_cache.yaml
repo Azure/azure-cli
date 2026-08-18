@@ -771,6 +771,33 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr cache create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r -s -t -c
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.12 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/cacheRules/test1?api-version=2026-03-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The cache rule test1 could
+        not be found."},"status":"Failed"}'
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+    status:
+      code: 404
+      message: Not Found
+- request:
     body: '{"properties": {"sourceRepository": "mcr.microsoft.com/mcr/hello-world",
       "targetRepository": "hello-world", "credentialSetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/credentialSets/test1"}}'
     headers:
