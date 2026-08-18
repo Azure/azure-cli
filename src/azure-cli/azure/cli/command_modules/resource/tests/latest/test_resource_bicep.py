@@ -5,6 +5,7 @@
 
 import os
 import contextlib
+import subprocess
 import unittest
 import semver
 from unittest import mock
@@ -41,6 +42,21 @@ class TestBicep(unittest.TestCase):
         self.cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
             run_bicep_command(self.cli_ctx, ["--version"], auto_install=False)
+
+    @mock.patch("azure.cli.command_modules.resource._bicep.subprocess.run")
+    def test_run_bicep_command_includes_stdout_in_error(self, run_mock):
+        from azure.cli.command_modules.resource._bicep import _run_command
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+
+        process = mock.Mock(stdout=b"changed resource\n", stderr=b"Snapshot validation failed.\n")
+        process.check_returncode.side_effect = subprocess.CalledProcessError(1, "bicep")
+        run_mock.return_value = process
+
+        with self.assertRaisesRegex(
+            UnclassifiedUserFault,
+            r"Snapshot validation failed\.\nchanged resource\n",
+        ):
+            _run_command("bicep", ["snapshot", "main.bicepparam", "--mode", "Validate"])
 
 
     @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
