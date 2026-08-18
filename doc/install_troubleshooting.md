@@ -103,6 +103,30 @@ This can be resolved by installing the CLI in a higher directory to prevent reac
 See [#1221](https://github.com/Azure/azure-cli/issues/1221#issuecomment-258290204)
 
 
+Windows - CLI is blocked by Device Guard / WDAC (Windows Defender Application Control) after `az upgrade`
+-----------------------------------------------------------------------------------------------------------
+
+On machines that enforce Device Guard / Windows Defender Application Control (WDAC) or similar code
+integrity policies (for example, Azure Local/Azure Stack HCI cluster nodes), the bundled `python.exe`
+shipped with the Azure CLI MSI may be blocked from running if it doesn't meet the signing requirements
+configured by the enforced policy. This can make a previously working Azure CLI installation unusable
+immediately after running `az upgrade`.
+
+If you observe Windows Code Integrity events (such as Event ID 3033 or 3077) referencing
+`Microsoft SDKs\Azure\CLI2\python.exe` after an upgrade, or `az version`/`az` fails to start with a message
+like `'...\python.exe' was blocked by your organization's Device Guard policy`:
+
+* Reinstall the previous, working Azure CLI MSI to restore functionality. Installers for previous versions
+  are available at https://learn.microsoft.com/cli/azure/release-notes-azure-cli.
+* On machines with enforced code integrity policies, test `az upgrade` in a non-production/staging
+  environment first, and confirm `az version` still runs successfully before rolling the upgrade out more
+  broadly (for example, across an Azure Local cluster).
+* Contact your policy administrator to allow the new binary, or update the enforced policy, if you need to
+  use the newer version.
+
+See [#33919](https://github.com/Azure/azure-cli/issues/33919)
+
+
 Ubuntu 12.04 LTS - Known warning
 --------------------------------
 

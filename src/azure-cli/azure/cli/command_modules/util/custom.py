@@ -223,6 +223,11 @@ def _upgrade_on_windows():
     else:
         msi_url = 'https://aka.ms/installazurecliwindowsx64'
     logger.warning("Updating Azure CLI with MSI from %s", msi_url)
+    logger.warning("If this machine enforces Device Guard / Windows Defender Application Control (WDAC) "
+                   "policies, or similar code integrity policies (for example on Azure Local nodes), verify "
+                   "that the new installation still runs (e.g. with 'az version') before relying on it in "
+                   "production. If it's blocked, reinstall the previous MSI to restore functionality. See "
+                   "https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md for more details.")
 
     # Save MSI to ~\AppData\Local\Temp\azure-cli-msi, clean up the folder first
     msi_dir = os.path.join(tempfile.gettempdir(), 'azure-cli-msi')
