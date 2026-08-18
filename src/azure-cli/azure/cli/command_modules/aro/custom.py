@@ -1061,7 +1061,7 @@ def _determine_required_scopes_from_role_set(cmd, role) -> list[RoleAssignmentSc
             if action.startswith("Microsoft.Network/networkSecurityGroups/"):
                 scopes.add(RoleAssignmentScope.NSG)
 
-            if action.startswith("Microsoft.Network/routeTable/"):
+            if action.startswith("Microsoft.Network/routeTables/"):
                 scopes.add(RoleAssignmentScope.ROUTE_TABLE)
 
     # We're converting the set to a list to maintain a deterministic order.
