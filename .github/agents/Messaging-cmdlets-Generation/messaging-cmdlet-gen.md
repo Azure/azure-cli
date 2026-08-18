@@ -476,8 +476,8 @@ git -C $CLI ls-tree -r --name-only HEAD~1 $PRE | Where-Object { $_ -like "*.py" 
 
 For **every** name it reports, grep the custom layer and fix each hit:
 ```powershell
-grep -rn "<lost_name>" $CLI\srczure-clizure\cli\command_modules\<service>\operations
-grep -rn "<lost_name>" $CLI\srczure-clizure\cli\command_modules\<service>\_params.py
+grep -rn "<lost_name>" $CLI\src\azure-cli\azure\cli\command_modules\<service>\operations
+grep -rn "<lost_name>" $CLI\src\azure-cli\azure\cli\command_modules\<service>\_params.py
 ```
 
 **Prove the fix at runtime** - `--help` cannot show this bug, and a bogus resource group is enough
