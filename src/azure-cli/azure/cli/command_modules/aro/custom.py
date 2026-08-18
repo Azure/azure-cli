@@ -1108,10 +1108,19 @@ def create_identity_and_role_assignments(*,
         if not network_scopes[scope]:
             continue
 
+        role_definition_id = role.role_definition_id
+        if not role_definition_id.startswith("/"):
+            role_definition_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                namespace="Microsoft.Authorization",
+                type="roleDefinitions",
+                name=role_definition_id
+            )
+
         create_role_assignment(
             cmd.cli_ctx,
             identity["principalId"],
-            f"{resource_id(subscription=get_subscription_id(cmd.cli_ctx))}{role.role_definition_id}",
+            role_definition_id,
             network_scopes[scope]
         )
 
