@@ -54,7 +54,7 @@ class TestBicep(unittest.TestCase):
 
         with self.assertRaisesRegex(
             UnclassifiedUserFault,
-            r"Snapshot validation failed\.\nchanged resource",
+            r"(?s)Snapshot validation failed\..*changed resource",
         ):
             _run_command("bicep", ["snapshot", "main.bicepparam", "--mode", "Validate"])
 

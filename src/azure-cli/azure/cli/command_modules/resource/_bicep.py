@@ -411,7 +411,8 @@ def _run_command(bicep_installation_path, args, custom_env=None):
 
         error_msg = os.linesep.join(errors)
         if stdout_output:
-            error_msg = os.linesep.join([error_msg, stdout_output.strip()])
+            parts = [p for p in [error_msg, stdout_output.strip()] if p]
+            error_msg = os.linesep.join(parts)
         raise UnclassifiedUserFault(error_msg)
 
 
