@@ -53,7 +53,6 @@ from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
 from azure.cli.command_modules.acr._constants import ACR_AUDIENCE_RESOURCE_NAME
 from azure.cli.command_modules.acr.cache import acr_cache_create
 from azure.cli.core.mock import DummyCli
-from azure.core.exceptions import ResourceNotFoundError
 
 
 TEST_TENANT = 'testtenant'
