@@ -85,7 +85,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.databases.Element
         _element.database_name = AAZStrArg(
             options=["database-name"],
-            help="The name of the database in link",
+            help="The name of the database in the link",
         )
         return cls._args_schema
 

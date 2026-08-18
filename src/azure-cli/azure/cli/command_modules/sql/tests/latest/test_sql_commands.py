@@ -8627,6 +8627,9 @@ class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
 
             if self.in_recording:
                 time.sleep(interval)
+            else:
+                # Playback consumes recorded responses sequentially without waiting.
+                continue
 
         self.fail(
             'Timed out waiting for {} databases. Last observed database count: {}'.format(
