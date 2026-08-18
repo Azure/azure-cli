@@ -1935,7 +1935,6 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_automatic_repairs(cmd, namespace)
     _validate_vmss_create_host_group(cmd, namespace)
     _validate_vmss_create_auto_zone_placement(namespace)
-    _validate_vmss_auto_zone_placement(namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1959,12 +1958,6 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
-    _validate_vmss_auto_zone_placement(namespace)
-
-
-def _validate_vmss_auto_zone_placement(namespace):
-    if namespace.include_zones and namespace.exclude_zones:
-        raise MutuallyExclusiveArgumentError("You can only specify one of --include-zones and --exclude-zones")
 # endregion
 
 

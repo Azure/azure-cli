@@ -14851,48 +14851,6 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
         ])
 
 
-class VMSSUpdateZonePlacementPolicyTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_zone_placement_', location='eastus2')
-    def test_vmss_update_zone_placement_policy(self, resource_group):
-        self.kwargs.update({
-            'vmss_include': 'vmss-update-include-zones',
-            'vmss_exclude': 'vmss-update-exclude-zones',
-            'location': 'eastus2',
-            'image': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-g2:latest',
-            'admin_username': 'testadmin',
-            'admin_password': 'testPassword0!@#',
-            'vm_sku': 'Standard_D2s_v7'
-        })
-
-        # create a vmss (with no instances so no zones are in use) and update its include zones
-        self.cmd('vmss create -g {rg} -n {vmss_include} -l {location} --image {image} '
-                 '--admin-username {admin_username} --admin-password {admin_password} --upgrade-policy-mode Manual '
-                 '--zone-placement-policy Auto --instance-count 0 --vm-sku {vm_sku} ')
-
-        self.cmd('vmss update -g {rg} -n {vmss_include} --zone-placement-policy Auto --include-zones 1 2')
-
-        self.cmd('vmss show -g {rg} -n {vmss_include}', checks=[
-            self.check('placement.zonePlacementPolicy', 'Auto'),
-            self.check('placement.includeZones', ['1', '2'])
-        ])
-
-        # create a separate vmss (with no instances) and update its exclude zones
-        self.cmd('vmss create -g {rg} -n {vmss_exclude} -l {location} --image {image} '
-                 '--admin-username {admin_username} --admin-password {admin_password} --upgrade-policy-mode Manual '
-                 '--zone-placement-policy Auto --instance-count 0 --vm-sku {vm_sku} ')
-
-        self.cmd('vmss update -g {rg} -n {vmss_exclude} --zone-placement-policy Auto --exclude-zones 1')
-
-        self.cmd('vmss show -g {rg} -n {vmss_exclude}', checks=[
-            self.check('placement.zonePlacementPolicy', 'Auto'),
-            self.check('placement.excludeZones', ['1'])
-        ])
-
-        # --include-zones and --exclude-zones are mutually exclusive
-        with self.assertRaisesRegex(Exception, 'only specify one of --include-zones and --exclude-zones'):
-            self.cmd('vmss update -g {rg} -n {vmss_include} --include-zones 1 2 --exclude-zones 3')
-
-
 class VMZoneMovementScenarioTest(ScenarioTest):
 
     @live_only()
