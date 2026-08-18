@@ -82,7 +82,7 @@ class TestWebappMocked(unittest.TestCase):
 
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
-            m.assert_called_with(cmd, "NODE|26", is_linux)
+            m.assert_called_with(cmd=cmd, runtime_string="NODE|26", is_linux=is_linux)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
