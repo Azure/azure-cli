@@ -175,6 +175,7 @@ Release History
 
 * `az postgres flexible-server create/restore/geo-restore/replica create`: Add new arguments `--federated-client-id` and `--backup-federated-client-id` to support multi-tenant application registration (#33645)
 * `az postgresql flexible-server maintenance-event list/show/apply-now/reschedule`: Add commands for maintenance events (#33662)
+* Fix #33776: `az postgres flexible-server replica promote`: Populate `sourceServerResourceId` in the PATCH body so that planned switchover promote no longer fails with `MissingRequiredParameter` (#33777)
 
 **Resource**
 

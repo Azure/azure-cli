@@ -4,7 +4,7 @@ set -euo pipefail
 # Azure CLI Launcher (Homebrew Cask & Offline/Tarball)
 #
 # Install Mode:
-#   - Cask path detected: use Homebrew Python
+#   - Homebrew Cask path detected: use Homebrew Python
 #   - Other paths: treat as tarball and require AZ_PYTHON
 
 PY_VER="{PYTHON_MAJOR_MINOR}"
@@ -28,7 +28,9 @@ INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 AZURE_CLI_SITE_PACKAGES="$INSTALL_DIR/libexec/lib/python${PY_VER}/site-packages"
 
-if [[ "$SCRIPT_PATH" == /opt/homebrew/Caskroom/* ]] || [[ "$SCRIPT_PATH" == /usr/local/Caskroom/* ]]; then
+if [[ "$SCRIPT_PATH" == /opt/homebrew/Caskroom/* ]] || \
+    [[ "$SCRIPT_PATH" == /usr/local/Caskroom/* ]] || \
+    [[ "$SCRIPT_PATH" == /home/linuxbrew/.linuxbrew/Caskroom/* ]]; then
     INSTALLER="HOMEBREW_CASK"
 else
     INSTALLER="TARBALL"
@@ -43,6 +45,10 @@ if [[ "$INSTALLER" == "HOMEBREW_CASK" ]]; then
         PYTHON="/opt/homebrew/bin/python${PY_VER}"
     elif [[ -x "/usr/local/bin/python${PY_VER}" ]]; then
         PYTHON="/usr/local/bin/python${PY_VER}"
+    elif [[ -x "/home/linuxbrew/.linuxbrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
+        PYTHON="/home/linuxbrew/.linuxbrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
+    elif [[ -x "/home/linuxbrew/.linuxbrew/bin/python${PY_VER}" ]]; then
+        PYTHON="/home/linuxbrew/.linuxbrew/bin/python${PY_VER}"
     else
         echo "Error: Python ${PY_VER} not found." >&2
         echo "Install via Homebrew: brew install python@${PY_VER}" >&2

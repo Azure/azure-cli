@@ -2885,3 +2885,83 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def process_vmss_lifecycle_hook_remove(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.remove_all and namespace.type:
+        raise MutuallyExclusiveArgumentError("Specify exactly one of --type or --all.")
+
+    if not namespace.remove_all and not namespace.type:
+        raise RequiredArgumentMissingError("Specify exactly one of --type or --all.")
+
+
+def process_vmss_lifecycle_hook_event_update(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.instance_ids is not None and not namespace.action_state:
+        raise RequiredArgumentMissingError("--instance-ids requires --action-state.")
+
+    if namespace.action_state is None and namespace.wait_until is None:
+        raise RequiredArgumentMissingError("Specify at least one of --action-state or --wait-until.")
+
+    if namespace.action_state is not None:
+        _resolve_vmss_lifecycle_hook_event_target_resources(cmd, namespace)
+
+
+def process_vmss_lifecycle_hook_event_action(cmd, namespace):  # pylint: disable=unused-argument
+    _resolve_vmss_lifecycle_hook_event_target_resources(cmd, namespace)
+
+
+def _resolve_vmss_lifecycle_hook_event_target_resources(cmd, namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .aaz.latest.vmss.lifecycle_hook_event import Show as _lifecycleHookEventShow
+
+    event = _lifecycleHookEventShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'lifecycle_hook_event_name': namespace.lifecycle_hook_event_name,
+        'resource_group': namespace.resource_group_name,
+        'vmss_name': namespace.vmss_name,
+    })
+
+    target_resources = event.get('properties', {}).get('targetResources') or []
+
+    identifier_to_id = {}
+    target_name_to_id = {}
+    for target in target_resources:
+        resource_id = target.get('resource', {}).get('id')
+        if resource_id:
+            target_name = resource_id.rsplit('/', 1)[-1].lower()
+            identifier_to_id[target_name] = resource_id
+            target_name_to_id[target_name] = resource_id
+
+    if not namespace.instance_ids:
+        namespace.target_resource_ids = list(identifier_to_id.values())
+        return
+
+    requested_identifiers = {instance_id.lower() for instance_id in namespace.instance_ids}
+    if not requested_identifiers.issubset(identifier_to_id):
+        from .operations.vmss import VMSSListInstances
+        instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': namespace.resource_group_name,
+            'virtual_machine_scale_set_name': namespace.vmss_name,
+        })
+        for instance in instances:
+            instance_name = instance.get('name')
+            instance_id = instance.get('instanceId')
+            if instance_name and instance_id is not None:
+                target_resource_id = target_name_to_id.get(instance_name.lower())
+                if target_resource_id:
+                    identifier_to_id[str(instance_id).lower()] = target_resource_id
+
+    resolved_ids = []
+    unknown_ids = []
+    for instance_id in namespace.instance_ids:
+        resource_id = identifier_to_id.get(instance_id.lower())
+        if resource_id is None:
+            unknown_ids.append(instance_id)
+        else:
+            resolved_ids.append(resource_id)
+
+    if unknown_ids:
+        raise InvalidArgumentValueError("The following instance ids were not found among the target resources of "
+                                        "lifecycle hook event '{}': {}"
+                                        .format(namespace.lifecycle_hook_event_name, ", ".join(unknown_ids)))
+
+    namespace.target_resource_ids = resolved_ids
