@@ -860,8 +860,19 @@ def _get_wsl_browser_commands(url):
     ]
 
 
+def _is_safe_browser_url(url):
+    from urllib.parse import urlparse
+
+    try:
+        parsed_url = urlparse(url)
+    except ValueError:
+        return False
+
+    return parsed_url.scheme in ('http', 'https') and not any(c in url for c in '\n\r\t')
+
+
 def _open_url_in_wsl_browser(url):
-    if not _is_wsl_interop_enabled():
+    if not _is_safe_browser_url(url) or not _is_wsl_interop_enabled():
         return False
 
     import subprocess
@@ -878,6 +889,7 @@ def _open_url_in_wsl_browser(url):
 class _WslBrowserOpen:
     def __enter__(self):
         self._original_open = None
+        self._patch_applied = False
         if not is_wsl():
             return
 
@@ -888,9 +900,10 @@ class _WslBrowserOpen:
             return _open_url_in_wsl_browser(url) or self._original_open(url, *args, **kwargs)
 
         webbrowser.open = _open
+        self._patch_applied = True
 
     def __exit__(self, *args):
-        if self._original_open:
+        if self._patch_applied:
             import webbrowser
             webbrowser.open = self._original_open
 
