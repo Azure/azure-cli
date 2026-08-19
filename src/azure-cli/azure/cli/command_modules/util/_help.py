@@ -14,7 +14,8 @@ long-summary: >
     This command automatically authenticates using the logged-in credential: If Authorization header is not set, it
     attaches header `Authorization: Bearer <token>`, where `<token>` is retrieved from AAD. The target resource of the
     token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
-    use --resource for a custom resource.
+    use --resource for a custom resource. Examples include `https://graph.microsoft.com` for
+    Microsoft Graph or `499b84ac-1321-427f-aa17-267ca6975798` for Azure DevOps.
 
 
     If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
