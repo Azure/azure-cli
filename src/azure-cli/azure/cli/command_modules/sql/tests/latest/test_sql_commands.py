@@ -8160,8 +8160,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_mgmt(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
@@ -8169,7 +8169,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         database_name = 'CLI1'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8206,6 +8206,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
                         JMESPathCheck('replicationMode', 'Async'),
                         JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('linkMode', 'SingleDatabase'),
                         JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
                         JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
                         JMESPathCheck('seedingMode', seeding_mode),
@@ -8228,6 +8229,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
                         JMESPathCheck('replicationMode', 'Async'),
                         JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('linkMode', 'SingleDatabase'),
                         JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
                         JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
                         JMESPathCheck('seedingMode', seeding_mode),
@@ -8244,15 +8246,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_planned_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8311,15 +8313,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_forced_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8379,15 +8381,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_box_first_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
         partner_ag_name = 'AG_PS4'
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8455,8 +8457,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_error_handling(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
@@ -8464,7 +8466,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
         empty_databases = "[]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8593,7 +8595,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
             self.cmd(
                 'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
         except Exception as e:
-            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            expected_message = "A planned failover of Azure SQL Managed Instance link cannot be initiated from the secondary instance. Initiate failover from the primary instance for this link."
             if expected_message in str(e):
                 pass
             else:
@@ -8608,6 +8610,294 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                 pass
             else:
                 raise e
+
+
+class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
+    def _wait_for_databases(self, expected_count, timeout=30, interval=5):
+        deadline = time.monotonic() + timeout
+        last_count = 0
+
+        while time.monotonic() < deadline:
+            result = self.cmd(
+                'sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}')
+            link = result.get_output_in_json()
+            last_count = len(link.get('databases') or [])
+
+            if last_count == expected_count:
+                return result
+
+            if self.in_recording:
+                time.sleep(interval)
+            else:
+                # Playback consumes recorded responses sequentially without waiting.
+                continue
+
+        self.fail(
+            'Timed out waiting for {} databases. Last observed database count: {}'.format(
+                expected_count, last_count))
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_mgmt(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink1'
+        instance_ag_name = 'AG_multilink1_MI'
+        partner_ag_name = 'AG_multilink1'
+        replication_mode = 'Async'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'None'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'database_names': database_names,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # show link
+        link = self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('name', link_name),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('replicationMode', replication_mode),
+            JMESPathCheck('instanceLinkRole', instance_link_role),
+            JMESPathCheck('linkMode', link_mode),
+            JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+            JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+            JMESPathCheck('seedingMode', seeding_mode),
+            JMESPathCheck('failoverMode', failover_mode),
+            JMESPathCheck('partnerEndpoint', partner_endpoint),
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'link_id': link['id']
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi link show --ids {link_id}',
+                 checks=[
+                     JMESPathCheck('name', link_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                     JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+                     JMESPathCheck('replicationMode', replication_mode),
+                     JMESPathCheck('instanceLinkRole', instance_link_role),
+                     JMESPathCheck('linkMode', link_mode),
+                     JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                     JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                     JMESPathCheck('seedingMode', seeding_mode),
+                     JMESPathCheck('failoverMode', failover_mode),
+                     JMESPathCheck('partnerEndpoint', partner_endpoint),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_update_databases(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink2'
+        instance_ag_name = 'AG_multilink2_MI'
+        partner_ag_name = 'AG_multilink2'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Primary'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+            'databases': databases,
+            'database_names': database_names,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link with two databases
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # wait for initial databases
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # add database db3 to the link
+        databases = "[{database-name:db1},{database-name:db2},{database-name:db3}]"
+        database_names = ['db1', 'db2', 'db3']
+        self.kwargs.update({
+            'databases': databases,
+            'database_names': database_names,
+        })
+        self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}"')
+
+        # wait for database to be added
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # remove databases db2 and db3, leaving only db1
+        databases = "[{database-name:db1}]"
+        database_names = ['db1']
+        self.kwargs.update({
+            'databases': databases,
+            'database_names': database_names,
+        })
+        self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}"')
+
+        # wait for databases to be removed
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_error_handling(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink1'
+        invalid_link_name = 'MultiLink1'
+        instance_ag_name = 'AG_multilink1_MI'
+        partner_ag_name = 'AG_multilink1'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'None'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+        single_database_link_mode = 'SingleDatabase'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'invalid_link_name': invalid_link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'databases': databases,
+            'database_names': database_names,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+            'single_database_link_mode': single_database_link_mode,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # multiple databases are not valid for a single-database link
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {single_database_link_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected single-database link creation with multiple databases to fail.')
+
+        # omitting link mode defaults to a single-database link
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected link creation with multiple databases and no link mode to fail.')
+
+        # multi-database link names must be lowercase
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {invalid_link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+        except Exception as e:
+            expected_message = "Multi-database Distributed Availability Group name can only be made up of lowercase letters"
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected multi-database link creation with an uppercase name to fail.')
+
+        # create valid link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # wait for the databases to be created
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('instanceLinkRole', instance_link_role),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # updating a multi-database link requires a database list
+        try:
+            self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name}')
+        except Exception as e:
+            expected_message = "Multi-database Distributed Availability Group Add or Remove databases request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected multi-database link update without databases to fail.')
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):

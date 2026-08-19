@@ -15,16 +15,19 @@ from azure.cli.core.aaz import *
     "sql mi link update",
 )
 class Update(AAZCommand):
-    """Update a Managed Instance link replication mode.
+    """Update a Managed Instance link.
 
     :example: Update a Managed Instance link replication mode.
         az sql mi link update -g testrg --mi testcl --name link1 --replication-mode Sync
+
+    :example: Update the databases in a multi-database Managed Instance link.
+        az sql mi link update -g testrg --mi testcl --name link1 --databases "[{database-name:testdb1},{database-name:testdb2}]"
     """
 
     _aaz_info = {
-        "version": "2023-08-01-preview",
+        "version": "2025-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2025-08-01-preview"],
         ]
     }
 
@@ -64,11 +67,25 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.databases = AAZListArg(
+            options=["--databases"],
+            arg_group="Properties",
+            help="Databases in the distributed availability group. This property can be updated only for links in MultiDatabase mode.",
+        )
         _args_schema.replication_mode = AAZStrArg(
             options=["--replication-mode"],
             arg_group="Properties",
             help="Replication mode of the link",
             enum={"Async": "Async", "Sync": "Sync"},
+        )
+
+        databases = cls._args_schema.databases
+        databases.Element = AAZObjectArg()
+
+        _element = cls._args_schema.databases.Element
+        _element.database_name = AAZStrArg(
+            options=["database-name"],
+            help="The name of the database in the link",
         )
         return cls._args_schema
 
@@ -157,7 +174,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-08-01-preview",
+                    "api-version", "2025-08-01-preview",
                     required=True,
                 ),
             }
@@ -186,7 +203,16 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("databases", AAZListType, ".databases")
                 properties.set_prop("replicationMode", AAZStrType, ".replication_mode")
+
+            databases = _builder.get(".properties.databases")
+            if databases is not None:
+                databases.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.databases[]")
+            if _elements is not None:
+                _elements.set_prop("databaseName", AAZStrType, ".database_name")
 
             return self.serialize_content(_content_value)
 
@@ -239,6 +265,9 @@ class Update(AAZCommand):
             )
             properties.instance_link_role = AAZStrType(
                 serialized_name="instanceLinkRole",
+            )
+            properties.link_mode = AAZStrType(
+                serialized_name="linkMode",
             )
             properties.partner_availability_group_name = AAZStrType(
                 serialized_name="partnerAvailabilityGroupName",
