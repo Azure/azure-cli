@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import sys
+import threading
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -18,6 +19,7 @@ logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
+_WSL_BROWSER_OPEN_LOCK = threading.Lock()
 
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
@@ -864,7 +866,8 @@ def _is_safe_browser_url(url):
         return False
 
     parsed_url = urlparse(url)
-    return parsed_url.scheme in ('http', 'https') and not any(ord(c) < 32 or ord(c) == 127 for c in url)
+    return (parsed_url.scheme in ('http', 'https') and bool(parsed_url.netloc) and
+            not any(ord(c) < 32 or ord(c) == 127 for c in url))
 
 
 def _open_url_in_wsl_browser(url):
@@ -888,8 +891,12 @@ class _WslBrowserOpen:
     def __enter__(self):
         self._original_open = None
         self._patch_applied = False
+        self._lock_acquired = False
         if not _is_wsl_interop_enabled():
             return self
+
+        _WSL_BROWSER_OPEN_LOCK.acquire()
+        self._lock_acquired = True
 
         import webbrowser
         self._original_open = webbrowser.open
@@ -905,6 +912,8 @@ class _WslBrowserOpen:
         if self._patch_applied:
             import webbrowser
             webbrowser.open = self._original_open
+        if self._lock_acquired:
+            _WSL_BROWSER_OPEN_LOCK.release()
 
 
 def wsl_browser_open():

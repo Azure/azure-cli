@@ -257,6 +257,7 @@ class TestUtils(unittest.TestCase):
     @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
     def test_open_url_in_wsl_browser_rejects_non_http_url(self, _, subprocess_call_mock):
         assert not _open_url_in_wsl_browser('/C:/Windows/System32/calc.exe')
+        assert not _open_url_in_wsl_browser('https:')
         subprocess_call_mock.assert_not_called()
 
     @mock.patch('subprocess.call', autospec=True, return_value=0)
