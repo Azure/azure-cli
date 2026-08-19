@@ -35,6 +35,7 @@ from azure.cli.command_modules.sql.custom import (
     ResourceIdType)
 from datetime import datetime, timedelta
 
+
 # Constants
 server_name_prefix = 'clitestserver'
 server_name_max_length = 62
@@ -9383,14 +9384,19 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                                   checks=[
                                       JMESPathCheck('name', server_name),
                                       JMESPathCheck('location', location),
-                                      JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+                                      JMESPathCheck('resourceGroup', resource_group),
+                                      JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+
+        # Ensure retention policy is preserved on the restored server.
+        self.assertEqual(restored_server.get('retentionDays'), retention_days)
 
         # Verify restored server exists and shows it was restored successfully
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
 
         # Disable soft delete on the restored server
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
@@ -9469,13 +9475,21 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         print(f"DEBUG: Looking for server: {server_name}")
         print(f"DEBUG: Server names in list: {[s.get('name', 'NO_NAME') for s in deleted_servers_list]}")
 
-        # Verify our deleted server is in the list by checking FQDN
-        # The Azure API returns name=None, so we extract the server name from FQDN
-        # FQDN format: {servername}.{domain}, e.g., servername.sqltest-eg1.mscds.com
-        deleted_server_found = any(s.get('fullyQualifiedDomainName', '').startswith(server_name + '.') 
-                                   for s in deleted_servers_list)
-        self.assertTrue(deleted_server_found, 
-                       f"Deleted server {server_name} not found in deleted servers list")
+        # Verify our deleted server is in the list and key fields are populated.
+        # The Azure API may return name=None, so match by FQDN prefix.
+        deleted_server_from_list = next(
+            (s for s in deleted_servers_list
+             if s.get('fullyQualifiedDomainName', '').startswith(server_name + '.')),
+            None)
+        self.assertIsNotNone(
+            deleted_server_from_list,
+            f"Deleted server {server_name} not found in deleted servers list")
+
+        self.assertTrue(deleted_server_from_list.get('deletionTime'),
+                        'Expected deletionTime to be present for deleted server entry')
+        list_original_id = deleted_server_from_list.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", list_original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", list_original_id)
 
         # Test deleted-server show command by name
         deleted_server = self.cmd('sql server deleted-server show --name {} --location {}'
@@ -9490,6 +9504,10 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         fqdn = deleted_server.get('fullyQualifiedDomainName', '')
         self.assertTrue(fqdn.startswith(server_name + '.'),
                        f"Expected FQDN to start with {server_name}., but got {fqdn}")
+
+        show_original_id = deleted_server.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", show_original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", show_original_id)
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
     @AllowLargeResponse(size_kb=9999)
@@ -9622,6 +9640,80 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
         # Verify command succeeds and returns a list (even if empty)
         self.assertIsInstance(deleted_servers, list)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_without_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server list without location returns subscription-wide deleted servers.
+        '''
+        server_name = self.create_random_name('delall', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+
+        # Create a server with soft delete enabled so it appears in deleted-server listings.
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, 7),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        deleted_servers = self.cmd('sql server deleted-server list',
+                                   checks=[
+                                       JMESPathCheckGreaterThan('length(@)', 0)
+                                   ]).get_output_in_json()
+
+        self.assertIsInstance(deleted_servers, list)
+        deleted_server = next(
+            (s for s in deleted_servers
+             if s.get('fullyQualifiedDomainName', '').startswith(server_name + '.')),
+            None)
+        self.assertIsNotNone(
+            deleted_server,
+            f"Deleted server {server_name} not found in subscription-wide deleted servers list")
+
+        self.assertTrue(deleted_server.get('deletionTime'),
+                        'Expected deletionTime to be present for subscription-wide deleted server entry')
+        original_id = deleted_server.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", original_id)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_show_wrong_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server show fails when location does not match deleted server location.
+        '''
+        server_name = self.create_random_name('delwrong', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        wrong_location = 'eastus2' if location.lower() != 'eastus2' else 'westus2'
+
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, 7),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        self.cmd('sql server deleted-server show --name {} --location {}'
+                 .format(server_name, wrong_location),
+                 expect_failure=True)
 
     @live_only()
     def test_sql_deleted_server_show_not_found(self):
