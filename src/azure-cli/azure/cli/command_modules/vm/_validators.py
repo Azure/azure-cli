@@ -1951,6 +1951,10 @@ def process_vmss_create_namespace(cmd, namespace):
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.instance_id and namespace.disable_capacity_reservation_assignment is not None:
+        raise MutuallyExclusiveArgumentError(
+            "--disable-capacity-reservation-assignment applies to the parent VMSS and cannot be used with "
+            "--instance-id")
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."

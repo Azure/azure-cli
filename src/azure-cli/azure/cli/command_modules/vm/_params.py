@@ -991,7 +991,7 @@ def load_arguments(self, _):
             c.argument('automatic_zone_balancing_behavior', arg_type=get_enum_type(AutomaticZoneBalancingBehavior), options_list=['--automatic-zone-balancing-behavior', '--balancing-behavior'], help='Type of rebalance behavior that will be used for recreating virtualmachines in the scale set across availability zones.')
             c.argument('disable_capacity_reservation_assignment', arg_type=get_three_state_flag(),
                        options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'],
-                       help='Specifies whether the virtual machine is explicitly opted out from being associated with any capacity reservation. When set to true, the virtual machine will not be allowed to implicitly or explicitly associate with any type of capacity reservation and will consume capacity from the publicly available capacity.')
+                       help='Specifies whether the virtual machine scale set is explicitly opted out from being associated with any capacity reservation. When set to true, its virtual machines will not be allowed to implicitly or explicitly associate with any type of capacity reservation and will consume publicly available capacity. This option applies to the parent VMSS only.')
 
     with self.argument_context('vmss update') as c:
         c.argument('instance_id', id_part='child_name_1', help="Update the VM instance with this ID. If missing, update the VMSS.")
