@@ -799,14 +799,8 @@ def open_page_in_browser(url):
     platform_name, _ = _get_platform_info()
 
     if is_wsl():   # windows 10 linux subsystem
-        try:
-            # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
-            # Ampersand (&) should be quoted
-            safe_url = url.replace("'", "''")
-            return subprocess.Popen(
-                ['powershell.exe', '-NoProfile', '-Command', f"Start-Process '{safe_url}'"]).wait()
-        except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
-            pass
+        if _open_url_in_wsl_browser(url):
+            return True
     elif platform_name == 'darwin':
         # handle 2 things:
         # a. On OSX sierra, 'python -m webbrowser -t <url>' emits out "execution error: <url> doesn't
@@ -831,6 +825,78 @@ def is_wsl():
     #   - WSL 1: '4.4.0-19041-Microsoft'
     #   - WSL 2: '4.19.128-microsoft-standard'
     return platform_name == 'linux' and 'microsoft' in release
+
+
+def _is_wsl_interop_enabled():
+    if not is_wsl():
+        return False
+
+    try:
+        binfmt_entries = os.listdir('/proc/sys/fs/binfmt_misc')
+    except OSError:
+        return bool(os.environ.get('WSL_INTEROP'))
+
+    for entry in binfmt_entries:
+        if not entry.startswith('WSLInterop'):
+            continue
+        try:
+            with open(os.path.join('/proc/sys/fs/binfmt_misc', entry), 'r') as f:
+                if f.readline().strip() == 'enabled':
+                    return True
+        except OSError:
+            continue
+
+    return bool(os.environ.get('WSL_INTEROP'))
+
+
+def _get_wsl_browser_commands(url):
+    safe_url = url.replace("'", "''")
+    return [
+        (['/mnt/c/Windows/explorer.exe', url], (0, 1)),
+        (['explorer.exe', url], (0, 1)),
+        (['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
+          '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,)),
+        (['powershell.exe', '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,))
+    ]
+
+
+def _open_url_in_wsl_browser(url):
+    if not _is_wsl_interop_enabled():
+        return False
+
+    import subprocess
+    for cmd, success_codes in _get_wsl_browser_commands(url):
+        try:
+            exit_code = subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if exit_code in success_codes:
+                return True
+        except OSError:
+            continue
+    return False
+
+
+class _WslBrowserOpen:
+    def __enter__(self):
+        self._original_open = None
+        if not is_wsl():
+            return
+
+        import webbrowser
+        self._original_open = webbrowser.open
+
+        def _open(url, *args, **kwargs):
+            return _open_url_in_wsl_browser(url) or self._original_open(url, *args, **kwargs)
+
+        webbrowser.open = _open
+
+    def __exit__(self, *args):
+        if self._original_open:
+            import webbrowser
+            webbrowser.open = self._original_open
+
+
+def wsl_browser_open():
+    return _WslBrowserOpen()
 
 
 def is_windows():
@@ -863,7 +929,8 @@ def can_launch_browser():
         # Docker container running on WSL 2 also shows WSL, but it can't launch a browser.
         # If powershell.exe is on PATH, it can be called to launch a browser.
         import shutil
-        if shutil.which("powershell.exe"):
+        if _is_wsl_interop_enabled() and (
+                shutil.which("powershell.exe") or os.path.exists('/mnt/c/Windows/explorer.exe')):
             return True
 
     return False
