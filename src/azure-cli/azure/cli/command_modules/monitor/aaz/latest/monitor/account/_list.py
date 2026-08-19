@@ -22,12 +22,14 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-04-03",
+        "version": "2025-10-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.monitor/accounts", "2023-04-03"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts", "2023-04-03"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.monitor/accounts", "2025-10-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts", "2025-10-03"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -49,12 +51,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.AzureMonitorWorkspacesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.AzureMonitorWorkspacesListBySubscription(ctx=self.ctx)()
+        if condition_1:
+            self.AzureMonitorWorkspacesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +72,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class AzureMonitorWorkspacesListByResourceGroup(AAZHttpOperation):
+    class AzureMonitorWorkspacesListBySubscription(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +86,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Monitor/accounts",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Monitor/accounts",
                 **self.url_parameters
             )
 
@@ -100,10 +102,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -114,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -158,12 +156,10 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -183,6 +179,37 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.value.Element.properties
             properties.account_id = AAZStrType(
                 serialized_name="accountId",
@@ -192,9 +219,7 @@ class List(AAZCommand):
                 serialized_name="defaultIngestionSettings",
                 flags={"read_only": True},
             )
-            properties.metrics = AAZObjectType(
-                flags={"read_only": True},
-            )
+            properties.metrics = AAZObjectType()
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
                 flags={"read_only": True},
@@ -205,7 +230,6 @@ class List(AAZCommand):
             )
             properties.public_network_access = AAZStrType(
                 serialized_name="publicNetworkAccess",
-                flags={"read_only": True},
             )
 
             default_ingestion_settings = cls._schema_on_200.value.Element.properties.default_ingestion_settings
@@ -213,12 +237,28 @@ class List(AAZCommand):
                 serialized_name="dataCollectionEndpointResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.data_collection_rule_immutable_id = AAZStrType(
+                serialized_name="dataCollectionRuleImmutableId",
+                flags={"read_only": True},
+            )
             default_ingestion_settings.data_collection_rule_resource_id = AAZStrType(
                 serialized_name="dataCollectionRuleResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.ingestion_endpoints = AAZObjectType(
+                serialized_name="ingestionEndpoints",
+                flags={"read_only": True},
+            )
+
+            ingestion_endpoints = cls._schema_on_200.value.Element.properties.default_ingestion_settings.ingestion_endpoints
+            ingestion_endpoints.metrics = AAZStrType(
+                flags={"read_only": True},
+            )
 
             metrics = cls._schema_on_200.value.Element.properties.metrics
+            metrics.enable_access_using_resource_permissions = AAZBoolType(
+                serialized_name="enableAccessUsingResourcePermissions",
+            )
             metrics.internal_id = AAZStrType(
                 serialized_name="internalId",
                 flags={"read_only": True},
@@ -287,7 +327,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class AzureMonitorWorkspacesListBySubscription(AAZHttpOperation):
+    class AzureMonitorWorkspacesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -301,7 +341,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Monitor/accounts",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Monitor/accounts",
                 **self.url_parameters
             )
 
@@ -317,6 +357,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -327,7 +371,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -371,12 +415,10 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.etag = AAZStrType(
-                flags={"read_only": True},
-            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -396,6 +438,37 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.value.Element.properties
             properties.account_id = AAZStrType(
                 serialized_name="accountId",
@@ -405,9 +478,7 @@ class List(AAZCommand):
                 serialized_name="defaultIngestionSettings",
                 flags={"read_only": True},
             )
-            properties.metrics = AAZObjectType(
-                flags={"read_only": True},
-            )
+            properties.metrics = AAZObjectType()
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
                 flags={"read_only": True},
@@ -418,7 +489,6 @@ class List(AAZCommand):
             )
             properties.public_network_access = AAZStrType(
                 serialized_name="publicNetworkAccess",
-                flags={"read_only": True},
             )
 
             default_ingestion_settings = cls._schema_on_200.value.Element.properties.default_ingestion_settings
@@ -426,12 +496,28 @@ class List(AAZCommand):
                 serialized_name="dataCollectionEndpointResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.data_collection_rule_immutable_id = AAZStrType(
+                serialized_name="dataCollectionRuleImmutableId",
+                flags={"read_only": True},
+            )
             default_ingestion_settings.data_collection_rule_resource_id = AAZStrType(
                 serialized_name="dataCollectionRuleResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.ingestion_endpoints = AAZObjectType(
+                serialized_name="ingestionEndpoints",
+                flags={"read_only": True},
+            )
+
+            ingestion_endpoints = cls._schema_on_200.value.Element.properties.default_ingestion_settings.ingestion_endpoints
+            ingestion_endpoints.metrics = AAZStrType(
+                flags={"read_only": True},
+            )
 
             metrics = cls._schema_on_200.value.Element.properties.metrics
+            metrics.enable_access_using_resource_permissions = AAZBoolType(
+                serialized_name="enableAccessUsingResourcePermissions",
+            )
             metrics.internal_id = AAZStrType(
                 serialized_name="internalId",
                 flags={"read_only": True},

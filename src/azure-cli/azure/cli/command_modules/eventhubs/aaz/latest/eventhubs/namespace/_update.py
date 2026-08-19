@@ -16,15 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
-
-    :example: Update a new namespace.
-        az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-01-01"],
         ]
     }
 
@@ -53,7 +50,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -168,6 +165,13 @@ class Update(AAZCommand):
             help="Properties of BYOK Encryption description",
             nullable=True,
         )
+        _args_schema.ip_address_type = AAZStrArg(
+            options=["--ip-address-type"],
+            arg_group="Properties",
+            help="The IP address type for the namespace. Determines whether the namespace supports IPv4 only or both IPv4 and IPv6 (dual stack).",
+            nullable=True,
+            enum={"DualStack": "DualStack", "IPv4": "IPv4"},
+        )
         _args_schema.enable_auto_inflate = AAZBoolArg(
             options=["--enable-auto-inflate"],
             arg_group="Properties",
@@ -194,7 +198,12 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The minimum TLS version for the cluster to support, e.g. '1.2'",
             nullable=True,
-            enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2"},
+            enum={"1.0": "1.0", "1.1": "1.1", "1.2": "1.2", "1.3": "1.3"},
+        )
+        _args_schema.platform_capabilities = AAZObjectArg(
+            options=["--platform-capabilities"],
+            arg_group="Properties",
+            nullable=True,
         )
         _args_schema.private_endpoint_connections = AAZListArg(
             options=["--endpoint-connections", "--private-endpoint-connections"],
@@ -259,6 +268,20 @@ class Update(AAZCommand):
             options=["key-version"],
             help="Key Version",
             nullable=True,
+        )
+
+        platform_capabilities = cls._args_schema.platform_capabilities
+        platform_capabilities.confidential_compute = AAZObjectArg(
+            options=["confidential-compute"],
+            nullable=True,
+        )
+
+        confidential_compute = cls._args_schema.platform_capabilities.confidential_compute
+        confidential_compute.mode = AAZStrArg(
+            options=["mode"],
+            help="Setting to Enable or Disable Confidential Compute",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         private_endpoint_connections = cls._args_schema.private_endpoint_connections
@@ -409,7 +432,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -508,7 +531,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -566,7 +589,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -587,10 +610,12 @@ class Update(AAZCommand):
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth")
                 properties.set_prop("encryption", AAZObjectType, ".encryption")
                 properties.set_prop("geoDataReplication", AAZObjectType)
+                properties.set_prop("ipAddressType", AAZStrType, ".ip_address_type")
                 properties.set_prop("isAutoInflateEnabled", AAZBoolType, ".enable_auto_inflate")
                 properties.set_prop("kafkaEnabled", AAZBoolType, ".kafka_enabled")
                 properties.set_prop("maximumThroughputUnits", AAZIntType, ".maximum_throughput_units")
                 properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
+                properties.set_prop("platformCapabilities", AAZObjectType, ".platform_capabilities")
                 properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
                 properties.set_prop("zoneRedundant", AAZBoolType, ".zone_redundant")
@@ -630,6 +655,14 @@ class Update(AAZCommand):
                 _elements.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
                 _elements.set_prop("locationName", AAZStrType, ".location_name")
                 _elements.set_prop("roleType", AAZStrType, ".role_type")
+
+            platform_capabilities = _builder.get(".properties.platformCapabilities")
+            if platform_capabilities is not None:
+                platform_capabilities.set_prop("confidentialCompute", AAZObjectType, ".confidential_compute")
+
+            confidential_compute = _builder.get(".properties.platformCapabilities.confidentialCompute")
+            if confidential_compute is not None:
+                confidential_compute.set_prop("mode", AAZStrType, ".mode")
 
             private_endpoint_connections = _builder.get(".properties.privateEndpointConnections")
             if private_endpoint_connections is not None:
@@ -700,7 +733,7 @@ class _UpdateHelper:
         eh_namespace_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        eh_namespace_read.identity = AAZObjectType()
+        eh_namespace_read.identity = AAZIdentityObjectType()
         eh_namespace_read.location = AAZStrType()
         eh_namespace_read.name = AAZStrType(
             flags={"read_only": True},
@@ -764,6 +797,9 @@ class _UpdateHelper:
         properties.geo_data_replication = AAZObjectType(
             serialized_name="geoDataReplication",
         )
+        properties.ip_address_type = AAZStrType(
+            serialized_name="ipAddressType",
+        )
         properties.is_auto_inflate_enabled = AAZBoolType(
             serialized_name="isAutoInflateEnabled",
         )
@@ -779,6 +815,9 @@ class _UpdateHelper:
         )
         properties.minimum_tls_version = AAZStrType(
             serialized_name="minimumTlsVersion",
+        )
+        properties.platform_capabilities = AAZObjectType(
+            serialized_name="platformCapabilities",
         )
         properties.private_endpoint_connections = AAZListType(
             serialized_name="privateEndpointConnections",
@@ -859,6 +898,14 @@ class _UpdateHelper:
         _element.role_type = AAZStrType(
             serialized_name="roleType",
         )
+
+        platform_capabilities = _schema_eh_namespace_read.properties.platform_capabilities
+        platform_capabilities.confidential_compute = AAZObjectType(
+            serialized_name="confidentialCompute",
+        )
+
+        confidential_compute = _schema_eh_namespace_read.properties.platform_capabilities.confidential_compute
+        confidential_compute.mode = AAZStrType()
 
         private_endpoint_connections = _schema_eh_namespace_read.properties.private_endpoint_connections
         private_endpoint_connections.Element = AAZObjectType()

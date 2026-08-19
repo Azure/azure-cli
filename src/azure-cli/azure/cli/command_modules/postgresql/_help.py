@@ -942,6 +942,8 @@ short-summary: Upgrade the major version of a flexible server.
 examples:
   - name: Upgrade server 'testserver' to PostgreSQL major version 18.
     text: az postgres flexible-server upgrade -g testgroup -n testserver -v 18
+  - name: Run pre-upgrade validation for server targeting a later PostgreSQL major version without performing the upgrade.
+    text: az postgres flexible-server upgrade -g testgroup -n testserver -v 18 --validate-only
 """
 
 helps['postgres flexible-server identity'] = """

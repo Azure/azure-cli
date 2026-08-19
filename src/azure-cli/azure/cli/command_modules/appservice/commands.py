@@ -48,6 +48,89 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_troubleshoot_status_output(result):
+    """Flatten the nested `instances` payload into one row per worker for `-o table`.
+    Column layout: InstanceId / State / Details / (LastError /
+    LastErrorTimestamp / LastErrorDetails only when any row has an error) /
+    Succeeded (last 24h) / Failed (last 24h).
+
+    Also queues a post-output hint trailer (via ``atexit``) when at least one
+    instance has a visible error, so users see the recommended follow-up
+    ``az webapp log`` commands under the table.
+
+    The framework's default table renderer would only surface top-level scalars
+    (name, resourceGroup) and drop every meaningful field."""
+    from collections import OrderedDict
+    from ._troubleshoot_status_report import _format_dt, _short_id, _startup_fetch_failed
+
+    items = (result or {}).get('instances') or []
+    app_name = (result or {}).get('name') or '<webapp>'
+    resource_group = (result or {}).get('resourceGroup') or '<resource-group>'
+
+    # LastError is nullable on the backend SiteRuntimeStatusOnWorker contract.
+    # A 'Started' instance is healthy, so any LastError it still carries is stale
+    # and must not be shown. Surface the LastError columns only when an instance
+    # reports a LastError while NOT 'Started'.
+    def _has_visible_error(item):
+        return bool(item.get('lastError')) and item.get('state') != 'Started'
+
+    def _dash(value):
+        # Render an empty cell as '-' so a missing value in a shown column is
+        # visually distinct from an accidentally blank row.
+        if value is None or value == '':
+            return '-'
+        return value
+
+    show_errors = any(_has_visible_error(item) for item in items)
+
+    rows = []
+    for item in items:
+        startup = item.get('startup') or {}
+        # KuduLite returns a SummaryFetchStatus failure reason when it couldn't
+        # read this worker's log directory; count/timestamp fields are
+        # meaningless in that case.
+        has_startup_error = bool(_startup_fetch_failed(startup))
+        succeeded = None if has_startup_error else startup.get('Succeeded')
+        failed = None if has_startup_error else startup.get('Failed')
+
+        row = OrderedDict([
+            ('InstanceId', _dash(_short_id(item.get('instanceId')))),
+            ('State', _dash(item.get('state'))),
+            ('Details', _dash(item.get('details'))),
+        ])
+        if show_errors:
+            if _has_visible_error(item):
+                row['LastError'] = _dash(item.get('lastError'))
+                row['LastErrorTimestamp'] = _dash(_format_dt(item.get('lastErrorTimestamp')))
+                row['LastErrorDetails'] = _dash(item.get('lastErrorDetails'))
+            else:
+                row['LastError'] = '-'
+                row['LastErrorTimestamp'] = '-'
+                row['LastErrorDetails'] = '-'
+        row['Succeeded (last 24h)'] = _dash(succeeded)
+        row['Failed (last 24h)'] = _dash(failed)
+        rows.append(row)
+
+    # Trailer is only meaningful for -o table; this transformer is only invoked
+    # by knack when the user selected table output, so guarding on show_errors
+    # is sufficient. Deferring via atexit ensures the hint prints AFTER knack
+    # has flushed the table to stdout.
+    if show_errors:
+        import atexit
+        import sys as _sys
+
+        def _print_hint(app=app_name, rg=resource_group):
+            _sys.stderr.write(
+                '\n\u25b6 Hint:\n'
+                '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
+                '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
+                .format(name=app, rg=rg))
+
+        atexit.register(_print_hint)
+
+    return rows
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -129,11 +212,14 @@ def load_command_table(self, _):
 
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
+    webapp_exec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.webapp_exec#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
@@ -258,6 +344,10 @@ def load_command_table(self, _):
     with self.command_group('webapp log startup', is_preview=True) as g:
         g.custom_command('list', 'list_startup_logs')
         g.custom_show_command('show', 'show_startup_log')
+
+    with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('status', 'troubleshoot_status',
+                         table_transformer=transform_troubleshoot_status_output)
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
