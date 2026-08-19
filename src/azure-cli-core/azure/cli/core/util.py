@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
-_WSL_BROWSER_OPEN_LOCK = threading.Lock()
+_WSL_BROWSER_OPEN_LOCK = threading.RLock()
 
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
@@ -881,6 +881,7 @@ def _open_url_in_wsl_browser(url):
         try:
             exit_code = subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
             if exit_code in success_codes:
+                # Start-Process returns after handing off the URL to Windows.
                 return True
         except OSError:
             continue
@@ -902,7 +903,8 @@ class _WslBrowserOpen:
         self._original_open = webbrowser.open
 
         def _open(url, *args, **kwargs):
-            return _open_url_in_wsl_browser(url) or self._original_open(url, *args, **kwargs)
+            with _WSL_BROWSER_OPEN_LOCK:
+                return _open_url_in_wsl_browser(url) or self._original_open(url, *args, **kwargs)
 
         webbrowser.open = _open
         self._patch_applied = True
