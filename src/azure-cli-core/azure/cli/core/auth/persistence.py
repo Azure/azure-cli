@@ -28,6 +28,15 @@ file_extensions = [file_extension_encrypted, file_extension_plaintext, file_exte
 KEYCHAIN_SERVICE_NAME = 'Microsoft Azure CLI'
 LIBSECRET_SCHEMA_NAME = 'Microsoft Azure CLI'
 
+ENCRYPTION_FALLBACK_WARNING = (
+    "Encryption is unavailable on this machine, so the token cache and service principal secrets "
+    "are stored in plaintext. "
+    "Please follow https://aka.ms/azure-cli-credential-encryption to enable encryption.")
+
+# Set when a persistence falls back to plaintext, so sign-in can warn about it.
+_encryption_fallback = False
+
+
 def load_persisted_token_cache(location, encrypt):
     persistence = build_persistence(location, encrypt, type="Token cache")
     return PersistedTokenCache(persistence)
@@ -69,15 +78,29 @@ def build_persistence(location, encrypt, type=None):
                     attributes=attributes
                 )
             except Exception as e:
-                # Warn the user and continue with FilePersistence.
-                # LibsecretPersistence are known to be unavailable in some Linux environments.
+                # LibsecretPersistence is known to be unavailable in some Linux environments.
+                # Fall back to FilePersistence. The user is warned at sign-in.
                 logger.debug("Failed to initialize LibsecretPersistence: %s", e)
-                logger.warning("TBD: Encryption is unavailable. Falling back to plaintext persistence."
-                "Please follow https://aka.ms/azure-cli-credential-encryption to enable encryption.")
+                _record_encryption_fallback()
     # Either encryption is opted out or the OS is not supported for encryption. Use FilePersistence.
     path = location + file_extension_plaintext
     logger.debug("Initializing FilePersistence: location=%r", path)
     return FilePersistence(path)
+
+
+def _record_encryption_fallback():
+    global _encryption_fallback  # pylint: disable=global-statement
+    _encryption_fallback = True
+
+
+def warn_if_encryption_unavailable():
+    """Warn that credentials are persisted in plaintext.
+
+    Called at sign-in only. Every command runs in a new process, so warning once per session would
+    require storing state on the machine, and warning on every command is too noisy.
+    """
+    if _encryption_fallback:
+        logger.warning(ENCRYPTION_FALLBACK_WARNING)
 
 
 class SecretStore:
