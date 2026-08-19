@@ -67,7 +67,7 @@ class TestWebappMocked(unittest.TestCase):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     def test_transform_rename_server_farm_id_renames_key(self):
-        # Verifies the post-serialisation transformer renames serverFarmId -> appServicePlanId
+        # Verifies the post-serialisation transformer adds appServicePlanId alongside serverFarmId
         farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
         web = {
             'location': 'westus',
@@ -77,7 +77,8 @@ class TestWebappMocked(unittest.TestCase):
         result = transform_rename_server_farm_id(web)
 
         self.assertEqual(result['appServicePlanId'], farm_id)
-        self.assertNotIn('serverFarmId', result)
+        # serverFarmId is preserved for backward compatibility
+        self.assertEqual(result['serverFarmId'], farm_id)
 
     def test_transform_rename_server_farm_id_nested_under_properties(self):
         # New SDK ARM-envelope layout: serverFarmId is under 'properties', not at the top level
@@ -93,12 +94,12 @@ class TestWebappMocked(unittest.TestCase):
         result = transform_rename_server_farm_id(web)
 
         self.assertEqual(result['appServicePlanId'], farm_id)
-        self.assertNotIn('serverFarmId', result)
-        self.assertNotIn('serverFarmId', result.get('properties', {}))
+        # serverFarmId is preserved in properties for backward compatibility
+        self.assertEqual(result['properties']['serverFarmId'], farm_id)
 
     def test_transform_rename_server_farm_id_model_object(self):
         # When the transformer receives a raw model object (before todict), it must
-        # serialise the object first and then rename serverFarmId.
+        # serialise the object first and then add appServicePlanId.
         farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
         # Simulate a model object with __dict__ that todict() will expand.
         # Note: attribute names with underscores are converted to camelCase by todict(),
@@ -110,7 +111,8 @@ class TestWebappMocked(unittest.TestCase):
             result = transform_rename_server_farm_id(web_obj)
 
         self.assertEqual(result['appServicePlanId'], farm_id)
-        self.assertNotIn('serverFarmId', result)
+        # serverFarmId is preserved for backward compatibility
+        self.assertEqual(result['serverFarmId'], farm_id)
 
     def test_transform_rename_server_farm_id_noop_when_already_renamed(self):
         farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
@@ -131,7 +133,6 @@ class TestWebappMocked(unittest.TestCase):
         results = transform_rename_server_farm_id_list(webs)
 
         for r in results:
-            self.assertNotIn('serverFarmId', r)
             self.assertEqual(r['appServicePlanId'], farm_id)
 
     def test_rename_server_farm_props_handles_object_attributes(self):

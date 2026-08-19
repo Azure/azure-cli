@@ -41,13 +41,17 @@ def transform_web_list_output(webs):
 
 
 def transform_rename_server_farm_id(web):
-    """Post-serialization transformer: rename serverFarmId to appServicePlanId.
+    """Post-serialization transformer: expose appServicePlanId in output.
 
     The command-level 'transform' hook runs *before* the pipeline calls todict(),
     so the value received here is a raw model object, not yet a plain dict.  We
     therefore serialise it ourselves first using the same todict() the pipeline
-    would use, rename the key in the resulting dict, and return the dict so that
-    the pipeline's subsequent todict() call passes through it unchanged.
+    would use, add appServicePlanId to the resulting dict, and return the dict so
+    that the pipeline's subsequent todict() call passes through it unchanged.
+
+    serverFarmId is preserved in the output for backward compatibility with
+    existing scripts and tests.  appServicePlanId is added alongside it as an
+    alias so that callers relying on the original field name continue to work.
 
     In newer azure-mgmt-web SDK versions (ARM-envelope layout) serverFarmId is
     nested under 'properties'.  In older flat-layout versions it appears at the
@@ -64,10 +68,12 @@ def transform_rename_server_farm_id(web):
 
     # serverFarmId may be at the top level (older/flat SDK serialisation) or
     # nested under 'properties' (newer ARM-envelope SDK serialisation).
-    server_farm_id = web.pop('serverFarmId', None)
-    properties = web.get('properties')
-    if isinstance(properties, dict):
-        server_farm_id = properties.pop('serverFarmId', server_farm_id)
+    # Use get (not pop) so that serverFarmId is preserved for backward compat.
+    server_farm_id = web.get('serverFarmId')
+    if server_farm_id is None:
+        properties = web.get('properties')
+        if isinstance(properties, dict):
+            server_farm_id = properties.get('serverFarmId')
 
     if server_farm_id is not None and 'appServicePlanId' not in web:
         web['appServicePlanId'] = server_farm_id
