@@ -852,8 +852,6 @@ def _is_wsl_interop_enabled():
 def _get_wsl_browser_commands(url):
     safe_url = url.replace("'", "''")
     return [
-        (['/mnt/c/Windows/explorer.exe', url], (0, 1)),
-        (['explorer.exe', url], (0, 1)),
         (['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
           '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,)),
         (['powershell.exe', '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,))
@@ -891,7 +889,7 @@ class _WslBrowserOpen:
         self._original_open = None
         self._patch_applied = False
         if not is_wsl():
-            return
+            return self
 
         import webbrowser
         self._original_open = webbrowser.open
@@ -901,6 +899,7 @@ class _WslBrowserOpen:
 
         webbrowser.open = _open
         self._patch_applied = True
+        return self
 
     def __exit__(self, *args):
         if self._patch_applied:
@@ -943,7 +942,8 @@ def can_launch_browser():
         # If powershell.exe is on PATH, it can be called to launch a browser.
         import shutil
         if _is_wsl_interop_enabled() and (
-                shutil.which("powershell.exe") or os.path.exists('/mnt/c/Windows/explorer.exe')):
+                shutil.which("powershell.exe") or
+                os.path.exists('/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe')):
             return True
 
     return False

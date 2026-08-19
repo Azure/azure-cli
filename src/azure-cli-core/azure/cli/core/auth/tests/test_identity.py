@@ -47,7 +47,7 @@ class TestIdentity(unittest.TestCase):
 
     @mock.patch("azure.cli.core.auth.identity.check_result", return_value={"username": "user1"})
     @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
-    @mock.patch("azure.cli.core.util.wsl_browser_open")
+    @mock.patch("azure.cli.core.auth.identity.wsl_browser_open")
     def test_login_with_auth_code_uses_wsl_browser_open(self, wsl_browser_open_mock, _, check_result_mock):
         identity = Identity.__new__(Identity)
         identity._is_adfs = False

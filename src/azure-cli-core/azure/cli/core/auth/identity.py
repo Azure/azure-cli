@@ -13,6 +13,8 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
+from azure.cli.core.util import wsl_browser_open
+
 from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
@@ -163,7 +165,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
-        from azure.cli.core.util import wsl_browser_open
         with wsl_browser_open():
             result = self._msal_app.acquire_token_interactive(
                 scopes, prompt='select_account', port=8400 if self._is_adfs else None,
