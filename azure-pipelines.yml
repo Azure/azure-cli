@@ -18,6 +18,7 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - group: 'AME ESRP Variable Group'
+  - group: 'esrp-signing-codes'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
