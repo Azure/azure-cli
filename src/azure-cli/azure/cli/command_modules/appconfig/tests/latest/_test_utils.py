@@ -6,9 +6,9 @@
 import json
 import os
 
+from azure.cli.testsdk import ResourceGroupPreparer
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
-from azure.cli.testsdk.exceptions import CliTestError
 from azure.cli.core.util import shell_safe_json_parse
 
 def create_config_store(test, kwargs, disable_local_auth=False):
@@ -30,21 +30,23 @@ def get_resource_name_prefix(prefix):
     return prefix if resource_prefix is None else resource_prefix + prefix
 
 # Value the reused live test resource group (AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME) is rewritten to
-# in recordings by ResourceGroupNameReplacer, and returned by get_test_resource_group() during
-# playback so requests match the sanitized cassettes. Matches the default ResourceGroupPreparer() moniker.
+# in recordings by ResourceGroupNameReplacer. Matches the default ResourceGroupPreparer() moniker.
 SANITIZED_TEST_RESOURCE_GROUP = "clitest.rg000001"
 
-def get_test_resource_group():
-    resource_group = os.environ.get("AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME")
-    if resource_group:
-        return resource_group
-    # The stub only exists inside sanitized recordings; a live run needs a real group where the
-    # recording principal holds "App Configuration Data Owner".
-    if os.environ.get("AZURE_TEST_RUN_LIVE"):
-        raise CliTestError(
-            "Set AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a resource group where you hold "
-            "'App Configuration Data Owner' to record App Configuration data-plane tests.")
-    return SANITIZED_TEST_RESOURCE_GROUP
+
+class AppConfigResourceGroupPreparer(ResourceGroupPreparer):
+    """ ResourceGroupPreparer that keeps moniker numbering aligned when reusing a dev resource group.
+
+    In dev-setting mode the base preparer returns early without calling live_only_execute, so it never
+    advances test_resources_count during recording the way it does in playback. That would desync
+    create_random_name numbering (e.g. store000001 vs store000002) between recording and playback, so
+    touch the moniker here to consume the same counter slot in both modes.
+    """
+
+    def create_resource(self, name, **kwargs):
+        if self.dev_setting_name:
+            _ = self.moniker
+        return super().create_resource(name, **kwargs)
 
 
 def _case_insensitive_query_matcher(r1, r2):
@@ -101,8 +103,8 @@ class ResourceGroupNameReplacer(RecordingProcessor):
     """ Scrub the reused live test resource group name from recordings.
 
     Data-plane tests reuse a pre-provisioned resource group (AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME)
-    that holds a standing "App Configuration Data Owner" role. That name is never registered with the
-    base name-replacer, so rewrite it to the value get_test_resource_group() returns during playback.
+    that holds a standing "App Configuration Data Owner" role. ResourceGroupPreparer does not sanitize
+    a dev-setting resource group, so rewrite it to the moniker ResourceGroupPreparer uses in playback.
     """
 
     def __init__(self):
