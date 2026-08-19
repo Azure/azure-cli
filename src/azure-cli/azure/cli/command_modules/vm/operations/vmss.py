@@ -471,6 +471,10 @@ def convert_show_result_to_snake_case(result):
     if "hardwareProfile" in virtual_machine_profile:
         virtual_machine_profile["hardware_profile"] = virtual_machine_profile["hardwareProfile"]
         virtual_machine_profile.pop("hardwareProfile")
+    if "interconnectBlockProfile" in virtual_machine_profile:
+        virtual_machine_profile["interconnect_block_profile"] = virtual_machine_profile[
+            "interconnectBlockProfile"]
+        virtual_machine_profile.pop("interconnectBlockProfile")
     if "licenseType" in virtual_machine_profile:
         virtual_machine_profile["license_type"] = virtual_machine_profile["licenseType"]
         virtual_machine_profile.pop("licenseType")
@@ -523,6 +527,11 @@ def convert_show_result_to_snake_case(result):
     if "maxPrice" in billing_profile:
         billing_profile["max_price"] = billing_profile["maxPrice"]
         billing_profile.pop("maxPrice")
+
+    interconnect_block_profile = virtual_machine_profile.get("interconnect_block_profile", {}) or {}
+    if "interconnectBlock" in interconnect_block_profile:
+        interconnect_block_profile["interconnect_block"] = interconnect_block_profile["interconnectBlock"]
+        interconnect_block_profile.pop("interconnectBlock")
 
     capacity_reservation = virtual_machine_profile.get("capacity_reservation", {}) or {}
     if "capacityReservationGroup" in capacity_reservation:
