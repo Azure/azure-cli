@@ -51,11 +51,6 @@ parameters:
     type: string
     default: 'Azure/homebrew-azure-cli'
   
-  - name: GitHubServiceConnection
-    displayName: 'GitHub Service Connection'
-    type: string
-    default: 'Azure'
-  
   - name: ESRPServiceConnection
     displayName: 'ESRP Service Connection'
     type: string
@@ -79,6 +74,7 @@ variables:
   - ${{ if eq(variables['System.TeamProject'], 'release') }}:
     - group: 'AME ESRP Variable Group'
     - group: 'esrp-signing-codes'
+    - group: 'get-github-pat-token'
   
   - name: GitHubRepo
     value: ${{ parameters.GitHubRepo }}
@@ -189,7 +185,6 @@ jobs:
       UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
       TestAfterPublish: false
       GitHubRepo: $(GitHubRepo)
-      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
       HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}

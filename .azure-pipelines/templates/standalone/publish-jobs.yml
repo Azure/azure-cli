@@ -35,9 +35,6 @@ parameters:
   - name: GitHubRepo
     type: string
     default: ''
-  - name: GitHubServiceConnection
-    type: string
-    default: 'Azure'
   - name: HomebrewTapRepo
     type: string
     default: ''
@@ -80,6 +77,12 @@ jobs:
     
     steps:
     - checkout: none
+
+    - template: get-github-pat-token.yml
+      parameters:
+        azureSubscription: $(AzureSubscription)
+        keyVaultName: $(GitHubPatKeyVault)
+        secretName: $(GitHubPatSecretName)
     
     - download: current
       artifact: 'macos-cli-signed-notarized-arm64'
@@ -150,45 +153,41 @@ jobs:
         
       displayName: 'Prepare release files'
     
-    - task: GitHubRelease@1
-      displayName: 'Delete existing release if present'
-      continueOnError: true
-      inputs:
-        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
-        repositoryName: '${{ parameters.GitHubRepo }}'
-        action: 'delete'
-        tag: '$(ReleaseTag)'
-    
-    - task: GitHubRelease@1
-      displayName: 'Create GitHub Release'
-      inputs:
-        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
-        repositoryName: '${{ parameters.GitHubRepo }}'
-        action: 'create'
-        target: 'main'
-        tagSource: 'userSpecifiedTag'
-        tag: '$(ReleaseTag)'
-        title: 'Azure CLI $(AzureCliVersion) - Homebrew Cask'
-        releaseNotesSource: 'inline'
-        releaseNotesInline: |
-          ## Azure CLI $(AzureCliVersion) - Homebrew Cask
-          
-          ### Available Architectures
-          - **Apple Silicon (arm64)**: azure-cli-$(AzureCliVersion)-macos-arm64.tar.gz
-          - **Intel (x86_64)**: azure-cli-$(AzureCliVersion)-macos-x86_64.tar.gz
-          - **Linux ARM64**: azure-cli-$(AzureCliVersion)-linux-arm64.tar.gz
-          - **Linux x86_64**: azure-cli-$(AzureCliVersion)-linux-x86_64.tar.gz
-          
-          ### Requirements
-          - Homebrew Python ${{ parameters.PythonVersion }} on macOS or Linux
-          
-          ### Installation via Homebrew Cask
-          ```bash
-          brew tap ${{ parameters.HomebrewTapRepo }}
-          brew install --cask azure-cli
-          ```
-        assets: '$(Build.ArtifactStagingDirectory)/release/*'
-        addChangeLog: false
+    - bash: |
+        set -euo pipefail
+
+        release_tag='$(ReleaseTag)'
+        repository='${{ parameters.GitHubRepo }}'
+        notes_file='$(Agent.TempDirectory)/release-notes.md'
+
+        cat > "$notes_file" <<'EOF'
+        ## Azure CLI $(AzureCliVersion) - Homebrew Cask
+
+        ### Available Architectures
+        - **Apple Silicon (arm64)**: azure-cli-$(AzureCliVersion)-macos-arm64.tar.gz
+        - **Intel (x86_64)**: azure-cli-$(AzureCliVersion)-macos-x86_64.tar.gz
+        - **Linux ARM64**: azure-cli-$(AzureCliVersion)-linux-arm64.tar.gz
+        - **Linux x86_64**: azure-cli-$(AzureCliVersion)-linux-x86_64.tar.gz
+
+        ### Requirements
+        - Homebrew Python ${{ parameters.PythonVersion }} on macOS or Linux
+
+        ### Installation via Homebrew Cask
+        ```bash
+        brew tap ${{ parameters.HomebrewTapRepo }}
+        brew install --cask azure-cli
+        ```
+        EOF
+
+        gh release delete "$release_tag" --repo "$repository" --yes || true
+        gh release create "$release_tag" "$(Build.ArtifactStagingDirectory)/release/"* \
+          --repo "$repository" \
+          --target main \
+          --title "Azure CLI $(AzureCliVersion) - Homebrew Cask" \
+          --notes-file "$notes_file"
+      displayName: 'Create GitHub Release with PAT'
+      env:
+        GH_TOKEN: $(GH_TOKEN)
 
 # ============================================================================
 # JOB: UPDATE HOMEBREW CASK
