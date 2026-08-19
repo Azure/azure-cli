@@ -849,12 +849,11 @@ def _is_wsl_interop_enabled():
     return bool(os.environ.get('WSL_INTEROP'))
 
 
-def _get_wsl_browser_commands(url):
-    safe_url = url.replace("'", "''")
+def _get_wsl_browser_commands():
     return [
         (['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
-          '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,)),
-        (['powershell.exe', '-NoProfile', '-Command', f"Start-Process '{safe_url}'"], (0,))
+          '-NoProfile', '-Command', 'Start-Process $env:AZURE_CLI_WSL_BROWSER_URL'], (0,)),
+        (['powershell.exe', '-NoProfile', '-Command', 'Start-Process $env:AZURE_CLI_WSL_BROWSER_URL'], (0,))
     ]
 
 
@@ -873,9 +872,11 @@ def _open_url_in_wsl_browser(url):
         return False
 
     import subprocess
-    for cmd, success_codes in _get_wsl_browser_commands(url):
+    env = os.environ.copy()
+    env['AZURE_CLI_WSL_BROWSER_URL'] = url
+    for cmd, success_codes in _get_wsl_browser_commands():
         try:
-            exit_code = subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            exit_code = subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
             if exit_code in success_codes:
                 return True
         except OSError:

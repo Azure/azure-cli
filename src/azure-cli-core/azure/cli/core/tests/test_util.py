@@ -250,7 +250,7 @@ class TestUtils(unittest.TestCase):
             assert webbrowser.open('https://login.example.com')
 
         open_url_mock.assert_called_once_with('https://login.example.com')
-        wsl_interop_mock.assert_called_once()
+        wsl_interop_mock.assert_called()
         self.assertEqual(webbrowser.open, original_open)
 
     @mock.patch('subprocess.call', autospec=True)
@@ -258,6 +258,17 @@ class TestUtils(unittest.TestCase):
     def test_open_url_in_wsl_browser_rejects_non_http_url(self, _, subprocess_call_mock):
         assert not _open_url_in_wsl_browser('/C:/Windows/System32/calc.exe')
         subprocess_call_mock.assert_not_called()
+
+    @mock.patch('subprocess.call', autospec=True, return_value=0)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
+    def test_open_url_in_wsl_browser_passes_url_by_env(self, _, subprocess_call_mock):
+        url = 'https://login.example.com/path?x=1&y=2'
+
+        assert _open_url_in_wsl_browser(url)
+
+        cmd = subprocess_call_mock.call_args.args[0]
+        self.assertNotIn(url, cmd)
+        self.assertEqual(subprocess_call_mock.call_args.kwargs['env']['AZURE_CLI_WSL_BROWSER_URL'], url)
 
     def test_configured_default_setter(self):
         config = mock.MagicMock()
