@@ -7,7 +7,6 @@ import json
 import os
 import tempfile
 import unittest
-from unittest import mock
 
 from azure.cli.core.auth.persistence import AzureCliTokenCache, SecretStore, build_persistence
 
@@ -29,12 +28,10 @@ class TestAzureCliTokenCache(unittest.TestCase):
         try:
             persistence = self._make_persistence(tmp_path)
             cache = AzureCliTokenCache(persistence)
-
-            # Use float('inf') so that the condition `_last_sync < time_last_modified()` is
-            # always True, forcing a reload on every call to _reload_if_necessary.
-            with mock.patch.object(cache._persistence, 'time_last_modified', return_value=float('inf')):
-                # Should not raise JSONDecodeError
-                cache._reload_if_necessary()
+            # _last_sync is 0 on init; any real file mtime > 0 forces a reload attempt,
+            # so no mock is needed to trigger _reload_if_necessary.
+            # Should not raise JSONDecodeError
+            cache._reload_if_necessary()
         finally:
             os.unlink(tmp_path)
 
@@ -47,12 +44,10 @@ class TestAzureCliTokenCache(unittest.TestCase):
         try:
             persistence = self._make_persistence(tmp_path)
             cache = AzureCliTokenCache(persistence)
-
-            # Use float('inf') so that the condition `_last_sync < time_last_modified()` is
-            # always True, forcing a reload on every call to _reload_if_necessary.
-            with mock.patch.object(cache._persistence, 'time_last_modified', return_value=float('inf')):
-                # Should not raise
-                cache._reload_if_necessary()
+            # _last_sync is 0 on init; any real file mtime > 0 forces a reload attempt,
+            # so no mock is needed to trigger _reload_if_necessary.
+            # Should not raise
+            cache._reload_if_necessary()
         finally:
             os.unlink(tmp_path)
 
