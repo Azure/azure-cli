@@ -43,12 +43,35 @@ def transform_web_list_output(webs):
 def transform_rename_server_farm_id(web):
     """Post-serialization transformer: rename serverFarmId to appServicePlanId.
 
-    Newer azure-mgmt-web SDK models serialise their REST fields directly (bypassing
-    in-place dict writes), so we must rename the key here on the already-serialised
-    Python dict rather than on the model object in place.
+    The command-level 'transform' hook runs *before* the pipeline calls todict(),
+    so the value received here is a raw model object, not yet a plain dict.  We
+    therefore serialise it ourselves first using the same todict() the pipeline
+    would use, rename the key in the resulting dict, and return the dict so that
+    the pipeline's subsequent todict() call passes through it unchanged.
+
+    In newer azure-mgmt-web SDK versions (ARM-envelope layout) serverFarmId is
+    nested under 'properties'.  In older flat-layout versions it appears at the
+    top level.  Both cases are handled.
     """
-    if isinstance(web, dict) and 'serverFarmId' in web and 'appServicePlanId' not in web:
-        web['appServicePlanId'] = web.pop('serverFarmId')
+    from azure.cli.core.util import todict
+    from azure.cli.core.commands import AzCliCommandInvoker
+
+    if not isinstance(web, dict):
+        web = todict(web, AzCliCommandInvoker.remove_additional_prop_layer)
+
+    if not isinstance(web, dict):
+        return web
+
+    # serverFarmId may be at the top level (older/flat SDK serialisation) or
+    # nested under 'properties' (newer ARM-envelope SDK serialisation).
+    server_farm_id = web.pop('serverFarmId', None)
+    properties = web.get('properties')
+    if isinstance(properties, dict):
+        server_farm_id = properties.pop('serverFarmId', server_farm_id)
+
+    if server_farm_id is not None and 'appServicePlanId' not in web:
+        web['appServicePlanId'] = server_farm_id
+
     return web
 
 

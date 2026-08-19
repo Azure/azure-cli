@@ -79,6 +79,39 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(result['appServicePlanId'], farm_id)
         self.assertNotIn('serverFarmId', result)
 
+    def test_transform_rename_server_farm_id_nested_under_properties(self):
+        # New SDK ARM-envelope layout: serverFarmId is under 'properties', not at the top level
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        web = {
+            'location': 'westus',
+            'properties': {
+                'serverFarmId': farm_id,
+                'name': 'myapp',
+            },
+        }
+
+        result = transform_rename_server_farm_id(web)
+
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result)
+        self.assertNotIn('serverFarmId', result.get('properties', {}))
+
+    def test_transform_rename_server_farm_id_model_object(self):
+        # When the transformer receives a raw model object (before todict), it must
+        # serialise the object first and then rename serverFarmId.
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        # Simulate a model object with __dict__ that todict() will expand.
+        # Note: attribute names with underscores are converted to camelCase by todict(),
+        # so set them as camelCase to match what todict() would produce.
+        web_obj = types.SimpleNamespace(location='westus')
+        web_obj.__dict__['serverFarmId'] = farm_id
+
+        with mock.patch('azure.cli.core.util.todict', return_value={'location': 'westus', 'serverFarmId': farm_id}):
+            result = transform_rename_server_farm_id(web_obj)
+
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result)
+
     def test_transform_rename_server_farm_id_noop_when_already_renamed(self):
         farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
         web = {'appServicePlanId': farm_id}
