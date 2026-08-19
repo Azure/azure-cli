@@ -866,7 +866,7 @@ def _is_safe_browser_url(url):
     except ValueError:
         return False
 
-    return parsed_url.scheme in ('http', 'https') and not any(c in url for c in '\n\r\t')
+    return parsed_url.scheme in ('http', 'https') and not any(ord(c) < 32 or ord(c) == 127 for c in url)
 
 
 def _open_url_in_wsl_browser(url):
@@ -888,7 +888,7 @@ class _WslBrowserOpen:
     def __enter__(self):
         self._original_open = None
         self._patch_applied = False
-        if not is_wsl():
+        if not is_wsl() or not _is_wsl_interop_enabled():
             return self
 
         import webbrowser

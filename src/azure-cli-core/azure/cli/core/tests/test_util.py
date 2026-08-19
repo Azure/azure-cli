@@ -238,9 +238,10 @@ class TestUtils(unittest.TestCase):
         m.assert_called_once_with('/proc/sys/fs/binfmt_misc/WSLInterop-late', 'r')
 
     @mock.patch('azure.cli.core.util._open_url_in_wsl_browser', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True,
                 return_value=('linux', '5.10.16.3-microsoft-standard-WSL2'))
-    def test_wsl_browser_open_uses_wsl_browser(self, _, open_url_mock):
+    def test_wsl_browser_open_uses_wsl_browser(self, _, __, open_url_mock):
         import webbrowser
 
         original_open = webbrowser.open
