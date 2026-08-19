@@ -54,5 +54,29 @@ class TestEncryptionFallbackWarning(unittest.TestCase):
         self.assertFalse(persistence._encryption_fallback)
 
 
+class TestErasePersistence(unittest.TestCase):
+    """Clearing all accounts must empty the payload, not just remove the files.
+
+    On Linux and macOS the credential is held by libsecret or Keychain and the file is only a
+    modification signal, so removing files alone would leave the credential behind.
+    """
+
+    def test_payload_is_overwritten_through_the_persistence(self):
+        built = mock.MagicMock()
+        with mock.patch.object(persistence, 'build_persistence', return_value=built) as build_mock:
+            persistence.erase_persistence('/tmp/test_persistence', True, type='Secret store',
+                                          empty_payload='[]')
+
+        build_mock.assert_called_once_with('/tmp/test_persistence', True, type='Secret store')
+        built.save.assert_called_once_with('[]')
+
+    def test_failure_to_erase_is_swallowed(self):
+        # The caller removes the files regardless, so a keyring error must not break logout.
+        built = mock.MagicMock()
+        built.save.side_effect = Exception('keyring is gone')
+        with mock.patch.object(persistence, 'build_persistence', return_value=built):
+            persistence.erase_persistence('/tmp/test_persistence', True, type='Token cache')
+
+
 if __name__ == '__main__':
     unittest.main()

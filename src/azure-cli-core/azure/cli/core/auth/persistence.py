@@ -93,6 +93,20 @@ def _record_encryption_fallback():
     _encryption_fallback = True
 
 
+def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
+    """Overwrite a persisted payload with empty content.
+
+    Removing the files is not enough on Linux and macOS: the credential is held by libsecret or
+    Keychain and the file is only a modification signal. Write through the same persistence that
+    reads it, the way logging out of a single account does.
+    """
+    try:
+        build_persistence(location, encrypt, type=type).save(empty_payload)
+    except Exception as e:  # pylint: disable=broad-except
+        # Best effort. The files are removed by the caller regardless.
+        logger.debug("Failed to erase persisted payload at %r: %s", location, e)
+
+
 def warn_if_encryption_unavailable():
     """Warn that credentials are persisted in plaintext.
 

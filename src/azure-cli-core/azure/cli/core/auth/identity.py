@@ -15,7 +15,8 @@ from msal import PublicClientApplication, ConfidentialClientApplication
 
 from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential
-from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
+from .persistence import (load_persisted_token_cache, file_extensions, load_secret_store,
+                          erase_persistence)
 from .util import check_result
 
 # Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
@@ -210,6 +211,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         for account in accounts:
             self._msal_app.remove_account(account)
 
+        # Empty the payload before removing the files. MSAL only removes the accounts it knows
+        # about, and on Linux and macOS the credential lives in the OS keychain, where removing
+        # the signal file would leave it behind.
+        erase_persistence(self._token_cache_file, self._encrypt, type="Token cache",
+                          empty_payload='{}')
+
         # Also remove token cache file
         for e in file_extensions:
             _try_remove(self._token_cache_file + e)
@@ -227,8 +234,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def logout_all_service_principal(self):
         # remove service principal secrets
-        # TODO: As MSAL provides no interface to get all service principals in its token cache, this method can't
-        #   clear all service principals' access tokens from MSAL token cache.
+        # MSAL provides no interface to enumerate the service principals in its token cache, so
+        # their access tokens are cleared by logout_all_users emptying the whole token cache.
+        erase_persistence(self._secret_file, self._encrypt, type="Secret store",
+                          empty_payload='[]')
+
         for e in file_extensions:
             _try_remove(self._secret_file + e)
 
