@@ -182,7 +182,7 @@ class TestUtils(unittest.TestCase):
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True)
     @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
     @mock.patch('webbrowser.get', autospec=True)
-    def test_can_launch_browser(self, webbrowser_get_mock, _, get_platform_mock, which_mock):
+    def test_can_launch_browser(self, webbrowser_get_mock, wsl_interop_mock, get_platform_mock, which_mock):
         import webbrowser
 
         # Windows is always fine
@@ -225,6 +225,7 @@ class TestUtils(unittest.TestCase):
         webbrowser_get_mock.side_effect = webbrowser.Error
         which_mock.return_value = False
         assert not can_launch_browser()
+        self.assertTrue(wsl_interop_mock.called)
 
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True,
                 return_value=('linux', '5.10.16.3-microsoft-standard-WSL2'))
@@ -241,7 +242,7 @@ class TestUtils(unittest.TestCase):
     @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True,
                 return_value=('linux', '5.10.16.3-microsoft-standard-WSL2'))
-    def test_wsl_browser_open_uses_wsl_browser(self, _, __, open_url_mock):
+    def test_wsl_browser_open_uses_wsl_browser(self, _, wsl_interop_mock, open_url_mock):
         import webbrowser
 
         original_open = webbrowser.open
@@ -249,6 +250,7 @@ class TestUtils(unittest.TestCase):
             assert webbrowser.open('https://login.example.com')
 
         open_url_mock.assert_called_once_with('https://login.example.com')
+        wsl_interop_mock.assert_called_once()
         self.assertEqual(webbrowser.open, original_open)
 
     @mock.patch('subprocess.call', autospec=True)

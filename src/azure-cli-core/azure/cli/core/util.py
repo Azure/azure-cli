@@ -861,11 +861,10 @@ def _get_wsl_browser_commands(url):
 def _is_safe_browser_url(url):
     from urllib.parse import urlparse
 
-    try:
-        parsed_url = urlparse(url)
-    except ValueError:
+    if not isinstance(url, str):
         return False
 
+    parsed_url = urlparse(url)
     return parsed_url.scheme in ('http', 'https') and not any(ord(c) < 32 or ord(c) == 127 for c in url)
 
 
@@ -888,7 +887,7 @@ class _WslBrowserOpen:
     def __enter__(self):
         self._original_open = None
         self._patch_applied = False
-        if not is_wsl() or not _is_wsl_interop_enabled():
+        if not _is_wsl_interop_enabled():
             return self
 
         import webbrowser
