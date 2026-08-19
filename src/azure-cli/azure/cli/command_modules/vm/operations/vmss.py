@@ -528,6 +528,10 @@ def convert_show_result_to_snake_case(result):
     if "capacityReservationGroup" in capacity_reservation:
         capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
         capacity_reservation.pop("capacityReservationGroup")
+    if "disableCapacityReservationAssignment" in capacity_reservation:
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            capacity_reservation["disableCapacityReservationAssignment"]
+        capacity_reservation.pop("disableCapacityReservationAssignment")
 
     diagnostics_profile = virtual_machine_profile.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:
