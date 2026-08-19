@@ -4676,8 +4676,97 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
 
 
-class VMSSCreateOptions(ScenarioTest):
+class VMSSLifecycleHookScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lifecycle_hook')
+    def test_vmss_lifecycle_hook(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Updating / showing a non-existent hook type fails.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 expect_failure=True)
+
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT8H --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].waitDuration", 'PT8H'),
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].defaultAction", 'Approve')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H'), self.check('defaultAction', 'Approve')])
+
+        # remove: --type and --all are mutually exclusive, and exactly one is required.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling --all',
+                 expect_failure=True)
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss}', expect_failure=True)
+
+        # Add a second lifecycle hook of a different type.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSRollingBatchStarting '
+                 '--wait-duration PT20M --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSRollingBatchStarting'] | [0].waitDuration", 'PT20M')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 2)])
+
+        # Adding a hook whose type already exists is rejected client-side.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT1H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H')])
+
+        # Update one hook's wait-duration and confirm.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H')
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT2H')])
+
+        # Remove one hook by --type; one hook remains.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+
+        # Remove all remaining hooks with --all.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --all')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+
+class VMSSLifecycleHookEventScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lch_event')
+    # Not including approve/reject/show and update --action-state as they required live platform-generated event
+    def test_vmss_lifecycle_hook_event(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Lifecycle hook events are platform-generated; a fresh scale set has none.
+        self.cmd('vmss lifecycle-hook-event list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+        # --instance-ids requires --action-state (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent '
+                 '--instance-ids 0', expect_failure=True)
+
+        # update requires at least one of --action-state or --wait-until (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent',
+                 expect_failure=True)
+
+
+class VMSSCreateOptions(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
