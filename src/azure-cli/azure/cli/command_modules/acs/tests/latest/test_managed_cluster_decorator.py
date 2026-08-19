@@ -16358,6 +16358,161 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_update_hosted_system_profile(self):
+        system_node_subnet_id = "/subscriptions/fakesub/resourceGroups/fakerg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/systemnode"
+        node_subnet_id = "/subscriptions/fakesub/resourceGroups/fakerg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/node"
+        apiserver_subnet_id = "/subscriptions/fakesub/resourceGroups/fakerg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/apiserver"
+
+        # not specified, no change
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_hosted_system_profile(mc_0)
+        self.assertIsNone(dec_mc_0.hosted_system_profile)
+
+        # non-BYO conversion
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_hosted_system": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_hosted_system_profile(mc_1)
+        self.assertTrue(dec_mc_1.hosted_system_profile.enabled)
+        self.assertIsNone(dec_mc_1.hosted_system_profile.system_node_subnet_id)
+        self.assertIsNone(dec_mc_1.hosted_system_profile.node_subnet_id)
+
+        # BYO conversion
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_hosted_system": True,
+                "system_node_subnet_id": system_node_subnet_id,
+                "node_subnet_id": node_subnet_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_hosted_system_profile(mc_2)
+        self.assertTrue(dec_mc_2.hosted_system_profile.enabled)
+        self.assertEqual(dec_mc_2.hosted_system_profile.system_node_subnet_id, system_node_subnet_id)
+        self.assertEqual(dec_mc_2.hosted_system_profile.node_subnet_id, node_subnet_id)
+
+        # --node-subnet-id and --apiserver-subnet-id are optional
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_hosted_system": True,
+                "system_node_subnet_id": system_node_subnet_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_hosted_system_profile(mc_3)
+        self.assertTrue(dec_mc_3.hosted_system_profile.enabled)
+        self.assertEqual(dec_mc_3.hosted_system_profile.system_node_subnet_id, system_node_subnet_id)
+        self.assertIsNone(dec_mc_3.hosted_system_profile.node_subnet_id)
+
+        # --apiserver-subnet-id may still be supplied alongside the node subnets
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_hosted_system": True,
+                "system_node_subnet_id": system_node_subnet_id,
+                "node_subnet_id": node_subnet_id,
+                "apiserver_subnet_id": apiserver_subnet_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_vnet_integration=True,
+                subnet_id=apiserver_subnet_id,
+            ),
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_hosted_system_profile(mc_4)
+        self.assertTrue(dec_mc_4.hosted_system_profile.enabled)
+        self.assertEqual(dec_mc_4.hosted_system_profile.system_node_subnet_id, system_node_subnet_id)
+        self.assertEqual(dec_mc_4.hosted_system_profile.node_subnet_id, node_subnet_id)
+
+        # the subnet flags require --enable-hosted-system
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "system_node_subnet_id": system_node_subnet_id,
+                "node_subnet_id": node_subnet_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_5.context.attach_mc(mc_5)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_5.update_hosted_system_profile(mc_5)
+
+        # --node-subnet-id requires --system-node-subnet-id
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_hosted_system": True,
+                "node_subnet_id": node_subnet_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        dec_6.context.attach_mc(mc_6)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_6.update_hosted_system_profile(mc_6)
+
+        # non-Automatic SKU is rejected
+        dec_7 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_hosted_system": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            sku=self.models.ManagedClusterSKU(name="Base"),
+        )
+        dec_7.context.attach_mc(mc_7)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_7.update_hosted_system_profile(mc_7)
+
     def test_enable_container_network_logs(self):
         # Case 1: enable_acns, enable monitoring addons_profile, enable container_network_logs
         dec_1 = AKSManagedClusterUpdateDecorator(

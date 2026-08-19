@@ -1244,6 +1244,10 @@ def aks_update(
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
+    # BYO VNet for Managed System Pool (Automatic SKU)
+    system_node_subnet_id=None,
+    node_subnet_id=None,
+    enable_hosted_system=False,
     enable_private_cluster=False,
     disable_private_cluster=False,
     # node provisioning

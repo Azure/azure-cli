@@ -4342,14 +4342,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Obtain the value of enable_hosted_system.
 
         Returns True when the user explicitly opts in via --enable-hosted-system,
-        or implicitly via the BYO VNet subnet trio for Managed System Pool.
+        or, on create only, implicitly via the BYO VNet subnet trio.
 
         :return: bool
         """
-        if self.decorator_mode != DecoratorMode.CREATE:
+        if self.decorator_mode not in (DecoratorMode.CREATE, DecoratorMode.UPDATE):
             return False
         explicit = bool(self.raw_param.get("enable_hosted_system"))
-        implicit = all(
+        # on update the conversion must be requested explicitly; subnets never imply it
+        implicit = self.decorator_mode == DecoratorMode.CREATE and all(
             [
                 self.raw_param.get("system_node_subnet_id"),
                 self.raw_param.get("node_subnet_id"),
@@ -4358,20 +4359,23 @@ class AKSManagedClusterContext(BaseAKSContext):
         )
         return explicit or implicit
 
+    def _hosted_system_sku_error_message(self) -> str:
+        """Build the SKU requirement message for hosted-system flags, per decorator mode."""
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            return '"--enable-hosted-system" is only supported on clusters with the Automatic SKU.'
+        return '"--enable-hosted-system" requires "--sku automatic".'
+
     def validate_byo_hosted_system_subnets(self) -> None:
-        """Validate the BYO VNet subnet trio and the --enable-hosted-system flag.
+        """Cross-validate the BYO VNet subnet flags for the current decorator mode.
 
-        BYO VNet for a Managed System Pool is triggered by --system-node-subnet-id /
-        --node-subnet-id. --apiserver-subnet-id is intentionally NOT part of the trigger
-        because it keeps its existing general-purpose meaning for
-        --enable-apiserver-vnet-integration flows on non-Automatic clusters.
-
-        - If either --system-node-subnet-id or --node-subnet-id is set, the full trio
-          (--system-node-subnet-id, --node-subnet-id, --apiserver-subnet-id) must be
-          provided and --sku must be automatic.
-        - --enable-hosted-system is only valid with --sku automatic.
+        On create, setting either --system-node-subnet-id or --node-subnet-id requires the
+        full trio (both of those plus --apiserver-subnet-id), and a complete trio implies
+        hosted-system enablement. On update the conversion is requested explicitly with
+        --enable-hosted-system, so the subnets only shape the networking it lands on:
+        --node-subnet-id requires --system-node-subnet-id and --apiserver-subnet-id stays
+        optional. Either way the cluster must use the Automatic SKU.
         """
-        if self.decorator_mode != DecoratorMode.CREATE:
+        if self.decorator_mode not in (DecoratorMode.CREATE, DecoratorMode.UPDATE):
             return
         system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
         node_subnet_id = self.raw_param.get("node_subnet_id")
@@ -4380,11 +4384,23 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         byo_specific_set = bool(system_node_subnet_id or node_subnet_id)
 
-        # --enable-hosted-system requires --sku automatic.
+        # --enable-hosted-system requires the Automatic SKU.
         if enable_hosted_system and self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
-            raise RequiredArgumentMissingError(
-                '"--enable-hosted-system" requires "--sku automatic".'
-            )
+            raise RequiredArgumentMissingError(self._hosted_system_sku_error_message())
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            if not byo_specific_set:
+                return
+            if node_subnet_id and not system_node_subnet_id:
+                raise RequiredArgumentMissingError(
+                    '"--node-subnet-id" requires "--system-node-subnet-id".'
+                )
+            if not enable_hosted_system:
+                raise RequiredArgumentMissingError(
+                    'Using "--system-node-subnet-id" or "--node-subnet-id" require '
+                    '"--enable-hosted-system".'
+                )
+            return
 
         # Partial trio: if any BYO subnet is set, require the full trio.
         if byo_specific_set:
@@ -10548,6 +10564,33 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update hosted_system_profile for the ManagedCluster object.
+
+        Supports converting an existing Automatic cluster to a Managed System Pool (hosted
+        system) cluster, optionally with BYO VNet subnets.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        self.context.validate_byo_hosted_system_subnets()
+        if not self.context.get_enable_hosted_system():
+            return mc
+
+        if mc.hosted_system_profile is None:
+            mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile()  # pylint: disable=no-member
+        mc.hosted_system_profile.enabled = True
+
+        system_node_subnet_id = self.context.get_system_node_subnet_id()
+        node_subnet_id = self.context.get_node_subnet_id()
+        if system_node_subnet_id:
+            mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
+        if node_subnet_id:
+            mc.hosted_system_profile.node_subnet_id = node_subnet_id
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -10651,6 +10694,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_vmas_to_vms(mc)
         # update node provisioning profile
         mc = self.update_node_provisioning_profile(mc)
+        # update hosted system profile (Managed System Pool conversion)
+        mc = self.update_hosted_system_profile(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
