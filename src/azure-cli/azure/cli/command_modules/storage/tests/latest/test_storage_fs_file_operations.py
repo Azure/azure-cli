@@ -15,7 +15,7 @@ from azure.cli.command_modules.storage.operations.fs_file import download_file
 class TestStorageFsFileOperations(unittest.TestCase):
 
     def test_download_file_streams_content_to_destination(self):
-        download = mock.Mock()
+        download = mock.Mock(spec=['readinto', 'readall'])
 
         def _write_to_stream(target_stream):
             return target_stream.write(b'hello world')
