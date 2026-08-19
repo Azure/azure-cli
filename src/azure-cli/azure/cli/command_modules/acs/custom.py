@@ -1052,6 +1052,8 @@ def aks_create(
     enable_app_routing_istio=False,
     # gateway api
     enable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1255,6 +1257,9 @@ def aks_update(
     # gateway api
     enable_gateway_api=False,
     disable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
+    disable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
