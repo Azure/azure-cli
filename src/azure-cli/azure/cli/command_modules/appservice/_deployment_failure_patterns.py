@@ -185,6 +185,22 @@ _CONTROL_PLANE_PATTERN_INDEX = {p["errorCode"]: p for p in CONTROL_PLANE_FAILURE
 
 WEBAPP_CREATE_FAILURE_PATTERNS = [
     {
+        "errorCode": "InvalidLinuxRuntime",
+        "stage": "RequestValidation",
+        "suggestedFixes": [
+            "List supported Linux runtimes: 'az webapp list-runtimes --os-type linux -o table'",
+            "Set --runtime to a supported STACK:VERSION value from that list"
+        ]
+    },
+    {
+        "errorCode": "InvalidMinTlsCipherSuite",
+        "stage": "RequestValidation",
+        "suggestedFixes": [
+            "Set --min-tls-cipher-suite to one of the acceptable values listed in Raw Error",
+            "Or remove --min-tls-cipher-suite to use the App Service default cipher suite"
+        ]
+    },
+    {
         "errorCode": "SiteNameUnavailable",
         "stage": "ResourceProvisioning",
         "suggestedFixes": [
@@ -292,15 +308,20 @@ def match_control_plane_failure_pattern(status_code=None, error_message=None):  
     return None
 
 
-def match_webapp_create_failure_pattern(status_code=None, error_message=None):
+def match_webapp_create_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements
     """Map a web app create ARM failure to a known pattern, if possible."""
     error_lower = (error_message or "").lower()
 
+    if "linux runtime" in error_lower and "not supported" in error_lower:
+        return get_failure_pattern("InvalidLinuxRuntime")
+    if "mintlsciphersuite" in error_lower and "invalid" in error_lower:
+        return get_failure_pattern("InvalidMinTlsCipherSuite")
     if ("hostnameconflict" in error_lower or "sitealreadyexists" in error_lower or
             ("name" in error_lower and ("already exists" in error_lower or "not available" in error_lower))):
         return get_failure_pattern("SiteNameUnavailable")
-    if ("serverfarm" in error_lower or "server farm" in error_lower or "app service plan" in error_lower) and \
-            ("not found" in error_lower or "could not be found" in error_lower):
+    mentions_plan = any(term in error_lower for term in ("serverfarm", "server farm", "app service plan"))
+    plan_not_found = any(term in error_lower for term in ("not found", "could not be found", "cannot find"))
+    if mentions_plan and plan_not_found:
         return get_failure_pattern("ServerFarmNotFound")
     if "linux" in error_lower and "worker" in error_lower and \
             ("not available" in error_lower or "unavailable" in error_lower or "capacity" in error_lower):

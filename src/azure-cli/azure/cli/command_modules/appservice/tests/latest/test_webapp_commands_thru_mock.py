@@ -16,7 +16,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
                                        AzureResponseError,
-                                       ResourceNotFoundError)
+                                       ResourceNotFoundError,
+                                       ValidationError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -514,6 +515,40 @@ class TestWebappMocked(unittest.TestCase):
         self.assertIn('WEB APP CREATION FAILED', str(context.exception))
         self.assertIn('LinuxWorkersUnavailable', str(context.exception))
         self.assertIn('Runtime     : DOCKER|nginx:latest', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_enriches_invalid_runtime(self, get_site_avail_mock,
+                                                          stack_helper_mock, web_client_mock):
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, None)
+        stack_helper_mock.remove_delimiters.return_value = 'PYTHON|99.99'
+        stack_helper_mock.return_value.resolve.return_value = None
+
+        with self.assertRaises(EnrichedDeploymentError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          runtime='PYTHON:99.99', enriched_errors=True)
+
+        self.assertIn('InvalidLinuxRuntime', str(context.exception))
+        self.assertIn('Runtime     : PYTHON|99.99', str(context.exception))
+        self.assertIn('az webapp list-runtimes --os-type linux -o table', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_preserves_invalid_runtime_when_enrichment_disabled(
+            self, get_site_avail_mock, stack_helper_mock, web_client_mock):
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, None)
+        stack_helper_mock.remove_delimiters.return_value = 'PYTHON|99.99'
+        stack_helper_mock.return_value.resolve.return_value = None
+
+        with self.assertRaises(ValidationError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          runtime='PYTHON:99.99', enriched_errors=False)
+
+        self.assertIn("Linux Runtime 'PYTHON|99.99' is not supported", str(context.exception))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)

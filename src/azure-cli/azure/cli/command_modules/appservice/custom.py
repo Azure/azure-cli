@@ -300,8 +300,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
-                raise ValidationError("Linux Runtime '{}' is not supported."
-                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                error_message = ("Linux Runtime '{}' is not supported. "
+                                 "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                if enriched_errors:
+                    raise_enriched_webapp_create_error(
+                        resource_group_name=resource_group_name,
+                        webapp_name=name,
+                        plan_name=getattr(plan_info, 'name', None) or plan,
+                        location=location,
+                        sku=getattr(getattr(plan_info, 'sku', None), 'name', None),
+                        runtime=runtime,
+                        error_message=error_message,
+                        last_known_step="Linux runtime validation",
+                    )
+                raise ValidationError(error_message)
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif container_image_name:
             site_config.linux_fx_version = _format_fx_version(container_image_name)

@@ -353,9 +353,9 @@ def build_enriched_webapp_create_error_context(*, resource_group_name=None, weba
         context["errorCode"] = f"HTTP_{status_code}" if status_code else "UnknownWebAppCreateError"
         context["stage"] = "ResourceProvisioning"
         context["suggestedFixes"] = [
-            "Review the raw error message below for the failing property",
-            "Verify the App Service plan and runtime are compatible",
-            "Confirm the web app name is globally unique and retry 'az webapp create'"
+            "Correct the property or value identified in Raw Error and retry 'az webapp create'",
+            "If the failing property is optional, remove its argument to use the App Service default",
+            "Run 'az webapp create --help' to verify supported arguments and values"
         ]
 
     context["resourceGroup"] = resource_group_name or "Unknown"
