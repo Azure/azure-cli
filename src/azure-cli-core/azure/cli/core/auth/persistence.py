@@ -7,6 +7,7 @@
 # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/dev/sample/token_cache_sample.py
 
 import json
+import os
 import sys
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
@@ -93,18 +94,49 @@ def _record_encryption_fallback():
     _encryption_fallback = True
 
 
+def _try_remove(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+    except OSError as e:
+        logger.debug("Failed to remove %r: %s", path, e)
+
+
+def _remove_persistence_files(location):
+    """Remove every persistence file for a location.
+
+    All extensions are tried, not just the one in use, so that a plaintext or DPAPI file left
+    over from a previous core.encrypt_token_cache setting is cleaned up too.
+    """
+    for extension in file_extensions:
+        _try_remove(location + extension)
+
+
 def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
-    """Overwrite a persisted payload with empty content.
+    """Empty a persisted payload and remove its files. Returns whether it succeeded.
 
     Removing the files is not enough on Linux and macOS: the credential is held by libsecret or
     Keychain and the file is only a modification signal. Write through the same persistence that
     reads it, the way logging out of a single account does.
+
+    Emptying and removing happen under one lock, and nothing is touched unless the lock is held.
+    In practice this only fails when another az process is using the credential store, and
+    deleting its freshly written signal file would hide a credential rather than remove it.
     """
     try:
-        build_persistence(location, encrypt, type=type).save(empty_payload)
+        persistence = build_persistence(location, encrypt, type=type)
+        # Serialize against other az processes, like SecretStore.save and PersistedTokenCache do.
+        with CrossPlatLock(persistence.get_location() + '.lockfile'):
+            persistence.save(empty_payload)
+            _remove_persistence_files(location)
+        return True
     except Exception as e:  # pylint: disable=broad-except
-        # Best effort. The files are removed by the caller regardless.
+        # Logging out must not fail, but nothing was cleared and the credential is still readable,
+        # so this can't be silent. Details go to the debug log.
         logger.debug("Failed to erase persisted payload at %r: %s", location, e)
+        logger.warning("Could not clear credentials. Run 'az account clear' again.")
+        return False
 
 
 def warn_if_encryption_unavailable():

@@ -15,8 +15,7 @@ from msal import PublicClientApplication, ConfidentialClientApplication
 
 from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential
-from .persistence import (load_persisted_token_cache, file_extensions, load_secret_store,
-                          erase_persistence)
+from .persistence import load_persisted_token_cache, load_secret_store, erase_persistence
 from .util import check_result
 
 # Service principal entry properties. Names are taken from OAuth 2.0 client credentials flow parameters:
@@ -211,15 +210,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         for account in accounts:
             self._msal_app.remove_account(account)
 
-        # Empty the payload before removing the files. MSAL only removes the accounts it knows
-        # about, and on Linux and macOS the credential lives in the OS keychain, where removing
-        # the signal file would leave it behind.
+        # Empty the payload, then remove the files. MSAL only removes the accounts it knows about,
+        # and on Linux and macOS the credential lives in the OS keychain, where removing the
+        # signal file would leave it behind.
         erase_persistence(self._token_cache_file, self._encrypt, type="Token cache",
                           empty_payload='{}')
-
-        # Also remove token cache file
-        for e in file_extensions:
-            _try_remove(self._token_cache_file + e)
 
     def logout_service_principal(self, client_id):
         # If client_id is a username, it is ignored
@@ -238,9 +233,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # their access tokens are cleared by logout_all_users emptying the whole token cache.
         erase_persistence(self._secret_file, self._encrypt, type="Secret store",
                           empty_payload='[]')
-
-        for e in file_extensions:
-            _try_remove(self._secret_file + e)
 
     def get_user(self, user=None):
         accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
@@ -439,13 +431,6 @@ def _get_authority_url(authority_endpoint, tenant):
     else:
         authority_url = '{}/{}'.format(authority_endpoint, tenant or "organizations")
     return authority_url, is_adfs
-
-
-def _try_remove(path):
-    try:
-        os.remove(path)
-    except FileNotFoundError:
-        pass
 
 
 def get_environment_credential():
