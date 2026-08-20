@@ -897,7 +897,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True, tag=None):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -909,6 +909,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app = client.web_apps.get(resource_group_name, name)
     deployer = '&Deployer=az_cli_functions' if is_functionapp(app) else ''
     zip_url = scm_url + '/api/zipdeploy?isAsync=true' + deployer
+    if tag is not None:
+        zip_url = zip_url + '&tag=' + quote(tag, safe='')
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
@@ -10974,7 +10976,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=True):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True, tag=None):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -11165,7 +11167,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status,
-                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors)
+                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors, tag=tag)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -11417,7 +11419,8 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=True):
+                             enriched_errors=True,
+                             tag=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11436,6 +11439,7 @@ def perform_onedeploy_webapp(cmd,
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
+    params.tag = tag
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -11479,6 +11483,7 @@ class OneDeployParams:
         self.is_linux_webapp = None
         self.is_functionapp = None
         self.enriched_errors = True
+        self.tag = None
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -11619,6 +11624,9 @@ def _build_onedeploy_scm_url(params):
     if params.target_path is not None:
         deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
+    if params.tag is not None:
+        deploy_url = deploy_url + '&tag=' + quote(params.tag, safe='')
+
     return deploy_url
 
 
@@ -11736,6 +11744,7 @@ def _get_onedeploy_request_body(params):
                 "ignorestack": params.should_ignore_stack,
                 "clean": params.is_clean_deployment,
                 "restart": params.should_restart,
+                "tag": params.tag,
             }
         }
         body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}

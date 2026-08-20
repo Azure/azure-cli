@@ -1412,6 +1412,53 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
         self.status_code = status_code
 
 
+class TestOneDeployTag(unittest.TestCase):
+
+    def test_scm_url_includes_encoded_tag(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _build_onedeploy_scm_url
+        params = OneDeployParams()
+        params.artifact_type = 'zip'
+        params.tag = 'release 2026/08'
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_or_fetch_scm_url',
+                        return_value='https://example.scm.azurewebsites.net'):
+            result = _build_onedeploy_scm_url(params)
+
+        self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
+
+    @mock.patch('requests.post')
+    @mock.patch('builtins.open', new_callable=mock.mock_open, read_data=b'zip-content')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://example.scm.azurewebsites.net')
+    def test_zip_deploy_url_includes_encoded_tag(self, _get_scm_url_mock, client_factory_mock,
+                                                 _get_headers_mock, _open_mock, post_mock):
+        from azure.cli.command_modules.appservice.custom import enable_zip_deploy
+        app = mock.MagicMock(kind='app', reserved=False)
+        client_factory_mock.return_value.web_apps.get.return_value = app
+        post_mock.return_value.status_code = 0
+
+        enable_zip_deploy(mock.MagicMock(), 'myRG', 'myApp', 'app.zip',
+                          enable_kudu_warmup=False, tag='release / 1')
+
+        self.assertEqual(post_mock.call_args.args[0],
+                         'https://example.scm.azurewebsites.net/api/zipdeploy?isAsync=true&tag=release%20%2F%201')
+
+    def test_arm_body_includes_tag(self):
+        import json
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _get_onedeploy_request_body
+        params = OneDeployParams()
+        params.src_url = 'https://example.com/app.zip'
+        params.artifact_type = 'zip'
+        params.tag = 'release-2026-08'
+
+        body, file_hash = _get_onedeploy_request_body(params)
+
+        self.assertEqual(json.loads(body)['properties']['tag'], 'release-2026-08')
+        self.assertIsNone(file_hash)
+
+
 class TestCreateAppServicePlanDefaults(unittest.TestCase):
     """Tests for create_app_service_plan default SKU behavior"""
 
