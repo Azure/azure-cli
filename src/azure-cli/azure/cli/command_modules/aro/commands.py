@@ -15,7 +15,7 @@ from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-
 
 def load_command_table(loader, _):
     aro_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
+        operations_tmpl='azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
         client_factory=cf_aro)
 
     with loader.command_group('aro', aro_sdk, client_factory=cf_aro) as g:

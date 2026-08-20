@@ -15,7 +15,7 @@ import typing
 
 from base64 import b64decode
 
-import azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.models as openshiftcluster
+import azure.mgmt.redhatopenshift.models as openshiftcluster
 
 from azure.cli.command_modules.role import GraphError
 from azure.cli.core.commands import LongRunningOperation
