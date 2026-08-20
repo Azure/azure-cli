@@ -768,7 +768,7 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.network_profile.network_interfaces.Element
-        _element.id = AAZStrArg(
+        _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1410,7 +1410,7 @@ class Update(AAZCommand):
             help="Specified the community gallery image unique id for vm deployment. This can be fetched from community gallery image GET call.",
             nullable=True,
         )
-        image_reference.id = AAZStrArg(
+        image_reference.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1608,7 +1608,7 @@ class Update(AAZCommand):
         )
 
         disk_encryption_set_parameters_update = cls._args_disk_encryption_set_parameters_update
-        disk_encryption_set_parameters_update.id = AAZStrArg(
+        disk_encryption_set_parameters_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1680,7 +1680,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         cls._build_args_disk_encryption_set_parameters_update(managed_disk_parameters_update.disk_encryption_set)
-        managed_disk_parameters_update.id = AAZStrArg(
+        managed_disk_parameters_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1804,7 +1804,7 @@ class Update(AAZCommand):
         cls._args_sub_resource_update = AAZObjectArg()
 
         sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
+        sub_resource_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
