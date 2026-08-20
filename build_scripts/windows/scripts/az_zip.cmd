@@ -5,7 +5,7 @@
 
 @IF EXIST "%~dp0\..\python.exe" (
   SET AZ_INSTALLER=ZIP
-  "%~dp0\..\python.exe" -IBm azure.cli %*
+  "%~dp0\..\python.exe" -X utf8 -IBm azure.cli %*
 ) ELSE (
   echo Failed to load python executable.
   exit /b 1
