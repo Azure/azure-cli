@@ -907,6 +907,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
+    if tag is not None and not is_linux_webapp(app):
+        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+        tag = None
     deployer = '&Deployer=az_cli_functions' if is_functionapp(app) else ''
     zip_url = scm_url + '/api/zipdeploy?isAsync=true' + deployer
     if tag is not None:
@@ -10995,6 +10998,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if not os_type:
         logger.warning("No --os-type specified. Defaulting to '%s'.", os_name)
     _is_linux = os_name.lower() == LINUX_OS_NAME
+    if tag is not None and not _is_linux:
+        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+        tag = None
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime:
@@ -11448,6 +11454,9 @@ def perform_onedeploy_webapp(cmd,
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     params._cached_site = app  # pylint: disable=protected-access
     params.is_linux_webapp = is_linux_webapp(app)
+    if tag is not None and not params.is_linux_webapp:
+        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+        params.tag = None
 
     # Warn that zip deploy won't auto-build on Linux
     if params.is_linux_webapp and artifact_type in (None, 'zip'):
