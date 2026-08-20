@@ -8,7 +8,6 @@
 
 import collections
 import enum
-import os
 import random
 import textwrap
 import typing
@@ -80,12 +79,6 @@ class RoleAssignmentScope(enum.IntEnum):
     WORKER_SUBNET = enum.auto()
 
 
-# this is a development switch for upstream development of the ARO extension
-def rp_mode_development() -> bool:
-    # return os.environ.get('RP_MODE', '').lower() == 'development'
-    return False
-
-
 def aro_create(*,  # pylint: disable=too-many-locals
                cmd,
                client,
@@ -110,7 +103,7 @@ def aro_create(*,  # pylint: disable=too-many-locals
                master_encryption_at_host=False,
                master_vm_size=None,
                worker_encryption_at_host=False,
-               worker_vm_size=None,
+               worker_vm_size="Standard_D4s_v5",
                worker_vm_disk_size_gb=None,
                worker_count=None,
                apiserver_visibility=None,
@@ -123,13 +116,12 @@ def aro_create(*,  # pylint: disable=too-many-locals
                version=None,
                no_wait=False):
 
-    if not rp_mode_development():
-        resource_client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
-        if provider.registration_state != 'Registered':
-            raise UnauthorizedError('Microsoft.RedHatOpenShift provider is not registered.',
-                                    'Run `az provider register -n Microsoft.RedHatOpenShift --wait`.')
+    resource_client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
+    if provider.registration_state != 'Registered':
+        raise UnauthorizedError('Microsoft.RedHatOpenShift provider is not registered.',
+                                'Run `az provider register -n Microsoft.RedHatOpenShift --wait`.')
 
     validate_subnets(master_subnet, worker_subnet)
 
@@ -170,11 +162,6 @@ def aro_create(*,  # pylint: disable=too-many-locals
         rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
         if not rp_client_sp_id:
             raise ResourceNotFoundError("RP service principal not found.")
-
-    if rp_mode_development():
-        worker_vm_size = worker_vm_size or 'Standard_D2s_v5'
-    else:
-        worker_vm_size = worker_vm_size or 'Standard_D4s_v5'
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
@@ -813,9 +800,6 @@ def cluster_application_update(cli_ctx,
 
 
 def resolve_rp_client_id() -> str:
-    if rp_mode_development():
-        return os.environ.get('AZURE_FP_CLIENT_ID', FP_CLIENT_ID)
-
     return FP_CLIENT_ID
 
 
