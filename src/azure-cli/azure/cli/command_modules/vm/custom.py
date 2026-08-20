@@ -912,7 +912,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None,
+              disable_capacity_reservation_assignment=None, enable_hibernation=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
@@ -1143,6 +1144,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
+        disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
@@ -1756,6 +1758,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
+              disable_capacity_reservation_assignment=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
@@ -1880,8 +1883,15 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             capacity_reservation_group = None
 
         sub_resource = {"id": capacity_reservation_group}
-        capacity_reservation = {"capacity_reservation_group": sub_resource}
-        vm["capacity_reservation"] = capacity_reservation
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["capacity_reservation_group"] = sub_resource
+
+    if disable_capacity_reservation_assignment is not None:
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["disable_capacity_reservation_assignment"] = \
+            disable_capacity_reservation_assignment
 
     if dedicated_host is not None:
         if vm.get("host", None) is None:
@@ -6484,14 +6494,15 @@ def gallery_application_version_update(client,
 
 
 def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None, sharing_profile=None):
+                                      tags=None, zones=None, sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
         'location': location,
         'tags': tags,
-        'zones': zones
+        'zones': zones,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:
@@ -6504,12 +6515,13 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
 
 
 def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
-                                      sharing_profile=None):
+                                      sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
-        'tags': tags
+        'tags': tags,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:
