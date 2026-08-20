@@ -80,8 +80,10 @@ class RoleAssignmentScope(enum.IntEnum):
     WORKER_SUBNET = enum.auto()
 
 
+# this is a development switch for upstream development of the ARO extension
 def rp_mode_development() -> bool:
-    return os.environ.get('RP_MODE', '').lower() == 'development'
+    # return os.environ.get('RP_MODE', '').lower() == 'development'
+    return False
 
 
 def aro_create(*,  # pylint: disable=too-many-locals
