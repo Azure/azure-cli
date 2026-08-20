@@ -360,6 +360,10 @@ subscription than the app service environment, please use the resource ID for --
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
                    help="The minimum TLS Cipher Suite required for requests, e.g., 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'")
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, Linux web app creation failures will show context-enriched diagnostics with '
+                        'error codes, suggested fixes, and Copilot prompts. This flag only applies to Linux apps.',
+                   arg_type=get_three_state_flag())
         c.ignore('language')
         c.ignore('using_webapp_up')
 

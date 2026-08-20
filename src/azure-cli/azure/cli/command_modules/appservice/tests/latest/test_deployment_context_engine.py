@@ -15,9 +15,11 @@ from unittest.mock import MagicMock, patch
 from azure.cli.command_modules.appservice._deployment_failure_patterns import (
     DEPLOYMENT_FAILURE_PATTERNS,
     CONTROL_PLANE_FAILURE_PATTERNS,
+    WEBAPP_CREATE_FAILURE_PATTERNS,
     get_failure_pattern,
     match_failure_pattern,
     match_control_plane_failure_pattern,
+    match_webapp_create_failure_pattern,
 )
 from azure.cli.command_modules.appservice._deployment_context_engine import (
     build_enriched_error_context,
@@ -29,6 +31,9 @@ from azure.cli.command_modules.appservice._deployment_context_engine import (
     build_enriched_plan_error_context,
     format_enriched_plan_error_message,
     raise_enriched_plan_error,
+    build_enriched_webapp_create_error_context,
+    format_enriched_webapp_create_error_message,
+    raise_enriched_webapp_create_error,
 )
 
 
@@ -631,6 +636,87 @@ class TestPlanCreateEnrichment(unittest.TestCase):
         self.assertIn("APP SERVICE PLAN CREATION FAILED", error_msg)
         self.assertIn("LocationNotAvailable", error_msg)
         self.assertIn("Pick a region where App Service plans", error_msg)
+
+
+# ---------------------------------------------------------------------------
+# Tests for webapp-create enrichment (match / build / format / raise)
+# ---------------------------------------------------------------------------
+class TestWebappCreateEnrichment(unittest.TestCase):
+    """Tests for the Linux web app creation enrichment engine."""
+
+    def test_all_patterns_have_required_keys(self):
+        required_keys = {"errorCode", "stage", "suggestedFixes"}
+        for pattern in WEBAPP_CREATE_FAILURE_PATTERNS:
+            with self.subTest(errorCode=pattern["errorCode"]):
+                self.assertTrue(required_keys.issubset(pattern.keys()))
+                self.assertGreater(len(pattern["suggestedFixes"]), 0)
+
+    def test_match_linux_workers_unavailable(self):
+        pattern = match_webapp_create_failure_pattern(
+            status_code=400,
+            error_message="Linux workers are not available in this region due to capacity constraints",
+        )
+        self.assertEqual(pattern["errorCode"], "LinuxWorkersUnavailable")
+
+    def test_match_known_control_plane_failure(self):
+        pattern = match_webapp_create_failure_pattern(
+            status_code=403,
+            error_message="AuthorizationFailed: The client does not have authorization",
+        )
+        self.assertEqual(pattern["errorCode"], "AuthorizationFailed")
+
+    def test_generic_conflict_is_not_misclassified_as_registration_failure(self):
+        pattern = match_webapp_create_failure_pattern(status_code=409, error_message="Conflict")
+        self.assertIsNone(pattern)
+
+    def test_build_context_with_known_pattern(self):
+        context = build_enriched_webapp_create_error_context(
+            resource_group_name="test-rg",
+            webapp_name="test-app",
+            plan_name="test-plan",
+            location="westus2",
+            sku="B1",
+            runtime="PYTHON|3.11",
+            status_code=400,
+            error_message="Linux workers are unavailable due to capacity",
+            last_known_step="Web app create (control-plane request)",
+        )
+        self.assertEqual(context["errorCode"], "LinuxWorkersUnavailable")
+        self.assertEqual(context["webappName"], "test-app")
+        self.assertEqual(context["planName"], "test-plan")
+        self.assertEqual(context["runtime"], "PYTHON|3.11")
+        self.assertIn("rawError", context)
+
+    def test_format_message_contains_create_details(self):
+        context = build_enriched_webapp_create_error_context(
+            resource_group_name="test-rg",
+            webapp_name="test-app",
+            plan_name="test-plan",
+            location="westus2",
+            sku="B1",
+            runtime="PYTHON|3.11",
+            status_code=403,
+            error_message="AuthorizationFailed: not authorized",
+        )
+        message = format_enriched_webapp_create_error_message(context)
+        self.assertIn("WEB APP CREATION FAILED", message)
+        self.assertIn("AuthorizationFailed", message)
+        self.assertIn("Web App Name: test-app", message)
+        self.assertIn("Plan Name   : test-plan", message)
+        self.assertIn("Runtime     : PYTHON|3.11", message)
+        self.assertNotIn("Deploy Type", message)
+
+    def test_raise_enriched_webapp_create_error(self):
+        with self.assertRaises(EnrichedDeploymentError) as cm:
+            raise_enriched_webapp_create_error(
+                resource_group_name="test-rg",
+                webapp_name="test-app",
+                plan_name="test-plan",
+                status_code=409,
+                error_message="HostNameConflict: site name already exists",
+            )
+        self.assertIn("WEB APP CREATION FAILED", str(cm.exception))
+        self.assertIn("SiteNameUnavailable", str(cm.exception))
 
 
 if __name__ == '__main__':

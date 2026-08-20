@@ -42,6 +42,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_startup_log,
                                                          troubleshoot_status,
                                                          create_webapp)
+from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -472,6 +473,76 @@ class TestWebappMocked(unittest.TestCase):
         self.assertIn('Creating a Linux webapp requires one of the following', str(context.exception))
         self.assertIn('--runtime', str(context.exception))
         self.assertIn('--os-type linux', str(context.exception))
+
+    @staticmethod
+    def _configure_webapp_create_failure(get_site_avail_mock, stack_helper_mock, web_client_mock,
+                                         is_linux, error):
+        cmd_mock = _get_test_cmd()
+        SiteConfig, SkuDescription, NameValuePair = cmd_mock.get_models(
+            'SiteConfig', 'SkuDescription', 'NameValuePair')
+        cmd_mock.get_models = mock.MagicMock(return_value=(SiteConfig, SkuDescription, NameValuePair))
+
+        plan_info = mock.MagicMock()
+        plan_info.name = 'test-plan'
+        plan_info.reserved = is_linux
+        plan_info.is_xenon = False
+        plan_info.location = 'westus2'
+        plan_info.id = '/subscriptions/sub/resourceGroups/test-rg/providers/Microsoft.Web/serverfarms/test-plan'
+        plan_info.sku = SkuDescription(name='B1')
+        web_client_mock.return_value.app_service_plans.get.return_value = plan_info
+        web_client_mock.return_value.web_apps.begin_create_or_update.side_effect = error
+
+        name_validation = mock.MagicMock()
+        name_validation.name_available = True
+        get_site_avail_mock.return_value = name_validation
+        stack_helper_mock.return_value.get_default_version.return_value = '20.0'
+        return cmd_mock
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_enriches_control_plane_failure(self, get_site_avail_mock,
+                                                                stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 Linux workers are unavailable due to capacity')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, error)
+
+        with self.assertRaises(EnrichedDeploymentError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          container_image_name='nginx:latest', enriched_errors=True)
+
+        self.assertIn('WEB APP CREATION FAILED', str(context.exception))
+        self.assertIn('LinuxWorkersUnavailable', str(context.exception))
+        self.assertIn('Runtime     : DOCKER|nginx:latest', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_preserves_failure_when_enrichment_disabled(self, get_site_avail_mock,
+                                                                            stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 Linux workers are unavailable due to capacity')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, error)
+
+        with self.assertRaises(RuntimeError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          container_image_name='nginx:latest', enriched_errors=False)
+
+        self.assertIs(context.exception, error)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_windows_webapp_create_preserves_failure_when_enrichment_enabled(self, get_site_avail_mock,
+                                                                             stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 bad request')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, False, error)
+
+        with self.assertRaises(RuntimeError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan', enriched_errors=True)
+
+        self.assertIs(context.exception, error)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)

@@ -183,8 +183,40 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
 _CONTROL_PLANE_PATTERN_INDEX = {p["errorCode"]: p for p in CONTROL_PLANE_FAILURE_PATTERNS}
 
 
+WEBAPP_CREATE_FAILURE_PATTERNS = [
+    {
+        "errorCode": "SiteNameUnavailable",
+        "stage": "ResourceProvisioning",
+        "suggestedFixes": [
+            "Choose a globally unique web app name and retry 'az webapp create'",
+            "Check name availability with a different --name value"
+        ]
+    },
+    {
+        "errorCode": "ServerFarmNotFound",
+        "stage": "ResourceProvisioning",
+        "suggestedFixes": [
+            "Verify the App Service plan still exists: 'az appservice plan show -g <rg> -n <plan>'",
+            "Pass the full resource ID with --plan when the plan is in another resource group"
+        ]
+    },
+    {
+        "errorCode": "LinuxWorkersUnavailable",
+        "stage": "ResourceProvisioning",
+        "suggestedFixes": [
+            "Choose a region with Linux capacity: 'az appservice list-locations --linux-workers-enabled'",
+            "Create a Linux plan in a supported region and retry 'az webapp create'"
+        ]
+    },
+]
+
+_WEBAPP_CREATE_PATTERN_INDEX = {p["errorCode"]: p for p in WEBAPP_CREATE_FAILURE_PATTERNS}
+
+
 def get_failure_pattern(error_code):
-    return _PATTERN_INDEX.get(error_code) or _CONTROL_PLANE_PATTERN_INDEX.get(error_code)
+    return (_PATTERN_INDEX.get(error_code) or
+            _CONTROL_PLANE_PATTERN_INDEX.get(error_code) or
+            _WEBAPP_CREATE_PATTERN_INDEX.get(error_code))
 
 
 def match_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements,too-many-branches
@@ -258,3 +290,25 @@ def match_control_plane_failure_pattern(status_code=None, error_message=None):  
     # pattern above is left unclassified (returns None) so the caller produces a
     # generic HTTP_400 context rather than a potentially wrong SKU diagnosis.
     return None
+
+
+def match_webapp_create_failure_pattern(status_code=None, error_message=None):
+    """Map a web app create ARM failure to a known pattern, if possible."""
+    error_lower = (error_message or "").lower()
+
+    if ("hostnameconflict" in error_lower or "sitealreadyexists" in error_lower or
+            ("name" in error_lower and ("already exists" in error_lower or "not available" in error_lower))):
+        return get_failure_pattern("SiteNameUnavailable")
+    if ("serverfarm" in error_lower or "server farm" in error_lower or "app service plan" in error_lower) and \
+            ("not found" in error_lower or "could not be found" in error_lower):
+        return get_failure_pattern("ServerFarmNotFound")
+    if "linux" in error_lower and "worker" in error_lower and \
+            ("not available" in error_lower or "unavailable" in error_lower or "capacity" in error_lower):
+        return get_failure_pattern("LinuxWorkersUnavailable")
+
+    pattern = match_control_plane_failure_pattern(status_code=status_code, error_message=error_message)
+    if status_code == 409 and pattern and pattern["errorCode"] == "MissingSubscriptionRegistration" and \
+            "missingsubscriptionregistration" not in error_lower and \
+            "not registered to use namespace" not in error_lower:
+        return None
+    return pattern
