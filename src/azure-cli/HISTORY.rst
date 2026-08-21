@@ -9,6 +9,7 @@ Release History
 **Core**
 
 * Allow SSH certificate flow in Cloud Shell (#33860)
+* `az upgrade`: Warn about Device Guard / WDAC policies potentially blocking the CLI after a Windows MSI upgrade (#33919)
 
 2.89.0
 ++++++
