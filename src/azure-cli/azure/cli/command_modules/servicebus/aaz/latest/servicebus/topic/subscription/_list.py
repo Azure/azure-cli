@@ -19,11 +19,13 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions", "2026-01-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -65,7 +67,6 @@ class List(AAZCommand):
             help="Skip is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skip parameter that specifies a starting point to use for subsequent calls.",
             fmt=AAZIntArgFormat(
                 maximum=1000,
-                minimum=0,
             ),
         )
         _args_schema.top = AAZIntArg(
@@ -154,7 +155,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -190,7 +191,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -229,6 +232,7 @@ class List(AAZCommand):
             )
             properties.count_details = AAZObjectType(
                 serialized_name="countDetails",
+                flags={"read_only": True},
             )
             properties.created_at = AAZStrType(
                 serialized_name="createdAt",
@@ -275,6 +279,9 @@ class List(AAZCommand):
             properties.updated_at = AAZStrType(
                 serialized_name="updatedAt",
                 flags={"read_only": True},
+            )
+            properties.user_metadata = AAZStrType(
+                serialized_name="userMetadata",
             )
 
             client_affine_properties = cls._schema_on_200.value.Element.properties.client_affine_properties

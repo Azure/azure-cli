@@ -17,7 +17,8 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace, process_vmss_lifecycle_hook_remove,
+    process_vmss_lifecycle_hook_event_update, process_vmss_lifecycle_hook_event_action)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -180,9 +181,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
-        from .operations.vm import VMCapture, VMDeallocate, VMDelete
+        from .operations.vm import VMCapture, VMDelete
         self.command_table['vm capture'] = VMCapture(loader=self)
-        self.command_table['vm deallocate'] = VMDeallocate(loader=self)
         self.command_table['vm delete'] = VMDelete(loader=self)
 
     with self.command_group('vm availability-set') as g:
@@ -336,6 +336,24 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'vmss_run_command_show')
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
+
+    with self.command_group('vmss lifecycle-hook', is_preview=True) as g:
+        g.custom_command('add', 'vmss_lifecycle_hook_add', supports_no_wait=True)
+        g.custom_command('update', 'vmss_lifecycle_hook_update', supports_no_wait=True)
+        g.custom_command('remove', 'vmss_lifecycle_hook_remove', supports_no_wait=True,
+                         validator=process_vmss_lifecycle_hook_remove)
+        g.custom_show_command('show', 'vmss_lifecycle_hook_show')
+        g.custom_command('list', 'vmss_lifecycle_hook_list')
+
+    with self.command_group('vmss lifecycle-hook-event', is_preview=True) as g:
+        g.custom_command('update', 'vmss_lifecycle_hook_event_update',
+                         validator=process_vmss_lifecycle_hook_event_update)
+        g.custom_command('approve', 'vmss_lifecycle_hook_event_approve',
+                         validator=process_vmss_lifecycle_hook_event_action)
+        g.custom_command('reject', 'vmss_lifecycle_hook_event_reject',
+                         validator=process_vmss_lifecycle_hook_event_action)
+        g.custom_show_command('show', 'vmss_lifecycle_hook_event_show')
+        g.custom_command('list', 'vmss_lifecycle_hook_event_list')
 
     with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow

@@ -25,10 +25,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/capacityreservationgroups", "2024-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/capacityreservationgroups", "2026-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups", "2026-04-01"],
         ]
     }
 
@@ -131,7 +131,7 @@ class List(AAZCommand):
                     "resourceIdsOnly", self.ctx.args.resource_ids_only,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -187,6 +187,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -201,6 +205,9 @@ class List(AAZCommand):
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
                 flags={"read_only": True},
+            )
+            properties.reservation_type = AAZStrType(
+                serialized_name="reservationType",
             )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",
@@ -231,9 +238,17 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             _element.statuses = AAZListType()
             _element.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.statuses
@@ -253,10 +268,17 @@ class List(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
+
+            used_reserved_count_by_subscription = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
 
             virtual_machines_allocated = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
@@ -280,6 +302,26 @@ class List(AAZCommand):
             virtual_machines_associated = cls._schema_on_200.value.Element.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
             _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
@@ -336,7 +378,7 @@ class List(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -392,6 +434,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -406,6 +452,9 @@ class List(AAZCommand):
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
                 flags={"read_only": True},
+            )
+            properties.reservation_type = AAZStrType(
+                serialized_name="reservationType",
             )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",
@@ -436,9 +485,17 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             _element.statuses = AAZListType()
             _element.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.statuses
@@ -458,10 +515,17 @@ class List(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
+
+            used_reserved_count_by_subscription = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
 
             virtual_machines_allocated = cls._schema_on_200.value.Element.properties.instance_view.capacity_reservations.Element.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
@@ -485,6 +549,26 @@ class List(AAZCommand):
             virtual_machines_associated = cls._schema_on_200.value.Element.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
             _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()

@@ -443,7 +443,6 @@ def load_arguments(self, _):
         c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED']), help="Sets public network access in server to either Enabled or Disabled.")
         c.argument('disable_ttl', options_list=['--disable-ttl', '-d'], arg_type=get_three_state_flag(), help="Enable or disable restoring with ttl disabled.")
         c.argument('source_backup_location', help="This is the location of the source account where backups are located. Provide this value if the source and target are in different locations.")
-        c.argument('disable_local_auth', arg_type=get_three_state_flag(), help="Disable key-based authentication on the Cosmos DB account")
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:

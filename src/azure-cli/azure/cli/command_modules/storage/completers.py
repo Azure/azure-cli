@@ -88,6 +88,30 @@ def get_storage_name_completion_list(service, func, parent=None):
     return completer
 
 
+def _get_track2_client(cmd, namespace, client_factory, required=None):
+    if required and not getattr(namespace, required, None):
+        return None
+    validate_client_parameters(cmd, namespace)
+    return client_factory(cmd.cli_ctx, vars(namespace).copy())
+
+
+def _get_name(item):
+    if isinstance(item, dict):
+        return item.get('name')
+    return getattr(item, 'name', None)
+
+
+def get_storage_name_completion_list_track2(client_factory, func, required=None):
+    @Completer
+    def completer(cmd, _, namespace):
+        client = _get_track2_client(cmd, namespace, client_factory, required=required)
+        if not client:
+            return []
+        return sorted(x for x in (_get_name(item) for item in getattr(client, func)()) if x)
+
+    return completer
+
+
 def get_storage_acl_name_completion_list(service, container_param, func):
     @Completer
     def completer(cmd, _, namespace):
@@ -95,5 +119,24 @@ def get_storage_acl_name_completion_list(service, container_param, func):
         client = get_storage_client(cmd.cli_ctx, service, namespace)
         container_name = getattr(namespace, container_param)
         return list(getattr(client, func)(container_name))
+
+    return completer
+
+
+def _get_policy_id(item):
+    if isinstance(item, dict):
+        return item.get('id')
+    return getattr(item, 'id', None)
+
+
+def get_storage_acl_name_completion_list_track2(client_factory, func, required=None):
+    @Completer
+    def completer(cmd, _, namespace):
+        client = _get_track2_client(cmd, namespace, client_factory, required=required)
+        if not client:
+            return []
+        policy = getattr(client, func)()
+        identifiers = policy.get('signed_identifiers', []) if isinstance(policy, dict) else policy
+        return sorted(x for x in (_get_policy_id(item) for item in identifiers or []) if x)
 
     return completer
