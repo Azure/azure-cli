@@ -66,8 +66,8 @@ class CollectNetworkCaptureTest(unittest.TestCase):
     def test_collects_analyzes_and_downloads_both_artifacts(self, request_json):
         request_json.side_effect = [
             {'autoAnalysisEnabled': True},
-            {'sessionId': 'capture-1', 'captureCommand': 'server generated command'},
-            {'sessionId': 'capture-1', 'status': 'Ready', 'truncated': True},
+            {'id': 'capture-1', 'captureCommand': 'server generated command'},
+            {'id': 'capture-1', 'status': 'Ready', 'truncated': True},
         ]
 
         with tempfile.TemporaryDirectory() as destination:
@@ -81,7 +81,7 @@ class CollectNetworkCaptureTest(unittest.TestCase):
                           'https://app.scm.azurewebsites.net/api/networkcapture/captures'))
         self.assertEqual(create_call.kwargs['json'], {
             'iface': 'eth0',
-            'duration': 60,
+            'durationSeconds': 60,
             'snaplen': 128,
             'filter': 'port 443',
         })
@@ -95,8 +95,8 @@ class CollectNetworkCaptureTest(unittest.TestCase):
     def test_auto_analysis_disabled_downloads_only_pcap(self, request_json):
         request_json.side_effect = [
             {'autoAnalysisEnabled': False},
-            {'sessionId': 'capture-1', 'captureCommand': 'server generated command'},
-            {'sessionId': 'capture-1', 'status': 'Captured'},
+            {'id': 'capture-1', 'captureCommand': 'server generated command'},
+            {'id': 'capture-1', 'status': 'Captured'},
         ]
 
         with tempfile.TemporaryDirectory() as destination:
@@ -110,8 +110,8 @@ class CollectNetworkCaptureTest(unittest.TestCase):
     def test_report_only_surfaces_analysis_failure(self, request_json):
         request_json.side_effect = [
             {'autoAnalysisEnabled': True},
-            {'sessionId': 'capture-1', 'captureCommand': 'server generated command'},
-            {'sessionId': 'capture-1', 'status': 'Failed', 'error': 'invalid pcap'},
+            {'id': 'capture-1', 'captureCommand': 'server generated command'},
+            {'id': 'capture-1', 'status': 'Failed', 'error': 'invalid pcap'},
         ]
 
         with tempfile.TemporaryDirectory() as destination:

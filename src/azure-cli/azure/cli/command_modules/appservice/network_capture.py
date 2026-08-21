@@ -48,14 +48,14 @@ def collect_network_capture(cmd, resource_group_name, name, slot=None, instance=
 
     body = {key: value for key, value in {
         'iface': interface,
-        'duration': duration,
+        'durationSeconds': duration,
         'snaplen': snap_length,
         'filter': capture_filter,
     }.items() if value is not None}
 
     logger.warning("Starting network capture on web app '%s'...", name)
     capture = _request_json(session, 'POST', scm_url + _CAPTURE_API + '/captures', json=body)
-    session_id = _required_value(capture, 'sessionId', 'SessionId')
+    session_id = _required_value(capture, 'id', 'Id', 'sessionId', 'SessionId')
     capture_command = _required_value(capture, 'captureCommand', 'CaptureCommand')
 
     interrupted = _run_capture_command(scm_url, headers, session.cookies.get_dict(), capture_command,
