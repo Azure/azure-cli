@@ -15,12 +15,3 @@ from ._list import *
 from ._show import *
 from ._update import *
 from ._wait import *
-from .address_prefix_set import (
-    __CMDGroup as AddressPrefixSetGroup,
-    Create as AddressPrefixSetCreate,
-    Delete as AddressPrefixSetDelete,
-    List as AddressPrefixSetList,
-    Show as AddressPrefixSetShow,
-    Update as AddressPrefixSetUpdate,
-    Wait as AddressPrefixSetWait,
-)
