@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import time
-import uuid
 
 from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt_choice_list
 
 from azure.cli.core.azclierror import (AzureConnectionError, AzureResponseError, CLIInternalError,
                                        ResourceNotFoundError, ValidationError)
@@ -22,13 +21,13 @@ logger = get_logger(__name__)
 _CAPTURE_API = '/api/networkcapture'
 _TERMINAL_STATES = {'ready', 'captured', 'nopackets', 'failed'}
 _DEFAULT_OPERATION_TIMEOUT = 10 * 60
+_PROGRESS_PHASES = ('prepare', 'capture', 'process', 'complete')
 
 
-# pylint: disable=too-many-locals
-def collect_network_capture(cmd, resource_group_name, name, slot=None, instance=None, duration=None,
-                            interface=None, snap_length=None, capture_filter=None,
-                            artifact='both', destination='.'):
-    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+def collect_network_capture(cmd, resource_group_name, name, slot=None, instance=None, duration=60,
+                            collect_only=False):
+    webapp = _generic_site_operation(
+        cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
         raise ResourceNotFoundError(
             "Unable to find web app '{}' in resource group '{}'.".format(name, resource_group_name))
@@ -36,104 +35,131 @@ def collect_network_capture(cmd, resource_group_name, name, slot=None, instance=
         raise ValidationError(
             "Network capture is only supported for Linux web apps on dedicated App Service plans.")
 
-    _validate_capture_options(duration, snap_length, artifact, destination)
-    target = _resolve_single_instance(cmd, resource_group_name, name, instance, slot)
+    _validate_capture_options(duration)
+    _log_capture_advisory()
+    target = _select_target_instance(
+        cmd, resource_group_name, name, instance, slot)
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot).rstrip('/')
-    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    headers = get_scm_site_headers(
+        cmd.cli_ctx, name, resource_group_name, slot)
     session = _create_http_session(headers, target)
 
-    config = _request_json(session, 'GET', scm_url + _CAPTURE_API + '/config')
-    auto_analysis_enabled = bool(_value(config, 'autoAnalysisEnabled', 'AutoAnalysisEnabled', default=True))
+    logger.warning('')
+    _log_progress('prepare', 'Preparing network capture...')
+    body = {'durationSeconds': duration}
 
-    body = {key: value for key, value in {
-        'iface': interface,
-        'durationSeconds': duration,
-        'snaplen': snap_length,
-        'filter': capture_filter,
-    }.items() if value is not None}
-
-    logger.warning("Starting network capture on web app '%s'...", name)
-    capture = _request_json(session, 'POST', scm_url + _CAPTURE_API + '/captures', json=body)
+    _log_progress(
+        'capture', "Capturing network traffic on web app '%s'...", name)
+    capture = _request_json(session, 'POST', scm_url +
+                            _CAPTURE_API + '/captures', json=body)
     session_id = _required_value(capture, 'id', 'Id', 'sessionId', 'SessionId')
-    capture_command = _required_value(capture, 'captureCommand', 'CaptureCommand')
+    capture_command = _required_value(
+        capture, 'captureCommand', 'CaptureCommand')
 
     interrupted = _run_capture_command(scm_url, headers, session.cookies.get_dict(), capture_command,
-                                       duration or 300)
-    if interrupted:
-        logger.warning('Capture interrupted. Finalizing packets collected so far...')
-    else:
-        logger.warning('Packet collection finished. Finalizing capture...')
-
-    analyze_url = '{}/captures/{}/analyze'.format(scm_url + _CAPTURE_API, session_id)
-    try:
-        capture = _request_json(session, 'POST', analyze_url)
-    except AzureResponseError as ex:
-        if artifact == 'report':
-            raise
-        logger.warning('Capture analysis could not be started. The raw packet capture will still be downloaded.')
-        logger.debug('Network capture analysis request failed: %s', ex)
-
+                                       duration)
     status_url = '{}/captures/{}'.format(scm_url + _CAPTURE_API, session_id)
-    capture = _wait_for_terminal_state(session, status_url, capture, _DEFAULT_OPERATION_TIMEOUT)
+    message = ('Capture interrupted. Analyzing packets collected so far...' if interrupted else
+               'Packet collection finished. Analyzing capture...')
+    _log_progress('process', message)
+    capture = _request_json(session, 'POST', status_url + '/analyze')
+
+    capture = _wait_for_terminal_state(
+        session, status_url, capture, _DEFAULT_OPERATION_TIMEOUT)
     status = str(_required_value(capture, 'status', 'Status'))
     normalized_status = status.lower()
 
-    if normalized_status == 'failed' and artifact == 'report':
+    if normalized_status == 'failed':
         raise AzureResponseError(_capture_failure_message(capture))
 
-    destination = os.path.abspath(os.path.expanduser(destination))
-    os.makedirs(destination, exist_ok=True)
-    file_stem = '{}_{}'.format(_safe_filename(name), _safe_filename(str(session_id)))
-    pcap_path = None
-    report_path = None
+    _log_progress('complete', 'Network capture collected successfully.')
 
-    if artifact in ('pcap', 'both'):
-        pcap_path = os.path.join(destination, file_stem + '.pcap')
-        _download_artifact(session, '{}/download'.format(status_url), pcap_path)
-        logger.warning('Downloaded packet capture to %s', pcap_path)
-
-    if artifact in ('report', 'both'):
-        if normalized_status == 'ready':
-            report_path = os.path.join(destination, file_stem + '.pcap.html')
-            _download_artifact(session, '{}/report'.format(status_url), report_path)
-            logger.warning('Downloaded network capture report to %s', report_path)
-        elif not auto_analysis_enabled or normalized_status == 'captured':
-            if artifact == 'report':
-                raise AzureResponseError(
-                    'Network capture analysis is disabled for this app. Request the pcap artifact instead.')
-            logger.warning('Network capture analysis is disabled; only the raw packet capture was downloaded.')
-        elif normalized_status == 'nopackets':
-            logger.warning('The capture completed successfully but did not contain any packets.')
-        elif normalized_status == 'failed':
-            logger.warning('%s The raw packet capture was preserved.', _capture_failure_message(capture))
-
-    return {
-        'sessionId': session_id,
+    download_url = _value(capture, 'downloadUrl', 'DownloadUrl')
+    report_url = _value(capture, 'reportUrl', 'ReportUrl')
+    result = {
+        'captureId': session_id,
         'instance': target,
         'status': status,
         'truncated': bool(_value(capture, 'truncated', 'Truncated', default=False)),
-        'packetCapture': pcap_path,
-        'report': report_path,
+        'packetCaptureUrl': _with_instance(scm_url + download_url, target) if download_url else None,
+        'reportUrl': _with_instance(scm_url + report_url, target) if report_url else None,
     }
-# pylint: enable=too-many-locals
+    _render_capture_summary(result, collect_only)
 
 
-def _validate_capture_options(duration, snap_length, artifact, destination):
+def _log_progress(phase, message, *args):
+    step = _PROGRESS_PHASES.index(phase) + 1
+    logger.warning('[%d/%d] ' + message, step, len(_PROGRESS_PHASES), *args)
+
+
+def _render_capture_summary(result, collect_only):
+    status = result['status']
+    if str(status).lower() == 'nopackets':
+        print('\n\nNo packets were captured during the capture window.')
+        return
+
+    capture_id = result['captureId']
+    lines = []
+    lines.append('Capture ID: {}'.format(capture_id))
+    if result['packetCaptureUrl']:
+        lines.append('Download raw packet capture: {}'.format(result['packetCaptureUrl']))
+    if result['reportUrl'] and not collect_only:
+        lines.append('View analysis report: {}'.format(result['reportUrl']))
+    lines.append('For deeper investigation, manually download the trace and analyze it in '
+                 'Microsoft Network Monitor or Wireshark.')
+    lines.append('Kudu access is required to open these links.')
+    print('\n\n' + '\n\n'.join(lines))
+
+
+def _validate_capture_options(duration):
     if duration is not None and not 1 <= duration <= 300:
         raise ValidationError('--duration must be between 1 and 300 seconds.')
-    if snap_length is not None and snap_length != 0 and not 64 <= snap_length <= 65535:
-        raise ValidationError('--snap-length must be 0, or between 64 and 65535 bytes.')
-    if artifact not in ('pcap', 'report', 'both'):
-        raise ValidationError("--artifact must be one of 'pcap', 'report', or 'both'.")
-    if not destination or not destination.strip():
-        raise ValidationError('--destination must not be empty.')
 
 
-def _resolve_single_instance(cmd, resource_group_name, name, instance, slot):
-    if instance and (instance.strip().lower() == 'all' or ',' in instance):
-        raise ValidationError('Network capture supports one web app instance at a time.')
-    return _resolve_target_instances(cmd, resource_group_name, name, instance, slot)[0]
+def _with_instance(url, instance):
+    from urllib.parse import urlencode
+
+    separator = '&' if '?' in url else '?'
+    return url + separator + urlencode({'instance': instance})
+
+
+def _select_target_instance(cmd, resource_group_name, name, instance, slot):
+    if instance:
+        if instance.strip().lower() == 'all' or ',' in instance:
+            raise ValidationError(
+                'Network capture supports one web app instance at a time.')
+        return _resolve_target_instances(cmd, resource_group_name, name, instance, slot)[0]
+
+    instances = _resolve_target_instances(
+        cmd, resource_group_name, name, 'all', slot)
+    try:
+        selected = prompt_choice_list(
+            '\nSelect the instance where you will reproduce the issue:', instances)
+    except NoTTYException as ex:
+        raise ValidationError(
+            'No interactive terminal is available. Specify --instance <instance-id>. '
+            'Run "az webapp list-instances" to list current instances.') from ex
+    return instances[selected]
+
+
+def _log_capture_advisory():
+    import sys
+
+    logger.warning(
+        'What you should know before collecting a network capture:\n'
+        '  - Network traces help troubleshoot TCP packet loss and inspect HTTP communication between your app '
+        'and remote endpoints.\n'
+        '  - After the network trace starts, reproduce the problem so outbound traffic from your app is captured.\n'
+        '  - Traffic to remote endpoints over TLS or SSL (for example, HTTPS) is encrypted in the trace.\n'
+        '  - Network traces are collected on the selected instance serving your app.\n'
+        '  - Capture duration is 60 seconds by default and can be set from 1 to 300 seconds.\n'
+        '  - A network trace can capture up to 100 MB of data. The capture stops automatically at this limit, '
+        'and only the 5 most recent captures are retained.\n'
+        '  - For deeper analysis, use Microsoft Network Monitor '
+        '(https://www.microsoft.com/en-in/download/details.aspx?id=4865) or Wireshark '
+        '(https://www.wireshark.org/).')
+    sys.stderr.flush()
 
 
 def _create_http_session(headers, instance):
@@ -154,7 +180,8 @@ def _request_json(session, method, url, **kwargs):
     try:
         response = session.request(method, url, timeout=(30, 330), **kwargs)
     except requests.exceptions.RequestException as ex:
-        raise AzureConnectionError('Could not connect to the web app diagnostics service: {}'.format(ex))
+        raise AzureConnectionError(
+            'Could not connect to the web app diagnostics service: {}'.format(ex))
 
     if response.status_code < 200 or response.status_code >= 300:
         detail = _response_message(response)
@@ -170,9 +197,11 @@ def _request_json(session, method, url, **kwargs):
     try:
         payload = response.json()
     except ValueError as ex:
-        raise AzureResponseError('The web app diagnostics service returned an invalid JSON response.') from ex
+        raise AzureResponseError(
+            'The web app diagnostics service returned an invalid JSON response.') from ex
     if not isinstance(payload, dict):
-        raise AzureResponseError('The web app diagnostics service returned an unexpected response.')
+        raise AzureResponseError(
+            'The web app diagnostics service returned an unexpected response.')
     return payload
 
 
@@ -181,8 +210,10 @@ def _run_capture_command(scm_url, headers, cookies, capture_command, duration):
     import websocket
     from azure.cli.core.util import should_disable_connection_verify
 
-    ws_url = scm_url.replace('https://', 'wss://', 1).replace('http://', 'ws://', 1) + '/exec/shell'
-    cookie = '; '.join('{}={}'.format(key, value) for key, value in cookies.items()) or None
+    ws_url = scm_url.replace('https://', 'wss://',
+                             1).replace('http://', 'ws://', 1) + '/exec/shell'
+    cookie = '; '.join('{}={}'.format(key, value)
+                       for key, value in cookies.items()) or None
     verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
     try:
         ws = websocket.create_connection(
@@ -197,7 +228,8 @@ def _run_capture_command(scm_url, headers, cookies, capture_command, duration):
                 if message in (None, b'', ''):
                     break
             except websocket.WebSocketConnectionClosedException:
-                logger.debug('Network capture shell closed after the capture command was submitted.')
+                logger.debug(
+                    'Network capture shell closed after the capture command was submitted.')
                 break
             except KeyboardInterrupt:
                 if interrupted:
@@ -208,9 +240,11 @@ def _run_capture_command(scm_url, headers, cookies, capture_command, duration):
         raise CLIInternalError('The app container rejected the network capture session: {}'.format(
             getattr(ex, 'resp_body', None) or ex))
     except websocket.WebSocketTimeoutException as ex:
-        raise AzureConnectionError('Timed out waiting for the network capture command to finish.') from ex
+        raise AzureConnectionError(
+            'Timed out waiting for the network capture command to finish.') from ex
     except (OSError, websocket.WebSocketException) as ex:
-        raise AzureConnectionError('The app container network capture session was interrupted: {}'.format(ex))
+        raise AzureConnectionError(
+            'The app container network capture session was interrupted: {}'.format(ex))
     finally:
         if 'ws' in locals():
             try:
@@ -227,34 +261,10 @@ def _wait_for_terminal_state(session, status_url, capture, timeout):
         if status in _TERMINAL_STATES:
             return capture
         if time.monotonic() >= deadline:
-            raise AzureResponseError('Timed out waiting for network capture processing to finish.')
+            raise AzureResponseError(
+                'Timed out waiting for network capture processing to finish.')
         time.sleep(2)
         capture = _request_json(session, 'GET', status_url)
-
-
-def _download_artifact(session, url, destination):
-    import requests
-
-    if os.path.exists(destination):
-        raise ValidationError("The destination file already exists: '{}'".format(destination))
-    temporary_path = destination + '.{}.part'.format(uuid.uuid4().hex)
-    try:
-        try:
-            response = session.get(url, timeout=(30, 330), stream=True)
-        except requests.exceptions.RequestException as ex:
-            raise AzureConnectionError('Could not download the network capture artifact: {}'.format(ex))
-        if response.status_code < 200 or response.status_code >= 300:
-            raise AzureResponseError(_response_message(response))
-        with open(temporary_path, 'xb') as artifact_file:
-            for chunk in response.iter_content(chunk_size=64 * 1024):
-                if chunk:
-                    artifact_file.write(chunk)
-        if os.path.exists(destination):
-            raise ValidationError("The destination file already exists: '{}'".format(destination))
-        os.replace(temporary_path, destination)
-    finally:
-        if os.path.exists(temporary_path):
-            os.remove(temporary_path)
 
 
 def _response_message(response):
@@ -288,8 +298,3 @@ def _value(payload, *names, default=None):
         if name in payload:
             return payload[name]
     return default
-
-
-def _safe_filename(value):
-    return ''.join(character if character.isalnum() or character in ('-', '_') else '_'
-                   for character in value)
