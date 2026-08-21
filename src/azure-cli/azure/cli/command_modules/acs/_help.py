@@ -679,6 +679,9 @@ parameters:
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
           - "KataVmIsolation" for Kata.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -775,13 +778,13 @@ short-summary: Update a managed Kubernetes cluster. When called with no optional
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
-    short-summary: Enable cluster autoscaler.
+    short-summary: Enable cluster autoscaler. For VirtualMachines pools, converts all manual scale profiles to autoscale profiles using the same min/max counts.
   - name: --disable-cluster-autoscaler -d
     type: bool
-    short-summary: Disable cluster autoscaler.
+    short-summary: Disable cluster autoscaler. For VirtualMachines pools, converts all autoscale profiles back to manual scale profiles.
   - name: --update-cluster-autoscaler -u
     type: bool
-    short-summary: Update min-count or max-count for cluster autoscaler.
+    short-summary: Update min-count or max-count for cluster autoscaler. Not supported for VirtualMachines pools; use 'az aks nodepool auto-scale update' instead.
   - name: --min-count
     type: int
     short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
@@ -1235,6 +1238,12 @@ parameters:
         Auto: A standard set of Karpenter NodePools are provisioned.
         None: No Karpenter NodePools are provisioned.
         WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
+  - name: --disable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Disable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -2182,13 +2191,13 @@ long-summary: Update a node pool to enable/disable cluster-autoscaler or change 
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
-    short-summary: Enable cluster autoscaler.
+    short-summary: Enable cluster autoscaler. For VirtualMachines pools, converts all manual scale profiles to autoscale profiles using the same min/max counts.
   - name: --disable-cluster-autoscaler -d
     type: bool
-    short-summary: Disable cluster autoscaler.
+    short-summary: Disable cluster autoscaler. For VirtualMachines pools, converts all autoscale profiles back to manual scale profiles.
   - name: --update-cluster-autoscaler -u
     type: bool
-    short-summary: Update min-count or max-count for cluster autoscaler.
+    short-summary: Update min-count or max-count for cluster autoscaler. Not supported for VirtualMachines pools; use 'az aks nodepool auto-scale update' instead.
   - name: --min-count
     type: int
     short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
@@ -2422,7 +2431,7 @@ examples:
 
 helps["aks nodepool manual-scale"] = """
     type: group
-    short-summary: Commands to manage nodepool virtualMachineProfile.scale.manual.
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.manual.
 """
 
 helps["aks nodepool manual-scale add"] = """
@@ -2459,6 +2468,62 @@ helps["aks nodepool manual-scale delete"] = """
         - name: --current-vm-sizes
           type: string
           short-summary: Comma-separated list of sizes in the manual to be deleted.
+"""
+
+helps["aks nodepool auto-scale"] = """
+    type: group
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.autoscale.
+"""
+
+helps["aks nodepool auto-scale add"] = """
+    type: command
+    short-summary: Add a new autoscale profile to a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --node-vm-size
+          type: string
+          short-summary: VM size for the autoscale profile.
+        - name: --min-count
+          type: int
+          short-summary: Minimum number of nodes for autoscaling.
+        - name: --max-count
+          type: int
+          short-summary: Maximum number of nodes for autoscaling.
+    examples:
+        - name: Add an autoscale profile to a VirtualMachines agentpool
+          text: az aks nodepool auto-scale add -g MyResourceGroup --cluster-name MyMC --name MyNodePool --node-vm-size Standard_D2s_v3 --min-count 3 --max-count 5
+"""
+
+helps["aks nodepool auto-scale update"] = """
+    type: command
+    short-summary: Update an existing autoscale profile of a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-node-vm-size
+          type: string
+          short-summary: The current VM size of the autoscale profile to be updated.
+        - name: --node-vm-size
+          type: string
+          short-summary: The new VM size for the autoscale profile.
+        - name: --min-count
+          type: int
+          short-summary: Minimum number of nodes for autoscaling.
+        - name: --max-count
+          type: int
+          short-summary: Maximum number of nodes for autoscaling.
+    examples:
+        - name: Update an existing autoscale profile in a VirtualMachines agentpool
+          text: az aks nodepool auto-scale update -g MyResourceGroup --cluster-name MyMC --name MyNodePool --current-node-vm-size Standard_D2s_v3 --node-vm-size Standard_D8s_v3 --min-count 2 --max-count 4
+"""
+
+helps["aks nodepool auto-scale delete"] = """
+    type: command
+    short-summary: Delete an existing autoscale profile from a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-node-vm-size
+          type: string
+          short-summary: The VM size of the autoscale profile to be deleted.
+    examples:
+        - name: Delete an autoscale profile from a VirtualMachines agentpool
+          text: az aks nodepool auto-scale delete -g MyResourceGroup --cluster-name MyMC --name MyNodePool --current-node-vm-size Standard_D2s_v3
 """
 
 helps["aks show"] = """
@@ -2575,7 +2640,7 @@ parameters:
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
   - name: --endpoint -e
     type: string
-    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
+    short-summary: The endpoint type to be used for an Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-

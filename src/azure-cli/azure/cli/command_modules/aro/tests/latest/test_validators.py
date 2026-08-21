@@ -1009,13 +1009,13 @@ test_validate_enable_managed_identity_data = [
         "Should raise InvalidArgumentValueError if client_id is present",
         Mock(enable_managed_identity=True,
              client_id="00000000-0000-0000-0000-000000000000", client_secret=None),
-        InvalidArgumentValueError, 'Must not specify --client-id when --enable-managed-identity is True'
+        InvalidArgumentValueError, 'Must not specify --client-id when --enable-managed-identity/--enable-mi is True'
     ),
     (
         "Should raise InvalidArgumentValueError if client_secret is present",
         Mock(enable_managed_identity=True,
              client_id=None, client_secret="asdfghjkl"),
-        InvalidArgumentValueError, 'Must not specify --client-secret when --enable-managed-identity is True'
+        InvalidArgumentValueError, 'Must not specify --client-secret when --enable-managed-identity/--enable-mi is True'
     ),
     (
         "Should raise RequiredArgumentMissingError when no platform workload identities are set",
@@ -1023,7 +1023,7 @@ test_validate_enable_managed_identity_data = [
              client_id=None, client_secret=None,
              version="4.14.0",
              platform_workload_identities=[]),
-        RequiredArgumentMissingError, 'Enabling managed identity requires platform workload identities to be provided'
+        RequiredArgumentMissingError, 'Must specify --assign-platform-workload-identity/--assign-platform-wi with --assign-cluster-identity/--mi-user-assigned'
     ),
     (
         "Should raise RequiredArgumentMissingError when cluster identity is not set",
@@ -1032,7 +1032,7 @@ test_validate_enable_managed_identity_data = [
              version="4.14.0",
              platform_workload_identities=[("foo", Mock(resource_id='Foo'))],
              mi_user_assigned=None),
-        RequiredArgumentMissingError, 'Enabling managed identity requires cluster identity to be provided'
+        RequiredArgumentMissingError, 'Must specify --assign-cluster-identity/--mi-user-assigned with --assign-platform-workload-identity/--assign-platform-wi'
     ),
     (
         "Should not raise any exception when valid",

@@ -73,7 +73,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_details')
     def test_webapp_github_actions_add(self, get_app_details_mock, web_client_factory_mock, site_availability_mock, *args):
-        runtime = "python:3.9"
+        runtime = "NODE:26-lts"
         rg = "group"
         is_linux = True
         cmd = _get_test_cmd()
@@ -84,7 +84,7 @@ class TestWebappMocked(unittest.TestCase):
 
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
-            m.assert_called_with(cmd, runtime.replace(":", "|"), is_linux)
+            m.assert_called_with(cmd=cmd, runtime_string="NODE|26", is_linux=is_linux)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -2010,6 +2010,94 @@ class _TypespecContainerSettings(Mapping):
 
     def __len__(self):
         return len(self._data)
+
+
+class TestStackRuntimeNodeStandardization(unittest.TestCase):
+    @staticmethod
+    def _new_helper():
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._linux = True
+        helper._windows = True
+        helper._include_eol = False
+        helper._stacks = []
+        helper.windows_config_mappings = {'node': 'WEBSITE_NODE_DEFAULT_VERSION'}
+        return helper
+
+    @staticmethod
+    def _node_stack(version, display_text, linux_runtime):
+        git_hub_action_settings = types.SimpleNamespace(is_supported=True, supported_version="{}.x".format(version))
+        linux_settings = types.SimpleNamespace(
+            runtime_version=linux_runtime,
+            is_hidden=False,
+            is_deprecated=False,
+            end_of_life_date=None,
+            git_hub_action_settings=git_hub_action_settings,
+        )
+        windows_settings = types.SimpleNamespace(
+            runtime_version="~{}".format(version),
+            is_hidden=False,
+            is_deprecated=False,
+            end_of_life_date=None,
+            git_hub_action_settings=git_hub_action_settings,
+        )
+        minor = types.SimpleNamespace(
+            display_text=display_text,
+            stack_settings=types.SimpleNamespace(
+                linux_container_settings=None,
+                linux_runtime_settings=linux_settings,
+                windows_container_settings=None,
+                windows_runtime_settings=windows_settings,
+            ),
+        )
+        major = types.SimpleNamespace(display_text=display_text, minor_versions=[minor])
+        return types.SimpleNamespace(display_text='Node', major_versions=[major])
+
+    def test_node_26_uses_standard_identifier_on_both_platforms(self):
+        from azure.cli.command_modules.appservice.custom import _get_app_runtime_info_helper
+
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('26', 'Node 26 LTS', 'NODE|26-lts')])
+
+        self.assertEqual(
+            [(runtime.os, runtime.display_name) for runtime in helper._stacks],
+            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
+        self.assertEqual(
+            [(row['os'], row['config']) for row in helper.get_stacks_as_table(runtime_filter='node')],
+            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
+        self.assertEqual(helper.resolve('NODE|26', linux=True).configs['linux_fx_version'], 'NODE|26')
+        self.assertEqual(
+            helper.resolve('NODE|26', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
+        self.assertEqual(helper.resolve('NODE|26-lts', linux=True).configs['linux_fx_version'], 'NODE|26')
+        self.assertEqual(
+            helper.resolve('NODE|26LTS', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', return_value=helper):
+            runtime_info = _get_app_runtime_info_helper(mock.Mock(), 'NODE|26-lts', '', True)
+
+        self.assertEqual(runtime_info, {
+            'display_name': 'NODE|26',
+            'github_actions_version': '26.x',
+        })
+
+    def test_older_node_identifiers_remain_unchanged(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('24', 'Node 24 LTS', 'NODE|24-lts')])
+
+        self.assertEqual(
+            [(runtime.os, runtime.display_name) for runtime in helper._stacks],
+            [('Linux', 'NODE|24-lts'), ('Windows', 'NODE|24LTS')])
+
+    def test_node_26_transition_identifiers_are_deduplicated(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([
+            self._node_stack('26', 'Node 26 LTS', 'NODE|26-lts'),
+            self._node_stack('26', 'Node 26', 'NODE|26'),
+        ])
+
+        self.assertEqual(
+            [(runtime.os, runtime.display_name) for runtime in helper._stacks],
+            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
 
 
 class TestStackRuntimeJavaSELinux(unittest.TestCase):

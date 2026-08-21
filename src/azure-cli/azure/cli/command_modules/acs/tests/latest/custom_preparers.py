@@ -18,6 +18,15 @@ from azure.cli.testsdk.utilities import GraphClientPasswordReplacer
 from azure.cli.command_modules.acs.tests.latest.recording_processors import MOCK_GUID, MOCK_SECRET
 
 
+def _normalize_optional_live_test_setting(value):
+    if value is None:
+        return None
+    value = value.strip()
+    if value in {"", "''", '""', "\\'\\'", '\\"\\"'}:
+        return None
+    return value
+
+
 class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
     """
     Override to support overriding the default location in test cases using this custom preparer with specific
@@ -176,14 +185,18 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             dev_setting_sp_password,
             key,
         )
+        self.dev_setting_sp_name = _normalize_optional_live_test_setting(self.dev_setting_sp_name)
+        self.dev_setting_sp_password = _normalize_optional_live_test_setting(self.dev_setting_sp_password)
 
     def __call__(self, fn):
-        if not self.dev_setting_sp_password:
-            return unittest.skip("skip test case that requires service principal as password is not provided")(fn)
+        if not self.dev_setting_sp_name or not self.dev_setting_sp_password:
+            return unittest.skip(
+                "skip test case that requires service principal credentials as they are not provided"
+            )(fn)
         return super().__call__(fn)
 
     def create_resource(self, name, **kwargs):
-        if not self.dev_setting_sp_password:
+        if not self.dev_setting_sp_name or not self.dev_setting_sp_password:
             return
         else:
             # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live

@@ -1954,6 +1954,24 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_force_deallocate_', location='centralus')
+    def test_vm_force_deallocate(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vm': self.create_random_name('vm', 15),
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} -l {loc} --image Ubuntu2204 --zone 1 '
+                 '--zone-movement true --storage-sku Premium_ZRS '
+                 '--tags useNRPDeallocateOnFabricFailure=true --admin-username azureuser '
+                 '--admin-password Test123456789# --authentication-type password --nsg-rule NONE '
+                 '--size Standard_D2s_v3', checks=[
+                     self.check('zones', '1'),
+                 ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --force-deallocate')
+        self._check_vm_power_state('PowerState/deallocated')
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_')
     def test_vm_user_update_win(self, resource_group):
@@ -4658,8 +4676,97 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
 
 
-class VMSSCreateOptions(ScenarioTest):
+class VMSSLifecycleHookScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lifecycle_hook')
+    def test_vmss_lifecycle_hook(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Updating / showing a non-existent hook type fails.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 expect_failure=True)
+
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT8H --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].waitDuration", 'PT8H'),
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].defaultAction", 'Approve')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H'), self.check('defaultAction', 'Approve')])
+
+        # remove: --type and --all are mutually exclusive, and exactly one is required.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling --all',
+                 expect_failure=True)
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss}', expect_failure=True)
+
+        # Add a second lifecycle hook of a different type.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSRollingBatchStarting '
+                 '--wait-duration PT20M --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSRollingBatchStarting'] | [0].waitDuration", 'PT20M')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 2)])
+
+        # Adding a hook whose type already exists is rejected client-side.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT1H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H')])
+
+        # Update one hook's wait-duration and confirm.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H')
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT2H')])
+
+        # Remove one hook by --type; one hook remains.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+
+        # Remove all remaining hooks with --all.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --all')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+
+class VMSSLifecycleHookEventScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lch_event')
+    # Not including approve/reject/show and update --action-state as they required live platform-generated event
+    def test_vmss_lifecycle_hook_event(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Lifecycle hook events are platform-generated; a fresh scale set has none.
+        self.cmd('vmss lifecycle-hook-event list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+        # --instance-ids requires --action-state (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent '
+                 '--instance-ids 0', expect_failure=True)
+
+        # update requires at least one of --action-state or --wait-until (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent',
+                 expect_failure=True)
+
+
+class VMSSCreateOptions(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
@@ -13234,6 +13341,71 @@ class CapacityReservationScenarioTest(ScenarioTest):
         if self.is_live:
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
+    # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
+    # Provide private package for service team to test it out.
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='eastus2euap')
+    def test_open_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': 'eastus2euap',
+            'reservation_group': self.create_random_name('cli_open_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_open_reservation_', 40),
+            'vm': self.create_random_name('cli-open-vm-', 20),
+            'sku': 'Standard_DS1_v2',
+            'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} -l {location} '
+                 '--reservation-type Open',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('reservationType', 'Open')
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 1),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('vm create -g {rg} -n {vm} -l {location} --image {image} --size {sku} '
+                 '--admin-username azureuser '
+                 '--ssh-key-value "{ssh_key}" --public-ip-address "" --nsg-rule None --no-cap-reservation true')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment false', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', False)
+        ])
+        self.cmd('vm start -g {rg} -n {vm}')
+
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('instanceView.capacityReservationType', 'Open')
+        ])
+
+        utilization = \
+            self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                     '--instance-view', checks=[
+                self.exists('instanceView.utilizationInfo.usedReservedCountBySubscription')
+            ]).get_output_in_json()['instanceView']['utilizationInfo']['usedReservedCountBySubscription']
+        self.assertEqual(1, len(utilization))
+        self.assertEqual(1, next(iter(utilization.values())))
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment true', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
 
     @record_only()  # Some special subscriptions can test it.
     @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
