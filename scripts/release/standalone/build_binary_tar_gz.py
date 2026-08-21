@@ -15,8 +15,8 @@ This build produces a lightweight tar.gz with:
 Output Structure:
 ```
 dist/binary_tar_gz/
-    azure-cli-{VERSION}-macos-arm64-nopython.tar.gz
-    azure-cli-{VERSION}-macos-arm64-nopython.tar.gz.sha256
+    azure-cli-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz
+    azure-cli-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz.sha256
 ```
 
 Archive Contents:
@@ -48,8 +48,9 @@ Archive Contents:
 Usage:
     python build_binary_tar_gz.py --help
     python build_binary_tar_gz.py --platform-tag macos-arm64
+    python build_binary_tar_gz.py --platform-tag linux-x86_64
     python build_binary_tar_gz.py --platform-tag macos-arm64 --output-dir ./dist/custom
-    python build_binary_tar_gz.py --platform-tag macos-arm64 --keep-temp    
+    python build_binary_tar_gz.py --platform-tag macos-arm64 --keep-temp
 
 Requirements:
     - Homebrew python@x.yz installed: brew install python@x.yz
@@ -61,6 +62,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -72,12 +74,16 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = PROJECT_ROOT / "src"
 AZURE_CLI_CORE_DIR = SRC_DIR / "azure-cli-core"
-REQUIREMENTS_FILE = SRC_DIR / "azure-cli" / "requirements.py3.Darwin.txt"
+REQUIREMENTS_FILES = {
+    "linux": SRC_DIR / "azure-cli" / "requirements.py3.Linux.txt",
+    "macos": SRC_DIR / "azure-cli" / "requirements.py3.Darwin.txt",
+}
 
 # Package configuration
 APP_NAME = "azure-cli"
 CLI_EXECUTABLE_NAME = "az"
 TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz"
+PLATFORM_TAGS = ("linux-arm64", "linux-x86_64", "macos-arm64", "macos-x86_64")
 
 # Python version we're building for (must match Homebrew python@X.Y)
 # Can be overridden via PYTHON_MAJOR_MINOR env var
@@ -140,8 +146,10 @@ def find_homebrew_python() -> Path:
     candidates = [
         Path(f"/opt/homebrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
         Path(f"/usr/local/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
+        Path(f"/home/linuxbrew/.linuxbrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
         Path(f"/opt/homebrew/bin/python{PYTHON_MAJOR_MINOR}"),
         Path(f"/usr/local/bin/python{PYTHON_MAJOR_MINOR}"),
+        Path(f"/home/linuxbrew/.linuxbrew/bin/python{PYTHON_MAJOR_MINOR}"),
     ]
 
     for python_path in candidates:
@@ -182,12 +190,12 @@ def create_venv(python_path: Path, venv_dir: Path) -> Path:
     return venv_python
 
 
-def install_azure_cli(venv_python: Path) -> None:
+def install_azure_cli(venv_python: Path, requirements_file: Path) -> None:
     """Install Azure CLI components from source, then install pinned dependencies.
 
     Mirrors the run.sh approach:
       1. Install all src packages with --no-deps (local source code takes precedence)
-      2. Install pinned dependencies from requirements.py3.Darwin.txt
+    2. Install pinned dependencies from the platform requirements file
     """
     # Step 1: install every package found under SRC_DIR from source, without pulling
     # transitive deps from PyPI (--no-deps). This ensures the locally-built wheels
@@ -212,12 +220,12 @@ def install_azure_cli(venv_python: Path) -> None:
     # resolves to the exact version recorded in the requirements file.
     print("\n=== Step 2: Installing pinned dependencies from requirements file ===")
 
-    if not REQUIREMENTS_FILE.exists():
-        raise BuildError(f"Requirements file not found: {REQUIREMENTS_FILE}")
+    if not requirements_file.exists():
+        raise BuildError(f"Requirements file not found: {requirements_file}")
 
-    print(f"  Using: {REQUIREMENTS_FILE}")
+    print(f"  Using: {requirements_file}")
     subprocess.run(
-        [str(venv_python), "-m", "pip", "install", "-r", str(REQUIREMENTS_FILE)],
+        [str(venv_python), "-m", "pip", "install", "-r", str(requirements_file)],
         check=True,
     )
 
@@ -428,13 +436,34 @@ def create_tarball(
     return tarball_path
 
 
+def _platform_from_tag(platform_tag: str) -> str:
+    return platform_tag.split("-", maxsplit=1)[0]
+
+
+def _validate_build_architecture(platform_tag: str) -> None:
+    """Reject releases whose tag does not match the builder's architecture."""
+    expected_architecture = platform_tag.split("-", maxsplit=1)[1]
+    actual_architecture = platform.machine().lower()
+    aliases = {
+        "aarch64": "arm64",
+        "amd64": "x86_64",
+        "x64": "x86_64",
+    }
+    actual_architecture = aliases.get(actual_architecture, actual_architecture)
+    if actual_architecture != expected_architecture:
+        raise BuildError(
+            f"Platform tag {platform_tag} requires {expected_architecture}, "
+            f"but the builder is running on {actual_architecture}"
+        )
+
+
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Build Azure CLI tar.gz using Homebrew Python (no bundled Python)"
     )
     parser.add_argument(
-        "--platform-tag", required=True, choices=["macos-arm64", "macos-x86_64"], help="Platform tag for the build"
+        "--platform-tag", required=True, choices=PLATFORM_TAGS, help="Platform tag for the build"
     )
     parser.add_argument(
         "--output-dir",
@@ -459,6 +488,8 @@ def main() -> int:
     print()
 
     try:
+        _validate_build_architecture(args.platform_tag)
+        requirements_file = REQUIREMENTS_FILES[_platform_from_tag(args.platform_tag)]
         version = get_cli_version()
         print(f"Azure CLI version: {version}")
 
@@ -470,7 +501,7 @@ def main() -> int:
             install_dir = temp_path / "install"
 
             venv_python = create_venv(python_path=python_path, venv_dir=venv_dir)
-            install_azure_cli(venv_python=venv_python)
+            install_azure_cli(venv_python=venv_python, requirements_file=requirements_file)
 
             create_install_structure(
                 venv_dir=venv_dir,

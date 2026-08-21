@@ -1,19 +1,21 @@
-# Azure CLI - macOS Release Pipeline (Build → Sign → Test → Publish)
+# Azure CLI - macOS and Linux Standalone Validation Pipeline
 #
-# Purpose: Complete end-to-end macOS release pipeline
+# Purpose: Manually validate macOS and Linux standalone tarballs and the Homebrew Cask.
+# This is an ad hoc testing pipeline, not the production release pipeline.
 # Architecture: Chains 4 job templates in sequence
 #
 # Pipeline Flow:
 #   1. macos-build-jobs.yml        → Build unsigned tarballs (ARM64 + Intel)
 #   2. macos-sign-notarize-jobs.yml → Sign and notarize via ESRP
-#   3. macos-test-jobs.yml         → Test cask (local file://) + offline install
-#   4. macos-publish-jobs.yml      → GitHub release + Homebrew cask update
+#   3. cask-generation-and-tests.yml → Test cask (local file://) + offline install
+#   4. publish-jobs.yml            → GitHub release + Homebrew cask update
 #
 # Output Artifacts:
-#   - cli-build-unsigned-arm64, cli-build-unsigned-x86_64 (intermediate)
-#   - cli-signed-notarized-arm64, cli-signed-notarized-x86_64 (final)
+#   - macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64 (final)
+#   - linux-cli-final-arm64, linux-cli-final-x86_64 (final)
 
 trigger: none
+pr: none
 
 parameters:
   # Build parameters
@@ -49,11 +51,6 @@ parameters:
     type: string
     default: 'Azure/homebrew-azure-cli'
   
-  - name: GitHubServiceConnection
-    displayName: 'GitHub Service Connection'
-    type: string
-    default: 'Azure'
-  
   - name: ESRPServiceConnection
     displayName: 'ESRP Service Connection'
     type: string
@@ -76,6 +73,8 @@ variables:
   - template: templates/variables.yml
   - ${{ if eq(variables['System.TeamProject'], 'release') }}:
     - group: 'AME ESRP Variable Group'
+    - group: 'esrp-signing-codes'
+    - group: 'get-github-pat-token'
   
   - name: GitHubRepo
     value: ${{ parameters.GitHubRepo }}
@@ -100,10 +99,10 @@ variables:
   - name: skipNugetSecurityAnalysis
     value: true
 
-name: macos-release-$(Build.BuildId)
+name: standalone-release-$(Build.BuildId)
 
 # ============================================================================
-# JOBS: End-to-end macOS release flow
+# JOBS: End-to-end standalone release flow
 # ============================================================================
 jobs:
 # ============================================================================
@@ -114,6 +113,12 @@ jobs:
     PythonVersion: ${{ parameters.PythonVersion }}
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
+
+- template: templates/linux/linux-build-jobs.yml
+  parameters:
+    PythonVersion: ${{ parameters.PythonVersion }}
+    LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+    LinuxX64Pool: ${{ variables.ubuntu_pool }}
 
 # Jobs included:
 # - BuildMacOSCli (matrix: ARM64 + Intel)
@@ -140,46 +145,58 @@ jobs:
 # - SignBinaries (matrix: ARM64 + Intel)
 # - CreateNotarizeBundle (matrix: ARM64 + Intel)
 # - Notarize (matrix: ARM64 + Intel)
-# - CreateFinalTarball (matrix: ARM64 + Intel)
+# - CreateMacOSFinalTarball (matrix: ARM64 + Intel)
 # Artifacts: cli-signed-notarized-arm64, cli-signed-notarized-x86_64
 
 # ============================================================================
 # PHASE 3a: TEST (local file:// cask + offline install)
 # ============================================================================
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
-  - template: templates/macos/macos-cask-generation-and-tests.yml
+  - template: templates/standalone/cask-generation-and-tests.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
+      LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+      LinuxX64Pool: ${{ variables.ubuntu_pool }}
       PythonVersion: ${{ parameters.PythonVersion }}
       GitHubRepo: $(GitHubRepo)
       Debug: ${{ parameters.Debug }}
-      dependsOn:
-      - CreateFinalTarball
+      CaskDependsOn:
+      - CreateMacOSFinalTarball
+      - BuildLinuxCli
+      MacosDependsOn:
+      - CreateMacOSFinalTarball
+      LinuxDependsOn:
+      - BuildLinuxCli
 
 # Jobs included:
-# - TestTempTapCask (matrix: ARM64 + Intel) - tests cask with local file:// URLs
-# - TestOfflineInstall (matrix: ARM64 + Intel) - tests direct tarball install
+# - TestMacOSTempTapCask (matrix: ARM64 + Intel) - tests the macOS cask
+# - TestLinuxTempTapCask (matrix: ARM64 + x86_64) - tests the Linux cask
+# - TestMacOSOfflineInstall (matrix: ARM64 + Intel) - tests macOS tarballs
+# - TestLinuxOfflineInstall (matrix: ARM64 + x86_64) - tests Linux tarballs
 
 # ============================================================================
 # PHASE 3b: PUBLISH (GitHub + Homebrew tap)
 # ============================================================================
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
-  - template: templates/macos/macos-publish-jobs.yml
+  - template: templates/standalone/publish-jobs.yml
     parameters:
       PublishToGitHub: ${{ parameters.PublishToGitHub }}
       UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
       TestAfterPublish: false
       GitHubRepo: $(GitHubRepo)
-      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
       HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
+      LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+      LinuxX64Pool: ${{ variables.ubuntu_pool }}
       PythonVersion: ${{ parameters.PythonVersion }}
       Debug: ${{ parameters.Debug }}
       dependsOn:
-      - TestTempTapCask
-      - TestOfflineInstall
+      - TestMacOSTempTapCask
+      - TestLinuxTempTapCask
+      - TestMacOSOfflineInstall
+      - TestLinuxOfflineInstall
 
 # Jobs included:
 # - CreateGitHubRelease (conditional)

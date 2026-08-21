@@ -679,6 +679,9 @@ parameters:
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
           - "KataVmIsolation" for Kata.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -1235,6 +1238,12 @@ parameters:
         Auto: A standard set of Karpenter NodePools are provisioned.
         None: No Karpenter NodePools are provisioned.
         WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
+  - name: --disable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Disable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
