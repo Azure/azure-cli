@@ -123,11 +123,10 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
                            end_ip_address)
 
-    parameters = {
-        'name': firewall_rule_name,
-        'start_ip_address': start_ip_address,
-        'end_ip_address': end_ip_address
-    }
+    parameters = models.FirewallRule(
+        start_ip_address=start_ip_address,
+        end_ip_address=end_ip_address
+    )
 
     return client.begin_create_or_update(
         resource_group_name,
@@ -946,8 +945,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs,
-                                 storage_redundancy=source_server_object.storage.storage_redundancy)
+                                 log_on_disk=accelerated_logs)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -1859,13 +1857,13 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
 
-    parameters = {
-        'administratorType': 'ActiveDirectory',
-        'login': login,
-        'sid': sid,
-        'tenant_id': get_tenant_id(),
-        'identity_resource_id': identity
-    }
+    parameters = models.AzureADAdministrator(
+        administrator_type='ActiveDirectory',
+        login=login,
+        sid=sid,
+        tenant_id=get_tenant_id(),
+        identity_resource_id=identity
+    )
 
     resolve_poller(client.begin_create_or_update(
         resource_group_name=resource_group_name,
