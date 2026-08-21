@@ -2538,6 +2538,32 @@ parameters:
         structured payload that works with `-o json`, `-o yaml`, and `-o table`.
 """
 
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect network-capture'] = """
+type: command
+short-summary: Collect and analyze a packet capture from a Linux web app container.
+long-summary: |
+    Runs a bounded tcpdump capture in one app container instance, then downloads the raw
+    pcap, an HTML analysis report, or both. Network captures can contain credentials,
+    cookies, request bodies, and other sensitive application data. Store and share the
+    downloaded artifacts accordingly.
+
+    This command supports Linux web apps on dedicated App Service plans. Captures are
+    limited to one worker instance per command invocation. When the app has multiple
+    instances, use --instance to select the worker whose traffic you want to inspect.
+examples:
+  - name: Capture traffic for the service-defined duration and download both artifacts
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp
+  - name: Capture HTTPS traffic for 60 seconds from a specific worker
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --instance 7c2d9 --duration 60 --filter "port 443"
+  - name: Download only the raw pcap into a diagnostics directory
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --artifact pcap --destination ./diagnostics
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.

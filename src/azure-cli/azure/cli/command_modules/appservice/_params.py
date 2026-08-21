@@ -859,6 +859,28 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
 
+    with self.argument_context('webapp troubleshoot collect network-capture') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Worker instance to capture. Use "az webapp list-instances" to list instances. '
+                        'Only one instance can be captured at a time.')
+        c.argument('duration', options_list=['--duration'], type=int,
+                   help='Capture duration in seconds. Valid range: 1-300. The service default is used when omitted.')
+        c.argument('interface', options_list=['--interface'],
+                   help='Network interface to capture. The service default is used when omitted.')
+        c.argument('snap_length', options_list=['--snap-length'], type=int,
+                   help='Bytes captured from each packet. Use 0 for the complete packet, or a value from 64 to 65535.')
+        c.argument('capture_filter', options_list=['--filter'],
+                   help='Berkeley Packet Filter (BPF) expression, for example "port 443".')
+        c.argument('artifact', options_list=['--artifact'],
+                   arg_type=get_enum_type(['pcap', 'report', 'both']), default='both',
+                   help='Artifact to download. "both" downloads the raw pcap and HTML report.')
+        c.argument('destination', options_list=['--destination', '-d'], default='.',
+                   help='Directory for downloaded artifacts. Existing files are not overwritten.')
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
