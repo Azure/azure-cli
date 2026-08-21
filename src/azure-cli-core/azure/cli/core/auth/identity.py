@@ -9,11 +9,10 @@ import re
 import sys
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.util import wsl_browser_open
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
-
-from azure.cli.core.util import wsl_browser_open
 
 from .constants import AZURE_CLI_CLIENT_ID
 from .msal_credentials import UserCredential, ServicePrincipalCredential

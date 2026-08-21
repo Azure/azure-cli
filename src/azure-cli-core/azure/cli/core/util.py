@@ -889,6 +889,11 @@ def _open_url_in_wsl_browser(url):
 
 
 class _WslBrowserOpen:
+    def __init__(self):
+        self._original_open = None
+        self._patch_applied = False
+        self._lock_acquired = False
+
     def __enter__(self):
         self._original_open = None
         self._patch_applied = False
