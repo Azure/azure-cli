@@ -6387,6 +6387,31 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("disable_gateway_api", False)
 
+    def get_enable_upstream_kubescheduler_user_configuration(self) -> bool:
+        """Obtain the value of enable_upstream_kubescheduler_user_configuration.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_upstream_kubescheduler_user_configuration")
+
+    def get_disable_upstream_kubescheduler_user_configuration(self) -> bool:
+        """Obtain the value of disable_upstream_kubescheduler_user_configuration.
+
+        :return: bool
+        """
+        disable_upstream_kubescheduler_user_configuration = self.raw_param.get(
+            "disable_upstream_kubescheduler_user_configuration"
+        )
+        if (
+            disable_upstream_kubescheduler_user_configuration and
+            self.get_enable_upstream_kubescheduler_user_configuration()
+        ):
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-upstream-kubescheduler-user-configuration and "
+                "--disable-upstream-kubescheduler-user-configuration at the same time."
+            )
+        return disable_upstream_kubescheduler_user_configuration
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -8038,6 +8063,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # Default is disabled so no need to worry about that here
         return mc
 
+    def set_up_upstream_kubescheduler_user_configuration(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up user-defined scheduler configuration for kube-scheduler upstream for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_upstream_kubescheduler_user_configuration():
+            if mc.scheduler_profile is None:
+                mc.scheduler_profile = self.models.SchedulerProfile()  # pylint: disable=no-member
+            if mc.scheduler_profile.upstream is None:
+                mc.scheduler_profile.upstream = self.models.SchedulerInstanceProfile()  # pylint: disable=no-member
+            mc.scheduler_profile.upstream.scheduler_config_mode = (
+                self.models.SchedulerConfigMode.MANAGED_BY_CRD  # pylint: disable=no-member
+            )
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -8135,6 +8178,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_static_egress_gateway(mc)
         # set up node provisioning profile
         mc = self.set_up_node_provisioning_profile(mc)
+        # set up user-defined scheduler configuration for kube-scheduler upstream
+        mc = self.set_up_upstream_kubescheduler_user_configuration(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:

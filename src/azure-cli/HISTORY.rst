@@ -81,6 +81,7 @@ Release History
 * `az postgres flexible-server backup create`: Fix duplicate auto-generated backup names after deletions (#33684)
 * `az postgres flexible-server create`: Add example to create elastic cluster with custom database name (#33712)
 * `az postgres flexible-server upgrade`: Introduced `--validate-only` param for PVC (#33683)
+* `az postgres flexible-server maintenance-event list`: Fix `TypeError` caused by an unsupported `--ids` argument (#33846)
 
 2.88.0
 ++++++
