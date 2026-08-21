@@ -4447,11 +4447,13 @@ def deleted_server_show(
 
 def deleted_server_list(
         client,
-        location):
+        location=None):
     '''
-    Lists all deleted servers in a specific location.
+    Lists all deleted servers in a location or subscription.
     '''
-    return client.list_by_location(location)
+    if location:
+        return client.list_by_location(location)
+    return client.list()
 
 
 ###############################################

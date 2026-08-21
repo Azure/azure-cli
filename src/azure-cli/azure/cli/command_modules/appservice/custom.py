@@ -7842,7 +7842,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _parse_raw_stacks(self, stacks):
         # Track seen runtime display names to avoid duplicates in Linux parsing.
         # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
-        # Windows parsing doesn't have this issue due to its different structure.
 
         java_eol_map = self._build_java_eol_map(stacks)
 
@@ -7862,6 +7861,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self.windows_config_mappings,
                         runtime_family=lang.display_text,
                         java_eol_map=java_eol_map)
+
+        unique_runtimes = []
+        seen_runtime_names = set()
+        for runtime in self._stacks:
+            runtime_key = (runtime.linux, runtime.display_name.lower())
+            if runtime_key in seen_runtime_names:
+                continue
+            seen_runtime_names.add(runtime_key)
+            unique_runtimes.append(runtime)
+        self._stacks = unique_runtimes
 
     def _build_java_eol_map(self, stacks):
         """Build Java version -> EOL date map from the 'Java' stack.
@@ -7901,7 +7910,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        display_name = display_name.lower()
+        display_name = self.standardize_node_runtime_name(display_name).lower()
         stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
@@ -7989,6 +7998,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         t = t.replace(".NET", DOTNET_RUNTIME_NAME)
         t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
+
+    @staticmethod
+    def standardize_node_runtime_name(runtime_name):
+        match = re.fullmatch(r'node\|(\d+)(?:-?lts)?', runtime_name, re.IGNORECASE)
+        if match and int(match.group(1)) >= 26:
+            return "NODE|{}".format(match.group(1))
+        return runtime_name
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
@@ -8191,6 +8207,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
+                    runtime_name = self.standardize_node_runtime_name(runtime_name)
 
                     runtime = self.Runtime(display_name=runtime_name, linux=False,
                                            os="Windows", runtime_family=runtime_family,
@@ -8302,7 +8319,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
-                runtime_name = settings.runtime_version
+                runtime_name = self.standardize_node_runtime_name(settings.runtime_version)
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,
@@ -12216,6 +12233,8 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
     runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
+    if runtime:
+        runtime = _StackRuntimeHelper.standardize_node_runtime_name(runtime)
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
@@ -13155,7 +13174,7 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
         if gh_props.get("github_actions_version"):
             if is_linux:
                 return {
-                    "display_name": app_runtime,
+                    "display_name": matched_runtime.display_name,
                     "github_actions_version": gh_props["github_actions_version"]
                 }
             if gh_props.get("app_runtime_version").lower() == app_runtime_version.lower():

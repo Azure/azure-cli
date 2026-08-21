@@ -1859,13 +1859,13 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
 
-    parameters = {
-        'administratorType': 'ActiveDirectory',
-        'login': login,
-        'sid': sid,
-        'tenant_id': get_tenant_id(),
-        'identity_resource_id': identity
-    }
+    parameters = models.AzureADAdministrator(
+        administrator_type='ActiveDirectory',
+        login=login,
+        sid=sid,
+        tenant_id=get_tenant_id(),
+        identity_resource_id=identity
+    )
 
     resolve_poller(client.begin_create_or_update(
         resource_group_name=resource_group_name,

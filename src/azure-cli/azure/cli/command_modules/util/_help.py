@@ -26,7 +26,7 @@ examples:
 - name: Get Audit log through Microsoft Graph
   text: >
       az rest --method get --url https://graph.microsoft.com/beta/auditLogs/directoryAudits
-- name: Update a Azure Active Directory Graph User's display name
+- name: Update an Azure Active Directory Graph User's display name
   text: |
       (Bash or CMD)
       az rest --method patch --url "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"johndoe2\\"}"

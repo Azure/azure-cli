@@ -139,6 +139,10 @@ def get_postgres_skus(sku_info, tier):
     return _get_available_values(sku_info, 'skus', tier)
 
 
+def get_postgres_default_sku(sku_info, tier):
+    return _get_available_values(sku_info, 'default_sku_name', tier)
+
+
 def get_postgres_storage_sizes(sku_info, tier):
     return _get_available_values(sku_info, 'storage_sizes', tier)
 
