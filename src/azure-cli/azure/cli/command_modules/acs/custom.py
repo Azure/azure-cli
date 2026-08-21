@@ -2885,7 +2885,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :param space_name: Name of the new or existing dev space to select. Defaults to an \
     interactive selection experience.
     :type space_name: String
-    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    :param endpoint_type: The endpoint type to be used for an Azure Dev Spaces controller. \
     See https://aka.ms/azds-networking for more information.
     :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.
