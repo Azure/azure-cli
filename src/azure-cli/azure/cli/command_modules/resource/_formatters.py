@@ -110,7 +110,7 @@ def format_what_if_operation_result(
 def _format_noise_notice(builder):
     builder.append_line(
         """Note: The result may contain false positive predictions (noise).
-NOTICE! - Want to get What-if without noise? Move to Deployment Stacks What-If https://aka.ms/stackswhatifGA"""
+NOTICE! - Want to get What-if with reduced noise? Move to Deployment Stacks What-if https://aka.ms/stackswhatifGA"""
     )
     builder.append_line()
 
