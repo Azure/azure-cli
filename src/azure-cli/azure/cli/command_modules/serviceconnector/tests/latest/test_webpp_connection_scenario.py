@@ -651,9 +651,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
-    @record_only()
-    def test_webapp_neon_postgres_e2e(self):
+    def test_webapp_neon_postgres_blocked(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
@@ -671,29 +669,18 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         server = 'neontest-serve'
         database = 'testdb'
 
-        # create connection
-        self.cmd('webapp connection create neon-postgres --connection {} --source-id {} --server {} --database {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, server, database, user, password))
+        # verify that creating neon-postgres connection is blocked
+        with self.assertRaises(Exception) as context:
+            self.cmd('webapp connection create neon-postgres --connection {} --source-id {} --server {} --database {} '
+                     '--secret name={} secret={} --client-type python'.format(name, source_id, server, database, user, password))
+        self.assertIn('no longer supported', str(context.exception))
 
-        
+        # verify that updating neon-postgres connection is also blocked
         connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
-
-        # update connection
-        self.cmd('webapp connection update neon-postgres --id {} --client-type dotnet '
-                 '--secret name={} secret={}'.format(connection_id, user, password),
-                 checks = [ self.check('clientType', 'dotnet') ])
-
-        # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
-
-        # validate connection
-        self.cmd('webapp connection validate --id {}'.format(connection_id))
-
-        # show connection
-        self.cmd('webapp connection show --id {}'.format(connection_id))
-
-        # delete connection
-        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+        with self.assertRaises(Exception) as context:
+            self.cmd('webapp connection update neon-postgres --id {} --client-type dotnet '
+                     '--secret name={} secret={}'.format(connection_id, user, password))
+        self.assertIn('no longer supported', str(context.exception))
 
     @record_only()
     def test_webapp_mongodb_atlas_e2e(self):
