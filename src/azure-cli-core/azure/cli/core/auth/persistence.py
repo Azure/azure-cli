@@ -140,11 +140,6 @@ def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pyli
 
 
 def warn_if_encryption_unavailable():
-    """Warn that credentials are persisted in plaintext.
-
-    Called at sign-in only. Every command runs in a new process, so warning once per session would
-    require storing state on the machine, and warning on every command is too noisy.
-    """
     if _encryption_fallback:
         logger.warning(ENCRYPTION_FALLBACK_WARNING)
 

@@ -230,7 +230,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def logout_all_service_principal(self):
         # remove service principal secrets
         # MSAL provides no interface to enumerate the service principals in its token cache, so
-        # their access tokens are cleared by logout_all_users emptying the whole token cache.
+        # their access tokens are cleared by logout_all_users emptying the whole sp secret store
         erase_persistence(self._secret_file, self._encrypt, type="Secret store",
                           empty_payload='[]')
 
