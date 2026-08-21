@@ -10,18 +10,17 @@ import uuid
 from os.path import exists
 from collections import Counter
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
     MutuallyExclusiveArgumentError
 )
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
+from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
-
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -45,7 +44,8 @@ def validate_client_id(isCreate):
         if namespace.client_id is None:
             return
         if hasattr(namespace, 'enable_managed_identity') and namespace.enable_managed_identity is True:
-            raise MutuallyExclusiveArgumentError('Must not specify --client-id when --enable-managed-identity is True')  # pylint: disable=line-too-long
+            raise MutuallyExclusiveArgumentError("Must not specify --client-id when "
+                                                 "--enable-managed-identity/--enable-mi is True")
         if namespace.platform_workload_identities is not None:
             raise MutuallyExclusiveArgumentError('Must not specify --client-id when --assign-platform-workload-identity is used')  # pylint: disable=line-too-long
         try:
@@ -65,7 +65,8 @@ def validate_client_secret(isCreate):
         if namespace.client_secret is None:
             return
         if hasattr(namespace, 'enable_managed_identity') and namespace.enable_managed_identity is True:
-            raise MutuallyExclusiveArgumentError('Must not specify --client-secret when --enable-managed-identity is True')  # pylint: disable=line-too-long
+            raise MutuallyExclusiveArgumentError("Must not specify --client-secret when "
+                                                 "--enable-managed-identity/--enable-mi is True")
         if namespace.platform_workload_identities is not None:
             raise MutuallyExclusiveArgumentError('Must not specify --client-secret when --assign-platform-workload-identity is used')  # pylint: disable=line-too-long
         if isCreate and (namespace.client_id is None or not str(namespace.client_id)):
@@ -321,17 +322,27 @@ def validate_enable_managed_identity(namespace):
     if not namespace.enable_managed_identity:
         return
 
-    if namespace.client_id is not None:
-        raise InvalidArgumentValueError('Must not specify --client-id when --enable-managed-identity is True')
+    if namespace.client_id:
+        raise InvalidArgumentValueError("Must not specify --client-id when "
+                                        "--enable-managed-identity/--enable-mi is True")
 
-    if namespace.client_secret is not None:
-        raise InvalidArgumentValueError('Must not specify --client-secret when --enable-managed-identity is True')
+    if namespace.client_secret:
+        raise InvalidArgumentValueError("Must not specify --client-secret when "
+                                        "--enable-managed-identity/--enable-mi is True")
 
-    if not namespace.platform_workload_identities:
-        raise RequiredArgumentMissingError('Enabling managed identity requires platform workload identities to be provided')  # pylint: disable=line-too-long
+    if namespace.platform_workload_identities and not namespace.mi_user_assigned:
+        raise RequiredArgumentMissingError("Must specify --assign-cluster-identity/--mi-user-assigned "
+                                           "with --assign-platform-workload-identity/--assign-platform-wi")
 
-    if not namespace.mi_user_assigned:
-        raise RequiredArgumentMissingError('Enabling managed identity requires cluster identity to be provided')
+    if not namespace.platform_workload_identities and namespace.mi_user_assigned:
+        raise RequiredArgumentMissingError("Must specify --assign-platform-workload-identity/--assign-platform-wi "
+                                           "with --assign-cluster-identity/--mi-user-assigned")
+
+    if not namespace.platform_workload_identities and not namespace.mi_user_assigned and not namespace.version:
+        raise RequiredArgumentMissingError("--enable-managed-identity/--enable-mi without "
+                                           "--assign-cluster-identity/--mi-user-assigned and "
+                                           "--assign-platform-wi/--assign-platform-workload-identity "
+                                           "requires --version.")
 
 
 def validate_platform_workload_identities(isCreate):

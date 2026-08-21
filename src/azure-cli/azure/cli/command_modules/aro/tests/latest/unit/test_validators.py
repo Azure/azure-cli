@@ -996,12 +996,12 @@ def test_validate_load_balancer_managed_outbound_ip_count(test_description, name
 
 test_validate_enable_managed_identity_data = [
     (
-        "Should not raise any exception when empty",
+        "Should not raise any exception when 'enable_managed_identity' is empty",
         Mock(enable_managed_identity=None),
         None, None,
     ),
     (
-        "Should not raise any exception when False",
+        "Should not raise any exception when 'enable_managed_identity' is False",
         Mock(enable_managed_identity=False),
         None, None
     ),
@@ -1009,30 +1009,22 @@ test_validate_enable_managed_identity_data = [
         "Should raise InvalidArgumentValueError if client_id is present",
         Mock(enable_managed_identity=True,
              client_id="00000000-0000-0000-0000-000000000000", client_secret=None),
-        InvalidArgumentValueError, 'Must not specify --client-id when --enable-managed-identity/--enable-mi is True'
+        InvalidArgumentValueError, "Must not specify --client-id when --enable-managed-identity/--enable-mi is True"
     ),
     (
         "Should raise InvalidArgumentValueError if client_secret is present",
         Mock(enable_managed_identity=True,
              client_id=None, client_secret="asdfghjkl"),
-        InvalidArgumentValueError, 'Must not specify --client-secret when --enable-managed-identity/--enable-mi is True'
+        InvalidArgumentValueError, "Must not specify --client-secret when --enable-managed-identity/--enable-mi is True"
     ),
     (
-        "Should raise RequiredArgumentMissingError when no platform workload identities are set",
+        "Should raise RequiredArgumentMissingError if managed identities are enabled (with identity auto-creation) but no version is specified",
         Mock(enable_managed_identity=True,
              client_id=None, client_secret=None,
-             version="4.14.0",
-             platform_workload_identities=[]),
-        RequiredArgumentMissingError, 'Must specify --assign-platform-workload-identity/--assign-platform-wi with --assign-cluster-identity/--mi-user-assigned'
-    ),
-    (
-        "Should raise RequiredArgumentMissingError when cluster identity is not set",
-        Mock(enable_managed_identity=True,
-             client_id=None, client_secret=None,
-             version="4.14.0",
-             platform_workload_identities=[("foo", Mock(resource_id='Foo'))],
+             version=None,
+             platform_workload_identities=None,
              mi_user_assigned=None),
-        RequiredArgumentMissingError, 'Must specify --assign-cluster-identity/--mi-user-assigned with --assign-platform-workload-identity/--assign-platform-wi'
+        RequiredArgumentMissingError, "--enable-managed-identity/--enable-mi without --assign-cluster-identity/--mi-user-assigned and --assign-platform-wi/--assign-platform-workload-identity requires --version."
     ),
     (
         "Should not raise any exception when valid",
@@ -1042,6 +1034,33 @@ test_validate_enable_managed_identity_data = [
              platform_workload_identities=[("foo", Mock(resource_id='Foo'))],
              mi_user_assigned="foo"),
         None, None
+    ),
+    (
+        "Should not raise any exception when valid (auto-create identities)",
+        Mock(enable_managed_identity=True,
+             client_id=None, client_secret=None,
+             version="4.20.1",
+             platform_workload_identities=None,
+             mi_user_assigned=None),
+        None, None
+    ),
+    (
+        "Should raise RequiredArgumentMissingError when platform workload identities are set, but not cluster identity",
+        Mock(enable_managed_identity=True,
+             client_id=None, client_secret=None,
+             version=None,
+             platform_workload_identities=[("foo", Mock(resource_id="bar"))],
+             mi_user_assigned=None),
+        RequiredArgumentMissingError, "Must specify --assign-cluster-identity/--mi-user-assigned with --assign-platform-workload-identity/--assign-platform-wi"
+    ),
+    (
+        "Should raise RequiredArgumentMissingError when cluster identity is set, but not platform workload identities",
+        Mock(enable_managed_identity=True,
+             client_id=None, client_secret=None,
+             version=None,
+             platform_workload_identities=None,
+             mi_user_assigned="foo"),
+        RequiredArgumentMissingError, "Must specify --assign-platform-workload-identity/--assign-platform-wi with --assign-cluster-identity/--mi-user-assigned"
     )
 ]
 
