@@ -49,6 +49,13 @@ title 'Determine version'
 ##############################################
 # build product packages
 title 'Build Azure CLI and its command modules'
+
+# This script builds through the PEP 517 frontend. It is invoked both directly and by
+# being sourced via scripts/ci/artifacts.sh, so the set of callers responsible for
+# provisioning the frontend is easy to miss. Install it here if it is absent rather
+# than failing partway through the build.
+python -c 'import build' 2>/dev/null || python -m pip install --disable-pip-version-check -q build
+
 for setup_file in $(find src -name 'setup.py'); do
     pushd $(dirname ${setup_file}) >/dev/null
     echo "Building module at $(pwd) ..."
