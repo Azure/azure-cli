@@ -1075,6 +1075,32 @@ parameters:
   - name: --apiserver-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --enable-hosted-system
+    type: bool
+    short-summary: (Automatic SKU) Convert an existing Automatic cluster to use a Managed System Pool.
+    long-summary: |
+      Only valid for clusters with the Automatic SKU, and required to request the conversion.
+      The cluster keeps its existing networking: this flag does not onboard a cluster that
+      uses AKS-managed networking onto a VNet. For a cluster that already runs in a
+      bring-your-own VNet, combine it with `--system-node-subnet-id` (and optionally
+      `--node-subnet-id` and `--apiserver-subnet-id`) to place the Managed System Pool in
+      that same VNet.
+  - name: --system-node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by the Managed System Pool.
+    long-summary: |
+      Requires `--enable-hosted-system`, and only applies to a cluster that already runs in a
+      bring-your-own VNet. The subnet must belong to that VNet. Unlike `az aks create`, the
+      other bring-your-own VNet subnets are optional here: `--node-subnet-id` (for user node
+      pools) and `--apiserver-subnet-id` (for the control plane API server) can be omitted, in
+      which case the cluster keeps its current node and API server networking.
+  - name: --node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by user node pools.
+    long-summary: |
+      Requires `--enable-hosted-system` and `--system-node-subnet-id`, and only applies to a
+      cluster that already runs in a bring-your-own VNet. All supplied subnets must belong to
+      that same VNet.
   - name: --enable-private-cluster
     type: bool
     short-summary: Enable private cluster for apiserver vnet integration cluster.
@@ -1313,6 +1339,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-gateway-api
   - name: Update a kubernetes cluster to disable the managed installation of Gateway API CRDs.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-gateway-api
+  - name: Convert an existing non-HOBO Automatic cluster to use a Managed System Pool.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-hosted-system
+  - name: Convert an existing non-HOBO Automatic cluster that runs in a bring-your-own VNet, placing the Managed System Pool in that VNet.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-hosted-system --system-node-subnet-id <systemNodeSubnetID> --node-subnet-id <nodeSubnetID>
 """
 
 helps["aks delete"] = """

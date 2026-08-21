@@ -725,6 +725,9 @@ def load_arguments(self, _):
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
+        c.argument('system_node_subnet_id', validator=validate_system_node_subnet_id)
+        c.argument('node_subnet_id', validator=validate_node_subnet_id)
+        c.argument('enable_hosted_system', action='store_true')
         c.argument('enable_private_cluster', action='store_true')
         c.argument('disable_private_cluster', action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
