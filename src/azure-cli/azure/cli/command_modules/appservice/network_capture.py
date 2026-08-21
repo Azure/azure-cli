@@ -96,7 +96,11 @@ def _log_progress(phase, message, *args):
 def _render_capture_summary(result, collect_only):
     status = result['status']
     if str(status).lower() == 'nopackets':
-        print('\n\nNo packets were captured during the capture window.')
+        instance = result['instance'][:6]
+        print('\n\nNo packets were captured during the capture window.\n\n'
+              'This could happen when the app running on instance ({}) was not receiving traffic or making any '
+              'outbound calls.\n\n'
+              'Please generate a repro and capture again.'.format(instance))
         return
 
     capture_id = result['captureId']
