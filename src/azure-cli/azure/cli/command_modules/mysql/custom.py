@@ -945,8 +945,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs,
-                                 storage_redundancy=source_server_object.storage.storage_redundancy)
+                                 log_on_disk=accelerated_logs)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
