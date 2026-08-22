@@ -15,7 +15,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenario
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import AzureInternalError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -25,11 +25,13 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_import_export(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_import_export(self, resource_group, location):
         store_name_prefix = get_resource_name_prefix('importtest')
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
 
@@ -39,7 +41,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)
@@ -288,10 +290,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
             self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --dry-run -y')
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_import_export_new_fm_schema(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
         # Feature flags test with new ms fm schema
         os.environ['AZURE_APPCONFIG_FM_COMPATIBLE'] = 'False'
 
@@ -304,7 +307,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'import_source': 'file',
             'imported_format': 'json',
@@ -398,10 +401,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         os.remove(exported_prop_file_path)
 
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_import_export_kvset(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_import_export_kvset(self, resource_group, location):
         kvset_store_prefix = get_resource_name_prefix('kvsetimporttest')
         config_store_name = self.create_random_name(prefix=kvset_store_prefix, length=24)
 
@@ -411,7 +415,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)
@@ -453,10 +457,11 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert exported_kvs == expected_kvs
         os.remove(exported_file_path)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_strict_import(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_strict_import(self, resource_group, location):
         strict_store_prefix = get_resource_name_prefix('strictimporttest')
         config_store_name = self.create_random_name(prefix=strict_store_prefix, length=24)
 
@@ -466,7 +471,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)
@@ -757,11 +762,13 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_import_export_naming_conventions(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_import_export_naming_conventions(self, resource_group, location):
         naming_convention_store_prefix = get_resource_name_prefix('namingconventiontest')
         config_store_name = self.create_random_name(prefix=naming_convention_store_prefix, length=24)
 
@@ -771,7 +778,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)
@@ -843,10 +850,11 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_hyphen_yaml_file
         os.remove(exported_yaml_file_path)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_import_export_respect_both_schemas_naming_conventions(self, resource_group, location):
         # Respect both fm schemas in file
         both_schema_test_prefix = get_resource_name_prefix('bothschematest')
         config_store_name = self.create_random_name(prefix=both_schema_test_prefix, length=24)
@@ -857,7 +865,7 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'endpoint': 'https://' + config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'import_source': 'file'
         })
@@ -998,11 +1006,14 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
-    
+        register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
+
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_appconfig_to_appconfig_import_export(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_appconfig_to_appconfig_import_export(self, resource_group, location):
         src_config_store_prefix = get_resource_name_prefix('source')
         dest_config_store_prefix = get_resource_name_prefix('destination')
         src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
@@ -1015,7 +1026,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
             'src_endpoint': 'https://' + src_config_store_name + '.azconfig.io',
             'dest_endpoint': 'https://' + dest_config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)
