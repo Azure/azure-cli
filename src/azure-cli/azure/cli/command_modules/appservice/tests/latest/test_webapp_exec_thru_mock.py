@@ -137,14 +137,25 @@ class WebappExecValidationTest(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, "Invalid mode"):
             webapp_exec(self.cmd, 'rg', 'app', mode='bogus')
 
+    def test_invalid_target_raises(self):
+        with self.assertRaisesRegex(ValidationError, "Invalid target"):
+            webapp_exec(self.cmd, 'rg', 'app', target='sidecar')
+
+    @mock.patch(_MODULE + '._get_scm_url')
+    def test_execute_mode_rejects_kudu_target_before_scm_connection(self, scm_mock):
+        with self.assertRaisesRegex(ValidationError, "supported only in 'shell' mode"):
+            webapp_exec(self.cmd, 'rg', 'app', mode='execute', exec_command='ls', target='kudu')
+        scm_mock.assert_not_called()
+
     @mock.patch(_MODULE + '._start_shell_session')
     @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
     @mock.patch(_MODULE + '.get_scm_site_headers', return_value={})
     @mock.patch(_MODULE + '._get_scm_url', return_value='https://app.scm.azurewebsites.net')
     def test_shell_mode_happy_path_starts_session(self, _scm, _headers, _resolve, start_session):
-        result = webapp_exec(self.cmd, 'rg', 'app', mode='shell')
+        result = webapp_exec(self.cmd, 'rg', 'app', mode='shell', target='kudu')
         self.assertIsNone(result)
-        start_session.assert_called_once()
+        start_session.assert_called_once_with(
+            'https://app.scm.azurewebsites.net', {}, {}, shell=None, target='kudu')
 
     @mock.patch(_MODULE + '._execute_in_parallel', return_value=[{'status': 'accepted'}])
     @mock.patch(_MODULE + '._resolve_target_instances', return_value=[None])
@@ -662,6 +673,12 @@ class ShellSessionConnectTest(unittest.TestCase):
         self.assertEqual(
             self.create_conn.call_args.args[0],
             'wss://scm.example/exec/shell?shell=%2Fbin%2Fbash')
+
+    def test_kudu_target_is_appended_and_url_encoded_with_shell(self):
+        _start_shell_session('https://scm.example', {}, shell='/bin/sh', target='kudu')
+        self.assertEqual(
+            self.create_conn.call_args.args[0],
+            'wss://scm.example/exec/shell?target=kudu&shell=%2Fbin%2Fsh')
 
     def test_cookies_are_formatted_into_cookie_string(self):
         _start_shell_session('https://scm.example', {}, cookies={'ARRAffinity': 'abc'})

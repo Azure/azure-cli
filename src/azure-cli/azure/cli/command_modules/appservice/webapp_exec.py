@@ -55,7 +55,8 @@ def webapp_exec(cmd,
                 working_directory=None,
                 instance=None,
                 shell=None,
-                slot=None):
+                slot=None,
+                target='app'):
     # Validate Linux App
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
@@ -68,6 +69,8 @@ def webapp_exec(cmd,
     # Validate parameters
     if instance is not None:
         instance = instance.strip()
+
+    target = _validate_exec_target(mode, target)
 
     if shell and not shell.startswith('/'):
         raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
@@ -106,11 +109,11 @@ def webapp_exec(cmd,
 
     # Shell mode — single interactive session
     if mode.lower() == 'shell':
-        target = target_instances[0]
+        target_instance = target_instances[0]
         cookies = {}
-        if target:
-            cookies['ARRAffinity'] = target
-        _start_shell_session(scm_url, headers, cookies, shell=shell)
+        if target_instance:
+            cookies['ARRAffinity'] = target_instance
+        _start_shell_session(scm_url, headers, cookies, shell=shell, target=target)
         return None
 
     # Execute mode - run the command on each resolved instance in parallel.
@@ -129,6 +132,15 @@ def webapp_exec(cmd,
             .format(len(failed), len(results)))
 
     return results
+
+
+def _validate_exec_target(mode, target):
+    target = target.lower()
+    if target not in ('app', 'kudu'):
+        raise ValidationError("Invalid target '{}'. Supported targets: app, kudu.".format(target))
+    if mode.lower() == 'execute' and target == 'kudu':
+        raise ValidationError("--target kudu is currently supported only in 'shell' mode.")
+    return target
 
 
 def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
@@ -213,7 +225,7 @@ def _execute_in_parallel(fn, args_list, max_workers=10):
 # --- shell mode ---
 
 
-def _start_shell_session(scm_url, headers, cookies=None, shell=None):
+def _start_shell_session(scm_url, headers, cookies=None, shell=None, target='app'):
     import codecs
     import platform
     import ssl
@@ -226,13 +238,19 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
         raise ValidationError(
             "Interactive shell mode requires an interactive terminal; stdin cannot be redirected.")
 
-    ws_url = scm_url.replace('https://', 'wss://') + '/exec/shell'
+    query = {}
+    if target == 'kudu':
+        query['target'] = target
     if shell:
-        import urllib.parse
-        ws_url += '?shell=' + urllib.parse.quote(shell, safe='')
+        query['shell'] = shell
     else:
         logger.warning("No --shell provided; defaulting to /bin/bash. If your container image does not "
                        "include bash, run with --shell <absolute path> (e.g. --shell /bin/sh).")
+
+    ws_url = scm_url.replace('https://', 'wss://') + '/exec/shell'
+    if query:
+        import urllib.parse
+        ws_url += '?' + urllib.parse.urlencode(query)
 
     cookie_str = '; '.join(f'{k}={v}' for k, v in cookies.items()) if cookies else None
 

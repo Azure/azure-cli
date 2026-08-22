@@ -1643,5 +1643,11 @@ subscription than the app service environment, please use the resource ID for --
                    help="Absolute path of the shell to use (e.g. /bin/sh); defaults to /bin/bash. "
                    "In 'shell' mode it is the interactive shell to launch; in 'execute' mode it is "
                    "the shell used to run --shell-command.")
+        c.argument(
+            'target',
+            help="Container to connect to in 'shell' mode. 'app' targets the main web app container; "
+                 "'kudu' targets the Kudu (SCM) container.",
+            arg_type=get_enum_type(['app', 'kudu']),
+            default='app')
         c.argument('slot', options_list=['--slot', '-s'],
                    help='Name of the web app slot. Default to the production slot if not specified.')
