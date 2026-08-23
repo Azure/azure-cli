@@ -312,7 +312,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
         scheduled_events_api_version=None, enable_all_instance_down=None,
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
-        wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+        wire_server_mode=None, wire_server_use_local_file_rules=None, imds_mode=None,
+        wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
         disk_iops_read_write=None, disk_mbps_read_write=None, zone_movement=None):
 
@@ -707,8 +708,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if key_incarnation_id is not None:
         proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
 
-    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+    if wire_server_mode is not None:
         wire_server['mode'] = wire_server_mode
+    if wire_server_use_local_file_rules is not None:
+        wire_server['useLocalFileRules'] = wire_server_use_local_file_rules
+    if wire_server_access_control_profile_reference_id is not None:
         wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
 
     if imds_mode is not None or imds_access_control_profile_reference_id is not None:
@@ -1075,7 +1079,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_all_instance_down=None, skuprofile_vmsizes=None,
                         skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                        imds_mode=None, add_proxy_agent_extension=None,
+                        wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
                         wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                         automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
@@ -1647,8 +1651,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
 
-    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+    if wire_server_mode is not None:
         wire_server['mode'] = wire_server_mode
+    if wire_server_use_local_file_rules is not None:
+        wire_server['useLocalFileRules'] = wire_server_use_local_file_rules
+    if wire_server_access_control_profile_reference_id is not None:
         wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
 
     if imds_mode is not None or imds_access_control_profile_reference_id is not None:
@@ -1741,7 +1748,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2025-11-01',
+        'apiVersion': '2026-04-01',
         'dependsOn': [],
         'properties': vmss_properties
     }
