@@ -1159,6 +1159,9 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VM that is not associated with any capacity reservation.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204 --disable-capacity-reservation-assignment true
 """
 
 helps['vm diagnostics'] = """
@@ -2147,6 +2150,8 @@ examples:
         az vm deallocate -n name -g group
         az vm update -n name -g group --host-group my-host-group
         az vm start -n name -g group
+  - name: Opt out a VM from being associated with any capacity reservation.
+    text: az vm update -n name -g group --disable-capacity-reservation-assignment true
 """
 
 helps['vm user'] = """
@@ -2746,6 +2751,53 @@ helps['vmss run-command show'] = """
 "myResourceGroup" --run-command-name "myRunCommand" --vmss-name "myVMSS"
 """
 
+helps['vmss lifecycle-hook'] = """
+type: group
+short-summary: Manage lifecycle hooks on a Virtual Machine Scale Set (preview).
+"""
+
+helps['vmss lifecycle-hook add'] = """
+type: command
+short-summary: Add a lifecycle hook to a VMSS.
+examples:
+  - name: Add an UpgradeAutoOSScheduling hook with an 8 hour wait.
+    text: az vmss lifecycle-hook add -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling --wait-duration PT8H
+"""
+
+helps['vmss lifecycle-hook update'] = """
+type: command
+short-summary: Update an existing lifecycle hook on a VMSS.
+examples:
+  - name: Change the wait duration of a hook.
+    text: az vmss lifecycle-hook update -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling --wait-duration PT2H
+"""
+
+helps['vmss lifecycle-hook remove'] = """
+type: command
+short-summary: Remove one lifecycle hook (--type) or all lifecycle hooks (--all) from a VMSS.
+examples:
+  - name: Remove one hook type.
+    text: az vmss lifecycle-hook remove -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling
+  - name: Remove all hooks.
+    text: az vmss lifecycle-hook remove -g MyRg --vmss-name MyVmss --all
+"""
+
+helps['vmss lifecycle-hook show'] = """
+type: command
+short-summary: Show the details of a lifecycle hook on a VMSS.
+examples:
+  - name: Show a hook by type.
+    text: az vmss lifecycle-hook show -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling
+"""
+
+helps['vmss lifecycle-hook list'] = """
+type: command
+short-summary: List all lifecycle hooks on a VMSS.
+examples:
+  - name: List hooks.
+    text: az vmss lifecycle-hook list -g MyRg --vmss-name MyVmss
+"""
+
 helps['vmss scale'] = """
 type: command
 short-summary: Change the number of VMs within a VMSS.
@@ -2932,6 +2984,8 @@ examples:
     text: |
         az capacity reservation group create -n ReservationGroupName -l centraluseuap \\
             -g MyResourceGroup --tags key=val --zones 1 2
+  - name: Create an open capacity reservation group.
+    text: az capacity reservation group create -n ReservationGroupName -g MyResourceGroup --reservation-type Open
 """
 
 helps['capacity reservation group update'] = """
@@ -3027,4 +3081,57 @@ helps['restore-point collection show'] = """
       - name: Get a restore point collection, including the restore points contained in the restore point collection
         text: |-
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
+"""
+
+helps['vmss lifecycle-hook-event'] = """
+type: group
+short-summary: Manage virtual machine scale set lifecycle hook events.
+"""
+
+helps['vmss lifecycle-hook-event update'] = """
+type: command
+short-summary: Update a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Approve all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --action-state Approved
+  - name: Approve a subset of target resources (Uniform decimal instance ids or Flex VM names).
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2 --action-state Approved
+  - name: Delay the event deadline.
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --wait-until "2026-05-08T11:00:00Z"
+"""
+
+helps['vmss lifecycle-hook-event approve'] = """
+type: command
+short-summary: Approve a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Approve all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event approve --vmss-name MyVmss -g MyRg --name {eventGuid}
+  - name: Approve a subset of target resources.
+    text: az vmss lifecycle-hook-event approve --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2
+"""
+
+helps['vmss lifecycle-hook-event reject'] = """
+type: command
+short-summary: Reject a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Reject all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event reject --vmss-name MyVmss -g MyRg --name {eventGuid}
+  - name: Reject a subset of target resources.
+    text: az vmss lifecycle-hook-event reject --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2
+"""
+
+helps['vmss lifecycle-hook-event list'] = """
+type: command
+short-summary: List a list of virtual machine scale set lifecycle hook events created for a virtual machine scale set resource.
+examples:
+  - name: Gets a list of all lifecycle hook events in a virtual machine scale set.
+    text: az vmss lifecycle-hook-event list --resource-group RG01 --vmss-name VMSS01
+"""
+
+helps['vmss lifecycle-hook-event show'] = """
+type: command
+short-summary: Get a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Get a virtual machine scale set lifecycle hook event.
+    text: az vmss lifecycle-hook-event show --resource-group RG01 --vmss-name VMSS01 --name 2e2e3046-f85f-4966-8fd2-5fd7bf6ea717
 """

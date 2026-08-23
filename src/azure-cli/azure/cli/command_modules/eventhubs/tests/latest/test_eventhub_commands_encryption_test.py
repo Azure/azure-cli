@@ -21,7 +21,7 @@ class EHNamespaceMSITesting(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace_encryption(self, resource_group):
         self.kwargs.update({
-            'loc': 'northeurope',
+            'loc': 'eastus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -97,6 +97,12 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 3
         self.assertEqual(False, namespace['encryption']['requireInfrastructureEncryption'])
 
+        # Grant KeyVault permissions to the system-assigned identity
+        system_assigned_principal_id = namespace['identity']['principalId']
+        self.kwargs.update({'system_principal_id': system_assigned_principal_id})
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {system_principal_id} --key-permissions all --secret-permission all')
+
         namespace = self.cmd('eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename}' +
                              ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
 
@@ -155,6 +161,12 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 3
         self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
 
+        # Grant KeyVault permissions to the system-assigned identity for namespacename2
+        system_assigned_principal_id2 = namespace['identity']['principalId']
+        self.kwargs.update({'system_principal_id2': system_assigned_principal_id2})
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {system_principal_id2} --key-permissions all --secret-permission all')
+
         namespace = self.cmd(
             'eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
@@ -184,6 +196,12 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 2
+
+        # Grant KeyVault permissions to the system-assigned identity for namespacename3
+        system_assigned_principal_id3 = namespace['identity']['principalId']
+        self.kwargs.update({'system_principal_id3': system_assigned_principal_id3})
+        self.cmd(
+            'keyvault set-policy -n {kv_name} -g {rg} --object-id {system_principal_id3} --key-permissions all --secret-permission all')
 
         namespace = self.cmd(
             'eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename3}' +

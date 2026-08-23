@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2026-01-01"],
         ]
     }
 
@@ -121,7 +121,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -183,8 +183,12 @@ class Show(AAZCommand):
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
+                flags={"read_only": True},
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},
@@ -196,6 +200,17 @@ class Show(AAZCommand):
                 serialized_name="updatedAt",
                 flags={"read_only": True},
             )
+            properties.zone_redundant = AAZBoolType(
+                serialized_name="zoneRedundant",
+            )
+
+            platform_capabilities = cls._schema_on_200.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             sku = cls._schema_on_200.sku
             sku.capacity = AAZIntType()

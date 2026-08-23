@@ -912,8 +912,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
-              v_cpus_available=None, v_cpus_per_core=None, processor_mode=None, accept_term=None,
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None,
+              disable_capacity_reservation_assignment=None, enable_hibernation=None, processor_mode=None,
+              v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
               os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
@@ -1143,9 +1144,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
+        disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
-        processor_mode=processor_mode,
-        os_disk_security_encryption_type=os_disk_security_encryption_type,
+        processor_mode=processor_mode, os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
         proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
@@ -1757,16 +1758,15 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, processor_mode=None,
-              disk_controller_type=None,
-              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
-              enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-              scheduled_events_api_version=None, enable_all_instance_down=None,
-              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
-              add_proxy_agent_extension=None,
-              wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
+              disable_capacity_reservation_assignment=None, dedicated_host=None, dedicated_host_group=None, size=None,
+              ephemeral_os_disk_placement=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+              processor_mode=None, disk_controller_type=None, security_type=None, enable_proxy_agent=None,
+              proxy_agent_mode=None, additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+              enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
+              enable_all_instance_down=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
+              imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
+              imds_access_control_profile_reference_id=None, key_incarnation_id=None, zone_movement=None, zone=None,
+              **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
@@ -1882,8 +1882,15 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             capacity_reservation_group = None
 
         sub_resource = {"id": capacity_reservation_group}
-        capacity_reservation = {"capacity_reservation_group": sub_resource}
-        vm["capacity_reservation"] = capacity_reservation
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["capacity_reservation_group"] = sub_resource
+
+    if disable_capacity_reservation_assignment is not None:
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["disable_capacity_reservation_assignment"] = \
+            disable_capacity_reservation_assignment
 
     if dedicated_host is not None:
         if vm.get("host", None) is None:
@@ -5121,6 +5128,154 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
+
+def vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+    return vmss.get("lifecycleHooksProfile", {}).get("lifecycleHooks", [])
+
+
+def vmss_lifecycle_hook_show(cmd, resource_group_name, vmss_name, type):
+    for hook in vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
+        if hook.get("type") == type:
+            return hook
+
+    raise ResourceNotFoundError(
+        "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+
+def _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait):
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
+    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name)
+    vmss["lifecycleHooksProfile"] = {"lifecycleHooks": hooks}
+    vmss = convert_show_result_to_snake_case(vmss)
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = vmss_name
+    vmss["no_wait"] = no_wait
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+
+
+def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_duration=None,
+                            default_action=None, no_wait=False):
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            raise ArgumentUsageError(
+                "A lifecycle hook of type '{}' already exists. Use 'update' to modify it.".format(type))
+
+    hook = {"type": type}
+
+    if wait_duration is not None:
+        hook["waitDuration"] = wait_duration
+
+    if default_action is not None:
+        hook["defaultAction"] = default_action
+
+    lifecycle_hooks.append(hook)
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
+
+
+def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_duration=None,
+                               default_action=None, no_wait=False):
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+    target_hook = None
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            target_hook = h
+
+    if target_hook is None:
+        raise ResourceNotFoundError(
+            "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+    if wait_duration is not None:
+        target_hook["waitDuration"] = wait_duration
+
+    if default_action is not None:
+        target_hook["defaultAction"] = default_action
+
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
+
+
+def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, remove_all=False,
+                               no_wait=False):
+    if remove_all:
+        return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, [], no_wait)
+
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+    target_hook = None
+    hooks = []
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            target_hook = h
+        else:
+            hooks.append(h)
+
+    if not target_hook:
+        raise ResourceNotFoundError(
+            "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait)
+
+
+def vmss_lifecycle_hook_event_list(cmd, resource_group_name, vmss_name):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .aaz.latest.vmss.lifecycle_hook_event import List as _lifecycleHookEventList
+    unregister_global_transforms(cmd.cli_ctx)
+    return _lifecycleHookEventList(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name
+    })
+
+
+def vmss_lifecycle_hook_event_show(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .aaz.latest.vmss.lifecycle_hook_event import Show as _lifecycleHookEventShow
+    unregister_global_transforms(cmd.cli_ctx)
+    return _lifecycleHookEventShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'lifecycle_hook_event_name': lifecycle_hook_event_name,
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name
+    })
+
+
+def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     action_state=None, wait_until=None, target_resource_ids=None, instance_ids=None):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .operations.vmss_lifecycle_hook_event import VMSSLifecycleHookEventUpdate as _lifecycleHookEventUpdate
+    unregister_global_transforms(cmd.cli_ctx)
+
+    command_args = {
+        "lifecycle_hook_event_name": lifecycle_hook_event_name,
+        "resource_group": resource_group_name,
+        "vmss_name": vmss_name,
+    }
+
+    if wait_until is not None:
+        command_args["wait_until"] = wait_until
+
+    if action_state is not None:
+        command_args["target_resources"] = [
+            {"action_state": action_state, "resource": {"id": resource_id}}
+            for resource_id in (target_resource_ids or [])
+        ]
+
+    return _lifecycleHookEventUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
+def vmss_lifecycle_hook_event_approve(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                      target_resource_ids=None, instance_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Approved", wait_until=None,
+                                            target_resource_ids=target_resource_ids)
+
+
+def vmss_lifecycle_hook_event_reject(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     target_resource_ids=None, instance_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Rejected", wait_until=None,
+                                            target_resource_ids=target_resource_ids)
 # endregion
 
 
@@ -6352,14 +6507,15 @@ def gallery_application_version_update(client,
 
 
 def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None, sharing_profile=None):
+                                      tags=None, zones=None, sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
         'location': location,
         'tags': tags,
-        'zones': zones
+        'zones': zones,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:
@@ -6372,12 +6528,13 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
 
 
 def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
-                                      sharing_profile=None):
+                                      sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
-        'tags': tags
+        'tags': tags,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:

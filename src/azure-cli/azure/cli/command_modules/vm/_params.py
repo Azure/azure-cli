@@ -59,6 +59,9 @@ def load_arguments(self, _):
     EvictionPolicy = ['Deallocate', 'Delete']
     HyperVGenerationTypes = ['V1', 'V2']
     LicenseType = ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE', 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC', 'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']
+    LifecycleHookActionState = ['Approved', 'Rejected']
+    LifecycleHookDefaultAction = ['Approve', 'Reject']
+    LifecycleHookType = ['UpgradeAutoOSScheduling', 'UpgradeAutoOSRollingBatchStarting']
     LoadBalancerSkuName = ['Basic', 'Standard', 'Gateway']
     NetworkAccessPolicy = ['AllowAll', 'AllowPrivate', 'DenyAll']
     NsgRule = ['RDP', 'SSH']
@@ -77,6 +80,7 @@ def load_arguments(self, _):
     PublicNetworkAccess = ['Disabled', 'Enabled']
     RepairAction = ['Replace', 'Restart', 'Reimage']
     ReplicationMode = ['Full', 'Shallow']
+    ReservationType = ['Block', 'Open', 'Targeted']
     SecurityEncryptionType = ['VMGuestStateOnly', 'DiskWithVMGuestState', 'NonPersistedTPM']
     SecurityType = ['TrustedLaunch', 'Standard', 'ConfidentialVM']
     SnapshotStorageAccountTypes = ['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']
@@ -500,6 +504,7 @@ def load_arguments(self, _):
             c.argument('key_incarnation_id', type=int, help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
             c.argument('security_type', arg_type=get_enum_type(SecurityType, default=None), help='Specify the security type of the virtual machine.')
             c.argument('zone_movement', arg_type=get_three_state_flag(), help='Indicates if zone movement is enabled. By default isEnabled is set to false i.e VM can\'t be moved from one zone to another.')
+            c.argument('disable_capacity_reservation_assignment', options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'], arg_type=get_three_state_flag(), help='Explicitly opt out the VM from being associated with any capacity reservation. The VM will consume publicly available capacity.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -1148,6 +1153,50 @@ def load_arguments(self, _):
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
         c.argument('instance_view', action='store_true', help='The instance view of a run command.')
 
+    with self.argument_context('vmss lifecycle-hook') as c:
+        c.argument('vmss_name', help='The name of the VM scale set.', id_part=None)
+        c.argument('type', arg_type=get_enum_type(LifecycleHookType), help='Specifies the type of the lifecycle hook.')
+        c.argument('wait_duration',
+                   help='Specifies the time duration a virtual machine scale set lifecycle hook event sent to the customer waits for a response from the customer. It should be in ISO 8601 format.')
+        c.argument('default_action', arg_type=get_enum_type(LifecycleHookDefaultAction),
+                   help='Specifies the action that will be applied to a target resource in the virtual machine scale set lifecycle hook event if the platform does not receive a response from the customer for the target resource before waitUntil.')
+
+    with self.argument_context('vmss lifecycle-hook remove') as c:
+        c.argument('type', arg_type=get_enum_type(LifecycleHookType),
+                   help='Specifies the type of the lifecycle hook. Mutually exclusive with --all.')
+        c.argument('remove_all', options_list=['--all'], action='store_true',
+                   help='Remove all lifecycle hooks. Mutually exclusive with --type.')
+
+    with self.argument_context('vmss lifecycle-hook-event') as c:
+        c.argument('vmss_name', help='The name of the VM scale set.', id_part='name')
+        c.argument('lifecycle_hook_event_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The name of the VMScaleSetLifecycleHookEvent.')
+        c.argument('instance_ids', nargs='+',
+                   help='Space-separated list of identifiers for target resources in the lifecycle hook event. '
+                        'For a scale-set-level event such as UpgradeAutoOSScheduling, specify the VM scale set name. '
+                        'For an instance-level event such as UpgradeAutoOSRollingBatchStarting, specify decimal '
+                        'instance IDs for a Uniform scale set (e.g. 0 1 2) or VM names for a Flexible scale set. '
+                        'Each identifier must correspond to a target resource listed by the event. When omitted, '
+                        'the action is applied to all target resources of the event.')
+        c.ignore('target_resource_ids')
+
+    with self.argument_context('vmss lifecycle-hook-event update') as c:
+        c.argument('action_state', arg_type=get_enum_type(LifecycleHookActionState),
+                   help="State of the lifecycle hook for the target resource. The customer can patch this property to "
+                        "move the lifecycle hook to a terminal state.")
+        c.argument('wait_until',
+                   help='Specifies the exact UTC timestamp in ISO 8601 format till which the event would remain in '
+                        'the current lifecycle state waiting for an action from the customer. Beyond this timestamp, '
+                        'the platform will apply the defaultAction for the event.')
+
+    for scope in ['vmss lifecycle-hook-event approve', 'vmss lifecycle-hook-event reject']:
+        with self.argument_context(scope) as c:
+            c.ignore('target_resource_ids')
+
+    with self.argument_context('vmss lifecycle-hook-event list') as c:
+        c.argument('vmss_name', id_part=None)
+        c.ignore('lifecycle_hook_event_name')
+
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
@@ -1603,6 +1652,7 @@ def load_arguments(self, _):
                    help='The name of the capacity reservation group.')
         c.argument('tags', tags_type)
         c.argument('sharing_profile', nargs='*', help='Space-separated subscription resource IDs or nothing. Specify the settings to enable sharing across subscriptions for the capacity reservation group resource. Specify it to nothing to unsharing.')
+        c.argument('reservation_type', arg_type=get_enum_type(ReservationType), help='The capacity reservation type. The reservation type cannot be changed after the capacity reservation group is created.')
 
     with self.argument_context('capacity reservation group create') as c:
         c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')
