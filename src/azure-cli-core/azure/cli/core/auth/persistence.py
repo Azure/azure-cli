@@ -113,6 +113,32 @@ def _remove_persistence_files(location):
         _try_remove(location + extension)
 
 
+def _try_erase_os_credential_store(location, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
+    """Best effort erase of a payload the OS credential store may still hold.
+
+    On macOS and Linux the credential lives in Keychain or libsecret and the file is only a
+    modification signal, so removing the file hides the payload instead of removing it: a clear run
+    with core.encrypt_token_cache off would leave the credential readable as soon as the setting is
+    turned back on. Windows needs nothing here, because the DPAPI file is the ciphertext itself.
+
+    The persistence API has no delete, and macOS Keychain offers none at all, so an empty payload is
+    written over it instead. Like _try_remove, a failure must not stop the clear: an unreachable
+    credential store cannot be cleared by any means, so there is nothing to do but record it.
+    """
+    if not (sys.platform.startswith('darwin') or sys.platform.startswith('linux')):
+        return
+    try:
+        persistence = build_persistence(location, True, type=type)
+        if not persistence.is_encrypted:
+            # Fell back to plaintext, so the OS credential store is unreachable from here. The
+            # plaintext file is the caller's business and is dealt with there.
+            return
+        with CrossPlatLock(persistence.get_location() + '.lockfile'):
+            persistence.save(empty_payload)
+    except Exception as e:  # pylint: disable=broad-except
+        logger.debug("Failed to erase the OS credential store at %r: %s", location, e)
+
+
 def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
     """Empty a persisted payload and remove its files. Returns whether it succeeded.
 
@@ -120,12 +146,17 @@ def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pyli
     Keychain and the file is only a modification signal. Write through the same persistence that
     reads it, the way logging out of a single account does.
 
+    The OS credential store is erased too when it is not the configured one, so that a payload
+    written under a previous core.encrypt_token_cache setting does not outlive the clear.
+
     Emptying and removing happen under one lock, and nothing is touched unless the lock is held.
     In practice this only fails when another az process is using the credential store, and
     deleting its freshly written signal file would hide a credential rather than remove it.
     """
     try:
         persistence = build_persistence(location, encrypt, type=type)
+        if not persistence.is_encrypted:
+            _try_erase_os_credential_store(location, type=type, empty_payload=empty_payload)
         # Serialize against other az processes, like SecretStore.save and PersistedTokenCache do.
         with CrossPlatLock(persistence.get_location() + '.lockfile'):
             persistence.save(empty_payload)
