@@ -5,6 +5,7 @@
 
 import argparse
 
+from azure.mgmt.redhatopenshift.models import PlatformWorkloadIdentity
 from azure.cli.core.azclierror import CLIError
 
 
@@ -13,7 +14,6 @@ from azure.cli.core.azclierror import CLIError
 class AROPlatformWorkloadIdentityAddAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.redhatopenshift.models import PlatformWorkloadIdentity
         try:
             if len(values) != 2:
                 msg = f"{option_string} requires 2 values in format: `OPERATOR_NAME RESOURCE_ID`"

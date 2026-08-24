@@ -305,7 +305,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
@@ -753,12 +754,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group:
-        vm_properties['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        vm_properties['capacityReservation'] = {}
+        if capacity_reservation_group:
+            vm_properties['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     vm = {
         'apiVersion': '2026-04-01',

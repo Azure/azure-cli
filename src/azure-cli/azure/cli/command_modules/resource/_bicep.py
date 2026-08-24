@@ -400,6 +400,7 @@ def _run_command(bicep_installation_path, args, custom_env=None):
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
         stderr_output = process.stderr.decode("utf-8")
+        stdout_output = process.stdout.decode("utf-8")
         errors = []
 
         for line in stderr_output.splitlines():
@@ -409,6 +410,9 @@ def _run_command(bicep_installation_path, args, custom_env=None):
                 errors.append(line)
 
         error_msg = os.linesep.join(errors)
+        if stdout_output:
+            parts = [p for p in [error_msg, stdout_output.strip()] if p]
+            error_msg = os.linesep.join(parts)
         raise UnclassifiedUserFault(error_msg)
 
 
