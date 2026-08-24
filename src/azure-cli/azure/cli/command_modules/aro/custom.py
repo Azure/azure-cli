@@ -3,10 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# FIXME:
+# pylint: disable=too-many-lines
+
 import collections
+import enum
 import random
-from base64 import b64decode
 import textwrap
+import typing
+
+from base64 import b64decode
 
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -25,19 +31,23 @@ from azure.cli.core.azclierror import (
     UnauthorizedError,
     ValidationError
 )
-from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as CoreResourceNotFoundError
+from azure.core.exceptions import (
+    HttpResponseError,
+    ResourceNotFoundError as CoreResourceNotFoundError
+)
 from azure.mgmt.core.tools import (
     resource_id,
     parse_resource_id
 )
 from azure.cli.command_modules.aro._aad import AADManager
 from azure.cli.command_modules.aro._rbac import (
-    assign_role_to_resource,
-    has_role_assignment_on_resource
-)
-from azure.cli.command_modules.aro._rbac import (
     ROLE_NETWORK_CONTRIBUTOR,
-    ROLE_READER
+    ROLE_READER,
+    create_identity,
+    create_role_assignment,
+    has_role_assignment_on_resource,
+    print_identity_create_cmd,
+    print_role_assignment_create_cmd,
 )
 from azure.cli.command_modules.aro._validators import validate_subnets
 from azure.cli.command_modules.aro._dynamic_validators import validate_cluster_create, validate_cluster_delete
@@ -52,7 +62,21 @@ from tabulate import tabulate
 
 logger = get_logger(__name__)
 
-FP_CLIENT_ID = 'f1dd0a37-89c6-4e07-bcd1-ffd3d43d8875'
+FP_CLIENT_ID = "f1dd0a37-89c6-4e07-bcd1-ffd3d43d8875"
+
+ARO_FEDERATED_CREDENTIAL_ROLE = "ef318e2a-8334-4a05-9e4a-295a196c6a6e"
+FP_SERVICE_PRINCIPAL_ROLE = "42f3c60f-e7b1-46d7-ba56-6de681664342"
+
+
+class RoleAssignmentScope(enum.IntEnum):
+    """Role Assignment Scope"""
+    DISK_ENCRYPTION_SET = enum.auto()
+    MASTER_SUBNET = enum.auto()
+    NAT_GATEWAY = enum.auto()
+    NSG = enum.auto()
+    ROUTE_TABLE = enum.auto()
+    VNET = enum.auto()
+    WORKER_SUBNET = enum.auto()
 
 
 def aro_create(*,  # pylint: disable=too-many-locals
@@ -91,6 +115,7 @@ def aro_create(*,  # pylint: disable=too-many-locals
                tags=None,
                version=None,
                no_wait=False):
+
     resource_client = get_mgmt_service_client(
         cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
@@ -198,7 +223,27 @@ def aro_create(*,  # pylint: disable=too-many-locals
         platform_workload_identity_profile=None,
     )
 
-    if enable_managed_identity is True:
+    if enable_managed_identity:
+        if not platform_workload_identities and not mi_user_assigned:
+            identities = aro_identity_create_required(
+                cmd=cmd,
+                client=client,
+                resource_group_name=resource_group_name,
+                location=location,
+                version=version,
+                master_subnet=master_subnet,
+                worker_subnet=worker_subnet,
+                vnet=vnet,
+                disk_encryption_set=disk_encryption_set,
+                vnet_resource_group_name=vnet_resource_group_name
+            )
+
+            mi_user_assigned = identities[0]["id"]
+            platform_workload_identities = [
+                (elem["name"], openshiftcluster.PlatformWorkloadIdentity(resource_id=elem["id"]))
+                for elem in identities[1:]
+            ]
+
         oc.platform_workload_identity_profile = openshiftcluster.PlatformWorkloadIdentityProfile(
             platform_workload_identities=dict(platform_workload_identities)
         )
@@ -223,7 +268,7 @@ def aro_create(*,  # pylint: disable=too-many-locals
                        parameters=oc)
 
 
-def _report_validation_issues(errors_and_warnings, warnings_as_text):
+def _report_validation_issues(errors_and_warnings, warnings_as_text) -> None:
     warnings = [issue for issue in errors_and_warnings if issue[2] == "Warning"]
     errors = [issue for issue in errors_and_warnings if issue[2] != "Warning"]
 
@@ -271,7 +316,7 @@ def validate(*,  # pylint: disable=too-many-locals
              enable_managed_identity=False,
              platform_workload_identities=None,  # pylint: disable=unused-argument
              mi_user_assigned=None,  # pylint: disable=unused-argument
-             warnings_as_text=False):
+             warnings_as_text=False) -> None:
 
     class mockoc:  # pylint: disable=too-few-public-methods
         def __init__(self, disk_encryption_id, master_subnet_id, worker_subnet_id, preconfigured_nsg):
@@ -353,8 +398,7 @@ def aro_validate(*,  # pylint: disable=too-many-locals,too-many-statements
                  service_cidr=None,
                  enable_managed_identity=False,
                  platform_workload_identities=None,
-                 mi_user_assigned=None,
-                 ):
+                 mi_user_assigned=None) -> None:
 
     validate(cmd=cmd,
              client=client,
@@ -378,7 +422,13 @@ def aro_validate(*,  # pylint: disable=too-many-locals,too-many-statements
              warnings_as_text=False)
 
 
-def aro_delete(*, cmd, client, resource_group_name, resource_name, no_wait=False, delete_identities=None):
+def aro_delete(*,
+               cmd,
+               client,
+               resource_group_name,
+               resource_name,
+               no_wait=False,
+               delete_identities=None) -> None | typing.Any:
     # TODO: clean up rbac
     rp_client_sp_id = None
 
@@ -475,7 +525,7 @@ def aro_list_credentials(client, resource_group_name, resource_name):
     return client.open_shift_clusters.list_credentials(resource_group_name, resource_name)
 
 
-def aro_get_admin_kubeconfig(client, resource_group_name, resource_name, file="kubeconfig"):
+def aro_get_admin_kubeconfig(client, resource_group_name, resource_name, file="kubeconfig") -> None:
     query_result = client.open_shift_clusters.list_admin_credentials(resource_group_name, resource_name)
     file_mode = "x"
     yaml_data = b64decode(query_result.kubeconfig).decode('UTF-8')
@@ -487,7 +537,7 @@ def aro_get_admin_kubeconfig(client, resource_group_name, resource_name, file="k
     logger.info("Kubeconfig written to file: %s", file)
 
 
-def aro_get_versions(client, location):
+def aro_get_versions(client, location) -> list[typing.Any]:
     items = client.open_shift_versions.list(location)
     versions = []
     for item in items:
@@ -512,50 +562,58 @@ def aro_update(cmd,  # pylint: disable=too-many-positional-arguments
 
     oc_update = openshiftcluster.OpenShiftClusterUpdate()
 
-    if platform_workload_identities is not None and oc.service_principal_profile is not None:
+    if oc.service_principal_profile and (platform_workload_identities or mi_user_assigned):
         raise InvalidArgumentValueError(
-            "Cannot assign platform workload identities to a cluster with service principal"
+            "Cannot assign platform workload identities or a cluster identity "
+            "to a cluster with service principal."
         )
 
-    if mi_user_assigned is not None and oc.service_principal_profile is not None:
-        raise InvalidArgumentValueError(
-            "Cannot assign platform workload identities to a cluster with service principal"
-        )
-
-    if oc.service_principal_profile is not None:
+    if oc.service_principal_profile:
         client_id, client_secret = cluster_application_update(cmd.cli_ctx, oc, client_id, client_secret, refresh_cluster_credentials)  # pylint: disable=line-too-long
 
-        if client_id is not None or client_secret is not None:
+        if client_id or client_secret:
             # construct update payload
             oc_update.service_principal_profile = openshiftcluster.ServicePrincipalProfile()
 
-            if client_secret is not None:
+            if client_secret:
                 oc_update.service_principal_profile.client_secret = client_secret
 
-            if client_id is not None:
+            if client_id:
                 oc_update.service_principal_profile.client_id = client_id
 
-    if mi_user_assigned is not None:
+    if mi_user_assigned:
         oc_update.identity = openshiftcluster.ManagedServiceIdentity(
             type='UserAssigned',
             user_assigned_identities={mi_user_assigned: {}}
         )
 
-    if oc.platform_workload_identity_profile is not None:
-        if platform_workload_identities is not None or upgradeable_to is not None:
+    if oc.platform_workload_identity_profile:
+        if platform_workload_identities or upgradeable_to:
             oc_update.platform_workload_identity_profile = openshiftcluster.PlatformWorkloadIdentityProfile()
 
-        if platform_workload_identities is not None:
-            oc_update.platform_workload_identity_profile.platform_workload_identities = dict(platform_workload_identities)  # pylint: disable=line-too-long
+        if platform_workload_identities:
+            oc_update.platform_workload_identity_profile.platform_workload_identities = \
+                dict(platform_workload_identities)
 
-        if upgradeable_to is not None:
+        if upgradeable_to:
             oc_update.platform_workload_identity_profile.upgradeable_to = upgradeable_to
 
-    if load_balancer_managed_outbound_ip_count is not None:
+    if load_balancer_managed_outbound_ip_count:
         oc_update.network_profile = openshiftcluster.NetworkProfile()
         oc_update.network_profile.load_balancer_profile = openshiftcluster.LoadBalancerProfile()
         oc_update.network_profile.load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
-        oc_update.network_profile.load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
+        oc_update.network_profile.load_balancer_profile.managed_outbound_ips.count = \
+            load_balancer_managed_outbound_ip_count
+
+    if upgradeable_to and not platform_workload_identities and not mi_user_assigned and not oc.service_principal_profile:  # pylint: disable=line-too-long
+        oc_update = ensure_platform_workload_identities_for_upgrade(
+            cmd,
+            client,
+            resource_group_name,
+            oc,
+            oc_update,
+            upgradeable_to
+        )
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_update,
                        resource_group_name=resource_group_name,
@@ -563,23 +621,26 @@ def aro_update(cmd,  # pylint: disable=too-many-positional-arguments
                        parameters=oc_update)
 
 
-def generate_random_id():
+def generate_random_id() -> str:
     random_id = (random.choice('abcdefghijklmnopqrstuvwxyz') +
                  ''.join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
                          for _ in range(7)))
     return random_id
 
 
-def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
-    subnet_resources = set()
+def get_network_resources_from_subnets(cli_ctx, subnets, fail: bool = False, oc=None) -> dict[str, typing.Any]:
+    subnet_resources = {}
     subnets_with_no_nsg_attached = set()
+
+    preconfigured_nsg_enabled = oc and oc.network_profile.preconfigured_nsg == "Enabled"
+
     for sn in subnets:
         sid = parse_resource_id(sn)
 
         if 'resource_group' not in sid or 'name' not in sid or 'resource_name' not in sid:
             if fail:
-                raise ValidationError(f"""(ValidationError) Failed to validate subnet '{sn}'.
-                    Please retry, if issue persists: raise azure support ticket""")
+                raise ValidationError(f"(ValidationError) Failed to validate subnet '{sn}'. "
+                                      "Please retry, if issue persists: raise an Azure support ticket.")
             logger.info("Failed to validate subnet '%s'", sn)
 
         try:
@@ -592,30 +653,32 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
             continue
 
         if subnet.get("routeTable", None):
-            subnet_resources.add(subnet['routeTable']['id'])
+            subnet_resources["routeTable"] = subnet["routeTable"]["id"]
 
         if subnet.get("natGateway", None):
-            subnet_resources.add(subnet['natGateway']['id'])
+            subnet_resources["natGateway"] = subnet['natGateway']['id']
 
-        if oc.network_profile.preconfigured_nsg == 'Enabled':
-            if subnet.get("networkSecurityGroup", None):
-                subnet_resources.add(subnet['networkSecurityGroup']['id'])
-            else:
-                subnets_with_no_nsg_attached.add(sn)
+        nsg = subnet.get("networkSecurityGroup", None)
 
-    # when preconfiguredNSG feature is Enabled we either have all subnets NSG attached or none.
-    if oc.network_profile.preconfigured_nsg == 'Enabled' and \
+        if nsg and preconfigured_nsg_enabled:
+            subnet_resources["networkSecurityGroup"] = nsg["id"]
+        elif preconfigured_nsg_enabled and not nsg:
+            subnets_with_no_nsg_attached.add(sn)
+
+    # when preconfiguredNSG is Enabled we either have all subnets NSG attached
+    # or none.
+    if preconfigured_nsg_enabled and \
         len(subnets_with_no_nsg_attached) != 0 and \
             len(subnets_with_no_nsg_attached) != len(subnets):
-        raise ValidationError(f"(ValidationError) preconfiguredNSG feature is enabled but an NSG is\
-                               not attached for all required subnets. Please make sure all the following\
-                               subnets have a network security groups attached and retry.\
-                              {subnets_with_no_nsg_attached}")
+        raise ValidationError("(ValidationError) preconfiguredNSG feature is enabled but an NSG is "
+                              "not attached for all required subnets. Please make sure all the following "
+                              "subnets have a network security groups attached and retry. "
+                              f"{subnets_with_no_nsg_attached}")
 
     return subnet_resources
 
 
-def get_cluster_network_resources(cli_ctx, oc, fail):
+def get_cluster_network_resources(cli_ctx, oc, fail) -> set[typing.Any]:
     master_subnet = oc.master_profile.subnet_id
     worker_subnets = set()
 
@@ -644,17 +707,17 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
     return get_network_resources(cli_ctx, worker_subnets | {master_subnet}, vnet, fail, oc)
 
 
-def get_network_resources(cli_ctx, subnets, vnet, fail, oc):
+def get_network_resources(cli_ctx, subnets, vnet, fail, oc) -> set[typing.Any]:
     subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets, fail, oc)
 
     resources = set()
     resources.add(vnet)
-    resources.update(subnet_resources)
+    resources.update(list(subnet_resources.values()))
 
     return resources
 
 
-def get_disk_encryption_resources(oc):
+def get_disk_encryption_resources(oc) -> set[typing.Any]:
     disk_encryption_set = oc.master_profile.disk_encryption_set_id
     resources = set()
     if disk_encryption_set:
@@ -676,7 +739,7 @@ def cluster_application_update(cli_ctx,
                                oc,
                                client_id,
                                client_secret,
-                               refresh_cluster_credentials):
+                               refresh_cluster_credentials) -> tuple[typing.Any, typing.Any]:
     # QUESTION: is there possible unification with the create path?
 
     rp_client_sp_id = None
@@ -736,11 +799,179 @@ def cluster_application_update(cli_ctx,
     return client_id, client_secret
 
 
-def resolve_rp_client_id():
+def resolve_rp_client_id() -> str:
     return FP_CLIENT_ID
 
 
-def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
+def aro_identity_get_required(*,
+                              cmd,
+                              client,
+                              resource_group_name,
+                              location,
+                              version,
+                              master_subnet,
+                              worker_subnet,
+                              vnet=None,
+                              disk_encryption_set=None,
+                              vnet_resource_group_name=None) -> None:  # pylint: disable=unused-argument
+    if vnet is None:
+        validate_subnets(master_subnet, worker_subnet)
+        master_parts = parse_resource_id(master_subnet)
+        vnet = resource_id(
+            subscription=master_parts['subscription'],
+            resource_group=master_parts['resource_group'],
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=master_parts['name'],
+        )
+
+    _validate_version(client, version, location)
+    role_set = _get_pwi_role_set(client, version, location)
+
+    logger.warning("Use the following Azure CLI commands to create the required managed identities:")
+    print_identity_create_cmd(resource_group_name, 'aro-cluster', location)
+    for role in role_set.platform_workload_identity_roles:
+        print_identity_create_cmd(resource_group_name, role.operator_name, location)
+
+    logger.warning("\nUse the following Azure CLI commands to create the required role assignments "
+                   "over virtual network and/or subnets:")
+    scope_map = _determine_required_scopes_from_network_resources(
+        cmd,
+        disk_encryption_set,
+        vnet,
+        master_subnet,
+        worker_subnet
+    )
+    for role in role_set.platform_workload_identity_roles:
+        scopes = _determine_required_scopes_from_role_set(cmd, role)
+        for scope in scopes:
+            scopestr = scope_map[scope]
+            if not scopestr:
+                continue
+
+            print_role_assignment_create_cmd(
+                f"$(az identity show -g '{resource_group_name}' -n '{role.operator_name}' --query principalId -o tsv)",
+                f"{resource_id(subscription=get_subscription_id(cmd.cli_ctx))}{role.role_definition_id}",
+                scopestr
+            )
+
+    logger.warning("\nUse the following Azure CLI commands to create the required role assignments "
+                   "over platform workload identities:")
+    for role in role_set.platform_workload_identity_roles:
+        print_role_assignment_create_cmd(
+            f"$(az identity show -g '{resource_group_name}' -n 'aro-cluster' --query principalId -o tsv)",
+            ARO_FEDERATED_CREDENTIAL_ROLE,
+            f"$(az identity show -g '{resource_group_name}' -n '{role.operator_name}' --query id -o tsv)"
+        )
+
+    logger.warning("\nUse the following Azure CLI command to create the required "
+                   "role assignment over the virtual network:")
+    print_role_assignment_create_cmd(
+        "$(az ad sp list --display-name 'Azure Red Hat OpenShift RP' --query '[0].id' -o tsv)",
+        FP_SERVICE_PRINCIPAL_ROLE,
+        vnet
+    )
+
+    if disk_encryption_set:
+        logger.warning("\nUse the following Azure CLI command to create the required "
+                       "role assignment over the disk encryption set:")
+        print_role_assignment_create_cmd(
+            "$(az ad sp list --display-name 'Azure Red Hat OpenShift RP' --query '[0].id' -o tsv)",
+            ROLE_READER,
+            disk_encryption_set,
+        )
+
+
+def aro_identity_create_required(*,
+                                 cmd,
+                                 client,
+                                 resource_group_name,
+                                 location,
+                                 version,
+                                 master_subnet,
+                                 worker_subnet,
+                                 vnet=None,
+                                 disk_encryption_set=None,
+                                 vnet_resource_group_name=None) -> list[dict[str, typing.Any]]:  # pylint: disable=unused-argument
+    """
+    Create Identities and assign necessary roles for a given OpenShift version.
+
+    In the list of created identities returned, the cluster identity is the
+    zeroth element in the list while the rest are Platform Workload Identities.
+    """
+    # FIXME:
+    # pylint: disable=too-many-locals
+    if vnet is None:
+        validate_subnets(master_subnet, worker_subnet)
+        master_parts = parse_resource_id(master_subnet)
+        vnet = resource_id(
+            subscription=master_parts['subscription'],
+            resource_group=master_parts['resource_group'],
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=master_parts['name'],
+        )
+
+    identities = []
+    progress = cmd.cli_ctx.get_progress_controller()
+
+    progress.add(message="Validating OpenShift version")
+    _validate_version(client, version, location)
+
+    progress.add(message="Gathering necessary scopes for network resources")
+    network_scopes = _determine_required_scopes_from_network_resources(
+        cmd,
+        disk_encryption_set,
+        vnet,
+        master_subnet,
+        worker_subnet
+    )
+
+    progress.add(message="Creating cluster identity")
+    cluster_identity = create_identity(cmd, location, resource_group_name, "aro-cluster")
+    identities.append(cluster_identity)
+
+    roles = _get_pwi_role_set(client, version, location).platform_workload_identity_roles
+    for role in roles:
+        identity = create_identity_and_role_assignments(
+            cmd=cmd,
+            role=role,
+            location=location,
+            resource_group_name=resource_group_name,
+            network_scopes=network_scopes,
+            cluster_identity=cluster_identity
+        )
+        identities.append(identity)
+
+    progress.add(message="Creating first party service principal's role assignment over virtual network")
+    firstparty_principal = AADManager(cmd.cli_ctx).get_service_principal_id(FP_CLIENT_ID)
+    defn = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        namespace="Microsoft.Authorization",
+        type="roleDefinitions",
+        name=FP_SERVICE_PRINCIPAL_ROLE,
+    )
+    create_role_assignment(cmd.cli_ctx, firstparty_principal, defn, vnet)
+
+    if disk_encryption_set:
+        progress.add(message="Creating first party service principal's role assignment over disk encryption set")
+        des_defn = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            namespace="Microsoft.Authorization",
+            type="roleDefinitions",
+            name=ROLE_READER,
+        )
+        create_role_assignment(cmd.cli_ctx, firstparty_principal, des_defn, disk_encryption_set)
+
+    progress.end()
+
+    logger.warning("\nManaged identities and role assignments were created. "
+                   "Please record each identity's 'id' or 'name' to use with the 'az aro create' command.")
+
+    return identities
+
+
+def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids) -> None:
     try:
         # Get cluster resources we need to assign permissions on, sort to ensure the same order of operations
         resources = {ROLE_NETWORK_CONTRIBUTOR: sorted(get_cluster_network_resources(cli_ctx, oc, fail)),
@@ -767,4 +998,186 @@ def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
                     logger.info(e.message)
 
                 if not resource_contributor_exists:
-                    assign_role_to_resource(cli_ctx, resource, sp_id, role)
+                    role_definition_id = resource_id(
+                        subscription=get_subscription_id(cli_ctx),
+                        namespace="Microsoft.Authorization",
+                        type="roleDefinitions",
+                        name=role,
+                    )
+                    create_role_assignment(cli_ctx, sp_id, role_definition_id, resource)
+
+
+def _get_pwi_role_set(client, version, location):
+    """Get Platform Workload Identity Role Set"""
+    for rset in client.platform_workload_identity_role_sets.list(location):
+        if version.startswith(rset.open_shift_version):
+            return rset
+
+    raise InvalidArgumentValueError(f"Could not find identity requirements for OpenShift version {version}.")
+
+
+def _validate_version(client, version, location) -> None:
+    if version not in aro_get_versions(client, location):
+        raise InvalidArgumentValueError("--version invalid")
+
+
+def _determine_required_scopes_from_role_set(cmd, role) -> list[RoleAssignmentScope]:
+    auth_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION)
+    definition = auth_client.role_definitions.get_by_id(role.role_definition_id)
+
+    # We're using a set because sets guarantee uniqueness of elements. We don't
+    # want to accidentally double up on scopes.
+    scopes: set[RoleAssignmentScope] = set()
+    for permissions in definition.permissions:
+        for action in permissions.actions:
+            if action.startswith("Microsoft.Compute/diskEncryptionSets/"):
+                scopes.add(RoleAssignmentScope.DISK_ENCRYPTION_SET)
+
+            if action.startswith("Microsoft.Network/virtualNetworks/subnets/") and RoleAssignmentScope.VNET not in scopes:  # pylint: disable=line-too-long
+                scopes.add(RoleAssignmentScope.MASTER_SUBNET)
+                scopes.add(RoleAssignmentScope.WORKER_SUBNET)
+            elif action.startswith("Microsoft.Network/virtualNetworks/"):
+                scopes.add(RoleAssignmentScope.VNET)
+                scopes.discard(RoleAssignmentScope.MASTER_SUBNET)
+                scopes.discard(RoleAssignmentScope.WORKER_SUBNET)
+
+            if action.startswith("Microsoft.Network/natGateways/"):
+                scopes.add(RoleAssignmentScope.NAT_GATEWAY)
+
+            if action.startswith("Microsoft.Network/networkSecurityGroups/"):
+                scopes.add(RoleAssignmentScope.NSG)
+
+            if action.startswith("Microsoft.Network/routeTables/"):
+                scopes.add(RoleAssignmentScope.ROUTE_TABLE)
+
+    # We're converting the set to a list to maintain a deterministic order.
+    # `azdev test` dislikes nondeterminism.
+    l = list(scopes)
+    l.sort()
+    return l
+
+
+def _determine_required_scopes_from_network_resources(cmd,
+                                                      disk_encryption_set,
+                                                      vnet,
+                                                      master_subnet,
+                                                      worker_subnet) -> dict[RoleAssignmentScope, str | None]:
+    subnet_resources = get_network_resources_from_subnets(cmd.cli_ctx, [master_subnet, worker_subnet])
+
+    return {
+        RoleAssignmentScope.DISK_ENCRYPTION_SET: disk_encryption_set,
+        RoleAssignmentScope.MASTER_SUBNET: master_subnet,
+        RoleAssignmentScope.NAT_GATEWAY: subnet_resources.get("natGateway", None),
+        RoleAssignmentScope.NSG: subnet_resources.get("networkSecurityGroup", None),
+        RoleAssignmentScope.ROUTE_TABLE: subnet_resources.get("routeTable", None),
+        RoleAssignmentScope.VNET: vnet,
+        RoleAssignmentScope.WORKER_SUBNET: worker_subnet,
+    }
+
+
+def create_identity_and_role_assignments(*,
+                                         cmd,
+                                         role,
+                                         location,
+                                         resource_group_name,
+                                         network_scopes,
+                                         cluster_identity):
+    progress = cmd.cli_ctx.get_progress_controller()
+
+    progress.add(message=f"Creating {role.operator_name} identity")
+    identity = create_identity(cmd, location, resource_group_name, role.operator_name)
+
+    scopes = _determine_required_scopes_from_role_set(cmd, role)
+    for scope in scopes:
+        progress.add(message=f"Creating {role.operator_name} identity's role assignments over network resources")
+
+        if not network_scopes[scope]:
+            continue
+
+        role_definition_id = role.role_definition_id
+        if not role_definition_id.startswith("/"):
+            role_definition_id = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                namespace="Microsoft.Authorization",
+                type="roleDefinitions",
+                name=role_definition_id
+            )
+
+        create_role_assignment(
+            cmd.cli_ctx,
+            identity["principalId"],
+            role_definition_id,
+            network_scopes[scope]
+        )
+
+    progress.add(message="Creating cluster identity's federated credential "
+                 f"role assignment over {role.operator_name} identity")
+    defn = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        namespace="Microsoft.Authorization",
+        type="roleDefinitions",
+        name=ARO_FEDERATED_CREDENTIAL_ROLE
+    )
+
+    # hack
+    try:
+        cluster_principal_id = cluster_identity.principal_id
+    except AttributeError:
+        cluster_principal_id = cluster_identity["principalId"]
+
+    create_role_assignment(cmd.cli_ctx, cluster_principal_id, defn, identity["id"])
+
+    return identity
+
+
+# pylint: disable=too-many-positional-arguments
+def ensure_platform_workload_identities_for_upgrade(cmd, client, resource_group_name, oc, oc_update, upgradeable_to):
+    oc_update.identity = oc.identity
+    oc_update.platform_workload_identity_profile.platform_workload_identities = \
+        oc.platform_workload_identity_profile.platform_workload_identities
+
+    target_platform_workload_identity_roles = _get_pwi_role_set(
+        client,
+        upgradeable_to,
+        oc.location
+    ).platform_workload_identity_roles
+    existing_operator_identities = list(oc.platform_workload_identity_profile.platform_workload_identities.keys())
+    target_operator_identities = [elem.operator_name for elem in target_platform_workload_identity_roles]
+
+    dissection = set(target_operator_identities) - set(existing_operator_identities)
+
+    if dissection:
+        master_parts = parse_resource_id(oc.master_profile.subnet_id)
+        vnet = resource_id(
+            subscription=str(master_parts["subscription"]),
+            resource_group=str(master_parts["resource_group"]),
+            namespace="Microsoft.Network",
+            type="virtualNetworks",
+            name=str(master_parts["name"])
+        )
+
+        network_scopes = _determine_required_scopes_from_network_resources(
+            cmd,
+            oc.master_profile.disk_encryption_set_id,
+            vnet,
+            oc.master_profile.subnet_id,
+            oc.worker_profiles[0].subnet_id
+        )
+
+        # jank town
+        cluster_identity = list(oc.identity.user_assigned_identities.values())[0]
+
+        for operator_name in dissection:
+            role = [elem for elem in target_platform_workload_identity_roles if elem.operator_name == operator_name][0]
+            identity = create_identity_and_role_assignments(
+                cmd=cmd,
+                role=role,
+                location=oc.location,
+                resource_group_name=resource_group_name,
+                network_scopes=network_scopes,
+                cluster_identity=cluster_identity
+            )
+
+            oc_update.platform_workload_identity_profile.platform_workload_identities[operator_name] = \
+                openshiftcluster.PlatformWorkloadIdentity(resource_id=identity["id"])
+    return oc_update

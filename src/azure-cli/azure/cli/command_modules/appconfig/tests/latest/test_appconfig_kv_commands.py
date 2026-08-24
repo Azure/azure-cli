@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -23,11 +23,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_kv(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_kv(self, resource_group, location):
         # Lowercase store-name prefix so the HTTP-lowercased '<name>.azconfig.io' host matches the
         # name registered with the recording name-replacer, keeping cassettes scrubbed for playback.
         config_store_prefix = get_resource_name_prefix('kvtest')
@@ -38,7 +40,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
@@ -365,10 +367,12 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert exported_kvs[secret_name] == secret_value
         os.remove(exported_file_path)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_kv_revision_list(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live runs set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a resource group where the recording principal holds
+    # "App Configuration Data Owner"; ResourceGroupNameReplacer scrubs that name out of recordings.
+    def test_azconfig_kv_revision_list(self, resource_group, location):
         # Use an all-lowercase store name prefix. The data-plane endpoint is '<name>.azconfig.io'
         # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)
         # name registered with the recording name-replacer, leaving the live host unscrubbed in the
@@ -381,7 +385,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
