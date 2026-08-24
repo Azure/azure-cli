@@ -10482,7 +10482,28 @@ def remove_continuous_webjob(cmd, resource_group_name, name, webjob_name, slot=N
 
 
 def list_triggered_webjobs(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+    def _handle_409(ex):
+        try:
+            response_text = ex.response.text()
+        except TypeError:
+            response_text = ex.response.text
+        try:
+            parsed = json.loads(response_text)
+            # Live responses encode the JSON object as a JSON string; decode again if needed.
+            if isinstance(parsed, str):
+                parsed = json.loads(parsed)
+            message = parsed.get('error') or str(ex)
+        except (ValueError, AttributeError):
+            message = str(ex)
+        raise UnclassifiedUserFault(message)
+
+    try:
+        pager = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_triggered_web_jobs', slot)
+        return list(pager)
+    except HttpResponseError as ex:
+        if ex.status_code == 409:
+            _handle_409(ex)
+        raise
 
 
 def run_triggered_webjob(cmd, resource_group_name, name, webjob_name, slot=None):
