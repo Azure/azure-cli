@@ -255,7 +255,8 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None, target='app
     cookie_str = '; '.join(f'{k}={v}' for k, v in cookies.items()) if cookies else None
 
     # Request Websocket connection with 30s timeout
-    logger.warning("Connecting to the web app container...")
+    container_name = 'Kudu' if target == 'kudu' else 'web app'
+    logger.warning("Connecting to the %s container...", container_name)
     # Honor the CLI-wide certificate verification setting, consistent with other SCM connections.
     verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
     try:

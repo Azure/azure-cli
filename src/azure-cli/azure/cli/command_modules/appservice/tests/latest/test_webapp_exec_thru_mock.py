@@ -680,6 +680,16 @@ class ShellSessionConnectTest(unittest.TestCase):
             self.create_conn.call_args.args[0],
             'wss://scm.example/exec/shell?target=kudu&shell=%2Fbin%2Fsh')
 
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_connection_message_reflects_app_target(self, warning):
+        _start_shell_session('https://scm.example', {})
+        warning.assert_any_call("Connecting to the %s container...", 'web app')
+
+    @mock.patch(_MODULE + '.logger.warning')
+    def test_connection_message_reflects_kudu_target(self, warning):
+        _start_shell_session('https://scm.example', {}, target='kudu')
+        warning.assert_any_call("Connecting to the %s container...", 'Kudu')
+
     def test_cookies_are_formatted_into_cookie_string(self):
         _start_shell_session('https://scm.example', {}, cookies={'ARRAffinity': 'abc'})
         self.assertEqual(self.create_conn.call_args.kwargs['cookie'], 'ARRAffinity=abc')

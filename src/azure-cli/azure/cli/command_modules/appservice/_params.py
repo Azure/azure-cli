@@ -1645,8 +1645,7 @@ subscription than the app service environment, please use the resource ID for --
                    "the shell used to run --shell-command.")
         c.argument(
             'target',
-            help="Container to connect to in 'shell' mode. 'app' targets the main web app container; "
-                 "'kudu' targets the Kudu (SCM) container.",
+            help="Container to connect to in 'shell' mode. 'app' targets the main web app container; 'kudu' targets the Kudu (SCM) container. In 'execute' mode, only 'app' is supported.",
             arg_type=get_enum_type(['app', 'kudu']),
             default='app')
         c.argument('slot', options_list=['--slot', '-s'],
