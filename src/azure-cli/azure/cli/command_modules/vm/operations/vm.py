@@ -266,12 +266,16 @@ class VMListUsage(_VMListUsage):
 
 
 class VMDelete(_VMDelete):
-    class VirtualMachinesDelete(_VMDelete.VirtualMachinesDelete):
-        def on_204(self, session):
-            from azure.cli.core.azclierror import ResourceNotFoundError
+    def pre_operations(self):
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        args = self.ctx.args
+        show_cmd = _VMShow(cli_ctx=self.cli_ctx)
+        try:
+            show_cmd(resource_group=args.resource_group, name=args.name)
+        except ResourceNotFoundError:
             raise ResourceNotFoundError(
                 "The VM '{}' under resource group '{}' was not found.".format(
-                    str(self.ctx.args.name), str(self.ctx.args.resource_group)
+                    str(args.name), str(args.resource_group)
                 )
             )
 
