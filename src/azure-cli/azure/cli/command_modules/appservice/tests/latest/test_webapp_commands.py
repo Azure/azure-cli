@@ -1269,6 +1269,14 @@ class WebappScaleTest(ScenarioTest):
             JMESPathCheck('sku.family', 'B'),
             JMESPathCheck('sku.capacity', 2)
         ])
+        # change sku without specifying --number-of-workers; capacity must be preserved
+        self.cmd(
+            'appservice plan update -g {} -n {} --sku S1'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck('sku.tier', 'Standard'),
+            JMESPathCheck('sku.capacity', 2)
+        ])
 
 
 @unittest.skip("Test needs to re-done to match the errors")
