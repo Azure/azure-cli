@@ -440,6 +440,51 @@ class TestUtils(unittest.TestCase):
         self.assertFalse(is_same_origin('', endpoint))
         self.assertFalse(is_same_origin('https://management.azure.com/path', 'not a url'))
 
+    def test_normalize_url(self):
+        from azure.cli.core.util import normalize_url
+
+        # Already normalized URLs are unchanged
+        for url in ['https://management.azure.com/',
+                    'https://management.azure.com/subscriptions/01/resourceGroups/rg?api-version=2021-04-01']:
+            self.assertEqual(normalize_url(url), url)
+
+        # Empty path is normalized to '/'
+        self.assertEqual(normalize_url('https://management.azure.com'), 'https://management.azure.com/')
+        # Scheme and host are lowercased
+        self.assertEqual(normalize_url('HTTPS://Management.Azure.COM/Path'), 'https://management.azure.com/Path')
+        # Empty segments are collapsed, so the path can't be read as a protocol-relative URL
+        self.assertEqual(normalize_url('https://management.azure.com//attacker.example/leak'),
+                         'https://management.azure.com/attacker.example/leak')
+        # Dot segments are removed
+        self.assertEqual(normalize_url('https://management.azure.com/a/b/../c'),
+                         'https://management.azure.com/a/c')
+        self.assertEqual(normalize_url('https://management.azure.com/../..//attacker.example/leak'),
+                         'https://management.azure.com/attacker.example/leak')
+        # Backslashes in the authority belong to the path, like in WHATWG URL parsers
+        self.assertEqual(normalize_url('https://management.azure.com\\@attacker.example/leak'),
+                         'https://management.azure.com/@attacker.example/leak')
+        # Control characters are stripped
+        self.assertEqual(normalize_url('https://management.azure.com\t\r\n/path'),
+                         'https://management.azure.com/path')
+        # Query and fragment are preserved
+        self.assertEqual(normalize_url('https://management.azure.com/a//b?x=1//2#f//g'),
+                         'https://management.azure.com/a/b?x=1//2#f//g')
+
+    def test_is_trusted_cloud_endpoint(self):
+        from azure.cli.core.util import is_trusted_cloud_endpoint
+        from azure.cli.core.mock import DummyCli
+
+        cli_ctx = DummyCli()
+
+        self.assertTrue(is_trusted_cloud_endpoint(
+            'https://management.azure.com/subscriptions/01?api-version=2025-09-01', cli_ctx))
+        # Not a trusted host
+        self.assertFalse(is_trusted_cloud_endpoint('https://management.azure.com.attacker/path', cli_ctx))
+        # Not normalized: the path may be re-interpreted as an authority downstream
+        self.assertFalse(is_trusted_cloud_endpoint('https://management.azure.com//attacker.example/leak', cli_ctx))
+        self.assertFalse(is_trusted_cloud_endpoint('https://management.azure.com/../..//attacker.example', cli_ctx))
+        self.assertFalse(is_trusted_cloud_endpoint(None, cli_ctx))
+
     @mock.patch("psutil.Process")
     def test_get_parent_proc_name(self, mock_process_type):
         process = mock_process_type.return_value
