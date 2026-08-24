@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-01-01"],
         ]
     }
 
@@ -46,7 +46,7 @@ class Wait(AAZWaitCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -121,7 +121,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -157,9 +157,7 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -219,11 +217,12 @@ class Wait(AAZWaitCommand):
             properties.disable_local_auth = AAZBoolType(
                 serialized_name="disableLocalAuth",
             )
-            properties.encryption = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            properties.encryption = AAZObjectType()
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
+            )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
             )
             properties.is_auto_inflate_enabled = AAZBoolType(
                 serialized_name="isAutoInflateEnabled",
@@ -240,6 +239,9 @@ class Wait(AAZWaitCommand):
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
@@ -281,9 +283,7 @@ class Wait(AAZWaitCommand):
             key_vault_properties.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.encryption.key_vault_properties.Element
-            _element.identity = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.identity = AAZObjectType()
             _element.key_name = AAZStrType(
                 serialized_name="keyName",
             )
@@ -322,6 +322,14 @@ class Wait(AAZWaitCommand):
             _element.role_type = AAZStrType(
                 serialized_name="roleType",
             )
+
+            platform_capabilities = cls._schema_on_200.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()

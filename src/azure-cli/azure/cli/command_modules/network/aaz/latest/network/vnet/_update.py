@@ -28,9 +28,6 @@ class Update(AAZCommand):
 
     :example: For --summarized-gateway-prefixes with address-prefixes
         az network vnet update --resource-group rg1 --name test-vnet --summarized-gateway-prefixes address-prefixes="[10.0.0.0/16,10.1.0.0/16]"
-
-    :example: For --summarized-gateway-prefixes with ipam-pool-prefix-allocations
-        az network vnet update --resource-group rg1 --name test-vnet --summarized-gateway-prefixes ipam-pool-prefix-allocations="[{id:<pool-resource-id>,number-of-ip-addresses:10}]"
     """
 
     _aaz_info = {

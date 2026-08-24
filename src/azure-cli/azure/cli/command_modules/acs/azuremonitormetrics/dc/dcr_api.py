@@ -33,11 +33,12 @@ def create_dcr(cmd, mac_region, azure_monitor_workspace_resource_id, cluster_sub
         }
     }
     try:
-        resources.begin_create_or_update_by_id(
+        poller = resources.begin_create_or_update_by_id(
             dcr_resource_id,
             DC_API,
             dcr_creation_body
         )
+        poller.result()
         return dcr_resource_id
     except Exception as error:
         raise CLIError(error)

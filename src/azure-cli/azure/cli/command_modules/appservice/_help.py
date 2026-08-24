@@ -48,10 +48,10 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
   - name: Create a Windows app service plan.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux false
   - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1 --is-linux false
   - name: Create a Linux app service plan with four Linux workers.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
@@ -1969,6 +1969,64 @@ short-summary: Creates a remote connection using a tcp tunnel to your web app
 examples:
   - name: Create a remote connection using a tcp tunnel to your web app
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
+"""
+
+helps['webapp exec'] = """
+type: command
+short-summary: Open an interactive shell session or run a command in a Linux web app container.
+long-summary: |
+    Interact with your Linux web app container in two modes:
+    - 'shell' (default): open an interactive shell session in your main app container.
+    - 'execute': fire-and-forget a command in your main app container; returns immediately, no output.
+
+    Only supported for Linux App Service plans.
+
+    'shell' mode: Open an interactive shell in your app's main container.
+    A session ends automatically after 3 hours of inactivity,
+    and may also end if the underlying instance is reimaged or platform components are updated.
+
+    'execute' mode: Fire-and-forget a command in the main app container. A 'succeeded' result means the command was accepted.
+    It does not confirm the command ran or completed, and no logs, output, or exit code are returned. For immediate output, use 'shell' mode.
+    The CLI reports failure only if the command (or the shell) could not be started.
+    This makes execute mode well-suited to background or long-running work.
+    The process runs detached and lives for the lifetime of the container (or until it finishes on its own).
+    Use --command to run a single program, e.g. "npm start".
+    Use --shell-command to run a shell command line where shell operators (|, &&, >, etc.) work, e.g. "cat log.txt | grep error > out.txt".
+    Check the parameters and examples below, including how to capture output to a file.
+examples:
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+  - name: Start an interactive shell session using a specific shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
+  - name: Run a direct command in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
+  - name: Run a shell command and redirect output to a file
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell-command "echo hello > /home/LogFiles/out.txt 2>&1"
+  - name: Run a command in a specific working directory
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --cwd /home/site --command "touch newfile.txt"
+  - name: Run a Python script in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "python3 /home/site/wwwroot/script.py"
+  - name: Run a shell command with a non-default shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell /bin/sh --shell-command "echo hi | grep h"
+  - name: Execute a command on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance MyInstanceId
+  - name: Execute a command on all instances
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance all
+  - name: Execute a command on a deployment slot
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command "touch newfile.txt"
 """
 
 helps['webapp delete'] = """

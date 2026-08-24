@@ -16,15 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the description of the specified namespace.
-
-    :example: shows the Namespace details.
-        az eventhubs namespace show --resource-group myresourcegroup --name mynamespace
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-01-01"],
         ]
     }
 
@@ -50,7 +47,7 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -125,7 +122,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -161,7 +158,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -225,6 +222,9 @@ class Show(AAZCommand):
             properties.geo_data_replication = AAZObjectType(
                 serialized_name="geoDataReplication",
             )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
+            )
             properties.is_auto_inflate_enabled = AAZBoolType(
                 serialized_name="isAutoInflateEnabled",
             )
@@ -240,6 +240,9 @@ class Show(AAZCommand):
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
@@ -320,6 +323,14 @@ class Show(AAZCommand):
             _element.role_type = AAZStrType(
                 serialized_name="roleType",
             )
+
+            platform_capabilities = cls._schema_on_200.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()

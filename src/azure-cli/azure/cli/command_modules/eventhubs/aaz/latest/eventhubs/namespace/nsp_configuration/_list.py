@@ -15,13 +15,13 @@ from azure.cli.core.aaz import *
     "eventhubs namespace nsp-configuration list",
 )
 class List(AAZCommand):
-    """List of current NetworkSecurityPerimeterConfiguration for Namespace
+    """List list of current NetworkSecurityPerimeterConfiguration for Namespace
     """
 
     _aaz_info = {
-        "version": "2025-05-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations", "2025-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations", "2026-01-01"],
         ]
     }
 
@@ -46,7 +46,7 @@ class List(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -121,7 +121,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -159,9 +159,7 @@ class List(AAZCommand):
             )
 
             value = cls._schema_on_200.value
-            value.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
             _element.id = AAZStrType(
@@ -174,7 +172,11 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"client_flatten": True, "read_only": True},
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -203,6 +205,7 @@ class List(AAZCommand):
             )
             properties.provisioning_issues = AAZListType(
                 serialized_name="provisioningIssues",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -229,9 +232,7 @@ class List(AAZCommand):
             profile.name = AAZStrType()
 
             access_rules = cls._schema_on_200.value.Element.properties.profile.access_rules
-            access_rules.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            access_rules.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.profile.access_rules.Element
             _element.id = AAZStrType()
@@ -263,23 +264,17 @@ class List(AAZCommand):
             fully_qualified_domain_names.Element = AAZStrType()
 
             network_security_perimeters = cls._schema_on_200.value.Element.properties.profile.access_rules.Element.properties.network_security_perimeters
-            network_security_perimeters.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            network_security_perimeters.Element = AAZObjectType()
             _ListHelper._build_schema_network_security_perimeter_read(network_security_perimeters.Element)
 
             subscriptions = cls._schema_on_200.value.Element.properties.profile.access_rules.Element.properties.subscriptions
-            subscriptions.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            subscriptions.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.profile.access_rules.Element.properties.subscriptions.Element
             _element.id = AAZStrType()
 
             provisioning_issues = cls._schema_on_200.value.Element.properties.provisioning_issues
-            provisioning_issues.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            provisioning_issues.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.provisioning_issues.Element
             _element.name = AAZStrType()
@@ -298,6 +293,26 @@ class List(AAZCommand):
                 serialized_name="accessMode",
             )
             resource_association.name = AAZStrType()
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             return cls._schema_on_200
 
