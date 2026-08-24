@@ -274,6 +274,8 @@ class VMDelete(_VMDelete):
                     str(self.ctx.args.name), str(self.ctx.args.resource_group)
                 )
             )
+
+
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "id" in result:
