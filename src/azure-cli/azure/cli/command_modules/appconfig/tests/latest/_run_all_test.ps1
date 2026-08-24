@@ -11,7 +11,7 @@ Param(
     [switch]$CleanUp, 
 
     [Parameter()]
-    [string]$ResourceGroupName = "cli-local-test-rg",
+    [string]$ResourceGroupName = "cli-testing-rg",
 
     [Parameter()]
     [switch]$Live
@@ -67,5 +67,5 @@ function clean_up_resources {
 # Clean up 
 if ($CleanUp) {
     Write-Host "Cleaning up resources"
-    clean_up_resources -rgName $ResourceGroupName $prefix
+    clean_up_resources -rgName $ResourceGroupName -prefix $prefix
 }
