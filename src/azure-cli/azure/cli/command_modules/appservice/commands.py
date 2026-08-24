@@ -214,6 +214,9 @@ def load_command_table(self, _):
 
     webapp_exec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.webapp_exec#{}')
 
+    node_diagnostics_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appservice.node_diagnostics#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
@@ -348,6 +351,14 @@ def load_command_table(self, _):
     with self.command_group('webapp troubleshoot', is_preview=True) as g:
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
+
+    with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
+        g.custom_command('cpu-profiler-trace', 'collect_cpu_profiler_trace',
+                         custom_command_type=node_diagnostics_custom,
+                         exception_handler=ex_handler_factory())
+        g.custom_command('memory-dumps', 'collect_memory_dump',
+                         custom_command_type=node_diagnostics_custom,
+                         exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')

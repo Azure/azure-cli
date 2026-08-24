@@ -859,6 +859,21 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
 
+    for command_name in ('cpu-profiler-trace', 'memory-dumps'):
+        with self.argument_context('webapp troubleshoot collect ' + command_name) as c:
+            c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+            c.argument('resource_group', arg_type=resource_group_name_type)
+            c.argument('slot', options_list=['--slot', '-s'],
+                       help='Name of the web app slot. Defaults to the production slot.')
+            c.argument('instance', options_list=['--instance', '-i'],
+                       help='Worker instance to diagnose. When omitted, a single instance is selected automatically or you are prompted when multiple instances are running.')
+            c.argument('process_id', options_list=['--process-id'], type=int,
+                       help='Process ID of the Node.js process to diagnose. When omitted, a single eligible process is selected automatically or you are prompted when multiple processes are running.')
+
+    with self.argument_context('webapp troubleshoot collect cpu-profiler-trace') as c:
+        c.argument('duration', options_list=['--duration'], type=int, default=30,
+                   help='CPU profiling duration in seconds. Valid range: 5-300.')
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)

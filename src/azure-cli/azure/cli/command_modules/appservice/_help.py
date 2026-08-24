@@ -2538,6 +2538,48 @@ parameters:
         structured payload that works with `-o json`, `-o yaml`, and `-o table`.
 """
 
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect cpu-profiler-trace'] = """
+type: command
+short-summary: Collect and analyze a CPU profile from a Node.js process.
+long-summary: |
+    Collects a CPU profile from one Node.js process on a selected Linux web app instance.
+    Kudu supplies the runtime-specific collection command, analyzes the resulting profile,
+    and stores the raw profile and HTML report under its diagnostics history.
+
+    The command returns structured Kudu links for the raw artifact, generated report, and
+    CPU diagnostics page. Diagnostic artifacts can contain sensitive application data.
+    Kudu diagnostics must be enabled and the app must use a supported Node.js runtime.
+examples:
+  - name: Collect a 30-second CPU profile
+    text: az webapp troubleshoot collect cpu-profiler-trace -g MyResourceGroup -n MyWebApp
+  - name: Profile a specific process on a specific worker for 60 seconds
+    text: az webapp troubleshoot collect cpu-profiler-trace -g MyResourceGroup -n MyWebApp --instance MyInstanceId --process-id 42 --duration 60
+"""
+
+helps['webapp troubleshoot collect memory-dumps'] = """
+type: command
+short-summary: Collect and analyze a memory dump from a Node.js process.
+long-summary: |
+    Collects a V8 heap snapshot from one Node.js process on a selected Linux web app instance.
+    Kudu supplies the runtime-specific collection command, analyzes the resulting snapshot,
+    and stores the raw snapshot and HTML report under its diagnostics history.
+
+    The command returns structured Kudu links for the raw artifact, generated report, and
+    memory diagnostics page. Heap snapshots can contain sensitive application data and
+    collection can briefly affect application responsiveness. Kudu diagnostics must be
+    enabled and the app must use a supported Node.js runtime.
+examples:
+  - name: Collect a memory dump
+    text: az webapp troubleshoot collect memory-dumps -g MyResourceGroup -n MyWebApp
+  - name: Collect a memory dump from a specific process and worker
+    text: az webapp troubleshoot collect memory-dumps -g MyResourceGroup -n MyWebApp --instance MyInstanceId --process-id 42
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
