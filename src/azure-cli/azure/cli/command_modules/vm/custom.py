@@ -3733,7 +3733,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
+                capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+                enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
@@ -4050,7 +4051,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            capacity_reservation_group=capacity_reservation_group,
+            disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
+            enable_auto_update=enable_auto_update,
             patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
@@ -4599,6 +4602,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                disable_capacity_reservation_assignment=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
@@ -4736,6 +4740,17 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         sub_resource = {"id": capacity_reservation_group}
         capacity_reservation = {"capacity_reservation_group": sub_resource}
         vmss["virtual_machine_profile"]["capacity_reservation"] = capacity_reservation
+
+    if disable_capacity_reservation_assignment is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("capacity_reservation", None) is None:
+            vmss["virtual_machine_profile"]["capacity_reservation"] = {}
+        capacity_reservation = vmss["virtual_machine_profile"]["capacity_reservation"]
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            disable_capacity_reservation_assignment
+        if disable_capacity_reservation_assignment:
+            capacity_reservation.pop("capacity_reservation_group", None)
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.get("virtual_machine_profile", None) is None:
