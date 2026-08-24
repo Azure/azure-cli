@@ -233,6 +233,99 @@ class TestWebappMocked(unittest.TestCase):
         self.assertEqual(site_config.java_container, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config_generic_configurations_camelcase(self, is_centauri_functionapp_mock, site_op_mock):
+        """Verify that camelCase key=value properties in --generic-configurations (e.g. webJobsEnabled=false)
+        are serialized under properties.webJobsEnabled (not at resource root) and that the string 'false'
+        is coerced to boolean False (GitHub issue #33823)."""
+        cmd_mock = _get_test_cmd()
+        SiteConfigResource = cmd_mock.get_models('SiteConfigResource')
+        SiteConfig = cmd_mock.get_models('SiteConfig')
+        site_config_resource = SiteConfigResource()
+        site_config_resource.properties = SiteConfig()
+        site_op_mock.return_value = site_config_resource
+
+        is_centauri_functionapp_mock.return_value = False
+        # action: pass webJobsEnabled (camelCase, not a named SDK property) via generic_configurations
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['webJobsEnabled=false'])
+        # assert: the property must be on properties (the SiteConfig child), not at resource root
+        self.assertNotIn('webJobsEnabled', dict(site_config_resource))
+        self.assertIn('webJobsEnabled', dict(site_config_resource.properties))
+        # assert: string 'false' from key=value form must be coerced to boolean False
+        self.assertIs(site_config_resource.properties['webJobsEnabled'], False)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config_generic_configurations_camelcase_json(self, is_centauri_functionapp_mock, site_op_mock):
+        """Verify that camelCase properties in --generic-configurations provided as JSON
+        (e.g. {"webJobsEnabled": false}) are serialized under properties.webJobsEnabled."""
+        cmd_mock = _get_test_cmd()
+        SiteConfigResource = cmd_mock.get_models('SiteConfigResource')
+        SiteConfig = cmd_mock.get_models('SiteConfig')
+        site_config_resource = SiteConfigResource()
+        site_config_resource.properties = SiteConfig()
+        site_op_mock.return_value = site_config_resource
+
+        is_centauri_functionapp_mock.return_value = False
+        # action: pass webJobsEnabled as a JSON object
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['{"webJobsEnabled": false}'])
+        # assert: property must be on the SiteConfig child (properties), not at resource root
+        self.assertNotIn('webJobsEnabled', dict(site_config_resource))
+        self.assertIn('webJobsEnabled', dict(site_config_resource.properties))
+        self.assertIs(site_config_resource.properties['webJobsEnabled'], False)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config_generic_configurations_request_body_serialization(
+            self, is_centauri_functionapp_mock, site_op_mock):
+        """Regression test: the serialized ARM request body must contain webJobsEnabled under
+        'properties', never at the resource root.  A root-level webJobsEnabled is silently
+        ignored by ARM, leaving properties.webJobsEnabled unchanged (the live bug)."""
+        import json
+        from azure.mgmt.web._utils.model_base import SdkJSONEncoder
+
+        cmd_mock = _get_test_cmd()
+        SiteConfigResource = cmd_mock.get_models('SiteConfigResource')
+        SiteConfig = cmd_mock.get_models('SiteConfig')
+        site_config_resource = SiteConfigResource()
+        site_config_resource.properties = SiteConfig()
+        site_config_resource.properties.always_on = True  # existing setting
+        site_op_mock.return_value = site_config_resource
+
+        is_centauri_functionapp_mock.return_value = False
+
+        # Test key=value form
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['webJobsEnabled=false'])
+
+        body = json.loads(json.dumps(site_config_resource, cls=SdkJSONEncoder, exclude_readonly=True))
+        # webJobsEnabled must NOT appear at the resource root
+        self.assertNotIn('webJobsEnabled', body,
+                         "webJobsEnabled must not be at resource root; ARM ignores root-level props")
+        # webJobsEnabled must appear under properties
+        self.assertIn('properties', body)
+        self.assertIn('webJobsEnabled', body['properties'])
+        self.assertIs(body['properties']['webJobsEnabled'], False)
+
+        # Test JSON-file form
+        site_config_resource2 = SiteConfigResource()
+        site_config_resource2.properties = SiteConfig()
+        site_config_resource2.properties.always_on = True
+        site_op_mock.return_value = site_config_resource2
+
+        update_site_configs(cmd_mock, 'myRG', 'myweb',
+                            generic_configurations=['{"webJobsEnabled": false}'])
+
+        body2 = json.loads(json.dumps(site_config_resource2, cls=SdkJSONEncoder, exclude_readonly=True))
+        self.assertNotIn('webJobsEnabled', body2,
+                         "webJobsEnabled must not be at resource root; ARM ignores root-level props")
+        self.assertIn('properties', body2)
+        self.assertIn('webJobsEnabled', body2['properties'])
+        self.assertIs(body2['properties']['webJobsEnabled'], False)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_list_publish_profiles_on_slots(self, site_op_mock):
         site_op_mock.return_value = [b'<publishData><publishProfile publishUrl="ftp://123"/><publishProfile publishUrl="ftp://1234"/></publishData>']
         # action
