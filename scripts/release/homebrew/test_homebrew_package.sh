@@ -20,7 +20,8 @@ AZ_BASE=/usr/local/Cellar/azure-cli/$CLI_VERSION/libexec
 export PATH=$AZ_BASE/bin:$PATH
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 echo $PATH
-pip install wheel
+# `build` is the PEP 517 frontend used by scripts/ci/build.sh.
+pip install wheel build
 ./scripts/ci/build.sh
 pip install pytest --prefix $AZ_BASE
 pip install pytest-xdist --prefix $AZ_BASE
