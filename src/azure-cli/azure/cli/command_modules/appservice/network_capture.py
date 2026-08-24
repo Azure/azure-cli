@@ -156,6 +156,8 @@ def _log_capture_advisory():
         'and remote endpoints.\n'
         '  - After the network trace starts, reproduce the problem so outbound traffic from your app is captured.\n'
         '  - Traffic to remote endpoints over TLS or SSL (for example, HTTPS) is encrypted in the trace.\n'
+        '  - Network captures can contain credentials, cookies, request bodies, and other sensitive application '
+        'data. Store and share capture artifacts securely.\n'
         '  - Network traces are collected on the selected instance serving your app.\n'
         '  - Capture duration is 60 seconds by default and can be set from 1 to 300 seconds.\n'
         '  - A network trace can capture up to 100 MB of data. The capture stops automatically at this limit, '

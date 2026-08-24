@@ -126,6 +126,8 @@ class CollectNetworkCaptureTest(unittest.TestCase):
                 if call.args and call.args[0].startswith('What you should know'))
         self.assertIn('help troubleshoot TCP packet loss', advisory[0])
         self.assertIn('selected instance serving your app', advisory[0])
+        self.assertIn('credentials, cookies, request bodies', advisory[0])
+        self.assertIn('Store and share capture artifacts securely', advisory[0])
         self.assertIn('Capture duration is 60 seconds by default', advisory[0])
         self.assertIn('capture up to 100 MB of data', advisory[0])
         self.assertIn('https://www.wireshark.org/', advisory[0])
