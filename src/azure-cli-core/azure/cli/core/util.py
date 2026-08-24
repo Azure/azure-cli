@@ -1086,7 +1086,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if 'Authorization' in prepped.headers and not is_same_origin(prepped.url, url):
         from .azclierror import InvalidArgumentValueError
         raise InvalidArgumentValueError(
-            "The request URL '{}' doesn't match the validated URL '{}'.".format(prepped.url, url))
+            "The prepared request URL '{}' does not share the same origin as the validated URL '{}'.".format(prepped.url, url))
 
     # Merge environment settings into session
     settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
