@@ -1257,8 +1257,8 @@ def normalize_url(url):
       ``https://management.azure.com/attacker.example/leak``.
 
     :param url: The URL to normalize.
-    :return: The normalized URL, or the input unchanged if it is not a parsable string.
-    :rtype: str
+    :return: The normalized URL. If ``url`` is not a string, it is returned unchanged. If parsing fails, the cleaned (control/whitespace-stripped) input is returned.
+    :rtype: str or object
     """
     from urllib.parse import urlsplit, urlunsplit
 
