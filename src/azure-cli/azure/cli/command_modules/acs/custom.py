@@ -1052,6 +1052,8 @@ def aks_create(
     enable_app_routing_istio=False,
     # gateway api
     enable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1255,6 +1257,9 @@ def aks_update(
     # gateway api
     enable_gateway_api=False,
     disable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
+    disable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2880,7 +2885,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :param space_name: Name of the new or existing dev space to select. Defaults to an \
     interactive selection experience.
     :type space_name: String
-    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    :param endpoint_type: The endpoint type to be used for an Azure Dev Spaces controller. \
     See https://aka.ms/azds-networking for more information.
     :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.

@@ -44,7 +44,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
+from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -3975,9 +3975,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     result = {}
     for s in generic_configurations:
         try:
-            json_object = get_json_object(s)
+            json_object = shell_safe_json_parse(s)
             for config_name in json_object:
-                if config_name.lower() == 'ip_security_restrictions':
+                if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
                     updating_ip_security_restrictions = True
             result.update(json_object)
         except CLIError:
@@ -3985,9 +3985,24 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             result[config_name] = value
 
     for config_name, value in result.items():
-        if config_name.lower() == 'ip_security_restrictions':
+        if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
             updating_ip_security_restrictions = True
-        setattr(configs, config_name, value)
+        # In azure-mgmt-web 11.0.0+, SiteConfigResource wraps SiteConfig under 'properties'.
+        # Extra camelCase keys (e.g. 'webJobsEnabled') that are not flattened SDK fields must be
+        # set on configs.properties so the SDK serializer places them under "properties" in the
+        # request body, not at the resource root where ARM ignores them.
+        # String 'true'/'false' from key=value form are also coerced to bool so they match the
+        # boolean type expected by ARM (consistent with JSON-file form which already passes bool).
+        if any(c.isupper() for c in config_name):
+            if isinstance(value, str) and value.lower() in ('true', 'false'):
+                value = value.lower() == 'true'
+            # Route to the SiteConfig child when configs is a SiteConfigResource
+            target = getattr(configs, 'properties', None)
+            if target is None:
+                target = configs
+            target[config_name] = value
+        else:
+            setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
@@ -7845,7 +7860,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _parse_raw_stacks(self, stacks):
         # Track seen runtime display names to avoid duplicates in Linux parsing.
         # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
-        # Windows parsing doesn't have this issue due to its different structure.
 
         java_eol_map = self._build_java_eol_map(stacks)
 
@@ -7865,6 +7879,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self.windows_config_mappings,
                         runtime_family=lang.display_text,
                         java_eol_map=java_eol_map)
+
+        unique_runtimes = []
+        seen_runtime_names = set()
+        for runtime in self._stacks:
+            runtime_key = (runtime.linux, runtime.display_name.lower())
+            if runtime_key in seen_runtime_names:
+                continue
+            seen_runtime_names.add(runtime_key)
+            unique_runtimes.append(runtime)
+        self._stacks = unique_runtimes
 
     def _build_java_eol_map(self, stacks):
         """Build Java version -> EOL date map from the 'Java' stack.
@@ -7904,7 +7928,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        display_name = display_name.lower()
+        display_name = self.standardize_node_runtime_name(display_name).lower()
         stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
@@ -7992,6 +8016,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         t = t.replace(".NET", DOTNET_RUNTIME_NAME)
         t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
+
+    @staticmethod
+    def standardize_node_runtime_name(runtime_name):
+        match = re.fullmatch(r'node\|(\d+)(?:-?lts)?', runtime_name, re.IGNORECASE)
+        if match and int(match.group(1)) >= 26:
+            return "NODE|{}".format(match.group(1))
+        return runtime_name
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
@@ -8194,6 +8225,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
+                    runtime_name = self.standardize_node_runtime_name(runtime_name)
 
                     runtime = self.Runtime(display_name=runtime_name, linux=False,
                                            os="Windows", runtime_family=runtime_family,
@@ -8305,7 +8337,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
-                runtime_name = settings.runtime_version
+                runtime_name = self.standardize_node_runtime_name(settings.runtime_version)
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,
@@ -12219,6 +12251,8 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
     runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
+    if runtime:
+        runtime = _StackRuntimeHelper.standardize_node_runtime_name(runtime)
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
@@ -13158,7 +13192,7 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
         if gh_props.get("github_actions_version"):
             if is_linux:
                 return {
-                    "display_name": app_runtime,
+                    "display_name": matched_runtime.display_name,
                     "github_actions_version": gh_props["github_actions_version"]
                 }
             if gh_props.get("app_runtime_version").lower() == app_runtime_version.lower():

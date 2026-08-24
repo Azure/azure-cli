@@ -305,7 +305,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
@@ -749,15 +750,18 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group:
-        vm_properties['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        vm_properties['capacityReservation'] = {}
+        if capacity_reservation_group:
+            vm_properties['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     vm = {
-        'apiVersion': '2025-11-01',
+        'apiVersion': '2026-04-01',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -1057,6 +1061,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
@@ -1675,12 +1680,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group:
-        virtual_machine_profile['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        virtual_machine_profile['capacityReservation'] = {}
+        if capacity_reservation_group:
+            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
@@ -1737,7 +1745,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2025-11-01',
+        'apiVersion': '2026-04-01',
         'dependsOn': [],
         'properties': vmss_properties
     }

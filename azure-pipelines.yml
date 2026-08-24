@@ -18,13 +18,14 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - group: 'AME ESRP Variable Group'
+  - group: 'esrp-signing-codes'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
 
-# macOS Cask parameters
-- name: macos_cask_python_version
+# Standalone tarball and Cask parameters
+- name: standalone_python_version
   value: '3.14'
 
 parameters:
@@ -576,7 +577,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools<81"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -597,7 +598,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools<81"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
@@ -684,10 +685,14 @@ jobs:
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
       python_version=3.14
-      brew unlink python@$python_version && brew link --overwrite python@$python_version
+      brew unlink python@$python_version && brew link --overwrite python@$python_version || true
       
       echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
+      if brew list --versions azure-cli >/dev/null 2>&1; then
+        brew uninstall azure-cli
+      else
+        echo "azure-cli is not pre-installed"
+      fi
       
       echo == Install azure-cli.rb formula ==
       # Need to create a dummy homebrew tap to install the formula
@@ -757,9 +762,17 @@ jobs:
 # Phase 1: Build unsigned tarballs (ARM64 + Intel)
 - template: .azure-pipelines/templates/macos/macos-build-jobs.yml
   parameters:
-    PythonVersion: $(macos_cask_python_version)
+    PythonVersion: $(standalone_python_version)
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+    dependsOn: ['ExtractMetadata']
+
+- template: .azure-pipelines/templates/linux/linux-build-jobs.yml
+  parameters:
+    PythonVersion: $(standalone_python_version)
+    LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+    LinuxX64Pool: ${{ variables.ubuntu_pool }}
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
@@ -770,21 +783,25 @@ jobs:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
       BundleId: 'com.microsoft.azure.cli'
-      PythonVersion: $(macos_cask_python_version)
+      PythonVersion: $(standalone_python_version)
       ESRPServiceConnection: 'ame_esrp_connection'
       UseCurrentPipelineArtifacts: true
       dependsOn: ['VerifyMacOSCli']
 
 # Phase 3: Generate cask and test via temp tap
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
-  - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
+  - template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
-      PythonVersion: $(macos_cask_python_version)
+      LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+      LinuxX64Pool: ${{ variables.ubuntu_pool }}
+      PythonVersion: $(standalone_python_version)
       GitHubRepo: $(Build.Repository.Name)
       Debug: false
-      dependsOn: ['CreateFinalTarball']
+      CaskDependsOn: ['CreateMacOSFinalTarball', 'BuildLinuxCli']
+      MacosDependsOn: ['CreateMacOSFinalTarball']
+      LinuxDependsOn: ['BuildLinuxCli']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
@@ -1012,6 +1029,13 @@ jobs:
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
+        Resolute ${{ arch.name }}:
+          # 26.04
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+
         # https://wiki.debian.org/DebianReleases
         Bullseye ${{ arch.name }}:
           # 11
@@ -1062,6 +1086,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
+        Resolute ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
