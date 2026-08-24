@@ -354,7 +354,6 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureCloud = 'AzureCloud'
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
-    AzureGermanCloud = 'AzureGermanCloud'
     AzureBleuCloud = 'AzureBleuCloud'
 
 
@@ -465,31 +464,6 @@ AZURE_US_GOV_CLOUD = Cloud(
         acr_login_server_endpoint='.azurecr.us',
         synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
-AZURE_GERMAN_CLOUD = Cloud(
-    CloudNameEnum.AzureGermanCloud,
-    endpoints=CloudEndpoints(
-        management='https://management.core.cloudapi.de/',
-        resource_manager='https://management.microsoftazure.de',
-        sql_management='https://management.core.cloudapi.de:8443/',
-        batch_resource_id='https://batch.cloudapi.de/',
-        gallery='https://gallery.cloudapi.de/',
-        active_directory='https://login.microsoftonline.de',
-        active_directory_resource_id='https://management.core.cloudapi.de/',
-        active_directory_graph_resource_id='https://graph.cloudapi.de/',
-        microsoft_graph_resource_id='https://graph.microsoft.de',
-        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
-        media_resource_id='https://rest.media.cloudapi.de',
-        ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de',
-        portal='https://portal.microsoftazure.de'),
-    suffixes=CloudSuffixes(
-        storage_endpoint='core.cloudapi.de',
-        keyvault_dns='.vault.microsoftazure.de',
-        mhsm_dns='.managedhsm.microsoftazure.de',
-        sql_server_hostname='.database.cloudapi.de',
-        mysql_server_endpoint='.mysql.database.cloudapi.de',
-        postgresql_server_endpoint='.postgres.database.cloudapi.de',
-        mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
-
 AZURE_BLEU_CLOUD = Cloud(
     CloudNameEnum.AzureBleuCloud,
     endpoints=CloudEndpoints(
@@ -519,7 +493,7 @@ AZURE_BLEU_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
         synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
-HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, AZURE_BLEU_CLOUD]
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_BLEU_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():
