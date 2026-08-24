@@ -9255,7 +9255,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='centralus')
     def test_create_vm_with_community_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -9289,13 +9289,13 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
         self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
 
-        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l eastus2 --gallery-image-version {version}',
+        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l centralus --gallery-image-version {version}',
             checks=[
                 self.check('name', '{version}'),
                 self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
             ])
 
-        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location eastus2 --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location centralus --gallery-image-version {version}').get_output_in_json()['uniqueId']
 
         self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} --size Standard_D2s_v3 '
                  '--admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term --subnet {subnet} --vnet-name {vnet}')
@@ -12877,7 +12877,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='centralus')
     def test_vm_vmss_proxy_agent_control_profile_reference(self, resource_group):
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
