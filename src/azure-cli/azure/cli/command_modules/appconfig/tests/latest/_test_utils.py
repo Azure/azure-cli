@@ -22,13 +22,6 @@ def create_config_store(test, kwargs, disable_local_auth=False):
     test.cmd(command)
 
 
-def _get_local_test_resource_prefix():
-    return os.environ.get("AZURE_CLI_LOCAL_TEST_RESOURCE_PREFIX")
-
-def get_resource_name_prefix(prefix):
-    resource_prefix = _get_local_test_resource_prefix()
-    return prefix if resource_prefix is None else resource_prefix + prefix
-
 # Value the reused live test resource group (AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME) is rewritten to
 # in recordings by ResourceGroupNameReplacer. Matches the default ResourceGroupPreparer() moniker.
 SANITIZED_TEST_RESOURCE_GROUP = "clitest.rg000001"
