@@ -1505,6 +1505,46 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
         self.status_code = status_code
 
 
+class TestOneDeployTag(unittest.TestCase):
+
+    def test_scm_url_includes_encoded_tag(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _build_onedeploy_scm_url
+        params = OneDeployParams()
+        params.artifact_type = 'zip'
+        params.tag = 'release 2026/08'
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_or_fetch_scm_url',
+                        return_value='https://example.scm.azurewebsites.net'):
+            result = _build_onedeploy_scm_url(params)
+
+        self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_webapp_deploy_ignores_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
+        from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
+        site_operation_mock.return_value = mock.MagicMock(kind='app', reserved=False)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
+            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', tag='windows-tag')
+
+        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
+        self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
+
+    def test_arm_body_includes_tag(self):
+        import json
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _get_onedeploy_request_body
+        params = OneDeployParams()
+        params.src_url = 'https://example.com/app.zip'
+        params.artifact_type = 'zip'
+        params.tag = 'release-2026-08'
+
+        body, file_hash = _get_onedeploy_request_body(params)
+
+        self.assertEqual(json.loads(body)['properties']['tag'], 'release-2026-08')
+        self.assertIsNone(file_hash)
+
+
 class TestCreateAppServicePlanDefaults(unittest.TestCase):
     """Tests for create_app_service_plan default SKU behavior"""
 

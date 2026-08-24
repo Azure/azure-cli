@@ -1110,6 +1110,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
+        c.argument('tag', help='Linux only. A friendly name used to identify the deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
