@@ -1248,7 +1248,8 @@ def normalize_url(url):
     Validating a URL that is not normalized is unsafe, because the validator and the consumer
     may disagree on which host the request is actually sent to. This function:
 
-    - removes whitespace and control characters, which are silently stripped by many URL parsers;
+    - removes control characters, which are silently stripped by many URL parsers, and trims
+      leading/trailing whitespace;
     - lowercases the scheme and the host;
     - converts backslashes in the authority to ``/`` (WHATWG URL parsers treat ``\\`` as ``/``),
       moving anything after them into the path;
@@ -1265,9 +1266,12 @@ def normalize_url(url):
     if not isinstance(url, str):
         return url
 
-    # Strip whitespace and C0/DEL control characters. Browsers and urllib strip some of them
-    # (\t, \r, \n), so a validator must not consider them part of the host.
-    cleaned = ''.join(c for c in url if ord(c) > 0x20 and ord(c) != 0x7f).strip()
+    # Strip C0/DEL control characters. Browsers and urllib strip some of them (\t, \r, \n), so a
+    # validator must not consider them part of the host.
+    # Note: the space character (U+0020) is *not* removed from the middle of the URL, as it is a
+    # meaningful character that downstream consumers percent-encode as '%20' rather than drop.
+    # Only leading and trailing whitespace is trimmed.
+    cleaned = ''.join(c for c in url if ord(c) >= 0x20 and ord(c) != 0x7f).strip()
 
     try:
         parts = urlsplit(cleaned)

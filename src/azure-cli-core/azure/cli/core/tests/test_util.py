@@ -466,6 +466,12 @@ class TestUtils(unittest.TestCase):
         # Control characters are stripped
         self.assertEqual(normalize_url('https://management.azure.com\t\r\n/path'),
                          'https://management.azure.com/path')
+        # Percent-encoded characters are preserved as-is
+        self.assertEqual(normalize_url('https://management.azure.com/a%20b'),
+                         'https://management.azure.com/a%20b')
+        # A literal space inside the URL is preserved, only leading/trailing whitespace is trimmed
+        self.assertEqual(normalize_url('  https://management.azure.com/a b  '),
+                         'https://management.azure.com/a b')
         # Query and fragment are preserved
         self.assertEqual(normalize_url('https://management.azure.com/a//b?x=1//2#f//g'),
                          'https://management.azure.com/a/b?x=1//2#f//g')
