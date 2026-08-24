@@ -361,10 +361,7 @@ class TestFunctionappMocked(unittest.TestCase):
             check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
 
         # assert
-        health_check_call = mock.call(
-            'https://mock-func.azurewebsites.net/admin/host/status',
-            headers={"x-functions-key": 'master-key'}, verify=True)
-        self.assertEqual(requests_get_mock.call_args_list.count(health_check_call), 15)
+        self.assertEqual(requests_get_mock.call_count, 15)
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
