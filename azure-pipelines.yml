@@ -685,10 +685,14 @@ jobs:
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
       python_version=3.14
-      brew unlink python@$python_version && brew link --overwrite python@$python_version
+      brew unlink python@$python_version && brew link --overwrite python@$python_version || true
       
       echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
+      if brew list --versions azure-cli >/dev/null 2>&1; then
+        brew uninstall azure-cli
+      else
+        echo "azure-cli is not pre-installed"
+      fi
       
       echo == Install azure-cli.rb formula ==
       # Need to create a dummy homebrew tap to install the formula
