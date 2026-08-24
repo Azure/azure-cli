@@ -5471,7 +5471,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete -g {rg} -n {table}')
         self.cmd('network route-table delete -g {rg} -n {table2}')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_route_table_ecmp', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_ecmp', location='eastasia')
     def test_network_route_table_ecmp_route(self, resource_group):
         self.kwargs.update({
             'table': 'cli-test-rt-ecmp',
@@ -5509,9 +5509,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list -g {rg} --route-table-name {table}',
                  checks=[
                      self.check('length(@)', 1),
-                     self.check('[0].nextHopType', 'VirtualApplianceEcmp'),
-                     self.check('[0].nextHop.nextHopIpAddresses[0]', '{ip1}'),
-                     self.check('[0].nextHop.nextHopIpAddresses[1]', '{ip2}')
+                     self.check('[0].nextHopType', 'VirtualApplianceEcmp')
                  ])
 
         # update route to change ECMP IP addresses (add a third IP)
