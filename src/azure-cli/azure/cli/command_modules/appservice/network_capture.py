@@ -264,6 +264,7 @@ def _wait_for_terminal_state(session, status_url, capture, timeout):
     deadline = time.monotonic() + timeout
     while True:
         status = str(_value(capture, 'status', 'Status', default='')).lower()
+        logger.debug("Network capture analysis status: '%s'.", status or 'unknown')
         if status in _TERMINAL_STATES:
             return capture
         if time.monotonic() >= deadline:
