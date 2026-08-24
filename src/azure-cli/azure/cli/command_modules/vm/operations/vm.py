@@ -271,7 +271,7 @@ class VMDelete(_VMDelete):
         args = self.ctx.args
         show_cmd = _VMShow(cli_ctx=self.cli_ctx)
         try:
-            show_cmd(resource_group=args.resource_group, name=args.name)
+            show_cmd(command_args={"resource_group": str(args.resource_group), "vm_name": str(args.name)})
         except ResourceNotFoundError:
             raise ResourceNotFoundError(
                 "The VM '{}' under resource group '{}' was not found.".format(
