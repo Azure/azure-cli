@@ -253,6 +253,7 @@ Release History
 **MySQL**
 
 * [BREAKING CHANGE] `az mysql flexible-server backup create/restore/geo-restore/replica`: Remove `--storage-redundancy` (#33428)
+* Fix #31568: `az mysql flexible-server list-skus`: Fix command returning empty list for all regions
 
 **NetAppFiles**
 
