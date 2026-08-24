@@ -1426,44 +1426,6 @@ class TestOneDeployTag(unittest.TestCase):
 
         self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
 
-    @mock.patch('requests.post')
-    @mock.patch('builtins.open', new_callable=mock.mock_open, read_data=b'zip-content')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
-                return_value='https://example.scm.azurewebsites.net')
-    def test_zip_deploy_url_includes_encoded_tag(self, _get_scm_url_mock, client_factory_mock,
-                                                 _get_headers_mock, _open_mock, post_mock):
-        from azure.cli.command_modules.appservice.custom import enable_zip_deploy
-        app = mock.MagicMock(kind='app,linux', reserved=True)
-        client_factory_mock.return_value.web_apps.get.return_value = app
-        post_mock.return_value.status_code = 0
-
-        enable_zip_deploy(mock.MagicMock(), 'myRG', 'myApp', 'app.zip',
-                          enable_kudu_warmup=False, tag='release / 1')
-
-        self.assertEqual(post_mock.call_args.args[0],
-                         'https://example.scm.azurewebsites.net/api/zipdeploy?isAsync=true&tag=release%20%2F%201')
-
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
-                return_value='https://example.scm.azurewebsites.net')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
-    @mock.patch('builtins.open', new_callable=mock.mock_open, read_data=b'zip-content')
-    @mock.patch('requests.post')
-    def test_zip_deploy_ignores_tag_for_windows_webapp(self, post_mock, _open_mock, _get_headers_mock,
-                                                       _get_scm_url_mock, client_factory_mock):
-        from azure.cli.command_modules.appservice.custom import enable_zip_deploy
-        app = mock.MagicMock(kind='app', reserved=False)
-        client_factory_mock.return_value.web_apps.get.return_value = app
-        post_mock.return_value.status_code = 0
-
-        with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
-            enable_zip_deploy(mock.MagicMock(), 'myRG', 'myApp', 'app.zip', tag='windows-tag')
-
-        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
-        self.assertNotIn('tag=', post_mock.call_args.args[0])
-
     @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_webapp_deploy_ignores_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
@@ -1475,29 +1437,6 @@ class TestOneDeployTag(unittest.TestCase):
 
         warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
         self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
-
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_profile_username')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability')
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_plan_to_use', return_value='myPlan')
-    @mock.patch('azure.cli.command_modules.appservice.custom.check_resource_group_exists', return_value=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_rg_to_use', return_value='myRG')
-    @mock.patch('azure.cli.command_modules.appservice.custom.set_location', return_value='westus')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_sku_to_use', return_value='F1')
-    def test_webapp_up_ignores_tag_for_windows_webapp(self, _get_sku_mock, _set_location_mock, _get_rg_mock,
-                                                      _check_rg_mock, _get_plan_mock, _client_factory_mock,
-                                                      site_availability_mock, _profile_username_mock):
-        from azure.cli.command_modules.appservice.custom import webapp_up
-        site_availability_mock.return_value = mock.MagicMock(name_available=True)
-        cmd = mock.MagicMock()
-        cmd.get_models.return_value = mock.MagicMock
-
-        with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
-            result = webapp_up(cmd, name='myApp', os_type='windows', html=True,
-                               tag='windows-tag', dryrun=True)
-
-        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
-        self.assertEqual(result['os'], 'windows')
 
     def test_arm_body_includes_tag(self):
         import json

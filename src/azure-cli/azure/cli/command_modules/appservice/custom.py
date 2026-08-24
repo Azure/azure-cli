@@ -897,7 +897,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=True, tag=None):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -907,13 +907,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
-    if tag is not None and not is_linux_webapp(app):
-        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
-        tag = None
     deployer = '&Deployer=az_cli_functions' if is_functionapp(app) else ''
     zip_url = scm_url + '/api/zipdeploy?isAsync=true' + deployer
-    if tag is not None:
-        zip_url = zip_url + '&tag=' + quote(tag, safe='')
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
@@ -10979,7 +10974,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=True, tag=None):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -10998,9 +10993,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if not os_type:
         logger.warning("No --os-type specified. Defaulting to '%s'.", os_name)
     _is_linux = os_name.lower() == LINUX_OS_NAME
-    if tag is not None and not _is_linux:
-        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
-        tag = None
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime:
@@ -11173,7 +11165,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status,
-                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors, tag=tag)
+                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
