@@ -269,7 +269,7 @@ class VMDelete(_VMDelete):
     def pre_operations(self):
         from azure.cli.core.azclierror import ResourceNotFoundError
         args = self.ctx.args
-        show_cmd = _VMShow(cli_ctx=self.cli_ctx)
+        show_cmd = VMShow(cli_ctx=self.cli_ctx)
         try:
             show_cmd(command_args={"resource_group": str(args.resource_group), "vm_name": str(args.name)})
         except ResourceNotFoundError as e:

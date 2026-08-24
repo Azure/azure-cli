@@ -233,7 +233,7 @@ class TestVMDeletePreOperations(unittest.TestCase):
         mock_show_instance = mock.MagicMock()
         mock_show_instance.side_effect = ResourceNotFoundError("VM not found")
         with mock.patch(
-            'azure.cli.command_modules.vm.operations.vm._VMShow',
+            'azure.cli.command_modules.vm.operations.vm.VMShow',
             return_value=mock_show_instance,
         ):
             with self.assertRaises(ResourceNotFoundError) as cm:
@@ -256,7 +256,7 @@ class TestVMDeletePreOperations(unittest.TestCase):
 
         mock_show_instance = mock.MagicMock()
         with mock.patch(
-            'azure.cli.command_modules.vm.operations.vm._VMShow',
+            'azure.cli.command_modules.vm.operations.vm.VMShow',
             return_value=mock_show_instance,
         ):
             # Should not raise
