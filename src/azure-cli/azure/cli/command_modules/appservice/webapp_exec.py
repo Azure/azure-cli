@@ -137,7 +137,7 @@ def webapp_exec(cmd,
 def _validate_exec_target(mode, target):
     target = target.lower()
     if target not in ('app', 'kudu'):
-        raise ValidationError("Invalid target '{}'. Supported targets: app, kudu.".format(target))
+        raise ValidationError("Invalid target '{}'. Supported target: app, kudu.".format(target))
     if mode.lower() == 'execute' and target == 'kudu':
         raise ValidationError("--target kudu is currently supported only in 'shell' mode.")
     return target
