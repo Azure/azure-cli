@@ -42,6 +42,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_startup_log,
                                                          troubleshoot_status,
                                                          create_webapp)
+from azure.cli.command_modules.appservice.tunnel import TunnelServer
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -1405,6 +1406,174 @@ class TestRuntimeFailedHintMocked(unittest.TestCase):
         error_msg = str(cm.exception)
         self.assertIn('az webapp log startup show -n myApp -g myRG', error_msg)
         self.assertIn('Timeout', error_msg)
+
+
+class TestTunnelServer(unittest.TestCase):
+    """Tests for TunnelServer reliability and cleanup improvements."""
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_tunnel_server_close_sets_closing_event(self, mock_socket_cls):
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = None
+        server.ws = None
+        from threading import Event
+        server._closing = Event()
+        server.sock = mock_sock
+
+        server.close()
+        self.assertTrue(server._closing.is_set())
+        mock_sock.close.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_tunnel_server_close_is_idempotent(self, mock_socket_cls):
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = None
+        server.ws = None
+        from threading import Event
+        server._closing = Event()
+        server.sock = mock_sock
+
+        server.close()
+        server.close()
+        # Socket.close should only be called once
+        mock_sock.close.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_tunnel_server_close_handles_ws_and_client(self, mock_socket_cls):
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = mock.MagicMock()
+        server.ws = mock.MagicMock()
+        from threading import Event
+        server._closing = Event()
+        server.sock = mock_sock
+
+        server.close()
+        server.ws.close.assert_called_once()
+        server.client.close.assert_called_once()
+        mock_sock.close.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.create_connection')
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_create_websocket_connection_retries_on_failure(self, mock_socket_cls, mock_create_conn):
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = None
+        server.ws = None
+        from threading import Event
+        server._closing = Event()
+        server.sock = mock_sock
+
+        mock_ws = mock.MagicMock()
+        # Fail twice, succeed on third
+        mock_create_conn.side_effect = [ConnectionError("fail1"), ConnectionError("fail2"), mock_ws]
+
+        with mock.patch.object(server._closing, 'wait'):
+            result = server._create_websocket_connection(
+                'wss://test/Tunnel.ashx', ['Authorization: Basic dGVzdDp0ZXN0'], 0)
+
+        self.assertEqual(result, mock_ws)
+        self.assertEqual(mock_create_conn.call_count, 3)
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.create_connection')
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_create_websocket_connection_raises_after_max_retries(self, mock_socket_cls, mock_create_conn):
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = None
+        server.ws = None
+        from threading import Event
+        server._closing = Event()
+        server.sock = mock_sock
+
+        mock_create_conn.side_effect = ConnectionError("always fail")
+
+        with mock.patch.object(server._closing, 'wait'):
+            with self.assertRaises(CLIError) as ctx:
+                server._create_websocket_connection(
+                    'wss://test/Tunnel.ashx', ['Authorization: Basic dGVzdDp0ZXN0'], 0)
+
+        self.assertIn('Failed to establish WebSocket tunnel connection', str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.tunnel.socket.socket')
+    def test_keepalive_ping_stops_on_event(self, mock_socket_cls):
+        from threading import Event
+        mock_sock = mock.MagicMock()
+        mock_socket_cls.return_value = mock_sock
+        mock_sock.getsockname.return_value = ('127.0.0.1', 12345)
+        server = TunnelServer.__new__(TunnelServer)
+        server.local_addr = '127.0.0.1'
+        server.local_port = 0
+        server.remote_addr = 'testapp.scm.azurewebsites.net'
+        server.auth_string = 'Basic dGVzdDp0ZXN0'
+        server.instance = None
+        server.client = None
+        server.ws = None
+        server._closing = Event()
+        server.sock = mock_sock
+
+        mock_ws = mock.MagicMock()
+        mock_ws.connected = True
+        stop_event = Event()
+        # Signal stop immediately so the keepalive loop runs once at most
+        stop_event.set()
+        server._send_keepalive_pings(mock_ws, 1, stop_event)
+        # Should not crash; ws.ping may or may not have been called depending on timing
+
+
+class TestTunnelSignalCleanup(unittest.TestCase):
+    """Tests for signal handler registration and cleanup in create_tunnel / create_tunnel_and_session."""
+
+    @mock.patch('signal.signal')
+    @mock.patch('atexit.register')
+    def test_register_tunnel_cleanup_registers_handlers(self, mock_atexit, mock_signal):
+        from azure.cli.command_modules.appservice.custom import _register_tunnel_cleanup
+        import signal
+
+        mock_tunnel = mock.MagicMock()
+        _register_tunnel_cleanup(mock_tunnel)
+
+        mock_atexit.assert_called_once()
+        signal_calls = {call[0][0] for call in mock_signal.call_args_list}
+        self.assertIn(signal.SIGINT, signal_calls)
+        self.assertIn(signal.SIGTERM, signal_calls)
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

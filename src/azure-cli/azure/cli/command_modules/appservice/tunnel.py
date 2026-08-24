@@ -8,12 +8,11 @@ import sys
 import ssl
 import json
 import socket
-import time
 import traceback
 import logging as logs
 from contextlib import closing
 from datetime import datetime
-from threading import Thread
+from threading import Thread, Event
 
 import websocket
 from websocket import create_connection, WebSocket
@@ -23,6 +22,12 @@ from .utils import get_pool_manager
 from knack.util import CLIError
 from knack.log import get_logger
 logger = get_logger(__name__)
+
+# Retry / keepalive constants
+_MAX_RECONNECT_ATTEMPTS = 5
+_INITIAL_RECONNECT_DELAY = 1        # seconds
+_MAX_RECONNECT_DELAY = 30           # seconds
+_KEEPALIVE_INTERVAL = 30            # seconds between WebSocket pings
 
 
 class TunnelWebSocket(WebSocket):
@@ -52,6 +57,7 @@ class TunnelServer:
         self.instance = instance
         self.client = None
         self.ws = None
+        self._closing = Event()
         logger.info('Creating a socket on port: %s', self.local_port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         logger.info('Setting socket options')
@@ -117,12 +123,48 @@ class TunnelServer:
             logger.warning('Waiting for app to start up... ')
         return False
 
+    def _create_websocket_connection(self, host, basic_auth_header, verify_mode):
+        """Create a WebSocket connection with retry logic and exponential backoff."""
+        delay = _INITIAL_RECONNECT_DELAY
+        for attempt in range(1, _MAX_RECONNECT_ATTEMPTS + 1):
+            if self._closing.is_set():
+                return None
+            try:
+                ws = create_connection(host,
+                                       sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
+                                       class_=TunnelWebSocket,
+                                       header=basic_auth_header,
+                                       sslopt={'cert_reqs': verify_mode},
+                                       timeout=60 * 60,
+                                       enable_multithread=True)
+                logger.info('WebSocket connected on attempt %s', attempt)
+                return ws
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info('WebSocket connection attempt %s/%s failed: %s',
+                            attempt, _MAX_RECONNECT_ATTEMPTS, ex)
+                if attempt == _MAX_RECONNECT_ATTEMPTS:
+                    raise CLIError(
+                        'Failed to establish WebSocket tunnel connection after {} attempts. '
+                        'Last error: {}'.format(_MAX_RECONNECT_ATTEMPTS, ex))
+                logger.warning('Retrying WebSocket connection in %s seconds...', delay)
+                self._closing.wait(delay)
+                delay = min(delay * 2, _MAX_RECONNECT_DELAY)
+        return None  # pragma: no cover
+
     def _listen(self):
         self.sock.listen(100)
         index = 0
-        while True:
-            self.client, _address = self.sock.accept()
-            self.client.settimeout(60 * 60)
+        while not self._closing.is_set():
+            try:
+                self.sock.settimeout(1.0)
+                try:
+                    self.client, _address = self.sock.accept()
+                except socket.timeout:
+                    continue
+                self.client.settimeout(60 * 60)
+            except OSError:
+                # Socket closed during shutdown
+                break
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
             basic_auth_header = [f"Authorization: {self.auth_string}"]
             if self.instance is not None:
@@ -136,30 +178,47 @@ class TunnelServer:
                 logger.info('Websocket tracing disabled, use --verbose flag to enable')
                 websocket.enableTrace(False)
             verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
-            self.ws = create_connection(host,
-                                        sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
-                                        class_=TunnelWebSocket,
-                                        header=basic_auth_header,
-                                        sslopt={'cert_reqs': verify_mode},
-                                        timeout=60 * 60,
-                                        enable_multithread=True)
+            self.ws = self._create_websocket_connection(host, basic_auth_header, verify_mode)
+            if self.ws is None:
+                break
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
             logger.info('Got debugger connection... index: %s', index)
+            keepalive_stop = Event()
             debugger_thread = Thread(target=self._listen_to_client, args=(self.client, self.ws, index))
             web_socket_thread = Thread(target=self._listen_to_web_socket, args=(self.client, self.ws, index))
+            keepalive_thread = Thread(target=self._send_keepalive_pings,
+                                      args=(self.ws, index, keepalive_stop))
+            keepalive_thread.daemon = True
             debugger_thread.start()
             web_socket_thread.start()
+            keepalive_thread.start()
             logger.info('Both debugger and websocket threads started...')
             logger.info('Successfully connected to local server..')
             debugger_thread.join()
             web_socket_thread.join()
+            keepalive_stop.set()
+            keepalive_thread.join(timeout=5)
             logger.info('Both debugger and websocket threads stopped...')
             logger.info('Stopped local server..')
 
+    def _send_keepalive_pings(self, ws_socket, index, stop_event):
+        """Periodically send WebSocket pings to prevent idle disconnects."""
+        while not stop_event.is_set() and not self._closing.is_set():
+            try:
+                if ws_socket.connected:
+                    ws_socket.ping()
+                    logger.info('Sent keepalive ping, index: %s', index)
+                else:
+                    break
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.info('Keepalive ping failed (index %s): %s', index, ex)
+                break
+            stop_event.wait(_KEEPALIVE_INTERVAL)
+
     def _listen_to_web_socket(self, client, ws_socket, index):
         try:
-            while True:
+            while not self._closing.is_set():
                 logger.info('Waiting for websocket data, connection status: %s, index: %s', ws_socket.connected, index)
                 data = ws_socket.recv()
                 logger.info('Received websocket data: %s, index: %s', data, index)
@@ -175,12 +234,18 @@ class TunnelServer:
             logger.info(ex)
         finally:
             logger.info('Client disconnected!, index: %s', index)
-            client.close()
-            ws_socket.close()
+            try:
+                client.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+            try:
+                ws_socket.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
 
     def _listen_to_client(self, client, ws_socket, index):
         try:
-            while True:
+            while not self._closing.is_set():
                 logger.info('Waiting for debugger data, index: %s', index)
                 buf = bytearray(4096)
                 nbytes = client.recv_into(buf, 4096)
@@ -197,8 +262,37 @@ class TunnelServer:
             logger.warning("Connection Timed Out")
         finally:
             logger.info('Client disconnected %s', index)
-            client.close()
-            ws_socket.close()
+            try:
+                client.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+            try:
+                ws_socket.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+
+    def close(self):
+        """Cleanly shut down the tunnel server and release all resources."""
+        if self._closing.is_set():
+            return
+        self._closing.set()
+        logger.info('Closing tunnel server...')
+        if self.ws:
+            try:
+                self.ws.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+        if self.client:
+            try:
+                self.client.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+        if self.sock:
+            try:
+                self.sock.close()
+            except Exception:  # pylint: disable=broad-except
+                pass
+        logger.info('Tunnel server closed')
 
     def start_server(self):
         self._listen()
