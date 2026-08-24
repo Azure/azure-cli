@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines/{}/instanceview", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/virtualmachines/{}/instanceview", "2026-04-01"],
         ]
     }
 
@@ -124,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -164,6 +164,10 @@ class Show(AAZCommand):
             _schema_on_200.boot_diagnostics = AAZObjectType(
                 serialized_name="bootDiagnostics",
             )
+            _schema_on_200.capacity_reservation_type = AAZStrType(
+                serialized_name="capacityReservationType",
+                flags={"read_only": True},
+            )
             _schema_on_200.computer_name = AAZStrType(
                 serialized_name="computerName",
             )
@@ -171,6 +175,10 @@ class Show(AAZCommand):
             _schema_on_200.extensions = AAZListType()
             _schema_on_200.hyper_v_generation = AAZStrType(
                 serialized_name="hyperVGeneration",
+            )
+            _schema_on_200.interconnect_instance_view = AAZObjectType(
+                serialized_name="interconnectInstanceView",
+                flags={"read_only": True},
             )
             _schema_on_200.maintenance_redeploy_status = AAZObjectType(
                 serialized_name="maintenanceRedeployStatus",
@@ -225,6 +233,9 @@ class Show(AAZCommand):
             )
             _element.name = AAZStrType()
             _element.statuses = AAZListType()
+            _element.storage_alignment_status = AAZStrType(
+                serialized_name="storageAlignmentStatus",
+            )
 
             encryption_settings = cls._schema_on_200.disks.Element.encryption_settings
             encryption_settings.Element = AAZObjectType()
@@ -283,6 +294,12 @@ class Show(AAZCommand):
             substatuses = cls._schema_on_200.extensions.Element.substatuses
             substatuses.Element = AAZObjectType()
             _ShowHelper._build_schema_instance_view_status_read(substatuses.Element)
+
+            interconnect_instance_view = cls._schema_on_200.interconnect_instance_view
+            interconnect_instance_view.interconnect_subgroup_id = AAZStrType(
+                serialized_name="interconnectSubgroupId",
+                flags={"read_only": True},
+            )
 
             maintenance_redeploy_status = cls._schema_on_200.maintenance_redeploy_status
             maintenance_redeploy_status.is_customer_initiated_maintenance_allowed = AAZBoolType(

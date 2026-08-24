@@ -44,7 +44,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
+from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -3975,9 +3975,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     result = {}
     for s in generic_configurations:
         try:
-            json_object = get_json_object(s)
+            json_object = shell_safe_json_parse(s)
             for config_name in json_object:
-                if config_name.lower() == 'ip_security_restrictions':
+                if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
                     updating_ip_security_restrictions = True
             result.update(json_object)
         except CLIError:
@@ -3985,9 +3985,24 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             result[config_name] = value
 
     for config_name, value in result.items():
-        if config_name.lower() == 'ip_security_restrictions':
+        if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
             updating_ip_security_restrictions = True
-        setattr(configs, config_name, value)
+        # In azure-mgmt-web 11.0.0+, SiteConfigResource wraps SiteConfig under 'properties'.
+        # Extra camelCase keys (e.g. 'webJobsEnabled') that are not flattened SDK fields must be
+        # set on configs.properties so the SDK serializer places them under "properties" in the
+        # request body, not at the resource root where ARM ignores them.
+        # String 'true'/'false' from key=value form are also coerced to bool so they match the
+        # boolean type expected by ARM (consistent with JSON-file form which already passes bool).
+        if any(c.isupper() for c in config_name):
+            if isinstance(value, str) and value.lower() in ('true', 'false'):
+                value = value.lower() == 'true'
+            # Route to the SiteConfig child when configs is a SiteConfigResource
+            target = getattr(configs, 'properties', None)
+            if target is None:
+                target = configs
+            target[config_name] = value
+        else:
+            setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
