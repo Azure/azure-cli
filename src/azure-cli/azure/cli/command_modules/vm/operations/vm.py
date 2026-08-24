@@ -272,12 +272,12 @@ class VMDelete(_VMDelete):
         show_cmd = _VMShow(cli_ctx=self.cli_ctx)
         try:
             show_cmd(command_args={"resource_group": str(args.resource_group), "vm_name": str(args.name)})
-        except ResourceNotFoundError:
+        except ResourceNotFoundError as e:
             raise ResourceNotFoundError(
                 "The VM '{}' under resource group '{}' was not found.".format(
                     str(args.name), str(args.resource_group)
                 )
-            )
+            ) from e
 
 
 def convert_show_result_to_snake_case(result):
