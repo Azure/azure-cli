@@ -38,7 +38,7 @@ function clean_up_resources {
     # List all resources in the Resource Group
     $resources = az resource list --resource-group $rgName --query "[].{name: name, id: id}" | ConvertFrom-Json
 
-    if ($resources -eq "") {
+    if ($null -eq $resources -or $resources.Count -eq 0) {
         Write-Host "No resources found in resource group $rgName."
         return
     }
