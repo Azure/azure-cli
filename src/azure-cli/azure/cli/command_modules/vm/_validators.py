@@ -1951,6 +1951,10 @@ def process_vmss_create_namespace(cmd, namespace):
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.instance_id and namespace.disable_capacity_reservation_assignment is not None:
+        raise MutuallyExclusiveArgumentError(
+            "--disable-capacity-reservation-assignment applies to the parent VMSS and cannot be used with "
+            "--instance-id")
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
@@ -2366,7 +2370,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 try:
                     replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[2]
-                    if storage_account_type not in storage_account_types_list:
+                    if storage_account_type.lower() not in storage_account_types_list:
                         raise ArgumentUsageError(
                             "usage error: {} is an invalid target region argument. "
                             "The third part is not a valid storage account type. "
@@ -2499,10 +2503,10 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 try:
                     replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[3]
-                    if storage_account_type not in storage_account_types_list:
+                    if storage_account_type.lower() not in storage_account_types_list:
                         raise ArgumentUsageError(
                             "usage error: {} is an invalid target edge zone argument. "
-                            "The forth part is not a valid storage account type. "
+                            "The fourth part is not a valid storage account type. "
                             "Storage account types must be one of {}.".format(t, storage_account_types_str))
                 except ValueError:
                     raise ArgumentUsageError(
@@ -2827,6 +2831,11 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
 
 
 def _validate_capacity_reservation_group(cmd, namespace):
+    if getattr(namespace, 'capacity_reservation_group', None) is not None and \
+            getattr(namespace, 'disable_capacity_reservation_assignment', None) is not None:
+        raise MutuallyExclusiveArgumentError(
+            "You can only specify one of --capacity-reservation-group and "
+            "--disable-capacity-reservation-assignment")
 
     if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 

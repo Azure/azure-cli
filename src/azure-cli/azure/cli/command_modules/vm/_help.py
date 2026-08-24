@@ -1159,6 +1159,9 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VM that is not associated with any capacity reservation.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204 --disable-capacity-reservation-assignment true
 """
 
 helps['vm diagnostics'] = """
@@ -2147,6 +2150,8 @@ examples:
         az vm deallocate -n name -g group
         az vm update -n name -g group --host-group my-host-group
         az vm start -n name -g group
+  - name: Opt out a VM from being associated with any capacity reservation.
+    text: az vm update -n name -g group --disable-capacity-reservation-assignment true
 """
 
 helps['vm user'] = """
@@ -2301,6 +2306,9 @@ examples:
   - name: Create a VMSS from community gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VMSS that is not associated with any capacity reservation.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image Ubuntu2204 --disable-capacity-reservation-assignment true
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
@@ -2854,6 +2862,8 @@ examples:
     text: >
         az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
             --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
+  - name: Opt out a VMSS from being associated with any capacity reservation.
+    text: az vmss update -n MyVmss -g MyResourceGroup --disable-capacity-reservation-assignment true
 """
 
 helps['vmss update-instances'] = """
@@ -2979,6 +2989,8 @@ examples:
     text: |
         az capacity reservation group create -n ReservationGroupName -l centraluseuap \\
             -g MyResourceGroup --tags key=val --zones 1 2
+  - name: Create an open capacity reservation group.
+    text: az capacity reservation group create -n ReservationGroupName -g MyResourceGroup --reservation-type Open
 """
 
 helps['capacity reservation group update'] = """
