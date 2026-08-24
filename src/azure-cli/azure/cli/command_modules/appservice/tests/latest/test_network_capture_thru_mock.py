@@ -142,6 +142,31 @@ class CollectNetworkCaptureTest(unittest.TestCase):
             ('[%d/%d] Network capture collected successfully.', 4, 4),
         ])
 
+    @mock.patch(_MODULE + '.time.sleep')
+    @mock.patch(_MODULE + '._request_json')
+    def test_captured_status_polls_until_analysis_is_ready(self, request_json, sleep):
+        request_json.side_effect = [
+            {'id': 'capture-1', 'captureCommand': 'server generated command'},
+            {'id': 'capture-1', 'status': 'Captured'},
+            {
+                'id': 'capture-1',
+                'status': 'Ready',
+                'downloadUrl': '/api/networkcapture/captures/capture-1/download',
+                'reportUrl': '/api/networkcapture/captures/capture-1/report',
+            },
+        ]
+
+        output = StringIO()
+        with redirect_stdout(output):
+            collect_network_capture(self.cmd, 'rg', 'app')
+
+        request_json.assert_any_call(
+            self.session, 'GET',
+            'https://app.scm.azurewebsites.net/api/networkcapture/captures/capture-1')
+        sleep.assert_called_once_with(2)
+        self.assertIn('/capture-1/download', output.getvalue())
+        self.assertIn('/capture-1/report', output.getvalue())
+
     @mock.patch(_MODULE + '._request_json')
     def test_collect_only_omits_report_link(self, request_json):
         request_json.side_effect = [

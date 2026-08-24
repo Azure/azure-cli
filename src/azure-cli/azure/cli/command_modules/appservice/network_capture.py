@@ -19,7 +19,7 @@ from .webapp_exec import _resolve_target_instances
 logger = get_logger(__name__)
 
 _CAPTURE_API = '/api/networkcapture'
-_TERMINAL_STATES = {'ready', 'captured', 'nopackets', 'failed'}
+_TERMINAL_STATES = {'ready', 'nopackets', 'failed'}
 _DEFAULT_OPERATION_TIMEOUT = 10 * 60
 _PROGRESS_PHASES = ('prepare', 'capture', 'process', 'complete')
 
