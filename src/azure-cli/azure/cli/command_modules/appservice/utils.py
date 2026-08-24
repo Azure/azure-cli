@@ -8,6 +8,7 @@ import os
 import urllib
 import urllib3
 import certifi
+from collections.abc import MutableMapping
 from datetime import datetime
 
 from knack.log import get_logger
@@ -53,13 +54,21 @@ def get_site_server_farm_id(site):
     In azure-mgmt-web 11.0.0+, models use hybrid dict/model nature with camelCase keys.
     This helper provides backward compatibility.
     """
-    # Try new SDK dictionary-style access with camelCase
-    try:
-        return site["serverFarmId"]
-    except (KeyError, TypeError):
-        pass
+    # Try new SDK dictionary-style access with camelCase. The generated Site
+    # model stores flattened properties under "properties".
+    # For hybrid SDK objects, site.properties is an attribute; for plain dicts, fall back
+    # to the "properties" key so that unit-test fixtures (plain dicts) also work.
+    properties_source = getattr(site, 'properties', None)
+    if properties_source is None and isinstance(site, MutableMapping):
+        properties_source = site.get('properties')
+    for source in (site, properties_source):
+        if not isinstance(source, MutableMapping):
+            continue
+        for property_name in ('serverFarmId', 'appServicePlanId'):
+            if property_name in source:
+                return source[property_name]
     # Fall back to old SDK attribute access
-    return getattr(site, 'server_farm_id', None)
+    return getattr(site, 'server_farm_id', getattr(site, 'app_service_plan_id', None))
 
 
 def str2bool(v):
@@ -247,15 +256,20 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 
 def _rename_server_farm_props(webapp):
-    # Should be renamed in SDK in a future release
-    server_farm_id = get_site_server_farm_id(webapp)
-    setattr(webapp, 'app_service_plan_id', server_farm_id)
-    # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
-    if hasattr(webapp, 'server_farm_id'):
-        try:
-            del webapp.server_farm_id
-        except (AttributeError, TypeError):
-            pass
+    # Newer SDK models (MutableMapping-based) are handled by the command-level
+    # transform (transform_rename_server_farm_id / _list) which operates on the
+    # already-serialised dict. Here we only need to cover the legacy attribute-style
+    # objects so that downstream code (e.g. get_site_server_farm_id) can still read
+    # app_service_plan_id from older SDK models.
+    if not isinstance(webapp, MutableMapping):
+        server_farm_id = get_site_server_farm_id(webapp)
+        setattr(webapp, 'app_service_plan_id', server_farm_id)
+        # Remove server_farm_id attribute for old SDK compatibility
+        if hasattr(webapp, 'server_farm_id'):
+            try:
+                del webapp.server_farm_id
+            except (AttributeError, TypeError):
+                pass
     return webapp
 
 

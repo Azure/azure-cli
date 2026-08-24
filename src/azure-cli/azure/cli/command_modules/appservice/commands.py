@@ -40,6 +40,51 @@ def transform_web_list_output(webs):
     return [transform_web_output(w) for w in webs]
 
 
+def transform_rename_server_farm_id(web):
+    """Post-serialization transformer: expose appServicePlanId in output.
+
+    The command-level 'transform' hook runs *before* the pipeline calls todict(),
+    so the value received here is a raw model object, not yet a plain dict.  We
+    therefore serialise it ourselves first using the same todict() the pipeline
+    would use, add appServicePlanId to the resulting dict, and return the dict so
+    that the pipeline's subsequent todict() call passes through it unchanged.
+
+    serverFarmId is preserved in the output for backward compatibility with
+    existing scripts and tests.  appServicePlanId is added alongside it as an
+    alias so that callers relying on the original field name continue to work.
+
+    In newer azure-mgmt-web SDK versions (ARM-envelope layout) serverFarmId is
+    nested under 'properties'.  In older flat-layout versions it appears at the
+    top level.  Both cases are handled.
+    """
+    from azure.cli.core.util import todict
+    from azure.cli.core.commands import AzCliCommandInvoker
+
+    if not isinstance(web, dict):
+        web = todict(web, AzCliCommandInvoker.remove_additional_prop_layer)
+
+    if not isinstance(web, dict):
+        return web
+
+    # serverFarmId may be at the top level (older/flat SDK serialisation) or
+    # nested under 'properties' (newer ARM-envelope SDK serialisation).
+    # Use get (not pop) so that serverFarmId is preserved for backward compat.
+    server_farm_id = web.get('serverFarmId')
+    if server_farm_id is None:
+        properties = web.get('properties')
+        if isinstance(properties, dict):
+            server_farm_id = properties.get('serverFarmId')
+
+    if server_farm_id is not None and 'appServicePlanId' not in web:
+        web['appServicePlanId'] = server_farm_id
+
+    return web
+
+
+def transform_rename_server_farm_id_list(webs):
+    return [transform_rename_server_farm_id(w) for w in webs]
+
+
 def transform_runtime_list_output(result):
     from collections import OrderedDict
     return [OrderedDict([
@@ -220,8 +265,10 @@ def load_command_table(self, _):
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_webapp', transform=transform_rename_server_farm_id_list,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_app', transform=transform_rename_server_farm_id,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -462,8 +509,10 @@ def load_command_table(self, _):
                          validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list-flexconsumption-runtimes', 'list_flex_function_app_runtimes')
-        g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_function_app', transform=transform_rename_server_farm_id_list,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_functionapp', transform=transform_rename_server_farm_id,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -686,8 +735,10 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_logicapp', transform=transform_rename_server_farm_id_list,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', transform=transform_rename_server_farm_id,
+                              table_transformer=transform_web_output)
         g.custom_command('scale', 'scale_logicapp', exception_handler=ex_handler_factory())
 
     with self.command_group('logicapp config appsettings', custom_command_type=logicapp_custom) as g:
