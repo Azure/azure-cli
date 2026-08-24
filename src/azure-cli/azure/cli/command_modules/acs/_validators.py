@@ -783,7 +783,7 @@ def validate_registry_name(cmd, namespace):
     """Append login server endpoint suffix."""
     registry = namespace.acr
     suffixes = cmd.cli_ctx.cloud.suffixes
-    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    # Some clouds do not define 'acr_login_server_endpoint'
     from azure.cli.core.cloud import CloudSuffixNotSetException
     try:
         acr_suffix = suffixes.acr_login_server_endpoint

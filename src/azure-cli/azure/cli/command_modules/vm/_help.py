@@ -2306,6 +2306,9 @@ examples:
   - name: Create a VMSS from community gallery image.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VMSS that is not associated with any capacity reservation.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image Ubuntu2204 --disable-capacity-reservation-assignment true
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
@@ -2859,6 +2862,8 @@ examples:
     text: >
         az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
             --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
+  - name: Opt out a VMSS from being associated with any capacity reservation.
+    text: az vmss update -n MyVmss -g MyResourceGroup --disable-capacity-reservation-assignment true
 """
 
 helps['vmss update-instances'] = """
