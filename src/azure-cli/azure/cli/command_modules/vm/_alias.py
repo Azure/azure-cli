@@ -74,9 +74,9 @@ alias_json = """
             "version":  "latest",
             "architecture": "x64"
           },
-          "SuseSles15SP3": {
+          "SuseSles15SP5": {
             "publisher": "SUSE",
-            "offer": "sles-15-sp3",
+            "offer": "sles-15-sp5",
             "sku": "gen2",
             "version": "latest",
             "architecture": "x64"
@@ -86,6 +86,20 @@ alias_json = """
             "offer":  "0001-com-ubuntu-server-jammy",
             "sku":  "22_04-lts-gen2",
             "version":  "latest",
+            "architecture": "x64"
+          },
+          "Ubuntu2404": {
+            "publisher": "Canonical",
+            "offer": "ubuntu-24_04-lts",
+            "sku": "server",
+            "version": "latest",
+            "architecture": "x64"
+          },
+          "Ubuntu2404Pro": {
+            "publisher": "Canonical",
+            "offer": "ubuntu-24_04-lts",
+            "sku": "ubuntu-pro",
+            "version": "latest",
             "architecture": "x64"
           }
         },

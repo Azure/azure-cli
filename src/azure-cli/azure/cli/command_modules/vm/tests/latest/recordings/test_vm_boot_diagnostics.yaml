@@ -5569,6 +5569,200 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - vm boot-diagnostics get-boot-log-uris
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --expire
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Compute/virtualMachines/myvm/retrieveBootDiagnosticsData?sasUriExpirationTimeInMinutes=100&api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"consoleScreenshotBlobUri\": \"https://clitestbootdiag000002.blob.core.windows.net/bootdiagnostics-myvm-696487e1-ab2f-49a4-94bc-4ab20202db11/myvm.696487e1-ab2f-49a4-94bc-4ab20202db11.screenshot.bmp?sv=2018-03-28&sr=b&sig=customSasToken%3d&se=2026-02-16T04%3a16%3a58Z&sp=r\",\r\n  \"serialConsoleLogBlobUri\": \"https://clitestbootdiag000002.blob.core.windows.net/bootdiagnostics-myvm-696487e1-ab2f-49a4-94bc-4ab20202db11/myvm.696487e1-ab2f-49a4-94bc-4ab20202db11.serialconsole.log?sv=2018-03-28&sr=b&sig=customSasToken%3d&se=2026-02-16T04%3a16%3a58Z&sp=r\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '555'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 Feb 2026 01:16:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-operation-identifier:
+      - tenantId=4b71fe15-44c6-47b7-94ac-5a6b2cc290e9,objectId=fe51c4e5-d60c-4818-a8d9-80928d053b7b/westus/aabbccdd-0000-0000-0000-aabbccddaabb
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGetSubscriptionMaximum;23997,Microsoft.Compute/LowCostGetResource;26
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: AABBCCDDAABBCCDDAABBCCDDAABBCCDD Ref B: SG2AA1070303036 Ref C: 2026-02-16T01:16:59Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm boot-diagnostics get-boot-log
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Compute/virtualMachines/myvm?$expand=instanceView&api-version=2025-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Compute/virtualMachines/myvm\",\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_B2ms\"\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"vmId\": \"696487e1-ab2f-49a4-94bc-4ab20202db11\",\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\": \"16.04.202109281\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\": \"myvm_OsDisk_1_7db76d410f54481bbfa9e8ff046c42b6\",\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Compute/disks/myvm_OsDisk_1_7db76d410f54481bbfa9e8ff046c42b6\"\r\n        },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"myvm\",\r\n      \"adminUsername\": \"user11\",\r\n      \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\": true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Network/networkInterfaces/myvmVMNic\"}]},\r\n    \"diagnosticsProfile\": {\r\n      \"bootDiagnostics\": {\r\n        \"enabled\": true,\r\n        \"storageUri\": \"https://clitestbootdiag000002.blob.core.windows.net/\"\r\n      }\r\n    },\r\n    \"instanceView\": {\r\n      \"computerName\": \"myvm\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\": \"16.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.15.0.1\",\r\n        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n            \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n            \"message\": \"Guest Agent is running\",\r\n            \"time\": \"2026-02-16T01:15:52+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\": []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"myvm_OsDisk_1_7db76d410f54481bbfa9e8ff046c42b6\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning succeeded\",\r\n              \"time\": \"2026-02-16T01:15:44.4646818+00:00\"\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"bootDiagnostics\": {},\r\n      \"hyperVGeneration\": \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n          \"time\": \"2026-02-16T01:15:54.1991945+00:00\"\r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n        }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2026-02-16T01:14:39.5575714+00:00\"\r\n  },\r\n  \"etag\": \"\\\"4\\\"\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3462'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 Feb 2026 01:16:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGetSubscriptionMaximum;23997,Microsoft.Compute/LowCostGetResource;25
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: BBCCDDAABBCCDDAABBCCDDAABBCCDDAA Ref B: SG2AA1070303036 Ref C: 2026-02-16T01:16:59Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm boot-diagnostics get-boot-log
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_diagnostics000001/providers/Microsoft.Compute/virtualMachines/myvm/retrieveBootDiagnosticsData?api-version=2024-07-01
+  response:
+    body:
+      string: "{\r\n  \"consoleScreenshotBlobUri\": \"https://clitestbootdiag000002.blob.core.windows.net/bootdiagnostics-myvm-696487e1-ab2f-49a4-94bc-4ab20202db11/myvm.696487e1-ab2f-49a4-94bc-4ab20202db11.screenshot.bmp?sv=2018-03-28&sr=b&sig=customSasToken%3d&se=2026-02-16T04%3a16%3a58Z&sp=r\",\r\n  \"serialConsoleLogBlobUri\": \"https://clitestbootdiag000002.blob.core.windows.net/bootdiagnostics-myvm-696487e1-ab2f-49a4-94bc-4ab20202db11/myvm.696487e1-ab2f-49a4-94bc-4ab20202db11.serialconsole.log?sv=2018-03-28&sr=b&sig=customSasToken%3d&se=2026-02-16T04%3a16%3a58Z&sp=r\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '555'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 Feb 2026 01:17:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-operation-identifier:
+      - tenantId=4b71fe15-44c6-47b7-94ac-5a6b2cc290e9,objectId=fe51c4e5-d60c-4818-a8d9-80928d053b7b/westus/ccddaabb-0000-0000-0000-ccddaabbccdd
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGetSubscriptionMaximum;23996,Microsoft.Compute/LowCostGetResource;24
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: CCDDAABBCCDDAABBCCDDAABBCCDDAABB Ref B: SG2AA1070303036 Ref C: 2026-02-16T01:17:00Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: https://clitestbootdiag000002.blob.core.windows.net/bootdiagnostics-myvm-696487e1-ab2f-49a4-94bc-4ab20202db11/myvm.696487e1-ab2f-49a4-94bc-4ab20202db11.serialconsole.log?sv=2018-03-28&sr=b&sig=customSasToken%3D&se=2026-02-16T04%3A16%3A58Z&sp=r
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Error><Code>BlobNotFound</Code><Message>The specified blob does not exist.\nRequestId:aabbccdd-0000-0000-0000-aabbccddaabb\nTime:2026-02-16T01:17:00.0000000Z</Message></Error>"
+    headers:
+      content-length:
+      - '214'
+      content-type:
+      - application/xml
+      date:
+      - Mon, 16 Feb 2026 01:17:00 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-error-code:
+      - BlobNotFound
+      x-ms-version:
+      - '2018-03-28'
+    status:
+      code: 404
+      message: The specified blob does not exist.
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - vm boot-diagnostics disable
       Connection:
       - keep-alive
