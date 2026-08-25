@@ -125,5 +125,51 @@ class TestVpnConnectionCertAuthNoSharedKey(unittest.TestCase):
         self.assertIn('--shared-key is required', str(ctx.exception))
 
 
+    def test_application_gateway_parent_api_version(self):
+        """Parent application-gateway operations must use API version 2025-07-01 so that
+        Managed HSM SSL certificate fields (hsm.keyId / hsm.publicCertData) are preserved."""
+        from azure.cli.command_modules.network.aaz.latest.network.application_gateway import _show, _create, _update
+
+        for module, name in [(_show, "Show"), (_create, "Create"), (_update, "Update")]:
+            cls = getattr(module, name)
+            self.assertEqual(
+                cls._aaz_info["version"],
+                "2025-07-01",
+                msg=f"application-gateway {name}._aaz_info['version'] must be 2025-07-01",
+            )
+            for resource in cls._aaz_info["resources"]:
+                self.assertEqual(
+                    resource[-1],
+                    "2025-07-01",
+                    msg=f"application-gateway {name} resources entry must reference 2025-07-01",
+                )
+
+    def test_application_gateway_show_ssl_cert_hsm_schema(self):
+        """The parent application-gateway show response schema must include the
+        sslCertificates[].properties.hsm object with keyId and publicCertData."""
+        from azure.cli.command_modules.network.aaz.latest.network.application_gateway._show import Show
+
+        inner_cls = Show.ApplicationGatewaysGet
+        inner_cls._build_schema_on_200()
+        ssl_cert_props = inner_cls._schema_on_200.properties.ssl_certificates.Element.properties
+        fields = ssl_cert_props._fields
+        self.assertIn(
+            "hsm",
+            fields,
+            "ssl_certificates.Element.properties must contain 'hsm'",
+        )
+        hsm_fields = fields["hsm"]._fields
+        self.assertIn(
+            "key_id",
+            hsm_fields,
+            "ssl_certificates.Element.properties.hsm must contain 'key_id'",
+        )
+        self.assertIn(
+            "public_cert_data",
+            hsm_fields,
+            "ssl_certificates.Element.properties.hsm must contain 'public_cert_data'",
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

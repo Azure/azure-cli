@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-10-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2024-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01"],
         ]
     }
 
@@ -117,7 +117,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-10-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -1062,6 +1062,7 @@ class Show(AAZCommand):
 
             properties = cls._schema_on_200.properties.ssl_certificates.Element.properties
             properties.data = AAZStrType()
+            properties.hsm = AAZObjectType()
             properties.key_vault_secret_id = AAZStrType(
                 serialized_name="keyVaultSecretId",
             )
@@ -1073,6 +1074,14 @@ class Show(AAZCommand):
             properties.public_cert_data = AAZStrType(
                 serialized_name="publicCertData",
                 flags={"read_only": True},
+            )
+
+            hsm = cls._schema_on_200.properties.ssl_certificates.Element.properties.hsm
+            hsm.key_id = AAZStrType(
+                serialized_name="keyId",
+            )
+            hsm.public_cert_data = AAZStrType(
+                serialized_name="publicCertData",
             )
 
             ssl_profiles = cls._schema_on_200.properties.ssl_profiles
