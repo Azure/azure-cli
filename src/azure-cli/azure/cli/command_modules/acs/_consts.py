@@ -6,6 +6,8 @@
 from enum import Enum
 
 # consts for AgentPool
+CONST_AGENTPOOL_UPDATE_ZONES_API_VERSION = "2026-01-02-preview"
+
 # priority
 CONST_SCALE_SET_PRIORITY_REGULAR = "Regular"
 CONST_SCALE_SET_PRIORITY_SPOT = "Spot"

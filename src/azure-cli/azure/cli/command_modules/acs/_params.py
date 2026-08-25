@@ -1192,6 +1192,14 @@ def load_arguments(self, _):
         c.argument("undrainable_node_behavior")
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
+        c.argument(
+            'zones',
+            zones_type,
+            options_list=['--zones', '-z'],
+            is_preview=True,
+            help='Use "auto" to migrate a regional node pool to automatic zone placement. '
+                 'Other availability zone changes are subject to service restrictions.',
+        )
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)

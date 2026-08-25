@@ -11,6 +11,7 @@ from typing import Dict, List, Tuple, TypeVar, Union
 
 from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
+    CONST_AGENTPOOL_UPDATE_ZONES_API_VERSION,
     CONST_AVAILABILITY_SET,
     CONST_DEFAULT_NODE_OS_TYPE,
     CONST_DEFAULT_NODE_VM_SIZE,
@@ -48,6 +49,7 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
@@ -2861,6 +2863,18 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.mode = mode
         return agentpool
 
+    def update_zones(self, agentpool: AgentPool) -> AgentPool:
+        """Update availability zones for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        zones = self.context.raw_param.get("zones")
+        if zones is not None:
+            agentpool.availability_zones = zones
+        return agentpool
+
     def update_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -2982,6 +2996,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_upgrade_settings(agentpool)
         # update misc vm properties
         agentpool = self.update_vm_properties(agentpool)
+        # update availability zones
+        agentpool = self.update_zones(agentpool)
         # update network profile
         agentpool = self.update_network_profile(agentpool)
         # update os sku
@@ -3010,11 +3026,24 @@ class AKSAgentPoolUpdateDecorator:
         """
         self._ensure_agentpool(agentpool)
 
+        update_client = self.client
+        # Zone migration is not accepted by the stable API yet, so scope the preview client to this PUT.
+        if (
+            self.resource_type == ResourceType.MGMT_CONTAINERSERVICE
+            and self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE
+            and self.context.raw_param.get("zones") is not None
+        ):
+            update_client = get_mgmt_service_client(
+                self.cmd.cli_ctx,
+                ResourceType.MGMT_CONTAINERSERVICE,
+                api_version=CONST_AGENTPOOL_UPDATE_ZONES_API_VERSION,
+            ).agent_pools
+
         active_cloud = get_active_cloud(self.cmd.cli_ctx)
         if active_cloud.profile != "latest":
             return sdk_no_wait(
                 self.context.get_no_wait(),
-                self.client.begin_create_or_update,
+                update_client.begin_create_or_update,
                 self.context.get_resource_group_name(),
                 self.context.get_cluster_name(),
                 self.context.get_nodepool_name(),
@@ -3024,7 +3053,7 @@ class AKSAgentPoolUpdateDecorator:
 
         return sdk_no_wait(
             self.context.get_no_wait(),
-            self.client.begin_create_or_update,
+            update_client.begin_create_or_update,
             self.context.get_resource_group_name(),
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),

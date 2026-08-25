@@ -50,7 +50,7 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import CustomResourceType, ResourceType
 from azure.cli.core.util import get_file_json
 
 class AKSAgentPoolModelsTestCase(unittest.TestCase):
@@ -3570,6 +3570,53 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
 
+    def common_update_zones(self):
+        # --zones auto replaces the current availability zone setting
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"zones": ["auto"]},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_zones(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(availability_zones=None)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_zones(agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(availability_zones=["auto"])
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # Explicit zone lists are passed through unchanged
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"zones": ["1", "2", "3"]},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(availability_zones=["auto"])
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_zones(agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            availability_zones=["1", "2", "3"]
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # Omitting --zones preserves the existing setting
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"zones": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(availability_zones=["1", "2"])
+        dec_3.context.attach_agentpool(agentpool_3)
+        dec_agentpool_3 = dec_3.update_zones(agentpool_3)
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(availability_zones=["1", "2"])
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
     def common_update_gpu_profile(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
@@ -3892,7 +3939,10 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
 
     def test_update_vm_properties(self):
         self.common_update_vm_properties()
-    
+
+    def test_update_zones(self):
+        self.common_update_zones()
+
     def test_update_fips_image(self):
         self.common_update_fips_image()
 
@@ -3948,6 +3998,31 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+        # Explicit zones compose with another nodepool update property in the full update flow
+        raw_param_dict["zones"] = ["auto"]
+        raw_param_dict["scale_down_mode"] = "Deallocate"
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        self.client.get = Mock(
+            return_value=self.create_initialized_agentpool_instance(
+                nodepool_name="test_nodepool_name",
+                availability_zones=None,
+                scale_down_mode="Delete",
+            )
+        )
+        dec_agentpool_2 = dec_2.update_agentpool_profile_default()
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name",
+            availability_zones=["auto"],
+            scale_down_mode="Deallocate",
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
         dec_1.context.raw_param.print_usage_statistics()
 
     def test_update_agentpool(self):
@@ -3965,10 +4040,97 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
         # fail on passing the wrong agentpool object
         with self.assertRaises(CLIInternalError):
             dec_1.update_agentpool(None)
-        agentpool_1 = self.create_initialized_agentpool_instance(nodepool_name="test_nodepool_name")
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", availability_zones=["auto"]
+        )
         dec_1.context.attach_agentpool(agentpool_1)
-        with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_mgmt_service_client"
+        ) as get_client, patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait"
+        ) as put_agentpool:
             dec_1.update_agentpool(agentpool_1)
+        get_client.assert_not_called()
+        put_agentpool.assert_called_once_with(
+            False,
+            self.client.begin_create_or_update,
+            "test_resource_group_name",
+            "test_cluster_name",
+            "test_nodepool_name",
+            agentpool_1,
+            headers={},
+        )
+
+    def test_update_agentpool_with_zones_uses_preview_api(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_resource_group_name",
+                "cluster_name": "test_cluster_name",
+                "nodepool_name": "test_nodepool_name",
+                "zones": ["auto"],
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", availability_zones=["auto"]
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        preview_agentpool_client = Mock()
+        preview_client = Mock(agent_pools=preview_agentpool_client)
+
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_mgmt_service_client",
+            return_value=preview_client,
+        ) as get_client, patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait"
+        ) as put_agentpool:
+            dec_1.update_agentpool(agentpool_1)
+
+        get_client.assert_called_once_with(
+            self.cmd.cli_ctx,
+            ResourceType.MGMT_CONTAINERSERVICE,
+            api_version="2026-01-02-preview",
+        )
+        put_agentpool.assert_called_once_with(
+            False,
+            preview_agentpool_client.begin_create_or_update,
+            "test_resource_group_name",
+            "test_cluster_name",
+            "test_nodepool_name",
+            agentpool_1,
+            headers={},
+        )
+
+    def test_update_agentpool_with_zones_keeps_custom_resource_client(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_resource_group_name",
+                "cluster_name": "test_cluster_name",
+                "nodepool_name": "test_nodepool_name",
+                "zones": ["auto"],
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        dec_1.resource_type = CustomResourceType("azext_aks_preview.vendored_sdks", "ContainerServiceClient")
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", availability_zones=["auto"]
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.get_mgmt_service_client"
+        ) as get_client, patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait"
+        ) as put_agentpool:
+            dec_1.update_agentpool(agentpool_1)
+
+        get_client.assert_not_called()
         put_agentpool.assert_called_once_with(
             False,
             self.client.begin_create_or_update,
@@ -4085,6 +4247,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
 
     def test_update_vm_properties(self):
         self.common_update_vm_properties()
+
+    def test_update_zones(self):
+        self.common_update_zones()
 
     def test_update_localdns_profile(self):
         self.common_update_localdns_profile()

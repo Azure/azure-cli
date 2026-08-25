@@ -3100,6 +3100,7 @@ def aks_agentpool_update(
     undrainable_node_behavior=None,
     mode=None,
     scale_down_mode=None,
+    zones=None,
     no_wait=False,
     aks_custom_headers=None,
     allowed_host_ports=None,
