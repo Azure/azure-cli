@@ -3029,9 +3029,9 @@ class AKSAgentPoolUpdateDecorator:
         update_client = self.client
         # Zone migration is not accepted by the stable API yet, so scope the preview client to this PUT.
         if (
-            self.resource_type == ResourceType.MGMT_CONTAINERSERVICE
-            and self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE
-            and self.context.raw_param.get("zones") is not None
+            self.resource_type == ResourceType.MGMT_CONTAINERSERVICE and
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+            self.context.raw_param.get("zones") is not None
         ):
             update_client = get_mgmt_service_client(
                 self.cmd.cli_ctx,
