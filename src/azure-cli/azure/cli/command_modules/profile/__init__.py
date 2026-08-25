@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
@@ -86,6 +86,10 @@ class ProfileCommandsLoader(AzCommandsLoader):
                             'certificate rolls.')
             c.argument('client_assertion', options_list=['--federated-token'],
                        help='Federated token that can be used for OIDC token exchange.')
+            c.argument('federated_identity', options_list=['--federated-identity'], arg_type=get_three_state_flag(),
+                       help='Acquire and automatically refresh the OIDC federated token from the CI/CD provider '
+                            '(currently GitHub Actions). Avoids the AADSTS700024 error on long-running tasks. '
+                            'Cannot be combined with --federated-token.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',

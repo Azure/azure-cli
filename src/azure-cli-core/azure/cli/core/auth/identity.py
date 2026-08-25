@@ -33,6 +33,10 @@ AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
 
+# Sentinel value persisted as the client_assertion of a service principal entry to indicate that the OIDC
+# ID token should be fetched (and refreshed) on demand from the CI/CD provider instead of being a static token.
+FEDERATED_IDENTITY = "FEDERATED_IDENTITY"
+
 WAM_PROMPT = (
     "Select the account you want to log in with. "
     "For more information on login with Azure CLI, see https://go.microsoft.com/fwlink/?linkid=2271136")
@@ -347,7 +351,9 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
         # }
         if self.client_assertion:
-            client_credential = {'client_assertion': self.client_assertion}
+            client_credential = {
+                'client_assertion': get_federated_id_token if self.client_assertion == FEDERATED_IDENTITY
+                else self.client_assertion}
 
         return client_credential
 
@@ -456,3 +462,55 @@ def get_environment_credential():
         getenv(AZURE_TENANT_ID))
     credentials = ServicePrincipalCredential(sp_auth, authority=authority)
     return credentials
+
+
+def get_federated_id_token():
+    """Acquire a fresh OIDC ID token from the current CI/CD provider.
+
+    This is the dispatcher registered as MSAL's ``client_assertion`` callback. MSAL invokes it lazily every
+    time it needs a client assertion, so an expired ID token is transparently replaced with a fresh one for
+    as long as the underlying provider request token is valid. The provider is auto-detected from the
+    environment so that ``--federated-identity`` stays a single, provider-agnostic flag.
+    """
+    if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
+        return _get_id_token_github()
+    raise CLIError(
+        "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
+        "Only GitHub Actions is currently supported. Provide a token with --federated-token instead. "
+        "See https://github.com/Azure/azure-cli/issues/28708 for provider support progress.")
+
+
+def _get_id_token_github():
+    """Fetch a fresh OIDC ID token from the GitHub Actions token service.
+
+    Valid for the lifetime of the GitHub Actions request token (currently ~6 hours after the job starts).
+    https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers
+    """
+    from urllib.parse import quote
+    import requests
+
+    try:
+        request_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
+        request_url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
+    except KeyError as ex:
+        raise CLIError(
+            'Environment variable {} is not set. --federated-identity requires GitHub Actions with '
+            '"id-token: write" permission granted to the workflow.'.format(ex))
+
+    audience = quote('api://AzureADTokenExchange')
+    url = '{}&audience={}'.format(request_url, audience)
+    headers = {
+        'Authorization': 'bearer {}'.format(request_token),
+        'Accept': 'application/json; api-version=2.0',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(url, headers=headers)
+    if not response.ok:
+        raise CLIError('Failed to retrieve an ID token from GitHub Actions: {} {}'.format(
+            response.status_code, response.reason))
+    id_token = response.json().get('value')
+    if not id_token:
+        raise CLIError('GitHub Actions OIDC endpoint did not return an ID token.')
+    # Never log the token value itself.
+    logger.debug('Retrieved a fresh ID token from the GitHub Actions OIDC endpoint.')
+    return id_token

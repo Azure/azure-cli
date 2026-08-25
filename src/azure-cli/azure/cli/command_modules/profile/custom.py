@@ -139,6 +139,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           use_device_code=False,
           # Service principal
           service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          federated_identity=None,
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
@@ -157,6 +158,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if client_assertion and federated_identity:
+        raise CLIError('usage error: Only one of --federated-token and --federated-identity can be specified')
+    if federated_identity and not service_principal:
+        raise CLIError("usage error: '--federated-identity' is only applicable with a service principal")
     if skip_subscription_discovery and not tenant:
         raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
     if skip_subscription_discovery and subscription:
@@ -188,7 +193,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion or certificate):
+        if not (password or client_assertion or certificate or federated_identity):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -197,11 +202,11 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         interactive = True
 
     if service_principal:
-        from azure.cli.core.auth.identity import ServicePrincipalAuth
+        from azure.cli.core.auth.identity import ServicePrincipalAuth, FEDERATED_IDENTITY
         password = ServicePrincipalAuth.build_credential(
             client_secret=password,
             certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
-            client_assertion=client_assertion)
+            client_assertion=FEDERATED_IDENTITY if federated_identity else client_assertion)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry
