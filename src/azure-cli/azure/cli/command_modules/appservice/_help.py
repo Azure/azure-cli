@@ -2542,6 +2542,37 @@ parameters:
         structured payload that works with `-o json`, `-o yaml`, and `-o table`.
 """
 
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect network-capture'] = """
+type: command
+short-summary: Collect and analyze a packet capture from a Linux web app container.
+long-summary: |
+  Runs a bounded tcpdump capture in one app container instance and analyzes it in Kudu.
+  The command does not download files locally; it returns authenticated Kudu links for
+  viewing the analysis report and downloading the raw pcap. Network captures can contain
+  credentials, cookies, request bodies, and other sensitive application data.
+
+    Use --collect-only to show only the raw packet capture link. Kudu still performs the
+    processing required to finalize the capture, but the analysis report link is omitted.
+
+    This command supports Linux web apps on dedicated App Service plans. Captures are
+    limited to one worker instance per command invocation. When --instance is omitted,
+    an interactive terminal prompts you to select from the app's current workers. Scripts
+    and other non-interactive callers must specify --instance. Capture duration defaults
+    to 60 seconds and can be changed with --duration.
+examples:
+  - name: Capture and analyze traffic for the default 60 seconds
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp
+  - name: Capture traffic for 30 seconds from a specific worker
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --instance 7c2d9 --duration 30
+  - name: Show only the raw packet capture link
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --collect-only
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.

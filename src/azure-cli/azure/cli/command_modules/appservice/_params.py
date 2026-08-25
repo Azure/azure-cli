@@ -859,6 +859,15 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
 
+    with self.argument_context('webapp troubleshoot collect network-capture') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('instance', options_list=['--instance', '-i'], help='Worker instance to capture. When omitted in an interactive terminal, you are prompted to select from the current instances. Specify this option for scripts and other non-interactive use. Only one instance can be captured at a time.')
+        c.argument('duration', options_list=['--duration'], type=int, default=60, help='Capture duration in seconds. Valid range: 1-300.')
+        c.argument('collect_only', options_list=['--collect-only'], arg_type=get_three_state_flag(), help='Show only the raw packet capture link. Kudu still finalizes the capture internally, but the analysis report link is omitted.')
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
