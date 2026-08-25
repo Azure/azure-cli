@@ -343,9 +343,35 @@ class TestFederatedIdentity(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, 'Failed to retrieve an ID token'):
             get_federated_id_token()
 
+    @mock.patch.dict(os.environ, {
+        'SYSTEM_OIDCREQUESTURI': 'https://vstoken.dev.azure.com/org/',
+        'SYSTEM_ACCESSTOKEN': 'system_access_token',
+        'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID': 'sc-guid'
+    }, clear=True)
+    @mock.patch('requests.post')
+    def test_get_federated_id_token_azure_devops(self, post_mock):
+        post_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'oidcToken': 'ado_id_token'})
+
+        token = get_federated_id_token()
+
+        assert token == 'ado_id_token'
+        called_url = post_mock.call_args.args[0]
+        # Trailing slash on the request URI is trimmed; api-version and service connection are appended.
+        assert called_url == ('https://vstoken.dev.azure.com/org'
+                              '?api-version=7.1&serviceConnectionId=sc-guid')
+        headers = post_mock.call_args.kwargs['headers']
+        assert headers['Authorization'] == 'bearer system_access_token'
+        assert headers['X-TFS-FedAuthRedirect'] == 'Suppress'
+
+    @mock.patch.dict(os.environ, {'SYSTEM_OIDCREQUESTURI': 'https://vstoken.dev.azure.com/org/'}, clear=True)
+    def test_get_federated_id_token_azure_devops_missing_env(self):
+        # Detected as Azure DevOps, but the access token and service connection ID are missing.
+        with self.assertRaisesRegex(CLIError, 'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID'):
+            get_federated_id_token()
+
     @mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'https://dev.azure.com/org'}, clear=True)
     def test_get_federated_id_token_unsupported_provider(self):
-        # Only GitHub Actions is supported for now; any other environment reports the same clear error.
+        # A DevOps collection URI without the OIDC request URI is not enough to attempt a refresh.
         with self.assertRaisesRegex(CLIError, 'no supported CI/CD OIDC provider'):
             get_federated_id_token()
 
