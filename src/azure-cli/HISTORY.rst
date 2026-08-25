@@ -38,7 +38,7 @@ Release History
 * `az webapp deploy`: Add `--tag` parameter to give friendly name to deployment (#33940)
 * `az webapp exec`: Add `--target kudu` for connecting Kudu container (#33954)
 * `az webapp troubleshoot collect network-capture`: Add command to collect a bounded packet capture from a selected Linux App Service worker (#33949)
-* `az webapp troubleshoot collect network-capture`: Add `--collect-only` to returns only the targeted packet capture link (#33949)
+* `az webapp troubleshoot collect network-capture`: Add `--collect-only` to return only the targeted packet capture link (#33949)
 * `az webapp create`: Add `--enriched-errors` parameter to see detailed failure log (#33936)
 
 **ARO**
@@ -54,7 +54,7 @@ Release History
 **Compute**
 
 * `az vm deallocate`: Expose new parameter `--force-deallocate` (#33855)
-* `az vmss lifecycle-hook/ lifecycle-hook-event`: Add new command groups to support vmss lifecycle hooks (#33758)
+* `az vmss lifecycle-hook/lifecycle-hook-event`: Add new command groups to support vmss lifecycle hooks (#33758)
 * `az capacity reservation group create/update`: Add new parameter `--reservation-type` to support Open Capacity Reservation (#33901)
 * `az vm create/update`: Add new parameter `--disable-capacity-reservation-assignment` to support Open Capacity Reservation (#33901)
 * `az vmss create/ update`: Add new parameter `--disable-capacity-reservation-assignment` to support Open Capacity Reservation (#33929)
@@ -67,7 +67,7 @@ Release History
 
 **Container app**
 
-* `containerapp job update`: Fix crash for `--no-wait` parameter (#33807)
+* `az containerapp job update`: Fix crash for `--no-wait` parameter (#33807)
 
 **Key Vault**
 
@@ -78,7 +78,7 @@ Release History
 * Fix grammar in MySQL import help text (#33819)
 * `az mysql flexible-server ad-admin create`: Fix AD admin creation (#33838)
 * `az mysql flexible-server firewall-rule create`: Fix firewall rule create request payload serialization. (#33865)
-* `az mysql flexible-server geo-restore`: stop forcing source storage redundancy in target create payload to avoid non-ZRS region restore failures (#33814)
+* `az mysql flexible-server geo-restore`: Stop forcing source storage redundancy in target create payload to avoid non-ZRS region restore failures (#33814)
 * `az mysql flexible-server list-skus`: Fix command returning empty list for all regions (#33747)
 
 **Network**
@@ -89,8 +89,6 @@ Release History
 
 **Packaging**
 
-* Azure CLI Docker image based on Azure Linux 4.0 (#33815)
-* Revert Azure CLI Docker image based on Azure Linux 4.0 (#33831)
 * Azure CLI container images and RPMs based on Azure Linux 4.0 (#33850)
 * Add Ubuntu 26.04 Resolute Raccoon (#33791)
 
@@ -102,7 +100,7 @@ Release History
 
 **RDBMS**
 
-* `az postgres flexible-server replica promote`: Populate `sourceServerResourceId` in the PATCH body so that planned switchover promote no longer fails with `MissingRequiredParameter` (#33777)
+* `az postgres flexible-server replica promote`: Populate `sourceServerResourceId` in the PATCH body so that planned switchover promotion no longer fails with `MissingRequiredParameter` (#33777)
 
 **Redis**
 
@@ -116,17 +114,14 @@ Release History
 **SQL**
 
 * Make deleted server location optional (#33918)
-* `az sql mi link create` : Add multi-database link mode support (#33874)
-* `az sql mi link update` : Add database membership updates for multi-database links (#33874)
+* `az sql mi link create`: Add multi-database link mode support (#33874)
+* `az sql mi link update`: Add database membership updates for multi-database links (#33874)
 * Clean up server update handling for soft-delete (#33933)
 
-**SSH**
-
-* `az ssh`: Allow SSH certificate flow in Cloud Shell (#33860)
 
 **Storage**
 
-* az storage blob allow empty blob with data (#33803)
+* `az storage blob`: Allow empty blob with data (#33803)
 * Fix #33671: `az storage container list`: Doesn't return anything with ModuleNotFoundError (#33793)
 * `az storage fs file download`: Stream ADLS Gen2 downloads to avoid content-encoding decode failures (#33730)
 
