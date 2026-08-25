@@ -1982,6 +1982,7 @@ long-summary: |
     Only supported for Linux App Service plans.
 
     'shell' mode: Open an interactive shell in your app's main container.
+    Use --target kudu to connect to the Kudu container instead.
     A session ends automatically after 3 hours of inactivity,
     and may also end if the underlying instance is reimaged or platform components are updated.
 
@@ -2003,6 +2004,9 @@ examples:
   - name: Start an interactive shell session using a specific shell
     text: >
         az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
+  - name: Start an interactive shell session with the Kudu container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --target kudu
   - name: Run a direct command in the container
     text: >
         az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
