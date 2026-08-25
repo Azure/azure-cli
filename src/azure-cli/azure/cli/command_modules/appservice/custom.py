@@ -62,7 +62,7 @@ from ._appservice_utils import _generic_site_operation, _generic_settings_operat
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
     raise_enriched_deployment_error, EnrichedDeploymentError,
-    raise_enriched_plan_error, extract_status_code_from_message
+    raise_enriched_plan_error, raise_enriched_webapp_create_error, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -132,7 +132,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None,
+                  enriched_errors=False):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -299,8 +300,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
-                raise ValidationError("Linux Runtime '{}' is not supported."
-                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                error_message = ("Linux Runtime '{}' is not supported. "
+                                 "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                if enriched_errors:
+                    raise_enriched_webapp_create_error(
+                        resource_group_name=resource_group_name,
+                        webapp_name=name,
+                        plan_name=getattr(plan_info, 'name', None) or plan,
+                        location=location,
+                        sku=getattr(getattr(plan_info, 'sku', None), 'name', None),
+                        runtime=runtime,
+                        error_message=error_message,
+                        last_known_step="Linux runtime validation",
+                    )
+                raise ValidationError(error_message)
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif container_image_name:
             site_config.linux_fx_version = _format_fx_version(container_image_name)
@@ -359,8 +372,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                           value='https://{}.scm.azurewebsites.net/detectors'
                                                           .format(name)))
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
-    webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    try:
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
+        webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if not (enriched_errors and is_linux):
+            raise
+        error_message, status_code = _get_enriched_error_details(ex)
+        raise_enriched_webapp_create_error(
+            resource_group_name=resource_group_name,
+            webapp_name=name,
+            plan_name=getattr(plan_info, 'name', None) or plan,
+            location=location,
+            sku=getattr(getattr(plan_info, 'sku', None), 'name', None),
+            runtime=site_config.linux_fx_version,
+            status_code=status_code,
+            error_message=error_message,
+            last_known_step="Web app create (control-plane request)",
+        )
 
     if current_stack:
         _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
@@ -5043,7 +5074,7 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
-def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+def _get_enriched_error_details(ex):
     message_parts = []
     top_message = getattr(ex, 'message', None)
     if top_message:
@@ -5066,6 +5097,11 @@ def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, s
         status_code = getattr(response, 'status_code', None)
     if status_code is None:
         status_code = extract_status_code_from_message(error_message)
+    return error_message, status_code
+
+
+def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+    error_message, status_code = _get_enriched_error_details(ex)
     raise_enriched_plan_error(
         resource_group_name=resource_group_name,
         plan_name=name,
