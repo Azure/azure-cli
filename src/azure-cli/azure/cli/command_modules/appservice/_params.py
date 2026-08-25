@@ -619,7 +619,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('power_shell_version', help='The version used to run your function app if using PowerShell, e.g., 7.2', options_list=['--powershell-version'])
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
-            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
+            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, in the format 'RUNTIME|VERSION'. Common examples: \"PYTHON|3.11\", \"NODE|18-lts\", \"DOTNETCORE|8.0\", \"JAVA|17-java17\", \"PHP|8.2\". Use `az webapp list-runtimes --os linux` to see all supported values. See https://aka.ms/linux-stacks for more info.")
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
@@ -629,7 +629,7 @@ subscription than the app service environment, please use the resource ID for --
                 c.ignore('reserved_instance_count')
                 c.argument('runtime', help="Canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
                                            "Use `az webapp list-runtimes` for available list")
-                c.argument('acr_use_identity', arg_type=get_three_state_flag(return_label=True), help="Enable or disable pull image from acr use managed identity")
+                c.argument('acr_use_identity', arg_type=get_three_state_flag(return_label=True), help="If not specified, managed identity will not be used for ACR image pull.")
                 c.argument('acr_identity', help="Accept system or user assigned identity which will be set for acr image pull. "
                                                 "Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.")
             c.argument('java_version',
@@ -893,7 +893,11 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
-                   help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+                   help='Connection string type. App Service sets an env var prefix per type '
+                        '(e.g., SQLAZURECONNSTR_, POSTGRESQLCONNSTR_). .NET GetConnectionString() '
+                        'auto-maps SQLServer, SQLAzure, and Custom only; for MySQL/PostgreSQL, '
+                        'read the env var directly.',
+                   arg_type=get_enum_type(ConnectionStringType))
         c.argument('ids', options_list=['--ids'],
                    help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.",
                    required=True)
@@ -1114,9 +1118,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('clean', help='If true, cleans the target directory prior to deploying the file(s). Default value is determined based on artifact type.', arg_type=get_three_state_flag())
         c.argument('ignore_stack', help='If true, any stack-specific defaults are ignored.', arg_type=get_three_state_flag())
         c.argument('reset', help='Reset Java apps to the default parking page if set to true with no type specified.', arg_type=get_three_state_flag())
-        c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Ignored when using "--src-url" since synchronous deployments are not yet supported when using "--src-url"')
-        c.argument('slot', help="The name of the slot. Default to the productions slot if not specified.")
-        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
+        c.argument('timeout', type=int, help='Timeout for the deployment operation in milliseconds. Default: 900000 (15 minutes). Ignored when using "--src-url".')
+        c.argument('slot', help="The name of the slot. Default to the production slot if not specified.")
+        c.argument('track_status', help="If not specified, the command will track app startup and runtime health. Default: true.",
                    arg_type=get_three_state_flag())
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())

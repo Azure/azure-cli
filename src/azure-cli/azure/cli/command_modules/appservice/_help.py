@@ -1612,12 +1612,33 @@ examples:
 helps['webapp config connection-string set'] = """
 type: command
 short-summary: Update a web app's connection strings.
-long-summary: Note that connection string values are now redacted in the result. Please use the `az webapp config connection-string list` command to view the values.
+long-summary: >
+    Note that connection string values are now redacted in the result. Please use the
+    `az webapp config connection-string list` command to view the values.
+
+
+    App Service exposes each connection string as an environment variable with a type-based
+    prefix:
+      SQLServer    → `SQLCONNSTR_<name>`
+      SQLAzure     → `SQLAZURECONNSTR_<name>`
+      MySQL        → `MYSQLCONNSTR_<name>`
+      PostgreSQL   → `POSTGRESQLCONNSTR_<name>`
+      Custom       → `CUSTOMCONNSTR_<name>`
+
+
+    .NET's Configuration.GetConnectionString() auto-maps only the SQLServer, SQLAzure, and
+    Custom prefixes. For MySQL and PostgreSQL connection strings, access the value directly
+    via `Configuration["MYSQLCONNSTR_<name>"]` or `Configuration["POSTGRESQLCONNSTR_<name>"]`
+    instead.
 examples:
   - name: Add a mysql connection string.
     text: >
         az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t mysql \\
             --settings mysql1='Server=myServer;Database=myDB;Uid=myUser;Pwd=myPwd;'
+  - name: Add a PostgreSQL connection string (access in .NET via Configuration["POSTGRESQLCONNSTR_pg1"]).
+    text: >
+        az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t postgresql \\
+            --settings pg1='Host=myHost;Database=myDB;Username=myUser;Password=myPwd;'
 """
 
 helps['webapp config container'] = """
@@ -1699,6 +1720,15 @@ examples:
   - name: set configuration through a JSON file called params.json
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\\params.json"
+  - name: Set the linux runtime stack to Python 3.11 (format is RUNTIME|VERSION).
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "PYTHON|3.11"
+  - name: Set the linux runtime stack to Node.js 18 LTS.
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "NODE|18-lts"
+  - name: Set the linux runtime stack to .NET 8.0.
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "DOTNETCORE|8.0"
 
 """
 
@@ -1961,6 +1991,9 @@ examples:
   - name: Create a Linux Python web app with a startup script.
     text: >
         az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "startup.sh"
+  - name: Create a web app with a system-assigned managed identity and grant it access to a storage account.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --assign-identity [system] --scope /subscriptions/{subscription}/resourceGroups/{resourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount} --role Contributor
 """
 
 helps['webapp create-remote-connection'] = """
@@ -3542,6 +3575,9 @@ helps['webapp deploy'] = """
     long-summary: |
         Deploys a zip, war, jar, ear, static file, startup script, or library to an existing Azure Web App.
         The web app must already exist — use 'az webapp create' to create one first.
+        Supports deploying from local files (--src-path) or remote URLs (--src-url).
+        When --track-status is enabled (the default for Linux web apps), the command monitors
+        application startup after deployment by polling health endpoints.
 
         IMPORTANT: Zip deployment does NOT automatically run build automation (dependency installation,
         compilation, etc.). If your package is not pre-built, you must set the
@@ -3561,4 +3597,14 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a zip file from a remote URL.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-url https://example.com/app.zip
+    - name: Deploy without cleaning the target directory.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.zip --clean false
+    - name: Deploy with runtime status tracking for Linux web app.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.zip --track-status true --async false
+    - name: Deploy to a specific slot.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.jar --type jar --slot staging
+    - name: Deploy a static text file to a custom path.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path file.txt --type static --target-path staticfiles/file.txt
 """
