@@ -76,6 +76,42 @@ class VaultUriValidationTest(unittest.TestCase):
             with self.assertRaises(InvalidArgumentValueError):
                 validate_vault_uri(cli_ctx, 'https://{}.vault.azure.net'.format(name))
 
+    def test_rejects_backslash_host_confusion(self):
+        # urlparse keeps '\' in the host, but the HTTP transport treats it as a path separator and
+        # would dial 'attacker.example'. The two parsers must not be allowed to disagree.
+        cli_ctx = _CliCtx()
+        for uri in [
+            'https://attacker.example\\.vault.azure.net',
+            'https://attacker.example\\.managedhsm.azure.net',
+            'https://attacker.example\\@.vault.azure.net',
+        ]:
+            with self.assertRaises(InvalidArgumentValueError):
+                validate_vault_uri(cli_ctx, uri)
+
+    def test_rejects_invalid_dns_labels(self):
+        cli_ctx = _CliCtx()
+        for uri in [
+            'https://.attacker.example.vault.azure.net',   # empty leading label
+            'https://a..b.vault.azure.net',                # empty inner label
+            'https://-bad.vault.azure.net',                # label may not start with '-'
+            'https://bad-.vault.azure.net',                # label may not end with '-'
+            'https://attacker.example;.vault.azure.net',
+            'https://attacker.example,.vault.azure.net',
+            'https://attacker.example%2f.vault.azure.net',
+            'https://{}.vault.azure.net'.format('a' * 64),  # label longer than 63 chars
+        ]:
+            with self.assertRaises(InvalidArgumentValueError):
+                validate_vault_uri(cli_ctx, uri)
+
+    def test_accepts_valid_dns_labels(self):
+        cli_ctx = _CliCtx()
+        for uri in [
+            'https://a.vault.azure.net',
+            'https://my-vault-01.vault.azure.net',
+            'https://{}.vault.azure.net'.format('a' * 63),
+        ]:
+            self.assertEqual(validate_vault_uri(cli_ctx, uri), uri)
+
     def test_rejects_non_https(self):
         cli_ctx = _CliCtx()
         for uri in ['http://myvault.vault.azure.net', 'ftp://myvault.vault.azure.net']:

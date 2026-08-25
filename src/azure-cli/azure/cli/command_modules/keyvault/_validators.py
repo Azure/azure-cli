@@ -594,6 +594,11 @@ def validate_vault_uri(cli_ctx, uri):
     # Compare against the suffixes with a leading '.' so that look-alikes such as
     # 'maliciousvault.azure.net' don't match '.vault.azure.net'.
     hostname = hostname.rstrip('.').lower()
+    # urlparse and the HTTP transport disagree on characters such as '\', which urlparse keeps in the
+    # host but the transport treats as a path separator. Requiring well-formed DNS labels keeps the
+    # name validated here identical to the one actually dialled.
+    if not all(re.fullmatch(r'[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?', label) for label in hostname.split('.')):
+        raise _invalid('the host is not a valid DNS name')
     allowed = _get_allowed_vault_dns_suffixes(cli_ctx)
     if not any(len(hostname) > len(suffix) and hostname.endswith(suffix) for suffix in allowed):
         raise InvalidArgumentValueError(
