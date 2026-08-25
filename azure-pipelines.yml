@@ -18,13 +18,14 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - group: 'AME ESRP Variable Group'
+  - group: 'esrp-signing-codes'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
 
-# macOS Cask parameters
-- name: macos_cask_python_version
+# Standalone tarball and Cask parameters
+- name: standalone_python_version
   value: '3.14'
 
 parameters:
@@ -37,6 +38,20 @@ parameters:
   - name: ARM64
     value: arm64
     pool: pool-ubuntu-latest-arm64
+
+# Azure Linux versions to build in parallel. AZL3 is the current stable release;
+# AZL4 is being onboarded (currently beta) to pick up the patched OpenSSL and
+# resolve the S360 vulnerability. Both are built and published side-by-side
+# until AZL4 reaches GA and AZL3 is deprecated.
+- name: azureLinuxVersions
+  type: object
+  default:
+  - name: '3.0'
+    tag: '3.0'
+    image: mcr.microsoft.com/azurelinux/base/core:3.0
+  - name: '4.0 (Beta)'
+    tag: '4.0'
+    image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
 
 jobs:
 - job: CheckPullRequest
@@ -351,13 +366,14 @@ jobs:
   dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
-          dockerfile: azure-linux.dockerfile
-          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
+            dockerfile: azure-linux.dockerfile
+            packageArtifactName: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            image: ${{ azl.image }}
   pool:
     name: $(pool)
   steps:
@@ -395,10 +411,11 @@ jobs:
     - ExtractMetadata
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -560,7 +577,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools<81"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -581,7 +598,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools<81"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
@@ -668,10 +685,14 @@ jobs:
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
       python_version=3.14
-      brew unlink python@$python_version && brew link --overwrite python@$python_version
+      brew unlink python@$python_version && brew link --overwrite python@$python_version || true
       
       echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
+      if brew list --versions azure-cli >/dev/null 2>&1; then
+        brew uninstall azure-cli
+      else
+        echo "azure-cli is not pre-installed"
+      fi
       
       echo == Install azure-cli.rb formula ==
       # Need to create a dummy homebrew tap to install the formula
@@ -683,6 +704,17 @@ jobs:
       # allowed in official Homebrew taps. Remove it so the formula can be installed from
       # this local dev tap. It must remain in the released formula, so we only strip it here.
       sed -i '' '/no_autobump!/d' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      # TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
+      # The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
+      # Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
+      # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
+      # form for the local test install only; the generated/submitted formula stays upstream-faithful.
+      sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      
+      # Homebrew 6.0.0+ requires non-official taps to be explicitly trusted before it will
+      # load their Ruby code (see https://docs.brew.sh/Tap-Trust). Trust this local dev tap
+      # that we just created so the generated formula can be installed in CI.
+      brew trust dev/azure-cli
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
@@ -730,9 +762,17 @@ jobs:
 # Phase 1: Build unsigned tarballs (ARM64 + Intel)
 - template: .azure-pipelines/templates/macos/macos-build-jobs.yml
   parameters:
-    PythonVersion: $(macos_cask_python_version)
+    PythonVersion: $(standalone_python_version)
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+    dependsOn: ['ExtractMetadata']
+
+- template: .azure-pipelines/templates/linux/linux-build-jobs.yml
+  parameters:
+    PythonVersion: $(standalone_python_version)
+    LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+    LinuxX64Pool: ${{ variables.ubuntu_pool }}
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
@@ -743,32 +783,37 @@ jobs:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
       BundleId: 'com.microsoft.azure.cli'
-      PythonVersion: $(macos_cask_python_version)
+      PythonVersion: $(standalone_python_version)
       ESRPServiceConnection: 'ame_esrp_connection'
       UseCurrentPipelineArtifacts: true
       dependsOn: ['VerifyMacOSCli']
 
 # Phase 3: Generate cask and test via temp tap
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
-  - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
+  - template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
-      PythonVersion: $(macos_cask_python_version)
+      LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+      LinuxX64Pool: ${{ variables.ubuntu_pool }}
+      PythonVersion: $(standalone_python_version)
       GitHubRepo: $(Build.Repository.Name)
       Debug: false
-      dependsOn: ['CreateFinalTarball']
+      CaskDependsOn: ['CreateMacOSFinalTarball', 'BuildLinuxCli']
+      MacosDependsOn: ['CreateMacOSFinalTarball']
+      LinuxDependsOn: ['BuildLinuxCli']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -810,11 +855,12 @@ jobs:
     name: $(pool)
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -983,6 +1029,13 @@ jobs:
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
+        Resolute ${{ arch.name }}:
+          # 26.04
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+
         # https://wiki.debian.org/DebianReleases
         Bullseye ${{ arch.name }}:
           # 11
@@ -1033,6 +1086,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
+        Resolute ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy

@@ -24,9 +24,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-01-preview",
+        "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2022-07-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -50,6 +50,9 @@ class Delete(AAZCommand):
             options=["-n", "--name"],
             help="The name of the policy exemption.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
+            ),
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
@@ -118,7 +121,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }

@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-05-01"],
         ]
     }
 
@@ -155,6 +155,11 @@ class Create(AAZCommand):
             help="UUID v4 or resource identifier used to identify the Backup.",
             nullable=True,
         )
+        _element.breakthrough_mode = AAZStrArg(
+            options=["breakthrough-mode"],
+            help="Specifies whether the volume operates in Breakthrough Mode.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
         _element.capacity_pool_resource_id = AAZStrArg(
             options=["capacity-pool-resource-id"],
             help="Pool Resource Id used in case of creating a volume through volume group",
@@ -187,7 +192,7 @@ class Create(AAZCommand):
             help="A unique file path for the volume. Used when creating mount targets",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,79}$",
                 max_length=80,
                 min_length=1,
             ),
@@ -653,7 +658,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -718,6 +723,7 @@ class Create(AAZCommand):
                 properties.set_prop("acceptGrowCapacityPoolForShortTermCloneSplit", AAZStrType, ".accept_grow_capacity_pool_for_short_term_clone_split")
                 properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("backupId", AAZStrType, ".backup_id", typ_kwargs={"nullable": True})
+                properties.set_prop("breakthroughMode", AAZStrType, ".breakthrough_mode")
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
@@ -941,6 +947,9 @@ class Create(AAZCommand):
             properties.baremetal_tenant_id = AAZStrType(
                 serialized_name="baremetalTenantId",
                 flags={"read_only": True},
+            )
+            properties.breakthrough_mode = AAZStrType(
+                serialized_name="breakthroughMode",
             )
             properties.capacity_pool_resource_id = AAZStrType(
                 serialized_name="capacityPoolResourceId",

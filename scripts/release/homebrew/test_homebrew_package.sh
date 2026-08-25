@@ -5,16 +5,27 @@ set -ev
 CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
 echo == Remove pre-installed azure-cli ==
-brew uninstall azure-cli
+if brew list --versions azure-cli >/dev/null 2>&1; then
+    brew uninstall azure-cli
+else
+    echo "azure-cli is not pre-installed"
+fi
 
 echo == Install azure-cli.rb formula ==
+# TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
+# The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
+# Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
+# (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
+# form for the local test install only; the generated/submitted formula stays upstream-faithful.
+sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
 AZ_BASE=/usr/local/Cellar/azure-cli/$CLI_VERSION/libexec
 export PATH=$AZ_BASE/bin:$PATH
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 echo $PATH
-pip install wheel
+# `build` is the PEP 517 frontend used by scripts/ci/build.sh.
+pip install wheel build
 ./scripts/ci/build.sh
 pip install pytest --prefix $AZ_BASE
 pip install pytest-xdist --prefix $AZ_BASE

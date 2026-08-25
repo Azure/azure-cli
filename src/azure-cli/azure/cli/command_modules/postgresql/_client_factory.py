@@ -117,6 +117,14 @@ def cf_postgres_flexible_tuning_options(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).tuning_options
 
 
+def cf_postgres_flexible_maintenance_events(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).maintenance_events
+
+
+def cf_postgres_flexible_major_version_upgrade_precheck(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).major_version_upgrade_precheck
+
+
 def resource_client_factory(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
 

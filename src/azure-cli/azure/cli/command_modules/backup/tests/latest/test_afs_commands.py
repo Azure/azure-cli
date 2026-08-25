@@ -7,11 +7,11 @@ import json
 from datetime import datetime, timedelta
 import unittest
 import time
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, record_only, live_only
+from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
+    record_only, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
-    AFSRPPreparer, FilePreparer, RGPreparer
+    AFSRPPreparer, FilePreparer, ResourceGroupPreparer, StorageAccountPreparer
 
 subscription_id = "da364f0f-307b-41c9-9d47-b7413ec45535"
 unprotected_afs = "clitestafs"

@@ -589,7 +589,9 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             'networkFeatures':'Standard'
         })
 
-        networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
+        assert networkSiblingSet is not None
+        # standar basic requres afec ANFBasicToStdNetworkFeaturesUpgrade
+        #networkSiblingSet = self.cmd("az netappfiles update-network-sibling-set -l {loc} --subnet-id {subnet_id} --network-sibling-set-id {networkSiblingSetId} --network-sibling-set-state-id='{networkSiblingSetStateId}' --network-features {networkFeatures}").get_output_in_json()
 
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})

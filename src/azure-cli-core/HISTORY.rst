@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.89.1
+++++++
+* Allow SSH certificate flow in Cloud Shell (#33860)
+
+2.89.0
+++++++
+* Minor fixes
+
+2.88.0
+++++++
+* Resolve CVE-2026-48526 (#33562)
+* Update global policy argument `--acquire-policy-token` to pick up new api-version and propagate correlation-id (#33661)
+
 2.87.0
 ++++++
 * Resolve CVE-2026-44431 (#33351)

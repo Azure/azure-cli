@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/queues/{}", "2026-01-01"],
         ]
     }
 
@@ -128,7 +128,7 @@ class Create(AAZCommand):
         _args_schema.max_size_in_megabytes = AAZIntArg(
             options=["--max-size", "--max-size-in-megabytes"],
             arg_group="Properties",
-            help="The maximum capacity of the queue, denoted in megabytes, signifies the volume of memory assigned to the queue. The permissible values for this parameter are 1024, 2048, 3072, 4096, and 5120 megabytes. By default, the system assigns a capacity of 1024 megabytes. If the ‘enable-partition’ setting is set to true, the specified queue size will be amplified by a factor of 16.",
+            help="Maximum size of the topic in megabytes, which is the size of the memory allocated for the topic. Default is 1024.",
         )
         _args_schema.enable_duplicate_detection = AAZBoolArg(
             options=["--duplicate-detection", "--enable-duplicate-detection"],
@@ -145,6 +145,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Enumerates the possible values for the status of a messaging entity.",
             enum={"Active": "Active", "Creating": "Creating", "Deleting": "Deleting", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "Renaming": "Renaming", "Restoring": "Restoring", "SendDisabled": "SendDisabled", "Unknown": "Unknown"},
+        )
+        _args_schema.user_metadata = AAZStrArg(
+            options=["--user-metadata"],
+            arg_group="Properties",
+            help="Gets and Sets Metadata of User.",
         )
         return cls._args_schema
 
@@ -217,7 +222,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -262,6 +267,7 @@ class Create(AAZCommand):
                 properties.set_prop("requiresDuplicateDetection", AAZBoolType, ".enable_duplicate_detection")
                 properties.set_prop("requiresSession", AAZBoolType, ".enable_session")
                 properties.set_prop("status", AAZStrType, ".status")
+                properties.set_prop("userMetadata", AAZStrType, ".user_metadata")
 
             return self.serialize_content(_content_value)
 
@@ -313,6 +319,7 @@ class Create(AAZCommand):
             )
             properties.count_details = AAZObjectType(
                 serialized_name="countDetails",
+                flags={"read_only": True},
             )
             properties.created_at = AAZStrType(
                 serialized_name="createdAt",
@@ -372,6 +379,9 @@ class Create(AAZCommand):
             properties.updated_at = AAZStrType(
                 serialized_name="updatedAt",
                 flags={"read_only": True},
+            )
+            properties.user_metadata = AAZStrType(
+                serialized_name="userMetadata",
             )
 
             count_details = cls._schema_on_200.properties.count_details
