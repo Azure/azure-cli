@@ -22,7 +22,7 @@ from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
-from ._constants import ACR_IMAGE_SUFFIX
+from ._constants import ACR_IMAGE_SUFFIX, ISOLATED_V4_SKUS
 
 logger = get_logger(__name__)
 
@@ -93,19 +93,20 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'PREMIUMV4', 'PREMIUMMV4', 'ISOLATEDV2', 'ISOLATEDMV2', 'ELASTICPREMIUM']  # pylint: disable=line-too-long
+    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'PREMIUMV4', 'PREMIUMMV4', 'ISOLATEDV2', 'ISOLATEDMV2', 'ISOLATEDV4', 'ELASTICPREMIUM']  # pylint: disable=line-too-long
     if zone_redundant and get_sku_tier(sku).upper() not in supported_skus:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:
+    if sku.upper() in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2',
+                       'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2'] + ISOLATED_V4_SKUS:
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
                                   "https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
-            raise ValidationError("Only pricing tier 'IsolatedV2' and 'IsolatedMV2' is allowed in this "
-                                  "app service plan. Use this link to "
+            raise ValidationError("Only pricing tiers 'IsolatedV2', 'IsolatedMV2', and 'IsolatedV4' are allowed "
+                                  "in this app service plan. Use this link to "
                                   "learn more: https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
 
 

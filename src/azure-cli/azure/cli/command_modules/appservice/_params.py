@@ -19,7 +19,7 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -56,9 +56,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), P0V4(Premium V4 Extra Small), P1V4(Premium V4 Small), P2V4(Premium V4 Medium), P3V4(Premium V4 Large), P1MV4(Premium Memory Optimized V4 Small), P2MV4(Premium Memory Optimized V4 Medium), P3MV4(Premium Memory Optimized V4 Large), P4MV4(Premium Memory Optimized V4 Extra Large), P5MV4(Premium Memory Optimized V4 Extra Extra Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), P0V4(Premium V4 Extra Small), P1V4(Premium V4 Small), P2V4(Premium V4 Medium), P3V4(Premium V4 Large), P1MV4(Premium Memory Optimized V4 Small), P2MV4(Premium Memory Optimized V4 Medium), P3MV4(Premium Memory Optimized V4 Large), P4MV4(Premium Memory Optimized V4 Extra Large), P5MV4(Premium Memory Optimized V4 Extra Extra Large), I1V2 (Isolated V2 I1V2), I2V2 (Isolated V2 I2V2), I3V2 (Isolated V2 I3V2), I4V2 (Isolated V2 I4V2), I5V2 (Isolated V2 I5V2), I6V2 (Isolated V2 I6V2), I1MV2 (Isolated Memory Optimized V2 I1MV2), I2MV2 (Isolated Memory Optimized V2 I2MV2), I3MV2 (Isolated Memory Optimized V2 I3MV2), I4MV2 (Isolated Memory Optimized V2 I4MV2), I5MV2 (Isolated Memory Optimized V2 I5MV2), I1V4-I6V4 (Isolated V4), I1MV4-I5MV4 (Isolated Memory Optimized V4), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'P0V4', 'P1V4', 'P2V4', 'P3V4', 'P1MV4', 'P2MV4', 'P3MV4', 'P4MV4', 'P5MV4', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'P0V4', 'P1V4', 'P2V4', 'P3V4', 'P1MV4', 'P2MV4', 'P3MV4', 'P4MV4', 'P5MV4', 'I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2', 'I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2', 'WS1', 'WS2', 'WS3'] + ISOLATED_V4_SKUS))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -859,6 +859,15 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
 
+    with self.argument_context('webapp troubleshoot collect network-capture') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('instance', options_list=['--instance', '-i'], help='Worker instance to capture. When omitted in an interactive terminal, you are prompted to select from the current instances. Specify this option for scripts and other non-interactive use. Only one instance can be captured at a time.')
+        c.argument('duration', options_list=['--duration'], type=int, default=60, help='Capture duration in seconds. Valid range: 1-300.')
+        c.argument('collect_only', options_list=['--collect-only'], arg_type=get_three_state_flag(), help='Show only the raw packet capture link. Kudu still finalizes the capture internally, but the analysis report link is omitted.')
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
@@ -1057,7 +1066,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
                    default=False, action='store_true')
         c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 sku')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 or Isolated V4 sku')
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
@@ -1110,6 +1119,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
+        c.argument('tag', help='Linux only. A friendly name used to identify the deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
@@ -1643,5 +1653,10 @@ subscription than the app service environment, please use the resource ID for --
                    help="Absolute path of the shell to use (e.g. /bin/sh); defaults to /bin/bash. "
                    "In 'shell' mode it is the interactive shell to launch; in 'execute' mode it is "
                    "the shell used to run --shell-command.")
+        c.argument(
+            'target',
+            help="Container to connect to in 'shell' mode. 'app' targets the main web app container; 'kudu' targets the Kudu (SCM) container. In 'execute' mode, only 'app' is supported.",
+            arg_type=get_enum_type(['app', 'kudu']),
+            default='app')
         c.argument('slot', options_list=['--slot', '-s'],
                    help='Name of the web app slot. Default to the production slot if not specified.')

@@ -98,7 +98,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
                          STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
-from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, _validate_asp_sku
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
@@ -5272,6 +5272,9 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
+        _validate_asp_sku(sku,
+                          getattr(instance, 'hosting_environment_profile', None),
+                          getattr(instance, 'zone_redundant', False))
         sku_def.tier = get_sku_tier(sku)
         sku_def.name = sku
 
@@ -11432,7 +11435,8 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=True):
+                             enriched_errors=True,
+                             tag=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11451,6 +11455,7 @@ def perform_onedeploy_webapp(cmd,
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
+    params.tag = tag
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -11459,6 +11464,9 @@ def perform_onedeploy_webapp(cmd,
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     params._cached_site = app  # pylint: disable=protected-access
     params.is_linux_webapp = is_linux_webapp(app)
+    if tag is not None and not params.is_linux_webapp:
+        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+        params.tag = None
 
     # Warn that zip deploy won't auto-build on Linux
     if params.is_linux_webapp and artifact_type in (None, 'zip'):
@@ -11494,6 +11502,7 @@ class OneDeployParams:
         self.is_linux_webapp = None
         self.is_functionapp = None
         self.enriched_errors = True
+        self.tag = None
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -11634,6 +11643,9 @@ def _build_onedeploy_scm_url(params):
     if params.target_path is not None:
         deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
+    if params.tag is not None:
+        deploy_url = deploy_url + '&tag=' + quote(params.tag, safe='')
+
     return deploy_url
 
 
@@ -11751,6 +11763,7 @@ def _get_onedeploy_request_body(params):
                 "ignorestack": params.should_ignore_stack,
                 "clean": params.is_clean_deployment,
                 "restart": params.should_restart,
+                "tag": params.tag,
             }
         }
         body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
