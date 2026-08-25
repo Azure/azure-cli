@@ -5,6 +5,8 @@ set -exv
 
 export USERNAME=azureuser
 
+# Pinned UBI 8/9 images contain an older Expat incompatible with current Python 3.12 pyexpat.
+dnf update -y expat
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
 dnf install git findutils $PYTHON_PACKAGE-pip -y
