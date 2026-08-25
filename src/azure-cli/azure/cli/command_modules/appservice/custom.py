@@ -98,7 +98,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
                          STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
-from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, _validate_asp_sku
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
@@ -5272,6 +5272,9 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
+        _validate_asp_sku(sku,
+                          getattr(instance, 'hosting_environment_profile', None),
+                          getattr(instance, 'zone_redundant', False))
         sku_def.tier = get_sku_tier(sku)
         sku_def.name = sku
 
