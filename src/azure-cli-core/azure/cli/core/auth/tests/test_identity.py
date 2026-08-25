@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, ServicePrincipalStore,
+                                          FEDERATED_IDENTITY, get_federated_id_token,
                                           _get_authority_url)
 from knack.util import CLIError
 
@@ -263,6 +264,26 @@ class TestServicePrincipalAuth(unittest.TestCase):
         client_credential = sp_auth.get_msal_client_credential()
         assert client_credential == {'client_assertion': 'test_jwt'}
 
+    def test_service_principal_auth_federated_identity(self):
+        # The FEDERATED_IDENTITY sentinel is persisted like a normal client_assertion, ...
+        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
+                                                             {'client_assertion': FEDERATED_IDENTITY})
+        assert sp_auth.client_assertion == FEDERATED_IDENTITY
+
+        # Verify persist entry keeps the sentinel so later processes can rebuild the callback
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'client_assertion': FEDERATED_IDENTITY
+        }
+
+        # ... but get_msal_client_credential resolves the sentinel to the refreshing callback (not a string),
+        # so MSAL fetches a fresh ID token on every acquisition.
+        client_credential = sp_auth.get_msal_client_credential()
+        assert client_credential == {'client_assertion': get_federated_id_token}
+        assert callable(client_credential['client_assertion'])
+
     def test_build_credential(self):
         # client_secret
         cred = ServicePrincipalAuth.build_credential(client_secret="test_secret")
@@ -290,6 +311,48 @@ class TestServicePrincipalAuth(unittest.TestCase):
         # client_assertion
         cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
         assert cred == {"client_assertion": "test_jwt"}
+
+
+class TestFederatedIdentity(unittest.TestCase):
+    """Tests for the OIDC federated-token dispatcher used by 'az login --federated-identity'."""
+
+    @mock.patch.dict(os.environ, {
+        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token?foo=bar',
+        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
+    }, clear=True)
+    @mock.patch('requests.get')
+    def test_get_federated_id_token_github(self, get_mock):
+        get_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'value': 'fresh_id_token'})
+
+        token = get_federated_id_token()
+
+        assert token == 'fresh_id_token'
+        # The audience is appended to the GitHub-provided request URL and the request token is used as bearer.
+        called_url = get_mock.call_args.args[0]
+        assert called_url.startswith('https://github.example/token?foo=bar&audience=')
+        assert 'api%3A//AzureADTokenExchange' in called_url
+        assert get_mock.call_args.kwargs['headers']['Authorization'] == 'bearer request_token'
+
+    @mock.patch.dict(os.environ, {
+        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
+        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
+    }, clear=True)
+    @mock.patch('requests.get')
+    def test_get_federated_id_token_github_http_error(self, get_mock):
+        get_mock.return_value = mock.MagicMock(ok=False, status_code=403, reason='Forbidden')
+        with self.assertRaisesRegex(CLIError, 'Failed to retrieve an ID token'):
+            get_federated_id_token()
+
+    @mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'https://dev.azure.com/org'}, clear=True)
+    def test_get_federated_id_token_unsupported_provider(self):
+        # Only GitHub Actions is supported for now; any other environment reports the same clear error.
+        with self.assertRaisesRegex(CLIError, 'no supported CI/CD OIDC provider'):
+            get_federated_id_token()
+
+    @mock.patch.dict(os.environ, {}, clear=True)
+    def test_get_federated_id_token_no_provider(self):
+        with self.assertRaisesRegex(CLIError, 'no supported CI/CD OIDC provider'):
+            get_federated_id_token()
 
 
 class TestServicePrincipalStore(unittest.TestCase):
