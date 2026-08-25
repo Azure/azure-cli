@@ -5,6 +5,7 @@ set -exv
 
 export USERNAME=azureuser
 
+dnf update -y
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
 dnf install git findutils $PYTHON_PACKAGE-pip -y
