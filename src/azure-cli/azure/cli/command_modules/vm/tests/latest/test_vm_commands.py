@@ -6158,8 +6158,9 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'user_data_file': user_data_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" '
-                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username deploy '
+                 '--ssh-key-value "{ssh_key}" --user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard '
+                 '--vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -9687,7 +9688,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian '
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username debian '
                  '--ssh-key-value \'{ssh_key}\' --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} '
                  '--vm-sku Standard_D2s_v3')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
@@ -9695,7 +9696,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         time.sleep(30)
         self.cmd('vmss update -g {rg} -n {vmss} --ppg {ppg_id}')
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian '
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username debian '
                  '--ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
                  '--size Standard_D2s_v3')
 
@@ -10197,7 +10198,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         ])
 
     # Required Microsoft.Compute/SendScheduledEventsPolicy
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='westus')
     def test_vmss_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
@@ -10248,7 +10249,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         ])
 
     # Required Microsoft.Compute/SendScheduledEventsPolicy
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='westus')
     def test_vm_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
@@ -12659,7 +12660,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='northeurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='westus')
     def test_enable_trusted_launch_on_v1(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm1', 10),
@@ -15055,7 +15056,7 @@ class VMZoneMovementScenarioTest(ScenarioTest):
 
     # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate to be enabled
     # to use --zone-movement.
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='westus')
     def test_vm_zone_movement_preserved(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 15),
