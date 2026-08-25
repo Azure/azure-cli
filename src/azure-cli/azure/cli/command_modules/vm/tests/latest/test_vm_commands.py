@@ -2027,6 +2027,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
+    @live_only()
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_processor_mode_', location='westus')
     def test_vm_processor_mode(self, resource_group):
