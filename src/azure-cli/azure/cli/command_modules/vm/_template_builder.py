@@ -1063,6 +1063,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, processor_mode=None, os_disk_security_encryption_type=None,
@@ -1684,12 +1685,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group:
-        virtual_machine_profile['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        virtual_machine_profile['capacityReservation'] = {}
+        if capacity_reservation_group:
+            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
