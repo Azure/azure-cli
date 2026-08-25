@@ -164,7 +164,6 @@ Release History
 * `az appservice plan`: Remove preview flag for managed instance app service plans (#33690)
 * `az appservice plan`: Add Premium V3 SKU support (`P0V3`, `P1-3V3`, `P1-5MV3`) for managed instances (#33690)
 * `az webapp troubleshoot status`: Provide latest application startup attempt data (#33673)
-* `az appservice plan create`: Fix help examples for Windows plans to include `--is-linux false`, consistent with the default behavior that creates Linux plans when the flag is omitted (#33821)
 
 **ARM**
 
