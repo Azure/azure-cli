@@ -474,10 +474,12 @@ def get_federated_id_token():
     """
     if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
         return _get_id_token_github()
+    if 'SYSTEM_OIDCREQUESTURI' in os.environ or 'ARM_OIDC_REQUEST_URL' in os.environ:
+        return _get_id_token_azure_devops()
     raise CLIError(
         "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
-        "Only GitHub Actions is currently supported. Provide a token with --federated-token instead. "
-        "See https://github.com/Azure/azure-cli/issues/28708 for provider support progress.")
+        "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
+        "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
 
 
 def _get_id_token_github():
@@ -513,4 +515,56 @@ def _get_id_token_github():
         raise CLIError('GitHub Actions OIDC endpoint did not return an ID token.')
     # Never log the token value itself.
     logger.debug('Retrieved a fresh ID token from the GitHub Actions OIDC endpoint.')
+    return id_token
+
+
+def _get_id_token_azure_devops():
+    """Fetch a fresh OIDC ID token from Azure DevOps Pipelines.
+
+    Azure DevOps issues short-lived ID tokens (~5 min) and, unlike GitHub Actions, requires a POST to the
+    oidctoken API authenticated with the pipeline's System.AccessToken and targeting a specific service
+    connection. Because the token refresh runs in a later `az` process, all three inputs are read from the
+    environment following the documented Azure DevOps convention:
+
+    - request URL:   ARM_OIDC_REQUEST_URL, else SYSTEM_OIDCREQUESTURI
+    - access token:  ARM_OIDC_REQUEST_TOKEN, else SYSTEM_ACCESSTOKEN (the pipeline's System.AccessToken)
+    - service conn:  ARM_OIDC_AZURE_SERVICE_CONNECTION_ID
+
+    https://devblogs.microsoft.com/devops/introducing-azure-devops-id-token-refresh-and-terraform-task-version-5/
+    """
+    from urllib.parse import quote
+    import requests
+
+    request_url = os.environ.get('ARM_OIDC_REQUEST_URL') or os.environ.get('SYSTEM_OIDCREQUESTURI')
+    request_token = os.environ.get('ARM_OIDC_REQUEST_TOKEN') or os.environ.get('SYSTEM_ACCESSTOKEN')
+    service_connection_id = os.environ.get('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID')
+
+    missing = [name for name, value in (
+        ('ARM_OIDC_REQUEST_URL (or SYSTEM_OIDCREQUESTURI)', request_url),
+        ('ARM_OIDC_REQUEST_TOKEN (or SYSTEM_ACCESSTOKEN)', request_token),
+        ('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID', service_connection_id)) if not value]
+    if missing:
+        raise CLIError(
+            '--federated-identity on Azure DevOps requires the environment variable(s): {}. '
+            'System.AccessToken is not exposed to scripts by default, so map it explicitly and set the '
+            'service connection ID. See https://github.com/Azure/azure-cli/issues/28708 for guidance.'
+            .format(', '.join(missing)))
+
+    url = '{}?api-version=7.1&serviceConnectionId={}'.format(
+        request_url.rstrip('/'), quote(service_connection_id))
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'bearer {}'.format(request_token),
+        # Prevents the service from responding with a redirect HTTP status code.
+        'X-TFS-FedAuthRedirect': 'Suppress',
+    }
+    response = requests.post(url, headers=headers)
+    if not response.ok:
+        raise CLIError('Failed to retrieve an ID token from Azure DevOps: {} {}'.format(
+            response.status_code, response.reason))
+    id_token = response.json().get('oidcToken')
+    if not id_token:
+        raise CLIError('Azure DevOps OIDC endpoint did not return an ID token.')
+    # Never log the token value itself.
+    logger.debug('Retrieved a fresh ID token from the Azure DevOps OIDC endpoint.')
     return id_token
