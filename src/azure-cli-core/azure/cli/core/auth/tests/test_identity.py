@@ -284,6 +284,43 @@ class TestServicePrincipalAuth(unittest.TestCase):
         assert client_credential == {'client_assertion': get_federated_id_token}
         assert callable(client_credential['client_assertion'])
 
+    def test_service_principal_auth_federated_token_callback(self):
+        # The callback command is persisted so later `az` processes can rebuild the callable.
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'my-get-token-command'})
+        assert sp_auth.client_assertion_callback == 'my-get-token-command'
+
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'client_assertion_callback': 'my-get-token-command'
+        }
+
+        # get_msal_client_credential wraps the command as a refreshing callable (not a static string).
+        client_credential = sp_auth.get_msal_client_credential()
+        assert callable(client_credential['client_assertion'])
+
+    @mock.patch('subprocess.run')
+    def test_federated_token_callback_invokes_command(self, run_mock):
+        run_mock.return_value = mock.MagicMock(stdout='fresh_token\n', stderr='')
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        callback = sp_auth.get_msal_client_credential()['client_assertion']
+
+        # The callable runs the user command and returns its trimmed stdout each time MSAL calls it.
+        assert callback() == 'fresh_token'
+        assert run_mock.call_args.args[0] == 'get-token'
+
+    @mock.patch('subprocess.run')
+    def test_federated_token_callback_empty_output(self, run_mock):
+        run_mock.return_value = mock.MagicMock(stdout='   \n', stderr='')
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with self.assertRaisesRegex(CLIError, 'produced no output'):
+            callback()
+
     def test_build_credential(self):
         # client_secret
         cred = ServicePrincipalAuth.build_credential(client_secret="test_secret")
@@ -311,6 +348,10 @@ class TestServicePrincipalAuth(unittest.TestCase):
         # client_assertion
         cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
         assert cred == {"client_assertion": "test_jwt"}
+
+        # client_assertion_callback
+        cred = ServicePrincipalAuth.build_credential(client_assertion_callback="get-token")
+        assert cred == {"client_assertion_callback": "get-token"}
 
 
 class TestFederatedIdentity(unittest.TestCase):
