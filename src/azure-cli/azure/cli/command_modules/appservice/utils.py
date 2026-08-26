@@ -21,7 +21,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory, providers_client_factory
-from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND, ISOLATED_V4_SKUS
 
 logger = get_logger(__name__)
 
@@ -113,6 +113,8 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'IsolatedV2'
     if name in ['I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:
         return 'IsolatedMV2'
+    if name in ISOLATED_V4_SKUS:
+        return 'IsolatedV4'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
