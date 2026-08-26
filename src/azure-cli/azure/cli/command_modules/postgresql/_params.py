@@ -461,6 +461,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('restore_point_in_time', arg_type=restore_point_in_time_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
+            c.argument('sku_name', arg_type=sku_name_arg_type)
+            c.argument('tier', arg_type=tier_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
