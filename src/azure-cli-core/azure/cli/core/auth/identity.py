@@ -517,7 +517,9 @@ def _get_id_token_github():
             '"id-token: write" permission granted to the workflow.'.format(ex))
 
     audience = quote('api://AzureADTokenExchange')
-    url = '{}&audience={}'.format(request_url, audience)
+    # Append the audience with the correct separator in case the request URL already has a query string.
+    separator = '&' if '?' in request_url else '?'
+    url = '{}{}audience={}'.format(request_url, separator, audience)
     headers = {
         'Authorization': 'bearer {}'.format(request_token),
         'Accept': 'application/json; api-version=2.0',
@@ -592,14 +594,26 @@ def _build_command_assertion_callback(command):
 
     This is the provider-agnostic escape hatch behind `az login --federated-token-callback`. The command
     is expected to print a single OIDC token to stdout; MSAL invokes the returned callable whenever it
-    needs a fresh assertion, so refresh works with any CI/CD provider. The command is supplied directly by
-    the user on the command line (it is their own command, not untrusted input).
+    needs a fresh assertion, so refresh works with any CI/CD provider.
+
+    The command is parsed into an argument vector and run WITHOUT a shell (shell=False). Because the command
+    is persisted in the service principal entry and re-executed on every refresh, avoiding a shell prevents a
+    tampered token cache from turning into arbitrary code execution. Users who need shell features such as
+    pipes or redirection should either point to a script file or wrap the pipeline explicitly, e.g.
+    --federated-token-callback "bash -c 'curl ... | jq -r .value'".
     """
+    import shlex
+    # posix=False keeps Windows paths (backslashes) intact; args are still executed without a shell.
+    args = shlex.split(command, posix=not sys.platform.startswith('win'))
+    if not args:
+        raise CLIError('--federated-token-callback: the command is empty.')
+
     def get_id_token():
         import subprocess
         try:
-            # shell=True is required so users can pipe (e.g. `curl ... | jq -r .value`).
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+            result = subprocess.run(args, capture_output=True, text=True, check=True)
+        except FileNotFoundError:
+            raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0]))
         except subprocess.CalledProcessError as ex:
             raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
                 ex.returncode, (ex.stderr or '').strip()))
