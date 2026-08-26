@@ -305,12 +305,23 @@ class TestServicePrincipalAuth(unittest.TestCase):
     def test_federated_token_callback_invokes_command(self, run_mock):
         run_mock.return_value = mock.MagicMock(stdout='fresh_token\n', stderr='')
         sp_auth = ServicePrincipalAuth.build_from_credential(
-            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token --audience x'})
         callback = sp_auth.get_msal_client_credential()['client_assertion']
 
         # The callable runs the user command and returns its trimmed stdout each time MSAL calls it.
         assert callback() == 'fresh_token'
-        assert run_mock.call_args.args[0] == 'get-token'
+        # The command is split into an argv list and run WITHOUT a shell (no shell=True kwarg).
+        assert run_mock.call_args.args[0] == ['get-token', '--audience', 'x']
+        assert 'shell' not in run_mock.call_args.kwargs
+
+    def test_federated_token_callback_no_shell_interpretation(self):
+        # Shell metacharacters must be treated as literal argv, never interpreted by a shell.
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': "get-token ; rm -rf /"})
+        with mock.patch('subprocess.run') as run_mock:
+            run_mock.return_value = mock.MagicMock(stdout='tok\n', stderr='')
+            sp_auth.get_msal_client_credential()['client_assertion']()
+        assert run_mock.call_args.args[0] == ['get-token', ';', 'rm', '-rf', '/']
 
     @mock.patch('subprocess.run')
     def test_federated_token_callback_empty_output(self, run_mock):
@@ -373,6 +384,21 @@ class TestFederatedIdentity(unittest.TestCase):
         assert called_url.startswith('https://github.example/token?foo=bar&audience=')
         assert 'api%3A//AzureADTokenExchange' in called_url
         assert get_mock.call_args.kwargs['headers']['Authorization'] == 'bearer request_token'
+
+    @mock.patch.dict(os.environ, {
+        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
+        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
+    }, clear=True)
+    @mock.patch('requests.get')
+    def test_get_federated_id_token_github_url_without_query(self, get_mock):
+        # When the request URL has no existing query string, the audience must be appended with '?', not '&'.
+        get_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'value': 'fresh_id_token'})
+
+        get_federated_id_token()
+
+        called_url = get_mock.call_args.args[0]
+        assert called_url.startswith('https://github.example/token?audience=')
+        assert '&audience=' not in called_url
 
     @mock.patch.dict(os.environ, {
         'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',

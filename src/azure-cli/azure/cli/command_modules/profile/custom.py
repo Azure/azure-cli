@@ -157,10 +157,15 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
-        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+        raise CLIError('usage error: --service-principal --username NAME --tenant TENANT with one credential '
+                       '(--password, --certificate, --federated-token, --federated-identity or '
+                       '--federated-token-callback)')
     if sum(map(bool, [client_assertion, federated_identity, federated_token_callback])) > 1:
         raise CLIError('usage error: Only one of --federated-token, --federated-identity and '
                        '--federated-token-callback can be specified')
+    if (client_assertion or federated_identity or federated_token_callback) and (password or certificate):
+        raise CLIError('usage error: --federated-token, --federated-identity and --federated-token-callback '
+                       'cannot be combined with --password or --certificate')
     if federated_identity and not service_principal:
         raise CLIError("usage error: '--federated-identity' is only applicable with a service principal")
     if federated_token_callback and not service_principal:
