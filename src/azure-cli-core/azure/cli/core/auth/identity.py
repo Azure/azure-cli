@@ -159,7 +159,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 logger.warning(WAM_PROMPT)
 
         from .util import read_response_templates
-        success_template, error_template = read_response_templates()
+        # Recommend enabling the Windows broker (WAM) on the browser login success page only when
+        # the broker is disabled on a WAM-capable Windows platform, i.e. the user is falling back
+        # to browser-based login on Windows.
+        show_wam_prompt = sys.platform == 'win32' and not self._enable_broker_on_windows
+        success_template, error_template = read_response_templates(show_wam_prompt=show_wam_prompt)
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.

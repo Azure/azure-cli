@@ -20,6 +20,23 @@ PASSWORD_CERTIFICATE_WARNING = (
     "To pass a service principal certificate, use --certificate instead.")
 
 
+# WAM enablement doc for Azure CLI.
+WAM_ENABLEMENT_URL = (
+    "https://learn.microsoft.com/en-us/cli/azure/"
+    "authenticate-azure-cli-interactively#sign-in-with-web-account-manager-wam-on-windows")
+
+# HTML snippet injected into the browser login success page to recommend enabling the
+# Windows broker (Web Account Manager, WAM). Injected by read_response_templates.
+_WAM_PROMPT_HTML = (
+    '<div class="wam-prompt">\n'
+    '        <p>🔐 To better protect your account, we recommend enabling '
+    '<strong>Web Account Manager (WAM)</strong> &mdash; the Windows authentication broker. '
+    'It adds token protection, Windows Hello, conditional access, and streamlined single sign-on.</p>\n'
+    '        <p>Enable it in a few steps: '
+    f'<a href="{WAM_ENABLEMENT_URL}">Sign in with Web Account Manager (WAM) on Windows</a>.</p>\n'
+    '    </div>')
+
+
 def aad_error_handler(error, tenant=None, scopes=None, claims_challenge=None):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
@@ -185,11 +202,18 @@ def decode_access_token(access_token):
     return json.loads(decoded_str)
 
 
-def read_response_templates():
-    """Read from success.html and error.html to strings and pass them to MSAL. """
+def read_response_templates(show_wam_prompt=False):
+    """Read from success.html and error.html to strings and pass them to MSAL.
+
+    :param show_wam_prompt: Whether to include the prompt that recommends enabling the Windows
+        broker (Web Account Manager, WAM) in the success page. This should only be enabled for
+        browser-based login on a WAM-capable Windows platform where the broker is disabled.
+    """
     success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
     with open(success_file) as f:
         success_template = f.read()
+
+    success_template = success_template.replace('{{wam_prompt}}', _WAM_PROMPT_HTML if show_wam_prompt else '')
 
     error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
     with open(error_file) as f:
