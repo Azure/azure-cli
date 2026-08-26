@@ -89,11 +89,13 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('federated_identity', options_list=['--federated-identity'], arg_type=get_three_state_flag(),
                        help='Acquire and automatically refresh the OIDC federated token from the CI/CD provider '
                             '(GitHub Actions or Azure DevOps). Avoids the AADSTS700024 error on long-running '
-                            'tasks. Cannot be combined with --federated-token.')
+                            'tasks. Cannot be combined with --federated-token or --federated-token-callback.')
             c.argument('federated_token_callback', options_list=['--federated-token-callback'],
                        help='A command that prints a fresh OIDC federated token to stdout. Azure CLI runs it on '
-                            'demand to refresh the token, so it works with any CI/CD provider. Cannot be combined '
-                            'with --federated-token or --federated-identity.')
+                            'demand to refresh the token, so it works with any CI/CD provider. The command runs '
+                            'without a shell; to use pipes or redirection, point to a script file or wrap it, '
+                            'e.g. "bash -c \'...\'". Cannot be combined with --federated-token or '
+                            '--federated-identity.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
