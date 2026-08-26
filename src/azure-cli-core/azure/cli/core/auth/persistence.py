@@ -48,7 +48,7 @@ def load_secret_store(location, encrypt):
     return SecretStore(persistence)
 
 
-def build_persistence(location, encrypt, type=None):
+def build_persistence(location, encrypt, type=None):  # pylint: disable=redefined-builtin
     """Build a suitable persistence instance based your current OS"""
     logger.debug("build_persistence: location=%r, encrypt=%r, type=%r", location, encrypt, type)
     if encrypt:
@@ -78,7 +78,7 @@ def build_persistence(location, encrypt, type=None):
                     schema_name=LIBSECRET_SCHEMA_NAME,
                     attributes=attributes
                 )
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 # LibsecretPersistence is known to be unavailable in some Linux environments.
                 # Fall back to FilePersistence. The user is warned at sign-in.
                 logger.debug("Failed to initialize LibsecretPersistence: %s", e)
