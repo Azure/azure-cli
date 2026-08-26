@@ -2560,5 +2560,151 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         self.assertTrue(all(is_auto for _, _, is_auto in runtimes))
 
 
+class TestDetectOsFromSrc(unittest.TestCase):
+    """Tests for detect_os_from_src improvements (#25743)"""
+
+    def test_python_detected_as_linux(self):
+        from azure.cli.command_modules.appservice._create_util import detect_os_from_src
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            result = detect_os_from_src(tmp)
+            self.assertEqual(result, "Linux")
+
+    def test_node_detected_as_linux(self):
+        from azure.cli.command_modules.appservice._create_util import detect_os_from_src
+        import tempfile
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'package.json'), 'w') as f:
+                json.dump({"name": "test", "version": "1.0.0"}, f)
+            result = detect_os_from_src(tmp)
+            self.assertEqual(result, "Linux")
+
+    def test_html_detected_as_linux(self):
+        from azure.cli.command_modules.appservice._create_util import detect_os_from_src
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'index.html'), 'w') as f:
+                f.write('<html></html>')
+            result = detect_os_from_src(tmp, html=True)
+            self.assertEqual(result, "Linux")
+
+    def test_runtime_override_python(self):
+        from azure.cli.command_modules.appservice._create_util import detect_os_from_src
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            result = detect_os_from_src(tmp, runtime="python|3.11")
+            self.assertEqual(result, "Linux")
+
+    def test_runtime_override_aspnet(self):
+        from azure.cli.command_modules.appservice._create_util import detect_os_from_src
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            result = detect_os_from_src(tmp, runtime="aspnet|4.8")
+            self.assertEqual(result, "Windows")
+
+
+class TestGetLangFromContent(unittest.TestCase):
+    """Tests for static HTML auto-detection (#25129)"""
+
+    def test_html_autodetected_without_flag(self):
+        from azure.cli.command_modules.appservice._create_util import get_lang_from_content
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'index.html'), 'w') as f:
+                f.write('<html></html>')
+            result = get_lang_from_content(tmp, html=False)
+            self.assertEqual(result['language'], 'static')
+
+    def test_python_takes_precedence_over_html(self):
+        from azure.cli.command_modules.appservice._create_util import get_lang_from_content
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            with open(os.path.join(tmp, 'index.html'), 'w') as f:
+                f.write('<html></html>')
+            result = get_lang_from_content(tmp, html=False)
+            self.assertEqual(result['language'], 'python')
+
+
+class TestDetectPythonVersion(unittest.TestCase):
+    """Tests for Python version detection from project files (#30756)"""
+
+    def test_detect_from_runtime_txt(self):
+        from azure.cli.command_modules.appservice._create_util import _detect_python_version
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            with open(os.path.join(tmp, 'runtime.txt'), 'w') as f:
+                f.write('python-3.11.4\n')
+            result = _detect_python_version(os.path.join(tmp, 'requirements.txt'))
+            self.assertEqual(result, '3.11')
+
+    def test_detect_from_python_version_file(self):
+        from azure.cli.command_modules.appservice._create_util import _detect_python_version
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            with open(os.path.join(tmp, '.python-version'), 'w') as f:
+                f.write('3.10.2\n')
+            result = _detect_python_version(os.path.join(tmp, 'requirements.txt'))
+            self.assertEqual(result, '3.10')
+
+    def test_no_version_file_returns_dash(self):
+        from azure.cli.command_modules.appservice._create_util import _detect_python_version
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            result = _detect_python_version(os.path.join(tmp, 'requirements.txt'))
+            self.assertEqual(result, '-')
+
+    def test_runtime_txt_takes_precedence(self):
+        from azure.cli.command_modules.appservice._create_util import _detect_python_version
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, 'requirements.txt'), 'w') as f:
+                f.write('flask\n')
+            with open(os.path.join(tmp, 'runtime.txt'), 'w') as f:
+                f.write('python-3.12.0\n')
+            with open(os.path.join(tmp, '.python-version'), 'w') as f:
+                f.write('3.10\n')
+            result = _detect_python_version(os.path.join(tmp, 'requirements.txt'))
+            self.assertEqual(result, '3.12')
+
+
+class TestValidateRuntimeOsCombo(unittest.TestCase):
+    """Tests for runtime+OS pre-validation (#25597)"""
+
+    def test_static_runtime_skips_validation(self):
+        from azure.cli.command_modules.appservice._create_util import validate_runtime_os_combo
+        validate_runtime_os_combo('static', '-', 'Linux', None, True)
+
+    def test_no_version_skips_validation(self):
+        from azure.cli.command_modules.appservice._create_util import validate_runtime_os_combo
+        validate_runtime_os_combo('python', '-', 'Linux', None, True)
+
+    def test_invalid_combo_raises_error(self):
+        from azure.cli.command_modules.appservice._create_util import validate_runtime_os_combo
+        from azure.cli.core.azclierror import ValidationError
+
+        mock_helper = mock.MagicMock()
+        mock_helper.resolve.return_value = None
+        with self.assertRaises(ValidationError):
+            validate_runtime_os_combo('python', '3.11', 'Windows', mock_helper, False)
+
+    def test_valid_combo_passes(self):
+        from azure.cli.command_modules.appservice._create_util import validate_runtime_os_combo
+
+        mock_helper = mock.MagicMock()
+        mock_helper.resolve.return_value = mock.MagicMock()
+        validate_runtime_os_combo('python', '3.11', 'Linux', mock_helper, True)
+
+
 if __name__ == '__main__':
     unittest.main()
