@@ -26,6 +26,7 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
+_CLIENT_ASSERTION_CALLBACK = 'client_assertion_callback'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -261,6 +262,8 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
+        # command that prints a fresh federated token to stdout (provider-agnostic callback)
+        self.client_assertion_callback = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -298,12 +301,13 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None):
+                         client_assertion=None, client_assertion_callback=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token'
+            'client_assertion': 'my_federated_token',
+            'client_assertion_callback': 'my-get-token-command'
         }
         """
         entry = {}
@@ -315,11 +319,14 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
+        elif client_assertion_callback:
+            entry[_CLIENT_ASSERTION_CALLBACK] = client_assertion_callback
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
-        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
+        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
+                          _CLIENT_ASSERTION, _CLIENT_ASSERTION_CALLBACK]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -354,6 +361,16 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
             client_credential = {
                 'client_assertion': get_federated_id_token if self.client_assertion == FEDERATED_IDENTITY
                 else self.client_assertion}
+
+        # client_assertion_callback
+        # A user-provided command that prints a fresh federated token to stdout. Wrapped as a callable so
+        # MSAL re-runs it whenever a fresh assertion is needed (provider-agnostic refresh).
+        # {
+        #     "client_assertion": <callable returning a JWT>
+        # }
+        if self.client_assertion_callback:
+            client_credential = {
+                'client_assertion': _build_command_assertion_callback(self.client_assertion_callback)}
 
         return client_credential
 
@@ -568,3 +585,28 @@ def _get_id_token_azure_devops():
     # Never log the token value itself.
     logger.debug('Retrieved a fresh ID token from the Azure DevOps OIDC endpoint.')
     return id_token
+
+
+def _build_command_assertion_callback(command):
+    """Wrap a user-provided command as a callable that returns a fresh federated token.
+
+    This is the provider-agnostic escape hatch behind `az login --federated-token-callback`. The command
+    is expected to print a single OIDC token to stdout; MSAL invokes the returned callable whenever it
+    needs a fresh assertion, so refresh works with any CI/CD provider. The command is supplied directly by
+    the user on the command line (it is their own command, not untrusted input).
+    """
+    def get_id_token():
+        import subprocess
+        try:
+            # shell=True is required so users can pipe (e.g. `curl ... | jq -r .value`).
+            result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as ex:
+            raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
+                ex.returncode, (ex.stderr or '').strip()))
+        id_token = result.stdout.strip()
+        if not id_token:
+            raise CLIError('--federated-token-callback command produced no output on stdout.')
+        # Never log the token value itself.
+        logger.debug('Retrieved a fresh ID token from the --federated-token-callback command.')
+        return id_token
+    return get_id_token
