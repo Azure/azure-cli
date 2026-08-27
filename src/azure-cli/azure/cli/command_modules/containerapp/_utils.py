@@ -142,7 +142,7 @@ def _create_role_assignment(cli_ctx, role, assignee, scope=None):
     definitions_client = auth_client.role_definitions
 
     assignment_name = uuid.uuid4()
-    role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+    role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
     role_id = role_defs[0].id
 
     api_version = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION, max_api='2015-07-01')
@@ -1327,14 +1327,14 @@ def queue_acr_build(cmd, registry_rg, registry_name, img_name, src_dir, dockerfi
     # So we need to update the docker_file_path
     docker_file_path = docker_file_in_tar
 
-    OS, Architecture = cmd.get_models('OS', 'Architecture', resource_type=ResourceType.MGMT_CONTAINERREGISTRY, operation_group='runs')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', resource_type=ResourceType.MGMT_CONTAINERREGISTRYTASKS, operation_group='runs')
     # Default platform values
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
     platform_variant = None
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties',
-                                                            resource_type=ResourceType.MGMT_CONTAINERREGISTRY, operation_group='runs')
+                                                            resource_type=ResourceType.MGMT_CONTAINERREGISTRYTASKS, operation_group='runs')
     docker_build_request = DockerBuildRequest(
         image_names=[img_name],
         is_push_enabled=True,

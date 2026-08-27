@@ -15,6 +15,10 @@ LINUX_OS_NAME = "linux"
 WINDOWS_OS_NAME = "windows"
 STATIC_RUNTIME_NAME = "static"  # not an official supported runtime but used for CLI logic
 LINUX_SKU_DEFAULT = "P1V2"
+ISOLATED_V4_SKUS = [
+    'I1V4', 'I2V4', 'I3V4', 'I4V4', 'I5V4', 'I6V4',
+    'I1MV4', 'I2MV4', 'I3MV4', 'I4MV4', 'I5MV4'
+]
 FUNCTIONS_VERSIONS = ['4']
 LOGICAPPS_NODE_RUNTIME_VERSIONS = ['~14', '~16', '~18']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
@@ -142,5 +146,7 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
 FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+UPDATE_STRATEGY_TYPES = ['Recreate', 'RollingUpdate']
 
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

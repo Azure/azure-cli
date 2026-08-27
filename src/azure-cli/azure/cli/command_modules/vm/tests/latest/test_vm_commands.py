@@ -1954,6 +1954,24 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_force_deallocate_', location='centralus')
+    def test_vm_force_deallocate(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vm': self.create_random_name('vm', 15),
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} -l {loc} --image Ubuntu2204 --zone 1 '
+                 '--zone-movement true --storage-sku Premium_ZRS '
+                 '--tags useNRPDeallocateOnFabricFailure=true --admin-username azureuser '
+                 '--admin-password Test123456789# --authentication-type password --nsg-rule NONE '
+                 '--size Standard_D2s_v3', checks=[
+                     self.check('zones', '1'),
+                 ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --force-deallocate')
+        self._check_vm_power_state('PowerState/deallocated')
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_')
     def test_vm_user_update_win(self, resource_group):
@@ -2131,14 +2149,14 @@ class VMAvailSetScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='westus')
     def test_vm_availset_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'availset1': 'availset-test1',
             'availset2': 'availset-test2'
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
+        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --scheduled-events-api-version 2020-07-01 --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
             self.check('name', '{availset1}'),
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
@@ -2157,7 +2175,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy', None),
         ])
 
-        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True', checks=[
+        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True --scheduled-events-api-version 2020-07-01', checks=[
             self.check('name', '{availset2}'),
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
@@ -2170,18 +2188,23 @@ class VMAvailSetScenarioTest(ScenarioTest):
             'avset': self.create_random_name('avset', 15)
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1')
-        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True', checks=[
+        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1 '
+                 '--additional-events True --enable-reboot True --enable-redeploy True '
+                 '--scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        with self.assertRaises(HttpResponseError): # No available regions found
-            self.cmd('vm availability-set update -g {rg} -n {avset} --scheduled-events-api-version 2020-07-01', checks=[
-                self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01')
-            ])
+        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down False', checks=[
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
+        ])
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
     @AllowLargeResponse(size_kb=99999)
+    @live_only() # Response is too large
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -3368,7 +3391,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --admin-username admin123 --admin-password testPassword0 '
+                 '--instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait --vm-sku Standard_D2s_v3')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3433,7 +3458,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password '
+                 '--admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait '
+                 '--orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3490,12 +3517,14 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'ext_name': 'MyNetworkWatcher'
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Flexible')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --admin-username admin123 --admin-password testPassword0 '
+                 '--instance-count 1 --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('typePropertiesType', '{ext_type}')
+            self.check('type', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
@@ -3638,13 +3667,16 @@ class VMCreateExistingOptions(ScenarioTest):
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm create --image Canonical:UbuntuServer:18.04-LTS:latest --os-disk-name {disk} --os-disk-delete-option Delete '
-                 '--vnet-name {vnet} --subnet {subnet} --availability-set {availset} --public-ip-address {pubip} -l "West US" --nsg {nsg} --use-unmanaged-disk --size Standard_DS2 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
+        self.cmd('vm create --image Canonical:UbuntuServer:16.04-LTS:latest --os-disk-name {disk} '
+                 '--os-disk-delete-option Delete --vnet-name {vnet} --subnet {subnet} --availability-set {availset} '
+                 '--public-ip-address {pubip} -l "West US" --nsg {nsg} --use-unmanaged-disk --size Standard_D2s_v3 '
+                 '--admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} '
+                 '--name {vm} --ssh-key-value \'{ssh_key}\'')
 
         self.cmd('vm availability-set show -n {availset} -g {rg}',
                  checks=self.check('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.kwargs['vm'].upper()), True))
         self.cmd('network nsg show -n {nsg} -g {rg}',
-                 checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
+                 checks=self.check("networkInterfaces[0].id.ends_with(@, '{}VMNIC')".format(self.kwargs['vm'].upper()), True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
@@ -3761,14 +3793,14 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['nsg_id'])
 
-        self.cmd('vm create --image Canonical:UbuntuServer:18.04-LTS:latest --os-disk-name {disk} --subnet {subnet_id} '
+        self.cmd('vm create --image Canonical:UbuntuServer:16.04-LTS:latest --os-disk-name {disk} --subnet {subnet_id} '
                  '--availability-set {availset_id} --public-ip-address {pubip_id} -l "West US" --nsg {nsg_id} --use-unmanaged-disk '
-                 '--size Standard_DS2 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
+                 '--size Standard_D2s_v3 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
 
         self.cmd('vm availability-set show -n {availset} -g {rg}',
                  checks=self.check('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.kwargs['vm'].upper()), True))
         self.cmd('network nsg show -n {nsg} -g {rg}',
-                 checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
+                 checks=self.check("networkInterfaces[0].id.ends_with(@, '{}VMNIC')".format(self.kwargs['vm'].upper()), True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
@@ -4644,8 +4676,97 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
 
 
-class VMSSCreateOptions(ScenarioTest):
+class VMSSLifecycleHookScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lifecycle_hook')
+    def test_vmss_lifecycle_hook(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Updating / showing a non-existent hook type fails.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 expect_failure=True)
+
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT8H --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].waitDuration", 'PT8H'),
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSScheduling'] | [0].defaultAction", 'Approve')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H'), self.check('defaultAction', 'Approve')])
+
+        # remove: --type and --all are mutually exclusive, and exactly one is required.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling --all',
+                 expect_failure=True)
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss}', expect_failure=True)
+
+        # Add a second lifecycle hook of a different type.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSRollingBatchStarting '
+                 '--wait-duration PT20M --default-action Approve', checks=[
+                     self.check("lifecycleHooksProfile.lifecycleHooks[?type=='UpgradeAutoOSRollingBatchStarting'] | [0].waitDuration", 'PT20M')
+                 ])
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 2)])
+
+        # Adding a hook whose type already exists is rejected client-side.
+        self.cmd('vmss lifecycle-hook add -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT1H', expect_failure=True)
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT8H')])
+
+        # Update one hook's wait-duration and confirm.
+        self.cmd('vmss lifecycle-hook update -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling '
+                 '--wait-duration PT2H')
+        self.cmd('vmss lifecycle-hook show -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling',
+                 checks=[self.check('waitDuration', 'PT2H')])
+
+        # Remove one hook by --type; one hook remains.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --type UpgradeAutoOSScheduling')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 1)])
+
+        # Remove all remaining hooks with --all.
+        self.cmd('vmss lifecycle-hook remove -g {rg} --vmss-name {vmss} --all')
+        self.cmd('vmss lifecycle-hook list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+
+class VMSSLifecycleHookEventScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_lch_event')
+    # Not including approve/reject/show and update --action-state as they required live platform-generated event
+    def test_vmss_lifecycle_hook_event(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 15)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 --admin-username myadmin '
+                 '--admin-password testPassword0 --orchestration-mode Uniform --instance-count 2 '
+                 '--vm-sku Standard_D2s_v3')
+
+        # Lifecycle hook events are platform-generated; a fresh scale set has none.
+        self.cmd('vmss lifecycle-hook-event list -g {rg} --vmss-name {vmss}',
+                 checks=[self.check('length(@)', 0)])
+
+        # --instance-ids requires --action-state (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent '
+                 '--instance-ids 0', expect_failure=True)
+
+        # update requires at least one of --action-state or --wait-until (client-side validation).
+        self.cmd('vmss lifecycle-hook-event update -g {rg} --vmss-name {vmss} --name fakeEvent',
+                 expect_failure=True)
+
+
+class VMSSCreateOptions(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
@@ -9134,7 +9255,7 @@ class VMGalleryImage(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='centralus')
     def test_create_vm_with_community_gallery_image(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 16),
@@ -9168,13 +9289,13 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1')
         self.kwargs['public_name'] = self.cmd('sig show --gallery-name {gallery} --resource-group {rg} --select Permissions').get_output_in_json()['sharingProfile']['communityGalleryInfo']['publicNames'][0]
 
-        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l eastus2 --gallery-image-version {version}',
+        self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} -l centralus --gallery-image-version {version}',
             checks=[
                 self.check('name', '{version}'),
                 self.check('uniqueId', '/CommunityGalleries/{public_name}/Images/{image}/Versions/{version}')
             ])
 
-        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location eastus2 --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.kwargs['community_gallery_image_version'] = self.cmd('sig image-version show-community --gallery-image-definition {image} --public-gallery-name {public_name} --location centralus --gallery-image-version {version}').get_output_in_json()['uniqueId']
 
         self.cmd('vm create -g {rg} -n {vm_with_community_gallery} --image {community_gallery_image_version} --size Standard_D2s_v3 '
                  '--admin-username gallerytest --generate-ssh-keys --nsg-rule None --accept-term --subnet {subnet} --vnet-name {vnet}')
@@ -9527,13 +9648,16 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
         self.kwargs['vm_id'] = self.cmd(
             'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --use-unmanaged-disk '
-            '--ssh-key-value \'{ssh_key}\' --ppg {ppg} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+            '--ssh-key-value \'{ssh_key}\' --ppg {ppg} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
+            '--size Standard_D2s_v3').get_output_in_json()['id']
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --orchestration-mode Flexible --nsg {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian '
+                 '--ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --orchestration-mode Flexible --nsg {nsg} '
+                 '--vm-sku Standard_D2s_v3')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
@@ -10072,56 +10196,80 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='centraluseuap')
+    # Required Microsoft.Compute/SendScheduledEventsPolicy
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='eastus2')
     def test_vmss_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--additional-events True --enable-reboot True --enable-redeploy True '
+                 '--scheduled-events-api-version 2020-07-01 --enable-all-instance-down True '
+                 '--vm-sku Standard_D2s_v3 --instance-count 1', checks=[
             self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
             self.check('vmss.scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('vmss.scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
-            self.check('scheduledEventsPolicy', None)
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False '
+                 '--enable-redeploy False --enable-all-instance-down False', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
         ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true '
+                 '--enable-reboot False --scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--vm-sku Standard_D2s_v3 --instance-count 1', checks=[
             self.check('vmss.scheduledEventsPolicy', None)
         ])
 
-        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True ', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True --scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-reboot True --enable-redeploy true', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='centraluseuap')
+    # Required Microsoft.Compute/SendScheduledEventsPolicy
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='eastus2')
     def test_vm_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
             'vm3': self.create_random_name('vm', 10),
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:16.04-LTS:latest --additional-events True '
+                 '--enable-reboot True --enable-redeploy True --scheduled-events-api-version 2020-07-01 '
+                 '--enable-all-instance-down True --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vm update -g {rg} -n {vm1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
+        self.cmd('vm update -g {rg} -n {vm1} --additional-events False --enable-reboot False --enable-redeploy False --enable-all-instance-down False', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
         ])
         self.cmd('vm update -g {rg} -n {vm1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
@@ -10129,26 +10277,35 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:16.04-LTS:latest --nsg-rule NONE '
+                 '--size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('scheduledEventsPolicy', None)
         ])
-        self.cmd('vm update -g {rg} -n {vm2} --additional-events True ', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        self.cmd('vm update -g {rg} -n {vm2} --additional-events True --enable-all-instance-down True --scheduled-events-api-version 2020-07-01', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
         self.cmd('vm update -g {rg} -n {vm2} --enable-reboot True --enable-redeploy true', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --nsg-rule NONE')
+
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:16.04-LTS:latest --additional-events True '
+                 '--scheduled-events-api-version 2020-07-01 --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
             self.check('scheduledEventsPolicy.userInitiatedReboot', None)
         ])
         self.cmd('vm update -g {rg} -n {vm3} --enable-reboot True', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable',True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
@@ -11266,7 +11423,8 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Prepare vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--admin-username azureuser --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
 
         # Prepare health extension
         _, settings_file = tempfile.mkstemp()
@@ -11997,7 +12155,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'Manual')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_', location='eastus')
     def test_vmss_linux_patch_mode(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('clitestvmss', 20),
@@ -12006,7 +12164,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --enable-agent '
                  '--patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest '
-                 '--vm-sku Standard_B1ls')
+                 '--vm-sku Standard_D2s_v3')
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
@@ -12719,7 +12877,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='centralus')
     def test_vm_vmss_proxy_agent_control_profile_reference(self, resource_group):
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
@@ -13183,6 +13341,71 @@ class CapacityReservationScenarioTest(ScenarioTest):
         if self.is_live:
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
+    # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
+    # Provide private package for service team to test it out.
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_open_capacity_reservation_', location='eastus2euap')
+    def test_open_capacity_reservation(self, resource_group):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': 'eastus2euap',
+            'reservation_group': self.create_random_name('cli_open_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_open_reservation_', 40),
+            'vm': self.create_random_name('cli-open-vm-', 20),
+            'sku': 'Standard_DS1_v2',
+            'image': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} -l {location} '
+                 '--reservation-type Open',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('reservationType', 'Open')
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('sku.name', '{sku}'),
+                     self.check('sku.capacity', 1),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('vm create -g {rg} -n {vm} -l {location} --image {image} --size {sku} '
+                 '--admin-username azureuser '
+                 '--ssh-key-value "{ssh_key}" --public-ip-address "" --nsg-rule None --no-cap-reservation true')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment false', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', False)
+        ])
+        self.cmd('vm start -g {rg} -n {vm}')
+
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('instanceView.capacityReservationType', 'Open')
+        ])
+
+        utilization = \
+            self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                     '--instance-view', checks=[
+                self.exists('instanceView.utilizationInfo.usedReservedCountBySubscription')
+            ]).get_output_in_json()['instanceView']['utilizationInfo']['usedReservedCountBySubscription']
+        self.assertEqual(1, len(utilization))
+        self.assertEqual(1, next(iter(utilization.values())))
+
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --disable-capacity-reservation-assignment true', checks=[
+            self.check('capacityReservation.disableCapacityReservationAssignment', True)
+        ])
 
     @record_only()  # Some special subscriptions can test it.
     @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_sharing_profile', location='westEurope')
@@ -14693,6 +14916,48 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
         ])
 
 
+class VMSSUpdateZonePlacementPolicyTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_zone_placement_', location='eastus2')
+    def test_vmss_update_zone_placement_policy(self, resource_group):
+        self.kwargs.update({
+            'vmss_include': 'vmss-update-include-zones',
+            'vmss_exclude': 'vmss-update-exclude-zones',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-g2:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_D2s_v7'
+        })
+
+        # create a vmss (with no instances so no zones are in use) and update its include zones
+        self.cmd('vmss create -g {rg} -n {vmss_include} -l {location} --image {image} '
+                 '--admin-username {admin_username} --admin-password {admin_password} --upgrade-policy-mode Manual '
+                 '--zone-placement-policy Auto --instance-count 0 --vm-sku {vm_sku} ')
+
+        self.cmd('vmss update -g {rg} -n {vmss_include} --zone-placement-policy Auto --include-zones 1 2')
+
+        self.cmd('vmss show -g {rg} -n {vmss_include}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.includeZones', ['1', '2'])
+        ])
+
+        # create a separate vmss (with no instances) and update its exclude zones
+        self.cmd('vmss create -g {rg} -n {vmss_exclude} -l {location} --image {image} '
+                 '--admin-username {admin_username} --admin-password {admin_password} --upgrade-policy-mode Manual '
+                 '--zone-placement-policy Auto --instance-count 0 --vm-sku {vm_sku} ')
+
+        self.cmd('vmss update -g {rg} -n {vmss_exclude} --zone-placement-policy Auto --exclude-zones 1')
+
+        self.cmd('vmss show -g {rg} -n {vmss_exclude}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.excludeZones', ['1'])
+        ])
+
+        # --include-zones and --exclude-zones are mutually exclusive
+        with self.assertRaisesRegex(Exception, 'only specify one of --include-zones and --exclude-zones'):
+            self.cmd('vmss update -g {rg} -n {vmss_include} --include-zones 1 2 --exclude-zones 3')
+
+
 class VMZoneMovementScenarioTest(ScenarioTest):
 
     @live_only()
@@ -14748,6 +15013,33 @@ class VMZoneMovementScenarioTest(ScenarioTest):
             self.check('zones[0]', '2'),
             self.check('resiliencyProfile.zoneMovement.isEnabled', True),
         ])
+
+    # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate to be enabled
+    # to use --zone-movement.
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='eastus2')
+    def test_vm_zone_movement_preserved(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 15),
+        })
+
+        # Create a VM with zone movement enabled.
+        # --location is passed explicitly so the create validator skips the
+        # subscription-wide Microsoft.Compute/skus listing (a multi-MB response that
+        # would otherwise require @AllowLargeResponse).
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntu2204 --zone 1 --location eastus2 '
+            '--zone-movement true --nsg-rule NONE '
+            '--storage-sku Premium_ZRS --admin-username azureuser --generate-ssh-keys '
+            '--size Standard_D2s_v7',
+        )
+
+        # Update an unrelated field (tag) without --zone-movement;
+        # zone movement should be preserved (regression test for the bug where
+        # zone_movement defaulted to None and overwrote the existing setting)
+        self.cmd('vm update -g {rg} -n {vm} --set tags.foo=bar', checks=[
+            self.check('tags.foo', 'bar'),
+            self.check('resiliencyProfile.zoneMovement.isEnabled', True),
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()

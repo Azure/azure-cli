@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.86.0"
+VERSION = "2.90.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -39,6 +39,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -55,10 +56,13 @@ DEPENDENCIES = [
     'knack~=0.14.0',
     'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.3.1',
-    'msal[broker]==1.35.1; sys_platform == "win32"',
-    'msal==1.35.1; sys_platform != "win32"',
+    'msal[broker]==1.36.0; sys_platform == "win32"',
+    'msal==1.36.0; sys_platform != "win32"',
     'packaging>=20.9',
-    'pkginfo>=1.5.0.1',
+    # pkginfo>=1.12.0 reads the spec-defined wheel METADATA / unpacked .dist-info
+    # layout produced by modern wheel/setuptools (no metadata.json). Required so
+    # WheelExtension.get_metadata works without the legacy wheel==0.30.0 artifact.
+    'pkginfo>=1.12.0',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
     'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',

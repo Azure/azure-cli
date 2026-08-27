@@ -2375,9 +2375,10 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             raise RequiredArgumentMissingError(
-                "--vnet-subnet-id must be specified for {outbound_type}. For an Automatic cluster "
-                "using Managed System Pool BYO VNet, specify --system-node-subnet-id, --node-subnet-id "
-                "and --apiserver-subnet-id instead. The subnet must be pre-configured with {requirement}".format(
+                "For an Automatic cluster using Managed System Pool BYO VNet, --system-node-subnet-id, "
+                "--node-subnet-id and --apiserver-subnet-id must be specified for {outbound_type}. "
+                "For other BYO VNet clusters, specify --vnet-subnet-id. The subnet must be "
+                "pre-configured with {requirement}".format(
                     outbound_type=outbound_type,
                     requirement=subnet_requirement,
                 )
@@ -2436,17 +2437,27 @@ class AKSManagedClusterContext(BaseAKSContext):
         skuName = self.get_sku_name()
         isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
         # For BYO VNet Managed System Pool (Automatic SKU with system-node/node subnet trio),
-        # the user's subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
+        # those subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
         byo_subnets_set = bool(
             self.raw_param.get("system_node_subnet_id") or
             self.raw_param.get("node_subnet_id")
         )
+        hosted_system_profile = getattr(self.mc, "hosted_system_profile", None) if self.mc else None
+        existing_byo_subnets_set = bool(
+            self.decorator_mode == DecoratorMode.UPDATE and
+            hosted_system_profile and
+            (
+                getattr(hosted_system_profile, "system_node_subnet_id", None) or
+                getattr(hosted_system_profile, "node_subnet_id", None)
+            )
+        )
+        byo_subnets_configured = byo_subnets_set or existing_byo_subnets_set
         use_automatic_managed_nat_gateway = (
             skuName is not None and
             skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
             isVnetSubnetIdEmpty and
             not read_from_mc and
-            not byo_subnets_set
+            not byo_subnets_configured
         )
         if use_automatic_managed_nat_gateway and outbound_type == CONST_OUTBOUND_TYPE_LOAD_BALANCER:
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
@@ -2479,7 +2490,20 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
             ]:
-                if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
+                if not read_from_mc and self.get_vnet_subnet_id() in ["", None] and not byo_subnets_configured:
+                    if self.decorator_mode == DecoratorMode.UPDATE:
+                        # --vnet-subnet-id is not registered for 'aks update'. For BYO VNet clusters the subnet
+                        # is already known from the agentpool, so validation passes above. Reaching here in update
+                        # mode means the cluster uses a managed VNet, which cannot be migrated to UDR/userAssignedNATGateway.
+                        raise InvalidArgumentValueError(
+                            "Updating outbound type to {outbound_type} is only supported for "
+                            "clusters using a custom (BYO) virtual network. Managed VNet clusters "
+                            "cannot be updated to {outbound_type}. Please refer to "
+                            "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype"
+                            "#updating-outboundtype-after-cluster-creation for supported migration paths.".format(
+                                outbound_type=outbound_type
+                            )
+                        )
                     self._raise_missing_vnet_subnet_for_outbound_type(outbound_type, skuName)
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:
@@ -5945,6 +5969,109 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
 
+    def validate_control_plane_metrics_params(self) -> None:
+        """Validate the --enable/--disable-control-plane-metrics flag combo and
+        its interaction with --enable/--disable-azure-monitor-metrics.
+
+        Raises MutuallyExclusiveArgumentError or RequiredArgumentMissingError on
+        an invalid combination. Returns nothing — use this when you want to
+        surface validation errors without consuming a parameter value.
+
+        Reads raw_param directly so the getters can also delegate here from
+        their enable_validation=True path without recursing.
+        """
+        enable_cp = self.raw_param.get("enable_control_plane_metrics")
+        disable_cp = self.raw_param.get("disable_control_plane_metrics")
+        # On create, the property may already be set on the incoming mc object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics and
+                self.mc.azure_monitor_profile.metrics.control_plane
+            ):
+                enable_cp = self.mc.azure_monitor_profile.metrics.control_plane.enabled
+
+        if enable_cp and disable_cp:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-control-plane-metrics and --disable-control-plane-metrics "
+                "at the same time."
+            )
+
+        if enable_cp:
+            # Reject combining enable-control-plane-metrics with disable-azure-monitor-metrics
+            # in the same command — the resulting payload would be inconsistent.
+            if self._get_disable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-control-plane-metrics together with "
+                    "--disable-azure-monitor-metrics."
+                )
+            # Must have Azure Monitor metrics enabled (either already or in this command).
+            already_enabled = (
+                self.mc and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics and
+                self.mc.azure_monitor_profile.metrics.enabled
+            )
+            enabling_now = self._get_enable_azure_monitor_metrics(False)
+            if not already_enabled and not enabling_now:
+                raise RequiredArgumentMissingError(
+                    "--enable-control-plane-metrics requires Azure Monitor metrics to be enabled. "
+                    "Specify --enable-azure-monitor-metrics or run on a cluster that already has "
+                    "Azure Monitor metrics enabled."
+                )
+
+    def _get_enable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_control_plane_metrics.
+        When enable_validation is True, the flag combinations are validated via
+        validate_control_plane_metrics_params before the value is returned.
+
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        enable_control_plane_metrics = self.raw_param.get("enable_control_plane_metrics")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics and
+                self.mc.azure_monitor_profile.metrics.control_plane
+            ):
+                enable_control_plane_metrics = self.mc.azure_monitor_profile.metrics.control_plane.enabled
+        if enable_validation:
+            self.validate_control_plane_metrics_params()
+        return bool(enable_control_plane_metrics)
+
+    def get_enable_control_plane_metrics(self) -> bool:
+        """Obtain the value of enable_control_plane_metrics.
+        This function will verify the parameter by default. If both enable_control_plane_metrics and
+        disable_control_plane_metrics are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_control_plane_metrics(enable_validation=True)
+
+    def _get_disable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_control_plane_metrics.
+        When enable_validation is True, the flag combinations are validated via
+        validate_control_plane_metrics_params before the value is returned.
+
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_control_plane_metrics = self.raw_param.get("disable_control_plane_metrics")
+        if enable_validation:
+            self.validate_control_plane_metrics_params()
+        return bool(disable_control_plane_metrics)
+
+    def get_disable_control_plane_metrics(self) -> bool:
+        """Obtain the value of disable_control_plane_metrics.
+        This function will verify the parameter by default. If both enable_control_plane_metrics and
+        disable_control_plane_metrics are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_control_plane_metrics(enable_validation=True)
+
     def _get_enable_azure_monitor_app_monitoring(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_azure_monitor_app_monitoring.
         This function supports the option of enable_validation. When enabled, if both
@@ -6244,6 +6371,31 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("disable_gateway_api", False)
 
+    def get_enable_upstream_kubescheduler_user_configuration(self) -> bool:
+        """Obtain the value of enable_upstream_kubescheduler_user_configuration.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_upstream_kubescheduler_user_configuration")
+
+    def get_disable_upstream_kubescheduler_user_configuration(self) -> bool:
+        """Obtain the value of disable_upstream_kubescheduler_user_configuration.
+
+        :return: bool
+        """
+        disable_upstream_kubescheduler_user_configuration = self.raw_param.get(
+            "disable_upstream_kubescheduler_user_configuration"
+        )
+        if (
+            disable_upstream_kubescheduler_user_configuration and
+            self.get_enable_upstream_kubescheduler_user_configuration()
+        ):
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-upstream-kubescheduler-user-configuration and "
+                "--disable-upstream-kubescheduler-user-configuration at the same time."
+            )
+        return disable_upstream_kubescheduler_user_configuration
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6519,6 +6671,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        # Automatic SKU clusters use a fully managed system node pool that rejects any SSH
+        # key configuration, so never attach a linux profile for them.
+        if (self.context.get_sku_name() or "").lower() == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            return mc
 
         ssh_key_value, no_ssh_key = self.context.get_ssh_key_value_and_no_ssh_key()
         if not no_ssh_key:
@@ -7703,6 +7860,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             ksm_metric_labels_allow_list = ""
         if ksm_metric_annotations_allow_list is None:
             ksm_metric_annotations_allow_list = ""
+        # Surface control-plane-metrics flag combination errors even when the
+        # parent metrics flag was not specified, so users get a clear error
+        # instead of a silent ignore when they pass --enable-control-plane-metrics
+        # on its own.
+        self.context.validate_control_plane_metrics_params()
         if self.context.get_enable_azure_monitor_metrics():
             if mc.azure_monitor_profile is None:
                 mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
@@ -7710,6 +7872,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(  # pylint:disable=line-too-long
                 metric_labels_allowlist=str(ksm_metric_labels_allow_list),
                 metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+            # NOTE: control_plane.enabled is intentionally NOT set here on the create flow.
+            # If we set it on this initial PUT, the RP would schedule the control-plane-metrics
+            # collection pod (CCP) before the DCRA (Data Collection Rule Association) has been
+            # created in postprocessing. The CCP would then crash-loop with "DCRA not found"
+            # until the next reconciliation. Instead, we defer the flip to the addon_put step
+            # inside link_azure_monitor_profile_artifacts (postprocessing_after_mc_created),
+            # which runs *after* DCRA creation.
             # set intermediate
             self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         if self.context.get_enable_azure_monitor_app_monitoring():
@@ -7878,6 +8047,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # Default is disabled so no need to worry about that here
         return mc
 
+    def set_up_upstream_kubescheduler_user_configuration(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up user-defined scheduler configuration for kube-scheduler upstream for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_upstream_kubescheduler_user_configuration():
+            if mc.scheduler_profile is None:
+                mc.scheduler_profile = self.models.SchedulerProfile()  # pylint: disable=no-member
+            if mc.scheduler_profile.upstream is None:
+                mc.scheduler_profile.upstream = self.models.SchedulerInstanceProfile()  # pylint: disable=no-member
+            mc.scheduler_profile.upstream.scheduler_config_mode = (
+                self.models.SchedulerConfigMode.MANAGED_BY_CRD  # pylint: disable=no-member
+            )
+
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -7975,6 +8162,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_static_egress_gateway(mc)
         # set up node provisioning profile
         mc = self.set_up_node_provisioning_profile(mc)
+        # set up user-defined scheduler configuration for kube-scheduler upstream
+        mc = self.set_up_upstream_kubescheduler_user_configuration(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -8230,12 +8419,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Could not get signed in user: %s", str(e))
             else:
+                # signed_in_user_get() calls Graph /me, which only succeeds for a delegated
+                # (interactive) user; service principal / managed identity logins raise GraphError
+                # and are handled by the except branch above. So the assignee here is always a User.
                 self.context.external_functions.add_role_assignment_executor(  # type: ignore # pylint: disable=protected-access
                     self.cmd,
                     "Azure Kubernetes Service RBAC Cluster Admin",
                     user["id"],
                     scope=cluster.id,
                     resolve_assignee=False,
+                    assignee_principal_type="User",
                 )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
@@ -9799,6 +9992,30 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 self.context.get_disable_azure_monitor_metrics(),
                 False)
 
+        # Handle enable / disable of control plane metrics independently of the parent metrics flag,
+        # so users can toggle control plane metrics on a cluster that already has metrics enabled.
+        if self.context.get_enable_control_plane_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            if mc.azure_monitor_profile.metrics is None:
+                # Should not normally happen — validation requires metrics to be enabled — but guard
+                # against partially-populated profiles to avoid AttributeError.
+                mc.azure_monitor_profile.metrics = (
+                    self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+                )
+            mc.azure_monitor_profile.metrics.control_plane = (
+                self.models.ManagedClusterAzureMonitorProfileMetricsControlPlane(enabled=True)
+            )
+
+        if self.context.get_disable_control_plane_metrics():
+            if (
+                mc.azure_monitor_profile and
+                mc.azure_monitor_profile.metrics
+            ):
+                mc.azure_monitor_profile.metrics.control_plane = (
+                    self.models.ManagedClusterAzureMonitorProfileMetricsControlPlane(enabled=False)
+                )
+
         if self.context.get_enable_azure_monitor_app_monitoring():
             if mc.azure_monitor_profile is None:
                 mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
@@ -10376,6 +10593,32 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_upstream_kubescheduler_user_configuration(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update user-defined scheduler configuration for kube-scheduler upstream for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # this getter also validates that the enable and disable options are mutually exclusive
+        disable_user_configuration = self.context.get_disable_upstream_kubescheduler_user_configuration()
+        enable_user_configuration = self.context.get_enable_upstream_kubescheduler_user_configuration()
+
+        scheduler_config_mode = None
+        if enable_user_configuration:
+            scheduler_config_mode = self.models.SchedulerConfigMode.MANAGED_BY_CRD  # pylint: disable=no-member
+        elif disable_user_configuration:
+            scheduler_config_mode = self.models.SchedulerConfigMode.DEFAULT  # pylint: disable=no-member
+
+        if scheduler_config_mode is not None:
+            if mc.scheduler_profile is None:
+                mc.scheduler_profile = self.models.SchedulerProfile()  # pylint: disable=no-member
+            if mc.scheduler_profile.upstream is None:
+                mc.scheduler_profile.upstream = self.models.SchedulerInstanceProfile()  # pylint: disable=no-member
+            mc.scheduler_profile.upstream.scheduler_config_mode = scheduler_config_mode
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -10479,6 +10722,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_vmas_to_vms(mc)
         # update node provisioning profile
         mc = self.update_node_provisioning_profile(mc)
+        # update user-defined scheduler configuration for kube-scheduler upstream
+        mc = self.update_upstream_kubescheduler_user_configuration(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:

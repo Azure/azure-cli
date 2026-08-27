@@ -139,6 +139,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_custom_ca_trust_certificates,
     validate_bootstrap_container_registry_resource_id,
     validate_gateway_prefix_size,
+    validate_artifact_streaming,
 )
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -572,6 +573,17 @@ def load_arguments(self, _):
         c.argument('ksm_metric_annotations_allow_list')
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument(
+            'enable_control_plane_metrics',
+            options_list=['--enable-control-plane-metrics', '--enable-cp-metrics'],
+            action='store_true',
+            help=(
+                'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
+                'cluster components (controlplane-apiserver and controlplane-etcd targets by default). '
+                'Requires Azure Monitor metrics to be enabled '
+                '(already enabled or via --enable-azure-monitor-metrics).'
+            ),
+        )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
@@ -666,6 +678,7 @@ def load_arguments(self, _):
             action="store_true",
             help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -811,6 +824,26 @@ def load_arguments(self, _):
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('disable_azure_monitor_metrics', action='store_true')
+        c.argument(
+            'enable_control_plane_metrics',
+            options_list=['--enable-control-plane-metrics', '--enable-cp-metrics'],
+            action='store_true',
+            help=(
+                'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
+                'cluster components (controlplane-apiserver and controlplane-etcd targets by default). '
+                'Requires Azure Monitor metrics to be enabled '
+                '(already enabled or via --enable-azure-monitor-metrics).'
+            ),
+        )
+        c.argument(
+            'disable_control_plane_metrics',
+            options_list=['--disable-control-plane-metrics', '--disable-cp-metrics'],
+            action='store_true',
+            help=(
+                'Disable collection of Azure Monitor managed Prometheus control plane metrics. '
+                'Sets azureMonitorProfile.metrics.controlPlane.enabled=false on the cluster.'
+            ),
+        )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('disable_azure_monitor_app_monitoring', action='store_true')
         # azure container storage
@@ -913,6 +946,9 @@ def load_arguments(self, _):
             action="store_true",
             help="Disable managed installation of Gateway API CRDs."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
+        c.argument("disable_upstream_kubescheduler_user_configuration", action="store_true")
+
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
         c.argument("if_none_match")
@@ -1049,7 +1085,7 @@ def load_arguments(self, _):
             c.argument('weekday', help='Weekday on which maintenance can happen. e.g. Monday')
             c.argument('start_hour', type=int, help='Maintenance start hour of 1 hour window on the weekday. e.g. 1 means 1:00am - 2:00am')
             c.argument('schedule_type', arg_type=get_enum_type(schedule_types),
-                       help='Schedule type for non-default maintenance configuration.')
+                       help='Schedule type for maintenance configuration. For default configuration, only Weekly is supported.')
             c.argument('interval_days', type=int, help='The number of days between each set of occurrences for Daily schedule.')
             c.argument('interval_weeks', type=int, help='The number of weeks between each set of occurrences for Weekly schedule.')
             c.argument('interval_months', type=int, help='The number of months between each set of occurrences for AbsoluteMonthly or RelativeMonthly schedule.')
@@ -1135,6 +1171,7 @@ def load_arguments(self, _):
         c.argument("gateway_prefix_size", type=int, validator=validate_gateway_prefix_size)
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
         c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the nodepool.")
+        c.argument('enable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -1168,6 +1205,8 @@ def load_arguments(self, _):
         c.argument("if_none_match")
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
+        c.argument('enable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
+        c.argument('disable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -1178,6 +1217,14 @@ def load_arguments(self, _):
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
+    with self.argument_context("aks nodepool get-rollback-versions") as c:
+        pass
+
+    with self.argument_context("aks nodepool rollback") as c:
+        c.argument("aks_custom_headers")
+        c.argument("if_match")
+        c.argument("if_none_match")
+
     with self.argument_context("aks nodepool manual-scale add") as c:
         c.argument("vm_sizes")
 
@@ -1187,6 +1234,20 @@ def load_arguments(self, _):
 
     with self.argument_context("aks nodepool manual-scale delete") as c:
         c.argument("current_vm_sizes")
+
+    with self.argument_context("aks nodepool auto-scale add") as c:
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale update") as c:
+        c.argument("current_node_vm_size")
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale delete") as c:
+        c.argument("current_node_vm_size")
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
@@ -1243,6 +1304,21 @@ def load_arguments(self, _):
 
     with self.argument_context('aks trustedaccess rolebinding update') as c:
         c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
+
+    with self.argument_context('aks identity-binding') as c:
+        c.argument('cluster_name', help='Name of the managed cluster.')
+
+    for scope in ['aks identity-binding show', 'aks identity-binding create', 'aks identity-binding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--name', '-n'], required=True,
+                       help='Name of the identity binding.')
+
+    with self.argument_context('aks identity-binding create') as c:
+        c.argument(
+            'managed_identity_resource_id',
+            options_list=['--managed-identity-resource-id'],
+            help='The resource ID of the managed identity to use.',
+        )
 
     with self.argument_context('aks mesh enable-ingress-gateway') as c:
         c.argument('ingress_gateway_type',

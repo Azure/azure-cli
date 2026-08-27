@@ -11,24 +11,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:30 GMT
+      - Mon, 15 Jun 2026 20:48:39 GMT
       expires:
       - '-1'
       pragma:
@@ -39,15 +39,15 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 17D3A3152C8A46FB8D79AA3E85863927 Ref B: BL2AA2010205007 Ref C: 2026-02-18T20:25:31Z'
+      - 'Ref A: F39C7A0ED5BE48B68E9A35F9F8B84D88 Ref B: BL2AA2010204049 Ref C: 2026-06-15T20:48:39Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "ea7c550b-f918-4dba-bc4e-43951b52f8b5", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    body: '{"name": "179c42a8-d048-41ca-8ae0-c64b8ce5634c", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
       - application/json
@@ -62,14 +62,14 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/checkMigrationNameAvailability?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/checkMigrationNameAvailability?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"name":"ea7c550b-f918-4dba-bc4e-43951b52f8b5","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"179c42a8-d048-41ca-8ae0-c64b8ce5634c","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
@@ -78,7 +78,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:31 GMT
+      - Mon, 15 Jun 2026 20:48:40 GMT
       expires:
       - '-1'
       pragma:
@@ -90,13 +90,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/01f76e56-2044-42a2-9d54-3678dc336709
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/c45fc5b2-1416-461b-bbad-c009ce913f77
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 572359D1041449E19CC1E7859DE1E88A Ref B: BL2AA2010204011 Ref C: 2026-02-18T20:25:31Z'
+      - 'Ref A: C930272AC1944BE8BF2E540D3B69C539 Ref B: BL2AA2010204047 Ref C: 2026-06-15T20:48:40Z'
     status:
       code: 200
       message: OK
@@ -112,24 +112,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:33 GMT
+      - Mon, 15 Jun 2026 20:48:41 GMT
       expires:
       - '-1'
       pragma:
@@ -143,7 +143,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: BB7C4C65F0B045589D12377493EF0D81 Ref B: BL2AA2010204007 Ref C: 2026-02-18T20:25:32Z'
+      - 'Ref A: A28062BCFCBF4F3E9AABAE5934DC6FCA Ref B: MNZ221060619053 Ref C: 2026-06-15T20:48:41Z'
     status:
       code: 200
       message: OK
@@ -159,11 +159,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
   response:
     body:
       string: ''
@@ -173,7 +173,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 18 Feb 2026 20:25:33 GMT
+      - Mon, 15 Jun 2026 20:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -187,7 +187,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 368D0FA12D76463CB65402FB9BB9DCF9 Ref B: BL2AA2010205035 Ref C: 2026-02-18T20:25:33Z'
+      - 'Ref A: B452FA0CCA0F479F82D7A443FA1C24A3 Ref B: BL2AA2010204003 Ref C: 2026-06-15T20:48:42Z'
     status:
       code: 204
       message: No Content
@@ -203,23 +203,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap","name":"autobot-resourcegroup-pg-eastus2euap","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup","name":"autobot-resourcegroup","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '274'
+      - '244'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:32 GMT
+      - Mon, 15 Jun 2026 20:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -233,17 +233,17 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 3F27A0F642E243989E7A8B570442DAF9 Ref B: BL2AA2010205017 Ref C: 2026-02-18T20:25:33Z'
+      - 'Ref A: FF93EBAD3F4D408790906D02413FD7AF Ref B: BL2AA2010204047 Ref C: 2026-06-15T20:48:42Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2euap", "properties": {"migrationMode": "offline",
-      "overwriteDbsInTarget": "True", "migrationOption": "Validate", "sslMode": "Prefer",
-      "setupLogicalReplicationOnSourceDbIfNeeded": "False", "sourceType": "OnPremises",
-      "sourceDbServerResourceId": "20.66.25.58:5432@postgres", "dbsToMigrate": ["postgres"],
-      "secretParameters": {"adminCredentials": {"sourceServerPassword": "XXXXXXXXX",
-      "targetServerPassword": "XXXXXXXXX"}, "targetServerUsername": "portaltestuser"}}}'
+    body: '{"location": "eastus2euap", "properties": {"dbsToMigrate": ["postgres"],
+      "overwriteDbsInTarget": "True", "sourceType": "OnPremises", "sslMode": "Prefer",
+      "sourceDbServerResourceId": "20.66.25.58:5432@postgres", "setupLogicalReplicationOnSourceDbIfNeeded":
+      "False", "secretParameters": {"adminCredentials": {"sourceServerPassword": "XXXXXXXXX",
+      "targetServerPassword": "XXXXXXXXX"}, "targetServerUsername": "portaltestuser"},
+      "migrationOption": "Validate", "migrationMode": "offline"}}'
     headers:
       Accept:
       - application/json
@@ -258,23 +258,23 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ea7c550b-f918-4dba-bc4e-43951b52f8b5?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/179c42a8-d048-41ca-8ae0-c64b8ce5634c?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"19fdb74d-fde7-48e9-9244-687326d25649","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-02-18T20:25:33.8934806Z","triggerCutover":"True","migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ea7c550b-f918-4dba-bc4e-43951b52f8b5","name":"ea7c550b-f918-4dba-bc4e-43951b52f8b5","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"7b562ed1-8dc6-4162-b721-373a1e0878f3","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:43.6880696Z","triggerCutover":"True","migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/179c42a8-d048-41ca-8ae0-c64b8ce5634c","name":"179c42a8-d048-41ca-8ae0-c64b8ce5634c","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1049'
+      - '1023'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:33 GMT
+      - Mon, 15 Jun 2026 20:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -286,13 +286,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus/725c3b80-d0b9-4956-b05b-35918c4f9b54
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/4d879531-6f6f-4dae-8017-11be39c775cc
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 386B0BA459A349B587233C5F4D7C2A0D Ref B: BL2AA2011002062 Ref C: 2026-02-18T20:25:33Z'
+      - 'Ref A: EC2E4CEE7ECB42EAAA41871B80A7951F Ref B: BL2AA2010205011 Ref C: 2026-06-15T20:48:43Z'
     status:
       code: 201
       message: Created
@@ -308,24 +308,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:34 GMT
+      - Mon, 15 Jun 2026 20:48:43 GMT
       expires:
       - '-1'
       pragma:
@@ -339,7 +339,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 7C3DDEC892D74A9BBF7BAE04CAA49B06 Ref B: BL2AA2030101045 Ref C: 2026-02-18T20:25:34Z'
+      - 'Ref A: BB6DCEF3AAC443B28567499F62CE9E36 Ref B: BL2AA2030101029 Ref C: 2026-06-15T20:48:44Z'
     status:
       code: 200
       message: OK
@@ -355,25 +355,26 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ea7c550b-f918-4dba-bc4e-43951b52f8b5?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/179c42a8-d048-41ca-8ae0-c64b8ce5634c?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"19fdb74d-fde7-48e9-9244-687326d25649","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-02-18T20:25:33.8934806Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"East
-        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/ea7c550b-f918-4dba-bc4e-43951b52f8b5","name":"ea7c550b-f918-4dba-bc4e-43951b52f8b5","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"7b562ed1-8dc6-4162-b721-373a1e0878f3","currentStatus":{"state":"CleaningUp","error":"There
+        is already an active Migration Running on this target.","currentSubStateDetails":{"currentSubState":"CompletingMigration","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:43.6880696Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"Canada
+        Central","version":"16","storageMb":32768,"sku":{"name":"Standard_B1ms","tier":"Burstable"}},"migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/179c42a8-d048-41ca-8ae0-c64b8ce5634c","name":"179c42a8-d048-41ca-8ae0-c64b8ce5634c","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1310'
+      - '1340'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:33 GMT
+      - Mon, 15 Jun 2026 20:48:44 GMT
       expires:
       - '-1'
       pragma:
@@ -385,11 +386,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/f78ebb2b-4240-4a44-b634-be63cbde8c1a
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/ec1221a6-bd87-4a19-b9da-0057be369d15
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: A7CE8B6C9A234E83B26EF8A547211E1E Ref B: BL2AA2010205019 Ref C: 2026-02-18T20:25:34Z'
+      - 'Ref A: 84661208E2FA408AA93421294B044063 Ref B: BL2AA2011006029 Ref C: 2026-06-15T20:48:45Z'
     status:
       code: 200
       message: OK
@@ -405,24 +406,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:35 GMT
+      - Mon, 15 Jun 2026 20:48:45 GMT
       expires:
       - '-1'
       pragma:
@@ -436,12 +437,12 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: CA2174DECE0441C6B8A90DE593683FAE Ref B: BL2AA2010205025 Ref C: 2026-02-18T20:25:34Z'
+      - 'Ref A: 35F727A38ECC40709185CCB86970F337 Ref B: BL2AA2010205011 Ref C: 2026-06-15T20:48:46Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "9e035c92-2919-4bac-9980-ac28d5c2cc7d", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    body: '{"name": "57dbbd67-5201-469b-b1a9-5dc5d108ff27", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
       - application/json
@@ -456,14 +457,14 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/checkMigrationNameAvailability?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/checkMigrationNameAvailability?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"name":"9e035c92-2919-4bac-9980-ac28d5c2cc7d","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"57dbbd67-5201-469b-b1a9-5dc5d108ff27","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
@@ -472,7 +473,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:34 GMT
+      - Mon, 15 Jun 2026 20:48:45 GMT
       expires:
       - '-1'
       pragma:
@@ -484,13 +485,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/3beebb71-dc3c-4f04-ba77-6eae5ad44055
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/7cd0b3aa-948b-4ca3-8fe4-f010793e223c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '798'
+      - '799'
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 9562E5876830418CBC0EE92C285D858C Ref B: BL2AA2030101029 Ref C: 2026-02-18T20:25:35Z'
+      - 'Ref A: 301F5A6DDE934197A9733A635B4CD056 Ref B: BL2AA2030101019 Ref C: 2026-06-15T20:48:46Z'
     status:
       code: 200
       message: OK
@@ -506,24 +507,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:35 GMT
+      - Mon, 15 Jun 2026 20:48:47 GMT
       expires:
       - '-1'
       pragma:
@@ -537,7 +538,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 8A8CF238489C4E82B7972E2FBC9EC93E Ref B: MNZ221060619037 Ref C: 2026-02-18T20:25:35Z'
+      - 'Ref A: B6F8D0414FFD405FAFBDE42A030D23F4 Ref B: BL2AA2010205005 Ref C: 2026-06-15T20:48:47Z'
     status:
       code: 200
       message: OK
@@ -553,11 +554,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
   response:
     body:
       string: ''
@@ -567,7 +568,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 18 Feb 2026 20:25:36 GMT
+      - Mon, 15 Jun 2026 20:48:47 GMT
       expires:
       - '-1'
       pragma:
@@ -581,7 +582,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: C745EE3F10854BBE8F6080867B208D85 Ref B: BL2AA2030101003 Ref C: 2026-02-18T20:25:36Z'
+      - 'Ref A: 785F5E0BFBB64EA8B25019006AA1B8EC Ref B: BL2AA2030101009 Ref C: 2026-06-15T20:48:48Z'
     status:
       code: 204
       message: No Content
@@ -597,23 +598,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup-pg-eastus2euap?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap","name":"autobot-resourcegroup-pg-eastus2euap","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup","name":"autobot-resourcegroup","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '274'
+      - '244'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:35 GMT
+      - Mon, 15 Jun 2026 20:48:48 GMT
       expires:
       - '-1'
       pragma:
@@ -627,17 +628,17 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 904EA595EDAD4DCE845F07CC7062FE07 Ref B: BL2AA2010205047 Ref C: 2026-02-18T20:25:36Z'
+      - 'Ref A: 3DBDED36810D4D469633C2FF52B96D58 Ref B: BL2AA2010205027 Ref C: 2026-06-15T20:48:48Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2euap", "properties": {"migrationMode": "offline",
-      "overwriteDbsInTarget": "True", "migrationOption": "ValidateAndMigrate", "sslMode":
-      "Prefer", "setupLogicalReplicationOnSourceDbIfNeeded": "False", "sourceType":
-      "OnPremises", "sourceDbServerResourceId": "20.66.25.58:5432@postgres", "dbsToMigrate":
-      ["postgres"], "secretParameters": {"adminCredentials": {"sourceServerPassword":
-      "XXXXXXXXX", "targetServerPassword": "XXXXXXXXX"}, "targetServerUsername": "portaltestuser"}}}'
+    body: '{"location": "eastus2euap", "properties": {"dbsToMigrate": ["postgres"],
+      "overwriteDbsInTarget": "True", "sourceType": "OnPremises", "sslMode": "Prefer",
+      "sourceDbServerResourceId": "20.66.25.58:5432@postgres", "setupLogicalReplicationOnSourceDbIfNeeded":
+      "False", "secretParameters": {"adminCredentials": {"sourceServerPassword": "XXXXXXXXX",
+      "targetServerPassword": "XXXXXXXXX"}, "targetServerUsername": "portaltestuser"},
+      "migrationOption": "ValidateAndMigrate", "migrationMode": "offline"}}'
     headers:
       Accept:
       - application/json
@@ -652,23 +653,23 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name --properties --migration-option
+      - --subscription --resource-group --server-name --name --properties --migration-option
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/9e035c92-2919-4bac-9980-ac28d5c2cc7d?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/57dbbd67-5201-469b-b1a9-5dc5d108ff27?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"f93a1b1c-2330-4415-bbb3-a75b511c0daa","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-02-18T20:25:37.0415867Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/9e035c92-2919-4bac-9980-ac28d5c2cc7d","name":"9e035c92-2919-4bac-9980-ac28d5c2cc7d","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"b77efe06-26a9-4154-b0bf-b8f716c2ad18","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:50.0139237Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/57dbbd67-5201-469b-b1a9-5dc5d108ff27","name":"57dbbd67-5201-469b-b1a9-5dc5d108ff27","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1059'
+      - '1033'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:36 GMT
+      - Mon, 15 Jun 2026 20:48:49 GMT
       expires:
       - '-1'
       pragma:
@@ -680,13 +681,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/36c7782b-265a-4a1a-b7da-268c5dcab645
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/9f95c086-470f-4515-b053-3c96b8b1994f
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 8E1282429C0943E3B026B16E9F4733CF Ref B: BL2AA2010205009 Ref C: 2026-02-18T20:25:36Z'
+      - 'Ref A: 58452CA327DF4B71B0F859FBDD74F5C5 Ref B: BL2AA2010204039 Ref C: 2026-06-15T20:48:49Z'
     status:
       code: 201
       message: Created
@@ -702,24 +703,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-15T13:30:19.1651160Z"},"properties":{"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Enabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-eastus2euap.postgres.database.azure.com","version":"13","minorVersion":"23","administratorLogin":"portaltestuser","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Enabled","earliestRestoreDate":"2026-02-11T22:52:14.5759097+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","name":"autobot-e2e-pg-fs-eastus2euap","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1210'
+      - '1344'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:37 GMT
+      - Mon, 15 Jun 2026 20:48:50 GMT
       expires:
       - '-1'
       pragma:
@@ -733,7 +734,7 @@ interactions:
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: 78C172FEA75A40309E44523462E9CA82 Ref B: BL2AA2030101051 Ref C: 2026-02-18T20:25:37Z'
+      - 'Ref A: 597B76B35FC64C52A50526781E815839 Ref B: BL2AA2010204047 Ref C: 2026-06-15T20:48:50Z'
     status:
       code: 200
       message: OK
@@ -749,25 +750,25 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --name --migration-name
+      - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/9e035c92-2919-4bac-9980-ac28d5c2cc7d?api-version=2026-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/57dbbd67-5201-469b-b1a9-5dc5d108ff27?api-version=2026-04-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"f93a1b1c-2330-4415-bbb3-a75b511c0daa","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-02-18T20:25:37.0415867Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"East
-        US 2 EUAP","version":"13","storageMb":32768,"sku":{"name":"Standard_D4s_v3","tier":"GeneralPurpose"}},"migrationOption":"ValidateAndMigrate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"East
-        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup-pg-eastus2euap/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-eastus2euap/migrations/9e035c92-2919-4bac-9980-ac28d5c2cc7d","name":"9e035c92-2919-4bac-9980-ac28d5c2cc7d","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"b77efe06-26a9-4154-b0bf-b8f716c2ad18","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:50.0139237Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"Canada
+        Central","version":"16","storageMb":32768,"sku":{"name":"Standard_B1ms","tier":"Burstable"}},"migrationOption":"ValidateAndMigrate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/57dbbd67-5201-469b-b1a9-5dc5d108ff27","name":"57dbbd67-5201-469b-b1a9-5dc5d108ff27","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1320'
+      - '1287'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Feb 2026 20:25:37 GMT
+      - Mon, 15 Jun 2026 20:48:51 GMT
       expires:
       - '-1'
       pragma:
@@ -779,11 +780,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/7735f927-5243-434b-ac52-e166247d411e
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/d9a5b02a-307e-42d5-9463-81849ed56a6b
       x-ms-throttling-version:
       - v2
       x-msedge-ref:
-      - 'Ref A: E76CD2DF4C8E45C586A32F4A9368FB06 Ref B: BL2AA2030101047 Ref C: 2026-02-18T20:25:37Z'
+      - 'Ref A: F04135B72B424EF39374C1FC138B2055 Ref B: BL2AA2030101009 Ref C: 2026-06-15T20:48:51Z'
     status:
       code: 200
       message: OK

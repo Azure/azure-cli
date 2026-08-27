@@ -1028,7 +1028,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # default to Azure Resource Manager.
     # https://management.azure.com + /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in url:
-        url = endpoints.resource_manager.rstrip('/') + url
+        # lstrip('/') prevents a protocol-relative path like '//attacker.example/leak' from
+        # producing 'https://management.azure.com//attacker.example/leak'.
+        url = endpoints.resource_manager.rstrip('/') + '/' + url.lstrip('/')
+
+    # Normalize before validating and before sending, so that the URL whose origin is validated is
+    # exactly the URL the request is sent to.
+    url = normalize_url(url)
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
@@ -1041,21 +1047,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and url.lower().startswith('https://'):
         # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # If url's origin matches the ARM endpoint, like `https://management.azure.com/`,
             # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
             # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 resource = endpoints.active_directory_resource_id
             else:
-                from azure.cli.core.cloud import CloudEndpointNotSetException
-                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                    try:
-                        value = getattr(endpoints, p)
-                    except CloudEndpointNotSetException:
-                        continue
-                    if isinstance(value, str) and url.lower().startswith(value.lower()):
-                        resource = value
-                        break
+                resource = match_cloud_endpoint(url, cli_ctx)
         if resource:
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
@@ -1063,7 +1061,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 token_subscription = _extract_subscription_id(url)
             if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
@@ -1082,6 +1080,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     s = Session()
     req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
     prepped = s.prepare_request(req)
+
+    # Final defense: make sure requests didn't resolve the URL to a different origin than the one
+    # whose origin was validated above before an access token was attached.
+    if 'Authorization' in prepped.headers and not is_same_origin(prepped.url, url):
+        from .azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(
+            "The request URL '{}' doesn't match the validated URL '{}'.".format(prepped.url, url))
 
     # Merge environment settings into session
     settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
@@ -1208,6 +1213,189 @@ def urlretrieve(url):
     from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def _remove_dot_segments(path):
+    """Remove ``.`` and ``..`` segments from a URL path (RFC 3986 section 5.2.4) and collapse
+    empty segments, so that ``/a/b/../c`` becomes ``/a/c`` and ``//attacker.example/leak``
+    becomes ``/attacker.example/leak``.
+    """
+    leading_slash = path.startswith('/')
+    trailing_slash = path.endswith('/')
+    segments = []
+    for segment in path.split('/'):
+        # Empty segments are dropped so that a path can never be re-interpreted as an authority
+        # (protocol-relative URL) by a downstream parser, proxy or gateway.
+        if segment in ('', '.'):
+            continue
+        if segment == '..':
+            if segments:
+                segments.pop()
+            continue
+        segments.append(segment)
+    new_path = '/'.join(segments)
+    if leading_slash:
+        new_path = '/' + new_path
+    if trailing_slash and not new_path.endswith('/'):
+        new_path += '/'
+    return new_path
+
+
+def normalize_url(url):
+    """Normalize a URL so that it is parsed the same way by the CLI and by any downstream
+    consumer (requests/urllib3, proxies, gateways, servers).
+
+    Validating a URL that is not normalized is unsafe, because the validator and the consumer
+    may disagree on which host the request is actually sent to. This function:
+
+    - removes control characters, which are silently stripped by many URL parsers, and trims
+      leading/trailing whitespace;
+    - lowercases the scheme and the host;
+    - converts backslashes in the authority to ``/`` (WHATWG URL parsers treat ``\\`` as ``/``),
+      moving anything after them into the path;
+    - removes ``.``/``..`` segments and collapses empty segments in the path, so that
+      ``https://management.azure.com//attacker.example/leak`` is normalized to
+      ``https://management.azure.com/attacker.example/leak``.
+
+    :param url: The URL to normalize.
+    :return: The normalized URL, or the input unchanged if it is not a parsable string.
+    :rtype: str
+    """
+    from urllib.parse import urlsplit, urlunsplit
+
+    if not isinstance(url, str):
+        return url
+
+    # Strip C0/DEL control characters. Browsers and urllib strip some of them (\t, \r, \n), so a
+    # validator must not consider them part of the host.
+    # Note: the space character (U+0020) is *not* removed from the middle of the URL, as it is a
+    # meaningful character that downstream consumers percent-encode as '%20' rather than drop.
+    # Only leading and trailing whitespace is trimmed.
+    cleaned = ''.join(c for c in url if ord(c) >= 0x20 and ord(c) != 0x7f).strip()
+
+    try:
+        parts = urlsplit(cleaned)
+    except ValueError:
+        return cleaned
+
+    scheme = parts.scheme.lower()
+    netloc = parts.netloc
+    path = parts.path
+
+    if netloc:
+        # `urlsplit` doesn't treat '\' as a delimiter, but WHATWG parsers do. Anything after it
+        # belongs to the path, not to the authority.
+        netloc = netloc.replace('\\', '/')
+        if '/' in netloc:
+            netloc, _, rest = netloc.partition('/')
+            path = '/' + rest + path
+        # The host is case-insensitive, but userinfo isn't, so only lowercase the host part.
+        userinfo, sep, hostport = netloc.rpartition('@')
+        netloc = userinfo + sep + hostport.lower()
+
+    if path:
+        path = _remove_dot_segments(path)
+    elif netloc:
+        path = '/'
+
+    return urlunsplit((scheme, netloc, path, parts.query, parts.fragment))
+
+
+def is_same_origin(url, endpoint):
+    """Check whether ``url`` and ``endpoint`` share the same origin (scheme + host + port).
+
+    This performs an exact origin comparison rather than substring or prefix matching, so a
+    malicious host such as ``https://management.azure.com.attacker`` is not mistaken for
+    the trusted endpoint ``https://management.azure.com``. It is intended for validating that a
+    URL points to a trusted endpoint before sensitive data (e.g., an Azure access token) is sent
+    to it.
+
+    The URLs are normalized with :func:`normalize_url` first, so that tricks relying on control
+    characters or backslashes in the authority can't hide the real host.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param endpoint: The trusted endpoint to validate against, e.g., ``https://management.azure.com/``.
+    :return: ``True`` if both share the same origin, otherwise ``False``.
+    :rtype: bool
+    """
+    from urllib.parse import urlparse
+
+    if not isinstance(url, str) or not isinstance(endpoint, str):
+        return False
+
+    try:
+        url_parts = urlparse(normalize_url(url))
+        endpoint_parts = urlparse(normalize_url(endpoint))
+
+    except (TypeError, ValueError):
+        return False
+
+    # Require a real host on both sides to avoid false positives against non-URL endpoint values.
+    # `hostname` (rather than `netloc`) is used so that userinfo tricks like
+    # `https://management.azure.com@attacker` resolve to the actual host `attacker`.
+    if not url_parts.hostname or not endpoint_parts.hostname:
+        return False
+
+    def _effective_port(parts):
+        # Treat a missing port as the scheme's default port so that, e.g.,
+        # `https://management.azure.com:443/` and `https://management.azure.com/` are equivalent.
+        if parts.port is not None:
+            return parts.port
+
+        return {'http': 80, 'https': 443}.get(parts.scheme.lower())
+
+    try:
+        if _effective_port(url_parts) != _effective_port(endpoint_parts):
+            return False
+
+    except ValueError:
+        return False
+
+    return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
+            url_parts.hostname.lower() == endpoint_parts.hostname.lower())
+
+
+def match_cloud_endpoint(url, cli_ctx):
+    """Return the active cloud endpoint that shares the same origin as ``url``.
+
+    :param url: The URL to match, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: The matching endpoint value, or ``None`` if no endpoint shares ``url``'s origin.
+    :rtype: str or None
+    """
+    from azure.cli.core.cloud import CloudEndpointNotSetException
+
+    endpoints = cli_ctx.cloud.endpoints
+    for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+        try:
+            value = getattr(endpoints, p)
+
+        except CloudEndpointNotSetException:
+            continue
+
+        if isinstance(value, str) and is_same_origin(url, value):
+            return value
+
+    return None
+
+
+def is_trusted_cloud_endpoint(url, cli_ctx):
+    """Check whether ``url`` shares the same origin as any endpoint of the active cloud.
+
+    The URL must already be in normalized form (see :func:`normalize_url`). A URL that is not
+    normalized is rejected, because the CLI and the downstream consumer (requests, a proxy or the
+    server) may not resolve it to the same host, e.g.
+    ``https://management.azure.com//attacker.example/leak``, whose path can be re-interpreted as
+    a protocol-relative URL.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: ``True`` if ``url`` shares the same origin as any cloud endpoint, otherwise ``False``.
+    :rtype: bool
+    """
+    if not isinstance(url, str) or normalize_url(url) != url:
+        return False
+    return match_cloud_endpoint(url, cli_ctx) is not None
 
 
 def parse_proxy_resource_id(rid):

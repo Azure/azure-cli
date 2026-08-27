@@ -152,10 +152,11 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 # pylint: disable=too-many-locals
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
-                           zone=None, standby_availability_zone=None, high_availability=None,
+                           zone=None, standby_availability_zone=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
@@ -196,10 +197,13 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance)
+    _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance)
     pg_version_validator(version, list_location_capability_info['server_versions'])
-    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                      geo_redundant_backup, instance,
+                      federated_client_id=federated_client_id,
+                      backup_federated_client_id=backup_federated_client_id)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
@@ -344,26 +348,13 @@ def pg_version_validator(version, versions):
                            'maintain security, performance, and supportability.')
 
 
-def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance):
-    high_availability_enabled = (high_availability is not None and high_availability.lower() != 'disabled')
+def _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance):
     zonal_resiliency_enabled = (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled')
-    high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
-
-    if high_availability_enabled and zonal_resiliency_enabled:
-        raise ArgumentUsageError('Setting both --high-availability and --zonal-resiliency is not allowed. '
-                                 'To proceed, set only --zonal-resiliency.')
 
     if instance:
         tier = instance.sku.tier if tier is None else tier
         zone = instance.availability_zone if zone is None else zone
-
-    if high_availability_enabled:
-        if tier.lower() == 'burstable':
-            raise ArgumentUsageError('High availability is not supported for the Burstable tier.')
-        if single_az and high_availability_zone_redundant:
-            raise ArgumentUsageError('This location has a single availability zone. '
-                                     'Zone-redundant high availability is not supported for this location.')
 
     if zonal_resiliency_enabled:
         if tier.lower() == 'burstable':
@@ -373,8 +364,8 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
                                      'To proceed, set --allow-same-zone.')
 
     if standby_availability_zone:
-        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
-            raise ArgumentUsageError('To set --standby-availability-zone, enable --zonal-resiliency.')
+        if not zonal_resiliency_enabled:
+            raise ArgumentUsageError('To set --standby-zone, enable --zonal-resiliency.')
         if zone == standby_availability_zone:
             raise ArgumentUsageError('Your server is in availability zone {}. '
                                      'The standby availability zone must be different from the server zone.'
@@ -390,7 +381,9 @@ def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported
 
 
 def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
-                      geo_redundant_backup=None, instance=None):
+                      geo_redundant_backup=None, instance=None,
+                      federated_client_id=None, backup_federated_client_id=None):
+
     if bool(byok_identity is None) ^ bool(byok_key is None):
         raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
                                  'Provide --identity and --key together.')
@@ -403,6 +396,20 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
        byok_identity.lower() == backup_byok_identity.lower():
         raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
                                  'Provide different identities for --identity and --backup-identity.')
+
+    if (federated_client_id or backup_federated_client_id) and byok_identity is None:
+        if instance is None:
+            raise ArgumentUsageError('To use --federated-client-id or --geo-backup-federated-client-id, '
+                                     'provide --identity and --key together.')
+        if not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault'):
+            logger.warning('You cannot update data encryption properties on a server '
+                           'that was not created with data encryption..')
+
+    if bool(federated_client_id is not None) and bool(backup_federated_client_id is not None) and \
+       federated_client_id.lower() == backup_federated_client_id.lower():
+        raise ArgumentUsageError('The primary federated client ID and backup federated client ID cannot be the same. '
+                                 'Provide different IDs for --federated-client-id and '
+                                 '--geo-backup-federated-client-id.')
 
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \

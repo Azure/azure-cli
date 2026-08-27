@@ -54,6 +54,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--name', '-n'],
             id_part='name',
             help="Name of the read replica.",
+            required=True,
             local_context_attribute=LocalContextAttribute(
                 name='server_name',
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -89,6 +90,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--database-name', '-d'],
             id_part='child_name_1',
             help='The name of the database',
+            local_context_attribute=LocalContextAttribute(
+                name='database_name',
+                actions=[LocalContextAction.GET, LocalContextAction.SET],
+                scopes=['{} flexible-server'.format(command_group)]))
+
+        database_object_name_arg_type = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--name', '-n'],
+            id_part='child_name_1',
+            help='The name of the database',
+            required=True,
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -239,12 +251,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help="The availability zone information of the standby server when high availability is enabled."
         )
 
-        high_availability_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
-            options_list=['--high-availability'],
-            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.'
-        )
-
         zonal_resiliency_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--zonal-resiliency'],
@@ -260,6 +266,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         pg_version_upgrade_arg_type = CLIArgumentType(
             options_list=['--version', '-v'],
             help='Server major version.'
+        )
+
+        pg_version_upgrade_validate_arg_type = CLIArgumentType(
+            options_list=['--validate-only'],
+            action='store_true',
+            help='Run a pre-upgrade validation against the server without performing major version upgrade on resource. '
+                 'Returns the prevalidation check result.'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
@@ -317,6 +330,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
+        federated_client_id_arg_type = CLIArgumentType(
+            options_list=['--federated-client-id'],
+            help='The client ID of the federated identity.'
+        )
+
+        backup_federated_client_id_arg_type = CLIArgumentType(
+            options_list=['--backup-federated-client-id', '-f'],
+            help='The client ID of the geo backup federated identity.'
+        )
+
         microsoft_entra_auth_arg_type = CLIArgumentType(
             options_list=['--microsoft-entra-auth'],
             arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -366,6 +389,23 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The read replicas the virtual endpoints point to.'
         )
 
+        maintenance_event_id_arg_type = CLIArgumentType(
+            options_list=['--maintenance-event-id'],
+            id_part='child_name_1',
+            help='The maintenance event identifier.'
+        )
+
+        maintenance_status_arg_type = CLIArgumentType(
+            options_list=['--maintenance-status'],
+            arg_type=get_enum_type(['Upcoming', 'Past']),
+            help='Filter maintenance events by status.'
+        )
+
+        start_time_arg_type = CLIArgumentType(
+            options_list=['--start-time', '-t'],
+            help='New UTC start time to target rescheduling maintenance (ISO8601 format), e.g., 2026-04-10T10:00:00+00:00.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -400,7 +440,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
             c.argument('public_access', arg_type=public_access_create_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
@@ -408,6 +447,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
@@ -425,6 +466,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
@@ -447,6 +490,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
 
         with self.argument_context('{} flexible-server revive-dropped'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -472,11 +517,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('public_access', arg_type=public_access_update_arg_type)
             c.argument('auto_grow', arg_type=auto_grow_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
@@ -493,6 +539,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=pg_version_upgrade_arg_type)
+            c.argument('validate', arg_type=pg_version_upgrade_validate_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server restart'.format(command_group)) as c:
@@ -524,12 +571,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=postgres_firewall_rule_name_validator,
-                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
+                c.argument('server_name', arg_type=server_name_resource_arg_type)
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name', '-n'], validator=postgres_firewall_rule_name_validator,
+                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall rule name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
                 c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                            help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
                 c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
                            help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+
+        with self.argument_context('{} flexible-server firewall-rule list'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
 
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
@@ -539,7 +590,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
-                c.argument('database_name', arg_type=database_name_arg_type)
+                c.argument('database_name', arg_type=database_object_name_arg_type)
 
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
@@ -565,15 +616,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server virtual-endpoint delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
 
-        # long-term-retention
-        for scope in ['show', 'start', 'pre-check']:
-            argument_context_string = '{} flexible-server long-term-retention {}'.format(command_group, scope)
-            with self.argument_context(argument_context_string) as c:
-                c.argument('backup_name', options_list=['--backup-name', '-b'], help='Long-term retention backup name.')
-
-        with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
-            c.argument('sas_url', options_list=['--sas-url', '-u'], help='Container SAS URL.')
-
         for scope in ['create', 'update']:
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
@@ -585,10 +627,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # replica
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', arg_type=source_server_arg_type)
-            c.argument('replica_name', options_list=['--replica-name'],
-                       help='The name of the read replica.')
-            c.argument('name', options_list=['--name', '-n'],
-                       help='The name of the read replica.')
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('vnet', arg_type=vnet_arg_type)
@@ -596,6 +635,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('tier', arg_type=tier_arg_type)
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
@@ -605,7 +646,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_type', default=None, arg_type=storage_type_replica_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
-            c.argument('replica_name', arg_type=replica_name_arg_type)
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)
             c.argument('promote_option', options_list=['--promote-option'], required=False, arg_type=promote_option_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -629,10 +670,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['show', 'create', 'delete']:
             argument_context_string = '{} flexible-server backup {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('backup_name', id_part='child_name_1', options_list=['--backup-name', '-b'], help='The name of the backup.')
+                c.argument('server_name', arg_type=server_name_resource_arg_type)
+                c.argument('backup_name', id_part='child_name_1', options_list=['--name', '-n'], help='The name of the backup.')
+
+        with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
 
         with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
+
+        # maintenance-event
+        with self.argument_context('{} flexible-server maintenance-event'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event list'.format(command_group)) as c:
+            c.argument('maintenance_status', arg_type=maintenance_status_arg_type)
+            c.argument('server_name', arg_type=server_name_resource_arg_type, id_part=None)
+            c.ignore('ids')
+
+        for scope in ['show', 'reschedule', 'apply-now']:
+            with self.argument_context('{} flexible-server maintenance-event {}'.format(command_group, scope)) as c:
+                c.argument('maintenance_event_id', arg_type=maintenance_event_id_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event reschedule'.format(command_group)) as c:
+            c.argument('start_time', arg_type=start_time_arg_type, required=True)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
@@ -758,7 +819,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Value of the tuning setting.')
 
         # migration
-        handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
+        handle_migration_parameters(command_group, server_name_resource_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
         for scope in ['create', 'show', 'list', 'update', 'check-name-availability']:
@@ -767,7 +828,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', arg_type=server_name_arg_type, help='Migration target server name.')
 
                 if scope == "create" or scope == "update" or scope == "show" or scope == "check-name-availability":
-                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--name', '-n'],
                                help='Name of the migration.')
 
                 if scope == "create":

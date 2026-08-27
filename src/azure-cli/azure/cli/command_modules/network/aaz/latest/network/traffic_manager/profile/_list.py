@@ -15,17 +15,17 @@ from azure.cli.core.aaz import *
     "network traffic-manager profile list",
 )
 class List(AAZCommand):
-    """List traffic manager profiles.
+    """List all Traffic Manager profiles within a resource group.
 
     :example: List traffic manager profiles.
         az network traffic-manager profile list -g MyResourceGroup
     """
 
     _aaz_info = {
-        "version": "2022-04-01",
+        "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/trafficmanagerprofiles", "2022-04-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles", "2022-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/trafficmanagerprofiles", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles", "2024-04-01-preview"],
         ]
     }
 
@@ -50,12 +50,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.ProfilesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.ProfilesListBySubscription(ctx=self.ctx)()
+        if condition_1:
+            self.ProfilesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,7 +70,7 @@ class List(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
 
-    class ProfilesListByResourceGroup(AAZHttpOperation):
+    class ProfilesListBySubscription(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/trafficmanagerprofiles",
                 **self.url_parameters
             )
 
@@ -100,10 +100,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -114,7 +110,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
@@ -147,7 +143,12 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -178,6 +179,9 @@ class List(AAZCommand):
             )
             properties.profile_status = AAZStrType(
                 serialized_name="profileStatus",
+            )
+            properties.record_type = AAZStrType(
+                serialized_name="recordType",
             )
             properties.traffic_routing_method = AAZStrType(
                 serialized_name="trafficRoutingMethod",
@@ -305,7 +309,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class ProfilesListBySubscription(AAZHttpOperation):
+    class ProfilesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -319,7 +323,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/trafficmanagerprofiles",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles",
                 **self.url_parameters
             )
 
@@ -335,6 +339,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -345,7 +353,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
@@ -378,7 +386,12 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -409,6 +422,9 @@ class List(AAZCommand):
             )
             properties.profile_status = AAZStrType(
                 serialized_name="profileStatus",
+            )
+            properties.record_type = AAZStrType(
+                serialized_name="recordType",
             )
             properties.traffic_routing_method = AAZStrType(
                 serialized_name="trafficRoutingMethod",

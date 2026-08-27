@@ -305,10 +305,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+        scheduled_events_api_version=None, enable_all_instance_down=None,
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
         wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
@@ -599,12 +601,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         vm_properties['resiliencyProfile'] = resiliency_profile
 
     scheduled_events_policy = {}
-    if additional_scheduled_events is not None:
+    if additional_scheduled_events is not None or scheduled_events_api_version is not None:
+        event_grid_and_resource_graph = {}
+        if additional_scheduled_events is not None:
+            event_grid_and_resource_graph["enable"] = additional_scheduled_events
+        if scheduled_events_api_version is not None:
+            event_grid_and_resource_graph["scheduledEventsApiVersion"] = scheduled_events_api_version
         scheduled_events_policy.update({
             "scheduledEventsAdditionalPublishingTargets": {
-                "eventGridAndResourceGraph": {
-                    "enable": additional_scheduled_events
-                }
+                "eventGridAndResourceGraph": event_grid_and_resource_graph
             }
         })
     if enable_user_redeploy_scheduled_events is not None:
@@ -617,6 +622,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         scheduled_events_policy.update({
             "userInitiatedReboot": {
                 "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if enable_all_instance_down is not None:
+        scheduled_events_policy.update({
+            "allInstancesDown": {
+                "automaticallyApprove": enable_all_instance_down
             }
         })
     if scheduled_events_policy:
@@ -739,15 +750,18 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group:
-        vm_properties['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        vm_properties['capacityReservation'] = {}
+        if capacity_reservation_group:
+            vm_properties['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     vm = {
-        'apiVersion': '2025-04-01',
+        'apiVersion': '2026-04-01',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -1047,6 +1061,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
@@ -1057,7 +1072,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                         enable_resilient_vm_creation=None, enable_resilient_vm_deletion=None,
                         additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                        enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
+                        enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
+                        enable_all_instance_down=None, skuprofile_vmsizes=None,
                         skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                         imds_mode=None, add_proxy_agent_extension=None,
@@ -1520,12 +1536,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
     scheduled_events_policy = {}
-    if additional_scheduled_events is not None:
+    if additional_scheduled_events is not None or scheduled_events_api_version is not None:
+        event_grid_and_resource_graph = {}
+        if additional_scheduled_events is not None:
+            event_grid_and_resource_graph["enable"] = additional_scheduled_events
+        if scheduled_events_api_version is not None:
+            event_grid_and_resource_graph["scheduledEventsApiVersion"] = scheduled_events_api_version
         scheduled_events_policy.update({
             "scheduledEventsAdditionalPublishingTargets": {
-                "eventGridAndResourceGraph": {
-                    "enable": additional_scheduled_events
-                }
+                "eventGridAndResourceGraph": event_grid_and_resource_graph
             }
         })
     if enable_user_redeploy_scheduled_events is not None:
@@ -1538,6 +1557,12 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         scheduled_events_policy.update({
             "userInitiatedReboot": {
                 "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if enable_all_instance_down is not None:
+        scheduled_events_policy.update({
+            "allInstancesDown": {
+                "automaticallyApprove": enable_all_instance_down
             }
         })
     if scheduled_events_policy:
@@ -1655,12 +1680,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group:
-        virtual_machine_profile['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        virtual_machine_profile['capacityReservation'] = {}
+        if capacity_reservation_group:
+            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
@@ -1717,7 +1745,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2025-04-01',
+        'apiVersion': '2026-04-01',
         'dependsOn': [],
         'properties': vmss_properties
     }
@@ -1754,13 +1782,15 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
                           platform_fault_domain_count, unmanaged, proximity_placement_group=None,
                           additional_scheduled_events=None,
                           enable_user_reboot_scheduled_events=None,
-                          enable_user_redeploy_scheduled_events=None):
+                          enable_user_redeploy_scheduled_events=None,
+                          scheduled_events_api_version=None,
+                          enable_all_instance_down=None):
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
+        'apiVersion': "2025-04-01",
     }
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
@@ -1770,12 +1800,15 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
 
     properties = {"platformFaultDomainCount": platform_fault_domain_count}
     scheduled_events_policy = {}
-    if additional_scheduled_events is not None:
+    if additional_scheduled_events is not None or scheduled_events_api_version is not None:
+        event_grid_and_resource_graph = {}
+        if additional_scheduled_events is not None:
+            event_grid_and_resource_graph["enable"] = additional_scheduled_events
+        if scheduled_events_api_version is not None:
+            event_grid_and_resource_graph["scheduledEventsApiVersion"] = scheduled_events_api_version
         scheduled_events_policy.update({
             "scheduledEventsAdditionalPublishingTargets": {
-                "eventGridAndResourceGraph": {
-                    "enable": additional_scheduled_events
-                }
+                "eventGridAndResourceGraph": event_grid_and_resource_graph
             }
         })
     if enable_user_redeploy_scheduled_events is not None:
@@ -1788,6 +1821,12 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
         scheduled_events_policy.update({
             "userInitiatedReboot": {
                 "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if enable_all_instance_down is not None:
+        scheduled_events_policy.update({
+            "allInstancesDown": {
+                "automaticallyApprove": enable_all_instance_down
             }
         })
 

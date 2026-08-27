@@ -732,8 +732,161 @@ def validate_key_create(cmd, ns):
     validate_tags(ns)
     set_vault_base_url(ns)
     validate_keyvault_resource_id('key')(ns)
-    validate_key_type(ns)
+    validate_external_key_id(ns)
+
+    if getattr(ns, 'external_key_id', None):
+        # External keys are backed by an External Key Manager (EKM); the service controls the
+        # key material, so client-specified key-shape arguments are not supported. Fail fast with
+        # a clear error instead of silently ignoring them.
+        incompatible = [opt for opt, val in (
+            ('--kty', getattr(ns, 'kty', None)),
+            ('--size', getattr(ns, 'key_size', None)),
+            ('--curve', getattr(ns, 'curve', None)),
+            ('--ops', getattr(ns, 'key_ops', None)),
+            ('--protection', getattr(ns, 'protection', None)),
+            ('--exportable', getattr(ns, 'exportable', None)),
+        ) if val is not None]
+        if incompatible:
+            raise CLIError(
+                '{} cannot be used with --external-key-id. External keys are backed by an External '
+                'Key Manager and the service controls the key material.'.format(', '.join(incompatible)))
+    else:
+        validate_key_type(ns)
+
     process_key_release_policy(cmd, ns)
+
+
+def validate_external_key_id(ns):
+    external_key_id = getattr(ns, 'external_key_id', None)
+    if not external_key_id:
+        return
+    if len(external_key_id) > 64:
+        raise CLIError('--external-key-id must be at most 64 characters.')
+    if not re.match(r'^[0-9A-Za-z-]+$', external_key_id):
+        raise CLIError('--external-key-id may contain only letters, digits, and hyphens.')
+
+
+def _validate_ekm_path_prefix(path_prefix=None):
+    if path_prefix is None:
+        return
+    if not path_prefix.startswith('/'):
+        raise CLIError('--path-prefix must start with "/".')
+    if path_prefix.endswith('/'):
+        raise CLIError('--path-prefix must not end with "/".')
+    if len(path_prefix) > 64:
+        raise CLIError('--path-prefix must be at most 64 characters.')
+    if not re.match(r'^[A-Za-z0-9/-]+$', path_prefix):
+        raise CLIError('--path-prefix may contain only letters, digits, "/" and "-".')
+
+
+def _normalize_ekm_host(host: str):
+    host = (host or '').strip()
+    if not host:
+        raise CLIError('--host cannot be empty.')
+    if '://' in host:
+        raise CLIError('--host must not include a URL scheme (use FQDN or FQDN:port).')
+    if '/' in host:
+        raise CLIError('--host must not include a path (use FQDN or FQDN:port).')
+
+    if ':' not in host:
+        return f'{host}:443'
+
+    # Avoid ambiguous parsing for IPv6 literals.
+    if host.count(':') != 1:
+        raise CLIError('--host must be in the form FQDN or FQDN:port.')
+
+    hostname, port_str = host.split(':', 1)
+    if not hostname:
+        raise CLIError('--host must be in the form FQDN or FQDN:port.')
+    try:
+        port = int(port_str)
+    except ValueError as ex:
+        raise CLIError('--host port must be an integer.') from ex
+    if port < 1 or port > 65535:
+        raise CLIError('--host port must be between 1 and 65535.')
+    return f'{hostname}:{port}'
+
+
+def _flatten_list(value):
+    if value is None:
+        return None
+    if isinstance(value, list) and value and isinstance(value[0], list):
+        flattened = []
+        for item in value:
+            flattened.extend(item)
+        return flattened
+    return value
+
+
+def _load_certificates_as_der_bytes(cert_paths):
+    import os
+    import ssl
+
+    cert_paths = _flatten_list(cert_paths)
+    if not cert_paths:
+        return []
+
+    der_certs = []
+    for cert_path in cert_paths:
+        if not cert_path:
+            continue
+        expanded = os.path.expanduser(cert_path)
+        try:
+            with open(expanded, 'rb') as f:
+                raw = f.read()
+        except OSError as ex:
+            raise CLIError("Unable to load certificate file '{}': {}.".format(cert_path, ex.strerror)) from ex
+
+        # PEM may contain multiple cert blocks.
+        if b'-----BEGIN CERTIFICATE-----' in raw:
+            text = raw.decode('utf-8', errors='ignore')
+            begin = '-----BEGIN CERTIFICATE-----'
+            end = '-----END CERTIFICATE-----'
+            start = 0
+            found_any = False
+            while True:
+                b_idx = text.find(begin, start)
+                if b_idx == -1:
+                    break
+                e_idx = text.find(end, b_idx)
+                if e_idx == -1:
+                    raise CLIError(f'Invalid PEM certificate in {cert_path}.')
+                block = text[b_idx:e_idx + len(end)]
+                der_certs.append(ssl.PEM_cert_to_DER_cert(block))
+                found_any = True
+                start = e_idx + len(end)
+            if not found_any:
+                raise CLIError(f'Invalid PEM certificate in {cert_path}.')
+        else:
+            # Assume DER.
+            der_certs.append(raw)
+
+    return der_certs
+
+
+def validate_ekm_connection_base(cmd, ns):  # pylint: disable=unused-argument
+    set_vault_base_url(ns)
+    if not getattr(ns, 'hsm_name', None) and not getattr(ns, 'identifier', None):
+        raise CLIError('Please specify --hsm-name or --id.')
+
+
+def validate_ekm_connection_create(cmd, ns):
+    validate_ekm_connection_base(cmd, ns)
+    ns.host = _normalize_ekm_host(ns.host)
+    _validate_ekm_path_prefix(getattr(ns, 'path_prefix', None))
+    server_ca_certificates = _load_certificates_as_der_bytes(getattr(ns, 'server_ca_certificates', None))
+    if not server_ca_certificates:
+        raise CLIError('Please specify at least one --server-ca-certificate for EKM connection creation.')
+    ns.server_ca_certificates = server_ca_certificates
+
+
+def validate_ekm_connection_update(cmd, ns):
+    validate_ekm_connection_base(cmd, ns)
+    if getattr(ns, 'host', None):
+        ns.host = _normalize_ekm_host(ns.host)
+    _validate_ekm_path_prefix(getattr(ns, 'path_prefix', None))
+    if getattr(ns, 'server_ca_certificates', None):
+        ns.server_ca_certificates = _load_certificates_as_der_bytes(ns.server_ca_certificates)
 
 
 # pylint: disable=line-too-long, too-many-locals

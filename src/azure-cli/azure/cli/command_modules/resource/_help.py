@@ -2427,7 +2427,7 @@ examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
   - name: Publish a bicep file overwriting an existing tag.
-    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --force
   - name: Publish a bicep file with documentation uri.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentation-uri {documentation_uri}
   - name: Publish a bicep file with documentation uri and include source code
@@ -2458,6 +2458,12 @@ helps['stack'] = """
 type: group
 short-summary: A deployment stack is a native Azure resource type that enables you to perform operations on a resource collection as an atomic unit.
 long-summary: Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks.
+"""
+
+helps['stack-whatif'] = """
+type: group
+short-summary: A deployment stack What-If is a preview of an operation to be performed on a new or existing deployment stack.
+long-summary: Deployment stacks What-Ifs are defined in ARM as the type Microsoft.Resources/deploymentStacksWhatIfResults.
 """
 
 helps['stack mg'] = """
@@ -2547,9 +2553,66 @@ examples:
     text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg --action-on-unmanage deleteAll
 """
 
+helps['stack-whatif mg'] = """
+type: group
+short-summary: Manage Deployment stacks what-if results at management group scope.
+"""
+
+helps['stack-whatif mg create'] = """
+type: command
+short-summary: Create a deployment stack what-if result at management group scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and detach all unmanaged resources.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack with template spec.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack using bicep file, delete all resources on unmanage, and remove color from the output.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --no-color --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+  - name: Perform a what-if on a deployment stack from a local template, apply deny settings to child scope.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources --ri P5D --stack-id /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
+"""
+
+helps['stack-whatif mg list'] = """
+type: command
+short-summary: List all deployment stacks what-if results in a management group.
+examples:
+  - name: List all stack what-if results in management group.
+    text: az stack-whatif mg list --management-group-id myMg
+"""
+
+helps['stack-whatif mg show'] = """
+type: command
+short-summary: Get a deployment stack what-if result from management group scope.
+examples:
+  - name: Get a stack what-if result by name.
+    text: az stack-whatif mg show --name ResultName --management-group-id myMg
+  - name: Get a stack what-if result by name without color.
+    text: az stack-whatif mg show --name ResultName --management-group-id myMg --no-color
+  - name: Get JSON for a stack what-if result by name.
+    text: az stack-whatif mg show --name ResultName --management-group-id myMg --no-pretty-print
+  - name: Get a stack what-if result by resource id.
+    text: az stack-whatif mg show --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName --management-group-id myMg
+"""
+
+helps['stack-whatif mg delete'] = """
+type: command
+short-summary: Delete a deployment stack what-if result from management group scope.
+examples:
+  - name: Delete a stack what-if result by name.
+    text: az stack-whatif mg delete --name ResultName --management-group-id myMg
+  - name: Delete a stack what-if result by resource id.
+    text: az stack-whatif mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName --management-group-id myMg
+"""
+
 helps['stack sub'] = """
 type: group
-short-summary: Manage Deployment Stacks at subscription.
+short-summary: Manage Deployment stacks at subscription scope.
 """
 
 helps['stack sub create'] = """
@@ -2642,9 +2705,72 @@ examples:
     text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
 """
 
+helps['stack-whatif sub'] = """
+type: group
+short-summary: Manage Deployment stacks what-if results at subscription scope.
+"""
+
+helps['stack-whatif sub create'] = """
+type: command
+short-summary: Create a deployment stack what-if result at subscription scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and detach all resources on unmanage.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack with parameter file, delete resources on unmanage, and remove color from the output.
+    text: az stack-whatif sub create --name StackName --action-on-unmanage deleteResources --no-color --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack with template spec.
+    text: az stack-whatif sub create --name StackName --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack-whatif sub create --name StackName --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack at a different subscription.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack and deploy at the resource group scope.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, apply deny settings to child scopes.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/mySubStack
+"""
+
+helps['stack-whatif sub list'] = """
+type: command
+short-summary: List all deployment stack what-if results in a subscription.
+examples:
+  - name: List all stack what-if results the current subscription.
+    text: az stack-whatif sub list
+"""
+
+helps['stack-whatif sub show'] = """
+type: command
+short-summary: Get a deployment stack what-if result from subscription scope.
+examples:
+  - name: Get a stack what-if result by name.
+    text: az stack-whatif sub show --name ResultName
+  - name: Get a stack what-if result by name without color.
+    text: az stack-whatif sub show --name ResultName --no-color
+  - name: Get JSON for a stack what-if result by name.
+    text: az stack-whatif sub show --name ResultName --no-pretty-print
+  - name: Get a stack what-if result by resource id.
+    text: az stack-whatif sub show --id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName
+"""
+
+helps['stack-whatif sub delete'] = """
+type: command
+short-summary: Delete a deployment stack what-if result from subscription scope.
+examples:
+  - name: Delete a stack what-if result by name.
+    text: az stack-whatif sub delete --name StackName
+  - name: Delete a stack what-if result by resource id.
+    text: az stack-whatif sub delete --id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName
+"""
+
 helps['stack group'] = """
 type: group
-short-summary: Manage Deployment Stacks at resource group.
+short-summary: Manage Deployment stacks at resource group scope.
 """
 
 helps['stack group create'] = """
@@ -2733,6 +2859,67 @@ examples:
     text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
 """
 
+helps['stack-whatif group'] = """
+type: group
+short-summary: Manage Deployment stacks what-if results at resource group scope.
+"""
+
+helps['stack-whatif group create'] = """
+type: command
+short-summary: Create a deployment stack what-if result at resource group scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and delete resources on unmanage.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --action-on-unmanage deleteResources --template-file simpleTemplate.json --description description --deny-settings-mode None --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack with parameter file, detach all resources on unmanage, and remove color from the output.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --no-color --action-on-unmanage detachAll --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack with template spec and delete all resources on unmanage.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --action-on-unmanage deleteAll --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack using bicep file.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --template-file simple.bicep --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack at a different subscription.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif group create --name ResultName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif group create --name ResultName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+  - name: Perform a what-if on a deployment stack from a local template, apply deny setting to child scopes.
+    text: az stack-whatif group create --name ResultName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --action-on-unmanage deleteResources --ri P5D --stack-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/mySubStack
+"""
+
+helps['stack-whatif group list'] = """
+type: command
+short-summary: List all deployment stack what-if results in a resource group.
+examples:
+  - name: List all stack what-if results in a resource group.
+    text: az stack-whatif group list --resource-group ResourceGroup
+"""
+
+helps['stack-whatif group show'] = """
+type: command
+short-summary: Get a deployment stack what-if result from resource group scope.
+examples:
+  - name: Get a stack what-if result by name.
+    text: az stack-whatif group show --name ResultName --resource-group ResourceGroup
+  - name: Get a stack what-if result by name without color.
+    text: az stack-whatif group show --name ResultName --resource-group ResourceGroup --no-color
+  - name: Get JSON for a stack what-if result by name.
+    text: az stack-whatif group show --name ResultName --resource-group ResourceGroup --no-pretty-print
+  - name: Get a stack what-if result by resource id.
+    text: az stack-whatif group show --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName
+"""
+
+helps['stack-whatif group delete'] = """
+type: command
+short-summary: Delete a deployment stack what-if result from resource group scope.
+examples:
+  - name: Delete stack what-if result by name.
+    text: az stack-whatif group delete --name ResultName --resource-group ResourceGroup
+  - name: Delete stack what-if result by resource id.
+    text: az stack-whatif group delete --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName
+"""
+
 helps['bicep generate-params'] = """
 type: command
 short-summary: Generate parameters file for a Bicep file.
@@ -2761,6 +2948,42 @@ examples:
     text: az bicep lint --file {bicep_file} --no-restore
   - name: Lint a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
     text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
+"""
+
+helps['bicep snapshot'] = """
+type: command
+short-summary: Capture or validate a snapshot of the resources predicted to be deployed by a .bicepparam file.
+long-summary: |
+    Compiles a .bicepparam file together with its referenced Bicep template and writes a deployment
+    snapshot (a `*.snapshot.json` file) next to the .bicepparam file. When run with `--mode Validate`,
+    the existing snapshot is compared against the current template and the command fails if they
+    differ. This command requires Bicep CLI v0.41.2 or later.
+examples:
+  - name: Capture a snapshot for a .bicepparam file.
+    text: az bicep snapshot --file main.bicepparam
+  - name: Validate that the existing snapshot still matches the current template.
+    text: az bicep snapshot --file main.bicepparam --mode Validate
+  - name: Capture a snapshot with explicit Azure context.
+    text: az bicep snapshot --file main.bicepparam --subscription-id 00000000-0000-0000-0000-000000000000 --resource-group myRg --location westus
+"""
+
+helps['bicep run'] = """
+type: command
+short-summary: Forward a raw command to the installed Bicep CLI.
+long-summary: |
+    Runs the Bicep CLI with the arguments supplied via `--command`, allowing use of Bicep CLI
+    features that do not yet have a dedicated `az bicep` wrapper. The string passed to
+    `--command` is split using shell-style quoting and forwarded to the Bicep CLI verbatim.
+    When the forwarded command itself starts with `--` (for example `--version`), use the
+    `--command=<value>` form so the CLI parser does not mistake the value for another option.
+
+    Because the value is forwarded to the Bicep CLI without validation, do not pass strings
+    derived from untrusted input.
+examples:
+  - name: Forward a build command to the Bicep CLI.
+    text: az bicep run --command "build main.bicep"
+  - name: Show the Bicep CLI help (use the --command=<value> form for option-like values).
+    text: az bicep run --command=--help
 """
 
 helps['resourcemanagement'] = """

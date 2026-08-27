@@ -327,8 +327,10 @@ def set_location(cmd, sku, location):
 
 def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
-    availability = client.check_name_availability(name, 'Site')
+    request = ResourceNameAvailabilityRequest(name=name, type='Site')
+    availability = client.check_name_availability(request)
 
     # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
     if "." in name:
@@ -339,15 +341,19 @@ def get_site_availability(cmd, name):
     return availability
 
 
-def get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope):
+def get_regional_site_availability(cmd, location, name, resource_group_name=None,  # pylint: disable=unused-argument
+                                   auto_generated_domain_name_label_scope=None):  # pylint: disable=unused-argument
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed
       (regional check)"""
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
-    availability = client.regional_check_name_availability(location,
-                                                           name,
-                                                           "Site",
-                                                           resource_group_name,
-                                                           auto_generated_domain_name_label_scope)
+    # Note: In azure-mgmt-web 11.0.0+, resource_group_name and auto_generated_domain_name_label_scope
+    # are no longer supported parameters for ResourceNameAvailabilityRequest
+    request = ResourceNameAvailabilityRequest(
+        name=name,
+        type="Site"
+    )
+    availability = client.regional_check_name_availability(location, request)
 
     # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
     if "." in name:

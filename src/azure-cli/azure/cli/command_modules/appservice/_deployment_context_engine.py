@@ -64,12 +64,14 @@ def _get_app_region_and_plan_sku(cmd, resource_group_name, webapp_name):
     try:
         from ._client_factory import web_client_factory
         from azure.mgmt.core.tools import parse_resource_id
+        from .utils import get_site_server_farm_id
         client = web_client_factory(cmd.cli_ctx)
         app = client.web_apps.get(resource_group_name, webapp_name)
         region = app.location if app else "Unknown"
         sku = "Unknown"
-        if app and app.server_farm_id:
-            plan_parts = parse_resource_id(app.server_farm_id)
+        server_farm_id = get_site_server_farm_id(app) if app else None
+        if app and server_farm_id:
+            plan_parts = parse_resource_id(server_farm_id)
             plan = client.app_service_plans.get(plan_parts['resource_group'], plan_parts['name'])
             if plan and plan.sku:
                 sku = plan.sku.name
@@ -231,3 +233,186 @@ def raise_enriched_deployment_error(params=None, *, cmd=None, resource_group_nam
 
     message = format_enriched_error_message(context)
     raise EnrichedDeploymentError(message)
+
+
+def build_enriched_plan_error_context(*, resource_group_name=None, plan_name=None,
+                                      location=None, sku=None, status_code=None,
+                                      error_message=None, last_known_step=None):
+    from ._deployment_failure_patterns import match_control_plane_failure_pattern
+
+    pattern = match_control_plane_failure_pattern(
+        status_code=status_code,
+        error_message=error_message,
+    )
+
+    context = {}
+
+    if pattern:
+        context["errorCode"] = pattern["errorCode"]
+        context["stage"] = pattern["stage"]
+        context["suggestedFixes"] = pattern["suggestedFixes"]
+    else:
+        context["errorCode"] = f"HTTP_{status_code}" if status_code else "UnknownPlanCreateError"
+        context["stage"] = "ResourceProvisioning"
+        context["suggestedFixes"] = [
+            "Review the raw error message below for the failing property",
+            "Verify --sku and --location are valid: 'az appservice list-locations --sku <SKU>'",
+            "Confirm the resource group exists and you have Contributor access"
+        ]
+
+    context["resourceGroup"] = resource_group_name or "Unknown"
+    context["planName"] = plan_name or "Unknown"
+    context["region"] = location or "Unknown"
+    context["planSku"] = sku or "Unknown"
+
+    if last_known_step:
+        context["lastKnownStep"] = last_known_step
+
+    if error_message:
+        if len(error_message) > 500:
+            context["rawError"] = error_message[:500] + "... [truncated]"
+        else:
+            context["rawError"] = error_message
+
+    return context
+
+
+def format_enriched_plan_error_message(context):
+    lines = []
+    lines.append("")
+    lines.append("=" * 72)
+    lines.append("APP SERVICE PLAN CREATION FAILED: Context-Enriched Diagnostics")
+    lines.append("=" * 72)
+    lines.append("")
+
+    lines.append(f"Error Code  : {context.get('errorCode', 'Unknown')}")
+    lines.append(f"Stage       : {context.get('stage', 'Unknown')}")
+    lines.append(f"Plan Name   : {context.get('planName', 'Unknown')}")
+    lines.append(f"Resource Grp: {context.get('resourceGroup', 'Unknown')}")
+    lines.append(f"Region      : {context.get('region', 'Unknown')}")
+    lines.append(f"Plan SKU    : {context.get('planSku', 'Unknown')}")
+    if context.get("lastKnownStep"):
+        lines.append(f"Last Step   : {context['lastKnownStep']}")
+    lines.append("")
+
+    if context.get("rawError"):
+        lines.append(f"Raw Error   : {context['rawError']}")
+        lines.append("")
+
+    fixes = context.get("suggestedFixes", [])
+    if fixes:
+        lines.append("Suggested Fixes:")
+        for f in fixes:
+            lines.append(f"  - {f}")
+        lines.append("")
+
+    # Copilot prompt
+    lines.append("-" * 72)
+    lines.append("  Copy the full error output above and paste it into GitHub Copilot Chat")
+    lines.append("  with the prompt: 'Why did my az appservice plan create fail and how do I fix it?'")
+    lines.append("-" * 72)
+
+    return "\n".join(lines)
+
+
+def raise_enriched_plan_error(*, resource_group_name=None, plan_name=None,
+                              location=None, sku=None, status_code=None,
+                              error_message=None, last_known_step=None):
+    context = build_enriched_plan_error_context(
+        resource_group_name=resource_group_name,
+        plan_name=plan_name,
+        location=location,
+        sku=sku,
+        status_code=status_code,
+        error_message=error_message,
+        last_known_step=last_known_step,
+    )
+
+    logger.debug("App Service plan creation failure context: %s", context)
+
+    message = format_enriched_plan_error_message(context)
+    raise EnrichedDeploymentError(message)
+
+
+def build_enriched_webapp_create_error_context(*, resource_group_name=None, webapp_name=None,
+                                               plan_name=None, location=None, sku=None, runtime=None,
+                                               status_code=None, error_message=None, last_known_step=None):
+    from ._deployment_failure_patterns import match_webapp_create_failure_pattern
+
+    pattern = match_webapp_create_failure_pattern(
+        status_code=status_code,
+        error_message=error_message,
+    )
+
+    context = {}
+    if pattern:
+        context["errorCode"] = pattern["errorCode"]
+        context["stage"] = pattern["stage"]
+        context["suggestedFixes"] = pattern["suggestedFixes"]
+    else:
+        context["errorCode"] = f"HTTP_{status_code}" if status_code else "UnknownWebAppCreateError"
+        context["stage"] = "ResourceProvisioning"
+        context["suggestedFixes"] = [
+            "Correct the property or value identified in Raw Error and retry 'az webapp create'",
+            "If the failing property is optional, remove its argument to use the App Service default",
+            "Run 'az webapp create --help' to verify supported arguments and values"
+        ]
+
+    context["resourceGroup"] = resource_group_name or "Unknown"
+    context["webappName"] = webapp_name or "Unknown"
+    context["planName"] = plan_name or "Unknown"
+    context["region"] = location or "Unknown"
+    context["planSku"] = sku or "Unknown"
+    context["runtime"] = runtime or "Unknown"
+
+    if last_known_step:
+        context["lastKnownStep"] = last_known_step
+    if error_message:
+        context["rawError"] = (error_message[:500] + "... [truncated]"
+                               if len(error_message) > 500 else error_message)
+
+    return context
+
+
+def format_enriched_webapp_create_error_message(context):
+    lines = [
+        "",
+        "=" * 72,
+        "WEB APP CREATION FAILED: Context-Enriched Diagnostics",
+        "=" * 72,
+        "",
+        f"Error Code  : {context.get('errorCode', 'Unknown')}",
+        f"Stage       : {context.get('stage', 'Unknown')}",
+        f"Web App Name: {context.get('webappName', 'Unknown')}",
+        f"Resource Grp: {context.get('resourceGroup', 'Unknown')}",
+        f"Plan Name   : {context.get('planName', 'Unknown')}",
+        f"Region      : {context.get('region', 'Unknown')}",
+        f"Plan SKU    : {context.get('planSku', 'Unknown')}",
+        f"Runtime     : {context.get('runtime', 'Unknown')}",
+    ]
+    if context.get("lastKnownStep"):
+        lines.append(f"Last Step   : {context['lastKnownStep']}")
+    lines.append("")
+
+    if context.get("rawError"):
+        lines.extend([f"Raw Error   : {context['rawError']}", ""])
+
+    fixes = context.get("suggestedFixes", [])
+    if fixes:
+        lines.append("Suggested Fixes:")
+        lines.extend(f"  - {fix}" for fix in fixes)
+        lines.append("")
+
+    lines.extend([
+        "-" * 72,
+        "  Copy the full error output above and paste it into GitHub Copilot Chat",
+        "  with the prompt: 'Why did my az webapp create fail and how do I fix it?'",
+        "-" * 72,
+    ])
+    return "\n".join(lines)
+
+
+def raise_enriched_webapp_create_error(**kwargs):
+    context = build_enriched_webapp_create_error_context(**kwargs)
+    logger.debug("Web app creation failure context: %s", context)
+    raise EnrichedDeploymentError(format_enriched_webapp_create_error_message(context))

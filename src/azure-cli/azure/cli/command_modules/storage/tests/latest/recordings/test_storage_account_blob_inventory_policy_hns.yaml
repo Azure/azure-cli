@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-08-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2025-10-24T09:36:48.6620410Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-10-24T09:36:48.6620410Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2026-05-14T08:33:16.1610942Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-05-14T08:33:16.1610942Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:37:12 GMT
+      - Thu, 14 May 2026 08:33:44 GMT
       expires:
       - '-1'
       pragma:
@@ -41,7 +41,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/e9b536e2-ed81-4729-9b77-d79e8276dfe8
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/401eb8ce-dffb-44d8-8b25-9949046156f5
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '799'
       x-ms-throttling-version:
@@ -65,11 +65,11 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:37:13 GMT
+      - Thu, 14 May 2026 08:33:45 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://clitest000002.blob.core.windows.net/mycontainer?restype=container
   response:
@@ -79,23 +79,23 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:37:13 GMT
+      - Thu, 14 May 2026 08:33:46 GMT
       etag:
-      - '"0x8DE12E0EA182C53"'
+      - '"0x8DEB19384645286"'
       last-modified:
-      - Fri, 24 Oct 2025 09:37:14 GMT
+      - Thu, 14 May 2026 08:33:47 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 201
       message: Created
 - request:
     body: '{"properties": {"policy": {"enabled": true, "type": "Inventory", "rules":
       [{"enabled": true, "name": "newfieldsblob", "destination": "mycontainer", "definition":
-      {"filters": {"prefixMatch": ["abc"], "excludePrefix": ["ac"], "blobTypes": ["blockBlob",
-      "appendBlob"], "includeSnapshots": true, "includeDeleted": true}, "format":
+      {"filters": {"blobTypes": ["blockBlob", "appendBlob"], "includeSnapshots": true,
+      "includeDeleted": true, "prefixMatch": ["abc"], "excludePrefix": ["ac"]}, "format":
       "Csv", "schedule": "Daily", "objectType": "Blob", "schemaFields": ["Name", "Creation-Time",
       "Last-Modified", "ETag", "Content-Length", "Content-Type", "Content-Encoding",
       "Content-Language", "Content-CRC64", "Content-MD5", "Cache-Control", "Content-Disposition",
@@ -129,12 +129,12 @@ interactions:
       ParameterSetName:
       - --account-name -g --policy
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2025-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2025-10-24T09:37:15.9750599Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"newfieldsblob","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","ETag","Content-Length","Content-Type","Content-Encoding","Content-Language","Content-CRC64","Content-MD5","Cache-Control","Content-Disposition","BlobType","AccessTier","AccessTierChangeTime","AccessTierInferred","LeaseStatus","LeaseState","LeaseDuration","ServerEncrypted","CustomerProvidedKeySha256","RehydratePriority","ArchiveStatus","EncryptionScope","IncrementalCopy","Snapshot","Metadata","DeletionId","Deleted","DeletedTime","RemainingRetentionDays","Expiry-Time","hdi_isfolder","Owner","Group","Permissions","Acl","CopyId","CopyStatus","CopySource","CopyProgress","CopyCompletionTime","CopyStatusDescription","ImmutabilityPolicyUntilDate","ImmutabilityPolicyMode","LegalHold","LastAccessTime"],"filters":{"includeDeleted":true,"excludePrefix":["ac"],"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["abc"],"includeSnapshots":true}}},{"destination":"mycontainer","enabled":true,"name":"newfieldscontainer","definition":{"format":"Csv","schedule":"Daily","objectType":"Container","schemaFields":["Name","Last-Modified","ETag","LeaseStatus","LeaseState","LeaseDuration","PublicAccess","DefaultEncryptionScope","DenyEncryptionScopeOverride","ImmutableStorageWithVersioningEnabled","HasImmutabilityPolicy","HasLegalHold","Deleted","DeletedTime","RemainingRetentionDays","Version","Metadata"],"filters":{"includeDeleted":true,"prefixMatch":["abc"]}}}]}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory_hns000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2026-05-14T08:33:49.9987778Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"newfieldsblob","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","ETag","Content-Length","Content-Type","Content-Encoding","Content-Language","Content-CRC64","Content-MD5","Cache-Control","Content-Disposition","BlobType","AccessTier","AccessTierChangeTime","AccessTierInferred","LeaseStatus","LeaseState","LeaseDuration","ServerEncrypted","CustomerProvidedKeySha256","RehydratePriority","ArchiveStatus","EncryptionScope","IncrementalCopy","Snapshot","Metadata","DeletionId","Deleted","DeletedTime","RemainingRetentionDays","Expiry-Time","hdi_isfolder","Owner","Group","Permissions","Acl","CopyId","CopyStatus","CopySource","CopyProgress","CopyCompletionTime","CopyStatusDescription","ImmutabilityPolicyUntilDate","ImmutabilityPolicyMode","LegalHold","LastAccessTime"],"filters":{"includeDeleted":true,"excludePrefix":["ac"],"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["abc"],"includeSnapshots":true}}},{"destination":"mycontainer","enabled":true,"name":"newfieldscontainer","definition":{"format":"Csv","schedule":"Daily","objectType":"Container","schemaFields":["Name","Last-Modified","ETag","LeaseStatus","LeaseState","LeaseDuration","PublicAccess","DefaultEncryptionScope","DenyEncryptionScopeOverride","ImmutableStorageWithVersioningEnabled","HasImmutabilityPolicy","HasLegalHold","Deleted","DeletedTime","RemainingRetentionDays","Version","Metadata"],"filters":{"includeDeleted":true,"prefixMatch":["abc"]}}}]}}}'
     headers:
       cache-control:
       - no-cache
@@ -143,7 +143,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:37:15 GMT
+      - Thu, 14 May 2026 08:33:49 GMT
       expires:
       - '-1'
       pragma:
@@ -155,7 +155,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/6460e2f6-c255-4bb7-81ee-d2d2265afc8b
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/af23f8f1-2a64-4139-9148-492bc4e39822
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-ms-throttling-version:

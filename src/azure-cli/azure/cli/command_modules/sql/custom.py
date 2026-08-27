@@ -2201,7 +2201,7 @@ def _get_storage_key(
 
     # Choose storage key
     index = 1 if use_secondary_key else 0
-    return keys.keys[index].value  # pylint: disable=no-member
+    return keys.keys_property[index].value  # pylint: disable=no-member
 
 
 def _db_security_policy_update(
@@ -4447,11 +4447,13 @@ def deleted_server_show(
 
 def deleted_server_list(
         client,
-        location):
+        location=None):
     '''
-    Lists all deleted servers in a specific location.
+    Lists all deleted servers in a location or subscription.
     '''
-    return client.list_by_location(location)
+    if location:
+        return client.list_by_location(location)
+    return client.list()
 
 
 ###############################################
@@ -4671,12 +4673,10 @@ def server_update(
     instance.federated_client_id = (federated_client_id or instance.federated_client_id)
 
     # Handle soft delete retention days
-    # 0 = disable soft delete, 1-7 = enable with specified retention days
-    # If not specified, set to None to avoid sending existing value to API
+    # -1 = never configured, 0 = disable soft delete, 1-7 = enable with specified retention days
+    # If not specified, preserve the existing value. If specified, update the value to maintain standard PUT behavior.
     if soft_delete_retention_days is not None:
         instance.retention_days = soft_delete_retention_days
-    else:
-        instance.retention_days = None
 
     return instance
 

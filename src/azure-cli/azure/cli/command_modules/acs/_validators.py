@@ -10,6 +10,7 @@ from math import isclose, isnan
 
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
@@ -42,6 +43,23 @@ logger = get_logger(__name__)
 
 def validate_ssh_key(namespace):
     if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
+        return
+    # Automatic SKU clusters use a fully managed system node pool that rejects any SSH key
+    # configuration. Skip reading/generating an SSH key so users don't need --no-ssh-key.
+    if getattr(namespace, 'sku', None) is not None and \
+            namespace.sku.lower() == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+        # ssh_key_value defaults to "~/.ssh/id_rsa.pub" (expanded to an absolute path by
+        # the arg's file_type); only treat a non-default value as an explicit user request.
+        default_ssh_key_value = os.path.expanduser(os.path.join("~", ".ssh", "id_rsa.pub"))
+        explicit_ssh_key = (
+            namespace.ssh_key_value and
+            os.path.expanduser(namespace.ssh_key_value) != default_ssh_key_value
+        )
+        if namespace.generate_ssh_keys or explicit_ssh_key:
+            raise MutuallyExclusiveArgumentError(
+                'SSH key configuration is not supported for the Automatic SKU. '
+                'Do not specify "--ssh-key-value" or "--generate-ssh-keys" when using "--sku automatic".'
+            )
         return
     string_or_file = (namespace.ssh_key_value or
                       os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
@@ -765,7 +783,7 @@ def validate_registry_name(cmd, namespace):
     """Append login server endpoint suffix."""
     registry = namespace.acr
     suffixes = cmd.cli_ctx.cloud.suffixes
-    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    # Some clouds do not define 'acr_login_server_endpoint'
     from azure.cli.core.cloud import CloudSuffixNotSetException
     try:
         acr_suffix = suffixes.acr_login_server_endpoint
@@ -979,3 +997,20 @@ def validate_gateway_prefix_size(namespace):
             raise ArgumentUsageError("--gateway-prefix-size can only be set for Gateway-mode nodepools")
         if namespace.gateway_prefix_size < 28 or namespace.gateway_prefix_size > 31:
             raise InvalidArgumentValueError("--gateway-prefix-size must be in the range [28, 31]")
+
+
+def validate_artifact_streaming(namespace):
+    """Validates artifact streaming flags for mutual exclusivity and OS support."""
+    enable_artifact_streaming = getattr(namespace, "enable_artifact_streaming", False)
+    disable_artifact_streaming = getattr(namespace, "disable_artifact_streaming", False)
+
+    if enable_artifact_streaming and disable_artifact_streaming:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-artifact-streaming and --disable-artifact-streaming at the same time."
+        )
+
+    if hasattr(namespace, "os_type") and str(namespace.os_type).lower() == "windows":
+        if enable_artifact_streaming:
+            raise ArgumentUsageError('--enable-artifact-streaming can only be set for Linux nodepools')
+        if disable_artifact_streaming:
+            raise ArgumentUsageError('--disable-artifact-streaming can only be set for Linux nodepools')
