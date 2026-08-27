@@ -1786,6 +1786,10 @@ class AKSAgentPoolContext(BaseAKSContext):
             ))
         return port_ranges
 
+    def get_enable_managed_dranet(self) -> bool:
+        """Obtain the value of enable_managed_dranet."""
+        return self.raw_param.get("enable_managed_dranet")
+
     def get_ip_tags(self) -> Union[List[IPTag], None]:
         ip_tags = self.raw_param.get("node_public_ip_tags")
         res = []
@@ -2329,10 +2333,15 @@ class AKSAgentPoolAddDecorator:
 
         asg_ids = self.context.get_asg_ids()
         allowed_host_ports = self.context.get_allowed_host_ports()
-        if allowed_host_ports is not None:
+        enable_managed_dranet = self.context.get_enable_managed_dranet()
+        if allowed_host_ports is not None or enable_managed_dranet:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
             agentpool.network_profile.application_security_groups = asg_ids
+            if enable_managed_dranet:
+                agentpool.network_profile.dranet = self.models.DRANETProfile(
+                    mode="Managed"
+                )
 
         ip_tags = self.context.get_ip_tags()
         if ip_tags:
@@ -2866,12 +2875,17 @@ class AKSAgentPoolUpdateDecorator:
 
         asg_ids = self.context.get_asg_ids()
         allowed_host_ports = self.context.get_allowed_host_ports()
-        if (asg_ids or allowed_host_ports) and not agentpool.network_profile:
+        enable_managed_dranet = self.context.get_enable_managed_dranet()
+        if (asg_ids or allowed_host_ports or enable_managed_dranet) and not agentpool.network_profile:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
         if asg_ids is not None:
             agentpool.network_profile.application_security_groups = asg_ids
         if allowed_host_ports is not None:
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
+        if enable_managed_dranet:
+            agentpool.network_profile.dranet = self.models.DRANETProfile(
+                mode="Managed"
+            )
         return agentpool
 
     def update_os_sku(self, agentpool: AgentPool) -> AgentPool:
