@@ -2614,33 +2614,37 @@ class TestSshSessionFailureReporting(unittest.TestCase):
         with mock.patch('azure.cli.command_modules.appservice.custom._start_ssh_session',
                         side_effect=fake_ssh_session):
             with mock.patch('azure.cli.command_modules.appservice.custom.threading.Thread') as mock_thread_cls:
-                # Set up tunnel thread (t) to die immediately so the loop exits
+                # The tunnel thread (t) is created first; the SSH thread (s) is created second.
                 tunnel_thread = mock.MagicMock()
                 tunnel_thread.is_alive.return_value = False
 
-                # Capture the SSH thread target and run it synchronously so the
-                # exception is placed into ssh_exception_holder before the check.
                 ssh_thread = mock.MagicMock()
-                ssh_thread_target = None
-
-                def make_thread(*args, **kwargs):
-                    nonlocal ssh_thread_target
-                    target = kwargs.get('target')
-                    if target is not None:
-                        ssh_thread_target = target
-                        return ssh_thread
-                    return tunnel_thread
-
-                mock_thread_cls.side_effect = make_thread
                 ssh_thread.is_alive.return_value = False
 
-                cmd = mock.MagicMock()
+                # Use a call counter to distinguish the two Thread() calls.
+                call_order = [0]
+                ssh_thread_target_holder = []
+
+                def capturing_thread_factory(*args, **kwargs):
+                    call_index = call_order[0]
+                    call_order[0] += 1
+                    # First call is the tunnel thread, second is the SSH thread.
+                    if call_index == 0:
+                        return tunnel_thread
+                    target = kwargs.get('target')
+                    if target is not None:
+                        ssh_thread_target_holder.append(target)
+                    return ssh_thread
+
+                mock_thread_cls.side_effect = capturing_thread_factory
 
                 def run_ssh_thread_synchronously():
-                    if ssh_thread_target:
-                        ssh_thread_target()
+                    if ssh_thread_target_holder:
+                        ssh_thread_target_holder[0]()
 
                 ssh_thread.start.side_effect = run_ssh_thread_synchronously
+
+                cmd = mock.MagicMock()
 
                 with self.assertRaises(CLIError) as ctx:
                     create_tunnel_and_session(cmd, 'rg', 'myapp', timeout=None)
