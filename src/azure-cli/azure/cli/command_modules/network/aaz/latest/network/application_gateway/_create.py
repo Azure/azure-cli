@@ -153,7 +153,7 @@ class Create(AAZCommand):
             help="Whether HTTP2 is enabled on the application gateway resource.",
         )
         _args_schema.entra_jwt_validation_configs = AAZListArg(
-            options=["--entra-jwt-validation-configs"],
+            options=["--entra-jwt-configs", "--entra-jwt-validation-configs"],
             arg_group="Properties",
             help="Entra JWT validation configurations for the application gateway resource. For default limits, see [Application Gateway limits](https://docs.microsoft.com/azure/azure-subscription-service-limits#application-gateway-limits).",
         )
