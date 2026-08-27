@@ -1719,6 +1719,9 @@ examples:
 helps['acr connected-registry update'] = """
 type: command
 short-summary: Update a connected registry for an Azure Container Registry.
+long-summary: |
+    Migrating between SyncToken and ManagedIdentity authentication requires the connected registry
+    to be in Offline state. Run `az acr connected-registry deactivate` before invoking the migration.
 examples:
   - name: Update the connected registry client Tokens.
     text: |

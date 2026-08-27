@@ -15,6 +15,8 @@ CREDENTIAL_SET_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{r
 
 USER_ASSIGNED_IDENTITY_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}'
 
+CONNECTED_REGISTRY_AUTH_TYPES = ['SyncToken', 'ManagedIdentity']
+
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
 TASK_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg}/tasks/{name}'
