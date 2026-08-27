@@ -12,7 +12,6 @@ Release History
 
 **AKS**
 
-* `az aks nodepool add/update`: Add `--enable-managed-dranet` to enable Managed DRANET on a node pool.
 * `az aks create`, `az aks nodepool add`: Support `--enable-cluster-autoscaler` for VirtualMachines agent pools to create pools in autoscale mode (#33801)
 * `az aks nodepool update`: Support `--enable-cluster-autoscaler` for VirtualMachines agent pools by converting manual scale profiles to autoscale profiles (#33801)
 * `az aks nodepool update`: Support `--disable-cluster-autoscaler` for VirtualMachines agent pools by converting autoscale profiles back to manual profiles (#33801)
