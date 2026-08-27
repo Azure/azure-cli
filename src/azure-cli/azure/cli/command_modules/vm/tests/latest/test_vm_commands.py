@@ -5415,7 +5415,7 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss3} --security-type Standard')
         self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
             self.check('name', '{vmss3}'),
-            self.check('securityProfile', None),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'Standard'),
         ])
 
         self.cmd('vmss create -n {vmss4} -g {rg} --image {img4} --admin-username vmtest --admin-password Test123456789# --vm-sku Standard_DC2as_v5 --nsg {nsg} '
@@ -6946,7 +6946,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
                  '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
-            self.check('securityProfile', None),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'Standard'),
         ])
         instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
         self.kwargs.update({
@@ -10227,7 +10227,7 @@ class VMCreateSpecialName(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('name', '{vm}'),
-            self.check('securityProfile', None),
+            self.check('securityProfile.securityType', 'Standard'),
             self.check('osProfile.computerName', 'vm1')
         ])
 
@@ -12244,7 +12244,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 '
                  '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
         # create VM with specifying security type Standard
@@ -12252,7 +12252,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --size Standard_B2ms '
                  '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
     @AllowLargeResponse(size_kb=99999)
