@@ -4647,7 +4647,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
+                zone_placement_policy=None, include_zones=None, exclude_zones=None, max_zone_count=None,
                 instance_percent_policy=None, max_instance_percent=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
@@ -5101,6 +5102,16 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if zone_balance is not None:
         vmss["zone_balance"] = zone_balance
+
+    if zone_placement_policy is not None or include_zones is not None or exclude_zones is not None:
+        if vmss.get("placement", None) is None:
+            vmss["placement"] = {}
+        if zone_placement_policy is not None:
+            vmss["placement"]["zone_placement_policy"] = zone_placement_policy
+        if include_zones is not None:
+            vmss["placement"]["include_zones"] = include_zones
+        if exclude_zones is not None:
+            vmss["placement"]["exclude_zones"] = exclude_zones
 
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = name
