@@ -994,6 +994,8 @@ long-summary: 'For more information, see https://learn.microsoft.com/azure/virtu
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
+  - name: Create an availability set with Scheduled Events auto-approval and API version.
+    text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2 --enable-all-instance-down true --scheduled-events-api-version 2020-07-01
 """
 
 helps['vm boot-diagnostics'] = """
@@ -1084,6 +1086,9 @@ examples:
   - name: Create a default Ubuntu2204 VM with automatic SSH authentication.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204
+  - name: Create a VM with Scheduled Events auto-approval and API version.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204 --enable-all-instance-down true --scheduled-events-api-version 2020-07-01
   - name: Create a default RedHat VM with automatic SSH authentication using an image URN.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image RedHat:RHEL:7-RAW:7.4.2018010506
@@ -2239,6 +2244,9 @@ examples:
   - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, a 2GB data disk and 40GB OS disk.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2 --os-disk-size-gb 40
+  - name: Create a VMSS with Scheduled Events auto-approval and API version.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image Ubuntu2204 --enable-all-instance-down true --scheduled-events-api-version 2020-07-01
   - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
     text: |
         az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
@@ -2807,6 +2815,9 @@ examples:
     text: >
         az vmss update -n MyVmss -g MyResourceGroup --security-posture-reference-id /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{version} \\
             --security-posture-reference-exclude-extensions "c:\\tmp\\exclude_extensions.json"
+  - name: Update a VMSS with Scheduled Events auto-approval and API version.
+    text: >
+        az vmss update -n MyVmss -g MyResourceGroup --enable-all-instance-down true --scheduled-events-api-version 2020-07-01
 """
 
 helps['vmss update-instances'] = """
