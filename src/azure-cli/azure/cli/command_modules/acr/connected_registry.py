@@ -244,29 +244,31 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                                   garbage_collection_enabled=None,
                                   garbage_collection_schedule=None,
                                   identity=None,
-                                  auth_type=None,
-                                  sync_token_name=None):
+                                  auth_type=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    # --- Auth migration validation (SyncToken <-> ManagedIdentity, no same-mode rotation) ---
+    # Only SyncToken -> ManagedIdentity migration is supported.
     current_auth_type = _get_current_auth_type(current_connected_registry)
     identity_update = None
     sync_auth_type_update = None
-    sync_token_id_update = None
 
     if auth_type or identity:
         if not auth_type:
             raise ArgumentUsageError(
                 "argument error: --auth-type is required when --identity is provided during update."
             )
-        if auth_type == current_auth_type:
+        if auth_type != AUTH_TYPE_MANAGED_IDENTITY:
             raise ArgumentUsageError(
-                "argument error: connected registry is already using '{}' authentication. "
-                "Same-mode credential rotation is not supported.".format(current_auth_type)
+                "argument error: only migration to --auth-type ManagedIdentity is supported."
+            )
+        if current_auth_type == AUTH_TYPE_MANAGED_IDENTITY:
+            raise ArgumentUsageError(
+                "argument error: connected registry is already using 'ManagedIdentity' authentication. "
+                "Same-mode credential rotation is not supported."
             )
         current_state = getattr(current_connected_registry, 'connection_state', None)
         if current_state != CONNECTION_STATE_OFFLINE:
@@ -275,40 +277,13 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                 "Current state is '{}'. Deactivate it first with "
                 "'az acr connected-registry deactivate'.".format(CONNECTION_STATE_OFFLINE, current_state)
             )
-        if auth_type == AUTH_TYPE_MANAGED_IDENTITY:
-            if not identity:
-                raise ArgumentUsageError(
-                    "argument error: --identity <user-assigned-managed-identity-resource-id> is required "
-                    "when migrating to --auth-type ManagedIdentity."
-                )
-            if sync_token_name:
-                raise ArgumentUsageError(
-                    "argument error: --sync-token is not applicable when migrating to ManagedIdentity."
-                )
-            identity_update = _build_user_assigned_identity(identity)
-            sync_auth_type_update = AUTH_TYPE_MANAGED_IDENTITY
-        else:  # migrating to SyncToken
-            if identity:
-                raise ArgumentUsageError(
-                    "argument error: --identity is only applicable with --auth-type ManagedIdentity."
-                )
-            if not sync_token_name:
-                raise ArgumentUsageError(
-                    "argument error: --sync-token <sync-token-name> is required when migrating to "
-                    "--auth-type SyncToken."
-                )
-            sync_token_id_update = build_token_id(
-                subscription_id, resource_group_name, registry_name, sync_token_name)
-            sync_auth_type_update = AUTH_TYPE_SYNC_TOKEN
-            # Do NOT send `identity` in the PATCH body when migrating to SyncToken.
-            # The RP rejects any non-null `identity` object (even {type: "None"}) combined
-            # with authType=SyncToken as ConnectedRegistryConflictingAuthInput. The server
-            # clears the resource-level identity itself when authType flips to SyncToken.
-            identity_update = None
-    elif sync_token_name:
-        raise ArgumentUsageError(
-            "argument error: --sync-token is only applicable when migrating auth-type."
-        )
+        if not identity:
+            raise ArgumentUsageError(
+                "argument error: --identity <user-assigned-managed-identity-resource-id> is required "
+                "when migrating to --auth-type ManagedIdentity."
+            )
+        identity_update = _build_user_assigned_identity(identity)
+        sync_auth_type_update = AUTH_TYPE_MANAGED_IDENTITY
 
     # Add or remove from the current client token id list
     if add_client_token_list is not None:
@@ -364,7 +339,6 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window,
-            token_id=sync_token_id_update,
             auth_type=sync_auth_type_update,
         ),
         logging=LoggingProperties(

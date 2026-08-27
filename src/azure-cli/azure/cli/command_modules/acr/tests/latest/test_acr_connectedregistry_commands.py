@@ -240,7 +240,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
     def test_acr_connectedregistry_managed_identity(self):
         # Managed-identity auth mode for connected registries. Recorded scenario is
         # intentionally minimal (create + show + get-settings + delete) so the cassette
-        # does not depend on the SyncToken<->ManagedIdentity migration round-trip.
+        # does not depend on the SyncToken->ManagedIdentity migration.
         # Client-side validation, the migration state machine, and MI-mode delete cleanup
         # are covered by mock-based unit tests in test_acr_connected_registry_mi_unit.py.
         # Note: This test does NOT import from azure.mgmt.containerregistry so the

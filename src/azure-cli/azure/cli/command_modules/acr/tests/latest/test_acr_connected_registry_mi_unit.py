@@ -261,29 +261,12 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
         with self.assertRaises(ArgumentUsageError):
             self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY)
 
-    def test_migrate_to_mi_rejects_sync_token(self):
-        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN,
-                       connection_state=CONNECTION_STATE_OFFLINE)
-        with self.assertRaises(ArgumentUsageError):
-            self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY,
-                             identity=TEST_MSI_ID, sync_token_name='tok')
-
-    def test_migrate_to_sync_token_requires_sync_token_name(self):
+    def test_migrate_to_sync_token_rejected(self):
         cur = _fake_cr(has_identity=True, connection_state=CONNECTION_STATE_OFFLINE)
-        with self.assertRaises(ArgumentUsageError):
+        with self.assertRaises(ArgumentUsageError) as ctx:
             self._run_update(cur, auth_type=AUTH_TYPE_SYNC_TOKEN)
-
-    def test_migrate_to_sync_token_rejects_identity(self):
-        cur = _fake_cr(has_identity=True, connection_state=CONNECTION_STATE_OFFLINE)
-        with self.assertRaises(ArgumentUsageError):
-            self._run_update(cur, auth_type=AUTH_TYPE_SYNC_TOKEN,
-                             identity=TEST_MSI_ID, sync_token_name='tok')
-
-    def test_sync_token_without_auth_type_errors(self):
-        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN,
-                       connection_state=CONNECTION_STATE_OFFLINE)
-        with self.assertRaises(ArgumentUsageError):
-            self._run_update(cur, sync_token_name='tok')
+        self.assertIn('only migration to --auth-type ManagedIdentity is supported',
+                      str(ctx.exception))
 
     # ---- success paths: assert PATCH body shape ---------------------------
 
@@ -293,17 +276,6 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
         self.assertTrue(client.begin_update.called)
         _, kwargs = client.begin_update.call_args
         return kwargs['connected_registry_update_parameters']
-
-    def test_migrate_mi_to_sync_token_omits_identity(self):
-        """RP rejects any non-null identity in the PATCH body when auth_type=SyncToken.
-        This is the Bug 2 regression guard: `identity` in the PATCH must be None."""
-        cur = _fake_cr(has_identity=True, connection_state=CONNECTION_STATE_OFFLINE)
-        client = self._run_update(cur, auth_type=AUTH_TYPE_SYNC_TOKEN,
-                                  sync_token_name='tok')
-        body = self._extract_update_body(client)
-        self.assertIsNone(body.identity)
-        self.assertEqual(body.sync_properties.auth_type, AUTH_TYPE_SYNC_TOKEN)
-        self.assertTrue(body.sync_properties.token_id.endswith('/tokens/tok'))
 
     def test_migrate_sync_token_to_mi_sends_identity(self):
         cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN,
