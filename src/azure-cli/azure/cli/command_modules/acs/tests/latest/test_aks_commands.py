@@ -8353,10 +8353,16 @@ spec:
 
         # role assignment
         assignee_object_id = _get_test_sp_object_id(sp_name)
-        role_assignment_cmd = (
-            'role assignment create --scope {vnet_id} --role "Network Contributor" ' +
-            ("--assignee-object-id " + assignee_object_id) if assignee_object_id else "--assignee {service_principal}"
-        )
+        if assignee_object_id:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                f"--assignee-object-id {assignee_object_id} --assignee-principal-type ServicePrincipal"
+            )
+        else:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                "--assignee {service_principal}"
+            )
         self.cmd(role_assignment_cmd, checks=[
             self.check('scope', vnet_id)
         ])
