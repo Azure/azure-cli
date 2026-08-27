@@ -11401,8 +11401,15 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     ssh_user_name = 'root'
     ssh_user_password = 'Docker!'
 
-    s = threading.Thread(target=_start_ssh_session,
-                         args=('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password))
+    ssh_exception_holder = [None]
+
+    def _ssh_session_with_error_capture():
+        try:
+            _start_ssh_session('localhost', tunnel_server.get_port(), ssh_user_name, ssh_user_password)
+        except Exception as ex:  # pylint: disable=broad-except
+            ssh_exception_holder[0] = ex
+
+    s = threading.Thread(target=_ssh_session_with_error_capture)
     s.daemon = True
     s.start()
 
@@ -11411,6 +11418,9 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     else:
         while s.is_alive() and t.is_alive():
             time.sleep(5)
+
+    if ssh_exception_holder[0] is not None:
+        raise ssh_exception_holder[0]
 
 
 def perform_onedeploy_functionapp(cmd,
@@ -12125,7 +12135,7 @@ def _start_ssh_session(hostname, port, username, password):
             pass
         c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
-        logger.info(ex)
+        raise CLIError("SSH session failed: {}".format(ex)) from ex
     finally:
         c.close()
 
