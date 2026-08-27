@@ -1501,6 +1501,17 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                      self.check('hsm.keyId', '{hsm_key_id2}'),
                  ])
 
+        # test parent show and update preserve the HSM-backed certificate
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check('sslCertificates[0].hsm.keyId', '{hsm_key_id2}'),
+            self.exists('sslCertificates[0].hsm.publicCertData'),
+        ])
+        self.cmd('network application-gateway update -g {rg} -n {ag} --tags hsm=preserved',
+                 checks=self.check('tags.hsm', 'preserved'))
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=self.check('hsm.keyId', '{hsm_key_id2}'))
+
         # test ssl-cert list includes the hsm cert
         self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
                  checks=[
