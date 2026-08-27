@@ -2560,5 +2560,93 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         self.assertTrue(all(is_auto for _, _, is_auto in runtimes))
 
 
+class TestSshSessionFailureReporting(unittest.TestCase):
+    """Tests that SSH session failures are reported instead of silently exiting 0."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.Connection')
+    def test_start_ssh_session_raises_clierror_on_run_failure(self, mock_connection_cls):
+        """_start_ssh_session raises CLIError when c.run() raises an exception."""
+        from knack.util import CLIError
+        from azure.cli.command_modules.appservice.custom import _start_ssh_session
+
+        mock_conn = mock.MagicMock()
+        mock_conn.run.side_effect = Exception("buffer overflow")
+        mock_connection_cls.return_value = mock_conn
+
+        with self.assertRaises(CLIError) as ctx:
+            _start_ssh_session('localhost', 2222, 'root', 'Docker!')
+
+        self.assertIn("SSH session failed", str(ctx.exception))
+        mock_conn.close.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.Connection')
+    def test_start_ssh_session_closes_connection_on_failure(self, mock_connection_cls):
+        """_start_ssh_session always closes the connection even when an error occurs."""
+        from knack.util import CLIError
+        from azure.cli.command_modules.appservice.custom import _start_ssh_session
+
+        mock_conn = mock.MagicMock()
+        mock_conn.run.side_effect = RuntimeError("ioctl error")
+        mock_connection_cls.return_value = mock_conn
+
+        with self.assertRaises(CLIError):
+            _start_ssh_session('localhost', 2222, 'root', 'Docker!')
+
+        mock_conn.close.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._start_tunnel')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_tunnel')
+    def test_create_tunnel_and_session_propagates_ssh_error(self, mock_get_tunnel, mock_start_tunnel):
+        """create_tunnel_and_session raises when the SSH session thread encounters an error."""
+        import threading
+        from knack.util import CLIError
+        from azure.cli.command_modules.appservice.custom import create_tunnel_and_session
+
+        mock_tunnel_server = mock.MagicMock()
+        mock_tunnel_server.get_port.return_value = 2222
+        mock_get_tunnel.return_value = mock_tunnel_server
+
+        ssh_error = CLIError("SSH session failed: buffer overflow")
+
+        def fake_ssh_session(hostname, port, username, password):
+            raise ssh_error
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._start_ssh_session',
+                        side_effect=fake_ssh_session):
+            with mock.patch('azure.cli.command_modules.appservice.custom.threading.Thread') as mock_thread_cls:
+                # Set up tunnel thread (t) to die immediately so the loop exits
+                tunnel_thread = mock.MagicMock()
+                tunnel_thread.is_alive.return_value = False
+
+                # Capture the SSH thread target and run it synchronously so the
+                # exception is placed into ssh_exception_holder before the check.
+                ssh_thread = mock.MagicMock()
+                ssh_thread_target = None
+
+                def make_thread(*args, **kwargs):
+                    nonlocal ssh_thread_target
+                    target = kwargs.get('target')
+                    if target is not None:
+                        ssh_thread_target = target
+                        return ssh_thread
+                    return tunnel_thread
+
+                mock_thread_cls.side_effect = make_thread
+                ssh_thread.is_alive.return_value = False
+
+                cmd = mock.MagicMock()
+
+                def run_ssh_thread_synchronously():
+                    if ssh_thread_target:
+                        ssh_thread_target()
+
+                ssh_thread.start.side_effect = run_ssh_thread_synchronously
+
+                with self.assertRaises(CLIError) as ctx:
+                    create_tunnel_and_session(cmd, 'rg', 'myapp', timeout=None)
+
+                self.assertIn("SSH session failed", str(ctx.exception))
+
+
 if __name__ == '__main__':
     unittest.main()
