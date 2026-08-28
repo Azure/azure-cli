@@ -1,12 +1,12 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "sku": {"capacity": 1, "name": "Dedicated"}, "tags":
+    body: '{"location": "westus", "sku": {"capacity": 1, "name": "Dedicated"}, "tags":
       {"tag1": "value1"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster create
       Connection:
@@ -18,37 +18,47 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-04-10T05:36:41.9935548Z","updatedAt":"2023-04-10T05:36:41.9935548Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag1":"value1"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:18:29.3142319Z","updatedAt":"2026-08-05T08:18:29.3142319Z","provisioningState":"Creating","status":"Creating","metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105405221&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=LmqO6tLKOnmADYYCGu7hFv-V7b3fnT8E4Wh_5vunDsUqbApLeVQIm5iwiEOoeN2kySv7xSL1VoXEF1xRIpFy2GxSnwkrW4_BvWoK3ctPl3OBN3zdzLsilYc0t7vAopqZ6uRiLAFEluGBO095v_y69zKTuHiqfX0CMUqTuNKKTE6uZxHf1esejal5JG5YsiPlv-PVoxxrp6_rqMi0IqhDc_84z3K0T8qE2C68rH_iFxy_-vtTMi5uMA-A5oUkU1vC5enDxQLRi5W3_bLzswKjOk41kCKqH1w_Et01-u-mNYCrebq1wGb0JaoUxEOeoXgBesa6uMVJ1XIyGhrdsoGhIA&h=7wutrn610A8z5Cf8zy8-EanFaayoQmTawsvpCIx88A8
       cache-control:
       - no-cache
       content-length:
-      - '494'
+      - '584'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:36:41 GMT
+      - Wed, 05 Aug 2026 08:18:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105873968&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=M3RwOomOWxkXsojKPIi2WoeUslemn2zrSldyFMnY2I772wxjS-IAd0M7NV4hvPpY5rW9pWEL7bH3LJa2OtrgCaiR-bdvt2CGqqBYju3EBWqWbdKR9vIaHNSiLPJnqgf0-PQdIW4CySS6WFOj4eP8pQ8fxZITmAS31eJ8Zvts4P3pmnJ--37SODPQB02aAbkBzm8drKJtlvtz1a9oZ_MGOwZnJApNO5djXz8ihkUR7A7bRVVLjfRcNGhskcHHbjPEahkUIJ8SM-W4m0zanSNL4b8RPfuOQ_WZ_gj8SgJ8qIyp83-n1KOw3epLwpbdYMLTJsCo9SA6IJqCBuB5nk6ndQ&h=_1timwZfR_f6E7b1g_UUVyFw_JdZNir6ijAj2V2CgiA
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4f871cd9-0509-4234-af34-ab62a2fa4fe9
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:18:29
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/83284261-6058-494e-8baf-9b0f5f871182
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: A35C7975EB134FE8BD5CCD9BB98F7DCD Ref B: KUL201100111060 Ref C: 2026-08-05T08:18:25Z'
     status:
       code: 202
       message: Accepted
@@ -58,7 +68,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster create
       Connection:
@@ -66,35 +76,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105405221&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=LmqO6tLKOnmADYYCGu7hFv-V7b3fnT8E4Wh_5vunDsUqbApLeVQIm5iwiEOoeN2kySv7xSL1VoXEF1xRIpFy2GxSnwkrW4_BvWoK3ctPl3OBN3zdzLsilYc0t7vAopqZ6uRiLAFEluGBO095v_y69zKTuHiqfX0CMUqTuNKKTE6uZxHf1esejal5JG5YsiPlv-PVoxxrp6_rqMi0IqhDc_84z3K0T8qE2C68rH_iFxy_-vtTMi5uMA-A5oUkU1vC5enDxQLRi5W3_bLzswKjOk41kCKqH1w_Et01-u-mNYCrebq1wGb0JaoUxEOeoXgBesa6uMVJ1XIyGhrdsoGhIA&h=7wutrn610A8z5Cf8zy8-EanFaayoQmTawsvpCIx88A8
   response:
     body:
-      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002","status":"Succeeded"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '106'
+      - '105'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:37:13 GMT
+      - Wed, 05 Aug 2026 08:18:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 03b99312-e731-4f71-a19e-a86769bf3ee6
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:18:32
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/malaysiawest/0e97faad-9048-4187-affd-cdb9703b451a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 25D5967B1AFA48A0A41C245DD98C5558 Ref B: SG2AA1070306034 Ref C: 2026-08-05T08:18:31Z'
     status:
       code: 200
       message: OK
@@ -104,7 +120,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster create
       Connection:
@@ -112,35 +128,199 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105405221&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=LmqO6tLKOnmADYYCGu7hFv-V7b3fnT8E4Wh_5vunDsUqbApLeVQIm5iwiEOoeN2kySv7xSL1VoXEF1xRIpFy2GxSnwkrW4_BvWoK3ctPl3OBN3zdzLsilYc0t7vAopqZ6uRiLAFEluGBO095v_y69zKTuHiqfX0CMUqTuNKKTE6uZxHf1esejal5JG5YsiPlv-PVoxxrp6_rqMi0IqhDc_84z3K0T8qE2C68rH_iFxy_-vtTMi5uMA-A5oUkU1vC5enDxQLRi5W3_bLzswKjOk41kCKqH1w_Et01-u-mNYCrebq1wGb0JaoUxEOeoXgBesa6uMVJ1XIyGhrdsoGhIA&h=7wutrn610A8z5Cf8zy8-EanFaayoQmTawsvpCIx88A8
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:36:42.9524162Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '105'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:37:14 GMT
+      - Wed, 05 Aug 2026 08:19:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 144ebfbb-83f6-4f34-8bc0-780b4b766900
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G4|2026-08-05T08:19:04
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/baf2b918-3f9a-4642-8655-b162166fce16
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 9967231406D8499C8541BA96B2B61D13 Ref B: SG2AA1040515023 Ref C: 2026-08-05T08:19:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105405221&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=LmqO6tLKOnmADYYCGu7hFv-V7b3fnT8E4Wh_5vunDsUqbApLeVQIm5iwiEOoeN2kySv7xSL1VoXEF1xRIpFy2GxSnwkrW4_BvWoK3ctPl3OBN3zdzLsilYc0t7vAopqZ6uRiLAFEluGBO095v_y69zKTuHiqfX0CMUqTuNKKTE6uZxHf1esejal5JG5YsiPlv-PVoxxrp6_rqMi0IqhDc_84z3K0T8qE2C68rH_iFxy_-vtTMi5uMA-A5oUkU1vC5enDxQLRi5W3_bLzswKjOk41kCKqH1w_Et01-u-mNYCrebq1wGb0JaoUxEOeoXgBesa6uMVJ1XIyGhrdsoGhIA&h=7wutrn610A8z5Cf8zy8-EanFaayoQmTawsvpCIx88A8
+  response:
+    body:
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:19:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 20f6012f-d2a9-4157-8288-58c773b1f721
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G1|2026-08-05T08:19:35
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/57c432a3-e1e0-460f-a211-6fca98a5bab8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8FE854D4A42A463BAB910336439C0448 Ref B: SG2AA1070303034 Ref C: 2026-08-05T08:19:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105405221&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=LmqO6tLKOnmADYYCGu7hFv-V7b3fnT8E4Wh_5vunDsUqbApLeVQIm5iwiEOoeN2kySv7xSL1VoXEF1xRIpFy2GxSnwkrW4_BvWoK3ctPl3OBN3zdzLsilYc0t7vAopqZ6uRiLAFEluGBO095v_y69zKTuHiqfX0CMUqTuNKKTE6uZxHf1esejal5JG5YsiPlv-PVoxxrp6_rqMi0IqhDc_84z3K0T8qE2C68rH_iFxy_-vtTMi5uMA-A5oUkU1vC5enDxQLRi5W3_bLzswKjOk41kCKqH1w_Et01-u-mNYCrebq1wGb0JaoUxEOeoXgBesa6uMVJ1XIyGhrdsoGhIA&h=7wutrn610A8z5Cf8zy8-EanFaayoQmTawsvpCIx88A8
+  response:
+    body:
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:20:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 9dedcdbf-0731-44f7-b912-de7a9ea5bf54
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G4|2026-08-05T08:20:07
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/4554340e-baee-431b-bbcd-5cbbdee7e246
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: B2F7674CF8384FDB87501F58784ED013 Ref B: KUL201100110025 Ref C: 2026-08-05T08:20:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215147105873968&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=M3RwOomOWxkXsojKPIi2WoeUslemn2zrSldyFMnY2I772wxjS-IAd0M7NV4hvPpY5rW9pWEL7bH3LJa2OtrgCaiR-bdvt2CGqqBYju3EBWqWbdKR9vIaHNSiLPJnqgf0-PQdIW4CySS6WFOj4eP8pQ8fxZITmAS31eJ8Zvts4P3pmnJ--37SODPQB02aAbkBzm8drKJtlvtz1a9oZ_MGOwZnJApNO5djXz8ihkUR7A7bRVVLjfRcNGhskcHHbjPEahkUIJ8SM-W4m0zanSNL4b8RPfuOQ_WZ_gj8SgJ8qIyp83-n1KOw3epLwpbdYMLTJsCo9SA6IJqCBuB5nk6ndQ&h=_1timwZfR_f6E7b1g_UUVyFw_JdZNir6ijAj2V2CgiA
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag1":"value1"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:20:03.1051888Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:20:09 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration1-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215148095818074&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=XBG19p3qloXWG3EOmWRgX4l5xLe1-puo0TwOn_Oyb6t6hFtBgc-QwTMzCZX3KcCbOQ68nfzAadiBRN6zOx9GQkcvitcYNwjrS0vgkT9o3SKwAYk-IbWwkc3-6Wz-vEKdqNTTrKIwl2yZ4ni21sfISXpjpBnQJ2W8xc-fZR5mOuBMFTGg4njJR1xpkHN8UMqWtWp0HONHsq46nzNKQ3xETQ3tK1CmEkXOqvj5uaAtB-QOfywyjVFkQot9x8P0Q502yAi7NlAW40y8QBUvx7m3TGuaNCiHivRnyS26uHtJjWGZZE4sa4B9kQgCIbI6dvU_Cg2Vqu4tOOrcfa6GyWT3Kw&h=x4Bli69TowjQvd51rPlUvOiIwcU5jfGba5Re5XsvO2w
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - ed9d1453-0e6f-4a9b-b7ee-8133fb05aaeb
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:20:09
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/d09d1eec-c40a-4d18-9a1e-b9a7d930ad96
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 660C6560F7384600ACB4BBD81A43DE7C Ref B: SG2AA1070306036 Ref C: 2026-08-05T08:20:08Z'
     status:
       code: 200
       message: OK
@@ -150,7 +330,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster show
       Connection:
@@ -158,93 +338,152 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:36:42.9524162Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag1":"value1"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:20:03.1051888Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '595'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:37:17 GMT
+      - Wed, 05 Aug 2026 08:20:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 01ab0a47-2c62-45e3-ba5c-7f840638dcba
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G1|2026-08-05T08:20:11
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 772DD194BE3549D892AF72ECEAD98E00 Ref B: SG2AA1040515052 Ref C: 2026-08-05T08:20:10Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "None"}, "location": "eastus", "properties": {"clusterArmId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002"},
+    body: '{"location": "westus", "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002"},
       "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"{tag1:value1}": ""}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
       - keep-alive
       Content-Length:
-      - '310'
+      - '281'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2026-01-01
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1:value1}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-04-10T05:37:26.373Z","updatedAt":"2023-04-10T05:37:26.373Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"{tag1:value1}":""},"properties":{"ipAddressType":"IPv4","dnsNamePolicy":"Standard","platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"errors":[],"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","clusterArmId":"/subscriptions//resourceGroups//providers/Microsoft.EventHub/clusters/","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"clusterArmId":"/subscriptions//resourceGroups//providers/Microsoft.EventHub/clusters/","provisioningState":"Creating","status":"Creating","createdAt":"2026-08-05T08:20:14.0731505Z","updatedAt":"2026-08-05T08:20:14.0731505Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=true&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146627005&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=A1YsKQJlpju9uEyVS889wAB13UOATuBflxnTqZw82GhSBoz8sWOTY4FdpBzaie3Diz2fAay5QF6Tqecu0m1yArgmXjX0RB7xHF6nWQmaBFzNxkzh8oicjeGykn8pJAe_zYpquuIVGP0mWzzOsn6f2iy9R1TszDmyqkGWBAkZxbxABS-7K1-cbHADbkjjF2WnSbgQCV0J-qrFQkKpwV-1MVHqLdErbxj-Z1qGL0N98R5DigkJDjVToSr7uNt4t_dNibomQMKCJy_UirA3KPK3wZuz8xCotRdVT44RQaJ2xHuaf8r9CnsE28sUew4fZtpU5x0WAfub8j22W7ABboG82w&h=5mFytVs95jTBCvPBaXbIwY5eJoI1ZSXisCjqWd0Ycdw
       cache-control:
       - no-cache
       content-length:
-      - '967'
+      - '1267'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:37:28 GMT
+      - Wed, 05 Aug 2026 08:20:14 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=false&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146939514&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=e8ysC7jwJnxhdX9D9I2VNONcnmduZBickkFf80iY4ALYBuk5w6VeLqnY26kNIc3millOLBWFLdPGICljirIRKFutRqnuDpNB1MvZwLRjDDpO6-Vj9zE4y5zzMuUVjdyt62klaEvT1Nf-dkYAupart8J_aiLhqy2WAlWWSU_C0mktMVQdjjfSh2kuZ6jBx7Np_Syc4R4dkBKGLu4pDCtd8fWMFIQZDBLwkD3r5O9k6IKe8KRk0-1nAMn9PYPz68d9Yc5Wu4_HpaF6xk2vH36IIZK15Ebf8rMkSb8scCocSey2Jx2IN726VP0EunLh1p-rN9_1T_q3K9oxS_lcoPbeJA&h=Bnvb1v60os63KNSFKn7qGIgjx7qtlrlj6D3aNdmDTvw
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 3a7c159e-0e85-4809-8c4d-db6789317142
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:20:14
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/eastus/6b7db7eb-758c-4b01-8ffe-45e71daf459d
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 5E5FDB8410784AACB631896D215DDEE0 Ref B: SG2AA1040513040 Ref C: 2026-08-05T08:20:12Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=true&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146627005&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=A1YsKQJlpju9uEyVS889wAB13UOATuBflxnTqZw82GhSBoz8sWOTY4FdpBzaie3Diz2fAay5QF6Tqecu0m1yArgmXjX0RB7xHF6nWQmaBFzNxkzh8oicjeGykn8pJAe_zYpquuIVGP0mWzzOsn6f2iy9R1TszDmyqkGWBAkZxbxABS-7K1-cbHADbkjjF2WnSbgQCV0J-qrFQkKpwV-1MVHqLdErbxj-Z1qGL0N98R5DigkJDjVToSr7uNt4t_dNibomQMKCJy_UirA3KPK3wZuz8xCotRdVT44RQaJ2xHuaf8r9CnsE28sUew4fZtpU5x0WAfub8j22W7ABboG82w&h=5mFytVs95jTBCvPBaXbIwY5eJoI1ZSXisCjqWd0Ycdw
+  response:
+    body:
+      string: '{"name":"1f9f39f0-e526-4c09-b597-a3ecc262c234","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:20:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 09890c8f-a111-4546-b668-60c5fee71d6a
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:20:16
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/b56fc226-9e16-42c4-b010-1eab7257c474
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4ED0C4AEEACF447EACB357D5DE33B4A5 Ref B: SG2AA1040516023 Ref C: 2026-08-05T08:20:15Z'
     status:
       code: 200
       message: OK
@@ -254,7 +493,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
@@ -262,39 +501,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=true&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146627005&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=A1YsKQJlpju9uEyVS889wAB13UOATuBflxnTqZw82GhSBoz8sWOTY4FdpBzaie3Diz2fAay5QF6Tqecu0m1yArgmXjX0RB7xHF6nWQmaBFzNxkzh8oicjeGykn8pJAe_zYpquuIVGP0mWzzOsn6f2iy9R1TszDmyqkGWBAkZxbxABS-7K1-cbHADbkjjF2WnSbgQCV0J-qrFQkKpwV-1MVHqLdErbxj-Z1qGL0N98R5DigkJDjVToSr7uNt4t_dNibomQMKCJy_UirA3KPK3wZuz8xCotRdVT44RQaJ2xHuaf8r9CnsE28sUew4fZtpU5x0WAfub8j22W7ABboG82w&h=5mFytVs95jTBCvPBaXbIwY5eJoI1ZSXisCjqWd0Ycdw
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1:value1}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-04-10T05:37:26.373Z","updatedAt":"2023-04-10T05:37:26.373Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"name":"1f9f39f0-e526-4c09-b597-a3ecc262c234","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '967'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:37:58 GMT
+      - Wed, 05 Aug 2026 08:20:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 9719e530-602a-41e3-8ba3-6a66f172be1e
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G4|2026-08-05T08:20:47
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/bfd6010c-a4e5-4c9b-a149-0d7705a8a229
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 61AA01BC5CC14BD2971B1C9D89F09CEA Ref B: SG2AA1070305025 Ref C: 2026-08-05T08:20:47Z'
     status:
       code: 200
       message: OK
@@ -304,7 +545,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
@@ -312,39 +553,143 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=true&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146627005&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=A1YsKQJlpju9uEyVS889wAB13UOATuBflxnTqZw82GhSBoz8sWOTY4FdpBzaie3Diz2fAay5QF6Tqecu0m1yArgmXjX0RB7xHF6nWQmaBFzNxkzh8oicjeGykn8pJAe_zYpquuIVGP0mWzzOsn6f2iy9R1TszDmyqkGWBAkZxbxABS-7K1-cbHADbkjjF2WnSbgQCV0J-qrFQkKpwV-1MVHqLdErbxj-Z1qGL0N98R5DigkJDjVToSr7uNt4t_dNibomQMKCJy_UirA3KPK3wZuz8xCotRdVT44RQaJ2xHuaf8r9CnsE28sUew4fZtpU5x0WAfub8j22W7ABboG82w&h=5mFytVs95jTBCvPBaXbIwY5eJoI1ZSXisCjqWd0Ycdw
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1:value1}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-04-10T05:37:26.373Z","updatedAt":"2023-04-10T05:38:26.95Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
+      string: '{"name":"1f9f39f0-e526-4c09-b597-a3ecc262c234","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:38:31 GMT
+      - Wed, 05 Aug 2026 08:21:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - d03e889d-3bdf-46fc-9435-f4aaaf88bf67
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:21:19
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/b8d9437e-11b7-496e-bd01-13aaf3058662
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7A3CE26972AE4322A0EE7EA986AB4096 Ref B: KUL201100110062 Ref C: 2026-08-05T08:21:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/1f9f39f0-e526-4c09-b597-a3ecc262c234?isAsyncHeader=true&resourceName=eventhubs-nscli000003&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215148146627005&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=A1YsKQJlpju9uEyVS889wAB13UOATuBflxnTqZw82GhSBoz8sWOTY4FdpBzaie3Diz2fAay5QF6Tqecu0m1yArgmXjX0RB7xHF6nWQmaBFzNxkzh8oicjeGykn8pJAe_zYpquuIVGP0mWzzOsn6f2iy9R1TszDmyqkGWBAkZxbxABS-7K1-cbHADbkjjF2WnSbgQCV0J-qrFQkKpwV-1MVHqLdErbxj-Z1qGL0N98R5DigkJDjVToSr7uNt4t_dNibomQMKCJy_UirA3KPK3wZuz8xCotRdVT44RQaJ2xHuaf8r9CnsE28sUew4fZtpU5x0WAfub8j22W7ABboG82w&h=5mFytVs95jTBCvPBaXbIwY5eJoI1ZSXisCjqWd0Ycdw
+  response:
+    body:
+      string: '{"name":"1f9f39f0-e526-4c09-b597-a3ecc262c234","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '68'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:21:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - dce46af0-9520-4b0a-9f03-d079dec64971
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:21:50
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/12ab0f68-c74e-4e7b-b62e-0ef31529e99f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E4F674B8F91747C6BE72EFDF506B4714 Ref B: SG2AA1040519042 Ref C: 2026-08-05T08:21:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2026-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"{tag1:value1}":""},"properties":{"ipAddressType":"IPv4","dnsNamePolicy":"Standard","platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"errors":[],"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","provisioningState":"Succeeded","status":"Active","createdAt":"2026-08-05T08:20:14.0731505Z","updatedAt":"2026-08-05T08:20:14.0731505Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1410'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:21:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 435a1c3e-4e56-4678-a3ae-09dbd86db766
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G1|2026-08-05T08:21:52
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 668F2C1C00844DC09ADA1168FA5FAE7B Ref B: SG2AA1070302052 Ref C: 2026-08-05T08:21:51Z'
     status:
       code: 200
       message: OK
@@ -354,7 +699,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster namespace list
       Connection:
@@ -362,35 +707,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002/namespaces?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002/namespaces?api-version=2026-01-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.Eventhub/namespaces/eventhubs-nscli000003"}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '164'
+      - '165'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:38:33 GMT
+      - Wed, 05 Aug 2026 08:21:53 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 86d6d41d-447d-4749-a89d-1c60be06b5db
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:21:54
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/eastus/d5a71086-3c26-419d-b335-75ac084375d5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 82D67C123CAD4A62962091437CA0AFFA Ref B: SG2AA1070301052 Ref C: 2026-08-05T08:21:53Z'
     status:
       code: 200
       message: OK
@@ -400,7 +751,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster update
       Connection:
@@ -408,88 +759,103 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:36:42.9524162Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag1":"value1"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:20:03.1051888Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '595'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:38:37 GMT
+      - Wed, 05 Aug 2026 08:21:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 90ba4098-0d29-4e7c-86e7-4c399f85a76e
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:21:55
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3CB680EB16AD4F2E952F875BCA5EF841 Ref B: SG2AA1070301031 Ref C: 2026-08-05T08:21:55Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"supportsScaling": true}, "sku":
+    body: '{"location": "westus", "properties": {"platformCapabilities": {"confidentialCompute":
+      {"mode": "Disabled"}}, "supportsScaling": true, "zoneRedundant": false}, "sku":
       {"capacity": 1, "name": "Dedicated"}, "tags": {"tag2": "value2"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster update
       Connection:
       - keep-alive
       Content-Length:
-      - '136'
+      - '231'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:36:42.9524162Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag2":"value2"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:20:03.1051888Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149169295891&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=mc8bkvVGUabuaTFXqgEpTSMiKLnvbGJL0LyTkj23fmbP1I8ceWMNeBbnWsWyaZpAb-5Le9zmqXtVY0e4eW2d4NmZYHhS13URyqnAnGiy3NpbMEcO1b52S9AkgZ2XWm2wahBa2_z0dzrgRM10Qf4kPpXoxzLPzCdqf5d4MVCA-ecUIdPkD3Nm37tM8j9CJ3c_pWU0h-5u0_pejlUljTSn9neqAib361qavpNOtRvICTmktGaAzhYOu2RuFg-PA8Td-xQTJnZ3aK7ylGYYbEMpj6dBttcNg5r8Jl02gVr4DvIpBtVKSGZdANIy20BRy9q6-dVha8___vUv73-lKaqxbA&h=XRt2XWXJURPY9HZ0Djr2F8W3O2c4get6TuJwGnLgU6E
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '595'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:38:38 GMT
+      - Wed, 05 Aug 2026 08:21:57 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149169295891&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=GrzqD74rzsMVNHUiWEylNJBgSwJMQ_04UIjgVI2_kqvgr8uCKctwvdSSRgX4dQw3liWsioUjImpC74g6SsUalpA-mMa9OfW_7PMetRzilLb42AC_9tuclthfJPBJCM-EXnPdkRLKBXw45lbodeNpguFUWsBk8T6RCM7TRp7N3jZK0b9BoxgouBMKXOax1mF4DRBs190e0BnCMUahoPhZPzkHXOJ1hs7xcEuy43HBUPB6WhRZUndPyL9fJjsmrSKyMQMbWZsW8jqPY3WRbl4kHZaL4pTniCWiJ6Umbp4RwhxctpcHvRQeogy5viEUM36IB8BgJmSCRVNzH2P08Qvalw&h=XRt2XWXJURPY9HZ0Djr2F8W3O2c4get6TuJwGnLgU6E
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 94aa8131-0299-48f6-9116-d83d65e42c56
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:21:56
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/eastus/0c2e37ac-320b-4c0f-8a36-dd1f1cd73cc3
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D586F7B507A948F5A40701A6A8B0826F Ref B: KUL201100111025 Ref C: 2026-08-05T08:21:56Z'
     status:
       code: 202
       message: Accepted
@@ -499,7 +865,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster update
       Connection:
@@ -507,35 +873,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149169295891&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=mc8bkvVGUabuaTFXqgEpTSMiKLnvbGJL0LyTkj23fmbP1I8ceWMNeBbnWsWyaZpAb-5Le9zmqXtVY0e4eW2d4NmZYHhS13URyqnAnGiy3NpbMEcO1b52S9AkgZ2XWm2wahBa2_z0dzrgRM10Qf4kPpXoxzLPzCdqf5d4MVCA-ecUIdPkD3Nm37tM8j9CJ3c_pWU0h-5u0_pejlUljTSn9neqAib361qavpNOtRvICTmktGaAzhYOu2RuFg-PA8Td-xQTJnZ3aK7ylGYYbEMpj6dBttcNg5r8Jl02gVr4DvIpBtVKSGZdANIy20BRy9q6-dVha8___vUv73-lKaqxbA&h=XRt2XWXJURPY9HZ0Djr2F8W3O2c4get6TuJwGnLgU6E
   response:
     body:
-      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Succeeded"}'
+      string: '{"name":"PROD-BY3-574-DedicatedCluster","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '63'
+      - '59'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:39:09 GMT
+      - Wed, 05 Aug 2026 08:21:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - c2bc914d-82f1-420c-8341-7a01fd9ecda1
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:21:58
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/c44f5705-20ab-4d28-8f0d-eda5f62c99d8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 69453CCB5F5C4408827258322735A3F2 Ref B: KUL201100111034 Ref C: 2026-08-05T08:21:57Z'
     status:
       code: 200
       message: OK
@@ -545,7 +917,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster update
       Connection:
@@ -553,35 +925,95 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149169295891&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=mc8bkvVGUabuaTFXqgEpTSMiKLnvbGJL0LyTkj23fmbP1I8ceWMNeBbnWsWyaZpAb-5Le9zmqXtVY0e4eW2d4NmZYHhS13URyqnAnGiy3NpbMEcO1b52S9AkgZ2XWm2wahBa2_z0dzrgRM10Qf4kPpXoxzLPzCdqf5d4MVCA-ecUIdPkD3Nm37tM8j9CJ3c_pWU0h-5u0_pejlUljTSn9neqAib361qavpNOtRvICTmktGaAzhYOu2RuFg-PA8Td-xQTJnZ3aK7ylGYYbEMpj6dBttcNg5r8Jl02gVr4DvIpBtVKSGZdANIy20BRy9q6-dVha8___vUv73-lKaqxbA&h=XRt2XWXJURPY9HZ0Djr2F8W3O2c4get6TuJwGnLgU6E
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:38:39.1363479Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"name":"PROD-BY3-574-DedicatedCluster","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '507'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:39:10 GMT
+      - Wed, 05 Aug 2026 08:22:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 5937e0eb-bb3e-4c21-a3ca-4bf899a231db
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G2|2026-08-05T08:22:29
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/ef8c74fa-d66a-4abd-9572-466545ed4399
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3380B6C8D00B4073B9315C3BBA8D3468 Ref B: SG2AA1070304062 Ref C: 2026-08-05T08:22:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149169295891&c=MIIHlDCCBnygAwIBAgIQZiYkoV_LM7Hwt06_u_DzJDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVVMyIENBIDAxMB4XDTI2MDQxMDA4MTUzOVoXDTI2MTAwNTE0MTUzOVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDealc9e2xWlYn0dX5zgxycoyRECfCn-ACb8WxKGmsKAA5yFa8bggPwuauZjSPSntq3xw99b6CFXZ6EM34WjxaWokZKYj8bbRT14WzrQHemPN5KUaI3SFtZidaSdEAzhm7Ha1a74SG8rDZU8qVqbaoCPQk9Iblv0LucrVV5BAMOwvi-5j-7X9vehxsheuxPwrVmGy_WrXI_3Qflmizp5BND_I3p4BIRjEcaQw_EBd3dhAC52EO5bT3FKSdM6N5xgpZvtjHjxRG2WG_8Gh07OrI0Ib0mnTB1_HNhiEw3_VzdnINXV0_Fsm7HMV-qCCkY5pyJIZjVX7L7FFY0PGqcqUKdAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSZIRQPs2If06iDFyiGbMnvIxenBzAfBgNVHSMEGDAWgBT87D7bqnwfgh4FuKEG-UPnArMKuTCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czIvY3Jscy9jY21lZWFzdHVzMnBraS9jY21lZWFzdHVzMmljYTAxLzQ2L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMi9jcmxzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvNDYvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21lZWFzdHVzMnBraS5lYXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJpY2EwMS80Ni9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMi9jYWNlcnRzL2NjbWVlYXN0dXMycGtpL2NjbWVlYXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyL2NhY2VydHMvY2NtZWVhc3R1czJwa2kvY2NtZWVhc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWVlYXN0dXMycGtpLmVhc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAxSvsyw-aQGPuLg3sIv-zDLSqhHgP__v9DGyP7D16rJpNG1JcjpiXpbloqD9RW5Gc_hHWn5Kyr1pRABJrFa-jEt89-FiQdkToF-vvwJOXbryAgZYdS03uFzUGqARs3JMMqCHrVkx6hb9oOxh_3JdEemO_dbhApyOVTfloO4kIRsgJnHI_ImFt8xm3xa9ftB0ARfJAdN_1EHgB2NdOgTvaSljVOnQY6R40lh_Wl8-s3GIhHbNwQOECXegBxeVAUVN5nGxlD8TEqKc_mX-22kBMao71zBz3JWtCING4-QzwrWj9pxmanpqYqiVGf40ZbZZihRkte0KI9zvW53Y2Smcy7&s=GrzqD74rzsMVNHUiWEylNJBgSwJMQ_04UIjgVI2_kqvgr8uCKctwvdSSRgX4dQw3liWsioUjImpC74g6SsUalpA-mMa9OfW_7PMetRzilLb42AC_9tuclthfJPBJCM-EXnPdkRLKBXw45lbodeNpguFUWsBk8T6RCM7TRp7N3jZK0b9BoxgouBMKXOax1mF4DRBs190e0BnCMUahoPhZPzkHXOJ1hs7xcEuy43HBUPB6WhRZUndPyL9fJjsmrSKyMQMbWZsW8jqPY3WRbl4kHZaL4pTniCWiJ6Umbp4RwhxctpcHvRQeogy5viEUM36IB8BgJmSCRVNzH2P08Qvalw&h=XRt2XWXJURPY9HZ0Djr2F8W3O2c4get6TuJwGnLgU6E
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag2":"value2"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:22:01.0539996Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '595'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 08:22:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/westus/clusterOperationResults/PROD-BY3-574-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration1&resourceType=cluster&api-version=2026-01-01&t=639215149511181804&c=MIIIJzCCBw-gAwIBAgIRAPkg2z-B9Jm_vrDg-qNrjwswDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA0MTAwNjUyMTdaFw0yNjEwMDUxMjUyMTdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxhFGHIBug-4Pg8y8wrt85aTDI_1ckzX8XYnsk6BmTh36sX4QX-zrgCccWt1yXC8y3lSRvEr66Pgoywj0gN60U0prO-Llj-OOWdlGOnbBFPBaBa2ogrj2ULknxSn8HyrgUsMa3zGCqoR_eDSq7R_O20UZDFBlonw8TSmqdLPA4fe1TarGVXDGoRxYv_BQE0sxI54JmyZ5uATcXoIBRqCEmrRFh6MO0V4rK5-sBO8yodyMdOweERdOFcDfLvM2WCaax5HnsjPSLMYy-XTD01vXM3XkKAJ6K30JxQ4_Wtn1IvN-b0R-eEdUMUdPKhH4RDL_8xL-ALqsnaG0cNZazOQr1QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUdjmEGeQg6LiPic0f-L1KBD3vO0wwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8yOS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI5L2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAwpZthpdA-8D9zmLFa9DswaQjZpHoWrNOxcAkBHpasqPjLn8-Kn0Epr2tRtCqiDWEGx_u3n8ziMDqRxvNKiDUdDWhMl9QuodIY45vNfF6z92zdJEJ0m01EaNwji4O0BNu0Yy7zPa_L79KmbrFPHHQkexKO2qyHqYM0M22afvWFTacEIlhMIcL-Hq6afh-pfO3r2D3ZnFSmrZFt1A8qT0qTCXRaOqAM1Wk35M7k-idK2KawQ4Q9KnP0h62bPPhktf4Hi_Ax5-Ms7zxobTxMvoilvGVHYDeQ2zZDEoMmyNZ1gfzPjnGnV2BbMj3JEHIzWuKuw033HBrOIc8peAt8JKrH&s=K-KrrEAmVhN4AolmtRkTQ_EhM-TKwUYOFk-wgd3v1p-rJL4Rox3LlDLtcqalNoMi-SUclHwRGX5f02xJ6aCgcA0p1baR8M6D8c5NzdJzTX9wLpENzzbVpBNyoy_JfoMv5dum7m4WoAh7PwPhZY6QKDrNsCApavlS7CcVMlhVscVzJ84TORKnQo06M6x3y5eatg5ZBQhfoL4jctIdiu-sbxS8gQJP-957EKX5HUcICC63wszG729d9KQx_etHb-LqTsFt2sgdBe3iCk6BQfh9mF0JTTPUS9C0uvUg93pLPFkYjJDHHpiM9f13VR1L8copp3ZTwnBNAaw5-X-nwXwReA&h=MzKu_cmSfru-Sh8MlLzpjF51kjo93mCboP3HiPcgzmA
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 7734e5d3-eec4-4265-b7e9-1201a40d7469
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G3|2026-08-05T08:22:31
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/f86575e3-fae8-41b0-a908-8ec18d4cc51e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F7164C639CDA430CA998C2E6DEE0B6D0 Ref B: SG2AA1070302031 Ref C: 2026-08-05T08:22:30Z'
     status:
       code: 200
       message: OK
@@ -591,7 +1023,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs cluster list
       Connection:
@@ -599,128 +1031,41 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters?api-version=2026-01-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-04-10T05:36:42.1398966Z","updatedAt":"2023-04-10T05:38:39.1363479Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51030"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clusqjqklv","name":"eventhubs-clusqjqklv","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"key2":"val2"},"properties":{"createdAt":"2023-04-10T05:19:20.5441154Z","updatedAt":"2023-04-10T05:21:16.1782146Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51026"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clusyv3zsf","name":"eventhubs-clusyv3zsf","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"key2":"val2"},"properties":{"createdAt":"2023-04-10T05:10:33.1003731Z","updatedAt":"2023-04-10T05:12:31.4064413Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"microsoft.eventhub/clusters","location":"westus","tags":{"tag2":"value2"},"properties":{"platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"supportsScaling":true,"zoneRedundant":false,"createdAt":"2026-08-05T08:20:03.1051888Z","updatedAt":"2026-08-05T08:22:01.0539996Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-BY3-574"},"sku":{"name":"Dedicated","capacity":1}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1539'
+      - '607'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 10 Apr 2023 05:39:14 GMT
+      - Wed, 05 Aug 2026 08:22:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 3d6cb878-c62e-46de-b7f6-4c92fbef98ea
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS|WESTUS|G1|2026-08-05T08:22:32
       x-ms-original-request-ids:
       - ''
-      - ''
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs cluster delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --resource-group --name
-      User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2023-01-01-preview
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 10 Apr 2023 05:39:15 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs cluster delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --yes
-      User-Agent:
-      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51030-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2023-01-01-preview
-  response:
-    body:
-      string: '{"name":"PROD-BL-V51030-DedicatedCluster","status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '63'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 10 Apr 2023 05:39:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8B4E1EBB9A444CAAB13F8FE136530568 Ref B: KUL201100111031 Ref C: 2026-08-05T08:22:32Z'
     status:
       code: 200
       message: OK

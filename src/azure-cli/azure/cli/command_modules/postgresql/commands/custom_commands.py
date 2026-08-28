@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from functools import cmp_to_key
 from importlib import import_module
 from urllib.parse import quote
 from knack.log import get_logger
@@ -33,14 +32,13 @@ from ..utils._flexible_server_util import (
     generate_missing_parameters,
     generate_password,
     get_current_time,
-    get_postgres_skus,
+    get_postgres_default_sku,
     get_postgres_tiers,
     parse_maintenance_window,
     resolve_poller)
 from ..utils.validators import (
     build_network_configuration,
     check_resource_group,
-    compare_sku_names,
     pg_arguments_validator,
     pg_byok_validator,
     pg_restore_validator,
@@ -105,11 +103,9 @@ def flexible_server_create(cmd, client,
             tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
             try:
                 sku_info = list_location_capability_info['sku_info']
-                skus = list(get_postgres_skus(sku_info, tier.lower()))
-                skus = sorted(skus, key=cmp_to_key(compare_sku_names))
-                sku_name = skus[0]
+                sku_name = get_postgres_default_sku(sku_info, tier)
             except:
-                raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+                raise CLIError('Incorrect value for --tier. Allowed values: {}'.format(tiers))
         # default to the latest version
         if version is None:
             supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])

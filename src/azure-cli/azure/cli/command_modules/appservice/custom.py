@@ -44,7 +44,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
+from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -62,7 +62,7 @@ from ._appservice_utils import _generic_site_operation, _generic_settings_operat
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
     raise_enriched_deployment_error, EnrichedDeploymentError,
-    raise_enriched_plan_error, extract_status_code_from_message
+    raise_enriched_plan_error, raise_enriched_webapp_create_error, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -98,7 +98,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
                          STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
 from ._github_oauth import (get_github_access_token, cache_github_token)
-from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, _validate_asp_sku
 
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
@@ -132,7 +132,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None,
+                  enriched_errors=False):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -299,8 +300,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         elif runtime:
             match = helper.resolve(runtime, is_linux)
             if not match:
-                raise ValidationError("Linux Runtime '{}' is not supported."
-                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                error_message = ("Linux Runtime '{}' is not supported. "
+                                 "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                if enriched_errors:
+                    raise_enriched_webapp_create_error(
+                        resource_group_name=resource_group_name,
+                        webapp_name=name,
+                        plan_name=getattr(plan_info, 'name', None) or plan,
+                        location=location,
+                        sku=getattr(getattr(plan_info, 'sku', None), 'name', None),
+                        runtime=runtime,
+                        error_message=error_message,
+                        last_known_step="Linux runtime validation",
+                    )
+                raise ValidationError(error_message)
             helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif container_image_name:
             site_config.linux_fx_version = _format_fx_version(container_image_name)
@@ -359,8 +372,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                           value='https://{}.scm.azurewebsites.net/detectors'
                                                           .format(name)))
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
-    webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    try:
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
+        webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if not (enriched_errors and is_linux):
+            raise
+        error_message, status_code = _get_enriched_error_details(ex)
+        raise_enriched_webapp_create_error(
+            resource_group_name=resource_group_name,
+            webapp_name=name,
+            plan_name=getattr(plan_info, 'name', None) or plan,
+            location=location,
+            sku=getattr(getattr(plan_info, 'sku', None), 'name', None),
+            runtime=site_config.linux_fx_version,
+            status_code=status_code,
+            error_message=error_message,
+            last_known_step="Web app create (control-plane request)",
+        )
 
     if current_stack:
         _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
@@ -3975,9 +4006,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     result = {}
     for s in generic_configurations:
         try:
-            json_object = get_json_object(s)
+            json_object = shell_safe_json_parse(s)
             for config_name in json_object:
-                if config_name.lower() == 'ip_security_restrictions':
+                if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
                     updating_ip_security_restrictions = True
             result.update(json_object)
         except CLIError:
@@ -3985,9 +4016,24 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             result[config_name] = value
 
     for config_name, value in result.items():
-        if config_name.lower() == 'ip_security_restrictions':
+        if config_name.lower() in ('ip_security_restrictions', 'ipsecurityrestrictions'):
             updating_ip_security_restrictions = True
-        setattr(configs, config_name, value)
+        # In azure-mgmt-web 11.0.0+, SiteConfigResource wraps SiteConfig under 'properties'.
+        # Extra camelCase keys (e.g. 'webJobsEnabled') that are not flattened SDK fields must be
+        # set on configs.properties so the SDK serializer places them under "properties" in the
+        # request body, not at the resource root where ARM ignores them.
+        # String 'true'/'false' from key=value form are also coerced to bool so they match the
+        # boolean type expected by ARM (consistent with JSON-file form which already passes bool).
+        if any(c.isupper() for c in config_name):
+            if isinstance(value, str) and value.lower() in ('true', 'false'):
+                value = value.lower() == 'true'
+            # Route to the SiteConfig child when configs is a SiteConfigResource
+            target = getattr(configs, 'properties', None)
+            if target is None:
+                target = configs
+            target[config_name] = value
+        else:
+            setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
@@ -5028,7 +5074,7 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
-def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+def _get_enriched_error_details(ex):
     message_parts = []
     top_message = getattr(ex, 'message', None)
     if top_message:
@@ -5051,6 +5097,11 @@ def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, s
         status_code = getattr(response, 'status_code', None)
     if status_code is None:
         status_code = extract_status_code_from_message(error_message)
+    return error_message, status_code
+
+
+def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+    error_message, status_code = _get_enriched_error_details(ex)
     raise_enriched_plan_error(
         resource_group_name=resource_group_name,
         plan_name=name,
@@ -5257,6 +5308,9 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
+        _validate_asp_sku(sku,
+                          getattr(instance, 'hosting_environment_profile', None),
+                          getattr(instance, 'zone_redundant', False))
         sku_def.tier = get_sku_tier(sku)
         sku_def.name = sku
 
@@ -7842,7 +7896,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _parse_raw_stacks(self, stacks):
         # Track seen runtime display names to avoid duplicates in Linux parsing.
         # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
-        # Windows parsing doesn't have this issue due to its different structure.
 
         java_eol_map = self._build_java_eol_map(stacks)
 
@@ -7862,6 +7915,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         self.windows_config_mappings,
                         runtime_family=lang.display_text,
                         java_eol_map=java_eol_map)
+
+        unique_runtimes = []
+        seen_runtime_names = set()
+        for runtime in self._stacks:
+            runtime_key = (runtime.linux, runtime.display_name.lower())
+            if runtime_key in seen_runtime_names:
+                continue
+            seen_runtime_names.add(runtime_key)
+            unique_runtimes.append(runtime)
+        self._stacks = unique_runtimes
 
     def _build_java_eol_map(self, stacks):
         """Build Java version -> EOL date map from the 'Java' stack.
@@ -7901,7 +7964,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        display_name = display_name.lower()
+        display_name = self.standardize_node_runtime_name(display_name).lower()
         stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
@@ -7989,6 +8052,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         t = t.replace(".NET", DOTNET_RUNTIME_NAME)
         t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
+
+    @staticmethod
+    def standardize_node_runtime_name(runtime_name):
+        match = re.fullmatch(r'node\|(\d+)(?:-?lts)?', runtime_name, re.IGNORECASE)
+        if match and int(match.group(1)) >= 26:
+            return "NODE|{}".format(match.group(1))
+        return runtime_name
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
@@ -8191,6 +8261,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
+                    runtime_name = self.standardize_node_runtime_name(runtime_name)
 
                     runtime = self.Runtime(display_name=runtime_name, linux=False,
                                            os="Windows", runtime_family=runtime_family,
@@ -8302,7 +8373,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
-                runtime_name = settings.runtime_version
+                runtime_name = self.standardize_node_runtime_name(settings.runtime_version)
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,
@@ -11421,7 +11492,8 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=True):
+                             enriched_errors=True,
+                             tag=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11440,6 +11512,7 @@ def perform_onedeploy_webapp(cmd,
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
+    params.tag = tag
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -11448,6 +11521,9 @@ def perform_onedeploy_webapp(cmd,
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     params._cached_site = app  # pylint: disable=protected-access
     params.is_linux_webapp = is_linux_webapp(app)
+    if tag is not None and not params.is_linux_webapp:
+        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+        params.tag = None
 
     # Warn that zip deploy won't auto-build on Linux
     if params.is_linux_webapp and artifact_type in (None, 'zip'):
@@ -11483,6 +11559,7 @@ class OneDeployParams:
         self.is_linux_webapp = None
         self.is_functionapp = None
         self.enriched_errors = True
+        self.tag = None
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -11623,6 +11700,9 @@ def _build_onedeploy_scm_url(params):
     if params.target_path is not None:
         deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
+    if params.tag is not None:
+        deploy_url = deploy_url + '&tag=' + quote(params.tag, safe='')
+
     return deploy_url
 
 
@@ -11740,6 +11820,7 @@ def _get_onedeploy_request_body(params):
                 "ignorestack": params.should_ignore_stack,
                 "clean": params.is_clean_deployment,
                 "restart": params.should_restart,
+                "tag": params.tag,
             }
         }
         body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
@@ -12237,6 +12318,8 @@ def delete_function_key(cmd, resource_group_name, name, key_name, function_name=
 def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None, slot=None,  # pylint: disable=too-many-statements,too-many-branches
                        branch='master', login_with_github=False, force=False):
     runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
+    if runtime:
+        runtime = _StackRuntimeHelper.standardize_node_runtime_name(runtime)
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
@@ -13176,7 +13259,7 @@ def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux
         if gh_props.get("github_actions_version"):
             if is_linux:
                 return {
-                    "display_name": app_runtime,
+                    "display_name": matched_runtime.display_name,
                     "github_actions_version": gh_props["github_actions_version"]
                 }
             if gh_props.get("app_runtime_version").lower() == app_runtime_version.lower():

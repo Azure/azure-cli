@@ -48,10 +48,10 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
   - name: Create a Windows app service plan.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux false
   - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1 --is-linux false
   - name: Create a Linux app service plan with four Linux workers.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
@@ -1971,6 +1971,68 @@ examples:
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp exec'] = """
+type: command
+short-summary: Open an interactive shell session or run a command in a Linux web app container.
+long-summary: |
+    Interact with your Linux web app container in two modes:
+    - 'shell' (default): open an interactive shell session in your main app container.
+    - 'execute': fire-and-forget a command in your main app container; returns immediately, no output.
+
+    Only supported for Linux App Service plans.
+
+    'shell' mode: Open an interactive shell in your app's main container.
+    Use --target kudu to connect to the Kudu container instead.
+    A session ends automatically after 3 hours of inactivity,
+    and may also end if the underlying instance is reimaged or platform components are updated.
+
+    'execute' mode: Fire-and-forget a command in the main app container. A 'succeeded' result means the command was accepted.
+    It does not confirm the command ran or completed, and no logs, output, or exit code are returned. For immediate output, use 'shell' mode.
+    The CLI reports failure only if the command (or the shell) could not be started.
+    This makes execute mode well-suited to background or long-running work.
+    The process runs detached and lives for the lifetime of the container (or until it finishes on its own).
+    Use --command to run a single program, e.g. "npm start".
+    Use --shell-command to run a shell command line where shell operators (|, &&, >, etc.) work, e.g. "cat log.txt | grep error > out.txt".
+    Check the parameters and examples below, including how to capture output to a file.
+examples:
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+  - name: Start an interactive shell session using a specific shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
+  - name: Start an interactive shell session with the Kudu container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --target kudu
+  - name: Run a direct command in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
+  - name: Run a shell command and redirect output to a file
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell-command "echo hello > /home/LogFiles/out.txt 2>&1"
+  - name: Run a command in a specific working directory
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --cwd /home/site --command "touch newfile.txt"
+  - name: Run a Python script in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "python3 /home/site/wwwroot/script.py"
+  - name: Run a shell command with a non-default shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell /bin/sh --shell-command "echo hi | grep h"
+  - name: Execute a command on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance MyInstanceId
+  - name: Execute a command on all instances
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance all
+  - name: Execute a command on a deployment slot
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command "touch newfile.txt"
+"""
+
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
@@ -2478,6 +2540,37 @@ parameters:
         per-instance Last runtime status and Startup summary) to stdout and
         returns no machine-readable output. Omit --report to keep the default
         structured payload that works with `-o json`, `-o yaml`, and `-o table`.
+"""
+
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect network-capture'] = """
+type: command
+short-summary: Collect and analyze a packet capture from a Linux web app container.
+long-summary: |
+  Runs a bounded tcpdump capture in one app container instance and analyzes it in Kudu.
+  The command does not download files locally; it returns authenticated Kudu links for
+  viewing the analysis report and downloading the raw pcap. Network captures can contain
+  credentials, cookies, request bodies, and other sensitive application data.
+
+    Use --collect-only to show only the raw packet capture link. Kudu still performs the
+    processing required to finalize the capture, but the analysis report link is omitted.
+
+    This command supports Linux web apps on dedicated App Service plans. Captures are
+    limited to one worker instance per command invocation. When --instance is omitted,
+    an interactive terminal prompts you to select from the app's current workers. Scripts
+    and other non-interactive callers must specify --instance. Capture duration defaults
+    to 60 seconds and can be changed with --duration.
+examples:
+  - name: Capture and analyze traffic for the default 60 seconds
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp
+  - name: Capture traffic for 30 seconds from a specific worker
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --instance 7c2d9 --duration 30
+  - name: Show only the raw packet capture link
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --collect-only
 """
 
 helps['functionapp log'] = """

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus",
 )
 class __CMDGroup(AAZCommandGroup):
-    """servicebus
+    """Manage Service Bus
     """
     pass
 
