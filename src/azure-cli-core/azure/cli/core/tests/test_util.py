@@ -245,6 +245,25 @@ class TestUtils(unittest.TestCase):
         actual = get_az_user_agent()
         self.assertEqual(actual, 'AZURECLI/7.8.9')
 
+    def test_in_managed_environment(self):
+        from azure.cli.core.util import in_ci, in_managed_environment
+
+        for variables in [{}, {'CODESPACES': 'true'}]:
+            with self.subTest(variables=variables):
+                with mock.patch.dict('os.environ', variables, clear=True):
+                    self.assertFalse(in_ci())
+                    self.assertFalse(in_managed_environment())
+
+        with mock.patch.dict('os.environ', {'ACC_CLOUD': 'PROD'}, clear=True):
+            self.assertFalse(in_ci())
+            self.assertTrue(in_managed_environment())
+
+        for variables in [{'GITHUB_ACTIONS': 'true'}, {'TF_BUILD': 'True'}]:
+            with self.subTest(variables=variables):
+                with mock.patch.dict('os.environ', variables, clear=True):
+                    self.assertTrue(in_ci())
+                    self.assertTrue(in_managed_environment())
+
     @mock.patch.dict('os.environ')
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
     @mock.patch('requests.Session.send', autospec=True)
@@ -583,6 +602,28 @@ class TestGetProperty(unittest.TestCase):
             getprop(self, 'new_props')
         self.assertEqual(getprop(self, 'maxDiff'), self.maxDiff)
         self.assertEqual(getprop(self, 'new_props', "new_props"), "new_props")
+
+
+class TestShouldEncryptTokenCache(unittest.TestCase):
+    """The default is what a user who never touched the config runs with, so it is pinned here.
+
+    The live encryption tests all set core.encrypt_token_cache or its environment override, so
+    flipping the fallback back to plaintext would not fail any of them.
+    """
+
+    def test_encryption_is_on_by_default(self):
+        from azure.cli.core.util import should_encrypt_token_cache
+        cli = DummyCli()
+        # Nothing configured: the value the caller passes as fallback is what takes effect.
+        with mock.patch.object(cli.config, 'getboolean',
+                               side_effect=lambda section, option, fallback=None: fallback):
+            self.assertTrue(should_encrypt_token_cache(cli))
+
+    def test_config_can_turn_encryption_off(self):
+        from azure.cli.core.util import should_encrypt_token_cache
+        cli = DummyCli()
+        with mock.patch.object(cli.config, 'getboolean', return_value=False):
+            self.assertFalse(should_encrypt_token_cache(cli))
 
 
 class TestHandleException(unittest.TestCase):
