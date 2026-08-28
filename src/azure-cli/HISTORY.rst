@@ -30,7 +30,6 @@ Release History
 * `az appservice plan`: Remove preview flag for managed instance app service plans (#33690)
 * `az appservice plan`: Add Premium V3 SKU support (`P0V3`, `P1-3V3`, `P1-5MV3`) for managed instances (#33690)
 * `az webapp troubleshoot status`: Provide latest application startup attempt data (#33673)
-* `az webapp list-runtimes`: Change `config` field delimiter from `|` to `:` so the value can be passed directly to `az webapp create --runtime` on all platforms including Windows (#33822)
 
 **ARM**
 
