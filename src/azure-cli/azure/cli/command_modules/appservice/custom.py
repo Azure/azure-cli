@@ -11419,8 +11419,9 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
         while s.is_alive() and t.is_alive():
             time.sleep(5)
 
-    if ssh_exception_holder[0] is not None:
-        raise ssh_exception_holder[0]
+    ssh_ex = ssh_exception_holder[0]
+    if ssh_ex is not None:
+        raise ssh_ex
 
 
 def perform_onedeploy_functionapp(cmd,
