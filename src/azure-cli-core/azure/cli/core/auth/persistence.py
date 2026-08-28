@@ -171,8 +171,17 @@ def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pyli
 
 
 def warn_if_encryption_unavailable():
-    if _encryption_fallback:
-        logger.warning(ENCRYPTION_FALLBACK_WARNING)
+    if not _encryption_fallback:
+        return
+
+    # The warning asks the user to make the OS credential store available, which can't be done on a
+    # platform-managed machine, so it would only be noise there.
+    from azure.cli.core.util import in_managed_environment
+    if in_managed_environment():
+        logger.debug("Encryption is unavailable, but the warning is suppressed in a managed environment.")
+        return
+
+    logger.warning(ENCRYPTION_FALLBACK_WARNING)
 
 
 class SecretStore:
