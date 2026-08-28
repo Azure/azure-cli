@@ -12,13 +12,13 @@ runs:
       run: |
         echo start azdev env setup
     - name: Checkout CLI repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         fetch-depth: 0 # checkout all branches
         ref: ${{ github.event.pull_request.head.ref }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}  # checkout pull request branch
     - name: Set up Python 3.12
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@3542bca2639a428e1796aaa6a2ffef0c0f575566 # v3.1.4
       with:
         python-version: "3.12"
     - name: Install azdev
