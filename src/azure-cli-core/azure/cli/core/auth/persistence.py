@@ -34,6 +34,16 @@ ENCRYPTION_FALLBACK_WARNING = (
     "are stored in plaintext. "
     "Please follow https://aka.ms/azure-cli-credential-encryption to enable encryption.")
 
+# Credentials left in the OS credential store by an earlier encrypted run, which a clear cannot
+# reach. Which one applies depends on why this run is not using the store.
+CREDENTIAL_STORE_UNAVAILABLE_WARNING = (
+    "Credentials may remain in the OS credential store, which is currently unavailable. "
+    "Clear again once it works.")
+CREDENTIAL_STORE_NOT_CLEARED_WARNING = (
+    "Credentials may remain in the OS credential store. It is not cleared because encryption is "
+    "off, and clearing it would prompt to unlock the keyring. Set 'core.encrypt_token_cache' to "
+    "true and clear again to remove them.")
+
 # Set when a persistence falls back to plaintext, so sign-in can warn about it.
 _encryption_fallback = False
 
@@ -103,68 +113,54 @@ def _try_remove(path):
         logger.debug("Failed to remove %r: %s", path, e)
 
 
-def _remove_persistence_files(location):
-    """Remove every persistence file for a location.
-
-    All extensions are tried, not just the one in use, so that a plaintext or DPAPI file left
-    over from a previous core.encrypt_token_cache setting is cleaned up too.
-    """
+def _remove_persistence_files(location, keep_signal_file=False):
+    # Every extension, not just the one in use, to clean up after a changed encrypt_token_cache.
     for extension in file_extensions:
+        if keep_signal_file and extension == file_extension_signal:
+            continue
         _try_remove(location + extension)
 
 
-def _try_erase_os_credential_store(location, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
-    """Best effort erase of a payload the OS credential store may still hold.
-
-    On macOS and Linux the credential lives in Keychain or libsecret and the file is only a
-    modification signal, so removing the file hides the payload instead of removing it: a clear run
-    with core.encrypt_token_cache off would leave the credential readable as soon as the setting is
-    turned back on. Windows needs nothing here, because the DPAPI file is the ciphertext itself.
-
-    The persistence API has no delete, and macOS Keychain offers none at all, so an empty payload is
-    written over it instead. Like _try_remove, a failure must not stop the clear: an unreachable
-    credential store cannot be cleared by any means, so there is nothing to do but record it.
-    """
-    if not (sys.platform.startswith('darwin') or sys.platform.startswith('linux')):
+def _warn_about_the_os_credential_store(location):
+    # A signal file means this location was written with encryption on, so the OS credential store
+    # may still hold a payload. Encryption is what every capable machine should be using, but
+    # setting encrypt_token_cache to false is the escape hatch for the ones really do not want to, or for
+    # rolling back. Emptying the store under that setting would have the possibility of prompt to unlock the keyring, which
+    # is the interruption the user opted out of, so leave the payload alone and say so instead.
+    if not os.path.exists(location + file_extension_signal):
         return
-    try:
-        persistence = build_persistence(location, True, type=type)
-        if not persistence.is_encrypted:
-            # Fell back to plaintext, so the OS credential store is unreachable from here. The
-            # plaintext file is the caller's business and is dealt with there.
-            return
-        with CrossPlatLock(persistence.get_location() + '.lockfile'):
-            persistence.save(empty_payload)
-    except Exception as e:  # pylint: disable=broad-except
-        logger.debug("Failed to erase the OS credential store at %r: %s", location, e)
+    if _encryption_fallback:
+        # Encryption is already on, so there is nothing to turn on. The keyring is what's broken.
+        logger.warning(CREDENTIAL_STORE_UNAVAILABLE_WARNING)
+    else:
+        logger.warning(CREDENTIAL_STORE_NOT_CLEARED_WARNING)
 
 
-def erase_persistence(location, encrypt, type=None, empty_payload='{}'):  # pylint: disable=redefined-builtin
+def erase_persistence(location, encrypt, type=None, empty_payload='{}',  # pylint: disable=redefined-builtin
+                      warn_if_credentials_may_remain=False):
     """Empty a persisted payload and remove its files. Returns whether it succeeded.
 
-    Removing the files is not enough on Linux and macOS: the credential is held by libsecret or
-    Keychain and the file is only a modification signal. Write through the same persistence that
-    reads it, the way logging out of a single account does.
+    With encryption on, the payload is held by libsecret or Keychain and the file is only a
+    modification signal, so it is overwritten rather than deleted. With encryption off the
+    credential store is not touched at all, so clearing never prompts to unlock a keyring the user
+    opted out of, and the signal file is kept as the evidence that it may still hold a payload.
 
-    The OS credential store is erased too when it is not the configured one, so that a payload
-    written under a previous core.encrypt_token_cache setting does not outlive the clear.
-
-    Emptying and removing happen under one lock, and nothing is touched unless the lock is held.
-    In practice this only fails when another az process is using the credential store, and
-    deleting its freshly written signal file would hide a credential rather than remove it.
+    :param warn_if_credentials_may_remain: Warn about what the credential store may still hold.
+        Only one location should, because the warning is about the store, not the location.
     """
     try:
         persistence = build_persistence(location, encrypt, type=type)
-        if not persistence.is_encrypted:
-            _try_erase_os_credential_store(location, type=type, empty_payload=empty_payload)
         # Serialize against other az processes, like SecretStore.save and PersistedTokenCache do.
         with CrossPlatLock(persistence.get_location() + '.lockfile'):
-            persistence.save(empty_payload)
-            _remove_persistence_files(location)
+            if persistence.is_encrypted:
+                persistence.save(empty_payload)
+            elif warn_if_credentials_may_remain:
+                _warn_about_the_os_credential_store(location)
+            _remove_persistence_files(location, keep_signal_file=not persistence.is_encrypted)
         return True
     except Exception as e:  # pylint: disable=broad-except
-        # Logging out must not fail, but nothing was cleared and the credential is still readable,
-        # so this can't be silent. Details go to the debug log.
+        # Clearing must not fail, but nothing was removed and the credential is still readable, so
+        # this can't be silent. In practice another az process is holding the lock.
         logger.debug("Failed to erase persisted payload at %r: %s", location, e)
         logger.warning("Could not clear credentials. Run 'az account clear' again.")
         return False
@@ -174,8 +170,7 @@ def warn_if_encryption_unavailable():
     if not _encryption_fallback:
         return
 
-    # The warning asks the user to make the OS credential store available, which can't be done on a
-    # platform-managed machine, so it would only be noise there.
+    # Nothing can be installed on a platform-managed machine, so the advice would only be noise.
     from azure.cli.core.util import in_managed_environment
     if in_managed_environment():
         logger.debug("Encryption is unavailable, but the warning is suppressed in a managed environment.")
