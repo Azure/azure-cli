@@ -1294,7 +1294,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Simulate: ACR-scope token fails (SSO error), ARM token succeeds
         arm_token_response = ('Bearer', TEST_AAD_ACCESS_TOKEN, {}), TEST_SUBSCRIPTION, TEST_TENANT
         mock_get_raw_token.side_effect = [
-            KnackCLIError("SSO failure, to mitigated it please try to click Jupyter/JupyterLab."),
+            KnackCLIError("SSO failure, to mitigate it please try to click Jupyter/JupyterLab."),
             arm_token_response,
         ]
 

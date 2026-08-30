@@ -170,13 +170,14 @@ def _get_aad_token_after_challenge(cli_ctx,
     # audience may fail while the ARM management token is still available. Fall back to the
     # ARM token since ACR's /oauth2/exchange endpoint accepts ARM tokens via the
     # access_token grant_type.
+    subscription_id = get_subscription_id(cli_ctx)
     try:
-        creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
+        creds, _, tenant = profile.get_raw_token(subscription=subscription_id,
                                                  resource=scope)
-    except CLIError as e:
-        logger.debug("Failed to get AAD token for ACR scope '%s' (%s). "
-                     "Falling back to ARM management token.", scope, str(e))
-        creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx))
+    except CLIError:
+        logger.debug("Failed to get AAD token for ACR scope '%s'. "
+                     "Falling back to ARM management token.", scope, exc_info=True)
+        creds, _, tenant = profile.get_raw_token(subscription=subscription_id)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
