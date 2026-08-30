@@ -82,142 +82,120 @@ class TestEncryptionFallbackWarning(unittest.TestCase):
         self.assertFalse(persistence._encryption_fallback)
 
 
-class TestEraseOsCredentialStore(unittest.TestCase):
-    """A clear must not leave a credential in the OS credential store.
+class TestPlaintextClear(unittest.TestCase):
+    """With encryption off, clearing must not touch the OS credential store.
 
-    On Linux and macOS the payload lives in libsecret or Keychain and the file is only a signal, so
-    a clear run with core.encrypt_token_cache off would remove the signal and leave the credential
-    readable as soon as the setting is turned back on.
+    Opting out of core.encrypt_token_cache opts out of the keyring prompt, and saving an empty
+    payload to libsecret or Keychain is what would raise it. The signal file stays behind, so a
+    later clear with encryption on still finds the payload.
     """
 
     LOCATION = '/tmp/test_persistence'
 
-    @staticmethod
-    def _persistence_mock(is_encrypted, extension):
+    def setUp(self):
+        persistence._encryption_fallback = False
+        self.addCleanup(setattr, persistence, '_encryption_fallback', False)
+
+    def _erase(self, signal_file_exists=False, warn_if_credentials_may_remain=False):
         built = mock.MagicMock()
-        built.is_encrypted = is_encrypted
-        built.get_location.return_value = TestEraseOsCredentialStore.LOCATION + extension
-        return built
-
-    def _erase(self, encrypt=False, platform='linux', os_store=None):
-        """Run a clear with the configured persistence and the OS credential store separated."""
-        plaintext = self._persistence_mock(False, persistence.file_extension_plaintext)
-        encrypted = os_store if os_store is not None else \
-            self._persistence_mock(True, persistence.file_extension_signal)
-
-        def build(location, wants_encryption, type=None):  # pylint: disable=redefined-builtin
-            return encrypted if wants_encryption else plaintext
-
-        with mock.patch.object(persistence.sys, 'platform', platform), \
-                mock.patch.object(persistence, 'build_persistence', side_effect=build), \
+        built.is_encrypted = False
+        built.get_location.return_value = self.LOCATION + persistence.file_extension_plaintext
+        with mock.patch.object(persistence, 'build_persistence', return_value=built), \
                 mock.patch.object(persistence, 'CrossPlatLock'), \
+                mock.patch.object(persistence.os.path, 'exists', return_value=signal_file_exists), \
                 mock.patch.object(persistence, '_try_remove') as remove_mock, \
                 mock.patch.object(persistence.logger, 'warning') as warning_mock:
-            result = persistence.erase_persistence(self.LOCATION, encrypt, type='Secret store',
-                                                   empty_payload='[]')
-        return result, plaintext, encrypted, remove_mock, warning_mock
+            result = persistence.erase_persistence(
+                self.LOCATION, False, type='Token cache',
+                warn_if_credentials_may_remain=warn_if_credentials_may_remain)
+        return result, built, remove_mock, warning_mock
 
-    def test_encrypted_payload_is_erased_when_encryption_is_off(self):
-        # The case a plain 'az account clear' used to miss entirely.
-        result, plaintext, encrypted, _, warning_mock = self._erase(encrypt=False)
-
-        self.assertTrue(result)
-        plaintext.save.assert_called_once_with('[]')
-        encrypted.save.assert_called_once_with('[]')
-        warning_mock.assert_not_called()
-
-    def test_configured_encrypted_store_is_erased_once(self):
-        # With encryption on, the configured persistence already is the OS credential store.
-        result, _, encrypted, _, warning_mock = self._erase(encrypt=True)
+    def test_credential_store_is_left_alone(self):
+        result, built, _, _ = self._erase()
 
         self.assertTrue(result)
-        encrypted.save.assert_called_once_with('[]')
+        built.save.assert_not_called()
+
+    def test_signal_file_is_kept(self):
+        # Removing it would orphan the payload the clear could not reach.
+        _, _, remove_mock, _ = self._erase()
+
+        self.assertNotIn(mock.call(self.LOCATION + persistence.file_extension_signal),
+                         remove_mock.call_args_list)
+
+    def test_the_other_files_are_removed(self):
+        # Including a .bin written while encryption was on.
+        _, _, remove_mock, _ = self._erase()
+
+        for extension in (persistence.file_extension_plaintext, persistence.file_extension_encrypted):
+            self.assertIn(mock.call(self.LOCATION + extension), remove_mock.call_args_list)
+
+    def test_a_leftover_signal_file_warns_about_the_credential_store(self):
+        _, _, _, warning_mock = self._erase(signal_file_exists=True,
+                                            warn_if_credentials_may_remain=True)
+
+        warning_mock.assert_called_once()
+        message = warning_mock.call_args[0][0]
+        self.assertIn('OS credential store', message)
+        self.assertIn('core.encrypt_token_cache', message)
+
+    def test_only_the_asked_location_warns(self):
+        # az account clear erases two locations, but the warning is about the store, not the file.
+        _, _, _, warning_mock = self._erase(signal_file_exists=True)
+
         warning_mock.assert_not_called()
 
-    def test_windows_needs_no_second_pass(self):
-        # The DPAPI file is the ciphertext, so removing the files is the whole of the erase.
-        result, plaintext, encrypted, _, warning_mock = self._erase(encrypt=False, platform='win32')
+    def test_no_warning_when_encryption_was_never_used(self):
+        _, _, _, warning_mock = self._erase(signal_file_exists=False,
+                                            warn_if_credentials_may_remain=True)
 
-        self.assertTrue(result)
-        plaintext.save.assert_called_once_with('[]')
-        encrypted.save.assert_not_called()
         warning_mock.assert_not_called()
 
-    def test_unreachable_credential_store_is_skipped(self):
-        # Falling back means the keyring cannot be reached, so there is nothing that can be done
-        # about whatever it holds. The plaintext clear must still go ahead.
-        fallback = self._persistence_mock(False, persistence.file_extension_plaintext)
-        result, plaintext, _, remove_mock, warning_mock = self._erase(encrypt=False, os_store=fallback)
+    def test_a_fallback_is_not_told_to_enable_encryption(self):
+        # Encryption is already on here; the keyring is what is broken.
+        persistence._encryption_fallback = True
+        _, _, _, warning_mock = self._erase(signal_file_exists=True,
+                                            warn_if_credentials_may_remain=True)
 
-        self.assertTrue(result)
-        plaintext.save.assert_called_once_with('[]')
-        remove_mock.assert_called()
-        warning_mock.assert_not_called()
+        message = warning_mock.call_args[0][0]
+        self.assertIn('OS credential store', message)
+        self.assertNotIn('core.encrypt_token_cache', message)
 
-    def test_a_failing_credential_store_does_not_fail_the_clear(self):
-        # Best effort, like _try_remove: the files still have to go, and the caller still succeeds.
-        encrypted = self._persistence_mock(True, persistence.file_extension_signal)
-        encrypted.save.side_effect = Exception('keyring is locked')
-        with mock.patch.object(persistence.logger, 'debug') as debug_mock:
-            result, plaintext, _, remove_mock, warning_mock = self._erase(
-                encrypt=False, os_store=encrypted)
-
-        self.assertTrue(result)
-        plaintext.save.assert_called_once_with('[]')
-        remove_mock.assert_called()
-        warning_mock.assert_not_called()
-        self.assertTrue(any('OS credential store' in str(call) for call in debug_mock.call_args_list))
-
-    def test_credential_store_is_erased_before_the_files_are_removed(self):
-        # Keychain and libsecret touch the signal file on save, so erasing after the removal would
-        # put the file back. The order is what keeps the clear from leaving one behind.
-        plaintext = self._persistence_mock(False, persistence.file_extension_plaintext)
-        encrypted = self._persistence_mock(True, persistence.file_extension_signal)
-        calls = []
-        plaintext.save.side_effect = lambda _: calls.append('save plaintext')
-        encrypted.save.side_effect = lambda _: calls.append('save credential store')
-
-        def build(location, wants_encryption, type=None):  # pylint: disable=redefined-builtin
-            return encrypted if wants_encryption else plaintext
-
-        with mock.patch.object(persistence.sys, 'platform', 'linux'), \
-                mock.patch.object(persistence, 'build_persistence', side_effect=build), \
+    def test_encryption_on_erases_and_removes_everything(self):
+        built = mock.MagicMock()
+        built.is_encrypted = True
+        built.get_location.return_value = self.LOCATION + persistence.file_extension_signal
+        with mock.patch.object(persistence, 'build_persistence', return_value=built), \
                 mock.patch.object(persistence, 'CrossPlatLock'), \
-                mock.patch.object(persistence, '_try_remove',
-                                  side_effect=lambda path: calls.append('remove')):
-            persistence.erase_persistence(self.LOCATION, False, type='Secret store')
+                mock.patch.object(persistence.os.path, 'exists', return_value=True), \
+                mock.patch.object(persistence, '_try_remove') as remove_mock, \
+                mock.patch.object(persistence.logger, 'warning') as warning_mock:
+            persistence.erase_persistence(self.LOCATION, True, type='Token cache',
+                                          warn_if_credentials_may_remain=True)
 
-        self.assertLess(calls.index('save credential store'), calls.index('remove'))
+        built.save.assert_called_once()
+        warning_mock.assert_not_called()
+        self.assertEqual(
+            [mock.call(self.LOCATION + e) for e in persistence.file_extensions],
+            remove_mock.call_args_list)
 
-    def test_no_signal_file_is_left_behind(self):
-        # The failure the order above prevents, reproduced end to end: a real save touches the
-        # signal file, and a real _try_remove has to be the last thing that runs.
+    def test_only_the_signal_file_is_left_behind(self):
+        # End to end with a real _try_remove, whichever setting wrote the files.
         with tempfile.TemporaryDirectory() as directory:
-            location = os.path.join(directory, 'service_principal_entries')
-            plaintext = self._persistence_mock(False, persistence.file_extension_plaintext)
-            encrypted = self._persistence_mock(True, persistence.file_extension_signal)
-            plaintext.get_location.return_value = location + persistence.file_extension_plaintext
-            encrypted.get_location.return_value = location + persistence.file_extension_signal
+            location = os.path.join(directory, 'msal_token_cache')
+            for extension in persistence.file_extensions:
+                open(location + extension, 'w').close()  # pylint: disable=consider-using-with
 
-            def touch(path):
-                return lambda _: open(path, 'w').close()  # pylint: disable=consider-using-with
+            with mock.patch.object(persistence.sys, 'platform', 'linux'):
+                result = persistence.erase_persistence(location, False, type='Token cache')
 
-            plaintext.save.side_effect = touch(location + persistence.file_extension_plaintext)
-            encrypted.save.side_effect = touch(location + persistence.file_extension_signal)
-
-            def build(location_, wants_encryption, type=None):  # pylint: disable=redefined-builtin
-                return encrypted if wants_encryption else plaintext
-
-            with mock.patch.object(persistence.sys, 'platform', 'linux'), \
-                    mock.patch.object(persistence, 'build_persistence', side_effect=build), \
-                    mock.patch.object(persistence, 'CrossPlatLock'):
-                persistence.erase_persistence(location, False, type='Secret store')
-
-            self.assertEqual([], os.listdir(directory), 'the clear left a persistence file behind')
+            self.assertTrue(result)
+            left = sorted(f for f in os.listdir(directory) if not f.endswith('.lockfile'))
+            self.assertEqual(['msal_token_cache' + persistence.file_extension_signal], left)
 
 
 class TestErasePersistence(unittest.TestCase):
-    """Clearing all accounts must empty the payload, not just remove the files.
+    """With encryption on, clearing must empty the payload, not just remove the files.
 
     On Linux and macOS the credential is held by libsecret or Keychain and the file is only a
     modification signal, so removing files alone would leave the credential behind.
@@ -225,6 +203,7 @@ class TestErasePersistence(unittest.TestCase):
 
     def test_payload_is_overwritten_through_the_persistence(self):
         built = mock.MagicMock()
+        built.is_encrypted = True
         built.get_location.return_value = '/tmp/test_persistence.sig'
         with mock.patch.object(persistence, 'build_persistence', return_value=built) as build_mock, \
                 mock.patch.object(persistence, 'CrossPlatLock'), \
@@ -240,6 +219,7 @@ class TestErasePersistence(unittest.TestCase):
         # A login landing between the erase and the removal would leave a credential in the OS
         # credential store that the removed signal file no longer points at.
         built = mock.MagicMock()
+        built.is_encrypted = True
         built.get_location.return_value = '/tmp/test_persistence.sig'
         calls = []
         with mock.patch.object(persistence, 'build_persistence', return_value=built), \
@@ -265,6 +245,7 @@ class TestErasePersistence(unittest.TestCase):
         # wrote would hide its credential instead of removing it, so the clear is all-or-nothing
         # and the user is told to retry.
         built = mock.MagicMock()
+        built.is_encrypted = True
         built.get_location.return_value = '/tmp/test_persistence.sig'
         built.save.side_effect = Exception('AlreadyLocked')
         with mock.patch.object(persistence, 'build_persistence', return_value=built), \

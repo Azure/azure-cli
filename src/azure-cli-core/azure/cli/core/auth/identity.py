@@ -210,11 +210,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         for account in accounts:
             self._msal_app.remove_account(account)
 
-        # Empty the payload, then remove the files. MSAL only removes the accounts it knows about,
-        # and on Linux and macOS the credential lives in the OS keychain, where removing the
-        # signal file would leave it behind.
+        # MSAL only removes the accounts it knows about, and on Linux and macOS the credential
+        # lives in the OS keychain, so the payload has to be emptied, not just deleted.
+        # Every auth type has a token cache, but only service principals have a secret store, so
+        # this is the one location that warns about what the keychain may still hold.
         erase_persistence(self._token_cache_file, self._encrypt, type="Token cache",
-                          empty_payload='{}')
+                          empty_payload='{}', warn_if_credentials_may_remain=True)
 
     def logout_service_principal(self, client_id):
         # If client_id is a username, it is ignored
@@ -228,9 +229,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._service_principal_store.remove_entry(client_id)
 
     def logout_all_service_principal(self):
-        # remove service principal secrets
         # MSAL provides no interface to enumerate the service principals in its token cache, so
-        # their access tokens are cleared by logout_all_users emptying the whole sp secret store
+        # their access tokens are cleared by logout_all_users emptying the whole sp secret store.
         erase_persistence(self._secret_file, self._encrypt, type="Secret store",
                           empty_payload='[]')
 
