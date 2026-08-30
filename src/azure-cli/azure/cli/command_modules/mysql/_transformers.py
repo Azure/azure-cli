@@ -47,7 +47,7 @@ def table_transform_output_list_servers(result):
 
 def mysql_table_transform_output_list_skus(result):
     table_result = []
-    if len(result) > 1:
+    if isinstance(result, list) and result:
         skus_tiers = result[0]["supportedFlexibleServerEditions"]
         for skus in skus_tiers:
             tier_name = skus["name"]
@@ -61,8 +61,8 @@ def mysql_table_transform_output_list_skus(result):
                     new_entry['Memory'] = str(int(key['supportedMemoryPerVCoreMb']) * int(key['vCores']) // 1024) + " GiB"
                     new_entry['Max Disk IOPS'] = key['supportedIops']
                     table_result.append(new_entry)
-            except:
-                raise CLIError("There is no sku available for this location.")
+            except (KeyError, IndexError, TypeError):
+                raise CLIError("No SKUs are available for this location.")
 
     return table_result
 

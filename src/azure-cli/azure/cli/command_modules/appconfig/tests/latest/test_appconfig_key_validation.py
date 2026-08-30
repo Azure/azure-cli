@@ -11,7 +11,7 @@ import os
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -21,11 +21,13 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
     
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_key_validation(self):
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_key_validation(self, resource_group, location):
         config_store_prefix = get_resource_name_prefix('kvtest')
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
@@ -34,7 +36,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
