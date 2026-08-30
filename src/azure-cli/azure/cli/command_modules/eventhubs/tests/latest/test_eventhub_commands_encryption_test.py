@@ -21,7 +21,7 @@ class EHNamespaceMSITesting(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace_encryption(self, resource_group):
         self.kwargs.update({
-            'loc': 'eastus',
+            'loc': 'southcentralus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
