@@ -1,0 +1,49 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+#
+# Throwaway pipeline. Shows on a real Azure Pipelines agent that the plaintext fallback warning is
+# suppressed there, which the unit tests cannot show because they mock the environment.
+#
+# Set it up by hand in azclitools/internal, pointing at this file on this branch, then run it and
+# delete both. Nothing here needs a service connection or a sign-in.
+
+name: encryption-fallback-warning-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.12'
+
+- script: |
+    set -ev
+    python -m pip install --upgrade pip
+    pip install ./src/azure-cli-telemetry
+    pip install ./src/azure-cli-core
+    pip install pytest
+  displayName: Install azure-cli-core from source
+
+- script: |
+    python -m pytest \
+      src/azure-cli-core/azure/cli/core/auth/tests/test_persistence.py \
+      "src/azure-cli-core/azure/cli/core/tests/test_util.py::TestUtils::test_in_managed_environment" -q
+  displayName: Unit tests
+
+- script: |
+    echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-<unset>}"
+    python -c "import gi" 2>&1 || echo "python3-gi is not importable"
+  displayName: Report what the agent offers
+
+- script: python .github/scripts/check_managed_environment.py
+  displayName: The warning is suppressed, and only because this is an agent
+  env:
+    # An unreachable D-Bus makes libsecret fail regardless of what the agent image ships, so the
+    # fallback is guaranteed to happen and there is always a warning to suppress.
+    DBUS_SESSION_BUS_ADDRESS: unix:path=/nonexistent

@@ -1,0 +1,213 @@
+name: Encryption Fallback Warning
+
+# Proves the plaintext fallback on a genuinely headless machine. A GitHub hosted runner has no
+# gnome-keyring and no D-Bus session, which is exactly the environment the fallback exists for and
+# the one a developer's laptop cannot reproduce. A runner is also a platform-managed machine, so it
+# doubles as the test that the fallback warning is suppressed on a CI agent.
+#
+# The login job needs a federated credential on an Entra application, with subject
+# repo:<owner>/azure-cli:ref:refs/heads/<branch> and issuer https://token.actions.githubusercontent.com,
+# plus the repository secrets AZURE_CLIENT_ID and AZURE_TENANT_ID. Without them it is skipped, and
+# the probe job still runs.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - encryption-warning-ci
+
+permissions: {}
+
+jobs:
+  probe:
+    name: Fallback and unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install azure-cli-core from source
+        run: |
+          set -ev
+          python -m pip install --upgrade pip
+          pip install ./src/azure-cli-telemetry
+          pip install -e ./src/azure-cli-core
+          pip install pytest
+
+      - name: Unit tests
+        # Only the encryption tests: the rest of test_util.py needs the full CLI dependency set,
+        # which this job deliberately does not install.
+        run: |
+          python -m pytest \
+            src/azure-cli-core/azure/cli/core/auth/tests/test_persistence.py \
+            "src/azure-cli-core/azure/cli/core/tests/test_util.py::TestShouldEncryptTokenCache" \
+            "src/azure-cli-core/azure/cli/core/tests/test_util.py::TestUtils::test_in_managed_environment" -q
+
+      - name: Report what the runner offers
+        run: |
+          echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-<unset>}"
+          python -c "import gi" 2>&1 || echo "python3-gi is not importable"
+
+      - name: Encryption is requested and refused
+        env:
+          # Nothing here is contrived: this is what the runner already looks like. The second case
+          # below removes the last doubt by pointing D-Bus at a socket that cannot exist.
+          AZURE_CORE_ENCRYPT_TOKEN_CACHE: 'true'
+        run: |
+          set -e
+          for dbus in "${DBUS_SESSION_BUS_ADDRESS:-}" "unix:path=/nonexistent"; do
+            echo "== DBUS_SESSION_BUS_ADDRESS=${dbus:-<unset>}"
+            DBUS_SESSION_BUS_ADDRESS="$dbus" python .github/scripts/check_encryption_fallback.py
+          done
+
+  login:
+    name: No warning on a CI agent
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require the federated credential
+        env:
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          if [ -z "$client_id" ] || [ -z "$tenant_id" ]; then
+            echo "::error::Set the AZURE_CLIENT_ID and AZURE_TENANT_ID repository secrets, and add a"
+            echo "::error::federated credential with subject repo:${GITHUB_REPOSITORY}:ref:${GITHUB_REF}"
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install the CLI from source
+        run: |
+          set -ev
+          python -m pip install --upgrade pip
+          # Not editable: PEP 660 editable installs of azure-cli-core and azure-cli each claim the
+          # azure.cli namespace, and only one wins, so `az` cannot find azure.cli.__main__.
+          pip install ./src/azure-cli-telemetry ./src/azure-cli-core ./src/azure-cli
+          az --version
+
+      - name: Sign in with no keyring, and check what the user is told
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          # An unreachable D-Bus makes libsecret fail regardless of what the runner image ships.
+          DBUS_SESSION_BUS_ADDRESS: unix:path=/nonexistent
+          AZURE_CORE_ENCRYPT_TOKEN_CACHE: 'true'
+        run: |
+          set -e
+
+          # A fresh ID token per sign-in: they are short lived and meant to be used once.
+          get_token() {
+            curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" \
+              | python -c 'import json,sys; print(json.load(sys.stdin)["value"])'
+          }
+
+          # $1 is a label, $2 is 'present' or 'absent', the rest is passed to env(1).
+          sign_in() {
+            label=$1
+            expected=$2
+            shift 2
+
+            az account clear || true
+            rm -f "$HOME/.azure"/msal_token_cache.* "$HOME/.azure"/service_principal_entries.*
+
+            set +e
+            # --debug echoes the command line, so the assertion runs over a file that is never
+            # printed unscrubbed and never uploaded.
+            env "$@" az login --service-principal -u "$AZURE_CLIENT_ID" \
+              --tenant "$AZURE_TENANT_ID" --federated-token "$(get_token)" \
+              --allow-no-subscriptions --debug -o none > "$label.out" 2> "$label.err"
+            status=$?
+            set -e
+
+            python .github/scripts/scrub.py "$label.err" "$label.out"
+            if [ $status -ne 0 ]; then
+              echo "::error::az login failed ($label)"
+              tail -40 "$label.err"
+              exit 1
+            fi
+            python .github/scripts/check_encryption_warning.py "$label.err" "$expected"
+          }
+
+          # env -u, because GITHUB_* cannot be overridden through a step's env: block.
+          echo '== as the runner is: GITHUB_ACTIONS is set, so the warning must be suppressed'
+          sign_in gated absent
+
+          echo '== the same sign-in with GITHUB_ACTIONS unset, to show the gate is what silenced it'
+          sign_in ungated present -u GITHUB_ACTIONS -u TF_BUILD -u CI
+
+          # An Azure Pipelines agent is the same headless Linux box with a different variable set,
+          # so this covers the TF_BUILD branch without an Azure DevOps organization.
+          echo '== TF_BUILD instead of GITHUB_ACTIONS, as an Azure Pipelines agent would have'
+          sign_in ado absent -u GITHUB_ACTIONS -u CI TF_BUILD=True
+
+      - name: Sign out
+        if: always()
+        run: az account clear || true
+
+  keyring:
+    name: Silence when the keyring works
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require the federated credential
+        env:
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          if [ -z "$client_id" ] || [ -z "$tenant_id" ]; then
+            echo "::error::Set the AZURE_CLIENT_ID and AZURE_TENANT_ID repository secrets, and add a"
+            echo "::error::federated credential with subject repo:${GITHUB_REPOSITORY}:ref:${GITHUB_REF}"
+            exit 1
+          fi
+
+      - name: Give the runner a keyring
+        run: |
+          set -ev
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            gnome-keyring libsecret-1-0 python3-gi gir1.2-secret-1 dbus-x11
+
+      - name: Install the CLI from source
+        # The system interpreter, not setup-python: the libsecret bindings are the distro's
+        # python3-gi, and a hosted-tool interpreter cannot see them.
+        run: |
+          set -ev
+          python3 -m venv --system-site-packages .cienv
+          .cienv/bin/pip install --upgrade pip
+          .cienv/bin/pip install ./src/azure-cli-telemetry ./src/azure-cli-core ./src/azure-cli
+          .cienv/bin/python -c "import gi; gi.require_version('Secret','1'); from gi.repository import Secret; print('libsecret bindings are importable')"
+
+      - name: Sign in with a working keyring, and check the user is not warned
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CORE_ENCRYPT_TOKEN_CACHE: 'true'
+        run: |
+          set -e
+          token=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')
+          export AZ_FEDERATED_TOKEN="$token"
+          dbus-run-session -- bash .github/scripts/login_with_keyring.sh
+
+      - name: Sign out
+        if: always()
+        run: .cienv/bin/az account clear || true
