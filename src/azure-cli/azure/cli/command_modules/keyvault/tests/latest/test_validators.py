@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from unittest import mock
 
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.cloud import (
@@ -13,6 +14,7 @@ from azure.cli.core.cloud import (
     Cloud,
     CloudSuffixes,
 )
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._validators import validate_vault_uri
 
@@ -31,6 +33,7 @@ class _CliCtx:  # pylint: disable=too-few-public-methods
     def __init__(self, cloud=AZURE_PUBLIC_CLOUD, allowed_dns_suffixes=None):
         self.cloud = cloud
         self.config = _Config(allowed_dns_suffixes)
+        self.data = {}
 
 
 class VaultUriValidationTest(unittest.TestCase):
@@ -123,6 +126,44 @@ class VaultUriValidationTest(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             validate_vault_uri(cli_ctx, 'https://user:pass@myvault.vault.azure.net')
 
+    def test_rejects_empty_userinfo(self):
+        # urlparse reports empty userinfo as '' rather than None, so a truthiness check misses these.
+        cli_ctx = _CliCtx()
+        for uri in [
+            'https://@myvault.vault.azure.net',
+            'https://:@myvault.vault.azure.net',
+            'https://@attacker.example.vault.azure.net',
+        ]:
+            with self.assertRaises(InvalidArgumentValueError):
+                validate_vault_uri(cli_ctx, uri)
+
+    def test_does_not_echo_credentials_in_error(self):
+        cli_ctx = _CliCtx()
+        with self.assertRaises(InvalidArgumentValueError) as ctx:
+            validate_vault_uri(cli_ctx, 'https://user:sup3rs3cret@attacker.example')
+        self.assertNotIn('sup3rs3cret', str(ctx.exception))
+        self.assertIn('***@', str(ctx.exception))
+
+    def test_trailing_dots(self):
+        cli_ctx = _CliCtx()
+        # A single DNS root terminator is legitimate and is normalized away.
+        self.assertEqual(
+            validate_vault_uri(cli_ctx, 'https://myvault.vault.azure.net.'),
+            'https://myvault.vault.azure.net')
+        # Anything beyond that leaves an empty label and is not a valid authority.
+        for uri in ['https://myvault.vault.azure.net..', 'https://myvault.vault.azure.net...']:
+            with self.assertRaises(InvalidArgumentValueError):
+                validate_vault_uri(cli_ctx, uri)
+
+    def test_returned_origin_is_normalized(self):
+        cli_ctx = _CliCtx()
+        self.assertEqual(
+            validate_vault_uri(cli_ctx, 'https://MyVault.Vault.Azure.Net/secrets/s'),
+            'https://myvault.vault.azure.net')
+        self.assertEqual(
+            validate_vault_uri(cli_ctx, 'https://myvault.vault.azure.net:8443/secrets/s'),
+            'https://myvault.vault.azure.net:8443')
+
     def test_rejects_malformed(self):
         cli_ctx = _CliCtx()
         for uri in [None, '', 'not-a-uri', 'https://', 'https://myvault.vault.azure.net:notaport']:
@@ -161,6 +202,51 @@ class VaultUriValidationTest(unittest.TestCase):
         cli_ctx = _CliCtx(cloud=cloud)
         with self.assertRaises(InvalidArgumentValueError):
             validate_vault_uri(cli_ctx, 'https://myvault.vault.azure.net')
+
+
+class DataPlaneClientCredentialGuardTest(unittest.TestCase):
+    """An untrusted host must be rejected before any Azure AD token is acquired."""
+
+    @staticmethod
+    def _prepare(cli_ctx, command_args):
+        from azure.cli.command_modules.keyvault import _client_factory
+
+        with mock.patch.object(_client_factory, 'Profile') as profile_cls, \
+                mock.patch.object(_client_factory, 'get_api_version', return_value='7.4'):
+            profile_cls.return_value.get_login_credentials.return_value = ('credential', None, None)
+            raised = None
+            try:
+                _client_factory._prepare_data_plane_azure_keyvault_client(  # pylint: disable=protected-access
+                    cli_ctx, dict(command_args), ResourceType.DATA_KEYVAULT_SECRETS)
+            except InvalidArgumentValueError as ex:
+                raised = ex
+            return raised, profile_cls
+
+    def test_no_token_acquired_for_untrusted_host(self):
+        cli_ctx = _CliCtx()
+        for command_args in [
+            {'identifier': 'https://attacker.example/secrets/leak'},
+            {'identifier': 'https://127.0.0.1:8443/secrets/leak'},
+            {'identifier': 'https://maliciousvault.azure.net/secrets/leak'},
+            {'vault_base_url': 'https://attacker.example'},
+            {'vault_base_url': 'https://attacker.example#.vault.azure.net'},
+            {'vault_base_url': 'https://attacker.example\\.vault.azure.net'},
+            {'hsm_name': 'https://attacker.example'},
+        ]:
+            raised, profile_cls = self._prepare(cli_ctx, command_args)
+            self.assertIsNotNone(raised, 'expected rejection for {}'.format(command_args))
+            profile_cls.assert_not_called()
+
+    def test_token_acquired_for_trusted_host(self):
+        cli_ctx = _CliCtx()
+        for command_args in [
+            {'identifier': 'https://myvault.vault.azure.net/secrets/s'},
+            {'vault_base_url': 'https://myvault.vault.azure.net'},
+            {'hsm_name': 'https://myhsm.managedhsm.azure.net'},
+        ]:
+            raised, profile_cls = self._prepare(cli_ctx, command_args)
+            self.assertIsNone(raised)
+            profile_cls.assert_called_once()
 
 
 if __name__ == '__main__':

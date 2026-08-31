@@ -570,9 +570,12 @@ def validate_vault_uri(cli_ctx, uri):
     """
     from urllib.parse import urlparse
 
+    # Never echo credentials that were embedded in the URI back to the terminal or logs.
+    display = re.sub(r'(?<=//)[^/@]*@', '***@', uri, count=1) if isinstance(uri, str) else uri
+
     def _invalid(reason):
         return InvalidArgumentValueError(
-            "'{}' is not a valid Key Vault or Managed HSM URI: {}.".format(uri, reason))
+            "'{}' is not a valid Key Vault or Managed HSM URI: {}.".format(display, reason))
 
     if not uri or not isinstance(uri, str):
         raise _invalid('a value is required')
@@ -580,7 +583,7 @@ def validate_vault_uri(cli_ctx, uri):
     try:
         parsed = urlparse(uri)
         hostname = parsed.hostname
-        parsed.port  # pylint: disable=pointless-statement  # raises ValueError on a malformed port
+        port = parsed.port  # raises ValueError on a malformed port
     except ValueError:
         raise _invalid('it is not a well-formed absolute URI')  # pylint: disable=raise-missing-from
 
@@ -588,12 +591,13 @@ def validate_vault_uri(cli_ctx, uri):
         raise _invalid('the scheme must be https')
     if not hostname:
         raise _invalid('it is not a well-formed absolute URI')
-    if parsed.username or parsed.password:
+    if parsed.username is not None or parsed.password is not None:
         raise _invalid('it must not contain credentials')
 
     # Compare against the suffixes with a leading '.' so that look-alikes such as
     # 'maliciousvault.azure.net' don't match '.vault.azure.net'.
-    hostname = hostname.rstrip('.').lower()
+    hostname = hostname[:-1] if hostname.endswith('.') else hostname  # drop a single DNS root terminator
+    hostname = hostname.lower()
     # urlparse and the HTTP transport disagree on characters such as '\', which urlparse keeps in the
     # host but the transport treats as a path separator. Requiring well-formed DNS labels keeps the
     # name validated here identical to the one actually dialled.
@@ -603,12 +607,13 @@ def validate_vault_uri(cli_ctx, uri):
     if not any(len(hostname) > len(suffix) and hostname.endswith(suffix) for suffix in allowed):
         raise InvalidArgumentValueError(
             "'{}' is not a recognized Key Vault or Managed HSM host in cloud '{}'. Azure CLI will not "
-            "send an access token to it. Expected a host ending in: {}. If this is a private or "
-            "disconnected deployment, register its suffixes with "
+            "send an access token to it. Expected a host ending in: {}. For a private or disconnected "
+            "deployment, pass the full vault URI with --id and register its suffix with "
             "'az config set keyvault.allowed_dns_suffixes=<suffix>[,<suffix>]'.".format(
-                uri, cli_ctx.cloud.name, ', '.join(allowed) or '<none configured>'))
+                display, cli_ctx.cloud.name, ', '.join(allowed) or '<none configured>'))
 
-    return 'https://{}'.format(parsed.netloc)
+    # Rebuild from the validated host so that nothing else in the authority survives into the URL.
+    return 'https://{}{}'.format(hostname, ':{}'.format(port) if port else '')
 
 
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
