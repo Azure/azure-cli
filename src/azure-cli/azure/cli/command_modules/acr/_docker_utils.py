@@ -170,7 +170,7 @@ def _resolve_acr_scope(cli_ctx, login_server=None):
         except AttributeError:
             cloud_name = None
         if cloud_name and cloud_name not in _STANDARD_CLOUD_NAMES:
-            return "https://{}".format(login_server)
+            return "https://{}".format(login_server.rstrip('/'))
 
     return "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 

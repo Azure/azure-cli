@@ -1525,3 +1525,11 @@ class ResolveAcrScopeTests(unittest.TestCase):
             _resolve_acr_scope(cli_ctx, login_server='edgeartifacts.edgeacr.local.private'),
             "https://override.example.com",
         )
+
+    def test_trailing_slash_on_login_server_is_stripped(self):
+        """A trailing '/' on login_server must not leak into the derived audience URL."""
+        cli_ctx = self._ctx(None, cloud_name='CustomLocalCloud')
+        self.assertEqual(
+            _resolve_acr_scope(cli_ctx, login_server='edgeartifacts.edgeacr.local.private/'),
+            "https://edgeartifacts.edgeacr.local.private",
+        )
