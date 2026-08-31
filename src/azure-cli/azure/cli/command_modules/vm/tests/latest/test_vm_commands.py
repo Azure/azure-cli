@@ -69,6 +69,7 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
 
 class VmReimageTest(ScenarioTest):
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature: Microsoft.Network/AllowBringYourOwnPublicIpAddress')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
     def test_vm_reimage(self, resource_group):
