@@ -123,10 +123,8 @@ def _remove_persistence_files(location, keep_signal_file=False):
 
 def _warn_about_the_os_credential_store(location):
     # A signal file means this location was written with encryption on, so the OS credential store
-    # may still hold a payload. Encryption is what every capable machine should be using, but
-    # setting encrypt_token_cache to false is the escape hatch for the ones really do not want to, or for
-    # rolling back. Emptying the store under that setting would have the possibility of prompt to unlock the keyring, which
-    # is the interruption the user opted out of, so leave the payload alone and say so instead.
+    # may still hold a payload. Emptying it here may prompt to unlock the keyring, which is the
+    # interruption encrypt_token_cache=false opted out of, so leave the payload alone and say so.
     if not os.path.exists(location + file_extension_signal):
         return
     if _encryption_fallback:
