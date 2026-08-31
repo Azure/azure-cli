@@ -12,20 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway ssl-policy wait",
+    "network application-gateway url-path-map rule show",
 )
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Show(AAZCommand):
+    """application-gateway url-path-map rule show
     """
 
     _aaz_info = {
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.sslPolicy"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.urlPathMaps[].properties.pathRules[]"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -44,9 +46,18 @@ class Wait(AAZWaitCommand):
             options=["--gateway-name"],
             help="Name of the application gateway.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
+        _args_schema.path_map_name = AAZStrArg(
+            options=["--path-map-name"],
+            help="Name of the URL path map that is unique within an Application Gateway.",
+            required=True,
+        )
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="Name of the path rule that is unique within an Application Gateway.",
             required=True,
         )
         return cls._args_schema
@@ -65,8 +76,49 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            result = result.properties.urlPathMaps
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.path_map_name,
+                filters
+            )
+            idx = next(filters)[0]
+            result = result[idx]
+            result = result.properties.pathRules
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters)[0]
+            return result[idx]
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result = result.properties.urlPathMaps
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.path_map_name,
+                filters
+            )
+            idx = next(filters)[0]
+            result = result[idx]
+            result = result.properties.pathRules
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[1].name == self.ctx.args.name,
+                filters
+            )
+            idx = next(filters, [len(result)])[0]
+            result[idx] = value
+            return
 
     class ApplicationGatewaysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -154,7 +206,7 @@ class Wait(AAZWaitCommand):
             )
             _schema_on_200.id = AAZStrType()
             _schema_on_200.identity = AAZIdentityObjectType()
-            _WaitHelper._build_schema_common_managed_service_identity_read(_schema_on_200.identity)
+            _ShowHelper._build_schema_common_managed_service_identity_read(_schema_on_200.identity)
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -203,7 +255,7 @@ class Wait(AAZWaitCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.force_firewall_policy_association = AAZBoolType(
                 serialized_name="forceFirewallPolicyAssociation",
             )
@@ -265,7 +317,7 @@ class Wait(AAZWaitCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _WaitHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _ShowHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.ssl_profiles = AAZListType(
                 serialized_name="sslProfiles",
             )
@@ -316,7 +368,7 @@ class Wait(AAZWaitCommand):
 
             backend_address_pools = cls._schema_on_200.properties.backend_address_pools
             backend_address_pools.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
+            _ShowHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
 
             backend_http_settings_collection = cls._schema_on_200.properties.backend_http_settings_collection
             backend_http_settings_collection.Element = AAZObjectType()
@@ -359,7 +411,7 @@ class Wait(AAZWaitCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(properties.probe)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.probe_enabled = AAZBoolType(
                 serialized_name="probeEnabled",
             )
@@ -386,7 +438,7 @@ class Wait(AAZWaitCommand):
 
             authentication_certificates = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
 
             connection_draining = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.connection_draining
             connection_draining.drain_timeout_in_sec = AAZIntType(
@@ -399,7 +451,7 @@ class Wait(AAZWaitCommand):
 
             trusted_root_certificates = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             backend_settings_collection = cls._schema_on_200.properties.backend_settings_collection
             backend_settings_collection.Element = AAZObjectType()
@@ -429,7 +481,7 @@ class Wait(AAZWaitCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(properties.probe)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.protocol = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -442,11 +494,11 @@ class Wait(AAZWaitCommand):
 
             trusted_root_certificates = cls._schema_on_200.properties.backend_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             custom_error_configurations = cls._schema_on_200.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _WaitHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _ShowHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             entra_jwt_validation_configs = cls._schema_on_200.properties.entra_jwt_validation_configs
             entra_jwt_validation_configs.Element = AAZObjectType()
@@ -506,7 +558,7 @@ class Wait(AAZWaitCommand):
             properties.private_link_configuration = AAZObjectType(
                 serialized_name="privateLinkConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -514,9 +566,9 @@ class Wait(AAZWaitCommand):
             properties.public_ip_address = AAZObjectType(
                 serialized_name="publicIPAddress",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
             properties.subnet = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             frontend_ports = cls._schema_on_200.properties.frontend_ports
             frontend_ports.Element = AAZObjectType()
@@ -543,7 +595,7 @@ class Wait(AAZWaitCommand):
 
             gateway_ip_configurations = cls._schema_on_200.properties.gateway_ip_configurations
             gateway_ip_configurations.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
+            _ShowHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
 
             global_configuration = cls._schema_on_200.properties.global_configuration
             global_configuration.enable_request_buffering = AAZBoolType(
@@ -576,15 +628,15 @@ class Wait(AAZWaitCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -602,15 +654,15 @@ class Wait(AAZWaitCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             custom_error_configurations = cls._schema_on_200.properties.http_listeners.Element.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _WaitHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _ShowHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             host_names = cls._schema_on_200.properties.http_listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -635,11 +687,11 @@ class Wait(AAZWaitCommand):
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_names = AAZListType(
                 serialized_name="hostNames",
             )
@@ -651,11 +703,11 @@ class Wait(AAZWaitCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             host_names = cls._schema_on_200.properties.listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -708,7 +760,7 @@ class Wait(AAZWaitCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.weight_per_server = AAZIntType(
                 serialized_name="weightPerServer",
             )
@@ -738,11 +790,11 @@ class Wait(AAZWaitCommand):
                 serialized_name="privateEndpoint",
                 flags={"read_only": True},
             )
-            _WaitHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
+            _ShowHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
             properties.private_link_service_connection_state = AAZObjectType(
                 serialized_name="privateLinkServiceConnectionState",
             )
-            _WaitHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
+            _ShowHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -802,7 +854,7 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
             properties.subnet = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             probes = cls._schema_on_200.properties.probes
             probes.Element = AAZObjectType()
@@ -892,7 +944,7 @@ class Wait(AAZWaitCommand):
             properties.target_listener = AAZObjectType(
                 serialized_name="targetListener",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.target_listener)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.target_listener)
             properties.target_url = AAZStrType(
                 serialized_name="targetUrl",
             )
@@ -902,15 +954,15 @@ class Wait(AAZWaitCommand):
 
             path_rules = cls._schema_on_200.properties.redirect_configurations.Element.properties.path_rules
             path_rules.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(path_rules.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(path_rules.Element)
 
             request_routing_rules = cls._schema_on_200.properties.redirect_configurations.Element.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
 
             url_path_maps = cls._schema_on_200.properties.redirect_configurations.Element.properties.url_path_maps
             url_path_maps.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
 
             request_routing_rules = cls._schema_on_200.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
@@ -932,23 +984,23 @@ class Wait(AAZWaitCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.entra_jwt_validation_config = AAZObjectType(
                 serialized_name="entraJWTValidationConfig",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
             properties.http_listener = AAZObjectType(
                 serialized_name="httpListener",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.http_listener)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.http_listener)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.priority = AAZIntType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -957,18 +1009,18 @@ class Wait(AAZWaitCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
             properties.rule_type = AAZStrType(
                 serialized_name="ruleType",
             )
             properties.url_path_map = AAZObjectType(
                 serialized_name="urlPathMap",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.url_path_map)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.url_path_map)
 
             rewrite_rule_sets = cls._schema_on_200.properties.rewrite_rule_sets
             rewrite_rule_sets.Element = AAZObjectType()
@@ -1018,11 +1070,11 @@ class Wait(AAZWaitCommand):
 
             request_header_configurations = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.request_header_configurations
             request_header_configurations.Element = AAZObjectType()
-            _WaitHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
+            _ShowHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
 
             response_header_configurations = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.response_header_configurations
             response_header_configurations.Element = AAZObjectType()
-            _WaitHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
+            _ShowHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
 
             url_configuration = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.url_configuration
             url_configuration.modified_path = AAZStrType(
@@ -1064,13 +1116,13 @@ class Wait(AAZWaitCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_settings = AAZObjectType(
                 serialized_name="backendSettings",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_settings)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_settings)
             properties.listener = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(properties.listener)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.listener)
             properties.priority = AAZIntType(
                 flags={"required": True},
             )
@@ -1155,7 +1207,7 @@ class Wait(AAZWaitCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _WaitHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _ShowHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.trusted_client_certificates = AAZListType(
                 serialized_name="trustedClientCertificates",
             )
@@ -1173,7 +1225,7 @@ class Wait(AAZWaitCommand):
 
             trusted_client_certificates = cls._schema_on_200.properties.ssl_profiles.Element.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
-            _WaitHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
 
             trusted_client_certificates = cls._schema_on_200.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
@@ -1252,23 +1304,23 @@ class Wait(AAZWaitCommand):
             properties.default_backend_address_pool = AAZObjectType(
                 serialized_name="defaultBackendAddressPool",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
             properties.default_backend_http_settings = AAZObjectType(
                 serialized_name="defaultBackendHttpSettings",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
             properties.default_load_distribution_policy = AAZObjectType(
                 serialized_name="defaultLoadDistributionPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
             properties.default_redirect_configuration = AAZObjectType(
                 serialized_name="defaultRedirectConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
             properties.default_rewrite_rule_set = AAZObjectType(
                 serialized_name="defaultRewriteRuleSet",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
             properties.path_rules = AAZListType(
                 serialized_name="pathRules",
             )
@@ -1297,19 +1349,19 @@ class Wait(AAZWaitCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.paths = AAZListType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -1318,11 +1370,11 @@ class Wait(AAZWaitCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _WaitHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
 
             paths = cls._schema_on_200.properties.url_path_maps.Element.properties.path_rules.Element.properties.paths
             paths.Element = AAZStrType()
@@ -1398,8 +1450,8 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_application_gateway_custom_error_read = None
 
@@ -3832,4 +3884,4 @@ class _WaitHelper:
         _schema.type = cls._schema_common_virtual_network_tap_read.type
 
 
-__all__ = ["Wait"]
+__all__ = ["Show"]

@@ -722,14 +722,13 @@ class IdentityAssign(_IdentityAssign):
                          "/userAssignedIdentities/{}",
             ),
         )
-        args_schema.type._registered = False
-        args_schema.user_assigned_identities._registered = False
+        args_schema.mi_system_assigned._registered = False
+        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.type = "UserAssigned"
-        args.user_assigned_identities = {args.identity.to_serialized_data(): {}}
+        args.mi_user_assigned = [args.identity.to_serialized_data()]
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)

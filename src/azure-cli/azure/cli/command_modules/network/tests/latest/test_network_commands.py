@@ -1510,7 +1510,10 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                  checks=self.check('tags.hsm', 'preserved'))
         self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
                  '-n {cert_name}',
-                 checks=self.check('hsm.keyId', '{hsm_key_id2}'))
+                 checks=[
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                     self.exists('hsm.publicCertData'),
+                 ])
 
         # test ssl-cert list includes the hsm cert
         self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
