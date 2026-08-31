@@ -169,6 +169,38 @@ Command arguments: ['{"key": "value"}', '--debug']
 Command arguments: ['{"key": "value"}', '--debug']
 ```
 
+### Closing parenthesis `)` is stripped
+
+This is a common issue that affects many `az` commands — not just a single command. It occurs when an argument ends with `)`, such as a password, JMESPath expression, blob name, or Key Vault secret value.
+
+When PowerShell calls a `.cmd` script, it passes arguments through Command Prompt, which treats `()` as grouping operators for command blocks. A trailing `)` that lacks a matching `(` is therefore consumed by the Command Prompt parser, and Azure CLI never receives it.
+
+```powershell
+# Wrong! The trailing ) is stripped by cmd.exe
+> az aks update -g MyGroup -n MyCluster --windows-admin-password "Pass@word1)"
+# Azure CLI receives: Pass@word1
+
+# Wrong! The trailing ) is stripped by cmd.exe
+> az keyvault secret set --name secret --value "myvalue)"
+# Azure CLI receives: myvalue
+```
+
+To solve it:
+
+```powershell
+# Wrap the argument in double quotes passed through single-quoted outer string so that
+# Command Prompt treats ) as a literal character
+> az aks update -g MyGroup -n MyCluster --windows-admin-password '"Pass@word1)"'
+# Azure CLI receives: Pass@word1)
+
+# Use --% to stop PowerShell from parsing the argument;
+# wrap the argument in double quotes as required by Command Prompt
+> az --% aks update -g MyGroup -n MyCluster --windows-admin-password "Pass@word1)"
+# Azure CLI receives: Pass@word1)
+```
+
+This issue is tracked at [#15529](https://github.com/Azure/azure-cli/issues/15529) and has been reported across many commands, including passwords ([#10370](https://github.com/Azure/azure-cli/issues/10370), [#23018](https://github.com/Azure/azure-cli/issues/23018), [#25173](https://github.com/Azure/azure-cli/issues/25173)), blob names ([#15418](https://github.com/Azure/azure-cli/issues/15418)), and JMESPath expressions ([#32320](https://github.com/Azure/azure-cli/issues/32320)).
+
 ## Best practice: use file input for JSON
 
 For complex arguments like JSON string, the best practice is to use Azure CLI's `@<file>` convention to load from a file to bypass the shell's interpretation.
