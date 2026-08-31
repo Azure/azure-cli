@@ -1989,6 +1989,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
         self.cmd('vm user update -g {rg} -n vm --username AzureUser --password testPassword1')
 
+    @live_only()
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_sp_')
     def test_vm_user_update_win_special_password(self, resource_group):
