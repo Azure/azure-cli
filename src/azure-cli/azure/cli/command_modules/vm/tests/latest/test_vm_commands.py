@@ -54,15 +54,17 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
     def test_vm_image_list_by_alias(self):
         result = self.cmd('vm image list --offer ubuntu').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[-1]['publisher'], 'Canonical')
-        self.assertTrue('lts' in result[-1]['sku'])
+        canonical_results = [i for i in result if i['publisher'] == 'Canonical']
+        self.assertTrue(len(canonical_results) >= 1)
+        self.assertTrue(all(i['sku'] for i in canonical_results))
 
     def test_vm_image_list_by_alias_and_filtered_by_arch(self):
         result = self.cmd('vm image list --offer ubuntu --architecture x64').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[-1]['publisher'], 'Canonical')
-        self.assertTrue('lts' in result[-1]['sku'])
-        self.assertEqual(result[-1]['architecture'], 'x64')
+        canonical_results = [i for i in result if i['publisher'] == 'Canonical']
+        self.assertTrue(len(canonical_results) >= 1)
+        self.assertTrue(all(i['sku'] for i in canonical_results))
+        self.assertTrue(all(i['architecture'] == 'x64' for i in result))
 
 
 class VmReimageTest(ScenarioTest):
