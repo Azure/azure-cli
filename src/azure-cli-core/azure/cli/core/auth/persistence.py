@@ -83,10 +83,12 @@ def build_persistence(location, encrypt, type=None):  # pylint: disable=redefine
             logger.debug("Initializing LibsecretPersistence: location=%r", path)
             try:
                 attributes = {"type": type} if type else {}
+                label = f"{LIBSECRET_SCHEMA_NAME} - {type}" if type else LIBSECRET_SCHEMA_NAME
                 return LibsecretPersistence(
                     path,
                     schema_name=LIBSECRET_SCHEMA_NAME,
-                    attributes=attributes
+                    attributes=attributes,
+                    label=label
                 )
             except Exception as e:  # pylint: disable=broad-except
                 # LibsecretPersistence is known to be unavailable in some Linux environments.

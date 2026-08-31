@@ -11,6 +11,24 @@ from unittest import mock
 from azure.cli.core.auth import persistence
 
 
+class TestLibsecretLabel(unittest.TestCase):
+
+    @staticmethod
+    def _build(type):
+        with mock.patch.object(persistence.sys, 'platform', 'linux'), \
+                mock.patch.object(persistence, 'LibsecretPersistence') as libsecret_mock:
+            persistence.build_persistence('/tmp/test_persistence', True, type=type)
+        return libsecret_mock.call_args.kwargs
+
+    def test_label_names_the_store(self):
+        # Without it libsecret stores an empty label, which shows as a blank row in keyring viewers.
+        self.assertEqual(self._build('Token cache')['label'], 'Microsoft Azure CLI - Token cache')
+        self.assertEqual(self._build('Secret store')['label'], 'Microsoft Azure CLI - Secret store')
+
+    def test_label_falls_back_to_the_schema_name(self):
+        self.assertEqual(self._build(None)['label'], 'Microsoft Azure CLI')
+
+
 class TestEncryptionFallbackWarning(unittest.TestCase):
     """The plaintext fallback warning is shown at sign-in, not by each persistence build."""
 
