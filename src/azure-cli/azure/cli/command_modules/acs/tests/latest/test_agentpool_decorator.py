@@ -1481,6 +1481,15 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         self.assertEqual(ctx_2.get_enable_artifact_streaming(), None)
 
     def common_get_enable_managed_dranet(self):
+        ctx_0 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_0.get_enable_managed_dranet(), False)
+
         ctx_1 = AKSAgentPoolContext(
             self.cmd,
             AKSAgentPoolParamDict({"enable_managed_dranet": False}),
@@ -3737,6 +3746,23 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         dec_2.context.attach_agentpool(agentpool_2)
         dec_agentpool_2 = dec_2.update_network_profile(agentpool_2)
         self.assertEqual(dec_agentpool_2.network_profile.dranet.mode, "Managed")
+
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance()
+        dec_3.context.attach_agentpool(agentpool_3)
+        with patch.object(dec_3.context, "get_asg_ids", return_value=[]), patch.object(
+            dec_3.context, "get_allowed_host_ports", return_value=[]
+        ):
+            dec_agentpool_3 = dec_3.update_network_profile(agentpool_3)
+        self.assertIsNotNone(dec_agentpool_3.network_profile)
+        self.assertEqual(dec_agentpool_3.network_profile.application_security_groups, [])
+        self.assertEqual(dec_agentpool_3.network_profile.allowed_host_ports, [])
 
     def common_update_fips_image(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
