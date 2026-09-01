@@ -16,7 +16,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
                                        AzureResponseError,
-                                       ResourceNotFoundError)
+                                       ResourceNotFoundError,
+                                       ValidationError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -42,6 +43,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_startup_log,
                                                          troubleshoot_status,
                                                          create_webapp)
+from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -565,6 +567,110 @@ class TestWebappMocked(unittest.TestCase):
         self.assertIn('Creating a Linux webapp requires one of the following', str(context.exception))
         self.assertIn('--runtime', str(context.exception))
         self.assertIn('--os-type linux', str(context.exception))
+
+    @staticmethod
+    def _configure_webapp_create_failure(get_site_avail_mock, stack_helper_mock, web_client_mock,
+                                         is_linux, error):
+        cmd_mock = _get_test_cmd()
+        SiteConfig, SkuDescription, NameValuePair = cmd_mock.get_models(
+            'SiteConfig', 'SkuDescription', 'NameValuePair')
+        cmd_mock.get_models = mock.MagicMock(return_value=(SiteConfig, SkuDescription, NameValuePair))
+
+        plan_info = mock.MagicMock()
+        plan_info.name = 'test-plan'
+        plan_info.reserved = is_linux
+        plan_info.is_xenon = False
+        plan_info.location = 'westus2'
+        plan_info.id = '/subscriptions/sub/resourceGroups/test-rg/providers/Microsoft.Web/serverfarms/test-plan'
+        plan_info.sku = SkuDescription(name='B1')
+        web_client_mock.return_value.app_service_plans.get.return_value = plan_info
+        web_client_mock.return_value.web_apps.begin_create_or_update.side_effect = error
+
+        name_validation = mock.MagicMock()
+        name_validation.name_available = True
+        get_site_avail_mock.return_value = name_validation
+        stack_helper_mock.return_value.get_default_version.return_value = '20.0'
+        return cmd_mock
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_enriches_control_plane_failure(self, get_site_avail_mock,
+                                                                stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 Linux workers are unavailable due to capacity')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, error)
+
+        with self.assertRaises(EnrichedDeploymentError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          container_image_name='nginx:latest', enriched_errors=True)
+
+        self.assertIn('WEB APP CREATION FAILED', str(context.exception))
+        self.assertIn('LinuxWorkersUnavailable', str(context.exception))
+        self.assertIn('Runtime     : DOCKER|nginx:latest', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_enriches_invalid_runtime(self, get_site_avail_mock,
+                                                          stack_helper_mock, web_client_mock):
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, None)
+        stack_helper_mock.remove_delimiters.return_value = 'PYTHON|99.99'
+        stack_helper_mock.return_value.resolve.return_value = None
+
+        with self.assertRaises(EnrichedDeploymentError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          runtime='PYTHON:99.99', enriched_errors=True)
+
+        self.assertIn('InvalidLinuxRuntime', str(context.exception))
+        self.assertIn('Runtime     : PYTHON|99.99', str(context.exception))
+        self.assertIn('az webapp list-runtimes --os-type linux -o table', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_preserves_invalid_runtime_when_enrichment_disabled(
+            self, get_site_avail_mock, stack_helper_mock, web_client_mock):
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, None)
+        stack_helper_mock.remove_delimiters.return_value = 'PYTHON|99.99'
+        stack_helper_mock.return_value.resolve.return_value = None
+
+        with self.assertRaises(ValidationError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          runtime='PYTHON:99.99', enriched_errors=False)
+
+        self.assertIn("Linux Runtime 'PYTHON|99.99' is not supported", str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_preserves_failure_when_enrichment_disabled(self, get_site_avail_mock,
+                                                                            stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 Linux workers are unavailable due to capacity')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, True, error)
+
+        with self.assertRaises(RuntimeError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
+                          container_image_name='nginx:latest', enriched_errors=False)
+
+        self.assertIs(context.exception, error)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_windows_webapp_create_preserves_failure_when_enrichment_enabled(self, get_site_avail_mock,
+                                                                             stack_helper_mock, web_client_mock):
+        error = RuntimeError('Status Code: 400 bad request')
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, False, error)
+
+        with self.assertRaises(RuntimeError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan', enriched_errors=True)
+
+        self.assertIs(context.exception, error)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
@@ -1505,6 +1611,46 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
         self.status_code = status_code
 
 
+class TestOneDeployTag(unittest.TestCase):
+
+    def test_scm_url_includes_encoded_tag(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _build_onedeploy_scm_url
+        params = OneDeployParams()
+        params.artifact_type = 'zip'
+        params.tag = 'release 2026/08'
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_or_fetch_scm_url',
+                        return_value='https://example.scm.azurewebsites.net'):
+            result = _build_onedeploy_scm_url(params)
+
+        self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_webapp_deploy_ignores_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
+        from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
+        site_operation_mock.return_value = mock.MagicMock(kind='app', reserved=False)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
+            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', tag='windows-tag')
+
+        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
+        self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
+
+    def test_arm_body_includes_tag(self):
+        import json
+        from azure.cli.command_modules.appservice.custom import OneDeployParams, _get_onedeploy_request_body
+        params = OneDeployParams()
+        params.src_url = 'https://example.com/app.zip'
+        params.artifact_type = 'zip'
+        params.tag = 'release-2026-08'
+
+        body, file_hash = _get_onedeploy_request_body(params)
+
+        self.assertEqual(json.loads(body)['properties']['tag'], 'release-2026-08')
+        self.assertIsNone(file_hash)
+
+
 class TestCreateAppServicePlanDefaults(unittest.TestCase):
     """Tests for create_app_service_plan default SKU behavior"""
 
@@ -1530,6 +1676,28 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = sku_description_cls.call_args
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
+
+    def test_update_to_isolated_v4_sku_requires_ase(self):
+        from azure.cli.command_modules.appservice.custom import update_app_service_plan
+        instance = mock.MagicMock()
+        instance.hosting_environment_profile = None
+        instance.zone_redundant = False
+
+        with self.assertRaises(ValidationError):
+            update_app_service_plan(mock.MagicMock(), instance, sku='I1V4')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._enable_managed_instance_properties')
+    def test_update_to_isolated_v4_sku_on_ase(self, _):
+        from azure.cli.command_modules.appservice.custom import update_app_service_plan
+        instance = mock.MagicMock()
+        instance.hosting_environment_profile = mock.MagicMock()
+        instance.zone_redundant = False
+        instance.sku.capacity = 1
+
+        result = update_app_service_plan(mock.MagicMock(), instance, sku='I1MV4')
+
+        self.assertEqual(result.sku.name, 'I1MV4')
+        self.assertEqual(result.sku.tier, 'IsolatedV4')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')

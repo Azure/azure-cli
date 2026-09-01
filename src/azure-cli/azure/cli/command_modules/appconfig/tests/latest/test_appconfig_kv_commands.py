@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -32,7 +32,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
     def test_azconfig_kv(self, resource_group, location):
         # Lowercase store-name prefix so the HTTP-lowercased '<name>.azconfig.io' host matches the
         # name registered with the recording name-replacer, keeping cassettes scrubbed for playback.
-        config_store_prefix = get_resource_name_prefix('kvtest')
+        config_store_prefix = 'kvtest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -348,7 +348,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
-        config_store_prefix = get_resource_name_prefix('kvtest')
+        config_store_prefix = 'kvtest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -408,7 +408,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)
         # name registered with the recording name-replacer, leaving the live host unscrubbed in the
         # cassette and breaking playback. A lowercase name keeps recording and playback hosts aligned.
-        config_store_prefix = get_resource_name_prefix('kvrevisiontest')
+        config_store_prefix = 'kvrevisiontest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
