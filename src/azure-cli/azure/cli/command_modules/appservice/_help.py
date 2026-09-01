@@ -1216,7 +1216,7 @@ short-summary: List available built-in stacks which can be used for function app
 
 helps['functionapp flex-migration'] = """
 type: group
-short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan — side-by-side (new app) or in place (same app).
+short-summary: Manage migration between Linux Consumption and Flex Consumption plans.
 """
 
 helps['functionapp flex-migration start'] = """
@@ -1234,6 +1234,15 @@ examples:
   - name: Upgrade a Linux Consumption function app to Flex Consumption in place (same app, same name).
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyResourceGroup --in-place
+"""
+
+helps['functionapp flex-migration revert'] = """
+type: command
+short-summary: Revert an in-place upgraded Flex Consumption function app to Linux Consumption.
+examples:
+  - name: Revert a function app to Linux Consumption within its revert window.
+    text: >
+        az functionapp flex-migration revert --source-name MyFunctionApp --source-resource-group MyResourceGroup
 """
 
 helps['functionapp flex-migration list'] = """

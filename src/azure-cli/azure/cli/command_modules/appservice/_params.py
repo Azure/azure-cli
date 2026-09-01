@@ -458,6 +458,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('skip_hostnames', options_list=['--skip-hostnames', '--sh'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating hostnames.")
         c.argument('skip_cors', options_list=['--skip-cors', '--sc'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating CORS settings.")
 
+    with self.argument_context('functionapp flex-migration revert') as c:
+        c.argument('source_resource_group', help='The resource group of the function app to revert.')
+        c.argument('source_name', help='The name of the function app to revert.')
+
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')

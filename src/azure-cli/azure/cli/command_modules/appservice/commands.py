@@ -480,6 +480,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp flex-migration') as g:
         g.custom_command('start', 'migrate_consumption_to_flex', exception_handler=ex_handler_factory())
+        g.custom_command('revert', 'revert_flex_migration', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_flex_migration_candidates', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment config') as g:
