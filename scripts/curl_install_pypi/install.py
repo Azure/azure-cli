@@ -23,7 +23,26 @@ import tempfile
 import shutil
 import subprocess
 import hashlib
+import ssl
 from urllib.request import urlopen
+
+def _create_ssl_context():
+    # Attempt to use system's default CA certificates (works on most platforms)
+    try:
+        return ssl.create_default_context()
+    except ssl.SSLError:
+        pass
+    # Fallback to certifi if available (e.g., in virtualenvs with requests installed)
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        pass
+    # Last resort: no verification (NOT recommended, but lets users proceed if they accept the risk)
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    return context
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
