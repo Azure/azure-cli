@@ -56,9 +56,11 @@ class TestCloud(unittest.TestCase):
         endpoint_rm = 'http://management.contoso.com'
         suffix_storage = 'core.contoso.com'
         suffix_acr_login_server = '.azurecr-test.io'
+        suffix_acr_service_fabrik = '.cloudapp.azure-test.io'
         endpoints = CloudEndpoints(resource_manager=endpoint_rm)
         suffixes = CloudSuffixes(storage_endpoint=suffix_storage,
-                                 acr_login_server_endpoint=suffix_acr_login_server)
+                                 acr_login_server_endpoint=suffix_acr_login_server,
+                                 acr_service_fabrik_endpoint=suffix_acr_service_fabrik)
         c = Cloud('MyOwnCloud', endpoints=endpoints, suffixes=suffixes)
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
@@ -70,6 +72,7 @@ class TestCloud(unittest.TestCase):
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
                 self.assertEqual(config.get(c.name, 'suffix_storage_endpoint'), suffix_storage)
                 self.assertEqual(config.get(c.name, 'suffix_acr_login_server_endpoint'), suffix_acr_login_server)
+                self.assertEqual(config.get(c.name, 'suffix_acr_service_fabrik_endpoint'), suffix_acr_service_fabrik)
             custom_clouds = get_custom_clouds(cli)
             self.assertEqual(len(custom_clouds), 1)
             self.assertEqual(custom_clouds[0].name, c.name)
@@ -79,6 +82,8 @@ class TestCloud(unittest.TestCase):
                              c.suffixes.storage_endpoint)
             self.assertEqual(custom_clouds[0].suffixes.acr_login_server_endpoint,
                              c.suffixes.acr_login_server_endpoint)
+            self.assertEqual(custom_clouds[0].suffixes.acr_service_fabrik_endpoint,
+                             c.suffixes.acr_service_fabrik_endpoint)
             with mock.patch('azure.cli.core.cloud._get_cloud', lambda _, _1: c):
                 remove_cloud(cli, c.name)
             custom_clouds = get_custom_clouds(cli)
