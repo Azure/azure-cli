@@ -1286,6 +1286,17 @@ examples:
             --path-map-name MyUrlPathMap -n MyUrlPathMapRule2
 """
 
+helps['network application-gateway url-path-map rule update'] = """
+type: command
+short-summary: Update a rule of a URL path map.
+examples:
+  - name: Update the paths for a URL path map rule.
+    text: |
+        az network application-gateway url-path-map rule update -g MyResourceGroup \\
+            --gateway-name MyAppGateway --path-map-name MyUrlPathMap -n MyUrlPathMapRule \\
+            --paths /mypath/*
+"""
+
 helps['network application-gateway url-path-map show'] = """
 type: command
 short-summary: Get the details of a URL path map.
