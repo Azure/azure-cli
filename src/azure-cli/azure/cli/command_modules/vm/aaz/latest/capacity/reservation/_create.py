@@ -22,12 +22,15 @@ class Create(AAZCommand):
 
     :example: Create a capacity reservation with specific capacity and zones.
         az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 --zone 1 --tags key=val
+
+    :example: Create a Future capacity reservation.
+        az capacity reservation create -c ReservationGroupName -n ReservationName -g MyResourceGroup --sku Standard_A1_v2 --capacity 5 --schedule-profile-start 2026-12-01T12:00:00Z --minimum-commitment-days 30
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2026-04-01"],
         ]
     }
 
@@ -90,6 +93,25 @@ class Create(AAZCommand):
         zone = cls._args_schema.zone
         zone.Element = AAZStrArg()
 
+        # define Arg Group "ScheduleProfile"
+
+        _args_schema = cls._args_schema
+        _args_schema.end = AAZStrArg(
+            options=["--end"],
+            arg_group="ScheduleProfile",
+            help="The required end date for Block capacity reservations. Must be after the start date, with a duration of either 1–14 whole days or 3–26 whole weeks. Example: 2025-06-28.",
+        )
+        _args_schema.minimum_commitment_days = AAZIntArg(
+            options=["--minimum-commitment-days"],
+            arg_group="ScheduleProfile",
+            help="The minimum number of days after the start date before a committed Future capacity reservation can be updated or deleted. The service supplies a default when this value is omitted.",
+        )
+        _args_schema.schedule_profile_start = AAZStrArg(
+            options=["--schedule-profile-start"],
+            arg_group="ScheduleProfile",
+            help="The start date and time of a Future capacity reservation. The value must be at least 7 days and at most 6 months in the future. Example: 2026-08-01T12:00:00Z.",
+        )
+
         # define Arg Group "Sku"
 
         _args_schema = cls._args_schema
@@ -134,7 +156,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -143,7 +165,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -190,7 +212,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -216,9 +238,20 @@ class Create(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
             _builder.set_prop("zones", AAZListType, ".zone")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("scheduleProfile", AAZObjectType)
+
+            schedule_profile = _builder.get(".properties.scheduleProfile")
+            if schedule_profile is not None:
+                schedule_profile.set_prop("end", AAZStrType, ".end")
+                schedule_profile.set_prop("minimumCommitmentDays", AAZIntType, ".minimum_commitment_days")
+                schedule_profile.set_prop("start", AAZStrType, ".schedule_profile_start")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -268,6 +301,10 @@ class Create(AAZCommand):
             _schema_on_200_201.sku = AAZObjectType(
                 flags={"required": True},
             )
+            _schema_on_200_201.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
@@ -295,6 +332,9 @@ class Create(AAZCommand):
                 serialized_name="reservationId",
                 flags={"read_only": True},
             )
+            properties.schedule_profile = AAZObjectType(
+                serialized_name="scheduleProfile",
+            )
             properties.time_created = AAZStrType(
                 serialized_name="timeCreated",
                 flags={"read_only": True},
@@ -305,9 +345,17 @@ class Create(AAZCommand):
             )
 
             instance_view = cls._schema_on_200_201.properties.instance_view
+            instance_view.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             instance_view.statuses = AAZListType()
             instance_view.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200_201.properties.instance_view.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200_201.properties.instance_view.statuses
@@ -327,14 +375,32 @@ class Create(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
 
+            used_reserved_count_by_subscription = cls._schema_on_200_201.properties.instance_view.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
+
             virtual_machines_allocated = cls._schema_on_200_201.properties.instance_view.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
             _CreateHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+
+            schedule_profile = cls._schema_on_200_201.properties.schedule_profile
+            schedule_profile.end = AAZStrType()
+            schedule_profile.minimum_commitment_days = AAZIntType(
+                serialized_name="minimumCommitmentDays",
+            )
+            schedule_profile.modifiable_until = AAZStrType(
+                serialized_name="modifiableUntil",
+                flags={"read_only": True},
+            )
+            schedule_profile.start = AAZStrType()
 
             virtual_machines_associated = cls._schema_on_200_201.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
@@ -344,6 +410,26 @@ class Create(AAZCommand):
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
+
+            system_data = cls._schema_on_200_201.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()

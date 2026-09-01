@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2026-04-01"],
         ]
     }
 
@@ -70,6 +70,29 @@ class Update(AAZCommand):
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.schedule_profile = AAZObjectArg(
+            options=["--schedule-profile"],
+            arg_group="Properties",
+            help="Defines the schedule for Block and Future capacity reservations. Specifies the schedule during which capacity reservation is active and VM or VMSS resource can be allocated using reservation. For Block capacity reservations, the scheduleProfile, start, and end fields are immutable after creation. Please refer to https://aka.ms/blockcapacityreservation for more details. Minimum API version for Block capacity reservations: 2025-04-01. Future capacity reservations must use this property with only a start time, which can be changed until the ‘modifiableUntil’ time. Please refer to https://aka.ms/futurecapacityreservation for more details. Minimum API version for Future capacity reservations: 2026-04-01.",
+        )
+
+        schedule_profile = cls._args_schema.schedule_profile
+        schedule_profile.end = AAZStrArg(
+            options=["end"],
+            help="The required end date for Block capacity reservations. Must be after the start date, with a duration of either 1–14 whole days or 3–26 whole weeks. Example: 2025-06-28.",
+        )
+        schedule_profile.minimum_commitment_days = AAZIntArg(
+            options=["minimum-commitment-days"],
+            help="The minimum number of days that must pass after the start date before a Future capacity reservation can be updated or deleted once it has been committed. Will be populated with a default value if not provided.",
+        )
+        schedule_profile.start = AAZStrArg(
+            options=["start"],
+            help="The required start date for Block or Future capacity reservations. Block capacity reservations: Must be today or within 56 days in the future. For same-day scheduling, requests must be submitted before 11:30 AM UTC. Future capacity reservations: Must be at least 7 days in the future, and maximum 6 months in the future. Minimum API version for Future capacity reservations: 2026-04-01. Example: 2025-06-27, applicable for both Block and Future capacity reservations.",
+        )
+
         # define Arg Group "Sku"
 
         _args_schema = cls._args_schema
@@ -109,7 +132,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -118,7 +141,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -165,7 +188,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -190,8 +213,19 @@ class Update(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("scheduleProfile", AAZObjectType, ".schedule_profile")
+
+            schedule_profile = _builder.get(".properties.scheduleProfile")
+            if schedule_profile is not None:
+                schedule_profile.set_prop("end", AAZStrType, ".end")
+                schedule_profile.set_prop("minimumCommitmentDays", AAZIntType, ".minimum_commitment_days")
+                schedule_profile.set_prop("start", AAZStrType, ".start")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -236,6 +270,10 @@ class Update(AAZCommand):
             _schema_on_200.sku = AAZObjectType(
                 flags={"required": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -263,6 +301,9 @@ class Update(AAZCommand):
                 serialized_name="reservationId",
                 flags={"read_only": True},
             )
+            properties.schedule_profile = AAZObjectType(
+                serialized_name="scheduleProfile",
+            )
             properties.time_created = AAZStrType(
                 serialized_name="timeCreated",
                 flags={"read_only": True},
@@ -273,9 +314,17 @@ class Update(AAZCommand):
             )
 
             instance_view = cls._schema_on_200.properties.instance_view
+            instance_view.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             instance_view.statuses = AAZListType()
             instance_view.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.properties.instance_view.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.properties.instance_view.statuses
@@ -295,14 +344,32 @@ class Update(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
 
+            used_reserved_count_by_subscription = cls._schema_on_200.properties.instance_view.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
+
             virtual_machines_allocated = cls._schema_on_200.properties.instance_view.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
             _UpdateHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+
+            schedule_profile = cls._schema_on_200.properties.schedule_profile
+            schedule_profile.end = AAZStrType()
+            schedule_profile.minimum_commitment_days = AAZIntType(
+                serialized_name="minimumCommitmentDays",
+            )
+            schedule_profile.modifiable_until = AAZStrType(
+                serialized_name="modifiableUntil",
+                flags={"read_only": True},
+            )
+            schedule_profile.start = AAZStrType()
 
             virtual_machines_associated = cls._schema_on_200.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
@@ -312,6 +379,26 @@ class Update(AAZCommand):
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
