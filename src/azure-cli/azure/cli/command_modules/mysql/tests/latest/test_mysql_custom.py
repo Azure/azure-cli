@@ -34,12 +34,44 @@ class MysqlFlexibleServerFirewallRuleCustomTest(unittest.TestCase):
         }, client.parameters.as_dict())
 
 
+class MysqlFlexibleServerAdvancedThreatProtectionCustomTest(unittest.TestCase):
+
+    def test_update_uses_properties_payload(self):
+        client = _FakeAdvancedThreatProtectionClient()
+
+        custom.flexible_server_advanced_threat_protection_update(
+            cmd=None,
+            client=client,
+            resource_group_name='rg',
+            server_name='server',
+            state='Enabled')
+
+        self.assertEqual('rg', client.resource_group_name)
+        self.assertEqual('server', client.server_name)
+        self.assertEqual('Default', client.advanced_threat_protection_name)
+        self.assertEqual({
+            'properties': {
+                'state': 'Enabled'
+            }
+        }, client.parameters)
+
+
 class _FakeFirewallRulesClient:
 
     def begin_create_or_update(self, resource_group_name, server_name, firewall_rule_name, parameters):
         self.resource_group_name = resource_group_name
         self.server_name = server_name
         self.firewall_rule_name = firewall_rule_name
+        self.parameters = parameters
+        return parameters
+
+
+class _FakeAdvancedThreatProtectionClient:
+
+    def begin_update(self, resource_group_name, server_name, advanced_threat_protection_name, parameters):
+        self.resource_group_name = resource_group_name
+        self.server_name = server_name
+        self.advanced_threat_protection_name = advanced_threat_protection_name
         self.parameters = parameters
         return parameters
 
