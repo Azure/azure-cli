@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.89.1"
+VERSION = "2.90.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.8.0',
+    'azure-appconfiguration==1.10.0b1',
     'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
@@ -153,7 +153,6 @@ DEPENDENCIES = [
     'PyNaCl~=1.6.2',
     'scp~=0.13.2',
     'semver~=3.0',
-    'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription
