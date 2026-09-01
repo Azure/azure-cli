@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "network application-gateway url-path-map rule update",
 )
 class Update(AAZCommand):
-    """network application-gateway url-path-map rule update
+    """Update a rule of a URL path map.
+
+    :example: Update the paths for a URL path map rule.
+        az network application-gateway url-path-map rule update -g MyResourceGroup --gateway-name MyAppGateway --path-map-name MyUrlPathMap -n MyUrlPathMapRule --paths /mypath/*
     """
 
     _aaz_info = {
