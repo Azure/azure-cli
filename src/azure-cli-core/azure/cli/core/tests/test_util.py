@@ -245,25 +245,6 @@ class TestUtils(unittest.TestCase):
         actual = get_az_user_agent()
         self.assertEqual(actual, 'AZURECLI/7.8.9')
 
-    def test_in_managed_environment(self):
-        from azure.cli.core.util import in_ci, in_managed_environment
-
-        for variables in [{}, {'CODESPACES': 'true'}]:
-            with self.subTest(variables=variables):
-                with mock.patch.dict('os.environ', variables, clear=True):
-                    self.assertFalse(in_ci())
-                    self.assertFalse(in_managed_environment())
-
-        with mock.patch.dict('os.environ', {'ACC_CLOUD': 'PROD'}, clear=True):
-            self.assertFalse(in_ci())
-            self.assertTrue(in_managed_environment())
-
-        for variables in [{'GITHUB_ACTIONS': 'true'}, {'TF_BUILD': 'True'}]:
-            with self.subTest(variables=variables):
-                with mock.patch.dict('os.environ', variables, clear=True):
-                    self.assertTrue(in_ci())
-                    self.assertTrue(in_managed_environment())
-
     @mock.patch.dict('os.environ')
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
     @mock.patch('requests.Session.send', autospec=True)

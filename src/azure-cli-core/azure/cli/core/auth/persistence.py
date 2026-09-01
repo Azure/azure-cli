@@ -32,7 +32,7 @@ LIBSECRET_SCHEMA_NAME = 'Microsoft Azure CLI'
 ENCRYPTION_FALLBACK_WARNING = (
     "Encryption is unavailable on this machine, so the token cache and service principal secrets "
     "are stored in plaintext. "
-    "Please follow https://aka.ms/azure-cli-credential-encryption to enable encryption.")
+    "Learn more: https://aka.ms/azure-cli-credential-encryption to enable encryption.")
 
 # Credentials left in the OS credential store by an earlier encrypted run, which a clear cannot
 # reach. Which one applies depends on why this run is not using the store.
@@ -170,10 +170,10 @@ def warn_if_encryption_unavailable():
     if not _encryption_fallback:
         return
 
-    # Nothing can be installed on a platform-managed machine, so the advice would only be noise.
-    from azure.cli.core.util import in_managed_environment
-    if in_managed_environment():
-        logger.debug("Encryption is unavailable, but the warning is suppressed in a managed environment.")
+    # Nothing can be installed on Cloud Shell's machine, so the advice would only be noise.
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        logger.debug("Encryption is unavailable, but the warning is suppressed in Cloud Shell.")
         return
 
     logger.warning(ENCRYPTION_FALLBACK_WARNING)

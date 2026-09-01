@@ -843,23 +843,6 @@ def is_github_codespaces():
     return os.environ.get('CODESPACES') == 'true'
 
 
-def in_ci():
-    """Whether az is running on a CI agent."""
-    # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
-    # https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
-    return 'GITHUB_ACTIONS' in os.environ or 'TF_BUILD' in os.environ
-
-
-def in_managed_environment():
-    """Whether az is running on a platform-managed machine that the user doesn't control.
-
-    Covers Cloud Shell and CI agents. Such machines are ephemeral and provide no way to install
-    or unlock an OS credential store, so advice that asks the user to change the machine's
-    configuration is only noise there.
-    """
-    return bool(in_cloud_console() or in_ci())
-
-
 def can_launch_browser():
     import webbrowser
     platform_name, _ = _get_platform_info()

@@ -65,17 +65,16 @@ class TestEncryptionFallbackWarning(unittest.TestCase):
         self._build_with_libsecret_unavailable()
         self._build_with_libsecret_unavailable()
 
-        # az's own CI sets TF_BUILD/GITHUB_ACTIONS, which would suppress the warning.
+        # A CI agent gets the warning too, so clear the environment to keep az's own CI honest.
         with mock.patch.dict(os.environ, {}, clear=True), \
                 mock.patch.object(persistence.logger, 'warning') as warning_mock:
             persistence.warn_if_encryption_unavailable()
 
         warning_mock.assert_called_once_with(persistence.ENCRYPTION_FALLBACK_WARNING)
 
-    def test_no_warning_in_a_managed_environment(self):
-        # Cloud Shell and CI agents can't have an OS credential store installed, so the advice
-        # to enable encryption is unactionable there.
-        for name, value in [('ACC_CLOUD', 'PROD'), ('GITHUB_ACTIONS', 'true'), ('TF_BUILD', 'True')]:
+    def test_warning_shown_on_a_ci_agent(self):
+        # A CI agent is someone's own machine to configure, unlike Cloud Shell.
+        for name, value in [('GITHUB_ACTIONS', 'true'), ('TF_BUILD', 'True')]:
             with self.subTest(variable=name):
                 self._build_with_libsecret_unavailable()
 
@@ -83,7 +82,18 @@ class TestEncryptionFallbackWarning(unittest.TestCase):
                         mock.patch.object(persistence.logger, 'warning') as warning_mock:
                     persistence.warn_if_encryption_unavailable()
 
-                warning_mock.assert_not_called()
+                warning_mock.assert_called_once_with(persistence.ENCRYPTION_FALLBACK_WARNING)
+
+    def test_no_warning_in_cloud_shell(self):
+        # Cloud Shell can't have an OS credential store installed, so the advice to enable
+        # encryption is unactionable there.
+        self._build_with_libsecret_unavailable()
+
+        with mock.patch.dict(os.environ, {'ACC_CLOUD': 'PROD'}, clear=True), \
+                mock.patch.object(persistence.logger, 'warning') as warning_mock:
+            persistence.warn_if_encryption_unavailable()
+
+        warning_mock.assert_not_called()
 
     def test_no_warning_without_fallback(self):
         with mock.patch.dict(os.environ, {}, clear=True), \
