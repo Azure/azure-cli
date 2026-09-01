@@ -4657,7 +4657,7 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus",
+        location="westus2",
         preserve_default_location=True,
     )
     def test_aks_nodepool_add_with_artifact_streaming(
@@ -4720,7 +4720,7 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus",
+        location="westus2",
         preserve_default_location=True,
     )
     def test_aks_nodepool_update_with_artifact_streaming(
@@ -6988,9 +6988,13 @@ spec:
             'resource_group': resource_group,
             'name': aks_name,
             'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': 'Standard_D2s_v3',
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --no-wait'
+        create_cmd = (
+            'aks create --resource-group={resource_group} --name={name} '
+            '--node-vm-size={node_vm_size} --ssh-key-value={ssh_key_value} --no-wait'
+        )
         self.cmd(create_cmd)
 
         abort_cmd = 'aks operation-abort --resource-group={resource_group} --name={name}'
@@ -7999,14 +8003,10 @@ spec:
         )
 
         # create an Automatic cluster
-        # Automatic clusters using the RP-managed VNet (i.e. no --vnet-subnet-id/BYO VNet) require
-        # a System-Assigned Managed Identity; be explicit about --enable-managed-identity instead of
-        # relying on implicit client-side backfill, so the intent is unambiguous to the service.
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--sku automatic "
             "--no-ssh-key "
-            "--enable-managed-identity "
             "--node-vm-size {node_vm_size} "
             "--workspace-resource-id {workspace_id} "
             "--aks-custom-header AKSHTTPCustomFeatures=Microsoft.ContainerService/AutomaticSKUPreview"
@@ -10562,14 +10562,20 @@ spec:
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix='clitest',
+        location='eastus2',
+        preserve_default_location=True,
+    )
     def test_aks_kubenet_to_cni_overlay_migration(self, resource_group, resource_group_location):
-        _, create_version = self._get_versions(resource_group_location)
+        cluster_location = 'eastus' if self.is_live else resource_group_location
+        _, create_version = self._get_versions(cluster_location)
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'location': resource_group_location,
+            'location': cluster_location,
             'k8s_version': create_version,
             'ssh_key_value': self.generate_ssh_keys(),
         })
