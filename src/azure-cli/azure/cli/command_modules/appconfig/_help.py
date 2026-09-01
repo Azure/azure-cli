@@ -751,9 +751,11 @@ helps['appconfig snapshot create'] = """
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'key'
         - name: Create a snapshot of all keys starting with 'Test' and have tags 'tag1=value1' and 'tag2=value2'.
           text:
-            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\", \\"tags\\":[\\"tag1=value1\\", \\"tag2=value2\\"]}'        - name: Create a snapshot MySnapshot with a description.
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\", \\"tags\\":[\\"tag1=value1\\", \\"tag2=value2\\"]}'
+        - name: Create a snapshot MySnapshot with a description.
           text:
-            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\"key\":\"Test*\"}' --description "Snapshot of Test key-values"    """
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\"}' --description "Snapshot of Test key-values"
+    """
 
 helps['appconfig snapshot show'] = """
     type: command
