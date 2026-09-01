@@ -402,6 +402,10 @@ def convert_show_result_to_snake_case(result):
     if "capacityReservationGroup" in capacity_reservation:
         capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
         capacity_reservation.pop("capacityReservationGroup")
+    if "disableCapacityReservationAssignment" in capacity_reservation:
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            capacity_reservation["disableCapacityReservationAssignment"]
+        capacity_reservation.pop("disableCapacityReservationAssignment")
 
     diagnostics_profile = new_result.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:
@@ -794,6 +798,9 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in wire_server:
         wire_server["in_vm_access_control_profile_reference_id"] = wire_server["inVMAccessControlProfileReferenceId"]
         wire_server.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in wire_server:
+        wire_server["use_local_file_rules"] = wire_server["useLocalFileRules"]
+        wire_server.pop("useLocalFileRules")
 
     uefi_settings = security_profile.get("uefi_settings", {}) or {}
     if "secureBootEnabled" in uefi_settings:

@@ -8458,10 +8458,16 @@ spec:
 
         # role assignment
         assignee_object_id = _get_test_sp_object_id(sp_name)
-        role_assignment_cmd = (
-            'role assignment create --scope {vnet_id} --role "Network Contributor" ' +
-            ("--assignee-object-id " + assignee_object_id) if assignee_object_id else "--assignee {service_principal}"
-        )
+        if assignee_object_id:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                f"--assignee-object-id {assignee_object_id} --assignee-principal-type ServicePrincipal"
+            )
+        else:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                "--assignee {service_principal}"
+            )
         self.cmd(role_assignment_cmd, checks=[
             self.check('scope', vnet_id)
         ])
@@ -16765,3 +16771,196 @@ spec:
         # Cleanup
         delete_cmd = "aks delete --resource-group={resource_group} --name={name} --yes --no-wait"
         self.cmd(delete_cmd, checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus2euap",
+    )
+    def test_aks_create_with_enable_upstream_kubescheduler_user_configuration(
+        self, resource_group, resource_group_location
+    ):
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "location": resource_group_location,
+                "resource_group": resource_group,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "name": aks_name,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_cmd = (
+            "aks create "
+            "--location={location} "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--kubernetes-version={k8s_version} "
+            "--ssh-key-value={ssh_key_value} "
+            "--node-count=1 "
+            "--enable-upstream-kubescheduler-user-configuration "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("schedulerProfile.upstream.schedulerConfigMode", "ManagedByCRD"),
+            ],
+        )
+
+        delete_cmd = (
+            "aks delete "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--yes "
+            "--no-wait "
+        )
+        self.cmd(
+            delete_cmd,
+            checks=[
+                self.is_empty(),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus2euap",
+    )
+    def test_aks_update_with_enable_upstream_kubescheduler_user_configuration(
+        self, resource_group, resource_group_location
+    ):
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "location": resource_group_location,
+                "resource_group": resource_group,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "name": aks_name,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_cmd = (
+            "aks create "
+            "--location={location} "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--kubernetes-version={k8s_version} "
+            "--ssh-key-value={ssh_key_value} "
+            "--node-count=1 "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        update_cmd = (
+            "aks update "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--enable-upstream-kubescheduler-user-configuration "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("schedulerProfile.upstream.schedulerConfigMode", "ManagedByCRD"),
+            ],
+        )
+
+        delete_cmd = (
+            "aks delete "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--yes "
+            "--no-wait "
+        )
+        self.cmd(
+            delete_cmd,
+            checks=[
+                self.is_empty(),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="eastus2euap",
+    )
+    def test_aks_update_with_disable_upstream_kubescheduler_user_configuration(
+        self, resource_group, resource_group_location
+    ):
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "location": resource_group_location,
+                "resource_group": resource_group,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "name": aks_name,
+                "k8s_version": create_version,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        create_cmd = (
+            "aks create "
+            "--location={location} "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--kubernetes-version={k8s_version} "
+            "--ssh-key-value={ssh_key_value} "
+            "--node-count=1 "
+            "--enable-upstream-kubescheduler-user-configuration "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        update_cmd = (
+            "aks update "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--disable-upstream-kubescheduler-user-configuration "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("schedulerProfile.upstream.schedulerConfigMode", "Default"),
+            ],
+        )
+
+        delete_cmd = (
+            "aks delete "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--yes "
+            "--no-wait "
+        )
+        self.cmd(
+            delete_cmd,
+            checks=[
+                self.is_empty(),
+            ],
+        )
