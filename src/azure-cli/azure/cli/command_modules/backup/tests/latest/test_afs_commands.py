@@ -672,3 +672,73 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item2} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
+
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
+    @StorageAccountPreparer(location="eastus2euap")
+    @FileSharePreparer()
+    @AFSPolicyPreparer()
+    @AFSItemPreparer()
+    def test_afs_backup_softdelete(self, resource_group, vault_name, storage_account, afs_name, policy_name):
+        """Validates the soft-delete lifecycle for Azure File Share backup items.
+
+        Steps mirror test_backup_softdelete (test_backup_commands.py) for IaaS VM:
+        1. Disable AFS protection with --delete-backup-data so the item is moved to
+           soft-deleted state.
+        2. Confirm `backup item show` reports ProtectionStopped + isScheduled-
+           ForDeferredDelete=True.
+        3. Confirm the new `--is-deleted` filter on `backup item list` includes the
+           soft-deleted item.
+        4. Run `backup protection undelete` to rehydrate.
+        5. Confirm `backup item show` reports ProtectionStopped + isScheduled-
+           ForDeferredDelete=None (item is rehydrated, recovery points retained).
+        """
+        self.kwargs.update({
+            'vault': vault_name,
+            'item': afs_name,
+            'container': storage_account,
+            'rg': resource_group,
+        })
+
+        # 1. Disable protection with delete-backup-data => soft delete
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} '
+                 '--backup-management-type AzureStorage --delete-backup-data true --yes', checks=[
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # 2. Item is now soft-deleted
+        self.cmd('backup item show -g {rg} -v {vault} -c {container} -n {item} '
+                 '--backup-management-type AzureStorage --workload-type AzureFileShare', checks=[
+            self.check("properties.friendlyName", '{item}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("properties.isScheduledForDeferredDelete", True),
+        ])
+
+        # 3. --is-deleted should return the soft-deleted item
+        self.cmd('backup item list -g {rg} -v {vault} --backup-management-type AzureStorage '
+                 '--workload-type AzureFileShare --is-deleted', checks=[
+            self.check("length([?properties.friendlyName == '{item}'])", 1),
+            self.check("[?properties.friendlyName == '{item}'].properties.isScheduledForDeferredDelete | [0]", True),
+        ])
+
+        # 4. Rehydrate
+        self.cmd('backup protection undelete -g {rg} -v {vault} -c {container} -i {item} '
+                 '--backup-management-type AzureStorage --workload-type AzureFileShare', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "Undelete"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # 5. Item is rehydrated, no longer soft-deleted
+        self.cmd('backup item show -g {rg} -v {vault} -c {container} -n {item} '
+                 '--backup-management-type AzureStorage --workload-type AzureFileShare', checks=[
+            self.check("properties.friendlyName", '{item}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("properties.isScheduledForDeferredDelete", None),
+        ])

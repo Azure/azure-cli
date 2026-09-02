@@ -138,7 +138,7 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               container_type=None, use_secondary_region=None):
+               container_type=None, use_secondary_region=None, is_deleted=None):
     workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': container_type,
@@ -161,6 +161,10 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
     paged_items = custom_help.get_list_from_paged_response(items)
     for item in paged_items:
         custom_help.set_container_subscription_id(item)
+
+    if is_deleted:
+        paged_items = [item for item in paged_items
+                       if getattr(item.properties, 'is_scheduled_for_deferred_delete', None)]
 
     if container_name:
         if custom_help.is_native_name(container_name):
