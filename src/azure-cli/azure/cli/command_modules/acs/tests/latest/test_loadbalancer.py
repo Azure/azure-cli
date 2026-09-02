@@ -119,6 +119,34 @@ class TestLoadBalancer(unittest.TestCase):
         self.assertEqual(profile.managed_outbound_i_ps.count, 3)
         self.assertEqual(profile.managed_outbound_i_ps.count_ipv6, 2)
 
+    def test_update_load_balancer_profile_preserves_existing_zero_ipv4_count_with_ipv6(self):
+        cmd = MockCmd(MockCLI())
+        load_balancer_models = AKSManagedClusterModels(
+            cmd, ResourceType.MGMT_CONTAINERSERVICE
+        ).load_balancer_models
+        profile = load_balancer_models.ManagedClusterLoadBalancerProfile(
+            managed_outbound_i_ps=(
+                load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                    count=0
+                )
+            )
+        )
+
+        loadbalancer.configure_load_balancer_profile(
+            None,
+            2,
+            None,
+            None,
+            None,
+            None,
+            None,
+            profile,
+            load_balancer_models,
+        )
+
+        self.assertEqual(profile.managed_outbound_i_ps.count, 0)
+        self.assertEqual(profile.managed_outbound_i_ps.count_ipv6, 2)
+
     def test_update_load_balancer_profile(self):
         cmd = MockCmd(MockCLI())
         managed_outbound_ip_count = None

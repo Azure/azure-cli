@@ -89,7 +89,7 @@ def _create_or_update_dcr_with_table_readiness_retry(resources, dcr_resource_id,
         try:
             return resources.begin_create_or_update_by_id(dcr_resource_id, api_version, body)
         except (CLIError, HttpResponseError) as ex:
-            if "InvalidOutputTable" in str(ex):
+            if "invalidoutputtable" in str(ex).casefold():
                 if readiness_retries >= _DCR_TABLE_READINESS_MAX_RETRIES:
                     raise
                 readiness_retries += 1

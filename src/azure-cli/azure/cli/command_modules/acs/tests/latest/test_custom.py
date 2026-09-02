@@ -1874,8 +1874,8 @@ class DcrTableReadinessRetryTest(unittest.TestCase):
     def test_retries_invalid_output_table_with_delay(self):
         expected = mock.Mock()
         self.resources.begin_create_or_update_by_id.side_effect = [
-            CLIError("InvalidOutputTable: output table is not ready"),
-            CLIError("InvalidOutputTable: output table is not ready"),
+            CLIError("invalidoutputtable: output table is not ready"),
+            CLIError("INVALIDOUTPUTTABLE: output table is not ready"),
             expected,
         ]
 
