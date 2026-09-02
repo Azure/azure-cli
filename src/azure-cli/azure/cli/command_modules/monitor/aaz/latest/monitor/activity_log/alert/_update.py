@@ -24,7 +24,7 @@ class Update(AAZCommand):
         az monitor activity-log alert update -n AlertName -g ResourceGroup --enable false
 
     :example: Update the details of this activity log alert rule.
-        az monitor activity-log alert update --enabled true --name MyActivityLogAlerts --resource- group MyResourceGroup --subscription MySubscription
+        az monitor activity-log alert update --enabled true --name MyActivityLogAlerts --resource-group MyResourceGroup --subscription MySubscription
 
     :example: Update the details of this activity log alert.
         az monitor activity-log alert update --name MyActivityLogAlerts --resource-group MyResourceGroup --tags key=value
