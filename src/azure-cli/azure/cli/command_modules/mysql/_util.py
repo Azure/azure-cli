@@ -224,6 +224,10 @@ def get_mysql_tiers(sku_info):
     return list(sku_info.keys())
 
 
+def normalize_mysql_tier(tier):
+    return 'MemoryOptimized' if tier == 'BusinessCritical' else tier
+
+
 def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     params = {'serverName': server_name} if server_name else None

@@ -13,7 +13,7 @@ from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, validate_action_name, validate_branch
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
-from ._util import get_current_time
+from ._util import get_current_time, normalize_mysql_tier
 from argcomplete.completers import FilesCompleter
 
 
@@ -70,6 +70,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     )
 
     tier_arg_type = CLIArgumentType(
+        type=normalize_mysql_tier,
         options_list=['--tier'],
         help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, MemoryOptimized '
     )
@@ -119,7 +120,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     accelerated_logs_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Enabled', 'Disabled']),
         options_list=['--accelerated-logs'],
-        help='Enable or disable accelerated logs. Supported for General Purpose and Memory Optimized tiers.'
+        help='Enable or disable accelerated logs. Supported for General Purpose and Memory Optimized tiers. '
+             'For server creation, defaults to Enabled for Memory Optimized and Disabled for General Purpose.'
     )
 
     faster_restore_arg_type = CLIArgumentType(

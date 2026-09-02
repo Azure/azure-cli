@@ -360,9 +360,6 @@ def flexible_server_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               server_name=server_name,
                               location=location,
@@ -567,9 +564,6 @@ def flexible_server_import_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               data_source_type=data_source_type,
                               mode=mode,
@@ -1016,9 +1010,6 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
         cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
         logging_name='MySQL', command_group='mysql', server_client=client, location=instance.location)
 
-    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               location=location,
                               tier=tier,
