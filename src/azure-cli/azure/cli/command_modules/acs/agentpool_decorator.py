@@ -2877,9 +2877,9 @@ class AKSAgentPoolUpdateDecorator:
         allowed_host_ports = self.context.get_allowed_host_ports()
         enable_managed_dranet = self.context.get_enable_managed_dranet()
         if (
-            asg_ids is not None
-            or allowed_host_ports is not None
-            or enable_managed_dranet
+            asg_ids is not None or
+            allowed_host_ports is not None or
+            enable_managed_dranet
         ) and not agentpool.network_profile:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
         if asg_ids is not None:
