@@ -1422,6 +1422,19 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     if not deployment_storage_name:
         deployment_storage_name = storage_account_name
 
+    deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
+
+    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is only a valid input when '
+            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+            'StorageAccountConnectionString.')
+    if deployment_storage_auth_type == 'UserAssignedIdentity' and not deployment_storage_auth_value:
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is required when '
+            '--deployment-storage-auth-type is set to UserAssignedIdentity.')
+
     deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, source_resource_group,
                                                               deployment_storage_name)
 
@@ -1432,18 +1445,10 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
     endpoints = deployment_storage.primary_endpoints
     deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
 
-    deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
-
-    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
-        raise ArgumentUsageError(
-            '--deployment-storage-auth-value is only a valid input when '
-            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
-            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
-            'StorageAccountConnectionString.')
-
     deployment_storage_auth_config = {"type": deployment_storage_auth_type}
 
     app_settings_to_add = []
+    deployment_storage_user_assigned_identity = None
     if deployment_storage_auth_type == 'UserAssignedIdentity':
         deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
             cmd, source_resource_group, source_name, deployment_storage_auth_value, source.location)
@@ -1488,6 +1493,10 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         "alwaysReady": always_ready_config
     }
 
+    _prepare_flex_migration_deployment_storage_identity(
+        cmd, source_resource_group, source_name, deployment_storage_auth_type, deployment_storage_auth_value,
+        deployment_storage, deployment_storage_name, deployment_storage_user_assigned_identity)
+
     # GET-mutate-PUT the existing site
     flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
     site = flex_client.web_apps.get(source_resource_group, source_name)
@@ -1524,9 +1533,32 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
 
     print(f"\nUpgrade complete. Function app '{source_name}' is now on Flex Consumption."
           f"\nNote: The app may take a few moments to become fully operational on Flex infrastructure."
-          f"\nA 7-day revert window is available via ACIS if needed.")
+          f"\nA 7-day revert window is available via 'az functionapp flex-migration revert' if needed.")
 
     return get_functionapp(cmd, source_resource_group, source_name)
+
+
+def _prepare_flex_migration_deployment_storage_identity(
+        cmd, resource_group_name, name, deployment_storage_auth_type, deployment_storage_auth_value,
+        deployment_storage, deployment_storage_name, deployment_storage_user_assigned_identity=None):
+    """Attach the deployment storage identity and grant access before migration begins."""
+    if deployment_storage_auth_type == 'UserAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, [deployment_storage_auth_value])
+        if not _has_deployment_storage_role_assignment_on_resource(
+                cmd.cli_ctx,
+                deployment_storage,
+                deployment_storage_user_assigned_identity.principal_id):
+            _assign_deployment_storage_managed_identity_role(
+                cmd.cli_ctx,
+                deployment_storage,
+                deployment_storage_user_assigned_identity.principal_id)
+        else:
+            logger.warning("User assigned identity '%s' already has the role assignment on "
+                           "the storage account '%s'",
+                           deployment_storage_user_assigned_identity.principal_id, deployment_storage_name)
+    elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, ['[system]'], 'Storage Blob Data Contributor',
+                        None, deployment_storage.id)
 
 
 def revert_flex_migration(cmd, source_resource_group, source_name):

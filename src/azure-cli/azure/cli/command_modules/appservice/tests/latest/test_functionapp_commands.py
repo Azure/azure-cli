@@ -1380,6 +1380,8 @@ class FunctionAppFlexMigrationInPlaceTest(LiveScenarioTest):
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
                  .format(resource_group, src_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
+        self.cmd('storage container create -g {} -n mycontainer --account-name {}'
+                 .format(resource_group, storage_account))
         result = self.cmd(
             'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place '
             '--deployment-storage-name {} --deployment-storage-container-name mycontainer'
@@ -1390,14 +1392,13 @@ class FunctionAppFlexMigrationInPlaceTest(LiveScenarioTest):
 
     def test_functionapp_flex_migration_in_place_rejects_target_args(self):
         """--in-place with --name should fail."""
-        with self.assertRaises(SystemExit):
-            self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app '
-                     '--in-place --name target-app --resource-group target-rg')
+        self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app '
+                 '--in-place --name target-app --resource-group target-rg', expect_failure=True)
 
     def test_functionapp_flex_migration_side_by_side_requires_target_args(self):
         """Side-by-side without --name/--resource-group should fail."""
-        with self.assertRaises(SystemExit):
-            self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app')
+        self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app',
+                 expect_failure=True)
 
 
 class FunctionAppFlex(LiveScenarioTest):

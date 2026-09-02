@@ -1233,7 +1233,7 @@ examples:
 
   - name: Upgrade a Linux Consumption function app to Flex Consumption in place (same app, same name).
     text: >
-        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyResourceGroup --in-place
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --in-place
 """
 
 helps['functionapp flex-migration revert'] = """
