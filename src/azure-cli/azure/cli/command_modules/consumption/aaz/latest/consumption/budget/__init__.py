@@ -10,11 +10,7 @@
 
 from .__cmd_group import *
 from ._create import *
-from ._create_with_rg import *
 from ._delete import *
-from ._delete_with_rg import *
 from ._list import *
 from ._show import *
-from ._show_with_rg import *
 from ._update import *
-from ._update_with_rg import *
