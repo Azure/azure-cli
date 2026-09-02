@@ -76,7 +76,7 @@ class KeyValue:
                "\nLabel: " + (self.label if self.label else '') + \
                "\netag: " + self.etag + \
                "\nLast Modified: " + self.last_modified + \
-               "\nLocked: " + self.locked + \
+               "\nLocked: " + str(self.locked) + \
                "\nContent Type: " + self.content_type + \
                "\nTags: " + (str(self.tags) if self.tags else '') + \
                "\nDescription: " + (self.description if self.description else '')

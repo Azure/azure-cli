@@ -526,7 +526,7 @@ def set_key(cmd,
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
-            description = retrieved_kv.description if description is None else description
+            description = getattr(retrieved_kv, 'description', None) if description is None else description
             if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON and strip comments if needed.
@@ -548,7 +548,7 @@ def set_key(cmd,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
             "tags": set_kv.tags,
-            "description": set_kv.description
+            "description": getattr(set_kv, 'description', None)
         }
 
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
@@ -617,7 +617,7 @@ def set_keyvault(cmd,
                                           tags=tags,
                                           description=description)
         else:
-            description = retrieved_kv.description if description is None else description
+            description = getattr(retrieved_kv, 'description', None) if description is None else description
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
                                           value=keyvault_ref_value,
@@ -633,7 +633,7 @@ def set_keyvault(cmd,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
             "tags": set_kv.tags,
-            "description": set_kv.description
+            "description": getattr(set_kv, 'description', None)
         }
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
         confirmation_message = "Are you sure you want to set the keyvault reference: \n" + entry + "\n"
@@ -701,7 +701,7 @@ def set_snapshot_reference(cmd,
                                           tags=tags,
                                           description=description)
         else:
-            description = retrieved_kv.description if description is None else description
+            description = getattr(retrieved_kv, 'description', None) if description is None else description
             set_kv = ConfigurationSetting(key=key,
                                           label=label,
                                           value=snapshot_ref_value,
@@ -717,7 +717,7 @@ def set_snapshot_reference(cmd,
             "content_type": set_kv.content_type,
             "value": set_kv.value,
             "tags": set_kv.tags,
-            "description": set_kv.description
+            "description": getattr(set_kv, 'description', None)
         }
         entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
         confirmation_message = "Are you sure you want to set the snapshot reference: \n" + entry + "\n"
