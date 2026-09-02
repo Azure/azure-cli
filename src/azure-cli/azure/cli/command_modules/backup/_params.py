@@ -438,6 +438,7 @@ def load_arguments(self, _):
                    options_list=['--target-resource-group-name', '--target-rg-name'],
                    help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
+        c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recovery point in secondary region. Supports only Alternate Location Restore.')
 
     with self.argument_context('backup restore restore-azurefiles') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
