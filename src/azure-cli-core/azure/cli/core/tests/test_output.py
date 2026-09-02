@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from io import BytesIO, TextIOWrapper
+from types import SimpleNamespace
 
 
 class TestCoreCLIOutput(unittest.TestCase):
@@ -15,6 +17,25 @@ class TestCoreCLIOutput(unittest.TestCase):
         self.assertEqual(7, len(output_producer._FORMAT_DICT))  # six types: json, jsonc, table, tsv, yaml, yamlc, none
         self.assertIn('yaml', output_producer._FORMAT_DICT)
         self.assertIn('none', output_producer._FORMAT_DICT)
+
+    def test_tsv_output_uses_lf_newlines(self):
+        from azure.cli.core._output import AzOutputProducer
+        from azure.cli.core.mock import DummyCli
+        from knack.util import CommandResultItem
+
+        cli = DummyCli()
+        cli.invocation = SimpleNamespace(data={'output': 'tsv'})
+        output_producer = AzOutputProducer(cli)
+        buffer = BytesIO()
+        out_file = TextIOWrapper(buffer, encoding='utf-8', newline='\r\n')
+
+        output_producer.out(
+            CommandResultItem(result=['first', 'second']),
+            formatter=output_producer.get_formatter('tsv'),
+            out_file=out_file)
+        out_file.flush()
+
+        self.assertEqual(b'first\nsecond\n', buffer.getvalue())
 
     # regression test for https://github.com/Azure/azure-cli/issues/9263
     def test_yaml_output_with_ordered_dict(self):
