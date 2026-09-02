@@ -34,6 +34,23 @@ class MysqlFlexibleServerFirewallRuleCustomTest(unittest.TestCase):
         }, client.parameters.as_dict())
 
 
+class MysqlAcceleratedLogsCustomTest(unittest.TestCase):
+
+    def test_accelerated_logs_tier_behavior(self):
+        self.assertEqual(
+            'Enabled',
+            custom._determine_acceleratedLogs('Enabled', 'GeneralPurpose'))
+        self.assertEqual(
+            'Disabled',
+            custom._determine_acceleratedLogs(None, 'GeneralPurpose'))
+        self.assertEqual(
+            'Enabled',
+            custom._determine_acceleratedLogs(None, 'MemoryOptimized'))
+        self.assertEqual(
+            'Disabled',
+            custom._determine_acceleratedLogs('Enabled', 'Burstable'))
+
+
 class MysqlFlexibleServerListSkusCustomTest(unittest.TestCase):
 
     def test_list_skus_preserves_memory_optimized_tier(self):
