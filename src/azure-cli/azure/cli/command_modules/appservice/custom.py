@@ -1437,6 +1437,10 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
 
     deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, source_resource_group,
                                                               deployment_storage_name)
+    if deployment_storage.sku.name == 'Premium_LRS':
+        raise ValidationError("Premium deployment storage is not supported for in-place Flex Consumption upgrade.")
+    if getattr(deployment_storage, 'is_hns_enabled', False) is True:
+        raise ValidationError("ADLS Gen2 deployment storage is not supported for in-place Flex Consumption upgrade.")
 
     deployment_storage_container = _get_or_create_deployment_storage_container(
         cmd, source_resource_group, source_name, deployment_storage_name, deployment_storage_container_name)
@@ -1461,37 +1465,12 @@ def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, so
         deployment_storage_auth_value = conn_string_app_setting
         deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
-    function_app_config = {}
-    function_app_config["deployment"] = {
-        "storage": {
-            "type": "blobContainer",
-            "value": deployment_config_storage_value,
-            "authentication": deployment_storage_auth_config
-        }
-    }
-
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, source.location, source_runtime, source_runtime_version)
     matched_runtime = runtime_helper.resolve(source_runtime, source_runtime_version)
     flex_sku = matched_runtime.sku
-
-    runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
-    version = flex_sku['functionAppConfigProperties']['runtime']['version']
-    function_app_config["runtime"] = {"name": runtime, "version": version}
-
-    always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-    always_ready_config = []
-    for key, value in always_ready_dict.items():
-        always_ready_config.append({
-            "name": key,
-            "instanceCount": max(0, validate_and_convert_to_int(key, value))
-        })
-
-    default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
-    function_app_config["scaleAndConcurrency"] = {
-        "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
-        "instanceMemoryMB": instance_memory or default_instance_memory['size'],
-        "alwaysReady": always_ready_config
-    }
+    function_app_config = _build_flex_function_app_config(
+        deployment_config_storage_value, deployment_storage_auth_config, flex_sku,
+        instance_memory, maximum_instance_count, always_ready_instances)
 
     _prepare_flex_migration_deployment_storage_identity(
         cmd, source_resource_group, source_name, deployment_storage_auth_type, deployment_storage_auth_value,
@@ -1559,6 +1538,35 @@ def _prepare_flex_migration_deployment_storage_identity(
     elif deployment_storage_auth_type == 'SystemAssignedIdentity':
         assign_identity(cmd, resource_group_name, name, ['[system]'], 'Storage Blob Data Contributor',
                         None, deployment_storage.id)
+
+
+def _build_flex_function_app_config(deployment_storage_value, deployment_storage_auth_config, flex_sku,
+                                    instance_memory, maximum_instance_count, always_ready_instances):
+    always_ready_config = [{
+        "name": key,
+        "instanceCount": max(0, validate_and_convert_to_int(key, value))
+    } for key, value in _parse_key_value_pairs(always_ready_instances).items()]
+    default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
+    runtime = flex_sku['functionAppConfigProperties']['runtime']
+
+    return {
+        "deployment": {
+            "storage": {
+                "type": "blobContainer",
+                "value": deployment_storage_value,
+                "authentication": deployment_storage_auth_config
+            }
+        },
+        "runtime": {
+            "name": runtime['name'],
+            "version": runtime['version']
+        },
+        "scaleAndConcurrency": {
+            "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
+            "instanceMemoryMB": instance_memory or default_instance_memory['size'],
+            "alwaysReady": always_ready_config
+        }
+    }
 
 
 def revert_flex_migration(cmd, source_resource_group, source_name):
@@ -9655,16 +9663,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                     'StorageAccountConnectionString.'
                 )
 
-            function_app_config = {}
             deployment_storage_auth_config = {
                 "type": deployment_storage_auth_type
-            }
-            function_app_config["deployment"] = {
-                "storage": {
-                    "type": "blobContainer",
-                    "value": deployment_config_storage_value,
-                    "authentication": deployment_storage_auth_config
-                }
             }
 
             if deployment_storage_auth_type == 'UserAssignedIdentity':
@@ -9687,31 +9687,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
             flex_sku = matched_runtime.sku
-            runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
-            version = flex_sku['functionAppConfigProperties']['runtime']['version']
-            runtime_config = {
-                "name": runtime,
-                "version": version
-            }
-            function_app_config["runtime"] = runtime_config
-            always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-            always_ready_config = []
-
-            for key, value in always_ready_dict.items():
-                always_ready_config.append(
-                    {
-                        "name": key,
-                        "instanceCount": max(0, validate_and_convert_to_int(key, value))
-                    }
-                )
-
-            default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
-
-            function_app_config["scaleAndConcurrency"] = {
-                "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
-                "instanceMemoryMB": instance_memory or default_instance_memory['size'],
-                "alwaysReady": always_ready_config
-            }
+            function_app_config = _build_flex_function_app_config(
+                deployment_config_storage_value, deployment_storage_auth_config, flex_sku,
+                instance_memory, maximum_instance_count, always_ready_instances)
 
             # Set flex consumption properties on the site
             from azure.mgmt.web.models import SiteProperties

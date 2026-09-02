@@ -21,6 +21,7 @@ from azure.cli.command_modules.appservice.custom import (
     list_function_keys,
     migrate_consumption_to_flex,
     _upgrade_consumption_to_flex_in_place,
+    _build_flex_function_app_config,
     _prepare_flex_migration_deployment_storage_identity,
     revert_flex_migration)
 from azure.cli.core.profiles import ResourceType
@@ -899,6 +900,112 @@ class TestFunctionappMocked(unittest.TestCase):
 class TestFlexMigrationInPlaceMocked(unittest.TestCase):
     """Unit tests for the --in-place flag on flex-migration start."""
 
+    def test_in_place_payload_matches_create(self):
+        flex_sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+        auth_config = {
+            'type': 'StorageAccountConnectionString',
+            'storageAccountConnectionStringName': 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+        }
+
+        config = _build_flex_function_app_config(
+            'https://storage.blob.core.windows.net/deployment', auth_config, flex_sku,
+            None, None, ['function=2'])
+
+        self.assertEqual(config, {
+            'deployment': {
+                'storage': {
+                    'type': 'blobContainer',
+                    'value': 'https://storage.blob.core.windows.net/deployment',
+                    'authentication': auth_config
+                }
+            },
+            'runtime': {'name': 'python', 'version': '3.11'},
+            'scaleAndConcurrency': {
+                'maximumInstanceCount': 100,
+                'instanceMemoryMB': 2048,
+                'alwaysReady': [{'name': 'function', 'instanceCount': 2}]
+            }
+        })
+
+    def test_in_place_put_uses_same_site_and_preserves_plan(self):
+        original_plan_id = '/subscriptions/sub/resourceGroups/src-rg/providers/Microsoft.Web/serverfarms/cv1-plan'
+        deployment_storage = mock.MagicMock()
+        deployment_storage.sku.name = 'Standard_LRS'
+        deployment_storage.is_hns_enabled = False
+        deployment_storage.primary_endpoints.blob = 'https://storage.blob.core.windows.net/'
+        container = mock.MagicMock()
+        container.name = 'deployment'
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        site = mock.MagicMock()
+        site.properties.server_farm_id = original_plan_id
+        site.site_config = mock.MagicMock()
+        site.as_dict.side_effect = lambda: {
+            'properties': {
+                'serverFarmId': site.properties.server_farm_id,
+                'functionAppConfig': site.properties.function_app_config,
+                'sku': site.properties.sku
+            }
+        }
+        flex_client = mock.MagicMock()
+        flex_client.web_apps.get.return_value = site
+        matched_runtime = mock.MagicMock()
+        matched_runtime.sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+
+        patches = {
+            '_validate_and_get_deployment_storage': mock.DEFAULT,
+            '_get_or_create_deployment_storage_container': mock.DEFAULT,
+            '_get_storage_connection_string': mock.DEFAULT,
+            '_FlexFunctionAppStackRuntimeHelper': mock.DEFAULT,
+            '_prepare_flex_migration_deployment_storage_identity': mock.DEFAULT,
+            'web_client_factory': mock.DEFAULT,
+            'LongRunningOperation': mock.DEFAULT,
+            'get_functionapp': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['_validate_and_get_deployment_storage'].return_value = deployment_storage
+            mocks['_get_or_create_deployment_storage_container'].return_value = container
+            mocks['_get_storage_connection_string'].return_value = 'connection-string'
+            mocks['_FlexFunctionAppStackRuntimeHelper'].return_value.resolve.return_value = matched_runtime
+            mocks['web_client_factory'].return_value = flex_client
+
+            _upgrade_consumption_to_flex_in_place(
+                _get_test_cmd(), source, 'src-rg', 'src-app', 'storage', None, None,
+                None, None, 'python', '3.11', None, None, None)
+
+        flex_client.web_apps.begin_create_or_update.assert_called_once()
+        resource_group, name, payload = flex_client.web_apps.begin_create_or_update.call_args.args
+        self.assertEqual((resource_group, name), ('src-rg', 'src-app'))
+        self.assertEqual(payload['properties']['serverFarmId'], original_plan_id)
+        self.assertEqual(payload['sku'], {'name': 'FlexConsumption'})
+        flex_client.app_service_plans.begin_create_or_update.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
+    def test_in_place_rejects_unsupported_deployment_storage(self, validate_storage_mock):
+        for sku, hns_enabled, expected_error in [
+                ('Premium_LRS', False, 'Premium deployment storage'),
+                ('Standard_LRS', True, 'ADLS Gen2 deployment storage')]:
+            with self.subTest(sku=sku, hns_enabled=hns_enabled):
+                deployment_storage = mock.MagicMock()
+                deployment_storage.sku.name = sku
+                deployment_storage.is_hns_enabled = hns_enabled
+                validate_storage_mock.return_value = deployment_storage
+
+                with self.assertRaises(ValidationError) as ctx:
+                    _upgrade_consumption_to_flex_in_place(
+                        _get_test_cmd(), mock.MagicMock(), 'src-rg', 'src-app', 'storage-name',
+                        None, None, None, None, 'python', '3.11', None, None, None)
+
+                self.assertIn(expected_error, str(ctx.exception))
+
     def test_in_place_requires_user_assigned_identity_value(self):
         cmd_mock = _get_test_cmd()
         source = mock.MagicMock()
@@ -1001,6 +1108,52 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
                                         resource_group=None,
                                         name='target-app',
                                         in_place=False)
+
+    def test_side_by_side_unchanged(self):
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        source.name = 'src-app'
+        site_configs = mock.MagicMock()
+        result = mock.sentinel.result
+        patches = {
+            'get_mgmt_service_client': mock.DEFAULT,
+            'list_flexconsumption_locations': mock.DEFAULT,
+            '_is_linux_consumption_function_app': mock.DEFAULT,
+            'validate_flex_migration_eligibility_for_linux_consumption_app': mock.DEFAULT,
+            'list_slots': mock.DEFAULT,
+            'get_site_configs': mock.DEFAULT,
+            '_get_functionapp_runtime_info_helper': mock.DEFAULT,
+            'create_functionapp': mock.DEFAULT,
+            '_migrate_app_settings': mock.DEFAULT,
+            '_migrate_site_configs': mock.DEFAULT,
+            '_migrate_site_properties': mock.DEFAULT,
+            '_migrate_basic_publishing_credentials_policies': mock.DEFAULT,
+            'get_functionapp': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['get_mgmt_service_client'].return_value.web_apps.get.return_value = source
+            mocks['list_flexconsumption_locations'].return_value = [{'name': 'eastus'}]
+            mocks['_is_linux_consumption_function_app'].return_value = True
+            mocks['validate_flex_migration_eligibility_for_linux_consumption_app'].return_value = (True, [])
+            mocks['list_slots'].return_value = []
+            mocks['get_site_configs'].return_value = site_configs
+            mocks['_get_functionapp_runtime_info_helper'].return_value = {
+                'app_runtime': 'python',
+                'app_runtime_version': '3.11'
+            }
+            mocks['get_functionapp'].return_value = result
+
+            actual = migrate_consumption_to_flex(
+                _get_test_cmd(), 'src-rg', 'src-app', resource_group='target-rg', name='target-app',
+                storage_account='storage', skip_managed_identities=True, skip_access_restrictions=True,
+                skip_storage_mount=True, skip_hostnames=True, skip_cors=True)
+
+        self.assertIs(actual, result)
+        mocks['create_functionapp'].assert_called_once_with(
+            mock.ANY, 'target-rg', 'target-app', 'storage', flexconsumption_location='eastus',
+            runtime='python', runtime_version='3.11', maximum_instance_count=None)
+        mocks['_migrate_app_settings'].assert_called_once_with(
+            mock.ANY, 'src-rg', 'src-app', 'target-rg', 'target-app', 'storage')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
     @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
