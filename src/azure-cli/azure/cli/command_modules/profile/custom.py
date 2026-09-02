@@ -134,7 +134,7 @@ def _select_and_set_active(profile, subscriptions):
 
 # pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
-          claims_challenge=None,
+          claims_challenge=None, use_broker_sso=False,
           # Device code flow
           use_device_code=False,
           # Service principal
@@ -169,6 +169,15 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
         else:
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
+    # broker_sso incompatible with workload identities
+    # broker_sso relies on the presence of a broker, which is only available on Windows (for now)
+    enable_broker_on_windows = cmd.cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
+    broker_sso_available = sys.platform.startswith('win') and enable_broker_on_windows
+    if use_broker_sso and not broker_sso_available:
+        raise CLIError("usage error: '--use-broker-sso' is only supported on Windows with broker enabled")
+    if use_broker_sso and (service_principal or identity):
+        raise CLIError("usage error: '--use-broker-sso' is not applicable "
+                       "to service principal or managed identity login")
 
     if claims_challenge:
         from azure.cli.core.util import b64decode
@@ -219,6 +228,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         service_principal,
         tenant,
         scopes=scopes,
+        use_broker_sso=use_broker_sso,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
