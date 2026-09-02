@@ -97,7 +97,13 @@ def _handle_challenge_phase(login_server,
 
     request_url = 'https://' + login_server + '/v2/'
     logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
-    challenge = requests.get(request_url, verify=not should_disable_connection_verify())
+    try:
+        challenge = requests.get(request_url, verify=not should_disable_connection_verify(), timeout=5)
+    except requests.ConnectionError:
+        # Fallback: if the standard request fails due to connection issues, 
+        # the code elsewhere handles identity differently; but for token acquisition
+        # the identity code (not shown here) must be adjusted. This is a placeholder.
+        raise
 
     if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
