@@ -26,7 +26,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
     cf_mysql_firewall_rules, get_mysql_flexible_management_client_by_sub
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
-    replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
+    _get_list_from_paged_response, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
     ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
@@ -360,7 +360,7 @@ def flexible_server_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
     if tier == 'BusinessCritical':
         tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
@@ -567,7 +567,7 @@ def flexible_server_import_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # MySQL changed MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
     if tier == 'BusinessCritical':
         tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
@@ -1016,7 +1016,7 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
         cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
         logging_name='MySQL', command_group='mysql', server_client=client, location=instance.location)
 
-    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+    # Accept BusinessCritical as a legacy alias; service capabilities use MemoryOptimized.
     if tier == 'BusinessCritical':
         tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
@@ -1467,8 +1467,7 @@ def flexible_server_mysql_get(cmd, resource_group_name, server_name):
 
 
 def flexible_list_skus(cmd, client, location):
-    result = client.list(location)
-    result = replace_memory_optimized_tier(result)
+    result = _get_list_from_paged_response(client.list(location))
     logger.warning('For prices please refer to https://aka.ms/mysql-pricing')
     return result
 

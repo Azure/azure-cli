@@ -119,7 +119,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     accelerated_logs_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Enabled', 'Disabled']),
         options_list=['--accelerated-logs'],
-        help='Enable or disable accelerated logs. Only support for Business Critical tier. Default value is Enabled.'
+        help='Enable or disable accelerated logs. Supported only for the Memory Optimized tier. Default value is Enabled.'
     )
 
     faster_restore_arg_type = CLIArgumentType(
