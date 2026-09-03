@@ -2565,7 +2565,7 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
         ])
 
     @live_only()
-    def test_vmss_extension_image_matches_vm_commands(self):
+    def test_vm_vmss_extension_image(self):
         self.kwargs.update({
             'loc': 'eastus',
             'pub': 'Microsoft.Compute',
