@@ -2564,6 +2564,32 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
             self.check("contains(id, '/Providers/Microsoft.Compute/Locations/{loc}/Publishers/{pub}/ArtifactTypes/VMExtension/Types/{ext}/Versions/{ver}')", True)
         ])
 
+    @live_only()
+    def test_vmss_extension_image_matches_vm_commands(self):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'pub': 'Microsoft.Compute',
+            'ext': 'CustomScriptExtension'
+        })
+
+        command_results = {}
+        for command_group in ('vm', 'vmss'):
+            versions = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions)
+
+            self.kwargs['ver'] = versions[0]['name']
+            image = self.cmd(
+                '{} extension image show --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --version {{ver}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertEqual(image['name'], self.kwargs['ver'])
+            command_results[command_group] = (versions, image)
+
+        self.assertEqual(command_results['vm'], command_results['vmss'])
+
 
 class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
