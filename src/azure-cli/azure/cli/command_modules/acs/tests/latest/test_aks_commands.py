@@ -1419,6 +1419,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
         ])
 
+    @live_only()  # live-only until a StandardV2 NAT gateway recording is captured
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_and_update_with_managed_nat_gateway_v2(self, resource_group, resource_group_location):
