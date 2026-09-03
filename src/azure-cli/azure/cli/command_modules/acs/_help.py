@@ -190,18 +190,6 @@ parameters:
     type: string
     short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
     long-summary: Only valid with --outbound-type managedNATGateway. Omit to default to StandardV2 where the region supports it, otherwise Standard. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth.
-  - name: --nat-gateway-managed-outbound-ipv6-count
-    type: int
-    short-summary: NAT gateway managed outbound IPv6 count.
-    long-summary: Desired number of managed IPv6 outbound IPs for NAT gateway outbound connection on dual-stack clusters. Please specify a value in the range of [0, 16]. Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
-  - name: --nat-gateway-outbound-ips
-    type: string
-    short-summary: Comma-separated public IP resource IDs for the cluster NAT gateway.
-    long-summary: Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
-  - name: --nat-gateway-outbound-ip-prefixes
-    type: string
-    short-summary: Comma-separated public IP prefix resource IDs for the cluster NAT gateway.
-    long-summary: Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -887,18 +875,6 @@ parameters:
     type: string
     short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
     long-summary: Only valid with --outbound-type managedNATGateway. Migrate an existing Standard (V1) cluster to StandardV2 by passing StandardV2. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth. Downgrade from StandardV2 to Standard is not supported.
-  - name: --nat-gateway-managed-outbound-ipv6-count
-    type: int
-    short-summary: NAT gateway managed outbound IPv6 count.
-    long-summary: Desired number of managed IPv6 outbound IPs for NAT gateway outbound connection on dual-stack clusters. Please specify a value in the range of [0, 16]. Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
-  - name: --nat-gateway-outbound-ips
-    type: string
-    short-summary: Comma-separated public IP resource IDs for the cluster NAT gateway.
-    long-summary: Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
-  - name: --nat-gateway-outbound-ip-prefixes
-    type: string
-    short-summary: Comma-separated public IP prefix resource IDs for the cluster NAT gateway.
-    long-summary: Only valid with --outbound-type managedNATGateway and --outbound-type-sku StandardV2.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
