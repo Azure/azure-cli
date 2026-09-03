@@ -12,28 +12,30 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway rewrite-rule condition delete",
+    "network application-gateway url-path-map rule update",
 )
-class Delete(AAZCommand):
-    """Delete a rewrite rule condition.
+class Update(AAZCommand):
+    """Update a rule of a URL path map.
 
-    :example: Delete a rewrite rule condition.
-        az network application-gateway rewrite-rule condition delete -g MyResourceGroup --gateway-name MyGateway --rule-set-name MyRuleSet --rule-name MyRule --variable MyVariable
+    :example: Update the paths for a URL path map rule.
+        az network application-gateway url-path-map rule update -g MyResourceGroup --gateway-name MyAppGateway --path-map-name MyUrlPathMap -n MyUrlPathMapRule --paths /mypath/*
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.rewriteRuleSets[].properties.rewriteRules[].conditions[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.urlPathMaps[].properties.pathRules[]"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
+    AZ_SUPPORT_GENERIC_UPDATE = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -54,29 +56,105 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.rule_set_name = AAZStrArg(
-            options=["--rule-set-name"],
-            help="Name of the rewrite rule set.",
+        _args_schema.path_map_name = AAZStrArg(
+            options=["--path-map-name"],
+            help="Name of the URL path map.",
             required=True,
         )
-        _args_schema.variable = AAZStrArg(
-            options=["--variable"],
-            help="The condition parameter of the RewriteRuleCondition.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="Name of the rule for a URL path map.",
             required=True,
         )
-        _args_schema.rule_name = AAZStrArg(
-            options=["--rule-name"],
-            help="Name of the rewrite rule that is unique within an Application Gateway.",
-            required=True,
+
+        # define Arg Group "Parameters.properties.urlPathMaps[].properties.pathRules[]"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.backend_address_pool = AAZObjectArg(
+            options=["--backend-address-pool"],
+            arg_group="Properties",
+            help="Backend address pool resource of URL path map path rule.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.backend_address_pool)
+        _args_schema.backend_http_settings = AAZObjectArg(
+            options=["--backend-http-settings"],
+            arg_group="Properties",
+            help="Backend http settings resource of URL path map path rule.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.backend_http_settings)
+        _args_schema.firewall_policy = AAZObjectArg(
+            options=["--firewall-policy"],
+            arg_group="Properties",
+            help="Reference to the FirewallPolicy resource.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.firewall_policy)
+        _args_schema.load_distribution_policy = AAZObjectArg(
+            options=["--load-policy", "--load-distribution-policy"],
+            arg_group="Properties",
+            help="Load Distribution Policy resource of URL path map path rule.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.load_distribution_policy)
+        _args_schema.paths = AAZListArg(
+            options=["--paths"],
+            arg_group="Properties",
+            help="Path rules of URL path map.",
+            nullable=True,
+        )
+        _args_schema.redirect_configuration = AAZObjectArg(
+            options=["--redirect-configuration"],
+            arg_group="Properties",
+            help="Redirect configuration resource of URL path map path rule.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.redirect_configuration)
+        _args_schema.rewrite_rule_set = AAZObjectArg(
+            options=["--rewrite-rule-set"],
+            arg_group="Properties",
+            help="Rewrite rule set resource of URL path map path rule.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.rewrite_rule_set)
+
+        paths = cls._args_schema.paths
+        paths.Element = AAZStrArg(
+            nullable=True,
         )
         return cls._args_schema
+
+    _args_sub_resource_update = None
+
+    @classmethod
+    def _build_args_sub_resource_update(cls, _schema):
+        if cls._args_sub_resource_update is not None:
+            _schema.id = cls._args_sub_resource_update.id
+            return
+
+        cls._args_sub_resource_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        sub_resource_update = cls._args_sub_resource_update
+        sub_resource_update.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+
+        _schema.id = cls._args_sub_resource_update.id
 
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -89,37 +167,33 @@ class Delete(AAZCommand):
         pass
 
     @register_callback
-    def pre_instance_delete(self):
+    def pre_instance_update(self, instance):
         pass
 
     @register_callback
-    def post_instance_delete(self):
+    def post_instance_update(self, instance):
         pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
+        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.rewriteRuleSets
+            result = result.properties.urlPathMaps
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_set_name,
+                lambda e: e[1].name == self.ctx.args.path_map_name,
                 filters
             )
             idx = next(filters)[0]
             result = result[idx]
-            result = result.properties.rewriteRules
+            result = result.properties.pathRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.conditions
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].variable == self.ctx.args.variable,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -127,26 +201,18 @@ class Delete(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.rewriteRuleSets
+            result = result.properties.urlPathMaps
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_set_name,
+                lambda e: e[1].name == self.ctx.args.path_map_name,
                 filters
             )
             idx = next(filters)[0]
             result = result[idx]
-            result = result.properties.rewriteRules
+            result = result.properties.pathRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.conditions
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].variable == self.ctx.args.variable,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
@@ -232,7 +298,7 @@ class Delete(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_application_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -343,18 +409,57 @@ class Delete(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
+            self._update_instance(self.ctx.selectors.subresource.get())
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("backendAddressPool", AAZObjectType, ".backend_address_pool"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("backendHttpSettings", AAZObjectType, ".backend_http_settings"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("firewallPolicy", AAZObjectType, ".firewall_policy"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("loadDistributionPolicy", AAZObjectType, ".load_distribution_policy"))
+                properties.set_prop("paths", AAZListType, ".paths")
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("redirectConfiguration", AAZObjectType, ".redirect_configuration"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("rewriteRuleSet", AAZObjectType, ".rewrite_rule_set"))
+
+            paths = _builder.get(".properties.paths")
+            if paths is not None:
+                paths.set_elements(AAZStrType, ".")
+
+            return _instance_value
+
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.selectors.subresource.get(),
+                self.ctx.generic_update_args
+            )
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _UpdateHelper:
+    """Helper class for Update"""
+
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -4062,4 +4167,4 @@ class _DeleteHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Delete"]
+__all__ = ["Update"]

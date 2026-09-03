@@ -12,28 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway rewrite-rule condition delete",
+    "network application-gateway url-path-map rule show",
 )
-class Delete(AAZCommand):
-    """Delete a rewrite rule condition.
-
-    :example: Delete a rewrite rule condition.
-        az network application-gateway rewrite-rule condition delete -g MyResourceGroup --gateway-name MyGateway --rule-set-name MyRuleSet --rule-name MyRule --variable MyVariable
+class Show(AAZCommand):
+    """application-gateway url-path-map rule show
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.rewriteRuleSets[].properties.rewriteRules[].conditions[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.urlPathMaps[].properties.pathRules[]"],
         ]
     }
-
-    AZ_SUPPORT_NO_WAIT = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -54,19 +50,14 @@ class Delete(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.rule_set_name = AAZStrArg(
-            options=["--rule-set-name"],
-            help="Name of the rewrite rule set.",
+        _args_schema.path_map_name = AAZStrArg(
+            options=["--path-map-name"],
+            help="Name of the URL path map.",
             required=True,
         )
-        _args_schema.variable = AAZStrArg(
-            options=["--variable"],
-            help="The condition parameter of the RewriteRuleCondition.",
-            required=True,
-        )
-        _args_schema.rule_name = AAZStrArg(
-            options=["--rule-name"],
-            help="Name of the rewrite rule that is unique within an Application Gateway.",
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
+            help="Name of the rule for a URL path map.",
             required=True,
         )
         return cls._args_schema
@@ -74,10 +65,6 @@ class Delete(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
-        yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -88,38 +75,26 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_delete(self):
-        pass
-
-    @register_callback
-    def post_instance_delete(self):
-        pass
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
         def _get(self):
             result = self.ctx.vars.instance
-            result = result.properties.rewriteRuleSets
+            result = result.properties.urlPathMaps
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_set_name,
+                lambda e: e[1].name == self.ctx.args.path_map_name,
                 filters
             )
             idx = next(filters)[0]
             result = result[idx]
-            result = result.properties.rewriteRules
+            result = result.properties.pathRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.conditions
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].variable == self.ctx.args.variable,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters)[0]
@@ -127,26 +102,18 @@ class Delete(AAZCommand):
 
         def _set(self, value):
             result = self.ctx.vars.instance
-            result = result.properties.rewriteRuleSets
+            result = result.properties.urlPathMaps
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_set_name,
+                lambda e: e[1].name == self.ctx.args.path_map_name,
                 filters
             )
             idx = next(filters)[0]
             result = result[idx]
-            result = result.properties.rewriteRules
+            result = result.properties.pathRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.rule_name,
-                filters
-            )
-            idx = next(filters)[0]
-            result = result[idx]
-            result = result.conditions
-            filters = enumerate(result)
-            filters = filter(
-                lambda e: e[1].variable == self.ctx.args.variable,
+                lambda e: e[1].name == self.ctx.args.name,
                 filters
             )
             idx = next(filters, [len(result)])[0]
@@ -232,129 +199,13 @@ class Delete(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_read(cls._schema_on_200)
+            _ShowHelper._build_schema_application_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class ApplicationGatewaysCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "applicationGatewayName", self.ctx.args.gateway_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2025-07-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
-
-        def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
-
-
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_application_gateway_backend_address_pool_read = None
 
@@ -4062,4 +3913,4 @@ class _DeleteHelper:
         _schema.type = cls._schema_virtual_network_tap_read.type
 
 
-__all__ = ["Delete"]
+__all__ = ["Show"]
