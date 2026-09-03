@@ -53,7 +53,7 @@ def load_arguments_sb(self, _):
                    help='A list of regions where replicas of the namespace are maintained Object')
         c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'],
                    help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
-
+        c.argument('ip_address_type', help='The IP address type for the namespace. Determines whether the namespace supports IPv4 only or both IPv4 and IPv6 (dualstack).  Allowed values: DualStack, IPv4.')
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(),

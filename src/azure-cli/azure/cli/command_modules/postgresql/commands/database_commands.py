@@ -29,9 +29,10 @@ def database_create_func(cmd, client, resource_group_name, server_name, database
         raise RequiredArgumentMissingError("charset and collation have to be input together.")
 
     parameters = {
-        'name': database_name,
-        'charset': charset,
-        'collation': collation
+        'properties': {
+            'charset': charset,
+            'collation': collation
+        }
     }
 
     return client.begin_create(

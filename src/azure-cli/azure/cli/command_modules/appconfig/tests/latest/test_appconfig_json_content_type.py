@@ -14,7 +14,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 from azure.cli.command_modules.appconfig._constants import AIConfigConstants, FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -25,13 +25,15 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
+        register_appconfig_recording_processors(self)
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_json_content_type(self):
-        src_config_store_prefix = get_resource_name_prefix('source')
-        dest_config_store_prefix = get_resource_name_prefix('destination')
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_json_content_type(self, resource_group, location):
+        src_config_store_prefix = 'source'
+        dest_config_store_prefix = 'destination'
         src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
         dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
@@ -41,7 +43,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'config_store_name': src_config_store_name,
             'src_endpoint': 'https://' + src_config_store_name + '.azconfig.io',
             'rg_loc': location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku
         })
         create_config_store(self, self.kwargs, disable_local_auth=True)

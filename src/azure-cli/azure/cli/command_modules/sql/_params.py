@@ -2328,8 +2328,8 @@ def load_arguments(self, _):
 
     with self.argument_context('sql server deleted-server list') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   required=True,
-                   help='Location where the deleted servers were originally located.')
+                   help='Location where the deleted servers were originally located. '
+                        'Omit to list deleted servers in all locations.')
 
     ###############################################
     #                sql managed instance         #

@@ -1413,6 +1413,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
             'init_admin': init_admin,
             'cert_name': 'hsmSslCert',
             'cert_name2': 'hsmSslCert2',
+            'listener_name': 'hsmListener',
         })
 
         # create managed identity
@@ -1499,6 +1500,33 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{cert_name}'),
                      self.check('hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test creating a listener preserves the existing HSM-backed certificate
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} '
+                 '-n port_443 --port 443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} '
+                 '-n {listener_name} --frontend-ip appGatewayFrontendIP '
+                 '--frontend-port port_443 --ssl-cert {cert_name} '
+                 '--host-name contoso.com',
+                 checks=[
+                     self.check('name', '{listener_name}'),
+                     self.check('hostName', 'contoso.com'),
+                     self.check("contains(sslCertificate.id, '{cert_name}')", True),
+                 ])
+
+        # test parent show and update preserve the HSM-backed certificate
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check('sslCertificates[0].hsm.keyId', '{hsm_key_id2}'),
+            self.exists('sslCertificates[0].hsm.publicCertData'),
+        ])
+        self.cmd('network application-gateway update -g {rg} -n {ag} --tags hsm=preserved',
+                 checks=self.check('tags.hsm', 'preserved'))
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                     self.exists('hsm.publicCertData'),
                  ])
 
         # test ssl-cert list includes the hsm cert
@@ -3360,6 +3388,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'policy_type': 'OWASP',
             'policy_version': 3.2,
             'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
+            'empty_rule_group_name': 'REQUEST-920-PROTOCOL-ENFORCEMENT',
             'rule_id': '921120'
         })
 
@@ -3420,6 +3449,19 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--version {policy_version} '
                  '--group-name {rule_group_name}',
                  checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {empty_rule_group_name}',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 0),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):

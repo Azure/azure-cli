@@ -1,58 +1,113 @@
 interactions:
 - request:
-    body: '{"identity": {"type": "None"}, "location": "westus2", "sku": {"name": "Premium",
-      "tier": "Premium"}}'
+    body: '{"location": "eastus", "sku": {"name": "Premium", "tier": "Premium"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
       - keep-alive
       Content-Length:
-      - '100'
+      - '69'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2026-01-01
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US 2","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-05-16T15:31:13.173Z","updatedAt":"2023-05-16T15:31:13.173Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"ipAddressType":"IPv4","dnsNamePolicy":"Standard","platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"errors":[],"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"eastus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2026-08-05T14:42:17.197869Z","updatedAt":"2026-08-05T14:42:17.197869Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Premium","tier":"Premium","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/f101fcb5-6ff5-410a-97df-bd1bff206227?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215377375643873&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=VW5b-XQfVLJ1bf7WT2hmVqBDDj1phkMj5vQsYNwPMat_MVeoRm6YIJdhfLxcSiSXbUnVqXMp4qavobU7soFX-b0eIq7asF6o5KiSIVWErnC2uKTRFQnrn2NRE-_ZM7A_flFawQk8srFMZCTuS_luMYmFsUr9XNKi9HX2hvMYU382pSa990WKFd5aTdKhCtxy5KIXn2d7cWHAJZDpElcxbtlSiwUhFhl8md2Q7OH6g65XZzBcAgbes5eVMiosU_hOxkARLXgo7WQXhCgzbDILP17Nx5ScaEhcdUJwNQFQGiNvklwEcgULSTVlwiWtJ1BcZlcX5wjEdH6ZI8PzO6FG2Q&h=AQXP8MhJNU0YRgcXV32P1usBH_dJTYeP6VJCDMJOQZ0
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '1080'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:31:13 GMT
+      - Wed, 05 Aug 2026 14:42:17 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/f101fcb5-6ff5-410a-97df-bd1bff206227?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215377375800224&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=mZ0N-mZREBYmRaU___DDmdEdTDuEfrU2KixQlqXoBBTyGPSBeop6K5c5lWyZi6sJcy5As7lQTbO-XHA54orEqMxHe8WFyA27V7tKMt4a1X6aB8W8cUd6k6STibeCVVU5sa_aRIFNPdjctRZtErGkn99UMPJJPIhHZ2yHCElOPqiOTSGiyirhYQcyChqbRCqLXojbnD-Gld_jliVTqtDJ6G3e9bHNfhRqWPwEUfi1W-_Fx4abDD7Z5at3eNjsN9CwVyrUr59pwxREkc5lt_CuLtw9eaRX5SHg-bhihF3NtTm9YEYb0P_cmvZuU78bcVhWmf0iyBkcRB8zL3ogXbCdoQ&h=Bz2fBiyGm_wAtoZQ38LMCslA-I0Thkii16hxFUhpIZA
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4272f0f3-4289-4e4f-b897-3f96ff73f539
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G10|2026-08-05T14:42:17
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/c44b5631-e5ec-478f-b961-6a1a94c3de08
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: D7F451368A71429EABA27E77DA54830A Ref B: SG2AA1070303025 Ref C: 2026-08-05T14:42:15Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --sku
+      User-Agent:
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/f101fcb5-6ff5-410a-97df-bd1bff206227?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215377375643873&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=VW5b-XQfVLJ1bf7WT2hmVqBDDj1phkMj5vQsYNwPMat_MVeoRm6YIJdhfLxcSiSXbUnVqXMp4qavobU7soFX-b0eIq7asF6o5KiSIVWErnC2uKTRFQnrn2NRE-_ZM7A_flFawQk8srFMZCTuS_luMYmFsUr9XNKi9HX2hvMYU382pSa990WKFd5aTdKhCtxy5KIXn2d7cWHAJZDpElcxbtlSiwUhFhl8md2Q7OH6g65XZzBcAgbes5eVMiosU_hOxkARLXgo7WQXhCgzbDILP17Nx5ScaEhcdUJwNQFQGiNvklwEcgULSTVlwiWtJ1BcZlcX5wjEdH6ZI8PzO6FG2Q&h=AQXP8MhJNU0YRgcXV32P1usBH_dJTYeP6VJCDMJOQZ0
+  response:
+    body:
+      string: '{"name":"f101fcb5-6ff5-410a-97df-bd1bff206227","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 05 Aug 2026 14:42:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 6b5929ff-4e5a-4304-8a35-f8062fc3765a
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G10|2026-08-05T14:42:19
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/46865869-7bc7-453b-9725-609fde8a1959
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4F9F0FF9717E44D9A90C2625E2080632 Ref B: SG2AA1070305031 Ref C: 2026-08-05T14:42:18Z'
     status:
       code: 200
       message: OK
@@ -62,7 +117,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
@@ -70,39 +125,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/f101fcb5-6ff5-410a-97df-bd1bff206227?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215377375643873&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=VW5b-XQfVLJ1bf7WT2hmVqBDDj1phkMj5vQsYNwPMat_MVeoRm6YIJdhfLxcSiSXbUnVqXMp4qavobU7soFX-b0eIq7asF6o5KiSIVWErnC2uKTRFQnrn2NRE-_ZM7A_flFawQk8srFMZCTuS_luMYmFsUr9XNKi9HX2hvMYU382pSa990WKFd5aTdKhCtxy5KIXn2d7cWHAJZDpElcxbtlSiwUhFhl8md2Q7OH6g65XZzBcAgbes5eVMiosU_hOxkARLXgo7WQXhCgzbDILP17Nx5ScaEhcdUJwNQFQGiNvklwEcgULSTVlwiWtJ1BcZlcX5wjEdH6ZI8PzO6FG2Q&h=AQXP8MhJNU0YRgcXV32P1usBH_dJTYeP6VJCDMJOQZ0
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US 2","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-05-16T15:31:13.173Z","updatedAt":"2023-05-16T15:31:13.173Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"name":"f101fcb5-6ff5-410a-97df-bd1bff206227","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:31:13 GMT
+      - Wed, 05 Aug 2026 14:42:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 346eb4b5-218c-4322-979c-a241fdc21f4b
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:42:50
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/0dd3d8aa-f1a8-4beb-980c-697a6027c73c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 383C4E4C4C774B7E8CFE0A48EF742A3E Ref B: SG2AA1070302034 Ref C: 2026-08-05T14:42:50Z'
     status:
       code: 200
       message: OK
@@ -112,7 +169,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
@@ -120,39 +177,41 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/eastus/namespaceOperationResults/f101fcb5-6ff5-410a-97df-bd1bff206227?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2026-01-01&operationType=Active&t=639215377375643873&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=VW5b-XQfVLJ1bf7WT2hmVqBDDj1phkMj5vQsYNwPMat_MVeoRm6YIJdhfLxcSiSXbUnVqXMp4qavobU7soFX-b0eIq7asF6o5KiSIVWErnC2uKTRFQnrn2NRE-_ZM7A_flFawQk8srFMZCTuS_luMYmFsUr9XNKi9HX2hvMYU382pSa990WKFd5aTdKhCtxy5KIXn2d7cWHAJZDpElcxbtlSiwUhFhl8md2Q7OH6g65XZzBcAgbes5eVMiosU_hOxkARLXgo7WQXhCgzbDILP17Nx5ScaEhcdUJwNQFQGiNvklwEcgULSTVlwiWtJ1BcZlcX5wjEdH6ZI8PzO6FG2Q&h=AQXP8MhJNU0YRgcXV32P1usBH_dJTYeP6VJCDMJOQZ0
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US 2","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-05-16T15:31:13.173Z","updatedAt":"2023-05-16T15:31:13.173Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"name":"f101fcb5-6ff5-410a-97df-bd1bff206227","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:31:44 GMT
+      - Wed, 05 Aug 2026 14:43:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 6a0caa8a-e96d-4bff-abdb-f6370d04eec0
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G1|2026-08-05T14:43:22
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/61a9ddd4-df80-4d58-bb03-4b7a9170b120
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FBB3570F9B66411F9C900EC9BFA5E57D Ref B: KUL201100110040 Ref C: 2026-08-05T14:43:21Z'
     status:
       code: 200
       message: OK
@@ -162,7 +221,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace create
       Connection:
@@ -170,89 +229,39 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --sku
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2026-01-01
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US 2","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-05-16T15:31:13.173Z","updatedAt":"2023-05-16T15:31:13.173Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"eastus","tags":{},"properties":{"ipAddressType":"IPv4","dnsNamePolicy":"Standard","platformCapabilities":{"confidentialCompute":{"mode":"Disabled"}},"errors":[],"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"eastus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2026-08-05T14:42:17.197869Z","updatedAt":"2026-08-05T14:42:17.197869Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Premium","tier":"Premium","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '801'
+      - '1077'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:32:14 GMT
+      - Wed, 05 Aug 2026 14:43:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --sku
-      User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US 2","tags":{},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":true,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-05-16T15:31:13.173Z","updatedAt":"2023-05-16T15:32:34.157Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '799'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 16 May 2023 15:32:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      x-ms-messaging-activity-id:
+      - 656d730b-a07a-4554-8100-d2fdf05029fe
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G1|2026-08-05T14:43:23
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: EC4293A109484883A3893E6260BBB8E9 Ref B: SG2AA1070301042 Ref C: 2026-08-05T14:43:23Z'
     status:
       code: 200
       message: OK
@@ -262,7 +271,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace authorization-rule create
       Connection:
@@ -274,37 +283,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key1?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key1?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key1","name":"key1","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Send","Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key1","name":"key1","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"eastus","properties":{"rights":["Send","Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '324'
+      - '323'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:32:51 GMT
+      - Wed, 05 Aug 2026 14:43:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - a592f83b-20c0-42f2-ab61-5828afb52653
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:43:30
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/11b80425-6fbd-427c-bc15-4984e4e7c93b
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: BBA7336B76F84CD681EFA7FC6E470F39 Ref B: SG2AA1070304060 Ref C: 2026-08-05T14:43:24Z'
     status:
       code: 200
       message: OK
@@ -319,7 +334,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group create
       Connection:
@@ -332,41 +347,43 @@ interactions:
       - --resource-group --namespace-name --name --client-app-group-identifier --is-enabled
         --throttling-policy-config --throttling-policy-config --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:32:56 GMT
+      - Wed, 05 Aug 2026 14:43:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 8e8fb8ce-2420-45bc-a622-237e8836ef0a
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G6|2026-08-05T14:43:32
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/d934f869-518b-40bd-9e36-f684e70abe85
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 8ECBD2522D5946CEBC1525F63939D72E Ref B: SG2AA1070302029 Ref C: 2026-08-05T14:43:31Z'
     status:
       code: 200
       message: OK
@@ -376,7 +393,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -384,39 +401,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:32:58 GMT
+      - Wed, 05 Aug 2026 14:43:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 5484bea8-28ed-4bf4-8ec0-3156e5821a4a
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:43:34
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/f6e9c3f6-04d3-421f-a07b-0fbf91f116f0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 99B27FF2D6EB4A4BB8A048597BFAA467 Ref B: SG2AA1040513031 Ref C: 2026-08-05T14:43:33Z'
     status:
       code: 200
       message: OK
@@ -426,7 +445,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -434,39 +453,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:32:59 GMT
+      - Wed, 05 Aug 2026 14:43:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 64077374-5e94-4071-a6c6-45c842f43dcc
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:43:35
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/b698a9bf-7bf5-473a-bef9-e920d0fb27cc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 54ACB260D80B446FB8AEDE53F89FB490 Ref B: SG2AA1040515052 Ref C: 2026-08-05T14:43:35Z'
     status:
       code: 200
       message: OK
@@ -482,7 +503,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -494,41 +515,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":19000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":19000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '848'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:00 GMT
+      - Wed, 05 Aug 2026 14:43:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - ddb9da3d-0703-417e-af51-860ba3b948c3
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G6|2026-08-05T14:43:38
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/dee81acd-8c98-446c-8ea3-312a75407e56
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: F3C65CAF00294A79914C583B94AF301E Ref B: KUL201100110062 Ref C: 2026-08-05T14:43:36Z'
     status:
       code: 200
       message: OK
@@ -538,7 +561,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -546,39 +569,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":19000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":19000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '848'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:01 GMT
+      - Wed, 05 Aug 2026 14:43:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - cbedfa3b-bac3-4c69-ba4f-77aff64ccfa7
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G4|2026-08-05T14:43:40
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/4b6a799d-71e3-4cd9-b342-7d3888c07a97
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 25AE200FA7F0409A8A0BFC615055DC85 Ref B: SG2AA1070305025 Ref C: 2026-08-05T14:43:39Z'
     status:
       code: 200
       message: OK
@@ -588,7 +613,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -596,39 +621,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":19000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":19000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '819'
+      - '848'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:02 GMT
+      - Wed, 05 Aug 2026 14:43:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 08cfcdf0-81a2-4f7e-98ca-6efb04db84c4
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G9|2026-08-05T14:43:41
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/c7e7aef2-3268-465e-8901-65bc31fef1ae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: DE32ED552F994580BC1ECA4789AD56E7 Ref B: KUL201100110042 Ref C: 2026-08-05T14:43:41Z'
     status:
       code: 200
       message: OK
@@ -643,7 +670,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -655,41 +682,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:02 GMT
+      - Wed, 05 Aug 2026 14:43:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 9b8ee25d-2d93-4ef9-998c-5568b95396cd
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G5|2026-08-05T14:43:44
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/90972c8d-bdcc-4de1-90ad-08c264c85691
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 1CF7A33692B7495680334345577BF1C3 Ref B: SG2AA1040519023 Ref C: 2026-08-05T14:43:42Z'
     status:
       code: 200
       message: OK
@@ -699,7 +728,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -707,39 +736,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:05 GMT
+      - Wed, 05 Aug 2026 14:43:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - f67b6183-f6a5-4dd7-a1e6-1c015539caec
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G1|2026-08-05T14:43:46
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/b6ed3b94-324a-4814-9050-e6635289017a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 12D8998157AC419FAAAC5282DB7F897B Ref B: KUL201100111023 Ref C: 2026-08-05T14:43:45Z'
     status:
       code: 200
       message: OK
@@ -749,7 +780,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -757,39 +788,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:05 GMT
+      - Wed, 05 Aug 2026 14:43:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 202535db-099b-4983-a88e-23db989efdd4
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G9|2026-08-05T14:43:47
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/fd8c3696-cd49-492c-813c-5610b5dbf1b4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 1EECB9DB2E9049F082DCF97500468821 Ref B: SG2AA1070303029 Ref C: 2026-08-05T14:43:46Z'
     status:
       code: 200
       message: OK
@@ -801,7 +834,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -813,41 +846,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '516'
+      - '545'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:06 GMT
+      - Wed, 05 Aug 2026 14:43:48 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4455f612-b4d3-4473-b479-09c095b9739f
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G13|2026-08-05T14:43:49
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/f163e054-1b7a-45f1-ba2b-9bd4ad7120ac
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 8A5F12FD6CE2405F9DDE7F3AE6AE89E0 Ref B: SG2AA1040519029 Ref C: 2026-08-05T14:43:48Z'
     status:
       code: 200
       message: OK
@@ -857,7 +892,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -865,39 +900,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '516'
+      - '545'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:07 GMT
+      - Wed, 05 Aug 2026 14:43:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - d769a866-2de0-4c29-b29a-2d231e88c4ad
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:43:51
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southeastasia/407f5917-7961-4cd1-880e-f01e9e2f8304
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 508D144640234CF2A67A01456665524B Ref B: SG2AA1040518011 Ref C: 2026-08-05T14:43:50Z'
     status:
       code: 200
       message: OK
@@ -907,7 +944,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -915,39 +952,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '516'
+      - '545'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:08 GMT
+      - Wed, 05 Aug 2026 14:43:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 96b1d509-0880-436e-a1aa-de7a0068d665
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G8|2026-08-05T14:43:52
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/1580989f-9be3-4c9f-8349-8248f6f637ee
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CC8E608150E544879AF04CAAA3BEBC6E Ref B: SG2AA1070303062 Ref C: 2026-08-05T14:43:52Z'
     status:
       code: 200
       message: OK
@@ -962,7 +1001,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy add
       Connection:
@@ -974,41 +1013,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --throttling-policy-config --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:09 GMT
+      - Wed, 05 Aug 2026 14:43:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - c746f9e0-87c7-4112-8ce1-2744dfd77968
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G6|2026-08-05T14:43:54
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/8de9c3ac-0c35-4a26-b784-f4a418be00a6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 229DE7D0B47545808687C08B15DCF68D Ref B: SG2AA1040515060 Ref C: 2026-08-05T14:43:53Z'
     status:
       code: 200
       message: OK
@@ -1018,7 +1059,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group show
       Connection:
@@ -1026,39 +1067,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:10 GMT
+      - Wed, 05 Aug 2026 14:43:56 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4e45c6d2-e44c-4db2-af51-6b7f73b60dd3
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G7|2026-08-05T14:43:56
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/c078f88d-bedf-4423-a8bb-f1a34d330764
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F81F2273C1EC4F96BD3BA5A6E109EFD1 Ref B: SG2AA1040519040 Ref C: 2026-08-05T14:43:55Z'
     status:
       code: 200
       message: OK
@@ -1068,7 +1111,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group update
       Connection:
@@ -1076,39 +1119,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --is-enabled
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:11 GMT
+      - Wed, 05 Aug 2026 14:43:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4e9bebfd-0e57-4b12-9d4c-db93b9f58446
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G8|2026-08-05T14:43:57
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/239984c1-1fc6-46d3-b9a1-6e3a553e4c40
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A3469759C95F4CD980A2D72B1C52E941 Ref B: SG2AA1040516040 Ref C: 2026-08-05T14:43:57Z'
     status:
       code: 200
       message: OK
@@ -1123,7 +1168,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group update
       Connection:
@@ -1135,41 +1180,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --is-enabled
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":false,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '721'
+      - '750'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:12 GMT
+      - Wed, 05 Aug 2026 14:43:59 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 9800956d-e101-4583-8ef8-d4a7c45ba950
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G3|2026-08-05T14:44:00
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/cd6bc630-7879-46b5-9244-0ad816a3d1e9
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 6AA81537E9294D96A0AB2107F2BB3DA7 Ref B: SG2AA1040518011 Ref C: 2026-08-05T14:43:58Z'
     status:
       code: 200
       message: OK
@@ -1179,7 +1226,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group update
       Connection:
@@ -1187,39 +1234,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --is-enabled
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":false}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":false,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '721'
+      - '750'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:14 GMT
+      - Wed, 05 Aug 2026 14:44:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 1911b941-bb0d-46c2-bf26-296e5458ac0a
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G9|2026-08-05T14:44:01
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/dc4ccb8e-1c3e-4db5-8138-f786eb48e6ce
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7ACAE0E7A9B245F6A3A8FBDF420090BE Ref B: SG2AA1070301042 Ref C: 2026-08-05T14:44:01Z'
     status:
       code: 200
       message: OK
@@ -1234,7 +1283,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group update
       Connection:
@@ -1246,41 +1295,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --is-enabled
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":12000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003","name":"app-group-nscli1000003","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli1000003","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key1","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":12000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:15 GMT
+      - Wed, 05 Aug 2026 14:44:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 272b7630-018b-4720-8e07-7e76a71dbfcd
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G1|2026-08-05T14:44:03
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/b3495b0e-f4ff-44f1-a0a3-93701dc11470
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: E5C839BDDC964A568B06FDE072E50198 Ref B: SG2AA1040520062 Ref C: 2026-08-05T14:44:02Z'
     status:
       code: 200
       message: OK
@@ -1290,7 +1341,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace authorization-rule create
       Connection:
@@ -1302,37 +1353,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key5?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key5?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key5","name":"key5","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Send","Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key5","name":"key5","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"eastus","properties":{"rights":["Send","Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '324'
+      - '323'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:21 GMT
+      - Wed, 05 Aug 2026 14:44:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4c904608-6d47-42ed-9f7f-a5d6dd2a9a94
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G6|2026-08-05T14:44:11
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/a0f92dc7-b782-4589-a928-ae9f382a0c42
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 9AE041D5C9704E2781B0E668C5957C61 Ref B: KUL201100110025 Ref C: 2026-08-05T14:44:04Z'
     status:
       code: 200
       message: OK
@@ -1348,7 +1405,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group create
       Connection:
@@ -1361,41 +1418,43 @@ interactions:
       - --resource-group --namespace-name --name --client-app-group-identifier --throttling-policy-config
         --throttling-policy-config --throttling-policy-config --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":182000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":182000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:23 GMT
+      - Wed, 05 Aug 2026 14:44:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - bee3bbaa-9f3b-4f1a-828c-af4d2ba26df3
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G10|2026-08-05T14:44:13
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/bcb34991-a346-4616-aa37-221ccf71f9df
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: F345E5EF1A1040738EE680CF9F184C5B Ref B: SG2AA1040520029 Ref C: 2026-08-05T14:44:12Z'
     status:
       code: 200
       message: OK
@@ -1405,7 +1464,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -1413,39 +1472,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":182000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":182000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:24 GMT
+      - Wed, 05 Aug 2026 14:44:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - b634aed2-a604-4629-be0a-ae22a095bcf9
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G2|2026-08-05T14:44:15
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/e06e6fa4-3f6f-4b53-bda0-8f7a0baaba7c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 26F7C6FA2D86467AB7A9D13A745CFC1D Ref B: SG2AA1070302034 Ref C: 2026-08-05T14:44:14Z'
     status:
       code: 200
       message: OK
@@ -1455,7 +1516,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group show
       Connection:
@@ -1463,39 +1524,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":182000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":182000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:25 GMT
+      - Wed, 05 Aug 2026 14:44:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 63461002-339f-4409-a191-b2fe94620728
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G13|2026-08-05T14:44:17
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/ff5d657e-2445-4375-b0d9-d5a42b41a464
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A21F3E704D1C45029B4847CFC8808045 Ref B: SG2AA1070304060 Ref C: 2026-08-05T14:44:16Z'
     status:
       code: 200
       message: OK
@@ -1505,7 +1568,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -1513,35 +1576,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":182000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":182000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:27 GMT
+      - Wed, 05 Aug 2026 14:44:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 0a1e741b-7038-46b8-8480-565f2bbb4add
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G7|2026-08-05T14:44:19
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/2aa72abc-9e6d-4572-a7e3-8dad7b482340
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4F68BCDA4E364D97BD7E147BB131442B Ref B: SG2AA1040512025 Ref C: 2026-08-05T14:44:18Z'
     status:
       code: 200
       message: OK
@@ -1551,7 +1620,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -1559,39 +1628,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy4","metricId":"OutgoingBytes","rateLimitThreshold":182000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"},{"metricId":"OutgoingBytes","rateLimitThreshold":182000,"type":"ThrottlingPolicy","name":"policy4"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '820'
+      - '849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:28 GMT
+      - Wed, 05 Aug 2026 14:44:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - e5b5e968-06d7-4776-8ddb-32ddd6826975
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G12|2026-08-05T14:44:20
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/ee14d339-0145-4010-bc7e-7f4319ae2b1f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 898C201BBB6840709A699A74A70017C6 Ref B: SG2AA1040518040 Ref C: 2026-08-05T14:44:19Z'
     status:
       code: 200
       message: OK
@@ -1606,7 +1677,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group policy remove
       Connection:
@@ -1618,41 +1689,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --policy
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '720'
+      - '749'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:29 GMT
+      - Wed, 05 Aug 2026 14:44:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - beb4fe9c-0e29-4833-b6c0-ecacbed6d8d1
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G13|2026-08-05T14:44:21
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/51d5774c-26e7-4465-9df2-e154123d1a68
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: CB9873BFEB884FDB83D9AF7985F01178 Ref B: SG2AA1040519029 Ref C: 2026-08-05T14:44:21Z'
     status:
       code: 200
       message: OK
@@ -1662,7 +1735,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace authorization-rule create
       Connection:
@@ -1674,37 +1747,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key6?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key6?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key6","name":"key6","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Send","Listen"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/key6","name":"key6","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"eastus","properties":{"rights":["Send","Listen"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '324'
+      - '323'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:36 GMT
+      - Wed, 05 Aug 2026 14:44:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 4d0436d6-4890-4fea-94ff-992a686a72eb
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G12|2026-08-05T14:44:29
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/86e46ae3-bca2-4a9a-96f0-50d8abefb322
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 2C56EA4EFAB34F83A5056FF5F93F134A Ref B: KUL201100110060 Ref C: 2026-08-05T14:44:22Z'
     status:
       code: 200
       message: OK
@@ -1716,7 +1795,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group create
       Connection:
@@ -1728,41 +1807,43 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --client-app-group-identifier --throttling-policy-config
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005","name":"app-group-nscli3000005","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key6","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000}],"isEnabled":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005","name":"app-group-nscli3000005","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli3000005","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key6","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '516'
+      - '545'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:33:37 GMT
+      - Wed, 05 Aug 2026 14:44:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 6dcc243b-c70a-4079-a396-9c3caacbd46e
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G1|2026-08-05T14:44:31
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/9b284cb9-220a-4189-ad0f-c8e1cdc09a94
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 38454834F8844D6D873AF0AAADF346F7 Ref B: SG2AA1070301029 Ref C: 2026-08-05T14:44:30Z'
     status:
       code: 200
       message: OK
@@ -1772,7 +1853,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group delete
       Connection:
@@ -1782,9 +1863,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli1000003?api-version=2026-01-01
   response:
     body:
       string: ''
@@ -1794,22 +1875,29 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 16 May 2023 15:33:39 GMT
+      - Wed, 05 Aug 2026 14:44:32 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 00000001-0000-0000-0002-000000010696
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G10|2026-08-05T14:44:32
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/2069eaf9-85c0-4329-9864-28167efcbffd
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 0B35D00A8102480FA67A45DD16431DC6 Ref B: SG2AA1070305031 Ref C: 2026-08-05T14:44:31Z'
     status:
       code: 200
       message: OK
@@ -1819,7 +1907,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - eventhubs namespace application-group list
       Connection:
@@ -1827,40 +1915,41 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name
       User-Agent:
-      - AZURECLI/2.48.1 (AAZ) azsdk-python-core/1.26.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups?api-version=2026-01-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000},{"type":"ThrottlingPolicy","name":"policy2","metricId":"OutgoingMessages","rateLimitThreshold":15000},{"type":"ThrottlingPolicy","name":"policy3","metricId":"IncomingMessages","rateLimitThreshold":10000}],"isEnabled":true}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005","name":"app-group-nscli3000005","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"West
-        US 2","properties":{"clientAppGroupIdentifier":"NamespaceSASKeyName=key6","policies":[{"type":"ThrottlingPolicy","name":"policy1","metricId":"IncomingBytes","rateLimitThreshold":10000}],"isEnabled":true}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli2000004","name":"app-group-nscli2000004","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli2000004","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key5","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"},{"metricId":"OutgoingMessages","rateLimitThreshold":15000,"type":"ThrottlingPolicy","name":"policy2"},{"metricId":"IncomingMessages","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy3"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/applicationGroups/app-group-nscli3000005","name":"app-group-nscli3000005","type":"Microsoft.EventHub/Namespaces/ApplicationGroups","location":"eastus","properties":{"name":"app-group-nscli3000005","isEnabled":true,"clientAppGroupIdentifier":"NamespaceSASKeyName=key6","policies":[{"metricId":"IncomingBytes","rateLimitThreshold":10000,"type":"ThrottlingPolicy","name":"policy1"}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1249'
+      - '1307'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 16 May 2023 15:34:00 GMT
+      - Wed, 05 Aug 2026 14:44:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-messaging-activity-id:
+      - 94ae90ec-5027-4952-bdc0-32d7df96f243
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS|EASTUS|G11|2026-08-05T14:44:54
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/24a16408-8f63-4bab-94a1-46891dd8823a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 55B1527E4FE2450E8CBCE2D1995A6127 Ref B: SG2AA1070305034 Ref C: 2026-08-05T14:44:53Z'
     status:
       code: 200
       message: OK

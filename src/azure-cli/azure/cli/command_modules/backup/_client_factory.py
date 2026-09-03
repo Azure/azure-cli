@@ -33,6 +33,13 @@ def _backup_passive_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupPassiveClient)
 
 
+def _storage_client_factory(cli_ctx, **_):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+
+
 # External Deps Client Factories
 def resources_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resources
@@ -40,6 +47,10 @@ def resources_cf(cli_ctx, *_):
 
 def resource_groups_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resource_groups
+
+
+def file_shares_cf(cli_ctx, *_):
+    return _storage_client_factory(cli_ctx).file_shares
 
 
 # Internal Deps Client Factories

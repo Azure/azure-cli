@@ -204,7 +204,7 @@ def _get_disk_lun_by_aaz(data_disks):
 def _get_private_config(cli_ctx, resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client(cli_ctx)
     # pylint: disable=no-member
-    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys
+    keys = storage_mgmt_client.storage_accounts.list_keys(resource_group_name, storage_account).keys_property
 
     private_config = {
         'storageAccountName': storage_account,
@@ -912,7 +912,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None,
+              disable_capacity_reservation_assignment=None, enable_hibernation=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
@@ -923,7 +924,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
               enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
               enable_all_instance_down=None, zone_placement_policy=None, include_zones=None,
-              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
+              wire_server_use_local_file_rules=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
               disk_mbps_read_write=None, zone_movement=None,
@@ -1144,6 +1146,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
+        disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
         os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
@@ -1155,6 +1158,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         enable_all_instance_down=enable_all_instance_down,
         zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
         align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
+        wire_server_use_local_file_rules=wire_server_use_local_file_rules,
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
@@ -1758,12 +1762,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
+              disable_capacity_reservation_assignment=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
               scheduled_events_api_version=None, enable_all_instance_down=None,
-              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              align_regional_disks_to_vm_zone=None, wire_server_mode=None,
+              wire_server_use_local_file_rules=None, imds_mode=None,
               add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
@@ -1882,8 +1888,15 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             capacity_reservation_group = None
 
         sub_resource = {"id": capacity_reservation_group}
-        capacity_reservation = {"capacity_reservation_group": sub_resource}
-        vm["capacity_reservation"] = capacity_reservation
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["capacity_reservation_group"] = sub_resource
+
+    if disable_capacity_reservation_assignment is not None:
+        if vm.get("capacity_reservation") is None:
+            vm["capacity_reservation"] = {}
+        vm["capacity_reservation"]["disable_capacity_reservation_assignment"] = \
+            disable_capacity_reservation_assignment
 
     if dedicated_host is not None:
         if vm.get("host", None) is None:
@@ -1932,7 +1945,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm["security_profile"]["uefi_settings"] = {"secure_boot_enabled": enable_secure_boot,
                                                    "v_tpm_enabled": enable_vtpm}
 
-    proxy_agent_parameters = [enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id]
+    proxy_agent_parameters = [
+        enable_proxy_agent, wire_server_mode, wire_server_use_local_file_rules, imds_mode, key_incarnation_id
+    ]
     if any(parameter is not None for parameter in proxy_agent_parameters):
         wire_server = {}
         imds = {}
@@ -1953,6 +1968,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm["security_profile"]["proxy_agent_settings"]["key_incarnation_id"] = key_incarnation_id
         if wire_server_mode is not None:
             vm["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] = wire_server_mode
+        if wire_server_use_local_file_rules is not None:
+            vm["security_profile"]["proxy_agent_settings"]["wire_server"]["use_local_file_rules"] = \
+                wire_server_use_local_file_rules
         if imds_mode is not None:
             vm["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
@@ -2302,7 +2320,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Get account key
     keys = storage_mgmt_client.storage_accounts.list_keys(rg, storage_account.name)
 
-    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys[0].value)
+    blob_client = BlobClient.from_blob_url(blob_url=blob_uri, credential=keys.keys_property[0].value)
 
     # our streamwriter not seekable, so no parallel.
     downloader = blob_client.download_blob(max_concurrency=1)
@@ -3717,7 +3735,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
+                capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+                enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
                 v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
@@ -3734,7 +3753,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_all_instance_down=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
+                wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
@@ -4035,7 +4055,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            capacity_reservation_group=capacity_reservation_group,
+            disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
+            enable_auto_update=enable_auto_update,
             patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
@@ -4058,7 +4080,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
-            zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            zone_balance=zone_balance, wire_server_mode=wire_server_mode,
+            wire_server_use_local_file_rules=wire_server_use_local_file_rules, imds_mode=imds_mode,
             add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
@@ -4586,6 +4609,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                disable_capacity_reservation_assignment=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
@@ -4599,7 +4623,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
-                wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_mode=None, wire_server_use_local_file_rules=None, imds_mode=None,
+                add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
@@ -4722,6 +4747,17 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         sub_resource = {"id": capacity_reservation_group}
         capacity_reservation = {"capacity_reservation_group": sub_resource}
         vmss["virtual_machine_profile"]["capacity_reservation"] = capacity_reservation
+
+    if disable_capacity_reservation_assignment is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("capacity_reservation", None) is None:
+            vmss["virtual_machine_profile"]["capacity_reservation"] = {}
+        capacity_reservation = vmss["virtual_machine_profile"]["capacity_reservation"]
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            disable_capacity_reservation_assignment
+        if disable_capacity_reservation_assignment:
+            capacity_reservation.pop("capacity_reservation_group", None)
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.get("virtual_machine_profile", None) is None:
@@ -4854,7 +4890,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     'v_tpm_enabled': enable_vtpm
                 }}
 
-    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or \
+            wire_server_use_local_file_rules is not None or imds_mode is not None:
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
 
@@ -4880,6 +4917,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if wire_server_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] \
                 = wire_server_mode
+        if wire_server_use_local_file_rules is not None:
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"][
+                "use_local_file_rules"] = wire_server_use_local_file_rules
         if imds_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
@@ -5112,6 +5152,154 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
+
+def vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+    return vmss.get("lifecycleHooksProfile", {}).get("lifecycleHooks", [])
+
+
+def vmss_lifecycle_hook_show(cmd, resource_group_name, vmss_name, type):
+    for hook in vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
+        if hook.get("type") == type:
+            return hook
+
+    raise ResourceNotFoundError(
+        "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+
+def _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait):
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
+    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name)
+    vmss["lifecycleHooksProfile"] = {"lifecycleHooks": hooks}
+    vmss = convert_show_result_to_snake_case(vmss)
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = vmss_name
+    vmss["no_wait"] = no_wait
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+
+
+def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_duration=None,
+                            default_action=None, no_wait=False):
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            raise ArgumentUsageError(
+                "A lifecycle hook of type '{}' already exists. Use 'update' to modify it.".format(type))
+
+    hook = {"type": type}
+
+    if wait_duration is not None:
+        hook["waitDuration"] = wait_duration
+
+    if default_action is not None:
+        hook["defaultAction"] = default_action
+
+    lifecycle_hooks.append(hook)
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
+
+
+def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_duration=None,
+                               default_action=None, no_wait=False):
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+    target_hook = None
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            target_hook = h
+
+    if target_hook is None:
+        raise ResourceNotFoundError(
+            "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+    if wait_duration is not None:
+        target_hook["waitDuration"] = wait_duration
+
+    if default_action is not None:
+        target_hook["defaultAction"] = default_action
+
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, lifecycle_hooks, no_wait)
+
+
+def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, remove_all=False,
+                               no_wait=False):
+    if remove_all:
+        return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, [], no_wait)
+
+    lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
+    target_hook = None
+    hooks = []
+
+    for h in lifecycle_hooks:
+        if h.get("type") == type:
+            target_hook = h
+        else:
+            hooks.append(h)
+
+    if not target_hook:
+        raise ResourceNotFoundError(
+            "Lifecycle hook of type '{}' was not found on VMSS '{}'.".format(type, vmss_name))
+
+    return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait)
+
+
+def vmss_lifecycle_hook_event_list(cmd, resource_group_name, vmss_name):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .aaz.latest.vmss.lifecycle_hook_event import List as _lifecycleHookEventList
+    unregister_global_transforms(cmd.cli_ctx)
+    return _lifecycleHookEventList(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name
+    })
+
+
+def vmss_lifecycle_hook_event_show(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .aaz.latest.vmss.lifecycle_hook_event import Show as _lifecycleHookEventShow
+    unregister_global_transforms(cmd.cli_ctx)
+    return _lifecycleHookEventShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'lifecycle_hook_event_name': lifecycle_hook_event_name,
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name
+    })
+
+
+def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     action_state=None, wait_until=None, target_resource_ids=None, instance_ids=None):
+    from azure.cli.core.commands.transform import unregister_global_transforms
+    from .operations.vmss_lifecycle_hook_event import VMSSLifecycleHookEventUpdate as _lifecycleHookEventUpdate
+    unregister_global_transforms(cmd.cli_ctx)
+
+    command_args = {
+        "lifecycle_hook_event_name": lifecycle_hook_event_name,
+        "resource_group": resource_group_name,
+        "vmss_name": vmss_name,
+    }
+
+    if wait_until is not None:
+        command_args["wait_until"] = wait_until
+
+    if action_state is not None:
+        command_args["target_resources"] = [
+            {"action_state": action_state, "resource": {"id": resource_id}}
+            for resource_id in (target_resource_ids or [])
+        ]
+
+    return _lifecycleHookEventUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
+def vmss_lifecycle_hook_event_approve(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                      target_resource_ids=None, instance_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Approved", wait_until=None,
+                                            target_resource_ids=target_resource_ids)
+
+
+def vmss_lifecycle_hook_event_reject(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     target_resource_ids=None, instance_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Rejected", wait_until=None,
+                                            target_resource_ids=target_resource_ids)
 # endregion
 
 
@@ -6343,14 +6531,15 @@ def gallery_application_version_update(client,
 
 
 def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None, sharing_profile=None):
+                                      tags=None, zones=None, sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
         'location': location,
         'tags': tags,
-        'zones': zones
+        'zones': zones,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:
@@ -6363,12 +6552,13 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
 
 
 def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
-                                      sharing_profile=None):
+                                      sharing_profile=None, reservation_type=None):
     from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
-        'tags': tags
+        'tags': tags,
+        'reservation_type': reservation_type
     }
 
     if sharing_profile is not None:

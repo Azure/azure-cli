@@ -123,7 +123,7 @@ def validate_registry_name(cmd, namespace):
     if registry_login_server_suffix == '' and dnl_hash_index != -1:
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
-    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    # Some clouds do not define 'acr_login_server_endpoint'
     if hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
         if registry_login_server_suffix.lower() == acr_suffix and registry_login_server_suffix != '':
