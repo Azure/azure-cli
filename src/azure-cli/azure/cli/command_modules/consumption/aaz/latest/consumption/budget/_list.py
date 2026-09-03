@@ -13,17 +13,18 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption budget list",
-    is_preview=True,
 )
 class List(AAZCommand):
-    """List budgets for an Azure subscription.
+    """List all budgets for the defined scope.
+
+    :example: BudgetsList
+        az consumption budget list --scope subscriptions/00000000-0000-0000-0000-000000000000
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/budgets", "2023-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.consumption/budgets", "2023-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.consumption/budgets", "2024-08-01"],
         ]
     }
 
@@ -44,17 +45,16 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg()
+        _args_schema.scope = AAZStrArg(
+            options=["--scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        if condition_0:
-            self.BudgetsListByResourceGroupName(ctx=self.ctx)()
-        if condition_1:
-            self.BudgetsList(ctx=self.ctx)()
+        self.BudgetsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -70,200 +70,6 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class BudgetsListByResourceGroupName(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Consumption/budgets",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2023-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-                flags={"read_only": True},
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"read_only": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.amount = AAZFloatType(
-                flags={"required": True},
-            )
-            properties.category = AAZStrType(
-                flags={"required": True},
-            )
-            properties.current_spend = AAZObjectType(
-                serialized_name="currentSpend",
-            )
-            properties.filters = AAZObjectType()
-            properties.notifications = AAZDictType()
-            properties.time_grain = AAZStrType(
-                serialized_name="timeGrain",
-                flags={"required": True},
-            )
-            properties.time_period = AAZObjectType(
-                serialized_name="timePeriod",
-                flags={"required": True},
-            )
-
-            current_spend = cls._schema_on_200.value.Element.properties.current_spend
-            current_spend.amount = AAZFloatType(
-                flags={"read_only": True},
-            )
-            current_spend.unit = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            filters = cls._schema_on_200.value.Element.properties.filters
-            filters.meters = AAZListType()
-            filters.resource_groups = AAZListType(
-                serialized_name="resourceGroups",
-            )
-            filters.resources = AAZListType()
-
-            meters = cls._schema_on_200.value.Element.properties.filters.meters
-            meters.Element = AAZStrType()
-
-            resource_groups = cls._schema_on_200.value.Element.properties.filters.resource_groups
-            resource_groups.Element = AAZStrType()
-
-            resources = cls._schema_on_200.value.Element.properties.filters.resources
-            resources.Element = AAZStrType()
-
-            notifications = cls._schema_on_200.value.Element.properties.notifications
-            notifications.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.notifications.Element
-            _element.contact_emails = AAZListType(
-                serialized_name="contactEmails",
-                flags={"required": True},
-            )
-            _element.contact_groups = AAZListType(
-                serialized_name="contactGroups",
-            )
-            _element.contact_roles = AAZListType(
-                serialized_name="contactRoles",
-            )
-            _element.enabled = AAZBoolType(
-                flags={"required": True},
-            )
-            _element.operator = AAZStrType(
-                flags={"required": True},
-            )
-            _element.threshold = AAZFloatType(
-                flags={"required": True},
-            )
-
-            contact_emails = cls._schema_on_200.value.Element.properties.notifications.Element.contact_emails
-            contact_emails.Element = AAZStrType()
-
-            contact_groups = cls._schema_on_200.value.Element.properties.notifications.Element.contact_groups
-            contact_groups.Element = AAZStrType()
-
-            contact_roles = cls._schema_on_200.value.Element.properties.notifications.Element.contact_roles
-            contact_roles.Element = AAZStrType()
-
-            time_period = cls._schema_on_200.value.Element.properties.time_period
-            time_period.end_date = AAZStrType(
-                serialized_name="endDate",
-            )
-            time_period.start_date = AAZStrType(
-                serialized_name="startDate",
-                flags={"required": True},
-            )
-
-            return cls._schema_on_200
-
     class BudgetsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
@@ -278,7 +84,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets",
+                "/{scope}/providers/Microsoft.Consumption/budgets",
                 **self.url_parameters
             )
 
@@ -288,13 +94,14 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "scope", self.ctx.args.scope,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -304,7 +111,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -361,6 +168,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -374,8 +185,13 @@ class List(AAZCommand):
             )
             properties.current_spend = AAZObjectType(
                 serialized_name="currentSpend",
+                flags={"read_only": True},
             )
-            properties.filters = AAZObjectType()
+            properties.filter = AAZObjectType()
+            properties.forecast_spend = AAZObjectType(
+                serialized_name="forecastSpend",
+                flags={"read_only": True},
+            )
             properties.notifications = AAZDictType()
             properties.time_grain = AAZStrType(
                 serialized_name="timeGrain",
@@ -394,21 +210,29 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            filters = cls._schema_on_200.value.Element.properties.filters
-            filters.meters = AAZListType()
-            filters.resource_groups = AAZListType(
-                serialized_name="resourceGroups",
+            filter = cls._schema_on_200.value.Element.properties.filter
+            filter["and"] = AAZListType()
+            filter.dimensions = AAZObjectType()
+            _ListHelper._build_schema_budget_comparison_expression_read(filter.dimensions)
+            filter.tags = AAZObjectType()
+            _ListHelper._build_schema_budget_comparison_expression_read(filter.tags)
+
+            and_ = cls._schema_on_200.value.Element.properties.filter["and"]
+            and_.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.filter["and"].Element
+            _element.dimensions = AAZObjectType()
+            _ListHelper._build_schema_budget_comparison_expression_read(_element.dimensions)
+            _element.tags = AAZObjectType()
+            _ListHelper._build_schema_budget_comparison_expression_read(_element.tags)
+
+            forecast_spend = cls._schema_on_200.value.Element.properties.forecast_spend
+            forecast_spend.amount = AAZFloatType(
+                flags={"read_only": True},
             )
-            filters.resources = AAZListType()
-
-            meters = cls._schema_on_200.value.Element.properties.filters.meters
-            meters.Element = AAZStrType()
-
-            resource_groups = cls._schema_on_200.value.Element.properties.filters.resource_groups
-            resource_groups.Element = AAZStrType()
-
-            resources = cls._schema_on_200.value.Element.properties.filters.resources
-            resources.Element = AAZStrType()
+            forecast_spend.unit = AAZStrType(
+                flags={"read_only": True},
+            )
 
             notifications = cls._schema_on_200.value.Element.properties.notifications
             notifications.Element = AAZObjectType()
@@ -427,11 +251,15 @@ class List(AAZCommand):
             _element.enabled = AAZBoolType(
                 flags={"required": True},
             )
+            _element.locale = AAZStrType()
             _element.operator = AAZStrType(
                 flags={"required": True},
             )
             _element.threshold = AAZFloatType(
                 flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
             )
 
             contact_emails = cls._schema_on_200.value.Element.properties.notifications.Element.contact_emails
@@ -452,11 +280,61 @@ class List(AAZCommand):
                 flags={"required": True},
             )
 
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
             return cls._schema_on_200
 
 
 class _ListHelper:
     """Helper class for List"""
+
+    _schema_budget_comparison_expression_read = None
+
+    @classmethod
+    def _build_schema_budget_comparison_expression_read(cls, _schema):
+        if cls._schema_budget_comparison_expression_read is not None:
+            _schema.name = cls._schema_budget_comparison_expression_read.name
+            _schema.operator = cls._schema_budget_comparison_expression_read.operator
+            _schema.values = cls._schema_budget_comparison_expression_read.values
+            return
+
+        cls._schema_budget_comparison_expression_read = _schema_budget_comparison_expression_read = AAZObjectType()
+
+        budget_comparison_expression_read = _schema_budget_comparison_expression_read
+        budget_comparison_expression_read.name = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.operator = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_budget_comparison_expression_read.values
+        values.Element = AAZStrType()
+
+        _schema.name = cls._schema_budget_comparison_expression_read.name
+        _schema.operator = cls._schema_budget_comparison_expression_read.operator
+        _schema.values = cls._schema_budget_comparison_expression_read.values
 
 
 __all__ = ["List"]
