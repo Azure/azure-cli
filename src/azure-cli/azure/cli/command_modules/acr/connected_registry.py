@@ -14,7 +14,6 @@ from azure.cli.core.util import user_confirmation
 # Preview azure-mgmt-containerregistry 15.1.0b3 uses a flat model namespace (no api-version
 # subpackages), so `cmd.get_models` cannot resolve these types. Import them directly.
 from azure.mgmt.containerregistry.models import (
-    AuthType,
     ConnectedRegistry,
     ConnectedRegistryUpdateParameters,
     ConnectionState,
@@ -30,6 +29,7 @@ from azure.mgmt.containerregistry.models import (
     UserAssignedIdentity,
 )
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps, cf_acr_registries
+from ._constants import ConnectedRegistryAuthType
 from ._utils import (
     build_token_id,
     create_default_scope_map,
@@ -59,12 +59,8 @@ REPO_SCOPES_BY_MODE = {
 REPOSITORY = "repositories/"
 GATEWAY = "gateway/"
 
-# Auth-type / identity / connection-state string constants sourced from the SDK enums so a
-# rename or removal in the SDK becomes an import-time AttributeError rather than a silent
-# string-comparison mismatch. Values on the wire remain plain strings; comparisons throughout
-# this module are string-to-string (server-returned enums are coerced via ``getattr(.., 'value', ..)``).
-AUTH_TYPE_SYNC_TOKEN = AuthType.SYNC_TOKEN.value
-AUTH_TYPE_MANAGED_IDENTITY = AuthType.MANAGED_IDENTITY.value
+AUTH_TYPE_SYNC_TOKEN = ConnectedRegistryAuthType.SYNC_TOKEN.value
+AUTH_TYPE_MANAGED_IDENTITY = ConnectedRegistryAuthType.MANAGED_IDENTITY.value
 MSI_TYPE_USER_ASSIGNED = ManagedServiceIdentityType.USER_ASSIGNED.value
 CONNECTION_STATE_OFFLINE = ConnectionState.OFFLINE.value
 
@@ -72,18 +68,11 @@ CONNECTION_STATE_OFFLINE = ConnectionState.OFFLINE.value
 def _get_current_auth_type(connected_registry):
     """Return the current auth type ('SyncToken' or 'ManagedIdentity') of a connected registry.
 
-    Falls back to 'SyncToken' when the server has not populated auth_type (older resources).
-    Coerces the SDK ``AuthType`` enum (if present) to its string value so downstream string
-    comparisons and error messages behave predictably.
+    ``authType`` is the RP's canonical discriminator. Legacy resources predate the field and
+    deserialize as ``None`` — those are SyncToken by definition.
     """
-    identity = getattr(connected_registry, 'identity', None)
-    if identity is not None and identity.type and MSI_TYPE_USER_ASSIGNED in str(identity.type):
-        return AUTH_TYPE_MANAGED_IDENTITY
-    try:
-        auth_type = connected_registry.parent.sync_properties.auth_type
-    except AttributeError:
-        auth_type = None
-    # The SDK deserializes auth_type as an ``AuthType`` enum; use ``.value`` when available.
+    auth_type = connected_registry.parent.sync_properties.auth_type
+    # SDK deserializes auth_type as an ``AuthType`` enum; use ``.value`` when available.
     auth_type = getattr(auth_type, 'value', auth_type)
     return auth_type or AUTH_TYPE_SYNC_TOKEN
 
@@ -271,6 +260,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                 "Same-mode credential rotation is not supported."
             )
         current_state = getattr(current_connected_registry, 'connection_state', None)
+        # SDK may deserialize connection_state as a ConnectionState enum; coerce to its string value.
+        current_state = getattr(current_state, 'value', current_state)
         if current_state != CONNECTION_STATE_OFFLINE:
             raise ArgumentUsageError(
                 "argument error: connected registry must be in '{}' state to migrate authentication mode. "
@@ -586,7 +577,44 @@ def acr_connected_registry_install_renew_credentials(cmd,
                                                '1', yes, resource_group_name)
 
 
-def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
+def _resolve_parent_endpoint(connected_registry, parent_protocol):
+    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint \
+        or "<parent gateway endpoint>"
+    if connected_registry.parent.id:
+        parent_endpoint_protocol = parent_protocol
+    else:
+        if parent_protocol != "https":
+            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
+        parent_endpoint_protocol = "https"
+    return parent_gateway_endpoint, parent_endpoint_protocol
+
+
+def _build_connected_registry_settings(connected_registry_name,
+                                       parent_gateway_endpoint,
+                                       parent_endpoint_protocol,
+                                       auth_connection_fragment,
+                                       auth_env):
+    connection_string = (
+        "ConnectedRegistryName={};".format(connected_registry_name) +
+        auth_connection_fragment +
+        "ParentGatewayEndpoint={};".format(parent_gateway_endpoint) +
+        "ParentEndpointProtocol={}".format(parent_endpoint_protocol)
+    )
+    login_server_placeholder = (
+        "<Optional: connected registry login server. "
+        "More info at https://aka.ms/acr/connected-registry>"
+    )
+    settings = dict(auth_env)
+    settings.update({
+        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
+        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
+        "ACR_REGISTRY_CONNECTION_STRING": connection_string,
+        "ACR_REGISTRY_LOGIN_SERVER": login_server_placeholder,
+    })
+    return settings
+
+
+def acr_connected_registry_get_settings(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
@@ -599,7 +627,6 @@ def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    # --- Managed Identity mode: no sync-token, return MI-flavored connection string. ---
     if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
         if generate_password:
             raise ArgumentUsageError(
@@ -619,32 +646,15 @@ def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
             raise CLIError(
                 "Client ID for user-assigned identity '{}' is not populated by the service yet.".format(
                     msi_resource_id))
-        parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
-        if not parent_gateway_endpoint:
-            parent_gateway_endpoint = "<parent gateway endpoint>"
-        parent_id = connected_registry.parent.id
-        if parent_id:
-            parent_endpoint_protocol = parent_protocol
-        else:
-            if parent_protocol != "https":
-                logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
-            parent_endpoint_protocol = "https"
-        connection_string = (
-            "ConnectedRegistryName=%s;" % connected_registry_name +
-            "ManagedIdentityClientId=%s;" % client_id +
-            "ParentGatewayEndpoint=%s;" % parent_gateway_endpoint +
-            "ParentEndpointProtocol=%s" % parent_endpoint_protocol
+        parent_gateway_endpoint, parent_endpoint_protocol = _resolve_parent_endpoint(
+            connected_registry, parent_protocol)
+        return _build_connected_registry_settings(
+            connected_registry_name,
+            parent_gateway_endpoint,
+            parent_endpoint_protocol,
+            auth_connection_fragment="ManagedIdentityClientId={};".format(client_id),
+            auth_env={},
         )
-        connected_registry_login_server = "<Optional: connected registry login server. " + \
-            "More info at https://aka.ms/acr/connected-registry>"
-        return {
-            "ACR_MANAGED_IDENTITY_CLIENT_ID": client_id,
-            "ACR_MANAGED_IDENTITY_RESOURCE_ID": msi_resource_id,
-            "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
-            "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
-            "ACR_REGISTRY_CONNECTION_STRING": connection_string,
-            "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
-        }
 
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
     if generate_password:
@@ -674,31 +684,18 @@ def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
         sync_username = sync_token_name
         sync_password = "<use --generate-password to generate a new password>"
 
-    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
-    if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
-        parent_gateway_endpoint = "<parent gateway endpoint>"
-    parent_id = connected_registry.parent.id
-    # if parent_id is not none, parent is a connected registry
-    if parent_id:
-        parent_endpoint_protocol = parent_protocol
-    # if parent_id is none, parent is a cloud registry
-    else:
-        if parent_protocol != "https":
-            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
-        parent_endpoint_protocol = "https"
-    connected_registry_login_server = "<Optional: connected registry login server. " + \
-        "More info at https://aka.ms/acr/connected-registry>"
-    connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
-        "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, sync_password) + \
-        "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
-    return {
-        "SYNC_TOKEN_USER": sync_username,
-        "SYNC_TOKEN_PASSWORD": sync_password,
-        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
-        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
-        "ACR_REGISTRY_CONNECTION_STRING": connection_string,
-        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
-    }
+    parent_gateway_endpoint, parent_endpoint_protocol = _resolve_parent_endpoint(
+        connected_registry, parent_protocol)
+    return _build_connected_registry_settings(
+        connected_registry_name,
+        parent_gateway_endpoint,
+        parent_endpoint_protocol,
+        auth_connection_fragment="SyncTokenName={};SyncTokenPassword={};".format(sync_username, sync_password),
+        auth_env={
+            "SYNC_TOKEN_USER": sync_username,
+            "SYNC_TOKEN_PASSWORD": sync_password,
+        },
+    )
 # endregion
 
 
@@ -786,9 +783,9 @@ def acr_connected_registry_permissions_show(cmd,
         cmd, client, connected_registry_name, registry_name, resource_group_name)
     if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
         raise ArgumentUsageError(
-            "'permissions show' is only supported for connected registries configured with SyncToken "
-            "authentication. Output is derived from the sync-token scope map, which is not present in "
-            "ManagedIdentity mode."
+            "'az acr connected-registry permissions show' is not supported for a connected registry "
+            "using ManagedIdentity authentication. View the managed identity's Azure role assignments "
+            "and ABAC conditions to determine its repository permissions."
         )
     sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
     return get_scope_map_from_id(cmd, sync_token.scope_map_id)
@@ -821,9 +818,9 @@ def acr_connected_registry_permissions_update(cmd,
         raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
     if _get_current_auth_type(target_connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
         raise ArgumentUsageError(
-            "'permissions update' is only supported for connected registries configured with SyncToken "
-            "authentication. Repository permissions are managed via the sync-token scope map, which is "
-            "not present in ManagedIdentity mode."
+            "'az acr connected-registry permissions update' is not supported for a connected registry "
+            "using ManagedIdentity authentication. Update the ABAC conditions on the managed identity's "
+            "Azure role assignments to grant or revoke its repository permissions."
         )
 
     # remove repo permissions from connected registry descendants.

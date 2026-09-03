@@ -11,6 +11,7 @@ import surface loudly (the recorded scenario in test_acr_connectedregistry_comma
 stays SDK-shape-proof).
 """
 
+import enum
 import unittest
 from unittest import mock
 
@@ -18,12 +19,13 @@ from azure.cli.core.azclierror import ArgumentUsageError
 from knack.util import CLIError
 
 from azure.mgmt.containerregistry.models import (
-    AuthType,
     ConnectionState,
     ManagedServiceIdentity,
     ManagedServiceIdentityType,
     UserAssignedIdentity,
 )
+
+from azure.cli.command_modules.acr._constants import ConnectedRegistryAuthType
 
 from azure.cli.command_modules.acr.connected_registry import (
     _build_user_assigned_identity,
@@ -70,6 +72,10 @@ def _fake_cr(auth_type=None, has_identity=False, connection_state=None,
     cr.parent = mock.MagicMock()
     cr.parent.id = None
     cr.parent.sync_properties = mock.MagicMock()
+    # Real MI-configured connected registries always have authType=ManagedIdentity set alongside
+    # the identity. Preserve that invariant when callers don't override auth_type explicitly.
+    if auth_type is None and has_identity:
+        auth_type = AUTH_TYPE_MANAGED_IDENTITY
     cr.parent.sync_properties.auth_type = auth_type
     cr.parent.sync_properties.token_id = token_id
     cr.parent.sync_properties.gateway_endpoint = gateway_endpoint
@@ -89,13 +95,12 @@ def _fake_cr(auth_type=None, has_identity=False, connection_state=None,
 # ---------------------------------------------------------------------------
 
 
-class TestConstantsSourcedFromSDK(unittest.TestCase):
-    """The module constants must match the SDK enum values verbatim so a rename
-    fails at import time rather than as a silent runtime string mismatch."""
+class TestConstantsSourcedFromEnum(unittest.TestCase):
+    """The module constants must match the ConnectedRegistryAuthType enum values verbatim."""
 
     def test_auth_type_constants(self):
-        self.assertEqual(AUTH_TYPE_SYNC_TOKEN, AuthType.SYNC_TOKEN.value)
-        self.assertEqual(AUTH_TYPE_MANAGED_IDENTITY, AuthType.MANAGED_IDENTITY.value)
+        self.assertEqual(AUTH_TYPE_SYNC_TOKEN, ConnectedRegistryAuthType.SYNC_TOKEN.value)
+        self.assertEqual(AUTH_TYPE_MANAGED_IDENTITY, ConnectedRegistryAuthType.MANAGED_IDENTITY.value)
 
     def test_msi_type_constant(self):
         self.assertEqual(MSI_TYPE_USER_ASSIGNED, ManagedServiceIdentityType.USER_ASSIGNED.value)
@@ -111,8 +116,8 @@ class TestConstantsSourcedFromSDK(unittest.TestCase):
 
 class TestGetCurrentAuthType(unittest.TestCase):
 
-    def test_identity_attached_returns_managed_identity(self):
-        cr = _fake_cr(auth_type=None, has_identity=True)
+    def test_managed_identity_auth_type(self):
+        cr = _fake_cr(auth_type=AUTH_TYPE_MANAGED_IDENTITY, has_identity=True)
         self.assertEqual(_get_current_auth_type(cr), AUTH_TYPE_MANAGED_IDENTITY)
 
     def test_sync_token_auth_type_no_identity(self):
@@ -124,11 +129,11 @@ class TestGetCurrentAuthType(unittest.TestCase):
         self.assertEqual(_get_current_auth_type(cr), AUTH_TYPE_SYNC_TOKEN)
 
     def test_enum_valued_auth_type_is_coerced_to_string(self):
-        cr = _fake_cr(auth_type=AuthType.MANAGED_IDENTITY, has_identity=False)
+        cr = _fake_cr(auth_type=ConnectedRegistryAuthType.MANAGED_IDENTITY, has_identity=False)
         result = _get_current_auth_type(cr)
         self.assertEqual(result, AUTH_TYPE_MANAGED_IDENTITY)
         self.assertIsInstance(result, str)
-        self.assertNotIn('AuthType.', result)
+        self.assertNotIn('ConnectedRegistryAuthType.', result)
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +294,18 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
         self.assertEqual(body.sync_properties.auth_type, AUTH_TYPE_MANAGED_IDENTITY)
         self.assertIsNone(body.sync_properties.token_id)
 
+    def test_plain_enum_valued_connection_state_offline_is_accepted(self):
+        # Simulate a future SDK regen where ConnectionState is a plain Enum (not str-mixed);
+        # equality with the raw string would fail without .value coercion.
+        class _PlainConnectionState(enum.Enum):
+            OFFLINE = 'Offline'
+
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN,
+                       connection_state=_PlainConnectionState.OFFLINE)
+        client = self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY,
+                                  identity=TEST_MSI_ID)
+        self.assertTrue(client.begin_update.called)
+
 
 # ---------------------------------------------------------------------------
 # delete: MI-mode skips sync-token / scope-map cleanup
@@ -370,14 +387,16 @@ class TestConnectedRegistryGetSettingsMI(unittest.TestCase):
         with self.assertRaises(CLIError):
             self._invoke(cr)
 
-    def test_happy_path_returns_mi_keys(self):
+    def test_happy_path_returns_mi_connection_string(self):
         cr = _fake_cr(has_identity=True, client_id='cid-happy')
         result = self._invoke(cr)
-        self.assertEqual(result['ACR_MANAGED_IDENTITY_CLIENT_ID'], 'cid-happy')
-        self.assertEqual(result['ACR_MANAGED_IDENTITY_RESOURCE_ID'], TEST_MSI_ID)
         self.assertIn('ManagedIdentityClientId=cid-happy',
                       result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SyncTokenName', result['ACR_REGISTRY_CONNECTION_STRING'])
         self.assertNotIn('SYNC_TOKEN_USER', result)
+        self.assertNotIn('SYNC_TOKEN_PASSWORD', result)
+        self.assertNotIn('ACR_MANAGED_IDENTITY_CLIENT_ID', result)
+        self.assertNotIn('ACR_MANAGED_IDENTITY_RESOURCE_ID', result)
 
 
 # ---------------------------------------------------------------------------
