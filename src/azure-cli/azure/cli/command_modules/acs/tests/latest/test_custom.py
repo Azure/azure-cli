@@ -20,6 +20,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
+    _create_or_update_dcr_with_table_readiness_retry,
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
@@ -1847,6 +1848,80 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         self.assertNotIn("nodeOSUpgradeChannel", warning)
         self.assertNotIn("The orchestrator version rollback will proceed", warning)
         mock_sdk_no_wait.assert_called_once()
+
+
+class DcrTableReadinessRetryTest(unittest.TestCase):
+    def setUp(self):
+        patcher = mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.time.sleep",
+            return_value=None,
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_sleep = patcher.start()
+        self.resources = mock.Mock()
+
+    def test_succeeds_without_retry(self):
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, self.resources.begin_create_or_update_by_id.return_value)
+        self.resources.begin_create_or_update_by_id.assert_called_once_with(
+            "dcr-id", "2022-06-01", {"properties": {}}
+        )
+        self.mock_sleep.assert_not_called()
+
+    def test_retries_invalid_output_table_with_delay(self):
+        expected = mock.Mock()
+        self.resources.begin_create_or_update_by_id.side_effect = [
+            CLIError("invalidoutputtable: output table is not ready"),
+            CLIError("INVALIDOUTPUTTABLE: output table is not ready"),
+            expected,
+        ]
+
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, expected)
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.assertEqual(self.mock_sleep.call_count, 2)
+
+    def test_raises_after_readiness_retry_limit(self):
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "InvalidOutputTable: output table is not ready"
+        )
+
+        with self.assertRaisesRegex(CLIError, "InvalidOutputTable"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(
+            self.resources.begin_create_or_update_by_id.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES + 1,
+        )
+        self.assertEqual(
+            self.mock_sleep.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+    def test_other_errors_keep_three_attempt_limit(self):
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "unrelated failure"
+        )
+
+        with self.assertRaisesRegex(CLIError, "unrelated failure"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.mock_sleep.assert_not_called()
 
 
 if __name__ == "__main__":
