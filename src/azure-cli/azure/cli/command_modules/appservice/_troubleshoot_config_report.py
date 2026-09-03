@@ -31,6 +31,8 @@ def _format_dt(value):
             if v.endswith('Z'):
                 v = v[:-1]
             v = v + ' UTC'
+        elif v.endswith('+00:00'):
+            v = v[:-6] + ' UTC'
         elif '+' in v:
             v = v.split('+', 1)[0]
         return v
@@ -96,7 +98,7 @@ def render_report(payload):
     def _row(*objs):
         _out(list(objs))
 
-    def _labeled(label, value):
+    def _labeled(label, value, style=Style.PRIMARY):
         """Emit '<label><value>' with hanging indent so wrapped continuation
         lines align under the value column."""
         text = '' if value is None else str(value)
@@ -104,13 +106,14 @@ def render_report(payload):
         indent = ' ' * len(label)
         body_w = max(20, term_w - len(label))
         lines = textwrap.wrap(text, width=body_w) or [text]
-        _row((Style.PRIMARY, label), (Style.PRIMARY, lines[0]))
+        _row((style, label), (style, lines[0]))
         for cont in lines[1:]:
-            _row((Style.PRIMARY, indent), (Style.PRIMARY, cont))
+            _row((style, indent), (style, cont))
 
     config_check = payload.get('configCheck') or {}
     config_check_failed = payload.get('configCheck') is None
     config_check_status = payload.get('configCheckStatus')
+    config_check_message = payload.get('configCheckMessage')
     settings = config_check.get('Settings') or config_check.get('settings') or []
     if not isinstance(settings, list):
         settings = []
@@ -150,9 +153,31 @@ def render_report(payload):
     _out()
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
+    if not config_check_failed:
+        machine_name = config_check.get('MachineName') or config_check.get('machineName')
+        requested_machine_name = payload.get('requestedMachineName')
+        instance_id = config_check.get('InstanceId') or config_check.get('instanceId')
+        written_at_raw = config_check.get('WrittenAt') or config_check.get('writtenAt')
+        if isinstance(machine_name, str):
+            machine_name = machine_name.strip()
+        if isinstance(requested_machine_name, str):
+            requested_machine_name = requested_machine_name.strip()
+        if isinstance(written_at_raw, str):
+            written_at_raw = written_at_raw.strip()
+        instance_value = machine_name or requested_machine_name or _short_id(instance_id)
+        if instance_value:
+            _labeled('Instance:     ', instance_value, Style.HIGHLIGHT)
+        if written_at_raw:
+            written_at = _format_dt(written_at_raw) or str(written_at_raw)
+            _labeled('Last Updated: ', written_at, Style.HIGHLIGHT)
+        if machine_name or written_at_raw:
+            _out()
+
     if config_check_failed:
         if config_check_status == 404:
-            _row((Style.WARNING, 'Configuration check feature is currently unavailable.'))
+            message = config_check_message or (
+                'Configuration check feature is currently disabled. Please try again later.')
+            _row((Style.WARNING, message))
         else:
             _row((Style.WARNING,
                   'Failed to retrieve built-in configuration checks. Please try again. '
@@ -195,51 +220,42 @@ def render_report(payload):
         _out()
         _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
         _out()
-        if runtime_error is None:
-            _row((Style.PRIMARY, 'No runtime error reported.'))
-        else:
-            state = str(runtime_error.get('state') or '')
-            last_error = str(runtime_error.get('lastError') or '')
-            details = str(runtime_error.get('lastErrorDetails') or runtime_error.get('details') or '')
-            timestamp_raw = runtime_error.get('lastErrorTimestamp')
-            timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
-            if timestamp:
-                age = _relative_age(timestamp_raw if isinstance(timestamp_raw, str) else None)
-                if age:
-                    timestamp = '{} ({})'.format(timestamp, age)
+        state = str(runtime_error.get('state') or '')
+        last_error = str(runtime_error.get('lastError') or '')
+        details = str(runtime_error.get('lastErrorDetails') or '')
+        timestamp_raw = runtime_error.get('lastErrorTimestamp')
+        timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
+        if timestamp:
+            age = _relative_age(timestamp_raw if isinstance(timestamp_raw, str) else None)
+            if age:
+                timestamp = '{} ({})'.format(timestamp, age)
 
-            instance_short = _short_id(runtime_error.get('instanceId'))
-            failing_count = runtime_error.get('failingInstanceCount')
-            if instance_short:
-                if isinstance(failing_count, int) and failing_count >= 1:
-                    instance_value = '{} (1 out of {} failing instances)'.format(
-                        instance_short, failing_count)
-                else:
-                    instance_value = instance_short
-                _labeled('Instance               ', instance_value)
-            if state:
-                _labeled('State                  ', state)
-            if last_error:
-                _labeled('Last Error             ', last_error)
-            if details:
-                _labeled('Last Error Details     ', details)
-            if timestamp:
-                _labeled('Last Error Timestamp   ', timestamp)
+        instance_short = _short_id(runtime_error.get('instanceId'))
+        if instance_short:
+            _labeled('Instance               ', instance_short)
+        if state:
+            _labeled('State                  ', state)
+        if last_error:
+            _labeled('Last Error             ', last_error)
+        if details:
+            _labeled('Last Error Details     ', details)
+        if timestamp:
+            _labeled('Last Error Timestamp   ', timestamp)
 
         _out()
 
     # ---- Section 3: Suggested next steps ----
-    # When any built-in check flagged a warning/error, point the user at the
-    # az commands they'll actually need to remediate: update the app setting
-    # and check application logs. Rendered in the same "Hint:" style used by
-    # the status command's failure footer.
-    if any_issue:
+    # Show actionable next steps when either source found a problem. Config
+    # update commands require a flagged built-in check; application logs are
+    # useful for both configuration findings and runtime errors.
+    if any_issue or show_runtime:
         rg = payload.get('resourceGroup') or '<resource-group>'
         site_name = payload.get('name') or '<site-name>'
         _out()
         _out((Style.WARNING, '▶ Hint:'))
-        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
-             '--settings KEY=VALUE'.format(site_name, rg))
-        _out('  Update flagged config:       az webapp config set -n {} -g {} '
-             '--settings KEY=VALUE'.format(site_name, rg))
+        if any_issue:
+            _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
+                 '--settings KEY=VALUE'.format(site_name, rg))
+            _out('  Update flagged config:       az webapp config set -n {} -g {} '
+                 '--settings KEY=VALUE'.format(site_name, rg))
         _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(site_name, rg))

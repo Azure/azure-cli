@@ -2443,7 +2443,11 @@ long-summary: >
     command, alwaysOn, health check path, ...) evaluated against the
     running site's configuration snapshot.
 
-    (2) The most recent site runtime status error reported by App Service.
+    (2) The site runtime status error reported by App Service for the worker
+    represented by the configuration-check snapshot.
+    Use `--instance` with a worker machine name to retrieve that worker's
+    configuration checks. The instance ID returned by those checks is then
+    used to select the matching runtime error.
     The runtime error recommendation section is only surfaced when the
     error occurred within the last 15 minutes; older errors are still
     included in the structured payload but are hidden from the `--report`
@@ -2459,6 +2463,8 @@ examples:
     text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
   - name: Target a deployment slot
     text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+  - name: Run checks and show the runtime error for a specific worker instance
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
 helps['functionapp log'] = """

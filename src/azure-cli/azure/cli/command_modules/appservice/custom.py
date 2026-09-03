@@ -6535,21 +6535,20 @@ def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MIN
     raw = runtime_error.get('lastErrorTimestamp')
     if not raw:
         return False
-    from datetime import datetime, timezone, timedelta
     try:
         ts = str(raw).strip()
         if ts.endswith('Z'):
             ts = ts[:-1] + '+00:00'
-        parsed = datetime.fromisoformat(ts)
+        parsed = datetime.datetime.fromisoformat(ts)
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = parsed.replace(tzinfo=datetime.timezone.utc)
     except (ValueError, TypeError):
         return False
-    delta = datetime.now(timezone.utc) - parsed
+    delta = datetime.datetime.now(datetime.timezone.utc) - parsed
     # Reject future timestamps: a clock-skewed or malformed value would
     # produce a negative delta, which still satisfies `<= 15min` and would
     # incorrectly mark stale errors as recent.
-    return timedelta(0) <= delta <= timedelta(minutes=minutes)
+    return datetime.timedelta(0) <= delta <= datetime.timedelta(minutes=minutes)
 
 
 def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):
@@ -6563,13 +6562,14 @@ def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=N
             "'az webapp troubleshoot config' is only supported for Linux web apps.")
 
 
-def _extract_runtime_error(arm_response):
-    """Return the freshest runtime-error block from an ARM /siteStatus response.
+def _extract_runtime_error(arm_response, instance_id=None):
+    """Return the runtime-error block from an ARM /siteStatus response.
 
     /siteStatus returns per-instance status under 'properties' (a list); the
-    single-instance form returns a dict. We normalize both, then pick the entry
-    with the latest ``lastErrorTimestamp`` that also has a non-empty
-    ``lastError``. Returns ``None`` when no runtime error is reported.
+    single-instance form returns a dict. When ``instance_id`` is provided, only
+    that worker is considered; otherwise, pick the entry with the latest
+    ``lastErrorTimestamp`` that also has a non-empty ``lastError``. Returns
+    ``None`` when no matching runtime error is reported.
     """
     if not isinstance(arm_response, dict):
         return None
@@ -6581,6 +6581,12 @@ def _extract_runtime_error(arm_response):
     else:
         return None
     candidates = [item for item in items if isinstance(item, dict) and item.get('lastError')]
+    if instance_id:
+        requested_instance = str(instance_id).casefold()
+        candidates = [
+            item for item in candidates
+            if str(item.get('instanceId') or '').casefold() == requested_instance
+        ]
     if not candidates:
         return None
 
@@ -6588,18 +6594,33 @@ def _extract_runtime_error(arm_response):
         return item.get('lastErrorTimestamp') or ''
 
     candidates.sort(key=_ts_key, reverse=True)
-    freshest = candidates[0]
-    freshest['failingInstanceCount'] = len(candidates)
-    return freshest
+    return candidates[0]
 
 
-def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False):
-    """Aggregate built-in KuduLite config-check findings plus the most recent ARM
+def _http_error_status(ex):
+    """Return a customer-safe HTTP status without including response content."""
+    response = getattr(ex, 'response', None)
+    status_code = getattr(response, 'status_code', None) or getattr(ex, 'status_code', None)
+    return 'status {}'.format(status_code) if status_code is not None else ex.__class__.__name__
+
+
+def _safe_response_message(response_text):
+    """Return a short plain-text response message, excluding HTML error pages."""
+    if not isinstance(response_text, str):
+        return None
+    message = ' '.join(response_text.split())
+    if not message or message.startswith('<') or '<html' in message.lower():
+        return None
+    return message[:500]
+
+
+def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None, report=False):
+    """Aggregate built-in KuduLite config-check findings plus the relevant ARM
     /siteStatus runtime error for a Linux web app.
 
     Data sources:
       * Built-in checks come from KuduLite (SCM):
-        GET https://{scm-host}/api/troubleshoot/config
+        GET https://{scm-host}/api/troubleshoot/config[?instance={instance}]
       * Last runtime error comes from ARM:
         GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
             /sites/{name}[/slots/{slot}]/siteStatus?api-version=...
@@ -6610,7 +6631,6 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     """
     import requests
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.core.exceptions import HttpResponseError as _Hre
 
     _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot)
 
@@ -6628,7 +6648,6 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     config_check = None
     last_status = None
     last_body_text = ''
-    tried_instances = []
 
     # SCM (Kudu) is occasionally slow to respond — especially when the app has
     # alwaysOn=false (so Kudu itself cold-starts) or the container is thrashing
@@ -6642,14 +6661,14 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
 
     def _try_config(cookies=None):
         try:
-            return requests.get(config_url, headers=headers, cookies=cookies,
+            params = {'instance': instance} if instance else None
+            return requests.get(config_url, headers=headers, cookies=cookies, params=params,
                                 timeout=30, allow_redirects=False)
         except requests.RequestException as ex:
             logger.warning("Failed to call '%s': %s", config_url, ex)
             return None
 
     def _try_config_with_retry(cookies=None):
-        import time
         resp = None
         for attempt in range(1, _MAX_ATTEMPTS + 1):
             resp = _try_config(cookies=cookies)
@@ -6681,10 +6700,12 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 config_url, snippet)
         return False
 
-    # First attempt: whichever worker ARR picks (with transient-failure retry).
+    # The explicit instance filter is a worker machine name consumed by
+    # KuduLite. Do not also use it as an ARR affinity cookie: ARR expects a
+    # platform-generated affinity value, not COMPUTERNAME.
     if not _consume(_try_config_with_retry()):
         # On 404, walk instances and retry with ARR affinity pinned to each.
-        if last_status == 404:
+        if last_status == 404 and not instance:
             try:
                 # Pin api-version explicitly. Using a literal here avoids depending
                 # on client._config.api_version (a protected attribute) and pins
@@ -6702,20 +6723,29 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
                 instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
                 instance_ids = [e.get('name') for e in (instances_payload.get('value') or [])
                                 if isinstance(e, dict) and e.get('name')]
+            except HttpResponseError as ex:
+                logger.warning(
+                    'Failed to enumerate site instances for retry (%s).',
+                    _http_error_status(ex))
+                instance_ids = []
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning('Failed to enumerate site instances for retry: %s', ex)
                 instance_ids = []
 
-            for instance_id in instance_ids:
-                tried_instances.append(instance_id)
-                cookies = {'ARRAffinity': instance_id, 'ARRAffinitySameSite': instance_id}
+            for retry_instance_id in instance_ids:
+                cookies = {
+                    'ARRAffinity': retry_instance_id,
+                    'ARRAffinitySameSite': retry_instance_id
+                }
                 if _consume(_try_config_with_retry(cookies=cookies)):
                     break
 
     if config_check is None and not report:
         status = last_status
         if status == 404:
-            logger.warning('Configuration check feature is currently unavailable.')
+            message = _safe_response_message(last_body_text) or (
+                'Configuration check feature is currently disabled. Please try again later.')
+            logger.warning(message)
         elif status in (401, 403):
             logger.warning(
                 "Access to built-in configuration checks was denied by the SCM "
@@ -6750,18 +6780,20 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     runtime_error = None
     try:
         arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
-        runtime_error = _extract_runtime_error(arm_response)
-    except _Hre as ex:
-        logger.warning("Failed to retrieve site runtime status from '%s': %s", arm_url, ex)
+        recommendation_instance = None
+        if isinstance(config_check, dict):
+            recommendation_instance = config_check.get('InstanceId') or config_check.get('instanceId')
+        runtime_error = _extract_runtime_error(arm_response, instance_id=recommendation_instance)
+    except HttpResponseError as ex:
+        logger.warning(
+            "Failed to retrieve site runtime status from '%s' (%s).",
+            arm_url, _http_error_status(ex))
     except ValueError as ex:
         logger.warning("Failed to parse site runtime status response: %s", ex)
 
-    # Annotate the runtime error with a freshness signal so the --report
-    # renderer can gate the recommendation section on a 15-minute window.
-    # These fields are internal plumbing and are stripped from the payload
-    # before it's returned to the caller (see below).
+    # Annotate the runtime error so the report renderer can apply its
+    # 15-minute recommendation window.
     if runtime_error is not None:
-        runtime_error['freshnessWindowMinutes'] = _RUNTIME_ERROR_FRESHNESS_MINUTES
         runtime_error['isRecent'] = _runtime_error_is_recent(
             runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES)
 
@@ -6770,6 +6802,10 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
         'resourceGroup': resource_group_name,
         'configCheck': config_check,
         'configCheckStatus': last_status,
+        'configCheckMessage': (
+            _safe_response_message(last_body_text) if last_status == 404 else None
+        ),
+        'requestedMachineName': instance,
         'runtimeError': runtime_error,
     }
     if report:
@@ -6779,8 +6815,9 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, report=False)
     # Strip internal plumbing fields from the structured payload so the
     # JSON/YAML/table output stays focused on user-visible data.
     payload.pop('configCheckStatus', None)
+    payload.pop('configCheckMessage', None)
+    payload.pop('requestedMachineName', None)
     if runtime_error is not None:
-        runtime_error.pop('freshnessWindowMinutes', None)
         runtime_error.pop('isRecent', None)
     return payload
 

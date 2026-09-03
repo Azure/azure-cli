@@ -62,12 +62,18 @@ def transform_troubleshoot_config_output(result):
     settings = config_check.get('Settings') or config_check.get('settings') or []
     if not isinstance(settings, list):
         return []
+    written_at = config_check.get('WrittenAt') or config_check.get('writtenAt')
+    if isinstance(written_at, str):
+        written_at = written_at.strip()
+    details_header = (
+        'Details (Last Updated: {})'.format(written_at)
+        if written_at else 'Details'
+    )
     return [OrderedDict([
         ('Setting', s.get('Setting') or s.get('setting') or ''),
         ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
-        ('Details', s.get('Details') or s.get('details') or ''),
+        (details_header, s.get('Details') or s.get('details') or ''),
     ]) for s in settings if isinstance(s, dict)]
-
 
 
 def ex_handler_factory(creating_plan=False):

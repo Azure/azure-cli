@@ -40,6 +40,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          troubleshoot_config,
                                                          _extract_runtime_error,
                                                          create_webapp)
+from azure.cli.command_modules.appservice.commands import transform_troubleshoot_config_output
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -1617,17 +1618,13 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         client_factory_patch = mock.patch(
             'azure.cli.command_modules.appservice.custom.web_client_factory')
         is_linux_patch.start()
-        cf_mock = client_factory_patch.start()
-        # Give the real code path something to unpack when it reads
-        # client._config.api_version.
-        cf_mock.return_value._config.api_version = '2022-03-01'
+        client_factory_patch.start()
         self.addCleanup(is_linux_patch.stop)
         self.addCleanup(client_factory_patch.stop)
 
-    def _scm_response(self, status_code=200, json_data=None, reason=''):
+    def _scm_response(self, status_code=200, json_data=None):
         resp = mock.MagicMock()
         resp.status_code = status_code
-        resp.reason = reason
         resp.json.return_value = json_data
         return resp
 
@@ -1635,6 +1632,111 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         resp = mock.MagicMock()
         resp.json.return_value = json_data
         return resp
+
+    @staticmethod
+    def _printed_text(print_mock):
+        text = ''
+        for call in print_mock.call_args_list:
+            for arg in call.args:
+                if isinstance(arg, list):
+                    for item in arg:
+                        if isinstance(item, tuple) and len(item) > 1:
+                            text += str(item[1])
+                elif isinstance(arg, tuple) and len(arg) > 1:
+                    text += str(arg[1])
+                elif isinstance(arg, str):
+                    text += arg
+        return text
+
+    def test_table_output_includes_config_written_time_in_details_header(self):
+        result = transform_troubleshoot_config_output({
+            'configCheck': {
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'true',
+                    'Details': 'No issues detected.',
+                }],
+            },
+        })
+
+        self.assertEqual(
+            list(result[0].keys()),
+            ['Setting', 'Value', 'Details (Last Updated: 2026-09-02T17:30:00Z)'])
+
+    def test_table_output_uses_details_header_when_written_time_is_missing(self):
+        result = transform_troubleshoot_config_output({
+            'configCheck': {
+                'WrittenAt': '  ',
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'true',
+                    'Details': 'No issues detected.',
+                }],
+            },
+        })
+
+        self.assertEqual(list(result[0].keys()), ['Setting', 'Value', 'Details'])
+
+    def test_report_omits_empty_snapshot_metadata(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'MachineName': '  ',
+                'WrittenAt': '',
+                'Settings': [],
+            },
+            'configCheckStatus': 200,
+            'runtimeError': None,
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertNotIn('Instance:', printed_text)
+        self.assertNotIn('Last Updated:', printed_text)
+
+    def test_report_uses_requested_machine_when_response_omits_machine_name(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [],
+            },
+            'configCheckStatus': 200,
+            'requestedMachineName': 'pl0sdlwk000r7s',
+            'runtimeError': None,
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('pl0sdlwk000r7s', printed_text)
+
+    def test_report_uses_instance_id_when_machine_name_and_filter_are_missing(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'InstanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [],
+            },
+            'configCheckStatus': 200,
+            'runtimeError': None,
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('f5105a099b', printed_text)
 
     # ---- _extract_runtime_error ----
 
@@ -1645,6 +1747,28 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             {'state': 'Stopped', 'lastError': 'B', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
         ]}
         self.assertEqual(_extract_runtime_error(arm)['lastError'], 'B')
+
+    def test_extract_runtime_error_uses_requested_instance(self):
+        arm = {'properties': [
+            {'instanceId': 'config-instance', 'state': 'Stopped',
+             'lastError': 'ConfigWorkerError', 'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'NewerOtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]}
+
+        result = _extract_runtime_error(arm, instance_id='CONFIG-INSTANCE')
+
+        self.assertEqual(result['instanceId'], 'config-instance')
+        self.assertEqual(result['lastError'], 'ConfigWorkerError')
+
+    def test_extract_runtime_error_returns_none_when_requested_instance_has_no_error(self):
+        arm = {'properties': [
+            {'instanceId': 'config-instance', 'state': 'Started', 'lastError': None},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'OtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]}
+
+        self.assertIsNone(_extract_runtime_error(arm, instance_id='config-instance'))
 
     def test_extract_runtime_error_returns_none_when_all_started(self):
         arm = {'properties': [{'state': 'Started', 'lastError': None}]}
@@ -1680,9 +1804,11 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         }
         requests_get_mock.return_value = self._scm_response(200, json_data=scm_body)
         send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+            {'instanceId': 'abc123', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
              'lastErrorDetails': 'Container did not respond', 'lastErrorAction': 'WaitingForSiteToStart',
              'lastErrorTimestamp': '2026-07-07T18:00:00Z'},
+            {'instanceId': 'other-instance', 'state': 'Stopped', 'lastError': 'OtherWorkerError',
+             'lastErrorTimestamp': '2026-07-07T18:01:00Z'},
         ]})
 
         result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
@@ -1693,11 +1819,62 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertEqual(result['configCheck'], scm_body)
         self.assertEqual(result['configCheck']['Settings'], settings)
         self.assertEqual(result['runtimeError']['lastError'], 'ContainerTimeout')
-        # freshnessWindowMinutes / isRecent are internal plumbing used by the
-        # --report renderer; they should not leak into the structured payload.
-        self.assertNotIn('freshnessWindowMinutes', result['runtimeError'])
+        self.assertEqual(result['runtimeError']['instanceId'], 'abc123')
+        # isRecent is internal plumbing used by the --report renderer and
+        # should not leak into the structured payload.
         self.assertNotIn('isRecent', result['runtimeError'])
         self.assertNotIn('configCheckStatus', result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_filters_by_requested_instance(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp',
+            'InstanceId': 'website-instance-id',
+            'Settings': [],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'website-instance-id', 'state': 'Stopped',
+             'lastError': 'RequestedWorkerError', 'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'NewerOtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]})
+
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+
+        self.assertEqual(
+            requests_get_mock.call_args.kwargs['params'],
+            {'instance': 'requested-instance'})
+        self.assertIsNone(requests_get_mock.call_args.kwargs['cookies'])
+        self.assertEqual(result['runtimeError']['instanceId'], 'website-instance-id')
+        self.assertEqual(result['runtimeError']['lastError'], 'RequestedWorkerError')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_instance_filter_does_not_enumerate_on_404(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+
+        config_calls = [
+            call for call in requests_get_mock.call_args_list
+            if call.args and call.args[0] == 'https://myapp.scm.azurewebsites.net/api/troubleshoot/config'
+        ]
+        self.assertEqual(len(config_calls), 1)
+        self.assertEqual(send_raw_request_mock.call_count, 1)
+        self.assertIn('/siteStatus?', send_raw_request_mock.call_args.args[2])
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1716,8 +1893,9 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
 
         self.assertIsNone(result['configCheck'])
         self.assertIsNone(result['runtimeError'])
-        # Exactly one warning: the 404 -> "Configuration check feature is currently unavailable." message.
-        logger_mock.warning.assert_any_call('Configuration check feature is currently unavailable.')
+        # Exactly one warning: the 404 -> feature-disabled message.
+        logger_mock.warning.assert_any_call(
+            'Configuration check feature is currently disabled. Please try again later.')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1728,7 +1906,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     def test_troubleshoot_config_report_shows_feature_unavailable_on_404(
             self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
         # SCM returns 404 -> BUILT-IN CHECKS section prints the compact
-        # "Configuration check feature is currently unavailable." message instead of the generic
+        # feature-disabled message instead of the generic
         # retry-and-restart guidance.
         requests_get_mock.return_value = self._scm_response(404)
         send_raw_request_mock.return_value = self._arm_response({'properties': []})
@@ -1737,17 +1915,35 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
-        self.assertIn('Configuration check feature is currently unavailable.', printed_text)
+        printed_text = self._printed_text(print_mock)
+        self.assertIn(
+            'Configuration check feature is currently disabled. Please try again later.',
+            printed_text)
         self.assertNotIn('Failed to retrieve built-in configuration checks', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_404_response_message(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        response = self._scm_response(404)
+        response.text = (
+            'Config check information for PL0SDLWK000R7S could not be retrieved. '
+            'Please try a different instance.')
+        requests_get_mock.return_value = response
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(
+                _get_test_cmd(), 'myRG', 'myApp', instance='PL0SDLWK000R7S', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn(response.text, printed_text)
+        self.assertNotIn('Configuration check feature is currently disabled', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1798,34 +1994,6 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertEqual(requests_get_mock.call_count, 3)
         logger_mock.warning.assert_called()
 
-    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': '******'})
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
-                return_value='https://myapp.scm.azurewebsites.net')
-    @mock.patch('requests.get')
-    def test_troubleshoot_config_payload_flags_recent_runtime_error(
-            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
-        # A fresh (<15 min old) ARM lastErrorTimestamp is what drives the
-        # --report view's runtime error recommendation section, but the
-        # freshness plumbing itself (isRecent / freshnessWindowMinutes) is
-        # stripped from the structured payload.
-        from datetime import datetime, timezone, timedelta
-        recent_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat().replace('+00:00', 'Z')
-        requests_get_mock.return_value = self._scm_response(200, json_data={
-            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't', 'Settings': [],
-        })
-        send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
-             'lastErrorTimestamp': recent_ts},
-        ]})
-
-        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
-
-        self.assertEqual(result['runtimeError']['lastError'], 'ContainerTimeout')
-        self.assertNotIn('isRecent', result['runtimeError'])
-        self.assertNotIn('freshnessWindowMinutes', result['runtimeError'])
-
     def test_runtime_error_is_recent_rejects_future_timestamp(self):
         # Regression: a clock-skewed or malformed timestamp that lands in the
         # future would produce a negative (now - parsed) delta which still
@@ -1854,7 +2022,8 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                           'Details': 'No issues detected'}],
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Started', 'lastError': None},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'OtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
         ]})
 
         result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
@@ -1878,7 +2047,10 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         from datetime import datetime, timezone
         fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         requests_get_mock.return_value = self._scm_response(200, json_data={
-            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+            'SiteName': 'myApp',
+            'MachineName': 'pl0sdlwk000r7s',
+            'InstanceId': 'abc',
+            'WrittenAt': '2026-09-02T17:30:00+00:00',
             'Settings': [
                 {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
                  'Details': 'No issues detected', 'DetailsLevel': 'info'},
@@ -1888,7 +2060,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             ],
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Stopped', 'lastError': 'ImagePullUnauthorizedFailure',
+            {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ImagePullUnauthorizedFailure',
              'lastErrorDetails': 'forbidden', 'lastErrorAction': 'StartingSiteContainers',
              'lastErrorTimestamp': fresh_ts},
         ]})
@@ -1898,16 +2070,12 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
         self.assertIsNone(result)
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
+        printed_text = self._printed_text(print_mock)
         self.assertIn('BUILT-IN CHECKS', printed_text)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('pl0sdlwk000r7s', printed_text)
+        self.assertIn('Last Updated:', printed_text)
+        self.assertIn('2026-09-02 17:30:00 UTC', printed_text)
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ImagePullUnauthorizedFailure', printed_text)
         self.assertIn('Last Error', printed_text)
@@ -1923,10 +2091,9 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('requests.get')
-    def test_troubleshoot_config_report_suppresses_runtime_when_no_issues(
+    def test_troubleshoot_config_report_suppresses_stale_runtime_error(
             self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
-        # Every setting has DetailsLevel == 'info' and the ARM timestamp is
-        # stale -> runtime section suppressed.
+        # A stale ARM timestamp suppresses the runtime recommendation.
         requests_get_mock.return_value = self._scm_response(200, json_data={
             'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
             'Settings': [
@@ -1936,10 +2103,8 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                  'Details': 'No issues detected', 'DetailsLevel': 'info'},
             ],
         })
-        # Even if ARM reports a stale runtime error, we should not render the
-        # recommendation section when no setting has an issue.
         send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Started', 'lastError': 'ContainerTimeout',
+            {'instanceId': 'abc', 'state': 'Started', 'lastError': 'ContainerTimeout',
              'lastErrorDetails': 'old error', 'lastErrorAction': 'None',
              'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
         ]})
@@ -1948,15 +2113,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
+        printed_text = self._printed_text(print_mock)
         self.assertIn('BUILT-IN CHECKS', printed_text)
         self.assertNotIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertNotIn('ContainerTimeout', printed_text)
@@ -1982,7 +2139,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             ],
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
-            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+            {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
              'lastErrorDetails': 'fresh error', 'lastErrorAction': 'None',
              'lastErrorTimestamp': fresh_ts},
         ]})
@@ -1991,18 +2148,36 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
+        printed_text = self._printed_text(print_mock)
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ContainerTimeout', printed_text)
         self.assertIn('fresh error', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_does_not_use_generic_details_for_last_error(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Started', 'lastError': 'IssueStartingContainer',
+             'lastErrorDetails': '', 'details': 'Site started successfully.',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('IssueStartingContainer', printed_text)
+        self.assertNotIn('Last Error Details', printed_text)
+        self.assertNotIn('Site started successfully.', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -2030,19 +2205,15 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
+        printed_text = self._printed_text(print_mock)
         self.assertIn('Failed to retrieve built-in configuration checks', printed_text)
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ContainerTimeout', printed_text)
         self.assertIn('fresh error', printed_text)
+        self.assertIn('Hint:', printed_text)
+        self.assertIn('az webapp log tail', printed_text)
+        self.assertNotIn('Update flagged app setting', printed_text)
+        self.assertNotIn('Update flagged config', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -2066,15 +2237,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
             troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
 
-        printed_text = ''
-        for call in print_mock.call_args_list:
-            for arg in call.args:
-                if isinstance(arg, list):
-                    for tup in arg:
-                        if isinstance(tup, tuple) and len(tup) > 1:
-                            printed_text += str(tup[1])
-                elif isinstance(arg, tuple) and len(arg) > 1:
-                    printed_text += str(arg[1])
+        printed_text = self._printed_text(print_mock)
         self.assertIn('Failed to retrieve built-in configuration checks', printed_text)
         self.assertNotIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
 
@@ -2131,7 +2294,35 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             requests_get_mock.call_args_list[2].kwargs['cookies'],
             {'ARRAffinity': 'inst2', 'ARRAffinitySameSite': 'inst2'})
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_suppresses_arm_error_response_body(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        unavailable = mock.MagicMock()
+        unavailable.status_code = 503
+        unavailable.reason = 'Service Unavailable'
+        arm_error = HttpResponseError(
+            message='<html>Azure services are not available right now.</html>',
+            response=unavailable)
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.side_effect = [
+            arm_error,
+            self._arm_response({'properties': []}),
+        ]
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        warning = logger_mock.warning.call_args_list[0]
+        rendered_warning = warning.args[0] % warning.args[1:]
+        self.assertIn('status 503', rendered_warning)
+        self.assertNotIn('<html>', rendered_warning)
+        self.assertNotIn('Azure services are not available', rendered_warning)
+
 
 if __name__ == '__main__':
     unittest.main()
-

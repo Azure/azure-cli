@@ -853,6 +853,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'],
+                   help='Filter configuration checks by worker machine name. The runtime error recommendation '
+                        'uses the corresponding instance ID returned by the configuration check.')
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(),
                    help='Print a human-readable report instead of the structured payload.')
 
