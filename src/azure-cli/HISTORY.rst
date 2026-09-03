@@ -308,6 +308,10 @@ Release History
 
 * `az role deny-assignment create/delete`: Add new commands (#33109)
 
+**Service Connector**
+
+* `az containerapp connection create`: Block the command as Service Connector (preview) on Azure Container Apps has been retired (#38660284)
+
 **SSH**
 
 * `az ssh`: Restore explicit failure for unsupported managed identity and Cloud Shell SSH cert flows (#33534)
