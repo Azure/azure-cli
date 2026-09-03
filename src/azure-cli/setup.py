@@ -187,6 +187,7 @@ setup(
     install_requires=DEPENDENCIES,
     python_requires='>=3.10.0',
     package_data={
+        'azure.cli': ['__main__.py'],
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
