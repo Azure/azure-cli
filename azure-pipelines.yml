@@ -524,6 +524,13 @@ jobs:
       pip install --find-links ./ azure_cli-$CLI_VERSION*whl && az self-test && az --version && sleep 5
     displayName: 'Test pip Install'
 
+
+# Snap Package Build
+- template: scripts/release/snap/azure-pipelines-snap.yml
+  parameters:
+    multi_arch: false
+    publish_to_store: false
+
 - job: TestCore
   displayName: Unit Test for Core
   timeoutInMinutes: 10
