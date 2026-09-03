@@ -974,8 +974,8 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
-        g.custom_show_command('show', 'get_long_term_retention_mi', is_preview=True)
+        g.custom_command('set', 'update_long_term_retention_mi')
+        g.custom_show_command('show', 'get_long_term_retention_mi')
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
@@ -984,11 +984,11 @@ def load_command_table(self, _):
     with self.command_group('sql midb ltr-backup',
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
-        g.custom_show_command('show', 'get_long_term_retention_mi_backup', is_preview=True)
+        g.custom_show_command('show', 'get_long_term_retention_mi_backup')
         g.custom_command(
             'list',
-            'list_long_term_retention_mi_backups', is_preview=True)
-        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True, is_preview=True)
+            'list_long_term_retention_mi_backups')
+        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True)
 
     with self.command_group('sql midb ltr-backup',
                             managed_databases_operations,
@@ -996,8 +996,7 @@ def load_command_table(self, _):
         g.custom_command(
             'restore',
             'restore_long_term_retention_mi_backup',
-            supports_no_wait=True,
-            is_preview=True)
+            supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('sql midb log-replay',
