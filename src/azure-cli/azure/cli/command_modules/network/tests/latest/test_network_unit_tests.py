@@ -11,6 +11,19 @@ from knack.util import CLIError
 
 
 class TestNetworkUnitTests(unittest.TestCase):
+    def test_application_gateway_subresource_preserves_hsm_schema(self):
+        from azure.cli.command_modules.network.aaz.latest.network.application_gateway.address_pool import Create
+
+        self.assertEqual(Create._aaz_info['version'], '2025-07-01')
+        schemas = [
+            Create.ApplicationGatewaysGet._build_schema_on_200(),
+            Create.ApplicationGatewaysCreateOrUpdate._build_schema_on_200_201(),
+        ]
+        for schema in schemas:
+            hsm = schema.properties.ssl_certificates.Element.properties.hsm
+            self.assertIsNotNone(hsm.key_id)
+            self.assertIsNotNone(hsm.public_cert_data)
+
     def test_network_get_nic_ip_config(self):
         from azure.cli.command_modules.network.custom import _get_nic_ip_config
 
