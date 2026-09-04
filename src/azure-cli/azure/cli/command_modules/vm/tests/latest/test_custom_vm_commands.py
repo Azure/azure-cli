@@ -256,5 +256,54 @@ class FakedAccessExtensionEntity:  # pylint: disable=too-few-public-methods
         self.type_handler_version = version
 
 
+class TestVMDeletePreOperations(unittest.TestCase):
+    """Unit tests for VMDelete.pre_operations behavior."""
+
+    def test_pre_operations_raises_resource_not_found_error_when_vm_missing(self):
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        from azure.cli.command_modules.vm.operations.vm import VMDelete
+
+        cli_ctx = DummyCli()
+        vm_delete = VMDelete(cli_ctx=cli_ctx)
+
+        # Simulate the ctx that would be set during command execution
+        ctx = mock.MagicMock()
+        ctx.args.name = "nonexistent-vm"
+        ctx.args.resource_group = "nonexistent-rg"
+        vm_delete.ctx = ctx
+
+        mock_show_instance = mock.MagicMock()
+        mock_show_instance.side_effect = ResourceNotFoundError("VM not found")
+        with mock.patch(
+            'azure.cli.command_modules.vm.operations.vm.VMShow',
+            return_value=mock_show_instance,
+        ):
+            with self.assertRaises(ResourceNotFoundError) as cm:
+                vm_delete.pre_operations()
+
+        self.assertIn("nonexistent-vm", str(cm.exception))
+        self.assertIn("nonexistent-rg", str(cm.exception))
+
+    def test_pre_operations_succeeds_when_vm_exists(self):
+        from azure.cli.core.azclierror import ResourceNotFoundError
+        from azure.cli.command_modules.vm.operations.vm import VMDelete
+
+        cli_ctx = DummyCli()
+        vm_delete = VMDelete(cli_ctx=cli_ctx)
+
+        ctx = mock.MagicMock()
+        ctx.args.name = "existing-vm"
+        ctx.args.resource_group = "existing-rg"
+        vm_delete.ctx = ctx
+
+        mock_show_instance = mock.MagicMock()
+        with mock.patch(
+            'azure.cli.command_modules.vm.operations.vm.VMShow',
+            return_value=mock_show_instance,
+        ):
+            # Should not raise
+            vm_delete.pre_operations()
+
+
 if __name__ == '__main__':
     unittest.main()
