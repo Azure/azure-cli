@@ -1413,6 +1413,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
             'init_admin': init_admin,
             'cert_name': 'hsmSslCert',
             'cert_name2': 'hsmSslCert2',
+            'listener_name': 'hsmListener',
         })
 
         # create managed identity
@@ -1499,6 +1500,33 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{cert_name}'),
                      self.check('hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test creating a listener preserves the existing HSM-backed certificate
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} '
+                 '-n port_443 --port 443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} '
+                 '-n {listener_name} --frontend-ip appGatewayFrontendIP '
+                 '--frontend-port port_443 --ssl-cert {cert_name} '
+                 '--host-name contoso.com',
+                 checks=[
+                     self.check('name', '{listener_name}'),
+                     self.check('hostName', 'contoso.com'),
+                     self.check("contains(sslCertificate.id, '{cert_name}')", True),
+                 ])
+
+        # test parent show and update preserve the HSM-backed certificate
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check('sslCertificates[0].hsm.keyId', '{hsm_key_id2}'),
+            self.exists('sslCertificates[0].hsm.publicCertData'),
+        ])
+        self.cmd('network application-gateway update -g {rg} -n {ag} --tags hsm=preserved',
+                 checks=self.check('tags.hsm', 'preserved'))
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                     self.exists('hsm.publicCertData'),
                  ])
 
         # test ssl-cert list includes the hsm cert
@@ -3360,6 +3388,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'policy_type': 'OWASP',
             'policy_version': 3.2,
             'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
+            'empty_rule_group_name': 'REQUEST-920-PROTOCOL-ENFORCEMENT',
             'rule_id': '921120'
         })
 
@@ -3420,6 +3449,19 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--version {policy_version} '
                  '--group-name {rule_group_name}',
                  checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {empty_rule_group_name}',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 0),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
@@ -8747,6 +8789,98 @@ class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
+class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_migration')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_migration(self, resource_group):
+        from time import sleep
+
+        # Variables to use in the test
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',  # Virtual WAN name
+            'vhub': 'clivhub',  # Virtual Hub name
+            'nva_name': 'clivirtualappliancemigration',  # NVA name
+            'rg': resource_group,
+            'subscription': subscriptionId,
+            'migration_type': 'MigrateToNewILBArchitecture',
+        })
+
+        # Add the required extension
+        self.cmd('extension add -n virtual-wan')
+
+        # Create Virtual WAN
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
+            self.check('name', '{vwan}'),
+            self.check('type', 'Microsoft.Network/virtualWans')
+        ])
+
+        # Create Virtual Hub within the Virtual WAN
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard', checks=[
+            self.check('name', '{vhub}'),
+        ])
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        # Create the NVA
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc"',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Phase 1: prepare the migration to the new ILB architecture
+        self.cmd('network virtual-appliance migration prepare -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Prepare migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 2: execute the migration
+        self.cmd('network virtual-appliance migration execute -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Execute migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 3: commit the migration to finalize the new ILB architecture
+        self.cmd('network virtual-appliance migration commit -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        # Ensure that the provisioning state is 'Succeeded' after committing the migration
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Commit migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
 class NetworkVirtualApplianceVnetScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -9752,6 +9886,68 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_pip', location='eastus')
+    def test_ddos_custom_policy_attach_to_public_ip(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'policy_name2': 'policy2',
+            'pip_name': 'pip1',
+        })
+
+        dcp = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} '
+                       '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                       '--traffic-type Tcp --packets-per-second 1000000', checks=[
+            self.check('name', '{policy_name}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id'] = dcp['id']
+
+        dcp2 = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name2} '
+                        '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                        '--traffic-type Tcp --packets-per-second 2000000', checks=[
+            self.check('name', '{policy_name2}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id2'] = dcp2['id']
+
+        # A DDoS custom policy can only be attached to an instance-level public IP,
+        # i.e. a public IP associated with a NIC's IP configuration. Create the public
+        # IP and associate it with a NIC to make it eligible.
+        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard '
+                 '--allocation-method Static', checks=[
+            self.check('publicIp.name', '{pip_name}'),
+            self.check('publicIp.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n nic1 --vnet-name vnet1 --subnet subnet1 '
+                 '--public-ip-address {pip_name}')
+
+        # Attach the DDoS custom policy to the (now instance-level) public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {pip_name}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        # Replace the attached policy on the existing public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id2}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id2}'),
+        ])
+
+        # Remove the policy from the public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy null', checks=[
+            self.check('ddosSettings.ddosCustomPolicy', None),
+        ])
+
+        self.cmd('network nic delete -g {rg} -n nic1')
+        self.cmd('network public-ip delete -g {rg} -n {pip_name}')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name2} -y')
 
 
 class NetworkPrivateEndpointScenarioTest(ScenarioTest):

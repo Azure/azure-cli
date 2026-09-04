@@ -212,11 +212,17 @@ def load_command_table(self, _):
 
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
+    webapp_exec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.webapp_exec#{}')
+
+    network_capture_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appservice.network_capture#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
@@ -345,6 +351,11 @@ def load_command_table(self, _):
     with self.command_group('webapp troubleshoot', is_preview=True) as g:
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
+
+    with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
+        g.custom_command('network-capture', 'collect_network_capture',
+                         custom_command_type=network_capture_custom,
+                         exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')

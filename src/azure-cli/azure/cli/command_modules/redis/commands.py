@@ -8,6 +8,11 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long
 from azure.cli.command_modules.redis._client_factory import cf_redis, cf_patch_schedules, cf_firewall_rule, cf_linked_server, cf_access_policy, cf_access_policy_assignment
 
+REDIS_IMPORT_CONFIRMATION = (
+    'Importing data deletes all existing cache data, and the cache is inaccessible '
+    'to clients during the import. Are you sure you want to perform this operation?'
+)
+
 
 def load_command_table(self, _):
     redis_sdk = CliCommandType(
@@ -58,8 +63,8 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('export', 'cli_redis_export')
         g.custom_command('force-reboot', 'cli_redis_force_reboot')
-        g.custom_command('import-method', 'cli_redis_import', deprecate_info=g.deprecate(redirect='redis import', hide=True))
-        g.custom_command('import', 'cli_redis_import')
+        g.custom_command('import-method', 'cli_redis_import', confirmation=REDIS_IMPORT_CONFIRMATION, deprecate_info=g.deprecate(redirect='redis import', hide=True))
+        g.custom_command('import', 'cli_redis_import', confirmation=REDIS_IMPORT_CONFIRMATION)
         g.custom_command('list', 'cli_redis_list_cache')
         g.command('list-keys', 'list_keys')
         g.custom_command('regenerate-keys', 'cli_redis_regenerate_key')

@@ -66,6 +66,97 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
+    @StorageAccountPreparer(location="eastus2euap")
+    @FileSharePreparer()
+    @AFSPolicyPreparer()
+    def test_afs_backup_protection_undelete(self, resource_group, vault_name, storage_account, afs_name, policy_name):
+        self.kwargs.update({
+            'vault': vault_name,
+            'item': afs_name,
+            'container': storage_account,
+            'rg': resource_group,
+            'type': "AzureStorage",
+            'policy': policy_name
+        })
+
+        self.cmd('backup protection enable-for-azurefileshare -g {rg} -v {vault} --storage-account {container} --azure-file-share {item} -p {policy}', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        item_json = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type {type}').get_output_in_json()
+        protected_item_count1 = len(item_json)
+
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type {type} --yes', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "DisableBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container} -n {item} --backup-management-type {type}', checks=[
+            self.check("properties.friendlyName", '{item}'),
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type {type} --delete-backup-data true --yes', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "DeleteBackupData"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        item_json = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type {type}').get_output_in_json()
+        protected_item_count2 = len(item_json)
+
+        self.assertTrue(protected_item_count1 == protected_item_count2)
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container} -n {item} --backup-management-type {type}', checks=[
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("properties.isScheduledForDeferredDelete", True)
+        ])
+
+        self.cmd(
+            'backup item list -g {rg} -v {vault} -c {container} --backup-management-type {type} '
+            '--workload-type AzureFileShare '
+            '--query "[?properties.isScheduledForDeferredDelete == `true` '
+            "&& properties.friendlyName == '{item}']\"",
+            checks=[
+                self.check("length(@)", 1),
+                self.check("[0].properties.friendlyName", "{item}"),
+                self.check("[0].properties.isScheduledForDeferredDelete", True)
+            ])
+
+        self.cmd('backup protection undelete -g {rg} -v {vault} -c {container} -i {item} --backup-management-type {type} --workload-type AzureFileShare', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "Undelete"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container} -n {item} --backup-management-type {type}', checks=[
+            self.check("properties.protectionState", "ProtectionStopped"),
+            self.check("properties.isScheduledForDeferredDelete", None)
+        ])
+
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type {type} --delete-backup-data true --yes')
+
+        # Cleaning up Storage account locks
+        command_string = 'lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = self.cmd(command_string).get_output_in_json()
+        for lock in list_of_locks:
+            command_string = 'lock delete --ids {}'.format(lock["id"])
+            self.cmd(command_string)
+        # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
+        # time.sleep(100)
+
     #@record_only()
     @live_only()
     @AllowLargeResponse()
@@ -185,6 +276,82 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item2} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_afs_cross_region_restore(self):
+        self.kwargs.update({
+            'sub': ('14d16a2a-56f6-4c75-b091-084df9640297'
+                    if self.is_live else self.get_subscription_id()),
+            'rg': 'afsbvtlonghaulrgne',
+            'vault': 'afsbvtcrrlonghaulvaultne',
+            'container': 'StorageContainer;Storage;afsbvtlonghaulrgne;afsbvtlonghaulcrrsane',
+            'item': 'AzureFileShare;DCAEC29D689395B269170A2156B6771285091236BA6D65E2A8FAD70B90587754',
+            'friendly_item': 'afs1hrtestfs',
+            'target_sa': 'afsbvttargetsacrrne',
+            'target_share': 'afsfilesharetarget1hr'
+        })
+
+        self.cmd(
+            'backup item list --subscription {sub} -g {rg} -v {vault} '
+            '--backup-management-type AzureStorage --workload-type AzureFileShare '
+            '--use-secondary-region',
+            checks=[
+                self.check("length([?name == '{item}'])", 1),
+                self.check(
+                    "[?name == '{item}'] | [0].properties.friendlyName",
+                    '{friendly_item}'
+                )
+            ]
+        )
+
+        self.cmd(
+            'backup item show --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -n {item} --backup-management-type AzureStorage '
+            '--workload-type AzureFileShare --use-secondary-region',
+            checks=[
+                self.check('name', '{item}'),
+                self.check('properties.friendlyName', '{friendly_item}'),
+                self.check('properties.backupManagementType', 'AzureStorage')
+            ]
+        )
+
+        self.kwargs['rp'] = self.cmd(
+            'backup recoverypoint list --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -i {item} --backup-management-type AzureStorage '
+            '--workload-type AzureFileShare --use-secondary-region --query [0].name'
+        ).get_output_in_json()
+
+        restore_job = self.cmd(
+            'backup restore restore-azurefileshare --subscription {sub} -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --target-storage-account {target_sa} '
+            '--target-file-share {target_share} --target-resource-group-name {rg} '
+            '--use-secondary-region',
+            checks=[
+                self.check('properties.operation', 'CrossRegionRestore'),
+                self.check('properties.status', 'InProgress')
+            ]
+        ).get_output_in_json()
+        self.kwargs['job'] = restore_job['name']
+
+        self.cmd(
+            'backup job wait --subscription {sub} -g {rg} -v {vault} '
+            '-n {job} --use-secondary-region'
+        )
+
+        self.cmd(
+            'backup job show --subscription {sub} -g {rg} -v {vault} '
+            '-n {job} --use-secondary-region',
+            checks=[
+                self.check('properties.operation', 'CrossRegionRestore'),
+                self.check('properties.status', 'Completed'),
+                self.check(
+                    'properties.extendedInfo.tasksList[0].status',
+                    'Completed'
+                )
+            ]
+        )
 
     #@record_only()
     @live_only()

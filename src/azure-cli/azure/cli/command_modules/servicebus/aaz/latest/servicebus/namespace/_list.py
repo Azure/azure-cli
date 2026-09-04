@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus namespace list",
 )
 class List(AAZCommand):
-    """List all the available namespaces within the subscription by resource group & also irrespective of the resource groups.
+    """List the available namespaces within a resource group.
 
     :example: List the Service Bus Namespaces under resourcegroup.
         az servicebus namespace list --resource-group myresourcegroup
@@ -25,12 +25,14 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.servicebus/namespaces", "2023-01-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.servicebus/namespaces", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces", "2026-01-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -52,12 +54,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.NamespacesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.NamespacesList(ctx=self.ctx)()
+        if condition_1:
+            self.NamespacesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -73,7 +75,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class NamespacesListByResourceGroup(AAZHttpOperation):
+    class NamespacesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -87,7 +89,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.ServiceBus/namespaces",
                 **self.url_parameters
             )
 
@@ -103,10 +105,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -117,7 +115,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -153,7 +151,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -162,7 +162,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -222,12 +222,21 @@ class List(AAZCommand):
                 serialized_name="disableLocalAuth",
             )
             properties.encryption = AAZObjectType()
+            properties.geo_data_replication = AAZObjectType(
+                serialized_name="geoDataReplication",
+            )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
+            )
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.premium_messaging_partitions = AAZIntType(
                 serialized_name="premiumMessagingPartitions",
@@ -287,6 +296,31 @@ class List(AAZCommand):
             identity.user_assigned_identity = AAZStrType(
                 serialized_name="userAssignedIdentity",
             )
+
+            geo_data_replication = cls._schema_on_200.value.Element.properties.geo_data_replication
+            geo_data_replication.locations = AAZListType()
+            geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+                serialized_name="maxReplicationLagDurationInSeconds",
+            )
+
+            locations = cls._schema_on_200.value.Element.properties.geo_data_replication.locations
+            locations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.geo_data_replication.locations.Element
+            _element.location_name = AAZStrType(
+                serialized_name="locationName",
+            )
+            _element.role_type = AAZStrType(
+                serialized_name="roleType",
+            )
+
+            platform_capabilities = cls._schema_on_200.value.Element.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.value.Element.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200.value.Element.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()
@@ -343,7 +377,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class NamespacesList(AAZHttpOperation):
+    class NamespacesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -357,7 +391,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.ServiceBus/namespaces",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ServiceBus/namespaces",
                 **self.url_parameters
             )
 
@@ -373,6 +407,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -383,7 +421,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -419,7 +457,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -428,7 +468,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.identity = AAZObjectType()
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -488,12 +528,21 @@ class List(AAZCommand):
                 serialized_name="disableLocalAuth",
             )
             properties.encryption = AAZObjectType()
+            properties.geo_data_replication = AAZObjectType(
+                serialized_name="geoDataReplication",
+            )
+            properties.ip_address_type = AAZStrType(
+                serialized_name="ipAddressType",
+            )
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
             properties.minimum_tls_version = AAZStrType(
                 serialized_name="minimumTlsVersion",
+            )
+            properties.platform_capabilities = AAZObjectType(
+                serialized_name="platformCapabilities",
             )
             properties.premium_messaging_partitions = AAZIntType(
                 serialized_name="premiumMessagingPartitions",
@@ -553,6 +602,31 @@ class List(AAZCommand):
             identity.user_assigned_identity = AAZStrType(
                 serialized_name="userAssignedIdentity",
             )
+
+            geo_data_replication = cls._schema_on_200.value.Element.properties.geo_data_replication
+            geo_data_replication.locations = AAZListType()
+            geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntType(
+                serialized_name="maxReplicationLagDurationInSeconds",
+            )
+
+            locations = cls._schema_on_200.value.Element.properties.geo_data_replication.locations
+            locations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.geo_data_replication.locations.Element
+            _element.location_name = AAZStrType(
+                serialized_name="locationName",
+            )
+            _element.role_type = AAZStrType(
+                serialized_name="roleType",
+            )
+
+            platform_capabilities = cls._schema_on_200.value.Element.properties.platform_capabilities
+            platform_capabilities.confidential_compute = AAZObjectType(
+                serialized_name="confidentialCompute",
+            )
+
+            confidential_compute = cls._schema_on_200.value.Element.properties.platform_capabilities.confidential_compute
+            confidential_compute.mode = AAZStrType()
 
             private_endpoint_connections = cls._schema_on_200.value.Element.properties.private_endpoint_connections
             private_endpoint_connections.Element = AAZObjectType()

@@ -1052,6 +1052,8 @@ def aks_create(
     enable_app_routing_istio=False,
     # gateway api
     enable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1255,6 +1257,9 @@ def aks_update(
     # gateway api
     enable_gateway_api=False,
     disable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
+    disable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2880,7 +2885,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :param space_name: Name of the new or existing dev space to select. Defaults to an \
     interactive selection experience.
     :type space_name: String
-    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    :param endpoint_type: The endpoint type to be used for an Azure Dev Spaces controller. \
     See https://aka.ms/azds-networking for more information.
     :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.
@@ -3178,13 +3183,20 @@ def aks_agentpool_rollback(
         node_os_upgrade_channel_value and str(node_os_upgrade_channel_value).lower() not in ["none", "unmanaged"]
     )
 
-    if upgrade_channel_enabled or node_os_channel_enabled:
+    if upgrade_channel_enabled:
         logger.warning(
-            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s, nodeOSUpgradeChannel=%s). "
+            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s). "
             "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
             cluster_name,
             upgrade_channel_value or "none",
-            node_os_upgrade_channel_value or "Unmanaged",
+        )
+    elif node_os_channel_enabled:
+        logger.warning(
+            "nodeOSUpgradeChannel is enabled on cluster '%s' (nodeOSUpgradeChannel=%s). "
+            "The orchestrator version rollback will proceed, but the node image rollback "
+            "will not succeed. Please disable nodeOSUpgradeChannel if you want to roll back the node image.",
+            cluster_name,
+            node_os_upgrade_channel_value,
         )
 
     logger.info("Fetching the most recent rollback version...")
@@ -3636,6 +3648,120 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
         raise InvalidArgumentValueError(f"Manual with size {_current_vm_sizes[0]} doesn't exist in node pool {nodepool_name}.")
     if len(instance.virtual_machines_profile.scale.manual) == 0:
         raise InvalidArgumentValueError(f"Cannot delete the last manual profile in node pool {nodepool_name}. ")
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_add(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 nodepool_name,
+                                 node_vm_size,
+                                 min_count,
+                                 max_count,
+                                 no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot add autoscale profile to a non-virtualmachines node pool.")
+
+    AutoScaleProfile = cmd.get_models(
+        "AutoScaleProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    new_autoscale_profile = AutoScaleProfile(
+        size=node_vm_size,
+        min_count=int(min_count),
+        max_count=int(max_count),
+    )
+    if instance.virtual_machines_profile.scale.autoscale is None:
+        instance.virtual_machines_profile.scale.autoscale = []
+    instance.virtual_machines_profile.scale.autoscale.append(new_autoscale_profile)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_update(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    node_vm_size=None,
+                                    min_count=None,
+                                    max_count=None,
+                                    no_wait=False):
+    if node_vm_size is None and min_count is None and max_count is None:
+        raise RequiredArgumentMissingError(
+            "specify --node-vm-size, --min-count, or --max-count (or a combination)."
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot update autoscale profile in a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            if node_vm_size is not None:
+                a.size = node_vm_size
+            if min_count is not None:
+                a.min_count = int(min_count)
+            if max_count is not None:
+                a.max_count = int(max_count)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_delete(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot delete autoscale profile from a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            instance.virtual_machines_profile.scale.autoscale.remove(a)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
 
     return sdk_no_wait(
         no_wait,

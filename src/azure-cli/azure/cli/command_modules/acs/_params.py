@@ -678,6 +678,7 @@ def load_arguments(self, _):
             action="store_true",
             help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -945,6 +946,9 @@ def load_arguments(self, _):
             action="store_true",
             help="Disable managed installation of Gateway API CRDs."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
+        c.argument("disable_upstream_kubescheduler_user_configuration", action="store_true")
+
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
         c.argument("if_none_match")
@@ -1230,6 +1234,20 @@ def load_arguments(self, _):
 
     with self.argument_context("aks nodepool manual-scale delete") as c:
         c.argument("current_vm_sizes")
+
+    with self.argument_context("aks nodepool auto-scale add") as c:
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale update") as c:
+        c.argument("current_node_vm_size")
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale delete") as c:
+        c.argument("current_node_vm_size")
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[

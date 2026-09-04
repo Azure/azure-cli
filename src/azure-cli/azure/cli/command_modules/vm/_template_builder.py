@@ -305,13 +305,15 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
         scheduled_events_api_version=None, enable_all_instance_down=None,
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
-        wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+        wire_server_mode=None, wire_server_use_local_file_rules=None, imds_mode=None,
+        wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
         disk_iops_read_write=None, disk_mbps_read_write=None, zone_movement=None):
 
@@ -706,8 +708,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if key_incarnation_id is not None:
         proxy_agent_settings['keyIncarnationId'] = key_incarnation_id
 
-    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+    if wire_server_mode is not None:
         wire_server['mode'] = wire_server_mode
+    if wire_server_use_local_file_rules is not None:
+        wire_server['useLocalFileRules'] = wire_server_use_local_file_rules
+    if wire_server_access_control_profile_reference_id is not None:
         wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
 
     if imds_mode is not None or imds_access_control_profile_reference_id is not None:
@@ -749,15 +754,18 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group:
-        vm_properties['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        vm_properties['capacityReservation'] = {}
+        if capacity_reservation_group:
+            vm_properties['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     vm = {
-        'apiVersion': '2025-11-01',
+        'apiVersion': '2026-04-01',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -1057,6 +1065,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
                         v_cpus_per_core=None, os_disk_security_encryption_type=None,
@@ -1071,7 +1080,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_all_instance_down=None, skuprofile_vmsizes=None,
                         skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                        imds_mode=None, add_proxy_agent_extension=None,
+                        wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
                         wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                         automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
@@ -1643,8 +1652,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if proxy_agent_mode is not None:
         proxy_agent_settings['mode'] = proxy_agent_mode
 
-    if wire_server_mode is not None or wire_server_access_control_profile_reference_id is not None:
+    if wire_server_mode is not None:
         wire_server['mode'] = wire_server_mode
+    if wire_server_use_local_file_rules is not None:
+        wire_server['useLocalFileRules'] = wire_server_use_local_file_rules
+    if wire_server_access_control_profile_reference_id is not None:
         wire_server['inVMAccessControlProfileReferenceId'] = wire_server_access_control_profile_reference_id
 
     if imds_mode is not None or imds_access_control_profile_reference_id is not None:
@@ -1675,12 +1687,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group:
-        virtual_machine_profile['capacityReservation'] = {
-            'capacityReservationGroup': {
+    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
+        virtual_machine_profile['capacityReservation'] = {}
+        if capacity_reservation_group:
+            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
                 'id': capacity_reservation_group
             }
-        }
+        if disable_capacity_reservation_assignment is not None:
+            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
+                disable_capacity_reservation_assignment
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
@@ -1737,7 +1752,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2025-11-01',
+        'apiVersion': '2026-04-01',
         'dependsOn': [],
         'properties': vmss_properties
     }

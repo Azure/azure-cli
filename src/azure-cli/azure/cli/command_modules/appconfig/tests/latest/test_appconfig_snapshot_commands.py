@@ -10,7 +10,7 @@ import json
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
@@ -21,11 +21,12 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         register_appconfig_recording_processors(self)
 
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_snapshot_mgmt(self):
-        store_name_prefix = get_resource_name_prefix('snapshotstore') 
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_snapshot_mgmt(self, resource_group, location):
+        store_name_prefix = 'snapshotstore'
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         snapshot_name = "TestSnapshot"
         store_location = 'francecentral'
@@ -35,7 +36,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'snapshot_name': snapshot_name,
             'rg_loc': store_location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'retention_days': 1,
             'enable_purge_protection': False,
@@ -181,11 +182,12 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.assertEqual(len(current_kvs), 2)
 
 
+    @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
-    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
-    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
-    def test_azconfig_snapshot_filtering(self):
-        store_name_prefix = get_resource_name_prefix('snapshotfilters') 
+    # Uses Entra ID auth (store created with local auth disabled). For live recording, set
+    # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
+    def test_azconfig_snapshot_filtering(self, resource_group, location):
+        store_name_prefix = 'snapshotfilters'
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
         store_location = 'francecentral'
         sku = 'standard'
@@ -193,7 +195,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': store_location,
-            'rg': get_test_resource_group(),
+            'rg': resource_group,
             'sku': sku,
             'retention_days': 1,
             'enable_purge_protection': False,

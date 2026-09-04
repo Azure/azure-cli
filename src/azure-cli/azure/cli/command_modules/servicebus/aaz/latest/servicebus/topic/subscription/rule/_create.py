@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions/{}/rules/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/topics/{}/subscriptions/{}/rules/{}", "2026-01-01"],
         ]
     }
 
@@ -92,6 +92,7 @@ class Create(AAZCommand):
             options=["--action-preprocessing", "--enable-action-preprocessing"],
             arg_group="Action",
             help="Value that indicates whether the rule action requires preprocessing.",
+            default=True,
         )
         _args_schema.action_sql_expression = AAZStrArg(
             options=["--action-sql-expression"],
@@ -141,6 +142,7 @@ class Create(AAZCommand):
             options=["--requires-preprocessing", "--enable-correlation-preprocessing"],
             arg_group="CorrelationFilter",
             help="Value that indicates whether the rule action requires preprocessing.",
+            default=True,
         )
         _args_schema.session_id = AAZStrArg(
             options=["--session-id"],
@@ -178,6 +180,7 @@ class Create(AAZCommand):
             options=["-f", "--enable-sql-preprocessing"],
             arg_group="SqlFilter",
             help="Value that indicates whether the rule action requires preprocessing.",
+            default=True,
         )
         _args_schema.filter_sql_expression = AAZStrArg(
             options=["--sql-expression", "--filter-sql-expression"],
@@ -263,7 +266,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
