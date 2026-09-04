@@ -9891,13 +9891,13 @@ class NetworkPrivateEndpointScenarioTest(ScenarioTest):
             self.check('length(@)', 3)
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_billing_sku', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_billing_sku', location='eastus2')
     @StorageAccountPreparer(name_prefix='sapebsku', kind='StorageV2')
     def test_network_private_endpoint_billing_sku(self, resource_group, storage_account):
         self.kwargs.update({
             'sa': storage_account,
             'rg': resource_group,
-            'location': 'eastus2euap',
+            'location': 'eastus2',
 
             'vnet': 'vnetbsku',
             'subnet_pe': 'subnetpe',

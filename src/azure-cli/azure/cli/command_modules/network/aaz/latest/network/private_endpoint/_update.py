@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-07-01",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privateendpoints/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/privateendpoints/{}", "2026-01-01"],
         ]
     }
 
@@ -157,6 +157,7 @@ class Update(AAZCommand):
     @classmethod
     def _build_args_common_private_link_service_connection_update(cls, _schema):
         if cls._args_common_private_link_service_connection_update is not None:
+            _schema.approval_reference = cls._args_common_private_link_service_connection_update.approval_reference
             _schema.group_ids = cls._args_common_private_link_service_connection_update.group_ids
             _schema.id = cls._args_common_private_link_service_connection_update.id
             _schema.name = cls._args_common_private_link_service_connection_update.name
@@ -180,6 +181,11 @@ class Update(AAZCommand):
             help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
             nullable=True,
         )
+        common_private_link_service_connection_update.approval_reference = AAZObjectArg(
+            options=["approval-reference"],
+            help="A reference to an existing approved private endpoint whose connection approval state should be inherited by this connection at creation time.",
+            nullable=True,
+        )
         common_private_link_service_connection_update.group_ids = AAZListArg(
             options=["group-ids"],
             help="The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to.",
@@ -199,6 +205,16 @@ class Update(AAZCommand):
             options=["request-message"],
             help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.",
             nullable=True,
+        )
+
+        approval_reference = cls._args_common_private_link_service_connection_update.approval_reference
+        approval_reference.private_endpoint_id = AAZResourceIdArg(
+            options=["private-endpoint-id"],
+            help="The ARM resource id of an existing approved private endpoint whose approval state is inherited by this connection.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateEndpoints/{}",
+            ),
         )
 
         group_ids = cls._args_common_private_link_service_connection_update.group_ids
@@ -223,6 +239,7 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        _schema.approval_reference = cls._args_common_private_link_service_connection_update.approval_reference
         _schema.group_ids = cls._args_common_private_link_service_connection_update.group_ids
         _schema.id = cls._args_common_private_link_service_connection_update.id
         _schema.name = cls._args_common_private_link_service_connection_update.name
@@ -329,7 +346,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -428,7 +445,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -544,10 +561,15 @@ class _UpdateHelper:
 
         properties = _builder.get(".properties")
         if properties is not None:
+            properties.set_prop("approvalReference", AAZObjectType, ".approval_reference")
             properties.set_prop("groupIds", AAZListType, ".group_ids")
             properties.set_prop("privateLinkServiceConnectionState", AAZObjectType, ".private_link_service_connection_state")
             properties.set_prop("privateLinkServiceId", AAZStrType, ".private_link_service_id")
             properties.set_prop("requestMessage", AAZStrType, ".request_message")
+
+        approval_reference = _builder.get(".properties.approvalReference")
+        if approval_reference is not None:
+            approval_reference.set_prop("privateEndpointId", AAZStrType, ".private_endpoint_id")
 
         group_ids = _builder.get(".properties.groupIds")
         if group_ids is not None:
@@ -669,6 +691,9 @@ class _UpdateHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -1899,6 +1924,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_common_private_link_service_connection_read.properties
+        properties.approval_reference = AAZObjectType(
+            serialized_name="approvalReference",
+        )
         properties.group_ids = AAZListType(
             serialized_name="groupIds",
         )
@@ -1915,6 +1943,11 @@ class _UpdateHelper:
         )
         properties.request_message = AAZStrType(
             serialized_name="requestMessage",
+        )
+
+        approval_reference = _schema_common_private_link_service_connection_read.properties.approval_reference
+        approval_reference.private_endpoint_id = AAZStrType(
+            serialized_name="privateEndpointId",
         )
 
         group_ids = _schema_common_private_link_service_connection_read.properties.group_ids
@@ -2024,6 +2057,10 @@ class _UpdateHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -2054,6 +2091,9 @@ class _UpdateHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
