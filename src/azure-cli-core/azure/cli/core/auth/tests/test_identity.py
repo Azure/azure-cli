@@ -5,6 +5,7 @@
 
 import os
 import re
+import time
 import unittest
 from unittest import mock
 
@@ -331,6 +332,36 @@ class TestServicePrincipalAuth(unittest.TestCase):
         callback = sp_auth.get_msal_client_credential()['client_assertion']
         with self.assertRaisesRegex(CLIError, 'produced no output'):
             callback()
+
+    def test_federated_token_callback_is_thread_safe(self):
+        # MSAL may invoke the callback concurrently; the command must not run overlapping.
+        import threading
+        concurrent = []
+        active = [0]
+        state_lock = threading.Lock()
+
+        def fake_run(*args, **kwargs):
+            with state_lock:
+                active[0] += 1
+                concurrent.append(active[0])
+            time.sleep(0.02)
+            with state_lock:
+                active[0] -= 1
+            return mock.MagicMock(stdout='tok\n', stderr='')
+
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        callback = sp_auth.get_msal_client_credential()['client_assertion']
+
+        with mock.patch('subprocess.run', side_effect=fake_run):
+            threads = [threading.Thread(target=callback) for _ in range(8)]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
+
+        # The lock must serialize invocations, so peak concurrency never exceeds 1.
+        assert max(concurrent) == 1, 'callback ran concurrently: peak={}'.format(max(concurrent))
 
     def test_build_credential(self):
         # client_secret

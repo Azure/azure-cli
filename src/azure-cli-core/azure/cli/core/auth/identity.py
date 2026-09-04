@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+import threading
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -481,6 +482,10 @@ def get_environment_credential():
     return credentials
 
 
+# MSAL may invoke a client_assertion callback concurrently; this lock keeps the dispatcher fetch thread-safe.
+_federated_id_token_lock = threading.Lock()
+
+
 def get_federated_id_token():
     """Acquire a fresh OIDC ID token from the current CI/CD provider.
 
@@ -488,15 +493,19 @@ def get_federated_id_token():
     time it needs a client assertion, so an expired ID token is transparently replaced with a fresh one for
     as long as the underlying provider request token is valid. The provider is auto-detected from the
     environment so that ``--federated-identity`` stays a single, provider-agnostic flag.
+
+    MSAL may invoke the client_assertion callback from concurrent token requests, so this is serialized with
+    a lock to avoid duplicate token fetches racing against each other.
     """
-    if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
-        return _get_id_token_github()
-    if 'SYSTEM_OIDCREQUESTURI' in os.environ or 'ARM_OIDC_REQUEST_URL' in os.environ:
-        return _get_id_token_azure_devops()
-    raise CLIError(
-        "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
-        "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
-        "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
+    with _federated_id_token_lock:
+        if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
+            return _get_id_token_github()
+        if 'SYSTEM_OIDCREQUESTURI' in os.environ or 'ARM_OIDC_REQUEST_URL' in os.environ:
+            return _get_id_token_azure_devops()
+        raise CLIError(
+            "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
+            "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
+            "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
 
 
 def _get_id_token_github():
@@ -608,16 +617,21 @@ def _build_command_assertion_callback(command):
     if not args:
         raise CLIError('--federated-token-callback: the command is empty.')
 
+    # MSAL may invoke the client_assertion callback from concurrent token requests; serialize the command
+    # execution so two requests don't run the callback command at the same time.
+    lock = threading.Lock()
+
     def get_id_token():
         import subprocess
-        try:
-            result = subprocess.run(args, capture_output=True, text=True, check=True)
-        except FileNotFoundError:
-            raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0]))
-        except subprocess.CalledProcessError as ex:
-            raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
-                ex.returncode, (ex.stderr or '').strip()))
-        id_token = result.stdout.strip()
+        with lock:
+            try:
+                result = subprocess.run(args, capture_output=True, text=True, check=True)
+            except FileNotFoundError:
+                raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0]))
+            except subprocess.CalledProcessError as ex:
+                raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
+                    ex.returncode, (ex.stderr or '').strip()))
+            id_token = result.stdout.strip()
         if not id_token:
             raise CLIError('--federated-token-callback command produced no output on stdout.')
         # Never log the token value itself.
