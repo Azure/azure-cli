@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # AZURE CLI VM TEST DEFINITIONS
+from datetime import datetime, timedelta, timezone
 import json
 import os
 import platform
@@ -13317,8 +13318,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
-    def test_capacity_reservation_operations(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='southafricanorth')
+    def test_capacity_reservation_operations(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -13381,6 +13382,57 @@ class CapacityReservationScenarioTest(ScenarioTest):
         if self.is_live:
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
+    @live_only()  # Future Capacity Reservation is a private preview that requires subscription access.
+    @ResourceGroupPreparer(name_prefix='cli_test_future_capacity_reservation_', location='westus')
+    def test_future_capacity_reservation(self, resource_group):
+        start = datetime.now(timezone.utc) + timedelta(days=90)
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_future_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_future_reservation_', 40),
+            'sku': 'Standard_DS1_v2',
+            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --zones 1',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('zones', ['1'])
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1 --zone 1 --schedule-profile-start {start} '
+                 '--minimum-commitment-days 30',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--instance-view',
+                 checks=[
+                     self.exists('instanceView.reservationStateInfo.reservationState')
+                 ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} '
+                 '--query "[?name==\'{reservation_name}\']"',
+                 checks=[
+                     self.check('[0].name', '{reservation_name}'),
+                     self.check('[0].scheduleProfile.start', '{start}'),
+                     self.check('[0].scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('[0].scheduleProfile.modifiableUntil')
+                 ])
 
     # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
     # Provide private package for service team to test it out.
