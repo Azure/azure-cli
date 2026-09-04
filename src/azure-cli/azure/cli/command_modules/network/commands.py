@@ -16,7 +16,9 @@ from azure.cli.command_modules.network._format import (
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
     transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
+    transform_vnet_table_output, transform_vnet_available_cidrs_table_output,
+    transform_vnet_used_cidrs_table_output,
+    transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace,
@@ -649,6 +651,8 @@ def load_command_table(self, _):
         self.command_table["network vnet update"] = VNetUpdate(loader=self)
         self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
         g.custom_command("list-available-ips", "list_available_ips", is_preview=True)
+        g.custom_command("list-available-cidrs", "list_available_cidrs", is_preview=True, table_transformer=transform_vnet_available_cidrs_table_output)
+        g.custom_command("list-used-cidrs", "list_used_cidrs", is_preview=True, table_transformer=transform_vnet_used_cidrs_table_output)
 
     with self.command_group("network vnet peering") as g:
         from .custom import VNetPeeringCreate

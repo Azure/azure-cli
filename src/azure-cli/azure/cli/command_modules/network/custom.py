@@ -9,6 +9,7 @@
 from collections import Counter, OrderedDict
 
 import socket
+import struct
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
@@ -5906,6 +5907,182 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
         "resource_group": resource_group_name,
         "ip_address": start_ip,
     }).get("availableIPAddresses", [])
+
+# converts 32-bit int into 4-octet IPv4 string
+def _int_to_ip(n):
+    return socket.inet_ntoa(struct.pack('!I', n & 0xFFFFFFFF))
+
+# converts 4-octet IPv4 CIDR string into a 32-bit int
+def _get_network_int(ip_cidr):
+    ip, prefix_len = ip_cidr.split('/')
+    mask = (0xFFFFFFFF << (32 - int(prefix_len))) & 0xFFFFFFFF
+    return struct.unpack('!I', socket.inet_aton(ip))[0] & mask
+
+# number of IPs in CIDR block
+def _block_size(prefix_len):
+    return 2 ** (32 - prefix_len)
+
+def _find_largest_aligned_cidr(start_int, available_size):
+    for prefix_len in range(1, 33):
+        size = _block_size(prefix_len)
+        mask = (0xFFFFFFFF << (32 - prefix_len)) & 0xFFFFFFFF
+        if (start_int & mask) == start_int and size <= available_size:
+            return prefix_len, size
+    return 32, 1
+
+
+def _fetch_vnet_and_subnets(cmd, resource_group_name, virtual_network_name):
+    from .aaz.latest.network.vnet import Show
+    from .aaz.latest.network.vnet.subnet import List as SubnetList
+    vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": virtual_network_name,
+        "resource_group": resource_group_name,
+    })
+    subnets = list(SubnetList(cli_ctx=cmd.cli_ctx)(command_args={
+        "vnet_name": virtual_network_name,
+        "resource_group": resource_group_name,
+    }))
+    return vnet, subnets
+
+def _validate_address_prefixes(address_prefixes, vnet_prefixes, virtual_network_name):
+    for prefix in address_prefixes:
+        syntactically_valid = False
+        try:
+            ip, prefix_len = prefix.split('/')
+            socket.inet_aton(ip)
+            syntactically_valid = 0 <= int(prefix_len) <= 32
+        except (AttributeError, ValueError, socket.error):
+            pass
+        if not syntactically_valid or prefix not in vnet_prefixes:
+            raise InvalidArgumentValueError(
+                f"Address prefix {prefix} is not valid or does not exist in virtual network {virtual_network_name}"
+            )
+
+# takes a raw subnet list and returns a minimal list of non-overlapping int
+#  ranges, together they cover the same IP space
+def _merge_subnet_ranges(subnets):
+    used_ranges = []
+    for subnet in subnets:
+        prefixes = subnet.get("addressPrefixes") or [subnet.get("addressPrefix")]
+        for prefix in prefixes:
+            if not prefix:
+                continue
+            start = _get_network_int(prefix)
+            size = _block_size(int(prefix.split('/')[1]))
+            used_ranges.append((start, start + size - 1))
+    used_ranges.sort()
+    merged = []
+    for rng_start, rng_end in used_ranges:
+        if merged and rng_start <= merged[-1][1] + 1:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], rng_end))
+        else:
+            merged.append((rng_start, rng_end))
+    return merged
+
+
+def list_available_cidrs(cmd, resource_group_name, virtual_network_name, address_prefixes=None):
+    vnet, subnets = _fetch_vnet_and_subnets(cmd, resource_group_name, virtual_network_name)
+    merged = _merge_subnet_ranges(subnets)
+
+    azure_reserved_ips = 5
+    vnet_prefixes = vnet["addressSpace"]["addressPrefixes"]
+    if address_prefixes:
+        _validate_address_prefixes(address_prefixes, vnet_prefixes, virtual_network_name)
+        vnet_prefixes = [p for p in vnet_prefixes if p in address_prefixes]
+
+    result = []
+    for vnet_cidr in vnet_prefixes:
+        vnet_start = _get_network_int(vnet_cidr)
+        vnet_prefix_len = int(vnet_cidr.split('/')[1])
+        vnet_end = vnet_start + _block_size(vnet_prefix_len) - 1
+
+        available_cidrs = []
+        current = vnet_start
+
+        # iterate over merged used SNET ranges
+        for used_start, used_end in merged:
+            if used_end < vnet_start or used_start > vnet_end:
+                continue
+            clipped_start = max(used_start, vnet_start)
+            # free gap found, greedily fill with CIDR blocks...
+            while current < clipped_start:
+                gap = clipped_start - current
+                # ...but with the largest ^2 block...
+                prefix_len, size = _find_largest_aligned_cidr(current, gap)
+                block_end = current + size - 1
+                available_cidrs.append({
+                    "cidrAddress": f"{_int_to_ip(current)}/{prefix_len}",
+                    "startingAddress": _int_to_ip(current),
+                    "endingAddress": _int_to_ip(block_end),
+                    "usableIPs": max(0, size - azure_reserved_ips),
+                })
+                current += size
+                # ...and repeats since there may still be a gap, so continue filling
+            current = max(current, min(used_end, vnet_end) + 1)
+
+        # continues where we left off above by looking at trailing free space
+        while current <= vnet_end:
+            gap = vnet_end - current + 1
+            prefix_len, size = _find_largest_aligned_cidr(current, gap)
+            block_end = current + size - 1
+            available_cidrs.append({
+                "cidrAddress": f"{_int_to_ip(current)}/{prefix_len}",
+                "startingAddress": _int_to_ip(current),
+                "endingAddress": _int_to_ip(block_end),
+                "usableIPs": max(0, size - azure_reserved_ips),
+            })
+            current += size
+
+        result.append({
+            "addressPrefixes": vnet_cidr,
+            "availableCIDRs": available_cidrs,
+        })
+
+    return result
+
+
+def list_used_cidrs(cmd, resource_group_name, virtual_network_name, address_prefixes=None):
+    vnet, subnets = _fetch_vnet_and_subnets(cmd, resource_group_name, virtual_network_name)
+
+    vnet_prefixes = vnet["addressSpace"]["addressPrefixes"]
+    if address_prefixes:
+        _validate_address_prefixes(address_prefixes, vnet_prefixes, virtual_network_name)
+        vnet_prefixes = [p for p in vnet_prefixes if p in address_prefixes]
+
+    result = []
+    for vnet_cidr in vnet_prefixes:
+        vnet_start = _get_network_int(vnet_cidr)
+        vnet_prefix_len = int(vnet_cidr.split('/')[1])
+        vnet_end = vnet_start + _block_size(vnet_prefix_len) - 1
+
+        used_cidrs = []
+        for subnet in subnets:
+            prefixes = subnet.get("addressPrefixes") or [subnet.get("addressPrefix")]
+            # build a list of used CIDRs per address prefix
+            for prefix in prefixes:
+                if not prefix:
+                    continue
+                subnet_start = _get_network_int(prefix)
+                if not (vnet_start <= subnet_start <= vnet_end):
+                    continue
+                subnet_prefix_len = int(prefix.split('/')[1])
+                subnet_end = subnet_start + _block_size(subnet_prefix_len) - 1
+                used_cidrs.append({
+                    "cidrAddress": prefix,
+                    "startingAddress": _int_to_ip(subnet_start),
+                    "endingAddress": _int_to_ip(subnet_end),
+                    "subnetName": subnet["name"],
+                    "usableIPs": max(0, _block_size(subnet_prefix_len) - 5),
+                })
+
+        # change sort key to cidr dimension for readability
+        used_cidrs.sort(key=lambda x: _get_network_int(x["cidrAddress"]))
+        result.append({
+            "addressPrefixes": vnet_cidr,
+            "usedCIDRs": used_cidrs,
+        })
+
+    return result
 
 
 def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):

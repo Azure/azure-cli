@@ -5737,6 +5737,134 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(@)', 5)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_available_cidrs')
+    def test_network_vnet_list_available_cidrs(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'rg': resource_group,
+            'prefixes': '10.198.0.0/16 10.197.0.0/16',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes {prefixes}')
+
+        # used CIDRs for SNET construction
+        for name, prefix in [
+            ('s198-0-0',  '10.198.0.0/24'),
+            ('s198-1-0',  '10.198.1.0/26'),
+            ('s198-1-64', '10.198.1.64/26'),
+            ('s198-2-0',  '10.198.2.0/26'),
+            ('s198-2-64', '10.198.2.64/26'),
+            ('s198-10',   '10.198.10.0/24'),
+            ('s198-11',   '10.198.11.0/24'),
+            ('s198-20',   '10.198.20.0/24'),
+            ('s197-0',    '10.197.0.0/24'),
+        ]:
+            self.kwargs.update({'subnet': name, 'prefix': prefix})
+            self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix {prefix} --default-outbound false')
+
+        def as_cidr_set(cidrs):
+            return frozenset(
+                (c['cidrAddress'], c['startingAddress'], c['endingAddress'], c['usableIPs'])
+                for c in cidrs
+            )
+
+        # free CIDRs, expecting this matches just maybe not in the same order
+        expected = {
+            '10.198.0.0/16': frozenset([
+                ('10.198.1.128/25',  '10.198.1.128',  '10.198.1.255',   123),
+                ('10.198.2.128/25',  '10.198.2.128',  '10.198.2.255',   123),
+                ('10.198.3.0/24',    '10.198.3.0',    '10.198.3.255',   251),
+                ('10.198.4.0/22',    '10.198.4.0',    '10.198.7.255',  1019),
+                ('10.198.8.0/23',    '10.198.8.0',    '10.198.9.255',   507),
+                ('10.198.12.0/22',   '10.198.12.0',   '10.198.15.255', 1019),
+                ('10.198.16.0/22',   '10.198.16.0',   '10.198.19.255', 1019),
+                ('10.198.21.0/24',   '10.198.21.0',   '10.198.21.255',  251),
+                ('10.198.22.0/23',   '10.198.22.0',   '10.198.23.255',  507),
+                ('10.198.24.0/21',   '10.198.24.0',   '10.198.31.255', 2043),
+                ('10.198.32.0/19',   '10.198.32.0',   '10.198.63.255', 8187),
+                ('10.198.64.0/18',   '10.198.64.0',   '10.198.127.255', 16379),
+                ('10.198.128.0/17',  '10.198.128.0',  '10.198.255.255', 32763),
+            ]),
+            '10.197.0.0/16': frozenset([
+                ('10.197.1.0/24',    '10.197.1.0',    '10.197.1.255',   251),
+                ('10.197.2.0/23',    '10.197.2.0',    '10.197.3.255',   507),
+                ('10.197.4.0/22',    '10.197.4.0',    '10.197.7.255',  1019),
+                ('10.197.8.0/21',    '10.197.8.0',    '10.197.15.255', 2043),
+                ('10.197.16.0/20',   '10.197.16.0',   '10.197.31.255', 4091),
+                ('10.197.32.0/19',   '10.197.32.0',   '10.197.63.255', 8187),
+                ('10.197.64.0/18',   '10.197.64.0',   '10.197.127.255', 16379),
+                ('10.197.128.0/17',  '10.197.128.0',  '10.197.255.255', 32763),
+            ]),
+        }
+
+        # both address spaces returned without filter
+        result = self.cmd('network vnet list-available-cidrs -g {rg} -n {vnet}').get_output_in_json()
+        by_prefix = {entry['addressPrefixes']: entry for entry in result}
+        self.assertEqual(set(by_prefix.keys()), set(expected.keys()))
+        for prefix, exp_cidrs in expected.items():
+            self.assertEqual(as_cidr_set(by_prefix[prefix]['availableCIDRs']), exp_cidrs)
+
+        # --address-prefixes filter test, assert per address space
+        for prefix, exp_cidrs in expected.items():
+            result = self.cmd(
+                'network vnet list-available-cidrs -g {rg} -n {vnet} --address-prefixes ' + prefix
+            ).get_output_in_json()
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0]['addressPrefixes'], prefix)
+            self.assertEqual(as_cidr_set(result[0]['availableCIDRs']), exp_cidrs)
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_used_cidrs')
+    def test_network_vnet_list_used_cidrs(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'rg': resource_group,
+            'prefixes': '10.197.0.0/16 10.196.0.0/16',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes {prefixes}')
+
+        for name, prefix in [
+            ('s197-0',  '10.197.0.0/24'),
+            ('s197-10', '10.197.10.0/24'),
+            ('s197-11', '10.197.11.0/24'),
+            ('s196-0',  '10.196.0.0/24'),
+        ]:
+            self.kwargs.update({'subnet': name, 'prefix': prefix})
+            self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix {prefix} --default-outbound false')
+
+        def as_used_cidr_set(cidrs):
+            return frozenset(
+                (c['cidrAddress'], c['startingAddress'], c['endingAddress'], c['subnetName'], c['usableIPs'])
+                for c in cidrs
+            )
+
+        expected = {
+            '10.197.0.0/16': frozenset([
+                ('10.197.0.0/24',  '10.197.0.0',  '10.197.0.255',  's197-0',  251),
+                ('10.197.10.0/24', '10.197.10.0', '10.197.10.255', 's197-10', 251),
+                ('10.197.11.0/24', '10.197.11.0', '10.197.11.255', 's197-11', 251),
+            ]),
+            '10.196.0.0/16': frozenset([
+                ('10.196.0.0/24', '10.196.0.0', '10.196.0.255', 's196-0', 251),
+            ]),
+        }
+
+        # both address spaces returned without filter
+        result = self.cmd('network vnet list-used-cidrs -g {rg} -n {vnet}').get_output_in_json()
+        by_prefix = {entry['addressPrefixes']: entry for entry in result}
+        self.assertEqual(set(by_prefix.keys()), set(expected.keys()))
+        for prefix, exp_cidrs in expected.items():
+            self.assertEqual(as_used_cidr_set(by_prefix[prefix]['usedCIDRs']), exp_cidrs)
+
+        # --address-prefixes filter test, assert per address space
+        for prefix, exp_cidrs in expected.items():
+            result = self.cmd(
+                'network vnet list-used-cidrs -g {rg} -n {vnet} --address-prefixes ' + prefix
+            ).get_output_in_json()
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0]['addressPrefixes'], prefix)
+            self.assertEqual(as_used_cidr_set(result[0]['usedCIDRs']), exp_cidrs)
+
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_bgp_community')
     def test_network_vnet_with_bgp_community(self, resource_group):
         self.kwargs.update({
