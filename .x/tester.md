@@ -10,9 +10,10 @@ repository-owned `changed_test_files` custom skill and call
 `infer_target_for_repo` with `repo_full_name="Azure/azure-cli"`, `text` set to
 the PR title/body, and `pr_files` set to those filenames. Use
 `dispatch_live_test_workflow` with the PR number,
-`pr_repo="Azure/azure-cli"`, and the resolved module and target kind. Never
-guess a module; the custom skill resolves only against configured live roots
-and the workflow validates the target.
+`pr_repo="Azure/azure-cli"`, the resolved module and target kind, and
+`test_files` set to the paths returned by `changed_test_files`. Never guess a
+module or test path; repository custom skills own both decisions and the
+workflow validates them against the current PR.
 
 Before dispatch, reuse any queued, in-progress, or completed run for the same
 head SHA. A new dispatch counts as one action; a reused run is a read. Call

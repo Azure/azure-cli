@@ -1,9 +1,9 @@
-"""Select changed Azure CLI pytest modules."""
+"""Select changed Azure CLI live-test files."""
 
 
 def changed_test_files(pr_files):
-    """Return unique changed test filename stems outside azure-cli-core."""
-    stems = []
+    """Return unique changed pytest paths outside azure-cli-core."""
+    selected = []
     seen = set()
     for path in pr_files or []:
         normalized = str(path).replace("\\", "/")
@@ -16,8 +16,7 @@ def changed_test_files(pr_files):
             or "azure-cli-core" in lowered.split("/")
         ):
             continue
-        stem = name[:-3]
-        if stem not in seen:
-            seen.add(stem)
-            stems.append(stem)
-    return stems
+        if normalized not in seen:
+            seen.add(normalized)
+            selected.append(normalized)
+    return selected
