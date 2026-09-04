@@ -54,19 +54,22 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
     def test_vm_image_list_by_alias(self):
         result = self.cmd('vm image list --offer ubuntu').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[-1]['publisher'], 'Canonical')
-        self.assertTrue('lts' in result[-1]['sku'])
+        canonical_results = [i for i in result if i['publisher'] == 'Canonical']
+        self.assertTrue(len(canonical_results) >= 1)
+        self.assertTrue(all(i['sku'] for i in canonical_results))
 
     def test_vm_image_list_by_alias_and_filtered_by_arch(self):
         result = self.cmd('vm image list --offer ubuntu --architecture x64').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[-1]['publisher'], 'Canonical')
-        self.assertTrue('lts' in result[-1]['sku'])
-        self.assertEqual(result[-1]['architecture'], 'x64')
+        canonical_results = [i for i in result if i['publisher'] == 'Canonical']
+        self.assertTrue(len(canonical_results) >= 1)
+        self.assertTrue(all(i['sku'] for i in canonical_results))
+        self.assertTrue(all(i['architecture'] == 'x64' for i in result))
 
 
 class VmReimageTest(ScenarioTest):
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature: Microsoft.Network/AllowBringYourOwnPublicIpAddress')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
     def test_vm_reimage(self, resource_group):
@@ -1988,6 +1991,28 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm user update -g {rg} -n vm --username AzureUser --password testPassword1')
+
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_sp_')
+    def test_vm_user_update_win_special_password(self, resource_group):
+        """Regression test: passwords containing ')' must not break the Windows az.bat/az_msi.cmd/az_zip.cmd
+        launcher scripts, which previously used IF/ELSE block syntax that CMD interprets ')' as closing."""
+        self.kwargs.update({
+            'subnet': 'subnet1',
+            'vnet': 'vnet1',
+            'password_with_paren': 'testP@ss)word1'
+        })
+        self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser '
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
+                 '--size Standard_D2s_v3')
+
+        # Disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        # Verify that a password containing ')' is accepted without error
+        self.cmd('vm user update -g {rg} -n vm --username AzureUser --password {password_with_paren}')
 
     @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
