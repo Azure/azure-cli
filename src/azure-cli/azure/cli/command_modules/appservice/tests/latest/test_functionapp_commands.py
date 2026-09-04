@@ -1344,6 +1344,63 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         self.assertTrue(tgt_cors_config['supportCredentials'])
 
 
+class FunctionAppFlexMigrationInPlaceTest(LiveScenarioTest):
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_migration_in_place(self, resource_group, storage_account):
+        """In-place upgrade: CV1 Linux Consumption → Flex Consumption (same site, same name)."""
+        src_name = self.create_random_name('inplace-func', 24)
+
+        # Create a Linux Consumption function app (CV1)
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                 .format(resource_group, src_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Verify it's on Dynamic (Consumption) SKU before upgrade
+        src_app = self.cmd('functionapp show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        self.assertEqual(src_app['kind'], 'functionapp,linux')
+
+        # Run in-place upgrade
+        result = self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place'
+            .format(resource_group, src_name)
+        ).get_output_in_json()
+
+        # Verify the app is now Flex Consumption
+        self.assertEqual(result['name'], src_name)
+        upgraded_app = self.cmd('functionapp show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        # After upgrade, the site should have Flex properties
+        self.assertIsNotNone(upgraded_app.get('properties', {}).get('functionAppConfig'))
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_migration_in_place_with_deployment_storage(self, resource_group, storage_account):
+        """In-place upgrade with explicit deployment storage arguments."""
+        src_name = self.create_random_name('inplace-ds', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                 .format(resource_group, src_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('storage container create -g {} -n mycontainer --account-name {}'
+                 .format(resource_group, storage_account))
+        result = self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place '
+            '--deployment-storage-name {} --deployment-storage-container-name mycontainer'
+            .format(resource_group, src_name, storage_account)
+        ).get_output_in_json()
+
+        self.assertEqual(result['name'], src_name)
+
+    def test_functionapp_flex_migration_in_place_rejects_target_args(self):
+        """--in-place with --name should fail."""
+        self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app '
+                 '--in-place --name target-app --resource-group target-rg', expect_failure=True)
+
+    def test_functionapp_flex_migration_side_by_side_requires_target_args(self):
+        """Side-by-side without --name/--resource-group should fail."""
+        self.cmd('functionapp flex-migration start --source-resource-group rg --source-name app',
+                 expect_failure=True)
+
+
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()

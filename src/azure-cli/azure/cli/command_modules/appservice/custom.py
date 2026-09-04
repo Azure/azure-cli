@@ -1305,10 +1305,28 @@ def get_storage_account_from_functionapp(cmd, resource_group_name, name):
                                 .format(storage_account_name, name))
 
 
-def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resource_group, name, storage_account=None,
+def _validate_flex_migration_target_arguments(in_place, name, resource_group):
+    if in_place:
+        if name or resource_group:
+            raise MutuallyExclusiveArgumentError(
+                "'--in-place' cannot be used with '--name' or '--resource-group'. "
+                "In-place upgrade operates on the source app directly.")
+    elif not name or not resource_group:
+        raise RequiredArgumentMissingError(
+            "'--name' and '--resource-group' are required for side-by-side migration. "
+            "Use '--in-place' to upgrade the source app directly.")
+
+
+def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resource_group=None, name=None,
+                                storage_account=None,
                                 maximum_instance_count=None, skip_managed_identities=False,
                                 skip_access_restrictions=False, skip_storage_mount=False, skip_hostnames=False,
-                                skip_cors=False):
+                                skip_cors=False, in_place=False,
+                                instance_memory=None, always_ready_instances=None,
+                                deployment_storage_name=None, deployment_storage_container_name=None,
+                                deployment_storage_auth_type=None, deployment_storage_auth_value=None):
+
+    _validate_flex_migration_target_arguments(in_place, name, resource_group)
 
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
 
@@ -1316,6 +1334,11 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     print(f"Validating that the app '{source_name}' is eligible for Flex Consumption migration...")
     flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
     source = web_client.web_apps.get(source_resource_group, source_name)
+
+    # Check if already on Flex (in-place only)
+    if in_place and is_flex_functionapp(cmd.cli_ctx, source_resource_group, source_name):
+        raise ValidationError("The site '{}' is already on Flex Consumption. No upgrade needed."
+                              .format(source_name))
 
     if not _is_linux_consumption_function_app(cmd, source):
         raise ValidationError("The site '{}' is not on a Linux Dynamic (Consumption) plan. Flex Consumption "
@@ -1339,6 +1362,15 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     source_runtime_info = _get_functionapp_runtime_info_helper(cmd, source_linux_fx_version, None, None, True)
     source_runtime = source_runtime_info['app_runtime']
     source_runtime_version = source_runtime_info['app_runtime_version']
+
+    # Branch: in-place upgrade vs side-by-side migration
+    if in_place:
+        return _upgrade_consumption_to_flex_in_place(
+            cmd, source, source_resource_group, source_name,
+            storage_account, deployment_storage_name, deployment_storage_container_name,
+            deployment_storage_auth_type, deployment_storage_auth_value,
+            source_runtime, source_runtime_version,
+            instance_memory, maximum_instance_count, always_ready_instances)
 
     print(f"\nCreating Flex Consumption function app '{name}' in resource group '{resource_group}'...")
 
@@ -1400,6 +1432,199 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
           f"https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex")
 
     return get_functionapp(cmd, resource_group, name)
+
+
+def _upgrade_consumption_to_flex_in_place(cmd, source, source_resource_group, source_name,
+                                          storage_account, deployment_storage_name,
+                                          deployment_storage_container_name,
+                                          deployment_storage_auth_type, deployment_storage_auth_value,
+                                          source_runtime, source_runtime_version,
+                                          instance_memory, maximum_instance_count, always_ready_instances):
+    """Upgrade an existing CV1 Linux Consumption function app to Flex Consumption in place."""
+    from azure.mgmt.web.models import SiteProperties
+
+    print(f"\nUpgrading function app '{source_name}' to Flex Consumption in place...")
+
+    if not storage_account:
+        storage_account = get_storage_account_from_functionapp(cmd, source_resource_group, source_name)
+    storage_account_name = parse_resource_id(storage_account)['name'] if is_valid_resource_id(storage_account) \
+        else storage_account
+
+    if not deployment_storage_name:
+        deployment_storage_name = storage_account_name
+
+    deployment_storage_auth_type = deployment_storage_auth_type or 'StorageAccountConnectionString'
+
+    if deployment_storage_auth_value and deployment_storage_auth_type == 'SystemAssignedIdentity':
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is only a valid input when '
+            '--deployment-storage-auth-type is set to UserAssignedIdentity or StorageAccountConnectionString. '
+            'Please try again with --deployment-storage-auth-type set to UserAssignedIdentity or '
+            'StorageAccountConnectionString.')
+    if deployment_storage_auth_type == 'UserAssignedIdentity' and not deployment_storage_auth_value:
+        raise ArgumentUsageError(
+            '--deployment-storage-auth-value is required when '
+            '--deployment-storage-auth-type is set to UserAssignedIdentity.')
+
+    deployment_storage = _validate_and_get_deployment_storage(cmd.cli_ctx, source_resource_group,
+                                                              deployment_storage_name)
+    if deployment_storage.sku.name == 'Premium_LRS':
+        raise ValidationError("Premium deployment storage is not supported for in-place Flex Consumption upgrade.")
+    if getattr(deployment_storage, 'is_hns_enabled', False) is True:
+        raise ValidationError("ADLS Gen2 deployment storage is not supported for in-place Flex Consumption upgrade.")
+
+    deployment_storage_container = _get_or_create_deployment_storage_container(
+        cmd, source_resource_group, source_name, deployment_storage_name, deployment_storage_container_name)
+    deployment_storage_container_name = deployment_storage_container.name
+
+    endpoints = deployment_storage.primary_endpoints
+    deployment_config_storage_value = getattr(endpoints, 'blob') + deployment_storage_container_name
+
+    deployment_storage_auth_config = {"type": deployment_storage_auth_type}
+
+    app_settings_to_add = []
+    deployment_storage_user_assigned_identity = None
+    if deployment_storage_auth_type == 'UserAssignedIdentity':
+        deployment_storage_user_assigned_identity = _get_or_create_user_assigned_identity(
+            cmd, source_resource_group, source_name, deployment_storage_auth_value, source.location)
+        deployment_storage_auth_value = deployment_storage_user_assigned_identity.id
+        deployment_storage_auth_config["userAssignedIdentityResourceId"] = deployment_storage_auth_value
+    elif deployment_storage_auth_type == 'StorageAccountConnectionString':
+        deployment_storage_conn_string = _get_storage_connection_string(cmd.cli_ctx, deployment_storage)
+        conn_string_app_setting = deployment_storage_auth_value or 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+        app_settings_to_add.append({'name': conn_string_app_setting, 'value': deployment_storage_conn_string})
+        deployment_storage_auth_value = conn_string_app_setting
+        deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
+
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, source.location, source_runtime, source_runtime_version)
+    matched_runtime = runtime_helper.resolve(source_runtime, source_runtime_version)
+    flex_sku = matched_runtime.sku
+    function_app_config = _build_flex_function_app_config(
+        deployment_config_storage_value, deployment_storage_auth_config, flex_sku,
+        instance_memory, maximum_instance_count, always_ready_instances)
+
+    _prepare_flex_migration_deployment_storage_identity(
+        cmd, source_resource_group, source_name, deployment_storage_auth_type, deployment_storage_auth_value,
+        deployment_storage, deployment_storage_name, deployment_storage_user_assigned_identity)
+
+    # GET-mutate-PUT the existing site
+    flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
+    site = flex_client.web_apps.get(source_resource_group, source_name)
+
+    if site.properties is None:
+        site.properties = SiteProperties()
+    site.properties.function_app_config = function_app_config
+    site.properties.sku = "FlexConsumption"
+    # serverFarmId left unchanged; the orchestrator creates the FC plan on the same stamp.
+
+    # Clear CV1 siteConfig properties that the server rejects on a Flex PUT.
+    if site.site_config is not None:
+        site.site_config.linux_fx_version = None
+        site.site_config.function_app_scale_limit = None
+
+    # Set app settings via dedicated API BEFORE the PUT — the orchestrator's
+    # MigrateDeploymentAsync reads from the appsettings store, not from the PUT body.
+    if app_settings_to_add:
+        from azure.mgmt.web.models import StringDictionary
+        existing_settings = flex_client.web_apps.list_application_settings(source_resource_group, source_name)
+        settings_dict = existing_settings.properties or {}
+        for setting in app_settings_to_add:
+            settings_dict[setting['name']] = setting['value']
+        flex_client.web_apps.update_application_settings(
+            source_resource_group, source_name, StringDictionary(properties=settings_dict))
+
+    # SkuTransitionResolver reads top-level sku.name, not properties.sku — inject manually.
+    site_dict = site.as_dict()
+    site_dict['sku'] = {'name': 'FlexConsumption'}
+
+    print(f"Submitting upgrade request for '{source_name}'...")
+    poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, site_dict)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+
+    print(f"\nUpgrade complete. Function app '{source_name}' is now on Flex Consumption."
+          f"\nNote: The app may take a few moments to become fully operational on Flex infrastructure."
+          f"\nA 7-day revert window is available via 'az functionapp flex-migration revert' if needed.")
+
+    return get_functionapp(cmd, source_resource_group, source_name)
+
+
+def _prepare_flex_migration_deployment_storage_identity(
+        cmd, resource_group_name, name, deployment_storage_auth_type, deployment_storage_auth_value,
+        deployment_storage, deployment_storage_name, deployment_storage_user_assigned_identity=None):
+    """Attach the deployment storage identity and grant access before migration begins."""
+    if deployment_storage_auth_type == 'UserAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, [deployment_storage_auth_value])
+        if not _has_deployment_storage_role_assignment_on_resource(
+                cmd.cli_ctx,
+                deployment_storage,
+                deployment_storage_user_assigned_identity.principal_id):
+            _assign_deployment_storage_managed_identity_role(
+                cmd.cli_ctx,
+                deployment_storage,
+                deployment_storage_user_assigned_identity.principal_id)
+        else:
+            logger.warning("User assigned identity '%s' already has the role assignment on "
+                           "the storage account '%s'",
+                           deployment_storage_user_assigned_identity.principal_id, deployment_storage_name)
+    elif deployment_storage_auth_type == 'SystemAssignedIdentity':
+        assign_identity(cmd, resource_group_name, name, ['[system]'], 'Storage Blob Data Contributor',
+                        None, deployment_storage.id)
+
+
+def _build_flex_function_app_config(deployment_storage_value, deployment_storage_auth_config, flex_sku,
+                                    instance_memory, maximum_instance_count, always_ready_instances):
+    always_ready_config = [{
+        "name": key,
+        "instanceCount": max(0, validate_and_convert_to_int(key, value))
+    } for key, value in _parse_key_value_pairs(always_ready_instances).items()]
+    default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
+    runtime = flex_sku['functionAppConfigProperties']['runtime']
+
+    return {
+        "deployment": {
+            "storage": {
+                "type": "blobContainer",
+                "value": deployment_storage_value,
+                "authentication": deployment_storage_auth_config
+            }
+        },
+        "runtime": {
+            "name": runtime['name'],
+            "version": runtime['version']
+        },
+        "scaleAndConcurrency": {
+            "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
+            "instanceMemoryMB": instance_memory or default_instance_memory['size'],
+            "alwaysReady": always_ready_config
+        }
+    }
+
+
+def revert_flex_migration(cmd, source_resource_group, source_name):
+    site = get_raw_functionapp(cmd.cli_ctx, source_resource_group, source_name)
+    sku = site.get('properties', {}).get('sku')
+    if not sku or sku.lower() != 'flexconsumption':
+        raise ValidationError(
+            "The site '{}' is not on Flex Consumption. Only function apps upgraded in place from Linux Consumption "
+            "can be reverted.".format(source_name))
+
+    flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
+    revert_request = {
+        'kind': 'functionapp,linux',
+        'location': site['location'],
+        'properties': {
+            'reserved': True,
+            'sku': 'Dynamic'
+        },
+        'sku': {'name': 'Dynamic'}
+    }
+
+    print(f"Reverting function app '{source_name}' to Linux Consumption...")
+    poller = flex_client.web_apps.begin_create_or_update(source_resource_group, source_name, revert_request)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+
+    print(f"Function app '{source_name}' reverted to Linux Consumption.")
+    return get_functionapp(cmd, source_resource_group, source_name)
 
 
 def _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name, storage_account):
@@ -9509,16 +9734,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                     'StorageAccountConnectionString.'
                 )
 
-            function_app_config = {}
             deployment_storage_auth_config = {
                 "type": deployment_storage_auth_type
-            }
-            function_app_config["deployment"] = {
-                "storage": {
-                    "type": "blobContainer",
-                    "value": deployment_config_storage_value,
-                    "authentication": deployment_storage_auth_config
-                }
             }
 
             if deployment_storage_auth_type == 'UserAssignedIdentity':
@@ -9541,31 +9758,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 deployment_storage_auth_config["storageAccountConnectionStringName"] = deployment_storage_auth_value
 
             flex_sku = matched_runtime.sku
-            runtime = flex_sku['functionAppConfigProperties']['runtime']['name']
-            version = flex_sku['functionAppConfigProperties']['runtime']['version']
-            runtime_config = {
-                "name": runtime,
-                "version": version
-            }
-            function_app_config["runtime"] = runtime_config
-            always_ready_dict = _parse_key_value_pairs(always_ready_instances)
-            always_ready_config = []
-
-            for key, value in always_ready_dict.items():
-                always_ready_config.append(
-                    {
-                        "name": key,
-                        "instanceCount": max(0, validate_and_convert_to_int(key, value))
-                    }
-                )
-
-            default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
-
-            function_app_config["scaleAndConcurrency"] = {
-                "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
-                "instanceMemoryMB": instance_memory or default_instance_memory['size'],
-                "alwaysReady": always_ready_config
-            }
+            function_app_config = _build_flex_function_app_config(
+                deployment_config_storage_value, deployment_storage_auth_config, flex_sku,
+                instance_memory, maximum_instance_count, always_ready_instances)
 
             # Set flex consumption properties on the site
             from azure.mgmt.web.models import SiteProperties

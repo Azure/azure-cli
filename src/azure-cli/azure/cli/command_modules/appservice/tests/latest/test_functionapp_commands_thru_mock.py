@@ -18,10 +18,16 @@ from azure.cli.command_modules.appservice.custom import (
     config_source_control,
     validate_app_settings_in_scm,
     update_container_settings_functionapp,
-    list_function_keys)
+    list_function_keys,
+    migrate_consumption_to_flex,
+    _upgrade_consumption_to_flex_in_place,
+    _build_flex_function_app_config,
+    _prepare_flex_migration_deployment_storage_identity,
+    revert_flex_migration)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import (ResourceNotFoundError, MutuallyExclusiveArgumentError,
+                                        RequiredArgumentMissingError, ValidationError, ArgumentUsageError)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -889,3 +895,353 @@ class TestFunctionappMocked(unittest.TestCase):
         self.assertEqual(result, {'default': 'abc'})
         client_mock.web_apps.list_function_keys_slot.assert_called_once_with('rg', 'app', 'httpget', 'staging')
         client_mock.web_apps.list_function_keys.assert_not_called()
+
+
+class TestFlexMigrationInPlaceMocked(unittest.TestCase):
+    """Unit tests for the --in-place flag on flex-migration start."""
+
+    def test_in_place_payload_matches_create(self):
+        flex_sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+        auth_config = {
+            'type': 'StorageAccountConnectionString',
+            'storageAccountConnectionStringName': 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+        }
+
+        config = _build_flex_function_app_config(
+            'https://storage.blob.core.windows.net/deployment', auth_config, flex_sku,
+            None, None, ['function=2'])
+
+        self.assertEqual(config, {
+            'deployment': {
+                'storage': {
+                    'type': 'blobContainer',
+                    'value': 'https://storage.blob.core.windows.net/deployment',
+                    'authentication': auth_config
+                }
+            },
+            'runtime': {'name': 'python', 'version': '3.11'},
+            'scaleAndConcurrency': {
+                'maximumInstanceCount': 100,
+                'instanceMemoryMB': 2048,
+                'alwaysReady': [{'name': 'function', 'instanceCount': 2}]
+            }
+        })
+
+    def test_in_place_put_uses_same_site_and_preserves_plan(self):
+        original_plan_id = '/subscriptions/sub/resourceGroups/src-rg/providers/Microsoft.Web/serverfarms/cv1-plan'
+        deployment_storage = mock.MagicMock()
+        deployment_storage.sku.name = 'Standard_LRS'
+        deployment_storage.is_hns_enabled = False
+        deployment_storage.primary_endpoints.blob = 'https://storage.blob.core.windows.net/'
+        container = mock.MagicMock()
+        container.name = 'deployment'
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        site = mock.MagicMock()
+        site.properties.server_farm_id = original_plan_id
+        site.site_config = mock.MagicMock()
+        site.as_dict.side_effect = lambda: {
+            'properties': {
+                'serverFarmId': site.properties.server_farm_id,
+                'functionAppConfig': site.properties.function_app_config,
+                'sku': site.properties.sku
+            }
+        }
+        flex_client = mock.MagicMock()
+        flex_client.web_apps.get.return_value = site
+        matched_runtime = mock.MagicMock()
+        matched_runtime.sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+
+        patches = {
+            '_validate_and_get_deployment_storage': mock.DEFAULT,
+            '_get_or_create_deployment_storage_container': mock.DEFAULT,
+            '_get_storage_connection_string': mock.DEFAULT,
+            '_FlexFunctionAppStackRuntimeHelper': mock.DEFAULT,
+            '_prepare_flex_migration_deployment_storage_identity': mock.DEFAULT,
+            'web_client_factory': mock.DEFAULT,
+            'LongRunningOperation': mock.DEFAULT,
+            'get_functionapp': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['_validate_and_get_deployment_storage'].return_value = deployment_storage
+            mocks['_get_or_create_deployment_storage_container'].return_value = container
+            mocks['_get_storage_connection_string'].return_value = 'connection-string'
+            mocks['_FlexFunctionAppStackRuntimeHelper'].return_value.resolve.return_value = matched_runtime
+            mocks['web_client_factory'].return_value = flex_client
+
+            _upgrade_consumption_to_flex_in_place(
+                _get_test_cmd(), source, 'src-rg', 'src-app', 'storage', None, None,
+                None, None, 'python', '3.11', None, None, None)
+
+        flex_client.web_apps.begin_create_or_update.assert_called_once()
+        resource_group, name, payload = flex_client.web_apps.begin_create_or_update.call_args.args
+        self.assertEqual((resource_group, name), ('src-rg', 'src-app'))
+        self.assertEqual(payload['properties']['serverFarmId'], original_plan_id)
+        self.assertEqual(payload['sku'], {'name': 'FlexConsumption'})
+        flex_client.app_service_plans.begin_create_or_update.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
+    def test_in_place_rejects_unsupported_deployment_storage(self, validate_storage_mock):
+        for sku, hns_enabled, expected_error in [
+                ('Premium_LRS', False, 'Premium deployment storage'),
+                ('Standard_LRS', True, 'ADLS Gen2 deployment storage')]:
+            with self.subTest(sku=sku, hns_enabled=hns_enabled):
+                deployment_storage = mock.MagicMock()
+                deployment_storage.sku.name = sku
+                deployment_storage.is_hns_enabled = hns_enabled
+                validate_storage_mock.return_value = deployment_storage
+
+                with self.assertRaises(ValidationError) as ctx:
+                    _upgrade_consumption_to_flex_in_place(
+                        _get_test_cmd(), mock.MagicMock(), 'src-rg', 'src-app', 'storage-name',
+                        None, None, None, None, 'python', '3.11', None, None, None)
+
+                self.assertIn(expected_error, str(ctx.exception))
+
+    def test_in_place_requires_user_assigned_identity_value(self):
+        cmd_mock = _get_test_cmd()
+        source = mock.MagicMock()
+        source.location = 'eastus'
+
+        with self.assertRaises(ArgumentUsageError) as ctx:
+            _upgrade_consumption_to_flex_in_place(
+                cmd_mock, source, 'src-rg', 'src-app', 'storage-name', None, None,
+                'UserAssignedIdentity', None, 'python', '3.11', None, None, None)
+
+        self.assertIn('--deployment-storage-auth-value is required', str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._assign_deployment_storage_managed_identity_role')
+    @mock.patch('azure.cli.command_modules.appservice.custom.'
+                '_has_deployment_storage_role_assignment_on_resource', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    def test_in_place_prepares_user_assigned_identity(
+            self, assign_identity_mock, has_role_assignment_mock, assign_role_mock):
+        cmd_mock = _get_test_cmd()
+        deployment_storage = mock.MagicMock()
+        deployment_identity = mock.MagicMock()
+        deployment_identity.principal_id = 'identity-principal-id'
+
+        _prepare_flex_migration_deployment_storage_identity(
+            cmd_mock, 'src-rg', 'src-app', 'UserAssignedIdentity', 'identity-resource-id',
+            deployment_storage, 'storage-name', deployment_identity)
+
+        assign_identity_mock.assert_called_once_with(
+            cmd_mock, 'src-rg', 'src-app', ['identity-resource-id'])
+        has_role_assignment_mock.assert_called_once_with(
+            cmd_mock.cli_ctx, deployment_storage, 'identity-principal-id')
+        assign_role_mock.assert_called_once_with(
+            cmd_mock.cli_ctx, deployment_storage, 'identity-principal-id')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    def test_in_place_prepares_system_assigned_identity(self, assign_identity_mock):
+        cmd_mock = _get_test_cmd()
+        deployment_storage = mock.MagicMock()
+        deployment_storage.id = 'storage-resource-id'
+
+        _prepare_flex_migration_deployment_storage_identity(
+            cmd_mock, 'src-rg', 'src-app', 'SystemAssignedIdentity', None,
+            deployment_storage, 'storage-name')
+
+        assign_identity_mock.assert_called_once_with(
+            cmd_mock, 'src-rg', 'src-app', ['[system]'], 'Storage Blob Data Contributor',
+            None, 'storage-resource-id')
+
+    def test_in_place_rejects_target_name_arg(self):
+        """--in-place with --name should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group=None,
+                                        name='target-app',
+                                        in_place=True)
+
+    def test_in_place_rejects_target_resource_group_arg(self):
+        """--in-place with --resource-group should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name=None,
+                                        in_place=True)
+
+    def test_in_place_rejects_both_target_args(self):
+        """--in-place with both --name and --resource-group should raise MutuallyExclusiveArgumentError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name='target-app',
+                                        in_place=True)
+
+    def test_side_by_side_requires_name(self):
+        """Side-by-side (no --in-place) without --name should raise RequiredArgumentMissingError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(RequiredArgumentMissingError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group='target-rg',
+                                        name=None,
+                                        in_place=False)
+
+    def test_side_by_side_requires_resource_group(self):
+        """Side-by-side (no --in-place) without --resource-group should raise RequiredArgumentMissingError."""
+        cmd_mock = _get_test_cmd()
+        with self.assertRaises(RequiredArgumentMissingError):
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        resource_group=None,
+                                        name='target-app',
+                                        in_place=False)
+
+    def test_side_by_side_unchanged(self):
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        source.name = 'src-app'
+        site_configs = mock.MagicMock()
+        result = mock.sentinel.result
+        patches = {
+            'get_mgmt_service_client': mock.DEFAULT,
+            'list_flexconsumption_locations': mock.DEFAULT,
+            '_is_linux_consumption_function_app': mock.DEFAULT,
+            'validate_flex_migration_eligibility_for_linux_consumption_app': mock.DEFAULT,
+            'list_slots': mock.DEFAULT,
+            'get_site_configs': mock.DEFAULT,
+            '_get_functionapp_runtime_info_helper': mock.DEFAULT,
+            'create_functionapp': mock.DEFAULT,
+            '_migrate_app_settings': mock.DEFAULT,
+            '_migrate_site_configs': mock.DEFAULT,
+            '_migrate_site_properties': mock.DEFAULT,
+            '_migrate_basic_publishing_credentials_policies': mock.DEFAULT,
+            'get_functionapp': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['get_mgmt_service_client'].return_value.web_apps.get.return_value = source
+            mocks['list_flexconsumption_locations'].return_value = [{'name': 'eastus'}]
+            mocks['_is_linux_consumption_function_app'].return_value = True
+            mocks['validate_flex_migration_eligibility_for_linux_consumption_app'].return_value = (True, [])
+            mocks['list_slots'].return_value = []
+            mocks['get_site_configs'].return_value = site_configs
+            mocks['_get_functionapp_runtime_info_helper'].return_value = {
+                'app_runtime': 'python',
+                'app_runtime_version': '3.11'
+            }
+            mocks['get_functionapp'].return_value = result
+
+            actual = migrate_consumption_to_flex(
+                _get_test_cmd(), 'src-rg', 'src-app', resource_group='target-rg', name='target-app',
+                storage_account='storage', skip_managed_identities=True, skip_access_restrictions=True,
+                skip_storage_mount=True, skip_hostnames=True, skip_cors=True)
+
+        self.assertIs(actual, result)
+        mocks['create_functionapp'].assert_called_once_with(
+            mock.ANY, 'target-rg', 'target-app', 'storage', flexconsumption_location='eastus',
+            runtime='python', runtime_version='3.11', maximum_instance_count=None)
+        mocks['_migrate_app_settings'].assert_called_once_with(
+            mock.ANY, 'src-rg', 'src-app', 'target-rg', 'target-app', 'storage')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=True)
+    def test_in_place_rejects_already_flex(self, is_flex_mock, list_locations_mock, get_client_mock):
+        """--in-place on an already-Flex app should raise ValidationError."""
+        cmd_mock = _get_test_cmd()
+        # Mock the web client to return a site
+        client_mock = mock.MagicMock()
+        site_mock = mock.MagicMock()
+        site_mock.kind = 'functionapp,linux'
+        site_mock.name = 'src-app'
+        client_mock.web_apps.get.return_value = site_mock
+        get_client_mock.return_value = client_mock
+
+        with self.assertRaises(ValidationError) as ctx:
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        in_place=True)
+        self.assertIn('already on Flex Consumption', str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._is_linux_consumption_function_app', return_value=False)
+    def test_in_place_rejects_non_consumption(self, is_linux_consumption_mock, is_flex_mock,
+                                               list_locations_mock, get_client_mock):
+        """--in-place on a non-Consumption app should raise ValidationError."""
+        cmd_mock = _get_test_cmd()
+        client_mock = mock.MagicMock()
+        site_mock = mock.MagicMock()
+        site_mock.kind = 'functionapp'
+        site_mock.name = 'src-app'
+        client_mock.web_apps.get.return_value = site_mock
+        get_client_mock.return_value = client_mock
+
+        with self.assertRaises(ValidationError) as ctx:
+            migrate_consumption_to_flex(cmd_mock,
+                                        source_resource_group='src-rg',
+                                        source_name='src-app',
+                                        in_place=True)
+        self.assertIn('not on a Linux Dynamic (Consumption) plan', str(ctx.exception))
+
+
+class TestFlexMigrationRevertMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_raw_functionapp',
+                return_value={'properties': {'sku': 'Dynamic'}})
+    def test_revert_rejects_non_flex_app(self, get_raw_functionapp_mock):
+        cmd_mock = _get_test_cmd()
+
+        with self.assertRaises(ValidationError) as ctx:
+            revert_flex_migration(cmd_mock, 'src-rg', 'src-app')
+
+        self.assertIn('not on Flex Consumption', str(ctx.exception))
+        get_raw_functionapp_mock.assert_called_once_with(cmd_mock.cli_ctx, 'src-rg', 'src-app')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_raw_functionapp',
+                return_value={'location': 'North Central US (Stage)',
+                              'properties': {'sku': 'FlexConsumption'}})
+    def test_revert_submits_dynamic_sku(self, get_raw_functionapp_mock, web_client_factory_mock,
+                                        long_running_operation_mock, get_functionapp_mock):
+        cmd_mock = _get_test_cmd()
+        result_mock = mock.sentinel.result
+        get_functionapp_mock.return_value = result_mock
+
+        client_mock = mock.MagicMock()
+        poller_mock = client_mock.web_apps.begin_create_or_update.return_value
+        web_client_factory_mock.return_value = client_mock
+
+        result = revert_flex_migration(cmd_mock, 'src-rg', 'src-app')
+
+        self.assertIs(result, result_mock)
+        request = client_mock.web_apps.begin_create_or_update.call_args.args[2]
+        self.assertEqual(request, {
+            'kind': 'functionapp,linux',
+            'location': 'North Central US (Stage)',
+            'properties': {
+                'reserved': True,
+                'sku': 'Dynamic'
+            },
+            'sku': {'name': 'Dynamic'}
+        })
+        client_mock.web_apps.get.assert_not_called()
+        long_running_operation_mock.assert_called_once_with(cmd_mock.cli_ctx)
+        long_running_operation_mock.return_value.assert_called_once_with(poller_mock)
+        get_functionapp_mock.assert_called_once_with(cmd_mock, 'src-rg', 'src-app')
