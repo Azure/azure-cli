@@ -121,6 +121,27 @@ class TestNatGatewayV2(unittest.TestCase):
         self.assertEqual(profile.outbound_ip_prefixes.public_ip_prefixes, ["/sub/pfx1"])
         self.assertEqual(profile.idle_timeout_in_minutes, 10)
 
+    def test_create_ipv6_only_defaults_ipv4_count(self):
+        # Only an IPv6 count is provided; the IPv4 count must fall back to the documented default of 1.
+        profile = natgateway.create_nat_gateway_profile(
+            None, None, models=self.nat_gateway_models,
+            managed_outbound_ipv6_count=3,
+            nat_gateway_sku="StandardV2",
+        )
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 1)
+        self.assertEqual(profile.managed_outbound_ip_profile.count_ipv6, 3)
+
+    def test_update_ipv6_only_preserves_existing_ipv4_count(self):
+        origin = self.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=5),
+        )
+        profile = natgateway.update_nat_gateway_profile(
+            None, None, origin, models=self.nat_gateway_models,
+            managed_outbound_ipv6_count=2,
+        )
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 5)
+        self.assertEqual(profile.managed_outbound_ip_profile.count_ipv6, 2)
+
     def test_create_sku_only(self):
         profile = natgateway.create_nat_gateway_profile(
             None, None, models=self.nat_gateway_models, nat_gateway_sku="StandardV2"

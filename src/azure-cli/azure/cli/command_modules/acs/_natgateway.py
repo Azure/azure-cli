@@ -92,6 +92,9 @@ def configure_nat_gateway_profile(
             profile.managed_outbound_ip_profile = ManagedClusterManagedOutboundIPProfile()
         if managed_outbound_ip_count is not None:
             profile.managed_outbound_ip_profile.count = managed_outbound_ip_count
+        elif profile.managed_outbound_ip_profile.count is None:
+            # SDK 41.6 no longer materializes the IPv4 default; keep the documented default of 1.
+            profile.managed_outbound_ip_profile.count = 1
         if managed_outbound_ipv6_count is not None:
             profile.managed_outbound_ip_profile.count_ipv6 = managed_outbound_ipv6_count
 
