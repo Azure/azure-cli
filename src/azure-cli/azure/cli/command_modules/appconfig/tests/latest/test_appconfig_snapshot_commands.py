@@ -10,7 +10,7 @@ import json
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError, MutuallyExclusiveArgumentError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
@@ -26,7 +26,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('snapshotstore') 
+        store_name_prefix = 'snapshotstore'
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         snapshot_name = "TestSnapshot"
         store_location = 'francecentral'
@@ -187,7 +187,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_snapshot_filtering(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('snapshotfilters') 
+        store_name_prefix = 'snapshotfilters'
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=36)
         store_location = 'francecentral'
         sku = 'standard'

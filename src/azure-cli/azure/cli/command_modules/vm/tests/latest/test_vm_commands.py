@@ -6159,8 +6159,9 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
             'user_data_file': user_data_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" '
-                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username deploy '
+                 '--ssh-key-value "{ssh_key}" --user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard '
+                 '--vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -9688,7 +9689,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian '
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username debian '
                  '--ssh-key-value \'{ssh_key}\' --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} '
                  '--vm-sku Standard_D2s_v3')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
@@ -9696,7 +9697,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         time.sleep(30)
         self.cmd('vmss update -g {rg} -n {vmss} --ppg {ppg_id}')
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian '
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username debian '
                  '--ssh-key-value \'{ssh_key}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
                  '--size Standard_D2s_v3')
 
@@ -10198,7 +10199,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         ])
 
     # Required Microsoft.Compute/SendScheduledEventsPolicy
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='westus')
     def test_vmss_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
@@ -10249,7 +10250,7 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         ])
 
     # Required Microsoft.Compute/SendScheduledEventsPolicy
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='westus')
     def test_vm_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
@@ -12660,7 +12661,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='northeurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v1_', location='westus')
     def test_enable_trusted_launch_on_v1(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm1', 10),
@@ -12875,6 +12876,45 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', False),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_wire_server_local_rules_', location='eastus2')
+    def test_vm_vmss_wire_server_use_local_file_rules(self, resource_group):
+        self.kwargs.update({
+            'nsg': self.create_random_name('nsg', 10),
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        vnet = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        self.kwargs['subnet_id'] = vnet['newVNet']['subnets'][0]['id']
+
+        self.cmd('vm create -g {rg} -n {vm} --location eastus2 '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --enable-proxy-agent '
+                 '--wire-server-mode Audit --wire-server-use-local-file-rules --size Standard_D2s_v3 '
+                 '--subnet {subnet_id} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE '
+                 '--add-proxy-agent-extension true')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', True)
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --wire-server-use-local-file-rules false', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', False)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --location eastus2 '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --nsg {nsg} '
+                 '--enable-proxy-agent --wire-server-mode Audit --wire-server-use-local-file-rules '
+                 '--vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-username azureuser '
+                 '--generate-ssh-keys --add-proxy-agent-extension true --subnet {subnet_id}', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --wire-server-use-local-file-rules false', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.useLocalFileRules', False)
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -15068,7 +15108,7 @@ class VMZoneMovementScenarioTest(ScenarioTest):
 
     # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate to be enabled
     # to use --zone-movement.
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='westus')
     def test_vm_zone_movement_preserved(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 15),
