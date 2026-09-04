@@ -324,6 +324,15 @@ class TestServicePrincipalAuth(unittest.TestCase):
             sp_auth.get_msal_client_credential()['client_assertion']()
         assert run_mock.call_args.args[0] == ['get-token', ';', 'rm', '-rf', '/']
 
+    def test_federated_token_callback_quoted_argument(self):
+        # A quoted argument containing spaces must reach the program without the surrounding quotes.
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'mytool --aud "api://x y"'})
+        with mock.patch('subprocess.run') as run_mock:
+            run_mock.return_value = mock.MagicMock(stdout='tok\n', stderr='')
+            sp_auth.get_msal_client_credential()['client_assertion']()
+        assert run_mock.call_args.args[0] == ['mytool', '--aud', 'api://x y']
+
     @mock.patch('subprocess.run')
     def test_federated_token_callback_empty_output(self, run_mock):
         run_mock.return_value = mock.MagicMock(stdout='   \n', stderr='')
@@ -415,6 +424,19 @@ class TestFederatedIdentity(unittest.TestCase):
         assert called_url.startswith('https://github.example/token?foo=bar&audience=')
         assert 'api%3A//AzureADTokenExchange' in called_url
         assert get_mock.call_args.kwargs['headers']['Authorization'] == 'bearer request_token'
+        # A timeout is always passed so a network stall fails fast instead of hanging the CI job.
+        assert get_mock.call_args.kwargs['timeout'] is not None
+
+    @mock.patch.dict(os.environ, {
+        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
+        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
+    }, clear=True)
+    @mock.patch('requests.get')
+    def test_get_federated_id_token_github_timeout(self, get_mock):
+        import requests
+        get_mock.side_effect = requests.exceptions.Timeout()
+        with self.assertRaisesRegex(CLIError, 'Timed out'):
+            get_federated_id_token()
 
     @mock.patch.dict(os.environ, {
         'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',

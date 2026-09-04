@@ -485,6 +485,10 @@ def get_environment_credential():
 # MSAL may invoke a client_assertion callback concurrently; this lock keeps the dispatcher fetch thread-safe.
 _federated_id_token_lock = threading.Lock()
 
+# Connect/read timeouts (seconds) for OIDC ID token requests, so a network stall fails fast on a
+# long-running CI job instead of hanging the whole token acquisition indefinitely.
+_OIDC_HTTP_TIMEOUT = (10, 30)
+
 
 def get_federated_id_token():
     """Acquire a fresh OIDC ID token from the current CI/CD provider.
@@ -506,6 +510,21 @@ def get_federated_id_token():
             "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
             "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
             "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
+
+
+def _oidc_http_request(method, url, headers, provider):
+    """Issue an OIDC ID token HTTP request with an explicit timeout.
+
+    A missing timeout would let a stalled connection hang token acquisition forever on a long-running CI
+    job, so we bound it and surface a clear error on timeout or connection failure.
+    """
+    import requests
+    try:
+        return method(url, headers=headers, timeout=_OIDC_HTTP_TIMEOUT)
+    except requests.exceptions.Timeout:
+        raise CLIError('Timed out requesting an ID token from {}. Please retry.'.format(provider))
+    except requests.exceptions.RequestException as ex:
+        raise CLIError('Failed to reach the {} OIDC endpoint: {}'.format(provider, ex))
 
 
 def _get_id_token_github():
@@ -534,7 +553,7 @@ def _get_id_token_github():
         'Accept': 'application/json; api-version=2.0',
         'Content-Type': 'application/json'
     }
-    response = requests.get(url, headers=headers)
+    response = _oidc_http_request(requests.get, url, headers, 'GitHub Actions')
     if not response.ok:
         raise CLIError('Failed to retrieve an ID token from GitHub Actions: {} {}'.format(
             response.status_code, response.reason))
@@ -586,7 +605,7 @@ def _get_id_token_azure_devops():
         # Prevents the service from responding with a redirect HTTP status code.
         'X-TFS-FedAuthRedirect': 'Suppress',
     }
-    response = requests.post(url, headers=headers)
+    response = _oidc_http_request(requests.post, url, headers, 'Azure DevOps')
     if not response.ok:
         raise CLIError('Failed to retrieve an ID token from Azure DevOps: {} {}'.format(
             response.status_code, response.reason))
@@ -605,15 +624,18 @@ def _build_command_assertion_callback(command):
     is expected to print a single OIDC token to stdout; MSAL invokes the returned callable whenever it
     needs a fresh assertion, so refresh works with any CI/CD provider.
 
-    The command is parsed into an argument vector and run WITHOUT a shell (shell=False). Because the command
-    is persisted in the service principal entry and re-executed on every refresh, avoiding a shell prevents a
-    tampered token cache from turning into arbitrary code execution. Users who need shell features such as
-    pipes or redirection should either point to a script file or wrap the pipeline explicitly, e.g.
+    The command is parsed into an argument vector (with POSIX rules on every platform) and run WITHOUT a
+    shell (shell=False). Because the command is persisted in the service principal entry and re-executed on
+    every refresh, avoiding a shell prevents a tampered token cache from turning into arbitrary code
+    execution. Users who need shell features such as pipes or redirection should either point to a script
+    file or wrap the pipeline explicitly, e.g.
     --federated-token-callback "bash -c 'curl ... | jq -r .value'".
+    On Windows, use forward slashes in paths or escape backslashes (POSIX parsing treats '\\' as an escape).
     """
     import shlex
-    # posix=False keeps Windows paths (backslashes) intact; args are still executed without a shell.
-    args = shlex.split(command, posix=not sys.platform.startswith('win'))
+    # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
+    # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
+    args = shlex.split(command, posix=True)
     if not args:
         raise CLIError('--federated-token-callback: the command is empty.')
 
