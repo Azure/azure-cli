@@ -100,10 +100,10 @@ def configure_nat_gateway_profile(
 
     if outbound_ip_ids is not None:
         ManagedClusterNATGatewayProfileOutboundIPs = models.ManagedClusterNATGatewayProfileOutboundIPs
+        if ManagedClusterNATGatewayProfileOutboundIPs is None:
+            raise ValueError("The selected AKS API profile/SDK does not support setting NAT gateway outbound IPs.")
         ip_id_list = [x.strip() for x in outbound_ip_ids.split(',') if x.strip()]
-        profile.outbound_i_ps = ManagedClusterNATGatewayProfileOutboundIPs(
-            public_i_ps=ip_id_list
-        )
+        profile.outbound_i_ps = ManagedClusterNATGatewayProfileOutboundIPs(public_i_ps=ip_id_list)
 
     if outbound_ip_prefix_ids is not None:
         ManagedClusterNATGatewayProfileOutboundIpPrefixes = models.ManagedClusterNATGatewayProfileOutboundIpPrefixes
