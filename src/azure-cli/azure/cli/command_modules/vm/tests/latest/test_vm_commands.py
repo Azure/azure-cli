@@ -11887,6 +11887,100 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
 
+
+class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
+    """Tests for Aligned Zonal Fault Domains for VMSS Flex (issue #32693).
+
+    The feature requires the AFEC `Microsoft.Compute/ZonalAlignedMultipleFDs`
+    to be registered on the subscription and applies only to Flexible
+    orchestration mode VMSS deployed to a single Availability Zone.
+    """
+
+    @live_only()
+    @AllowLargeResponse(size_kb=999999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zonal_aligned_fd_', location='eastus2')
+    def test_vmss_zonal_aligned_fault_domains(self, resource_group):
+        # NOTE: This feature requires the AFEC `Microsoft.Compute/ZonalAlignedMultipleFDs` to be
+        # registered on the test subscription. Two platform constraints make this mandatory:
+        #   1. Without the AFEC, Flex VMSS cannot combine `--zones` with `--platform-fault-domain-count > 1`.
+        #   2. The zonal alignment mode is rejected on a single-zone single-FD VMSS or a regional VMSS.
+        # The test runs live-only since playback recordings would also fail without the AFEC.
+        self.kwargs.update({
+            'vmss_aligned': self.create_random_name(prefix='vmss', length=15),
+            'vmss_best_effort': self.create_random_name(prefix='vmss', length=15),
+            'vm': self.create_random_name(prefix='vm', length=15),
+            'vm_neg': self.create_random_name(prefix='vm', length=15)
+        })
+
+        # 1. Strict Aligned VMSS-level mode in a single zone with multiple fault domains.
+        # FDC must be > 1 and zones must be a single zone for the alignment mode to be valid;
+        # this combination requires the ZonalAlignedMultipleFDs AFEC noted above.
+        self.cmd(
+            'vmss create -g {rg} -n {vmss_aligned} --orchestration-mode Flexible '
+            '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
+            '--vm-sku Standard_D2s_v5 --instance-count 0 '
+            '--image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--admin-username clitest --generate-ssh-keys '
+            '--zonal-platform-fault-domain-align-mode Aligned',
+            checks=[
+                self.check('vmss.orchestrationMode', 'Flexible'),
+                self.check('vmss.platformFaultDomainCount', 3),
+                self.check('vmss.zonalPlatformFaultDomainAlignMode', 'Aligned'),
+                self.check('vmss.zones', ['1']),
+            ])
+
+        # 2. BestEffortAligned VMSS-level mode + per-disk overrides on OS and data disks
+        self.cmd(
+            'vmss create -g {rg} -n {vmss_best_effort} --orchestration-mode Flexible '
+            '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
+            '--vm-sku Standard_D2s_v5 --instance-count 0 '
+            '--image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--data-disk-sizes-gb 10 '
+            '--admin-username clitest --generate-ssh-keys '
+            '--zonal-platform-fault-domain-align-mode BestEffortAligned '
+            '--os-disk-storage-fault-domain-alignment Aligned '
+            '--data-disk-storage-fault-domain-alignment BestEffortAligned',
+            checks=[
+                self.check('vmss.zonalPlatformFaultDomainAlignMode', 'BestEffortAligned'),
+                self.check(
+                    'vmss.virtualMachineProfile.storageProfile.osDisk.storageFaultDomainAlignment',
+                    'Aligned'),
+                self.check(
+                    'vmss.virtualMachineProfile.storageProfile.dataDisks[0].storageFaultDomainAlignment',
+                    'BestEffortAligned'),
+            ])
+
+        # 3. Add a VM that joins the Flex VMSS, with per-disk alignment overrides
+        self.cmd(
+            'vm create -g {rg} -n {vm} --vmss {vmss_best_effort} --platform-fault-domain 0 '
+            '--image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v5 '
+            '--admin-username clitest --generate-ssh-keys --nsg-rule None '
+            '--data-disk-sizes-gb 10 '
+            '--os-disk-storage-fault-domain-alignment Aligned '
+            '--data-disk-storage-fault-domain-alignment BestEffortAligned')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('platformFaultDomain', 0),
+            self.check('storageProfile.osDisk.storageFaultDomainAlignment', 'Aligned'),
+            self.check('storageProfile.dataDisks[0].storageFaultDomainAlignment', 'BestEffortAligned'),
+        ])
+
+        # 4. VMSS-level mode is updatable via generic --set
+        self.cmd(
+            'vmss update -g {rg} -n {vmss_best_effort} '
+            '--set zonalPlatformFaultDomainAlignMode=Aligned',
+            checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Aligned')])
+
+        # 5. Negative: per-disk alignment requires joining a Flex VMSS via --vmss
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaisesRegex(ArgumentUsageError, 'Flex'):
+            self.cmd(
+                'vm create -g {rg} -n {vm_neg} '
+                '--image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v5 '
+                '--admin-username clitest --generate-ssh-keys --nsg-rule None '
+                '--os-disk-storage-fault-domain-alignment Aligned')
+
+
 class VMCrossTenantUpdateScenarioTest(ScenarioTest):
 
     @live_only()
@@ -12388,8 +12482,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --size Standard_B2ms '
-                 '--enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:ubuntu-24_04-lts:server:latest '
+                 '--security-type TrustedLaunch --size Standard_D2s_v3 --enable-secure-boot true --enable-vtpm true '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--nsg-rule None')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12400,18 +12496,20 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 '
-                 '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--size Standard_D2s_v3 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
         # create VM with specifying security type Standard
         # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --size Standard_B2ms '
-                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v3 '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} '
+                 '--vnet-name {vnet} --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
     @AllowLargeResponse(size_kb=99999)

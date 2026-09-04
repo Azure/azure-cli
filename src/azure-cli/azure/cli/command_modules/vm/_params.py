@@ -24,7 +24,8 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     validate_vm_name_for_monitor_metrics)
 
-from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID, CachingTypes, UpgradeMode
+from azure.cli.command_modules.vm._vm_utils import (MSI_LOCAL_ID, CachingTypes, UpgradeMode, DiskStorageAlignment,
+                                                    FaultDomainAlignment)
 from azure.cli.command_modules.vm._image_builder import ScriptType
 
 from azure.cli.command_modules.monitor.validators import validate_metric_dimension
@@ -514,6 +515,18 @@ def load_arguments(self, _):
         c.argument('source_snapshots_or_disks_size_gb', options_list=['--source-snapshots-or-disks-size-gb', '--source-resource-size'], nargs='+', type=int, help='The size of the source disk in GB')
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
         c.argument('source_disk_restore_point_size_gb', options_list=['--source-disk-restore-point-size-gb', '--source-rp-size'], nargs='+', type=int, help='The size of the source disk restore point in GB')
+        c.argument(
+            'data_disk_storage_fault_domain_alignment',
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
+        c.argument(
+            'os_disk_storage_fault_domain_alignment',
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
@@ -843,6 +856,24 @@ def load_arguments(self, _):
             help='Specify the maximum percentage of virtual machine instances that can be allocated '
                  'to a single availability zone in the virtual machine scale set. '
                  'Valid values are integers between 1 and 100.'
+        )
+        c.argument(
+            'data_disk_storage_fault_domain_alignment',
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
+        c.argument(
+            'os_disk_storage_fault_domain_alignment',
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
+        c.argument(
+            'zonal_platform_fault_domain_align_mode',
+            options_list=['--zonal-fault-domain-align-mode', '--zonal-fda'],
+            arg_type=get_enum_type(FaultDomainAlignment),
+            help='Specifies the align mode between Virtual Machine Scale Set compute and storage Fault Domain count.'
         )
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
