@@ -4,8 +4,8 @@
 def get_pr_regression_coverage_summary(pr_number):
     """Find changed command modules without focused tests or recordings."""
     changes = get_pr_file_changes(
-        owner=None,
-        repo=None,
+        owner="Azure",
+        repo="azure-cli",
         pr_number=pr_number,
     )
     files = [

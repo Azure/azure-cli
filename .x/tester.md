@@ -15,6 +15,11 @@ the PR title/body, and `pr_files` set to those filenames. Use
 module or test path; repository custom skills own both decisions and the
 workflow validates them against the current PR.
 
+If no test path is selected, call the dispatcher with the empty list so it
+records a neutral skip for the current revision. If tests are selected but
+target inference does not return a named `module` or `extension`, stop with a
+pending result and do not dispatch.
+
 Before dispatch, reuse any queued, in-progress, or completed run for the same
 head SHA. A new dispatch counts as one action; a reused run is a read. Call
 `get_workflow_run` once. If it is not complete, return pending and let a later

@@ -12,7 +12,7 @@ def start_extension_tracker_task(issue_number, view, target, prompt, command, su
             "start_extension_tracker_task requires a CLI Extensions target"
         )
     return start_repository_handoff_task(
-        repository=None,
+        repository="Azure/azure-cli",
         issue_number=issue_number,
         view=view,
         target=target,
