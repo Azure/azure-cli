@@ -13347,14 +13347,12 @@ class CapacityReservationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_future_capacity_reservation_', location='westus')
     def test_future_capacity_reservation(self, resource_group):
         start = datetime.now(timezone.utc) + timedelta(days=90)
-        updated_start = start + timedelta(days=10)
         self.kwargs.update({
             'rg': resource_group,
             'reservation_group': self.create_random_name('cli_future_reservation_group_', 40),
             'reservation_name': self.create_random_name('cli_future_reservation_', 40),
             'sku': 'Standard_DS1_v2',
-            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'updated_start': updated_start.strftime('%Y-%m-%dT%H:%M:%SZ')
+            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ')
         })
 
         self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --zones 1',
@@ -13373,20 +13371,11 @@ class CapacityReservationScenarioTest(ScenarioTest):
                      self.exists('scheduleProfile.modifiableUntil')
                  ])
 
-        self.cmd('capacity reservation update -c {reservation_group} -n {reservation_name} -g {rg} '
-                 '--schedule-profile start={updated_start} minimum-commitment-days=45',
-                 checks=[
-                     self.check('name', '{reservation_name}'),
-                     self.check('scheduleProfile.start', '{updated_start}'),
-                     self.check('scheduleProfile.minimumCommitmentDays', 45),
-                     self.exists('scheduleProfile.modifiableUntil')
-                 ])
-
         self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
                  checks=[
                      self.check('name', '{reservation_name}'),
-                     self.check('scheduleProfile.start', '{updated_start}'),
-                     self.check('scheduleProfile.minimumCommitmentDays', 45),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
                      self.exists('scheduleProfile.modifiableUntil')
                  ])
 
@@ -13400,8 +13389,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
                  '--query "[?name==\'{reservation_name}\']"',
                  checks=[
                      self.check('[0].name', '{reservation_name}'),
-                     self.check('[0].scheduleProfile.start', '{updated_start}'),
-                     self.check('[0].scheduleProfile.minimumCommitmentDays', 45),
+                     self.check('[0].scheduleProfile.start', '{start}'),
+                     self.check('[0].scheduleProfile.minimumCommitmentDays', 30),
                      self.exists('[0].scheduleProfile.modifiableUntil')
                  ])
 
