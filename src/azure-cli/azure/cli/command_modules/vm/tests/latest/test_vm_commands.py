@@ -13318,8 +13318,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
-    def test_capacity_reservation_operations(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='southafricanorth')
+    def test_capacity_reservation_operations(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
