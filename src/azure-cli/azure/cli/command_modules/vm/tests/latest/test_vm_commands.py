@@ -2564,6 +2564,59 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
             self.check("contains(id, '/Providers/Microsoft.Compute/Locations/{loc}/Publishers/{pub}/ArtifactTypes/VMExtension/Types/{ext}/Versions/{ver}')", True)
         ])
 
+    @live_only()
+    def test_vm_vmss_extension_image(self):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'pub': 'Microsoft.Compute',
+            'ext': 'CustomScriptExtension'
+        })
+
+        command_results = {}
+        for command_group in ('vm', 'vmss'):
+            versions_without_expand = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_without_expand)
+
+            versions_with_metadata = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_with_metadata)
+            self.assertEqual(
+                [version['name'] for version in versions_without_expand],
+                [version['name'] for version in versions_with_metadata]
+            )
+            self.assertTrue(all(
+                field in version
+                for version in versions_with_metadata
+                for field in ('releaseCategory', 'urgencyLevel', 'runProfile')
+            ))
+
+            self.kwargs['ver'] = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties '
+                '--query "[?releaseCategory==\'SecurityFix\' && urgencyLevel==\'Emergency\'].name | [0]" '
+                '--output tsv'.format(command_group)
+            ).output.strip()
+            self.assertTrue(self.kwargs['ver'])
+            image = self.cmd(
+                '{} extension image show --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --version {{ver}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertEqual(image['name'], self.kwargs['ver'])
+            for field in ('releaseNotes', 'releaseCategory', 'urgencyLevel', 'runProfile'):
+                self.assertIn(field, image)
+
+            feature_tags = image['extensionFeatureMetadata']['extensionFeatureTags']
+            self.assertTrue(feature_tags)
+            self.assertTrue(all('key' in tag and 'value' in tag for tag in feature_tags))
+            command_results[command_group] = (versions_without_expand, versions_with_metadata, image)
+
+        self.assertEqual(command_results['vm'], command_results['vmss'])
+
 
 class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
 
