@@ -2697,3 +2697,120 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     if kwargs.get('enabled') is not None or kwargs.get('tags') is not None:
         return client.update_certificate_properties(certificate_name=certificate_name, version=version, **kwargs)
     return client.get_certificate(certificate_name=certificate_name)
+
+
+def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_single_mode):
+    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+
+    try:
+        # Check destination
+        if not overwrite:
+            try:
+                dest_client.get_secret(secret_name)
+                logger.warning("Secret '%s' already exists in destination. Skipping.", secret_name)
+                return None  # Skipped
+            except ResourceNotFoundError:
+                pass
+            except HttpResponseError as e:
+                logger.warning("Error checking secret '%s' in destination: %s", secret_name, str(e))
+                return False  # Failed
+
+        # Copy
+        logger.info("Copying secret: %s", secret_name)
+        s = source_client.get_secret(secret_name)
+
+        try:
+            new_secret = dest_client.set_secret(
+                s.name,
+                s.value,
+                content_type=s.properties.content_type,
+                tags=s.properties.tags,
+                enabled=s.properties.enabled,
+                not_before=s.properties.not_before,
+                expires_on=s.properties.expires_on
+            )
+        except HttpResponseError as e:
+            if is_single_mode:
+                raise e
+
+            logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
+            return False
+
+        logger.info("Successfully copied secret: %s", secret_name)
+        return {'name': new_secret.name, 'id': new_secret.id}
+
+    except ResourceNotFoundError as e:
+        if is_single_mode:
+            raise e
+        logger.error("Secret '%s' not found in source vault.", secret_name)
+        return False
+    except HttpResponseError as e:
+        if is_single_mode:
+            raise e
+        logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
+        return False
+
+
+def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
+    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
+
+    # If neither a specific secret name nor --all is provided, default to copying all secrets.
+    if not name and not all_secrets:
+        all_secrets = True
+
+    # A specific secret name and --all are mutually exclusive.
+    if name and all_secrets:
+        raise MutuallyExclusiveArgumentError("Specify either a secret name or --all, but not both.")
+    # Validation
+    if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
+        raise CLIError("Source and destination Key Vaults cannot be the same.")
+
+    command_args = {'vault_base_url': destination_vault}
+    dest_client = data_plane_azure_keyvault_secret_client(cmd.cli_ctx, command_args)
+
+    # Fail fast if source or destination vault is not accessible or does not exist
+    for c, vault_url in [(client, client.vault_url), (dest_client, destination_vault)]:
+        try:
+            # Perform a lightweight call to validate vault accessibility.
+            # A 404 for a dummy secret name means the vault is reachable but the secret does not exist.
+            c.get_secret("azure-cli-validation-dummy")
+        except ResourceNotFoundError:
+            # Vault is accessible but the dummy secret does not exist, which is expected.
+            pass
+        except HttpResponseError as e:
+            if e.status_code == 404:
+                # Vault is accessible but the dummy secret does not exist, which is expected.
+                pass
+            else:
+                raise CLIError(f"Failed to access Key Vault '{vault_url}': {str(e)}")
+
+    secrets_to_copy = []
+    if name:
+        secrets_to_copy.append(name)
+    else:
+        logger.info("Copying all secrets from source...")
+        try:
+            source_secrets = client.list_properties_of_secrets()
+            for s in source_secrets:
+                if s.managed:
+                    logger.warning("Skipping managed secret: %s", s.name)
+                    continue
+                secrets_to_copy.append(s.name)
+        except HttpResponseError as e:
+            raise CLIError(f"Failed to list secrets from source: {str(e)}")
+
+    copied_secrets = []
+    failed_secrets = []
+    for secret_name in secrets_to_copy:
+        result = _copy_single_secret(client, dest_client, secret_name, overwrite, bool(name))
+        if result:
+            copied_secrets.append(result)
+        elif result is False:
+            failed_secrets.append(secret_name)
+
+    if failed_secrets:
+        logger.warning("Operation completed with failures. %s secrets failed to copy: %s",
+                       len(failed_secrets), ', '.join(failed_secrets))
+
+    return copied_secrets

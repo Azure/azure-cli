@@ -571,6 +571,20 @@ def load_arguments(self, _):
     with self.argument_context('keyvault secret restore') as c:
         c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+
+    with self.argument_context('keyvault secret copy') as c:
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
+                options_list=['--source-vault'], help='Name of the source Key Vault.', required=True)
+        c.extra('destination_vault', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
+                options_list=['--destination-vault'], help='Name of the destination Key Vault.', required=True)
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the secret to copy. Mutually exclusive with --all. If neither --name nor --all is '
+                        'specified, all secrets will be copied.',
+                   required=False)
+        c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'],
+                help='Copy all secrets from the source vault. Mutually exclusive with --name. If neither --name nor '
+                     '--all is specified, all secrets will be copied.')
+        c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite secrets in the destination vault if they already exist.')
     # endregion
 
     # region keyvault security-domain
