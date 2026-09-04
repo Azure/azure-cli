@@ -10,9 +10,9 @@ human reviews, and live-test state once. Pending required CI or live tests are
 waiting, not failure. If the current decisive human review requests changes,
 preserve that state and do not post an Agent pass.
 
-Run `get_pr_regression_coverage_summary` and `get_pr_review_skill_summary`
-against
-the current diff. Deterministic findings are requirements. Semantic candidates
+Run the repository-owned `get_pr_regression_coverage_summary` custom skill
+with the PR number, then run `get_pr_review_skill_summary` against the current
+diff. Deterministic findings are requirements. Semantic candidates
 become findings only when changed-line evidence confirms them. Diagnose each
 failed check as PR-related, unrelated, or uncertain and include the exact
 evidence, practical correction, and focused verification.

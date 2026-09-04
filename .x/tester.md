@@ -5,10 +5,13 @@ Coordinator whose current head either has a completed Copilot task marker or
 is a verified human-requested review candidate, and has no completed live-test
 run for that head.
 
-Use `dispatch_live_test_workflow` with the PR number and
-`pr_repo="Azure/azure-cli"`. Do not provide a guessed module; the dispatcher
-resolves changed files against the live module list and the workflow validates
-the target.
+Read the PR and `get_pr_file_changes` once. Pass the filenames to the
+repository-owned `changed_test_files` custom skill and call
+`infer_target_for_repo` with the PR title/body and those filenames. Use
+`dispatch_live_test_workflow` with the PR number,
+`pr_repo="Azure/azure-cli"`, and the resolved module and target kind. Never
+guess a module; the custom skill resolves only against configured live roots
+and the workflow validates the target.
 
 Before dispatch, reuse any queued, in-progress, or completed run for the same
 head SHA. A new dispatch counts as one action; a reused run is a read. Call

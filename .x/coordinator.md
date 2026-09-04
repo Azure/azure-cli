@@ -16,8 +16,13 @@ For this repository, apply the generic loop priorities as follows:
    `Azure/azure-cli` before normal work. Never act on a dispute from another
    repository.
 2. Handle explicit, deduplicated human feedback on an Agent-managed PR.
-3. Promote completed Copilot fork work and complete any required AAZ source
-   promotion before downstream readiness.
+3. Promote completed Copilot fork work. After a downstream CLI PR exists, use
+   the repository-owned `start_aaz_source_task` custom skill when generated
+   AAZ output requires a durable source change. Discover completed source work
+   with `find_aaz_fork_prs_ready_for_promotion`, promote it with
+   `promote_aaz_fork_pr`, and confirm the live source PR with
+   `find_promoted_aaz_source_pr` before downstream readiness. Do not invoke the
+   neutral generation-source bridge primitives directly.
 4. Trigger missing CI for a ready fork PR.
 5. Send an actionable in-flight PR to Tester, then Reviewer after required
    live tests and CI complete.
