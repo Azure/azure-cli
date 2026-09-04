@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Exists(AAZCommand):
     """Check the give Namespace name availability.
+
+    :example: NamespacesCheckNameAvailability
+        az eventhubs namespace exists --name sdk-Namespace-8458
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.eventhub/checknameavailability", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.eventhub/checknameavailability", "2026-07-01-preview"],
         ]
     }
 
@@ -108,7 +111,7 @@ class Exists(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

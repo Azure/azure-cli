@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all the consumer groups in a Namespace. An empty feed is returned if no consumer group exists in the Namespace.
+
+    :example: ConsumerGroupsListAll
+        az eventhubs eventhub consumer-group list --resource-group ArunMonocle --namespace-name sdk-Namespace-2661 --eventhub-name sdk-EventHub-6681
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups", "2026-07-01-preview"],
         ]
     }
 
@@ -158,7 +161,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
