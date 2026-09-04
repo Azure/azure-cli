@@ -10,9 +10,9 @@ human reviews, and live-test state once. Pending required CI or live tests are
 waiting, not failure. If the current decisive human review requests changes,
 preserve that state and do not post an Agent pass.
 
-Run `get_pr_regression_coverage_summary` and `get_pr_review_skill_summary`
-against
-the current diff. Deterministic findings are requirements. Semantic candidates
+Run the repository-owned `get_pr_regression_coverage_summary` custom skill
+with the PR number, then run `get_pr_review_skill_summary` against the current
+diff. Deterministic findings are requirements. Semantic candidates
 become findings only when changed-line evidence confirms them. Diagnose each
 failed check as PR-related, unrelated, or uncertain and include the exact
 evidence, practical correction, and focused verification.
@@ -28,9 +28,12 @@ Require:
 - owning-team review for high-risk auth, security, core runtime, generated
   surface, or broad behavior changes.
 
-Use `repair_pr_title_check` only for a confirmed metadata-gate failure,
-then read the rerun in a later round. Combine CI, live-test, regression, risk,
-and review-skill evidence in one review.
+Use `repair_pr_title_check` only for a confirmed metadata-gate failure. Resolve
+the component first with repository-owned `infer_target_for_repo` using the
+current PR title, body, and changed filenames, then pass its name as
+`component`; central title repair must not infer repository policy. Read the
+rerun in a later round. Combine CI, live-test, regression, risk, and
+review-skill evidence in one review.
 
 For a human-requested PR, post one `COMMENT`. For a Copilot-authored PR with
 relevant failures, use `request_copilot_changes`; after the iteration cap,
