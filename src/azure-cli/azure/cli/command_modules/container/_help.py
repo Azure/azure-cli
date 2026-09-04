@@ -37,6 +37,8 @@ examples:
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "echo hello" --restart-policy Never
   - name: Create a container in a container group with environment variables.
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables key1=value1 key2=value2
+  - name: Create a container with environment variables from a JSON file (for values with special characters such as quotes or carets).
+    text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables-file /path/to/env.json
   - name: Create a container in a container group using container image from Azure Container Registry.
     text: az container create -g MyResourceGroup --name myapp --image myAcrRegistry.azurecr.io/myimage:latest --registry-password password
   - name: Create a container in a container group that mounts an Azure File share as volume.
