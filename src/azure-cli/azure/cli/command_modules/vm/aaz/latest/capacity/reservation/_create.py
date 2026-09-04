@@ -102,7 +102,7 @@ class Create(AAZCommand):
             help="The required end date for Block capacity reservations. Must be after the start date, with a duration of either 1–14 whole days or 3–26 whole weeks. Example: 2025-06-28.",
         )
         _args_schema.minimum_commitment_days = AAZIntArg(
-            options=["--minimum-commitment-days"],
+            options=["--min-commitment-days", "--minimum-commitment-days"],
             arg_group="ScheduleProfile",
             help="The minimum number of days after the start date before a committed Future capacity reservation can be updated or deleted. The service supplies a default when this value is omitted.",
         )
