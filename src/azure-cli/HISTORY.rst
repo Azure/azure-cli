@@ -24,6 +24,7 @@ Release History
 * `az aks nodepool rollback`: Show an accurate warning when only the node OS upgrade channel is enabled (#33854)
 * Implement enable/disable flags for user-defined scheduler configuration (#33934)
 * `az aks update`: Fix Azure Container Storage configuration detection for lowercase and boolean extension settings (#33938)
+* `az aks create`, `az aks update`: Add `--outbound-type-sku` to select the managed NAT gateway SKU (`Standard` or `StandardV2`) with `--outbound-type managedNATGateway`, the GA shape of NAT Gateway V2. `StandardV2` also supports IPv6 (`--nat-gateway-managed-outbound-ipv6-count`), user-provided public IPs (`--nat-gateway-outbound-ips`), and user-provided IP prefixes (`--nat-gateway-outbound-ip-prefixes`).
 
 **App Config**
 

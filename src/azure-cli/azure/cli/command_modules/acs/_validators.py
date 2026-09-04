@@ -356,6 +356,99 @@ def validate_nat_gateway_idle_timeout(namespace):
             raise InvalidArgumentValueError("--nat-gateway-idle-timeout must be in the range [4,120]")
 
 
+def validate_nat_gateway_managed_outbound_ipv6_count(namespace):
+    """validate NAT gateway profile managed outbound IPv6 count (StandardV2, dual-stack only)"""
+    ipv6_count = namespace.nat_gateway_managed_outbound_ipv6_count
+    if ipv6_count is not None:
+        if ipv6_count < 1 or ipv6_count > 16:
+            raise InvalidArgumentValueError(
+                "--nat-gateway-managed-outbound-ipv6-count must be in the range [1,16]"
+            )
+
+
+def validate_outbound_type_sku(namespace):
+    """Validate --outbound-type-sku on create (managed NAT gateway SKU).
+
+    The SKU only applies to the managed NAT gateway outbound type and, on create, drives building a
+    NAT gateway profile, so --outbound-type must be set explicitly to managedNATGateway; omitting it
+    defaults the cluster to loadBalancer and produces an incompatible request.
+    """
+    if getattr(namespace, 'nat_gateway_sku', None) is None:
+        return
+    if namespace.outbound_type != 'managedNATGateway':
+        raise InvalidArgumentValueError(
+            "--outbound-type-sku is only valid with --outbound-type managedNATGateway; "
+            "specify --outbound-type managedNATGateway explicitly."
+        )
+
+
+def validate_outbound_type_sku_for_update(namespace):
+    """Validate --outbound-type-sku on update (managed NAT gateway SKU).
+
+    Unlike create, --outbound-type may be omitted when the cluster is already managed NAT gateway;
+    only an explicit non-managed-NAT-gateway outbound type is rejected here. The update decorator
+    additionally verifies the cluster's existing outbound type.
+    """
+    if getattr(namespace, 'nat_gateway_sku', None) is None:
+        return
+    if namespace.outbound_type is not None and namespace.outbound_type != 'managedNATGateway':
+        raise InvalidArgumentValueError(
+            "--outbound-type-sku is only valid with --outbound-type managedNATGateway."
+        )
+
+
+def validate_nat_gateway_v2_params(namespace):
+    """Validate the V2-only NAT gateway params on create.
+
+    The V2-only params (managed IPv6 count, BYO outbound IPs / IP prefixes) require the managed NAT
+    gateway outbound type at the StandardV2 tier; the Standard (V1) SKU cannot carry them. Omitting
+    --outbound-type-sku is tolerated and defaults to StandardV2 where the region supports it, so only
+    an explicit Standard SKU is rejected here (region availability is enforced by the RP). On create
+    --outbound-type must be set explicitly to managedNATGateway.
+    """
+    v2_params = [
+        getattr(namespace, 'nat_gateway_managed_outbound_ipv6_count', None),
+        getattr(namespace, 'nat_gateway_outbound_ip_ids', None),
+        getattr(namespace, 'nat_gateway_outbound_ip_prefix_ids', None),
+    ]
+    if not any(p is not None for p in v2_params):
+        return
+    # Omitting the sku defaults to StandardV2 where supported, so only an explicit Standard is rejected.
+    if namespace.outbound_type != 'managedNATGateway' or getattr(namespace, 'nat_gateway_sku', None) == 'Standard':
+        raise InvalidArgumentValueError(
+            "--nat-gateway-managed-outbound-ipv6-count, --nat-gateway-outbound-ips and "
+            "--nat-gateway-outbound-ip-prefixes are only valid with --outbound-type managedNATGateway "
+            "and --outbound-type-sku StandardV2; specify --outbound-type managedNATGateway explicitly."
+        )
+
+
+def validate_nat_gateway_v2_params_for_update(namespace):
+    """Validate the V2-only NAT gateway params on update.
+
+    The V2-only params (managed IPv6 count, BYO outbound IPs / IP prefixes) require the StandardV2
+    tier. Unlike create, an omitted --outbound-type-sku is not a "default to StandardV2": on update
+    the RP preserves the cluster's existing SKU (which may be Standard), so the V2-only params
+    require an explicit --outbound-type-sku StandardV2. --outbound-type may be omitted when the
+    cluster is already managed NAT gateway; an explicit non-managed-NAT-gateway outbound type is
+    also rejected.
+    """
+    v2_params = [
+        getattr(namespace, 'nat_gateway_managed_outbound_ipv6_count', None),
+        getattr(namespace, 'nat_gateway_outbound_ip_ids', None),
+        getattr(namespace, 'nat_gateway_outbound_ip_prefix_ids', None),
+    ]
+    if not any(p is not None for p in v2_params):
+        return
+    # On update the RP preserves the existing SKU (possibly Standard), so require an explicit StandardV2.
+    if (namespace.outbound_type is not None and namespace.outbound_type != 'managedNATGateway') or \
+            getattr(namespace, 'nat_gateway_sku', None) != 'StandardV2':
+        raise InvalidArgumentValueError(
+            "--nat-gateway-managed-outbound-ipv6-count, --nat-gateway-outbound-ips and "
+            "--nat-gateway-outbound-ip-prefixes are only valid with --outbound-type managedNATGateway "
+            "and --outbound-type-sku StandardV2."
+        )
+
+
 def validate_nodes_count(namespace):
     """Validates that min_count and max_count is set between 0-1000"""
     if namespace.min_count is not None:

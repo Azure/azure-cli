@@ -90,5 +90,76 @@ class TestIsNatGatewayProfileProvided(unittest.TestCase):
         result = natgateway.is_nat_gateway_profile_provided(0, None)
         self.assertTrue(result)
 
+
+class TestNatGatewayV2(unittest.TestCase):
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.nat_gateway_models = AKSManagedClusterModels(
+            self.cmd, ResourceType.MGMT_CONTAINERSERVICE
+        ).nat_gateway_models
+
+    def test_is_provided_by_sku_and_v2_params(self):
+        self.assertTrue(natgateway.is_nat_gateway_profile_provided(None, None, nat_gateway_sku="StandardV2"))
+        self.assertTrue(natgateway.is_nat_gateway_profile_provided(None, None, managed_outbound_ipv6_count=1))
+        self.assertTrue(natgateway.is_nat_gateway_profile_provided(None, None, outbound_ip_ids="/sub/ip1"))
+        self.assertTrue(natgateway.is_nat_gateway_profile_provided(None, None, outbound_ip_prefix_ids="/sub/pfx1"))
+        self.assertFalse(natgateway.is_nat_gateway_profile_provided(None, None))
+
+    def test_create_with_sku_and_v2_params(self):
+        profile = natgateway.create_nat_gateway_profile(
+            2, 10, models=self.nat_gateway_models,
+            managed_outbound_ipv6_count=1,
+            outbound_ip_ids="/sub/ip1, /sub/ip2",
+            outbound_ip_prefix_ids="/sub/pfx1",
+            nat_gateway_sku="StandardV2",
+        )
+        self.assertEqual(profile.sku, "StandardV2")
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 2)
+        self.assertEqual(profile.managed_outbound_ip_profile.count_ipv6, 1)
+        self.assertEqual(profile.outbound_i_ps.public_i_ps, ["/sub/ip1", "/sub/ip2"])
+        self.assertEqual(profile.outbound_ip_prefixes.public_ip_prefixes, ["/sub/pfx1"])
+        self.assertEqual(profile.idle_timeout_in_minutes, 10)
+
+    def test_create_ipv6_only_defaults_ipv4_count(self):
+        # Only an IPv6 count is provided; the IPv4 count must fall back to the documented default of 1.
+        profile = natgateway.create_nat_gateway_profile(
+            None, None, models=self.nat_gateway_models,
+            managed_outbound_ipv6_count=3,
+            nat_gateway_sku="StandardV2",
+        )
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 1)
+        self.assertEqual(profile.managed_outbound_ip_profile.count_ipv6, 3)
+
+    def test_update_ipv6_only_preserves_existing_ipv4_count(self):
+        origin = self.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=5),
+        )
+        profile = natgateway.update_nat_gateway_profile(
+            None, None, origin, models=self.nat_gateway_models,
+            managed_outbound_ipv6_count=2,
+        )
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 5)
+        self.assertEqual(profile.managed_outbound_ip_profile.count_ipv6, 2)
+
+    def test_create_sku_only(self):
+        profile = natgateway.create_nat_gateway_profile(
+            None, None, models=self.nat_gateway_models, nat_gateway_sku="StandardV2"
+        )
+        self.assertIsNotNone(profile)
+        self.assertEqual(profile.sku, "StandardV2")
+
+    def test_update_sets_sku_on_existing_profile(self):
+        origin = self.nat_gateway_models.ManagedClusterNATGatewayProfile(
+            managed_outbound_ip_profile=self.nat_gateway_models.ManagedClusterManagedOutboundIPProfile(count=1),
+            idle_timeout_in_minutes=4,
+        )
+        profile = natgateway.update_nat_gateway_profile(
+            None, None, origin, models=self.nat_gateway_models, nat_gateway_sku="StandardV2"
+        )
+        self.assertEqual(profile.sku, "StandardV2")
+        self.assertEqual(profile.managed_outbound_ip_profile.count, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

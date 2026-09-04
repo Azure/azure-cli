@@ -238,6 +238,16 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
                 if hasattr(self, "ManagedClusterManagedOutboundIPProfile")
                 else None
             )   # backward compatibility
+            nat_gateway_models["ManagedClusterNATGatewayProfileOutboundIPs"] = (
+                self.ManagedClusterNATGatewayProfileOutboundIPs
+                if hasattr(self, "ManagedClusterNATGatewayProfileOutboundIPs")
+                else None
+            )   # backward compatibility
+            nat_gateway_models["ManagedClusterNATGatewayProfileOutboundIpPrefixes"] = (
+                self.ManagedClusterNATGatewayProfileOutboundIpPrefixes
+                if hasattr(self, "ManagedClusterNATGatewayProfileOutboundIpPrefixes")
+                else None
+            )   # backward compatibility
             self.__nat_gateway_models = SimpleNamespace(**nat_gateway_models)
         return self.__nat_gateway_models
 
@@ -2288,6 +2298,44 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return nat_gateway_idle_timeout
+
+    def get_nat_gateway_sku(self) -> Union[str, None]:
+        """Obtain the value of nat_gateway_sku (--outbound-type-sku).
+
+        The managed NAT gateway SKU (Standard or StandardV2). GA shape: V2 is expressed via
+        outboundType=managedNATGateway + natGatewayProfile.sku=StandardV2. Region availability
+        and downgrade rules are enforced server-side by the RP.
+
+        :return: str or None
+        """
+        return self.raw_param.get("nat_gateway_sku")
+
+    def get_nat_gateway_managed_outbound_ipv6_count(self) -> Union[int, None]:
+        """Obtain the value of nat_gateway_managed_outbound_ipv6_count.
+
+        Only valid with the StandardV2 SKU on dual-stack clusters.
+
+        :return: int or None
+        """
+        return self.raw_param.get("nat_gateway_managed_outbound_ipv6_count")
+
+    def get_nat_gateway_outbound_ip_ids(self) -> Union[str, None]:
+        """Obtain the value of nat_gateway_outbound_ip_ids (--nat-gateway-outbound-ips).
+
+        Only valid with the StandardV2 SKU.
+
+        :return: str or None
+        """
+        return self.raw_param.get("nat_gateway_outbound_ip_ids")
+
+    def get_nat_gateway_outbound_ip_prefix_ids(self) -> Union[str, None]:
+        """Obtain the value of nat_gateway_outbound_ip_prefix_ids (--nat-gateway-outbound-ip-prefixes).
+
+        Only valid with the StandardV2 SKU.
+
+        :return: str or None
+        """
+        return self.raw_param.get("nat_gateway_outbound_ip_prefix_ids")
 
     def get_pod_cidrs_and_service_cidrs_and_ip_families(self) -> Tuple[
         Union[List[str], None],
@@ -7064,6 +7112,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_nat_gateway_managed_outbound_ip_count(),
             self.context.get_nat_gateway_idle_timeout(),
             models=self.models.nat_gateway_models,
+            managed_outbound_ipv6_count=self.context.get_nat_gateway_managed_outbound_ipv6_count(),
+            outbound_ip_ids=self.context.get_nat_gateway_outbound_ip_ids(),
+            outbound_ip_prefix_ids=self.context.get_nat_gateway_outbound_ip_prefix_ids(),
+            nat_gateway_sku=self.context.get_nat_gateway_sku(),
         )
         load_balancer_sku = self.context.get_load_balancer_sku()
         if load_balancer_sku != CONST_LOAD_BALANCER_SKU_BASIC:
@@ -8842,6 +8894,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 "Unexpectedly get an empty network profile in the process of updating nat gateway profile."
             )
         outbound_type = self.context.get_outbound_type()
+        # The managed NAT gateway SKU and V2 params build a NAT gateway profile, so they are only
+        # valid when the cluster's effective outbound type is managedNATGateway. --outbound-type may
+        # be omitted on update, so reject here against the resolved type instead of silently dropping
+        # them on e.g. a loadBalancer cluster.
+        if outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY and (
+            self.context.get_nat_gateway_sku() is not None or
+            self.context.get_nat_gateway_managed_outbound_ipv6_count() is not None or
+            self.context.get_nat_gateway_outbound_ip_ids() is not None or
+            self.context.get_nat_gateway_outbound_ip_prefix_ids() is not None
+        ):
+            raise InvalidArgumentValueError(
+                "--outbound-type-sku, --nat-gateway-managed-outbound-ipv6-count, "
+                "--nat-gateway-outbound-ips and --nat-gateway-outbound-ip-prefixes are only valid "
+                "when the cluster's outbound type is managedNATGateway; set "
+                "--outbound-type managedNATGateway to change the outbound type."
+            )
         if outbound_type and outbound_type != CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
             mc.network_profile.nat_gateway_profile = None
         else:
@@ -8850,6 +8918,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 idle_timeout=self.context.get_nat_gateway_idle_timeout(),
                 profile=mc.network_profile.nat_gateway_profile,
                 models=self.models.nat_gateway_models,
+                managed_outbound_ipv6_count=self.context.get_nat_gateway_managed_outbound_ipv6_count(),
+                outbound_ip_ids=self.context.get_nat_gateway_outbound_ip_ids(),
+                outbound_ip_prefix_ids=self.context.get_nat_gateway_outbound_ip_prefix_ids(),
+                nat_gateway_sku=self.context.get_nat_gateway_sku(),
             )
         return mc
 

@@ -1512,6 +1512,48 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
         ])
 
+    @live_only()  # live-only until a StandardV2 NAT gateway recording is captured
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_and_update_with_managed_nat_gateway_v2(self, resource_group, resource_group_location):
+        # NAT Gateway V2 GA: outboundType=managedNATGateway + --outbound-type-sku StandardV2.
+        # Record with: azdev test test_aks_create_and_update_with_managed_nat_gateway_v2 --live
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--outbound-type=managedNATGateway ' \
+                     '--outbound-type-sku=StandardV2 ' \
+                     '--nat-gateway-managed-outbound-ip-count=1 ' \
+                     '--nat-gateway-idle-timeout=4 ' \
+                     '--generate-ssh-keys ' \
+                     '--location={location}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.sku', 'StandardV2'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 4),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 1),
+        ])
+
+        # Update keeps the StandardV2 SKU and applies the new managed outbound IP count / idle timeout.
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nat-gateway-managed-outbound-ip-count=2 ' \
+                     '--nat-gateway-idle-timeout=30 '
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.sku', 'StandardV2'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 30),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
+        ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_update_outbound_from_slb_to_natgateway(self, resource_group, resource_group_location):

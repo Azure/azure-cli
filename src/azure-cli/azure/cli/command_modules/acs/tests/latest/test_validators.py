@@ -2046,5 +2046,62 @@ class TestValidateSshKey(unittest.TestCase):
         self.assertIsNone(namespace.ssh_key_value)
 
 
+class TestNatGatewayV2Validators(unittest.TestCase):
+    def _ns(self, **kwargs):
+        defaults = {
+            "nat_gateway_sku": None,
+            "outbound_type": None,
+            "nat_gateway_managed_outbound_ipv6_count": None,
+            "nat_gateway_outbound_ip_ids": None,
+            "nat_gateway_outbound_ip_prefix_ids": None,
+        }
+        defaults.update(kwargs)
+        return SimpleNamespace(**defaults)
+
+    def test_sku_create_requires_explicit_managed_nat_gateway(self):
+        validators.validate_outbound_type_sku(self._ns(nat_gateway_sku="StandardV2", outbound_type="managedNATGateway"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_outbound_type_sku(self._ns(nat_gateway_sku="StandardV2", outbound_type=None))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_outbound_type_sku(self._ns(nat_gateway_sku="StandardV2", outbound_type="loadBalancer"))
+        validators.validate_outbound_type_sku(self._ns(outbound_type="loadBalancer"))
+
+    def test_sku_update_allows_omitted_outbound_type(self):
+        validators.validate_outbound_type_sku_for_update(self._ns(nat_gateway_sku="StandardV2", outbound_type=None))
+        validators.validate_outbound_type_sku_for_update(self._ns(nat_gateway_sku="StandardV2", outbound_type="managedNATGateway"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_outbound_type_sku_for_update(self._ns(nat_gateway_sku="StandardV2", outbound_type="loadBalancer"))
+
+    def test_v2_params_create_requires_managed_nat_gateway_and_v2_sku(self):
+        validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type="managedNATGateway"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type=None))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_outbound_ip_ids="/sub/ip", outbound_type="loadBalancer"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type="managedNATGateway", nat_gateway_sku="Standard"))
+        validators.validate_nat_gateway_v2_params(self._ns(outbound_type="loadBalancer"))
+
+    def test_v2_params_update_requires_v2_sku(self):
+        # On update the RP preserves the existing SKU (possibly Standard), so V2 params require an
+        # explicit StandardV2; a sku-less update is rejected.
+        validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type=None, nat_gateway_sku="StandardV2"))
+        validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type=None))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type=None, nat_gateway_sku="Standard"))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_outbound_ip_ids="/sub/ip", outbound_type="loadBalancer", nat_gateway_sku="StandardV2"))
+
+    def test_ipv6_count_range(self):
+        validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=1))
+        validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=16))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=0))
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=17))
+
+
 if __name__ == "__main__":
     unittest.main()
