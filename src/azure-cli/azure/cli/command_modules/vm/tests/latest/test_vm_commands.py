@@ -10315,6 +10315,51 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_spot_plus_', location='eastus2')
+    def test_vm_vmss_create_with_spot_plus_priority(self, resource_group):
+        self.kwargs.update({
+            'location': 'eastus2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss_uniform': self.create_random_name('vmssu', 10),
+            'vmss_flexible': self.create_random_name('vmssf', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Ubuntu2204 --size Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('priority', 'SpotPlus'),
+            self.check('evictionPolicy', 'Deallocate'),
+            self.check('billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_uniform} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Delete --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Uniform --lb ""')
+
+        self.cmd('vmss show -g {rg} -n {vmss_uniform}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Delete'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_flexible} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Flexible')
+
+        self.cmd('vmss show -g {rg} -n {vmss_flexible}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Deallocate'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
     def test_vm_priority_eviction_billing(self, resource_group):
         self.kwargs.update({

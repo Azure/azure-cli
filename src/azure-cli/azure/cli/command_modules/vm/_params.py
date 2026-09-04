@@ -73,7 +73,7 @@ def load_arguments(self, _):
     OrchestrationModeUniform = ['Uniform']
     OSTypes = ['Windows', 'Linux']
     PatchMode = ['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']
-    Priority = ['Regular', 'Low', 'Spot']
+    Priority = ['Regular', 'Low', 'Spot', 'SpotPlus']
     ProxyAgentMode = ['Audit', 'Enforce']
     PublicIPAddressAllocationMethod = ['dynamic', 'static']
     PublicNetworkAccess = ['Disabled', 'Enabled']
@@ -1415,7 +1415,7 @@ def load_arguments(self, _):
             c.argument('license_type', license_type)
             c.argument('priority',
                        arg_type=get_enum_type(Priority, default=None),
-                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
+                       help="Priority. Use 'Spot' or 'SpotPlus' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' or 'SpotPlus' to deploy Azure spot VM and/or VMSS. Default to Regular.")
             c.argument('max_price', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
             c.argument('capacity_reservation_group', options_list=['--capacity-reservation-group', '--crg'],
@@ -1438,7 +1438,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss create') as c:
         c.argument('priority', arg_type=get_enum_type(Priority, default=None),
-                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
+                   help="Priority. Use 'Spot' or 'SpotPlus' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' or 'SpotPlus' to deploy Azure spot VM and/or VMSS. Default to Regular.")
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
