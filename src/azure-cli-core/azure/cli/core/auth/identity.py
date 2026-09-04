@@ -3,10 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import http.server
 import json
 import os
 import re
 import sys
+import threading
+import webbrowser
+from urllib.parse import parse_qs, urlparse
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -169,6 +173,64 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
             enable_msa_passthrough=True,
             claims_challenge=claims_challenge)
+        return check_result(result)
+
+    def login_with_auth_code_for_codespaces(self, scopes, claims_challenge=None):
+        import queue
+        import warnings
+
+        callbacks = queue.Queue()
+
+        class _CallbackHandler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                parsed = urlparse(self.path)
+                params = {k: v[0] for k, v in
+                          parse_qs(parsed.query, keep_blank_values=True).items() if v}
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(
+                    b'<html><body><h2>Authentication complete.</h2>'
+                    b'<p>You may close this tab and return to your terminal.</p></body></html>')
+                if ('code' in params and 'state' in params) or 'error' in params:
+                    callbacks.put(params)
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
+
+            def log_message(self, fmt, *args):
+                pass
+
+        server = http.server.HTTPServer(('localhost', 0), _CallbackHandler)
+        port = server.server_address[1]
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+
+        # response_mode='query' is intentional — we need the code in the URL for the paste fallback
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            flow = self._msal_app.initiate_auth_code_flow(
+                scopes, redirect_uri='http://localhost:{}'.format(port),
+                prompt='select_account', claims_challenge=claims_challenge,
+                response_mode='query')
+
+        input('Press Enter to open the browser for sign-in...')
+        webbrowser.open(flow['auth_uri'])
+        logger.warning("If the browser did not open, visit: %s", flow['auth_uri'])
+
+        url = input('After signing in, press Enter to continue '
+                    '(or paste the redirected URL if your browser shows a connection error): ').strip()
+
+        try:
+            if url:
+                auth_response = _parse_codespaces_auth_response(url)
+            else:
+                try:
+                    auth_response = callbacks.get(timeout=300)
+                except queue.Empty:
+                    raise CLIError('Login timed out waiting for the redirected response. '
+                                   'Please try again, or paste the redirected URL.')
+        finally:
+            server.shutdown()
+            server.server_close()
+        result = self._msal_app.acquire_token_by_auth_code_flow(flow, auth_response, scopes=scopes)
         return check_result(result)
 
     def login_with_device_code(self, scopes, claims_challenge=None):
@@ -436,6 +498,26 @@ def _try_remove(path):
         os.remove(path)
     except FileNotFoundError:
         pass
+
+
+def _parse_codespaces_auth_response(redirected_url):
+    if not redirected_url:
+        raise CLIError('No redirected URL was provided.')
+
+    parsed = urlparse(redirected_url)
+    params = parse_qs(parsed.query or '', keep_blank_values=True)
+
+    if 'error' in params:
+        description = params.get('error_description', [''])[0]
+        raise CLIError('Authentication failed: {} {}'.format(params.get('error', [''])[0], description).strip())
+
+    code = params.get('code', [''])[0]
+    state = params.get('state', [''])[0]
+
+    if not code or not state:
+        raise CLIError('Redirected URL does not include required parameters "code" and "state".')
+
+    return {k: v[0] for k, v in params.items() if v and v[0] != ''}
 
 
 def get_environment_credential():

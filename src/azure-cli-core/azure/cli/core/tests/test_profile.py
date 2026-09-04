@@ -15,6 +15,7 @@ from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_
                                      _transform_subscription_for_multiapi,
                                      _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.azclierror import AuthenticationError
+from azure.cli.core.auth.identity import _parse_codespaces_auth_response
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
 from azure.mgmt.resource.subscriptions.models import \
@@ -381,15 +382,13 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
-    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_device_code', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code_for_codespaces', autospec=True)
     @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=True)
     @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
-    def test_login_fallback_to_device_code_github_codespaces(self, can_launch_browser_mock, is_github_codespaces_mock,
-                                                             login_with_device_code_mock, get_user_credential_mock,
-                                                             create_subscription_client_mock):
-        # GitHub Codespaces does support launching a browser (actually a new tab),
-        # so we mock can_launch_browser to True.
-        login_with_device_code_mock.return_value = self.user_identity_mock
+    def test_login_with_auth_code_github_codespaces(self, can_launch_browser_mock, is_github_codespaces_mock,
+                                                    login_with_auth_code_for_codespaces_mock,
+                                                    get_user_credential_mock, create_subscription_client_mock):
+        login_with_auth_code_for_codespaces_mock.return_value = self.user_identity_mock
 
         cli = DummyCli()
         mock_subscription_client = mock.MagicMock()
@@ -399,11 +398,60 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
 
         # assert
-        login_with_device_code_mock.assert_called_once()
+        login_with_auth_code_for_codespaces_mock.assert_called_once()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_device_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_does_not_use_device_code_in_codespaces(self, can_launch_browser_mock,
+                                                          is_github_codespaces_mock,
+                                                          login_with_device_code_mock,
+                                                          get_user_credential_mock,
+                                                          create_subscription_client_mock):
+        """Codespaces detection must route to auth_code flow, not device code."""
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        with mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code_for_codespaces',
+                        autospec=True, return_value=self.user_identity_mock):
+            profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
+
+        login_with_device_code_mock.assert_not_called()
+
+    def test_parse_codespaces_auth_response_valid(self):
+        url = 'http://localhost:12345?code=abc123&state=xyz&session_state=ss'
+        result = _parse_codespaces_auth_response(url)
+        self.assertEqual('abc123', result['code'])
+        self.assertEqual('xyz', result['state'])
+
+    def test_parse_codespaces_auth_response_error(self):
+        url = 'http://localhost:12345?error=access_denied&error_description=User+cancelled'
+        from knack.util import CLIError
+        with self.assertRaises(CLIError) as ctx:
+            _parse_codespaces_auth_response(url)
+        self.assertIn('access_denied', str(ctx.exception))
+
+    def test_parse_codespaces_auth_response_missing_code(self):
+        url = 'http://localhost:12345?state=xyz'
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            _parse_codespaces_auth_response(url)
+
+    def test_parse_codespaces_auth_response_empty(self):
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            _parse_codespaces_auth_response('')
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
