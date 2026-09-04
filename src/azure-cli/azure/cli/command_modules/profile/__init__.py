@@ -94,9 +94,10 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        options_list=['--federated-token-callback', '--federated-token-cmd'],
                        help='A command that prints a fresh OIDC federated token to stdout. Azure CLI runs it on '
                             'demand to refresh the token, so it works with any CI/CD provider. The command runs '
-                            'without a shell; to use pipes or redirection, point to a script file or wrap it, '
-                            'e.g. "bash -c \'...\'". Cannot be combined with --federated-token or '
-                            '--federated-identity.')
+                            'without a shell (arguments are parsed with POSIX rules; on Windows use forward '
+                            'slashes or escape backslashes). To use pipes or redirection, point to a script '
+                            'file or wrap it, e.g. "bash -c \'...\'". Cannot be combined with --federated-token '
+                            'or --federated-identity.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
