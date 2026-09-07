@@ -22,7 +22,8 @@ from azure.cli.command_modules.appservice.custom import (
     migrate_consumption_to_flex,
     _upgrade_consumption_to_flex_in_place,
     _build_flex_function_app_config,
-    _prepare_flex_migration_deployment_storage_identity,
+    _prepare_flex_deployment_storage,
+    _prepare_flex_deployment_storage_identity,
     revert_flex_migration)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
@@ -933,26 +934,14 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
 
     def test_in_place_put_uses_same_site_and_preserves_plan(self):
         original_plan_id = '/subscriptions/sub/resourceGroups/src-rg/providers/Microsoft.Web/serverfarms/cv1-plan'
-        deployment_storage = mock.MagicMock()
-        deployment_storage.sku.name = 'Standard_LRS'
-        deployment_storage.is_hns_enabled = False
-        deployment_storage.primary_endpoints.blob = 'https://storage.blob.core.windows.net/'
-        container = mock.MagicMock()
-        container.name = 'deployment'
         source = mock.MagicMock()
         source.location = 'eastus'
-        site = mock.MagicMock()
-        site.properties.server_farm_id = original_plan_id
-        site.site_config = mock.MagicMock()
-        site.as_dict.side_effect = lambda: {
-            'properties': {
-                'serverFarmId': site.properties.server_farm_id,
-                'functionAppConfig': site.properties.function_app_config,
-                'sku': site.properties.sku
-            }
-        }
+        source.server_farm_id = original_plan_id
+        source.identity = None
         flex_client = mock.MagicMock()
-        flex_client.web_apps.get.return_value = site
+        flex_client.web_apps.list_application_settings.return_value.properties = {
+            'AzureWebJobsStorage': 'source-connection-string'
+        }
         matched_runtime = mock.MagicMock()
         matched_runtime.sku = {
             'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
@@ -961,19 +950,29 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
         }
 
         patches = {
-            '_validate_and_get_deployment_storage': mock.DEFAULT,
-            '_get_or_create_deployment_storage_container': mock.DEFAULT,
-            '_get_storage_connection_string': mock.DEFAULT,
+            '_prepare_flex_deployment_storage': mock.DEFAULT,
             '_FlexFunctionAppStackRuntimeHelper': mock.DEFAULT,
-            '_prepare_flex_migration_deployment_storage_identity': mock.DEFAULT,
+            '_prepare_flex_deployment_storage_identity': mock.DEFAULT,
             'web_client_factory': mock.DEFAULT,
             'LongRunningOperation': mock.DEFAULT,
             'get_functionapp': mock.DEFAULT
         }
         with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
-            mocks['_validate_and_get_deployment_storage'].return_value = deployment_storage
-            mocks['_get_or_create_deployment_storage_container'].return_value = container
-            mocks['_get_storage_connection_string'].return_value = 'connection-string'
+            mocks['_prepare_flex_deployment_storage'].return_value = {
+                'app_settings_to_add': [],
+                'function_app_config': {
+                    'deployment': {
+                        'storage': {
+                            'type': 'blobContainer',
+                            'value': 'https://storage.blob.core.windows.net/deployment',
+                            'authentication': {
+                                'type': 'StorageAccountConnectionString',
+                                'storageAccountConnectionStringName': 'AzureWebJobsStorage'
+                            }
+                        }
+                    }
+                }
+            }
             mocks['_FlexFunctionAppStackRuntimeHelper'].return_value.resolve.return_value = matched_runtime
             mocks['web_client_factory'].return_value = flex_client
 
@@ -984,12 +983,35 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
         flex_client.web_apps.begin_create_or_update.assert_called_once()
         resource_group, name, payload = flex_client.web_apps.begin_create_or_update.call_args.args
         self.assertEqual((resource_group, name), ('src-rg', 'src-app'))
-        self.assertEqual(payload['properties']['serverFarmId'], original_plan_id)
-        self.assertEqual(payload['sku'], {'name': 'FlexConsumption'})
+        self.assertEqual(payload, {
+            'location': 'eastus',
+            'sku': {'name': 'FlexConsumption'},
+            'properties': {
+                'serverFarmId': original_plan_id,
+                'functionAppConfig': {
+                    'deployment': {
+                        'storage': {
+                            'type': 'blobContainer',
+                            'value': 'https://storage.blob.core.windows.net/deployment',
+                            'authentication': {
+                                'type': 'StorageAccountConnectionString',
+                                'storageAccountConnectionStringName': 'AzureWebJobsStorage'
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        flex_client.web_apps.update_application_settings.assert_not_called()
         flex_client.app_service_plans.begin_create_or_update.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
     def test_in_place_rejects_unsupported_deployment_storage(self, validate_storage_mock):
+        flex_sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
         for sku, hns_enabled, expected_error in [
                 ('Premium_LRS', False, 'Premium deployment storage'),
                 ('Standard_LRS', True, 'ADLS Gen2 deployment storage')]:
@@ -1000,9 +1022,10 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
                 validate_storage_mock.return_value = deployment_storage
 
                 with self.assertRaises(ValidationError) as ctx:
-                    _upgrade_consumption_to_flex_in_place(
-                        _get_test_cmd(), mock.MagicMock(), 'src-rg', 'src-app', 'storage-name',
-                        None, None, None, None, 'python', '3.11', None, None, None)
+                    _prepare_flex_deployment_storage(
+                        _get_test_cmd(), 'src-rg', 'src-app', 'storage-name', None,
+                        'StorageAccountConnectionString', None, 'eastus', flex_sku,
+                        None, None, None, validate_for_in_place=True)
 
                 self.assertIn(expected_error, str(ctx.exception))
 
@@ -1018,6 +1041,140 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
 
         self.assertIn('--deployment-storage-auth-value is required', str(ctx.exception))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_storage_connection_string')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_or_create_deployment_storage_container')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
+    def test_flex_storage_setup_preserves_existing_connection_string_setting(
+            self, validate_storage_mock, get_container_mock, get_connection_string_mock):
+        deployment_storage = mock.MagicMock()
+        deployment_storage.primary_endpoints.blob = 'https://storage.blob.core.windows.net/'
+        validate_storage_mock.return_value = deployment_storage
+        container = mock.MagicMock()
+        container.name = 'deployment'
+        get_container_mock.return_value = container
+        flex_sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+
+        setup = _prepare_flex_deployment_storage(
+            _get_test_cmd(), 'src-rg', 'src-app', 'storage-name', 'deployment',
+            'StorageAccountConnectionString', 'CUSTOM_DEPLOYMENT_STORAGE', 'eastus', flex_sku,
+            None, None, None, {'CUSTOM_DEPLOYMENT_STORAGE': 'existing-value'})
+
+        self.assertEqual(setup['app_settings_to_add'], [])
+        self.assertEqual(
+            setup['function_app_config']['deployment']['storage']['authentication']
+            ['storageAccountConnectionStringName'],
+            'CUSTOM_DEPLOYMENT_STORAGE')
+        get_connection_string_mock.assert_not_called()
+
+    def test_in_place_polling_failure_retains_side_effects(self):
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        source.server_farm_id = 'cv1-plan-id'
+        source.identity = None
+        flex_client = mock.MagicMock()
+        flex_client.web_apps.list_application_settings.return_value.properties = {
+            'AzureWebJobsStorage': 'original-value'
+        }
+        matched_runtime = mock.MagicMock()
+        matched_runtime.sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+        storage_setup = {
+            'app_settings_to_add': [{'name': 'DEPLOYMENT_STORAGE_CONNECTION_STRING', 'value': 'new-value'}],
+            'function_app_config': {'deployment': {'storage': {'authentication': {
+                'type': 'StorageAccountConnectionString'}}}}
+        }
+        identity_changes = {'identity_added': True}
+
+        patches = {
+            '_prepare_flex_deployment_storage': mock.DEFAULT,
+            '_prepare_flex_deployment_storage_identity': mock.DEFAULT,
+            '_rollback_flex_deployment_storage_identity': mock.DEFAULT,
+            '_cleanup_flex_deployment_storage': mock.DEFAULT,
+            '_FlexFunctionAppStackRuntimeHelper': mock.DEFAULT,
+            'web_client_factory': mock.DEFAULT,
+            'LongRunningOperation': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['_prepare_flex_deployment_storage'].return_value = storage_setup
+            mocks['_prepare_flex_deployment_storage_identity'].return_value = identity_changes
+            mocks['_FlexFunctionAppStackRuntimeHelper'].return_value.resolve.return_value = matched_runtime
+            mocks['web_client_factory'].return_value = flex_client
+            mocks['LongRunningOperation'].return_value.side_effect = RuntimeError('upgrade failed')
+
+            with self.assertRaisesRegex(RuntimeError, 'upgrade failed'):
+                _upgrade_consumption_to_flex_in_place(
+                    _get_test_cmd(), source, 'src-rg', 'src-app', 'storage', 'separate-storage', None,
+                    None, None, 'python', '3.11', None, None, None)
+
+        self.assertEqual(flex_client.web_apps.update_application_settings.call_count, 1)
+        mocks['_rollback_flex_deployment_storage_identity'].assert_not_called()
+        mocks['_cleanup_flex_deployment_storage'].assert_not_called()
+
+    def test_in_place_put_rejection_rolls_back_only_unchanged_setting(self):
+        source = mock.MagicMock()
+        source.location = 'eastus'
+        source.server_farm_id = 'cv1-plan-id'
+        source.identity = None
+        flex_client = mock.MagicMock()
+        flex_client.web_apps.list_application_settings.side_effect = [
+            mock.MagicMock(properties={'AzureWebJobsStorage': 'original-value'}),
+            mock.MagicMock(properties={
+                'AzureWebJobsStorage': 'original-value',
+                'DEPLOYMENT_STORAGE_CONNECTION_STRING': 'new-value',
+                'CONCURRENT_SETTING': 'preserve-me'
+            })
+        ]
+        flex_client.web_apps.begin_create_or_update.side_effect = RuntimeError('request rejected')
+        matched_runtime = mock.MagicMock()
+        matched_runtime.sku = {
+            'functionAppConfigProperties': {'runtime': {'name': 'python', 'version': '3.11'}},
+            'instanceMemoryMB': [{'isDefault': True, 'size': 2048}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+        storage_setup = {
+            'app_settings_to_add': [{'name': 'DEPLOYMENT_STORAGE_CONNECTION_STRING', 'value': 'new-value'}],
+            'function_app_config': {'deployment': {'storage': {'authentication': {
+                'type': 'StorageAccountConnectionString'}}}}
+        }
+        identity_changes = {'identity_added': True}
+
+        patches = {
+            '_prepare_flex_deployment_storage': mock.DEFAULT,
+            '_prepare_flex_deployment_storage_identity': mock.DEFAULT,
+            '_rollback_flex_deployment_storage_identity': mock.DEFAULT,
+            '_cleanup_flex_deployment_storage': mock.DEFAULT,
+            '_FlexFunctionAppStackRuntimeHelper': mock.DEFAULT,
+            'web_client_factory': mock.DEFAULT
+        }
+        with mock.patch.multiple('azure.cli.command_modules.appservice.custom', **patches) as mocks:
+            mocks['_prepare_flex_deployment_storage'].return_value = storage_setup
+            mocks['_prepare_flex_deployment_storage_identity'].return_value = identity_changes
+            mocks['_FlexFunctionAppStackRuntimeHelper'].return_value.resolve.return_value = matched_runtime
+            mocks['web_client_factory'].return_value = flex_client
+
+            with self.assertRaisesRegex(RuntimeError, 'request rejected'):
+                _upgrade_consumption_to_flex_in_place(
+                    _get_test_cmd(), source, 'src-rg', 'src-app', 'storage', 'separate-storage', None,
+                    None, None, 'python', '3.11', None, None, None)
+
+        self.assertEqual(flex_client.web_apps.update_application_settings.call_count, 2)
+        restored_settings = flex_client.web_apps.update_application_settings.call_args.args[2]
+        self.assertEqual(restored_settings.properties, {
+            'AzureWebJobsStorage': 'original-value',
+            'CONCURRENT_SETTING': 'preserve-me'
+        })
+        mocks['_rollback_flex_deployment_storage_identity'].assert_called_once_with(
+            mock.ANY, 'src-rg', 'src-app', identity_changes)
+        mocks['_cleanup_flex_deployment_storage'].assert_called_once_with(
+            mock.ANY, 'src-rg', storage_setup)
+
     @mock.patch('azure.cli.command_modules.appservice.custom._assign_deployment_storage_managed_identity_role')
     @mock.patch('azure.cli.command_modules.appservice.custom.'
                 '_has_deployment_storage_role_assignment_on_resource', return_value=False)
@@ -1029,9 +1186,21 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
         deployment_identity = mock.MagicMock()
         deployment_identity.principal_id = 'identity-principal-id'
 
-        _prepare_flex_migration_deployment_storage_identity(
-            cmd_mock, 'src-rg', 'src-app', 'UserAssignedIdentity', 'identity-resource-id',
-            deployment_storage, 'storage-name', deployment_identity)
+        assignment = mock.MagicMock()
+        assignment.id = 'role-assignment-id'
+        assign_role_mock.return_value = assignment
+        storage_setup = {
+            'deployment_storage': deployment_storage,
+            'deployment_storage_name': 'storage-name',
+            'deployment_storage_auth_value': 'identity-resource-id',
+            'user_assigned_identity': deployment_identity,
+            'function_app_config': {
+                'deployment': {'storage': {'authentication': {'type': 'UserAssignedIdentity'}}}
+            }
+        }
+
+        changes = _prepare_flex_deployment_storage_identity(
+            cmd_mock, 'src-rg', 'src-app', storage_setup)
 
         assign_identity_mock.assert_called_once_with(
             cmd_mock, 'src-rg', 'src-app', ['identity-resource-id'])
@@ -1039,20 +1208,43 @@ class TestFlexMigrationInPlaceMocked(unittest.TestCase):
             cmd_mock.cli_ctx, deployment_storage, 'identity-principal-id')
         assign_role_mock.assert_called_once_with(
             cmd_mock.cli_ctx, deployment_storage, 'identity-principal-id')
+        self.assertTrue(changes['identity_added'])
+        self.assertEqual(changes['role_assignment_id'], 'role-assignment-id')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._assign_deployment_storage_managed_identity_role')
+    @mock.patch('azure.cli.command_modules.appservice.custom.'
+                '_has_deployment_storage_role_assignment_on_resource', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
-    def test_in_place_prepares_system_assigned_identity(self, assign_identity_mock):
+    def test_in_place_prepares_system_assigned_identity(
+            self, assign_identity_mock, has_role_assignment_mock, assign_role_mock):
         cmd_mock = _get_test_cmd()
         deployment_storage = mock.MagicMock()
         deployment_storage.id = 'storage-resource-id'
+        assigned_identity = mock.MagicMock()
+        assigned_identity.principal_id = 'system-principal-id'
+        assign_identity_mock.return_value = assigned_identity
+        assignment = mock.MagicMock()
+        assignment.id = 'role-assignment-id'
+        assign_role_mock.return_value = assignment
+        storage_setup = {
+            'deployment_storage': deployment_storage,
+            'deployment_storage_name': 'storage-name',
+            'deployment_storage_auth_value': None,
+            'function_app_config': {
+                'deployment': {'storage': {'authentication': {'type': 'SystemAssignedIdentity'}}}
+            }
+        }
 
-        _prepare_flex_migration_deployment_storage_identity(
-            cmd_mock, 'src-rg', 'src-app', 'SystemAssignedIdentity', None,
-            deployment_storage, 'storage-name')
+        changes = _prepare_flex_deployment_storage_identity(
+            cmd_mock, 'src-rg', 'src-app', storage_setup)
 
         assign_identity_mock.assert_called_once_with(
-            cmd_mock, 'src-rg', 'src-app', ['[system]'], 'Storage Blob Data Contributor',
-            None, 'storage-resource-id')
+            cmd_mock, 'src-rg', 'src-app', ['[system]'])
+        has_role_assignment_mock.assert_called_once_with(
+            cmd_mock.cli_ctx, deployment_storage, 'system-principal-id')
+        assign_role_mock.assert_called_once_with(
+            cmd_mock.cli_ctx, deployment_storage, 'system-principal-id')
+        self.assertTrue(changes['identity_added'])
 
     def test_in_place_rejects_target_name_arg(self):
         """--in-place with --name should raise MutuallyExclusiveArgumentError."""
