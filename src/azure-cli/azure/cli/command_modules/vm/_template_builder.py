@@ -306,7 +306,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
-        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, processor_mode=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
@@ -590,6 +590,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+    if processor_mode is not None:
+        vm_properties['hardwareProfile']['processorMode'] = processor_mode
 
     resiliency_profile = {}
     if zone_movement is not None:
@@ -1068,7 +1070,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
-                        v_cpus_per_core=None, os_disk_security_encryption_type=None,
+                        v_cpus_per_core=None, processor_mode=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
@@ -1379,6 +1381,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         virtual_machine_profile['storageProfile'] = storage_properties
 
     hardware_profile = {}
+    if processor_mode is not None:
+        hardware_profile['processorMode'] = processor_mode
+
     vm_size_properties = {}
     if v_cpus_available is not None:
         vm_size_properties['vCPUsAvailable'] = v_cpus_available

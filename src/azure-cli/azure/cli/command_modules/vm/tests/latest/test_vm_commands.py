@@ -2027,6 +2027,51 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_processor_mode_', location='westus')
+    def test_vm_processor_mode(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10),
+            'vmss': self.create_random_name('vmss-', 12),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest',
+            'size': 'Standard_D2als_v7'
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image {image} --size {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --public-ip-address "" --nsg-rule NONE',
+            checks=[
+                self.check('hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --processor-mode Opportunistic', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image {image} --vm-sku {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --instance-count 0 --lb-sku Standard',
+            checks=[
+                self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --processor-mode Opportunistic', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):
 
