@@ -5513,6 +5513,61 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete -g {rg} -n {table}')
         self.cmd('network route-table delete -g {rg} -n {table2}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_ecmp', location='eastasia')
+    def test_network_route_table_ecmp_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-ecmp',
+            'route': 'ecmp-route',
+            'ip1': '10.0.0.1',
+            'ip2': '10.0.0.2',
+            'ip3': '10.0.0.3',
+            'prefix': '10.1.0.0/16'
+        })
+
+        # create route table
+        self.cmd('network route-table create -n {table} -g {rg}')
+
+        # create route with VirtualApplianceEcmp next hop type and ECMP IP addresses
+        self.cmd('network route-table route create --address-prefix {prefix} -n {route} -g {rg} '
+                 '--next-hop-type VirtualApplianceEcmp --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # show route and verify ECMP next hop properties
+        self.cmd('network route-table route show -g {rg} --route-table-name {table} -n {route}',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # list routes and verify ECMP properties
+        self.cmd('network route-table route list -g {rg} --route-table-name {table}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].nextHopType', 'VirtualApplianceEcmp')
+                 ])
+
+        # update route to change ECMP IP addresses (add a third IP)
+        self.cmd('network route-table route update -g {rg} -n {route} --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2},{ip3}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 3),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('nextHop.nextHopIpAddresses[2]', '{ip3}')
+                 ])
+
+        self.cmd('network route-table route delete -g {rg} --route-table-name {table} -n {route}')
+        self.cmd('network route-table delete -g {rg} -n {table}')
+
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
