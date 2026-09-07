@@ -82,7 +82,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
         self._secret_file = os.path.join(config_dir, "service_principal_entries")
-        self._msal_http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
+        self._msal_http_cache_file = os.path.join(config_dir, "msal_http_cache.json")
 
         # We make _msal_app_instance an instance attribute, instead of a class attribute,
         # because MSAL apps can have different tenant IDs.
@@ -131,8 +131,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return cache
 
     def _load_msal_http_cache(self):
-        from .binary_cache import BinaryCache
-        http_cache = BinaryCache(self._msal_http_cache_file)
+        from .json_cache import JsonCache
+        http_cache = JsonCache(self._msal_http_cache_file)
         return http_cache
 
     @property
