@@ -337,9 +337,6 @@ examples:
   - name: Import an image without waiting for successful completion. Failures during import will not be reflected. Run `az acr repository show-tags` to confirm that import succeeded.
     text: >
         az acr import -n myregistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag --no-wait
-  - name: Import an image using a regional endpoint URI as the source.
-    text: >
-        az acr import -n myregistry --source sourceregistry.eastus.geo.azurecr.io/sourcerepository:sourcetag
 """
 
 helps['acr list'] = """
