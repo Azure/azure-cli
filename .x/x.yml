@@ -6,18 +6,17 @@ agents:
 skills:
   - auto_trigger_pr_validation
   - build_promoted_pr_body
-  - changed_test_files
   - codegen_execution_guidance
   - compare_issue_similarity
   - copilot_iteration_cap_reached
   - copilot_iteration_state
   - daily_pr_cap_reached
   - dispatch_live_test_workflow
-  - find_aaz_fork_prs_ready_for_promotion
   - find_copilot_fork_prs_ready_for_promotion
   - find_fork_prs_needing_ci
+  - find_generation_source_fork_prs_ready_for_promotion
   - find_in_flight_prs
-  - find_promoted_aaz_source_pr
+  - find_promoted_generation_source_pr
   - find_sensitive_redaction_dispute
   - find_stale_prs
   - follow_up_requirements
@@ -30,13 +29,12 @@ skills:
   - get_pr_check_runs
   - get_pr_check_summary
   - get_pr_file_changes
-  - get_pr_regression_coverage_summary
   - get_pr_review_skill_summary
   - get_profile
   - get_workflow_run
   - handle_sensitive_redaction_dispute
   - has_agent_reviewed_head
-  - infer_target_for_repo
+  - list_repository_directories
   - mark_pr_ready_for_review
   - post_bug_analysis
   - post_comment
@@ -44,7 +42,7 @@ skills:
   - post_pr_review
   - pr_format_guidance
   - pr_title_for
-  - promote_aaz_fork_pr
+  - promote_generation_source_fork_pr
   - promote_copilot_fork_pr
   - recall_repository_memory
   - remediate_sensitive_issue
@@ -60,10 +58,18 @@ skills:
   - safe_issue_view
   - select_triagable_issues_for_repo
   - similar_issue_candidates
-  - start_aaz_source_task
   - start_copilot_fork_task
-  - start_extension_tracker_task
+  - start_generation_source_task
+  - start_repository_handoff_task
   - synchronize_pull_request_feedback
   - synchronize_repository_feedback
   - update_pr_branch
-custom_skills: {}
+custom_skills:
+  changed_test_files: changed_test_files
+  find_aaz_fork_prs_ready_for_promotion: find_aaz_fork_prs_ready_for_promotion
+  find_promoted_aaz_source_pr: find_promoted_aaz_source_pr
+  get_pr_regression_coverage_summary: get_pr_regression_coverage_summary
+  infer_target_for_repo: infer_target_for_repo
+  promote_aaz_fork_pr: promote_aaz_fork_pr
+  start_aaz_source_task: start_aaz_source_task
+  start_extension_tracker_task: start_extension_tracker_task

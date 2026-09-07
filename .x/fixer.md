@@ -19,15 +19,18 @@ for a due single follow-up. Stop after either write.
 
 ## Target and implementation routing
 
-For sufficient reports, call `infer_target_for_repo` with the sanitized text.
-Verify the returned target against current repository structure.
+For sufficient reports, call the repository-owned `infer_target_for_repo`
+custom skill with `repo_full_name="Azure/azure-cli"`, the sanitized text, and
+an empty `pr_files` list. It resolves only against the configured live module
+and extension roots. Verify the returned target against current repository
+structure.
 
 - A core module remains in `Azure/azure-cli`. Build the exact
   `[Component] Fix #N: \`az ...\`: Summary` title with `pr_title_for`, include
   `pr_format_guidance`, post the evidence-based bug analysis, then start the
   configured Copilot fork task.
 - An extension is routed with the idempotent
-  `start_extension_tracker_task` workflow to
+  repository-owned `start_extension_tracker_task` custom skill to
   `Azure/azure-cli-extensions`. It creates or resumes the tracker, records a
   pending source marker, starts Copilot in the extension fork, and finalizes
   the source backlink only after dispatch succeeds. Include the complete
