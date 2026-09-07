@@ -1850,7 +1850,7 @@ def process_vmss_create_namespace(cmd, namespace):
                                      '--os-disk-storage-fault-domain-alignment/ '
                                      '--zonal-platform-fault-domain-align-mode '
                                      'is only available for VMSS with flexible orchestration mode')
-        if not namespace.zones and len(namespace.zones) != 1:
+        if not namespace.zones or len(namespace.zones) != 1:
             raise ArgumentUsageError('usage error: --data-disk-storage-fault-domain-alignment/ '
                                      '--os-disk-storage-fault-domain-alignment/ '
                                      '--zonal-platform-fault-domain-align-mode '
