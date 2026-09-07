@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an AuthorizationRule for the specified Event Hub. Creation/update of the AuthorizationRule will take a few seconds to take effect.
+
+    :example: EventHubAuthorizationRuleCreate
+        az eventhubs eventhub authorization-rule create --resource-group ArunMonocle --namespace-name sdk-Namespace-960 --eventhub-name sdk-EventHub-532 --authorization-rule-name sdk-Authrules-2513 --rights "[Listen,Send]"
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -160,7 +163,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

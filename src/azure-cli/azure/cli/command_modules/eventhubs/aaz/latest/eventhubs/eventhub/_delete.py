@@ -12,16 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "eventhubs eventhub delete"
+    "eventhubs eventhub delete",
 )
 class Delete(AAZCommand):
     """Delete an Event Hub from the specified Namespace and resource group.
+
+    :example: EventHubDelete
+        az eventhubs eventhub delete --resource-group ArunMonocle --namespace-name sdk-Namespace-5357 --event-hub-name sdk-EventHub-6547
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -134,7 +137,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
