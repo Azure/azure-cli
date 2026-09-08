@@ -9,10 +9,12 @@ import os
 import re
 import time
 import tempfile
+import zipfile
 import requests
 import datetime
 
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor, record_only
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
@@ -30,6 +32,23 @@ LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
+
+
+class StorageSasSignatureReplacer(RecordingProcessor):
+    def _replace(self, value):
+        return re.sub(r'(?i)(sig=)[^&"\'\s\\]+', r'\1fakeSasSignature', value)
+
+    def process_request(self, request):
+        request.uri = self._replace(request.uri)
+        if is_text_payload(request) and request.body:
+            body = request.body.decode('utf-8') if isinstance(request.body, bytes) else str(request.body)
+            request.body = self._replace(body)
+        return request
+
+    def process_response(self, response):
+        if is_text_payload(response) and response['body']['string']:
+            response['body']['string'] = self._replace(response['body']['string'])
+        return response
 
 
 class FunctionappACRScenarioTest(ScenarioTest):
@@ -1344,49 +1363,185 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         self.assertTrue(tgt_cors_config['supportCredentials'])
 
 
-class FunctionAppFlexMigrationInPlaceTest(LiveScenarioTest):
-    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+class FunctionAppFlexMigrationInPlaceTest(ScenarioTest):
+    _STAGE_RESOURCE_LOCATION = 'northcentralus'
+    _STAGE_SITE_LOCATION = 'North Central US (Stage)'
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[StorageSasSignatureReplacer()])
+
+    def _create_stage_consumption_app(self, resource_group, storage_account, app_name):
+        plan_name = self.create_random_name('inplace-plan', 24)
+        subscription_id = self.get_subscription_id()
+        if self.in_recording:
+            self.name_replacer.register_name_pair(
+                subscription_id, '00000000-0000-0000-0000-000000000000')
+        plan_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}'
+            .format(subscription_id, resource_group, plan_name)
+        )
+        plan_url = 'https://management.azure.com{}?api-version=2024-11-01'.format(plan_id)
+
+        self.kwargs.update({
+            'plan_url': plan_url,
+            'plan_body': json.dumps({
+                'location': self._STAGE_SITE_LOCATION,
+                'kind': 'linux',
+                'sku': {
+                    'name': 'Y1',
+                    'tier': 'Dynamic',
+                    'size': 'Y1',
+                    'family': 'Y',
+                    'capacity': 0
+                },
+                'properties': {
+                    'reserved': True
+                }
+            }),
+        })
+        self.cmd("rest --method put --url '{plan_url}' --body '{plan_body}'")
+
+        connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} --query connectionString -o tsv'
+            .format(resource_group, storage_account)
+        ).output.strip()
+        container_name = 'source-packages'
+        blob_name = '{}.zip'.format(app_name)
+        package_path = os.path.join(tempfile.gettempdir(), blob_name)
+        try:
+            with zipfile.ZipFile(package_path, 'w') as package:
+                package.writestr('host.json', '{"version":"2.0"}')
+                package.writestr('hello/function.json', json.dumps({
+                    'bindings': [
+                        {
+                            'authLevel': 'anonymous',
+                            'type': 'httpTrigger',
+                            'direction': 'in',
+                            'name': 'req',
+                            'methods': ['get']
+                        },
+                        {
+                            'type': 'http',
+                            'direction': 'out',
+                            'name': 'res'
+                        }
+                    ]
+                }))
+                package.writestr(
+                    'hello/index.js',
+                    "module.exports = async function (context) { context.res = { body: 'Hello, CV1!' }; };"
+                )
+
+            self.kwargs.update({
+                'connection_string': connection_string,
+                'container_name': container_name,
+                'blob_name': blob_name,
+                'package_path': package_path,
+                'sas_expiry': (
+                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)
+                ).strftime('%Y-%m-%dT%H:%MZ'),
+            })
+            self.cmd(
+                'storage container create --name {container_name} '
+                '--connection-string "{connection_string}"'
+            )
+            if self.in_recording:
+                self.disable_recording = True
+                try:
+                    self.cmd(
+                        'storage blob upload --container-name {container_name} --name {blob_name} '
+                        '--file "{package_path}" --connection-string "{connection_string}"'
+                    )
+                finally:
+                    self.disable_recording = False
+            package_url = self.cmd(
+                'storage blob generate-sas --container-name {container_name} --name {blob_name} '
+                '--permissions r --expiry {sas_expiry} --full-uri '
+                '--connection-string "{connection_string}" -o tsv'
+            ).output.strip()
+        finally:
+            if os.path.exists(package_path):
+                os.remove(package_path)
+
+        site_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}'
+            .format(subscription_id, resource_group, app_name)
+        )
+        self.kwargs.update({
+            'site_url': 'https://management.azure.com{}?api-version=2024-11-01'.format(site_id),
+            'site_body': json.dumps({
+                'location': self._STAGE_SITE_LOCATION,
+                'kind': 'functionapp,linux',
+                'properties': {
+                    'serverFarmId': plan_id,
+                    'reserved': True,
+                    'httpsOnly': True,
+                    'siteConfig': {
+                        'linuxFxVersion': 'Node|22',
+                        'appSettings': [
+                            {'name': 'AzureWebJobsStorage', 'value': connection_string},
+                            {'name': 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', 'value': connection_string},
+                            {'name': 'WEBSITE_CONTENTSHARE', 'value': app_name},
+                            {'name': 'FUNCTIONS_EXTENSION_VERSION', 'value': '~4'},
+                            {'name': 'FUNCTIONS_WORKER_RUNTIME', 'value': 'node'},
+                            {'name': 'WEBSITE_RUN_FROM_PACKAGE', 'value': package_url},
+                        ]
+                    }
+                }
+            }),
+        })
+        self.cmd("rest --method put --url '{site_url}' --body '{site_body}'")
+
+    @ResourceGroupPreparer(location=_STAGE_RESOURCE_LOCATION)
     @StorageAccountPreparer()
     def test_functionapp_flex_migration_in_place(self, resource_group, storage_account):
         """In-place upgrade: CV1 Linux Consumption → Flex Consumption (same site, same name)."""
         src_name = self.create_random_name('inplace-func', 24)
 
-        # Create a Linux Consumption function app (CV1)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                 .format(resource_group, src_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        self._create_stage_consumption_app(resource_group, storage_account, src_name)
 
         # Verify it's on Dynamic (Consumption) SKU before upgrade
         src_app = self.cmd('functionapp show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
         self.assertEqual(src_app['kind'], 'functionapp,linux')
 
         # Run in-place upgrade
-        result = self.cmd(
-            'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place'
-            .format(resource_group, src_name)
-        ).get_output_in_json()
+        self.cmd('storage container create -g {} -n defaultcontainer --account-name {}'
+                 .format(resource_group, storage_account))
+        with mock.patch(
+                'azure.cli.command_modules.appservice.custom.list_flexconsumption_locations',
+                return_value=[{'name': 'northcentralusstage'}]), mock.patch(
+                    'azure.cli.command_modules.appservice.custom.list_functions',
+                    return_value=[]):
+            result = self.cmd(
+                'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place '
+                '--deployment-storage-container-name defaultcontainer'
+                .format(resource_group, src_name)
+            ).get_output_in_json()
 
         # Verify the app is now Flex Consumption
         self.assertEqual(result['name'], src_name)
-        upgraded_app = self.cmd('functionapp show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
-        # After upgrade, the site should have Flex properties
-        self.assertIsNotNone(upgraded_app.get('properties', {}).get('functionAppConfig'))
+        self.assertIsNotNone(result.get('functionAppConfig'))
 
-    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(location=_STAGE_RESOURCE_LOCATION)
     @StorageAccountPreparer()
     def test_functionapp_flex_migration_in_place_with_deployment_storage(self, resource_group, storage_account):
         """In-place upgrade with explicit deployment storage arguments."""
         src_name = self.create_random_name('inplace-ds', 24)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                 .format(resource_group, src_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        self._create_stage_consumption_app(resource_group, storage_account, src_name)
 
         self.cmd('storage container create -g {} -n mycontainer --account-name {}'
                  .format(resource_group, storage_account))
-        result = self.cmd(
-            'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place '
-            '--deployment-storage-name {} --deployment-storage-container-name mycontainer'
-            .format(resource_group, src_name, storage_account)
-        ).get_output_in_json()
+        with mock.patch(
+                'azure.cli.command_modules.appservice.custom.list_flexconsumption_locations',
+                return_value=[{'name': 'northcentralusstage'}]), mock.patch(
+                    'azure.cli.command_modules.appservice.custom.list_functions',
+                    return_value=[]):
+            result = self.cmd(
+                'functionapp flex-migration start --source-resource-group {} --source-name {} --in-place '
+                '--deployment-storage-name {} --deployment-storage-container-name mycontainer'
+                .format(resource_group, src_name, storage_account)
+            ).get_output_in_json()
 
         self.assertEqual(result['name'], src_name)
 
