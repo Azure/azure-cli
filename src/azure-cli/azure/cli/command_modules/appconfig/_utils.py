@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.appconfiguration import AzureAppConfigurationClient
+from azure.appconfiguration import AzureAppConfigurationClient, FeatureFlagClient
 from azure.core.exceptions import HttpResponseError
 from azure.core.credentials import AzureKeyCredential
 from azure.cli.core.azclierror import (ValidationError,
@@ -177,15 +177,14 @@ class AuthHeaderRequestsTransport(RequestsTransport):  # pylint: disable=too-few
         return super().send(request, **kwargs)
 
 
-def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
-    azconfig_client = None
+def _get_data_plane_retry_policy():
     # Configure retries with exponential backoff (factor=0.5) capped at 30 seconds,
     # with an overall retry timeout of 100 seconds.
     # We set retry count to a high number so the retry policy can continue retrying until
     # the timeout is reached. The actual retry timing may vary, for example when the service
     # returns a Retry-After header and the policy uses that delay instead of the exponential backoff.
     retry_count = 9999
-    retry_policy = RetryPolicy(
+    return RetryPolicy(
         retry_total=retry_count,
         retry_connect=retry_count,
         retry_read=retry_count,
@@ -194,6 +193,36 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
         retry_backoff_max=30,
         timeout=100  # seconds
     )
+
+
+def resolve_login_credential(cmd, name, endpoint):
+    if not endpoint:
+        try:
+            if name:
+                _, endpoint = resolve_store_metadata(cmd, name)
+            else:
+                raise RequiredArgumentMissingError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
+        except Exception as ex:
+            raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
+
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.cloud import get_active_cloud
+    from ._credential import AppConfigurationCliCredential
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    cred, _, _ = profile.get_login_credentials()
+
+    current_cloud = get_active_cloud(cmd.cli_ctx)
+    if hasattr(current_cloud.endpoints, "appconfig_auth_token_audience"):
+        token_audience = current_cloud.endpoints.appconfig_auth_token_audience
+    else:
+        token_audience = endpoint
+
+    return AppConfigurationCliCredential(cred, token_audience), endpoint
+
+
+def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
+    azconfig_client = None
+    retry_policy = _get_data_plane_retry_policy()
 
     if auth_mode == "anonymous":
         try:
@@ -217,30 +246,9 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
     if auth_mode == "login":
-        if not endpoint:
-            try:
-                if name:
-                    _, endpoint = resolve_store_metadata(cmd, name)
-                else:
-                    raise RequiredArgumentMissingError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
-            except Exception as ex:
-                raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
-
-        from azure.cli.core._profile import Profile
-        from azure.cli.core.cloud import get_active_cloud
-        from ._credential import AppConfigurationCliCredential
-        profile = Profile(cli_ctx=cmd.cli_ctx)
-        cred, _, _ = profile.get_login_credentials()
-
-        current_cloud = get_active_cloud(cmd.cli_ctx)
-        token_audience = None
-        if hasattr(current_cloud.endpoints, "appconfig_auth_token_audience"):
-            token_audience = current_cloud.endpoints.appconfig_auth_token_audience
-        else:
-            token_audience = endpoint
-
+        credential, endpoint = resolve_login_credential(cmd, name, endpoint)
         try:
-            azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred, token_audience),
+            azconfig_client = AzureAppConfigurationClient(credential=credential,
                                                           base_url=endpoint,
                                                           user_agent=HttpHeaders.USER_AGENT,
                                                           retry_policy=retry_policy)
@@ -248,6 +256,44 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
     return azconfig_client
+
+
+def get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint):
+    feature_flag_client = None
+    retry_policy = _get_data_plane_retry_policy()
+
+    if auth_mode == "anonymous":
+        try:
+            feature_flag_client = FeatureFlagClient(
+                base_url=endpoint,
+                credential=AzureKeyCredential(key=""),
+                id_credential="",
+                user_agent=HttpHeaders.USER_AGENT,
+                transport=AuthHeaderRequestsTransport(),
+                retry_policy=retry_policy)
+        except (ValueError, TypeError) as ex:
+            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
+
+    if auth_mode == "key":
+        connection_string = resolve_connection_string(cmd, name, connection_string)
+        try:
+            feature_flag_client = FeatureFlagClient.from_connection_string(connection_string=connection_string,
+                                                                           user_agent=HttpHeaders.USER_AGENT,
+                                                                           retry_policy=retry_policy)
+        except ValueError as ex:
+            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
+
+    if auth_mode == "login":
+        credential, endpoint = resolve_login_credential(cmd, name, endpoint)
+        try:
+            feature_flag_client = FeatureFlagClient(credential=credential,
+                                                    base_url=endpoint,
+                                                    user_agent=HttpHeaders.USER_AGENT,
+                                                    retry_policy=retry_policy)
+        except (ValueError, TypeError) as ex:
+            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
+
+    return feature_flag_client
 
 
 def is_json_content_type(content_type):

@@ -34,6 +34,10 @@ def featureflag_entry_format(result):
     return _output_format(result, _featureflag_entry_format_group)
 
 
+def enhanced_featureflag_entry_format(result):
+    return _output_format(result, _enhanced_featureflag_entry_format_group)
+
+
 def featurefilter_entry_format(result):
     return _output_format(result, _featurefilter_entry_format_group)
 
@@ -143,6 +147,22 @@ def _featureflag_entry_format_group(item):
         ('DESCRIPTION', _get_value(item, 'description')),
         ('LAST MODIFIED', _format_datetime(_get_value_by_names(item, ['lastModified', 'last_modified']))),
         ('CONDITIONS', _get_value(item, 'conditions'))
+    ])
+
+
+def _enhanced_featureflag_entry_format_group(item):
+
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('ENABLED', _get_value(item, 'enabled')),
+        ('LABEL', _get_value(item, 'label')),
+        ('DESCRIPTION', _get_value(item, 'description')),
+        ('LAST MODIFIED', _format_datetime(_get_value_by_names(item, ['lastModified', 'last_modified']))),
+        ('TAGS', _get_value(item, 'tags')),
+        ('CONDITIONS', _get_value(item, 'conditions')),
+        ('VARIANTS', _get_value(item, 'variants')),
+        ('ALLOCATION', _get_value(item, 'allocation')),
+        ('TELEMETRY', _get_value(item, 'telemetry'))
     ])
 
 
