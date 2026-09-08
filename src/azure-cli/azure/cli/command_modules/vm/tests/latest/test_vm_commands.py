@@ -11897,15 +11897,15 @@ class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
     """
 
     @live_only()
-    @AllowLargeResponse(size_kb=999999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zonal_aligned_fd_', location='eastus2')
-    def test_vmss_zonal_aligned_fault_domains(self, resource_group):
+    def test_vmss_zonal_aligned_fault_domains(self, resource_group, resource_group_location):
         # NOTE: This feature requires the AFEC `Microsoft.Compute/ZonalAlignedMultipleFDs` to be
         # registered on the test subscription. Two platform constraints make this mandatory:
         #   1. Without the AFEC, Flex VMSS cannot combine `--zones` with `--platform-fault-domain-count > 1`.
         #   2. The zonal alignment mode is rejected on a single-zone single-FD VMSS or a regional VMSS.
-        # The test runs live-only since playback recordings would also fail without the AFEC.
+        # Keep this live-only until the AFEC is available to capture a successful recording.
         self.kwargs.update({
+            'loc': resource_group_location,
             'vmss_aligned': self.create_random_name(prefix='vmss', length=15),
             'vmss_best_effort': self.create_random_name(prefix='vmss', length=15),
             'vm': self.create_random_name(prefix='vm', length=15),
@@ -11916,12 +11916,12 @@ class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
         # FDC must be > 1 and zones must be a single zone for the alignment mode to be valid;
         # this combination requires the ZonalAlignedMultipleFDs AFEC noted above.
         self.cmd(
-            'vmss create -g {rg} -n {vmss_aligned} --orchestration-mode Flexible '
+            'vmss create -g {rg} -n {vmss_aligned} --location {loc} --orchestration-mode Flexible '
             '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
-            '--vm-sku Standard_D2s_v5 --instance-count 0 '
-            '--image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--vm-sku Standard_D2s_v3 --instance-count 0 --public-ip-address "" '
+            '--image Ubuntu2204 '
             '--admin-username clitest --generate-ssh-keys '
-            '--zonal-platform-fault-domain-align-mode Aligned',
+            '--zonal-fault-domain-align-mode Aligned',
             checks=[
                 self.check('vmss.orchestrationMode', 'Flexible'),
                 self.check('vmss.platformFaultDomainCount', 3),
@@ -11929,17 +11929,24 @@ class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
                 self.check('vmss.zones', ['1']),
             ])
 
+        self.cmd('vmss show -g {rg} -n {vmss_aligned}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('zonalPlatformFaultDomainAlignMode', 'Aligned'),
+            self.check('zones', ['1']),
+        ])
+
         # 2. BestEffortAligned VMSS-level mode + per-disk overrides on OS and data disks
         self.cmd(
-            'vmss create -g {rg} -n {vmss_best_effort} --orchestration-mode Flexible '
+            'vmss create -g {rg} -n {vmss_best_effort} --location {loc} --orchestration-mode Flexible '
             '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
-            '--vm-sku Standard_D2s_v5 --instance-count 0 '
-            '--image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--vm-sku Standard_D2s_v3 --instance-count 0 --public-ip-address "" '
+            '--image Ubuntu2204 '
             '--data-disk-sizes-gb 10 '
             '--admin-username clitest --generate-ssh-keys '
-            '--zonal-platform-fault-domain-align-mode BestEffortAligned '
-            '--os-disk-storage-fault-domain-alignment Aligned '
-            '--data-disk-storage-fault-domain-alignment BestEffortAligned',
+            '--zonal-fault-domain-align-mode BestEffortAligned '
+            '--os-disk-storage-fd-alignment Aligned '
+            '--data-disk-storage-fd-alignment BestEffortAligned',
             checks=[
                 self.check('vmss.zonalPlatformFaultDomainAlignMode', 'BestEffortAligned'),
                 self.check(
@@ -11950,19 +11957,37 @@ class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
                     'BestEffortAligned'),
             ])
 
+        self.cmd('vmss show -g {rg} -n {vmss_best_effort}', checks=[
+            self.check('zonalPlatformFaultDomainAlignMode', 'BestEffortAligned'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.storageFaultDomainAlignment', 'Aligned'),
+            self.check(
+                'virtualMachineProfile.storageProfile.dataDisks[0].storageFaultDomainAlignment',
+                'BestEffortAligned'),
+        ])
+
         # 3. Add a VM that joins the Flex VMSS, with per-disk alignment overrides
         self.cmd(
-            'vm create -g {rg} -n {vm} --vmss {vmss_best_effort} --platform-fault-domain 0 '
-            '--image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v5 '
+            'vm create -g {rg} -n {vm} --location {loc} '
+            '--vmss {vmss_best_effort} --platform-fault-domain 0 '
+            '--image Ubuntu2204 --size Standard_D2s_v3 '
             '--admin-username clitest --generate-ssh-keys --nsg-rule None '
             '--data-disk-sizes-gb 10 '
-            '--os-disk-storage-fault-domain-alignment Aligned '
-            '--data-disk-storage-fault-domain-alignment BestEffortAligned')
+            '--os-disk-storage-fd-alignment Aligned '
+            '--data-disk-storage-fd-alignment BestEffortAligned')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('platformFaultDomain', 0),
             self.check('storageProfile.osDisk.storageFaultDomainAlignment', 'Aligned'),
             self.check('storageProfile.dataDisks[0].storageFaultDomainAlignment', 'BestEffortAligned'),
+        ])
+
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('length(instanceView.disks)', 2),
+            self.check('length(instanceView.disks[?storageAlignmentStatus != `null`])', 2),
+            self.check(
+                'length(instanceView.disks[?storageAlignmentStatus != `Aligned` && '
+                'storageAlignmentStatus != `Unaligned`])',
+                0),
         ])
 
         # 4. VMSS-level mode is updatable via generic --set
@@ -11971,14 +11996,18 @@ class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
             '--set zonalPlatformFaultDomainAlignMode=Aligned',
             checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Aligned')])
 
+        self.cmd(
+            'vmss show -g {rg} -n {vmss_best_effort}',
+            checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Aligned')])
+
         # 5. Negative: per-disk alignment requires joining a Flex VMSS via --vmss
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaisesRegex(ArgumentUsageError, 'Flex'):
             self.cmd(
-                'vm create -g {rg} -n {vm_neg} '
-                '--image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v5 '
+                'vm create -g {rg} -n {vm_neg} --location {loc} '
+                '--image Ubuntu2204 --size Standard_D2s_v3 '
                 '--admin-username clitest --generate-ssh-keys --nsg-rule None '
-                '--os-disk-storage-fault-domain-alignment Aligned')
+                '--os-disk-storage-fd-alignment Aligned')
 
 
 class VMCrossTenantUpdateScenarioTest(ScenarioTest):
