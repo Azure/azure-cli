@@ -10,7 +10,7 @@ from azure.cli.command_modules.appconfig._client_factory import cf_configstore, 
 from azure.cli.core.commands.progress import IndeterminateStandardOut
 from azure.cli.core.util import user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -48,6 +48,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                        tags=None,
                        assign_identity=None,
                        enable_public_network=None,
+                       public_network_access=None,
                        disable_local_auth=None,
                        retention_days=None,
                        enable_purge_protection=None,
@@ -62,7 +63,10 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
-    public_network_access = None
+    if public_network_access is not None and enable_public_network is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+
     if enable_public_network is not None:
         public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 
@@ -193,6 +197,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                        encryption_key_version=None,
                        identity_client_id=None,
                        enable_public_network=None,
+                       public_network_access=None,
                        disable_local_auth=None,
                        enable_purge_protection=None,
                        arm_auth_mode=None,
@@ -204,7 +209,10 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
 
-    public_network_access = None
+    if public_network_access is not None and enable_public_network is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+
     if enable_public_network is not None:
         public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 

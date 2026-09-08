@@ -22,6 +22,12 @@ def transform_assignment_list(result):
                          ('Scope', r['scope'])]) for r in result]
 
 
+def transform_deny_assignment_list(result):
+    return [OrderedDict([('Name', r.get('denyAssignmentName', '')),
+                         ('Id', r.get('name', '')),
+                         ('Scope', r.get('scope', ''))]) for r in result]
+
+
 def get_graph_object_transformer(object_type):
     selected_keys_for_type = {
         'app': ('displayName', 'id', 'appId', 'createdDateTime'),
@@ -77,6 +83,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_role_assignment', validator=process_assignment_namespace)
         g.custom_command('update', 'update_role_assignment')
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
+
+    with self.command_group('role deny-assignment') as g:
+        g.custom_command('list', 'list_deny_assignments', table_transformer=transform_deny_assignment_list)
+        g.custom_show_command('show', 'show_deny_assignment')
+        g.custom_command('create', 'create_deny_assignment')
+        g.custom_command('delete', 'delete_deny_assignment', confirmation=True)
 
     with self.command_group('ad app', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:
         g.custom_command('create', 'create_application')

@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-03-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-07-01"],
         ]
     }
 
@@ -193,7 +193,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-03-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -296,6 +296,10 @@ class Create(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.public_ip_addresses = AAZListType(
+                serialized_name="publicIPAddresses",
+                flags={"read_only": True},
+            )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
@@ -341,9 +345,11 @@ class Create(AAZCommand):
 
             front_end_ip_configuration = cls._schema_on_200_201.properties.front_end_ip_configuration
             front_end_ip_configuration.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
 
-            _element = cls._schema_on_200_201.properties.front_end_ip_configuration.Element
-            _element.id = AAZStrType()
+            public_ip_addresses = cls._schema_on_200_201.properties.public_ip_addresses
+            public_ip_addresses.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -353,6 +359,21 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_common_sub_resource_read = None
+
+    @classmethod
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
+            return
+
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
+
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Create"]

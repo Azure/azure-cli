@@ -134,16 +134,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         help='Enable or disable Auto scale IOPS configuration for both the source and the newly provisioned replica server to enable faster provisioning.'
     )
 
-    storage_redundancy_arg_type = CLIArgumentType(
-        arg_type=get_enum_type(['LocalRedundancy', 'ZoneRedundancy']),
-        options_list=['--storage-redundancy'],
-        help='Enable local redundancy or zone redundancy. Zone redundancy only supports Business Critical tier.'
-    )
-
     maintenance_policy_patch_strategy_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Regular', 'VirtualCanary']),
         options_list=['--maintenance-policy-patch-strategy', '--patch-strategy'],
         help='The patch strategy of maintenance policy. Accepted values: Regular, VirtualCanary. Default value is Regular.'
+    )
+
+    maintenance_batch_arg_type = CLIArgumentType(
+        arg_type=get_enum_type(['Default', 'Batch1', 'Batch2']),
+        options_list=['--maintenance-batch'],
+        help='The batch of the custom-managed maintenance window. Accepted values: Default, Batch1, Batch2. '
+             'Only valid with an enabled --maintenance-window; if omitted, the existing batch is preserved.'
     )
 
     yes_arg_type = CLIArgumentType(
@@ -372,7 +373,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('public_access', arg_type=public_access_create_arg_type)
         c.argument('vnet', arg_type=vnet_arg_type)
         c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
@@ -431,7 +431,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
         c.argument('zone', arg_type=zone_arg_type)
         c.argument('tags', tags_type)
@@ -464,7 +463,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
         c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
         c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
@@ -473,6 +471,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
         c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
                    help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
+        c.argument('maintenance_batch', arg_type=maintenance_batch_arg_type)
         c.argument('tags', tags_type)
         c.argument('tier', arg_type=tier_arg_type)
         c.argument('sku_name', arg_type=sku_name_arg_type)
@@ -530,6 +529,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server parameter set-batch') as c:
         c.argument('configuration_list', action=AddArgs, nargs='*', options_list=['--args'], required=True, help='List of the configuration key-value pair.')
         c.argument('source', options_list=['--source'], required=False, help='Source of the configuration.')
+
+    with self.argument_context('mysql flexible-server parameter list') as c:
+        c.argument('tags', help='The tags of the server configuration.')
+        c.argument('keyword', help='The keyword of the server configuration.')
+        c.argument('page', help='The page of the server configuration.')
+        c.argument('page_size', help='The page size of the server configuration.')
 
     # firewall-rule
     for scope in ['create', 'delete', 'list', 'show', 'update']:
@@ -594,7 +599,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('sku_name', arg_type=sku_name_arg_type)
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
         c.argument('faster_provisioning', arg_type=faster_provisioning_arg_type)
         c.argument('database_port', arg_type=database_port_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
@@ -736,3 +740,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             elif scope == "check-name-availability":
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                            help='Name of the migration.')
+
+    with self.argument_context('mysql flexible-server mirroring enable') as c:
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+        c.argument('identity_resource_id', options_list=['--identity-resource-id'], help='Resource ID of the User Assigned Managed Identity (UAMI) used for Fabric Mirroring. Example: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity-name}')
+
+    with self.argument_context('mysql flexible-server mirroring disable') as c:
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)

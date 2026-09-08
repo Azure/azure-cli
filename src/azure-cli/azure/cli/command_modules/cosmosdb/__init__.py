@@ -3,17 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.events import EVENT_INVOKER_PRE_PARSE_ARGS
-
 from azure.cli.core import AzCommandsLoader
 
 from azure.cli.command_modules.cosmosdb._help import helps  # pylint: disable=unused-import
-
-
-def _documentdb_deprecate(_, args):
-    if args[0] == 'documentdb':
-        from azure.cli.core.util import CLIError
-        raise CLIError('All documentdb commands have been renamed to cosmosdb')
 
 
 class CosmosDbCommandsLoader(AzCommandsLoader):
@@ -26,8 +18,6 @@ class CosmosDbCommandsLoader(AzCommandsLoader):
         cosmosdb_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.cosmosdb.custom#{}',
             client_factory=cf_cosmosdb_document)
-
-        cli_ctx.register_event(EVENT_INVOKER_PRE_PARSE_ARGS, _documentdb_deprecate)
 
         super().__init__(cli_ctx=cli_ctx,
                          resource_type=ResourceType.MGMT_COSMOSDB,

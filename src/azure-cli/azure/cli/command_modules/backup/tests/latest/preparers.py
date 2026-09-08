@@ -7,8 +7,11 @@ import json
 import os
 from datetime import datetime, timedelta
 
-from azure.cli.testsdk import CliTestError, ResourceGroupPreparer
+from azure.cli.testsdk import CliTestError
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, KeyVaultPreparer
+from azure.cli.testsdk.preparers import ResourceGroupPreparer as _CliResourceGroupPreparer
+from azure.cli.testsdk.preparers import StorageAccountPreparer as _CliStorageAccountPreparer
+from azure.cli.testsdk.utilities import StorageAccountKeyReplacer
 from azure.cli.testsdk.base import execute
 # pylint: disable=line-too-long
 
@@ -16,36 +19,96 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-# Temporary Resource Group Preparer for testing while we update the RecoveryServices SDK to deal with new Soft Delete rules
-class RGPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.rg',
-                 parameter_name='resource_group',
-                 parameter_name_for_location='resource_group_location', location='westus',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
-                 dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=75, key='rg', subscription=None, additional_tags=None):
-        if ' ' in name_prefix:
-            raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
-        super().__init__(name_prefix, random_name_length)
-        from azure.cli.core.mock import DummyCli
-        self.cli_ctx = DummyCli()
-        self.location = location
-        self.subscription = subscription
-        self.parameter_name = parameter_name
-        self.parameter_name_for_location = parameter_name_for_location
-        self.key = key
-        self.additional_tags = additional_tags
- 
-        self.dev_setting_name = os.environ.get(dev_setting_name, None)
-        self.dev_setting_location = os.environ.get(dev_setting_location, location)
+# Tags required by the "BCDR_StorageAccount_RequiredTags" Azure Policy (deny effect,
+# assigned at the management-group scope). A storage account that allows shared-key
+# access is rejected unless it carries all of these tags. AFS backup needs shared-key
+# / local auth enabled on the account, so DisableLocalAuth must be present and 'false'.
+BACKUP_SA_REQUIRED_TAGS = {
+    'DisableLocalAuth': 'false',
+    'Reason': 'CLITest',
+    'ETA': '12-2099',
+    'Owner': 'clitest',
+}
+
+
+class StorageAccountPreparer(_CliStorageAccountPreparer):
+    """Storage account preparer for backup tests.
+
+    Creates the account with the tags required by the BCDR storage-account tag
+    policy (a management-group deny policy rejects an account that allows
+    shared-key access unless it carries these tags) and with a supported account
+    kind (StorageV2 - the legacy GPv1 'Storage' kind is no longer allowed for new
+    accounts). Drop-in replacement for the testsdk preparer.
+    """
+    def __init__(self, *args, kind='StorageV2', tags=None, **kwargs):
+        super().__init__(*args, kind=kind, **kwargs)
+        self.tags = dict(BACKUP_SA_REQUIRED_TAGS) if tags is None else tags
 
     def create_resource(self, name, **kwargs):
-        cmd = 'az group create --location {} --name {}'.format(self.location, name)
-        execute(self.cli_ctx, cmd)
-        return {self.parameter_name: name, self.parameter_name_for_location: self.location}
- 
+        group = self._get_resource_group(**kwargs)
+        if not self.dev_setting_name:
+            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
+            template += ' --allow-blob-public-access {}'.format('true' if self.allow_blob_public_access else 'false')
+            if self.allow_shared_key_access is not None:
+                template += ' --allow-shared-key-access {}'.format('true' if self.allow_shared_key_access else 'false')
+            if self.hns:
+                template += ' --hns'
+            command = template.format(name, group, self.location, self.sku, self.kind)
+            if self.tags:
+                command += ' --tags ' + ' '.join('{}={}'.format(k, v) for k, v in self.tags.items())
+            self.live_only_execute(self.cli_ctx, command)
+        else:
+            name = self.dev_setting_name
+        try:
+            account_key = self.live_only_execute(
+                self.cli_ctx,
+                'storage account keys list -n {} -g {} --query "[0].value" -otsv'.format(name, group)).output
+        except AttributeError:  # live_only_execute returns None when playing back a recording
+            account_key = None
+        self.test_class_instance.kwargs[self.key] = name
+        return {self.parameter_name: name,
+                self.parameter_name + '_info': (name, account_key or StorageAccountKeyReplacer.KEY_REPLACEMENT)}
+
+
+# The single custom resource group preparer for backup tests. Subclasses the CLI
+# ResourceGroupPreparer and makes teardown resilient to the CanNotDelete lock that
+# Azure Backup places on a protected AFS storage account: Backup releases the lock
+# asynchronously, so `az group delete` can race it and fail with ScopeLocked, so we
+# clear any locks in the group and retry the delete a bounded number of times.
+class ResourceGroupPreparer(_CliResourceGroupPreparer):
+    _MAX_DELETE_ATTEMPTS = 6
+    _DELETE_RETRY_WAIT = 15
+
     def remove_resource(self, name, **kwargs):
-        pass
+        if self.dev_setting_name:
+            return
+
+        import time
+        from azure.core.exceptions import HttpResponseError
+
+        sub = ' --subscription {}'.format(self.subscription) if self.subscription else ''
+        for attempt in range(self._MAX_DELETE_ATTEMPTS):
+            self._remove_locks(name, sub)
+            try:
+                self.live_only_execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait{}'.format(name, sub))
+                return
+            except HttpResponseError as ex:
+                if 'ScopeLocked' not in str(ex) or attempt == self._MAX_DELETE_ATTEMPTS - 1:
+                    raise
+                time.sleep(self._DELETE_RETRY_WAIT)
+
+    def _remove_locks(self, name, sub):
+        from azure.core.exceptions import HttpResponseError
+        try:
+            result = self.live_only_execute(self.cli_ctx, 'az lock list -g {}{} -o json'.format(name, sub))
+            locks = result.get_output_in_json() if result else []
+        except (HttpResponseError, AttributeError):
+            return
+        for lock in locks or []:
+            try:
+                self.live_only_execute(self.cli_ctx, 'az lock delete --ids {}'.format(lock['id']))
+            except (HttpResponseError, AttributeError):
+                pass
 
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes

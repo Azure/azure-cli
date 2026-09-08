@@ -307,7 +307,8 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].deleted', True))
 
-        time.sleep(30)
+        if self.is_live:
+            time.sleep(30)
         version = self.oauth_cmd('storage container list --include-deleted --query [0].version -o tsv --account-name {}'
                                  .format(storage_account)).output.strip('\n')
         self.oauth_cmd('storage container restore -n {} --deleted-version {} --account-name {} '.format(

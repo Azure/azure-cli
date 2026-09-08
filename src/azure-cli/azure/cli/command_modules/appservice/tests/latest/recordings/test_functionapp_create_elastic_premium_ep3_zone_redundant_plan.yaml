@@ -5,7 +5,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - functionapp plan create
       Connection:
@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --sku --zone-redundant
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_elastic_premium_ep3_zone_redundant_plan","date":"2025-10-24T20:43:41Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_elastic_premium_ep3_zone_redundant_plan","date":"2026-05-15T18:20:51Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '412'
+      - '405'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Oct 2025 20:43:45 GMT
+      - Fri, 15 May 2026 18:20:59 GMT
       expires:
       - '-1'
       pragma:
@@ -41,48 +41,47 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 75EA64BC39954670B6E4213DF8A4B8BF Ref B: MWH011020808042 Ref C: 2025-10-24T20:43:45Z'
+      - 'Ref A: 6271B950BBF34E3690EA22BFCC2D4D8B Ref B: SN4AA2022305029 Ref C: 2026-05-15T18:21:00Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "francecentral", "sku": {"name": "EP3", "tier": "ElasticPremium",
-      "capacity": 3}, "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant":
-      true}}'
+    body: '{"location": "eastus", "sku": {"tier": "ElasticPremium", "name": "EP3",
+      "capacity": 3}, "properties": {"zoneRedundant": true}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - functionapp plan create
       Connection:
       - keep-alive
       Content-Length:
-      - '176'
+      - '126'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --sku --zone-redundant
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.14.2 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002?api-version=2025-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002","name":"epplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"francecentral","properties":{"serverFarmId":72567,"name":"epplan000002","sku":{"name":"EP3","tier":"ElasticPremium","size":"EP3","family":"EP","capacity":3},"workerSize":"D3","workerSizeId":5,"workerTierName":null,"numberOfWorkers":3,"currentWorkerSize":"D3","currentWorkerSizeId":5,"currentNumberOfWorkers":3,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2819c8c8-a774-4ac9-bf91-8bb8f1f47ece","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
-        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":3,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_72567","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":true,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":3,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-10-24T20:43:50.82","asyncScalingEnabled":false,"isCustomMode":null,"powerState":null,"eligibleLogCategories":null},"sku":{"name":"EP3","tier":"ElasticPremium","size":"EP3","family":"EP","capacity":3}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002","name":"epplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"eastus","properties":{"serverFarmId":99137,"name":"epplan000002","sku":{"name":"EP3","tier":"ElasticPremium","size":"EP3","family":"EP","capacity":3},"workerSize":"D3","workerSizeId":5,"workerTierName":null,"numberOfWorkers":3,"currentWorkerSize":"D3","currentWorkerSizeId":5,"currentNumberOfWorkers":3,"status":"Ready","webSpace":"clitest.rg000001-EastUSwebspace","subscription":"e160ca65-836f-4be6-8ef5-e6234b90de87","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":3,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-blu-283_99137","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":true,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":3,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2026-05-15T18:21:11.5133333","asyncScalingEnabled":false,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"EP3","tier":"ElasticPremium","size":"EP3","family":"EP","capacity":3}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1793'
+      - '1781'
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 20:43:53 GMT
+      - Fri, 15 May 2026 18:21:13 GMT
       etag:
-      - '"1DC4526E7F8784B"'
+      - 1DCE4979C7755D5
       expires:
       - '-1'
       pragma:
@@ -96,13 +95,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=bd30bf6a-f200-4cfd-bcd6-a339b0d9dbe8/westus2/47bc07cb-b0fb-45fc-b9f3-93b192a568f5
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f338340e-ef13-48e1-aa76-6cde16f7c55f/eastus/7fa50b80-18e4-45c3-829b-9e22ff251f96
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
       - '800'
       x-msedge-ref:
-      - 'Ref A: 26FA6A5BCD50434D9E2BCE1F4B0FD909 Ref B: CO6AA3150220039 Ref C: 2025-10-24T20:43:45Z'
+      - 'Ref A: 00B939E00E50463E8DD7C8C4732B8D04 Ref B: SN4AA2022303025 Ref C: 2026-05-15T18:21:02Z'
       x-powered-by:
       - ASP.NET
     status:

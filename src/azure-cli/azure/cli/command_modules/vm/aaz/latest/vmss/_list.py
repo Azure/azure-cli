@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-09-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/virtualmachinescalesets", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets", "2024-11-01"],
         ]
     }
 
@@ -51,12 +51,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.VirtualMachineScaleSetsList(ctx=self.ctx)()
-        if condition_1:
             self.VirtualMachineScaleSetsListAll(ctx=self.ctx)()
+        if condition_1:
+            self.VirtualMachineScaleSetsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +72,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class VirtualMachineScaleSetsList(AAZHttpOperation):
+    class VirtualMachineScaleSetsListAll(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,7 +86,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/virtualMachineScaleSets",
                 **self.url_parameters
             )
 
@@ -102,10 +102,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -116,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -267,8 +263,14 @@ class List(AAZCommand):
             properties.scale_in_policy = AAZObjectType(
                 serialized_name="scaleInPolicy",
             )
+            properties.scheduled_events_policy = AAZObjectType(
+                serialized_name="scheduledEventsPolicy",
+            )
             properties.single_placement_group = AAZBoolType(
                 serialized_name="singlePlacementGroup",
+            )
+            properties.sku_profile = AAZObjectType(
+                serialized_name="skuProfile",
             )
             properties.spot_restore_policy = AAZObjectType(
                 serialized_name="spotRestorePolicy",
@@ -286,6 +288,9 @@ class List(AAZCommand):
             )
             properties.virtual_machine_profile = AAZObjectType(
                 serialized_name="virtualMachineProfile",
+            )
+            properties.zonal_platform_fault_domain_align_mode = AAZStrType(
+                serialized_name="zonalPlatformFaultDomainAlignMode",
             )
             properties.zone_balance = AAZBoolType(
                 serialized_name="zoneBalance",
@@ -317,11 +322,23 @@ class List(AAZCommand):
             )
 
             resiliency_policy = cls._schema_on_200.value.Element.properties.resiliency_policy
+            resiliency_policy.automatic_zone_rebalancing_policy = AAZObjectType(
+                serialized_name="automaticZoneRebalancingPolicy",
+            )
             resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
                 serialized_name="resilientVMCreationPolicy",
             )
             resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
                 serialized_name="resilientVMDeletionPolicy",
+            )
+
+            automatic_zone_rebalancing_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.automatic_zone_rebalancing_policy
+            automatic_zone_rebalancing_policy.enabled = AAZBoolType()
+            automatic_zone_rebalancing_policy.rebalance_behavior = AAZStrType(
+                serialized_name="rebalanceBehavior",
+            )
+            automatic_zone_rebalancing_policy.rebalance_strategy = AAZStrType(
+                serialized_name="rebalanceStrategy",
             )
 
             resilient_vm_creation_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_creation_policy
@@ -334,10 +351,57 @@ class List(AAZCommand):
             scale_in_policy.force_deletion = AAZBoolType(
                 serialized_name="forceDeletion",
             )
+            scale_in_policy.prioritize_unhealthy_v_ms = AAZBoolType(
+                serialized_name="prioritizeUnhealthyVMs",
+            )
             scale_in_policy.rules = AAZListType()
 
             rules = cls._schema_on_200.value.Element.properties.scale_in_policy.rules
             rules.Element = AAZStrType()
+
+            scheduled_events_policy = cls._schema_on_200.value.Element.properties.scheduled_events_policy
+            scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
+                serialized_name="scheduledEventsAdditionalPublishingTargets",
+            )
+            scheduled_events_policy.user_initiated_reboot = AAZObjectType(
+                serialized_name="userInitiatedReboot",
+            )
+            scheduled_events_policy.user_initiated_redeploy = AAZObjectType(
+                serialized_name="userInitiatedRedeploy",
+            )
+
+            scheduled_events_additional_publishing_targets = cls._schema_on_200.value.Element.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
+            scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
+                serialized_name="eventGridAndResourceGraph",
+            )
+
+            event_grid_and_resource_graph = cls._schema_on_200.value.Element.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+            event_grid_and_resource_graph.enable = AAZBoolType()
+
+            user_initiated_reboot = cls._schema_on_200.value.Element.properties.scheduled_events_policy.user_initiated_reboot
+            user_initiated_reboot.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
+            user_initiated_redeploy = cls._schema_on_200.value.Element.properties.scheduled_events_policy.user_initiated_redeploy
+            user_initiated_redeploy.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
+            sku_profile = cls._schema_on_200.value.Element.properties.sku_profile
+            sku_profile.allocation_strategy = AAZStrType(
+                serialized_name="allocationStrategy",
+            )
+            sku_profile.vm_sizes = AAZListType(
+                serialized_name="vmSizes",
+            )
+
+            vm_sizes = cls._schema_on_200.value.Element.properties.sku_profile.vm_sizes
+            vm_sizes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.sku_profile.vm_sizes.Element
+            _element.name = AAZStrType()
+            _element.rank = AAZIntType()
 
             spot_restore_policy = cls._schema_on_200.value.Element.properties.spot_restore_policy
             spot_restore_policy.enabled = AAZBoolType()
@@ -527,13 +591,12 @@ class List(AAZCommand):
             properties.force_update_tag = AAZStrType(
                 serialized_name="forceUpdateTag",
             )
-            properties.protected_settings = AAZObjectType(
+            properties.protected_settings = AAZFreeFormDictType(
                 serialized_name="protectedSettings",
             )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
-            _ListHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
             properties.provision_after_extensions = AAZListType(
                 serialized_name="provisionAfterExtensions",
             )
@@ -542,7 +605,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
-            properties.settings = AAZObjectType()
+            properties.settings = AAZFreeFormDictType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -550,6 +613,17 @@ class List(AAZCommand):
             properties.type_handler_version = AAZStrType(
                 serialized_name="typeHandlerVersion",
             )
+
+            protected_settings_from_key_vault = cls._schema_on_200.value.Element.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.protected_settings_from_key_vault
+            protected_settings_from_key_vault.secret_url = AAZStrType(
+                serialized_name="secretUrl",
+                flags={"required": True},
+            )
+            protected_settings_from_key_vault.source_vault = AAZObjectType(
+                serialized_name="sourceVault",
+                flags={"required": True},
+            )
+            _ListHelper._build_schema_sub_resource_read(protected_settings_from_key_vault.source_vault)
 
             provision_after_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.provision_after_extensions
             provision_after_extensions.Element = AAZStrType()
@@ -843,6 +917,7 @@ class List(AAZCommand):
             )
             windows_configuration.enable_vm_agent_platform_updates = AAZBoolType(
                 serialized_name="enableVMAgentPlatformUpdates",
+                flags={"read_only": True},
             )
             windows_configuration.patch_settings = AAZObjectType(
                 serialized_name="patchSettings",
@@ -930,86 +1005,15 @@ class List(AAZCommand):
             security_posture_reference.exclude_extensions = AAZListType(
                 serialized_name="excludeExtensions",
             )
-            security_posture_reference.id = AAZStrType()
+            security_posture_reference.id = AAZStrType(
+                flags={"required": True},
+            )
+            security_posture_reference.is_overridable = AAZBoolType(
+                serialized_name="isOverridable",
+            )
 
             exclude_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions
-            exclude_extensions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties
-            properties.auto_upgrade_minor_version = AAZBoolType(
-                serialized_name="autoUpgradeMinorVersion",
-            )
-            properties.enable_automatic_upgrade = AAZBoolType(
-                serialized_name="enableAutomaticUpgrade",
-            )
-            properties.force_update_tag = AAZStrType(
-                serialized_name="forceUpdateTag",
-            )
-            properties.instance_view = AAZObjectType(
-                serialized_name="instanceView",
-            )
-            properties.protected_settings = AAZObjectType(
-                serialized_name="protectedSettings",
-            )
-            properties.protected_settings_from_key_vault = AAZObjectType(
-                serialized_name="protectedSettingsFromKeyVault",
-            )
-            _ListHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
-            properties.provision_after_extensions = AAZListType(
-                serialized_name="provisionAfterExtensions",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.publisher = AAZStrType()
-            properties.settings = AAZObjectType()
-            properties.suppress_failures = AAZBoolType(
-                serialized_name="suppressFailures",
-            )
-            properties.type = AAZStrType()
-            properties.type_handler_version = AAZStrType(
-                serialized_name="typeHandlerVersion",
-            )
-
-            instance_view = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view
-            instance_view.name = AAZStrType()
-            instance_view.statuses = AAZListType()
-            instance_view.substatuses = AAZListType()
-            instance_view.type = AAZStrType()
-            instance_view.type_handler_version = AAZStrType(
-                serialized_name="typeHandlerVersion",
-            )
-
-            statuses = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view.statuses
-            statuses.Element = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(statuses.Element)
-
-            substatuses = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view.substatuses
-            substatuses.Element = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(substatuses.Element)
-
-            provision_after_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.provision_after_extensions
-            provision_after_extensions.Element = AAZStrType()
-
-            tags = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.tags
-            tags.Element = AAZStrType()
+            exclude_extensions.Element = AAZStrType()
 
             security_profile = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile
             security_profile.encryption_at_host = AAZBoolType(
@@ -1035,10 +1039,16 @@ class List(AAZCommand):
 
             proxy_agent_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
             proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1169,7 +1179,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class VirtualMachineScaleSetsListAll(AAZHttpOperation):
+    class VirtualMachineScaleSetsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -1183,7 +1193,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/virtualMachineScaleSets",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets",
                 **self.url_parameters
             )
 
@@ -1199,6 +1209,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -1209,7 +1223,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -1360,8 +1374,14 @@ class List(AAZCommand):
             properties.scale_in_policy = AAZObjectType(
                 serialized_name="scaleInPolicy",
             )
+            properties.scheduled_events_policy = AAZObjectType(
+                serialized_name="scheduledEventsPolicy",
+            )
             properties.single_placement_group = AAZBoolType(
                 serialized_name="singlePlacementGroup",
+            )
+            properties.sku_profile = AAZObjectType(
+                serialized_name="skuProfile",
             )
             properties.spot_restore_policy = AAZObjectType(
                 serialized_name="spotRestorePolicy",
@@ -1379,6 +1399,9 @@ class List(AAZCommand):
             )
             properties.virtual_machine_profile = AAZObjectType(
                 serialized_name="virtualMachineProfile",
+            )
+            properties.zonal_platform_fault_domain_align_mode = AAZStrType(
+                serialized_name="zonalPlatformFaultDomainAlignMode",
             )
             properties.zone_balance = AAZBoolType(
                 serialized_name="zoneBalance",
@@ -1410,11 +1433,23 @@ class List(AAZCommand):
             )
 
             resiliency_policy = cls._schema_on_200.value.Element.properties.resiliency_policy
+            resiliency_policy.automatic_zone_rebalancing_policy = AAZObjectType(
+                serialized_name="automaticZoneRebalancingPolicy",
+            )
             resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
                 serialized_name="resilientVMCreationPolicy",
             )
             resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
                 serialized_name="resilientVMDeletionPolicy",
+            )
+
+            automatic_zone_rebalancing_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.automatic_zone_rebalancing_policy
+            automatic_zone_rebalancing_policy.enabled = AAZBoolType()
+            automatic_zone_rebalancing_policy.rebalance_behavior = AAZStrType(
+                serialized_name="rebalanceBehavior",
+            )
+            automatic_zone_rebalancing_policy.rebalance_strategy = AAZStrType(
+                serialized_name="rebalanceStrategy",
             )
 
             resilient_vm_creation_policy = cls._schema_on_200.value.Element.properties.resiliency_policy.resilient_vm_creation_policy
@@ -1427,10 +1462,57 @@ class List(AAZCommand):
             scale_in_policy.force_deletion = AAZBoolType(
                 serialized_name="forceDeletion",
             )
+            scale_in_policy.prioritize_unhealthy_v_ms = AAZBoolType(
+                serialized_name="prioritizeUnhealthyVMs",
+            )
             scale_in_policy.rules = AAZListType()
 
             rules = cls._schema_on_200.value.Element.properties.scale_in_policy.rules
             rules.Element = AAZStrType()
+
+            scheduled_events_policy = cls._schema_on_200.value.Element.properties.scheduled_events_policy
+            scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
+                serialized_name="scheduledEventsAdditionalPublishingTargets",
+            )
+            scheduled_events_policy.user_initiated_reboot = AAZObjectType(
+                serialized_name="userInitiatedReboot",
+            )
+            scheduled_events_policy.user_initiated_redeploy = AAZObjectType(
+                serialized_name="userInitiatedRedeploy",
+            )
+
+            scheduled_events_additional_publishing_targets = cls._schema_on_200.value.Element.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
+            scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
+                serialized_name="eventGridAndResourceGraph",
+            )
+
+            event_grid_and_resource_graph = cls._schema_on_200.value.Element.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+            event_grid_and_resource_graph.enable = AAZBoolType()
+
+            user_initiated_reboot = cls._schema_on_200.value.Element.properties.scheduled_events_policy.user_initiated_reboot
+            user_initiated_reboot.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
+            user_initiated_redeploy = cls._schema_on_200.value.Element.properties.scheduled_events_policy.user_initiated_redeploy
+            user_initiated_redeploy.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
+            sku_profile = cls._schema_on_200.value.Element.properties.sku_profile
+            sku_profile.allocation_strategy = AAZStrType(
+                serialized_name="allocationStrategy",
+            )
+            sku_profile.vm_sizes = AAZListType(
+                serialized_name="vmSizes",
+            )
+
+            vm_sizes = cls._schema_on_200.value.Element.properties.sku_profile.vm_sizes
+            vm_sizes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.sku_profile.vm_sizes.Element
+            _element.name = AAZStrType()
+            _element.rank = AAZIntType()
 
             spot_restore_policy = cls._schema_on_200.value.Element.properties.spot_restore_policy
             spot_restore_policy.enabled = AAZBoolType()
@@ -1620,13 +1702,12 @@ class List(AAZCommand):
             properties.force_update_tag = AAZStrType(
                 serialized_name="forceUpdateTag",
             )
-            properties.protected_settings = AAZObjectType(
+            properties.protected_settings = AAZFreeFormDictType(
                 serialized_name="protectedSettings",
             )
             properties.protected_settings_from_key_vault = AAZObjectType(
                 serialized_name="protectedSettingsFromKeyVault",
             )
-            _ListHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
             properties.provision_after_extensions = AAZListType(
                 serialized_name="provisionAfterExtensions",
             )
@@ -1635,7 +1716,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
-            properties.settings = AAZObjectType()
+            properties.settings = AAZFreeFormDictType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -1643,6 +1724,17 @@ class List(AAZCommand):
             properties.type_handler_version = AAZStrType(
                 serialized_name="typeHandlerVersion",
             )
+
+            protected_settings_from_key_vault = cls._schema_on_200.value.Element.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.protected_settings_from_key_vault
+            protected_settings_from_key_vault.secret_url = AAZStrType(
+                serialized_name="secretUrl",
+                flags={"required": True},
+            )
+            protected_settings_from_key_vault.source_vault = AAZObjectType(
+                serialized_name="sourceVault",
+                flags={"required": True},
+            )
+            _ListHelper._build_schema_sub_resource_read(protected_settings_from_key_vault.source_vault)
 
             provision_after_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.provision_after_extensions
             provision_after_extensions.Element = AAZStrType()
@@ -1936,6 +2028,7 @@ class List(AAZCommand):
             )
             windows_configuration.enable_vm_agent_platform_updates = AAZBoolType(
                 serialized_name="enableVMAgentPlatformUpdates",
+                flags={"read_only": True},
             )
             windows_configuration.patch_settings = AAZObjectType(
                 serialized_name="patchSettings",
@@ -2023,86 +2116,15 @@ class List(AAZCommand):
             security_posture_reference.exclude_extensions = AAZListType(
                 serialized_name="excludeExtensions",
             )
-            security_posture_reference.id = AAZStrType()
+            security_posture_reference.id = AAZStrType(
+                flags={"required": True},
+            )
+            security_posture_reference.is_overridable = AAZBoolType(
+                serialized_name="isOverridable",
+            )
 
             exclude_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions
-            exclude_extensions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType()
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties
-            properties.auto_upgrade_minor_version = AAZBoolType(
-                serialized_name="autoUpgradeMinorVersion",
-            )
-            properties.enable_automatic_upgrade = AAZBoolType(
-                serialized_name="enableAutomaticUpgrade",
-            )
-            properties.force_update_tag = AAZStrType(
-                serialized_name="forceUpdateTag",
-            )
-            properties.instance_view = AAZObjectType(
-                serialized_name="instanceView",
-            )
-            properties.protected_settings = AAZObjectType(
-                serialized_name="protectedSettings",
-            )
-            properties.protected_settings_from_key_vault = AAZObjectType(
-                serialized_name="protectedSettingsFromKeyVault",
-            )
-            _ListHelper._build_schema_key_vault_secret_reference_read(properties.protected_settings_from_key_vault)
-            properties.provision_after_extensions = AAZListType(
-                serialized_name="provisionAfterExtensions",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.publisher = AAZStrType()
-            properties.settings = AAZObjectType()
-            properties.suppress_failures = AAZBoolType(
-                serialized_name="suppressFailures",
-            )
-            properties.type = AAZStrType()
-            properties.type_handler_version = AAZStrType(
-                serialized_name="typeHandlerVersion",
-            )
-
-            instance_view = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view
-            instance_view.name = AAZStrType()
-            instance_view.statuses = AAZListType()
-            instance_view.substatuses = AAZListType()
-            instance_view.type = AAZStrType()
-            instance_view.type_handler_version = AAZStrType(
-                serialized_name="typeHandlerVersion",
-            )
-
-            statuses = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view.statuses
-            statuses.Element = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(statuses.Element)
-
-            substatuses = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.instance_view.substatuses
-            substatuses.Element = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(substatuses.Element)
-
-            provision_after_extensions = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.properties.provision_after_extensions
-            provision_after_extensions.Element = AAZStrType()
-
-            tags = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_posture_reference.exclude_extensions.Element.tags
-            tags.Element = AAZStrType()
+            exclude_extensions.Element = AAZStrType()
 
             security_profile = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile
             security_profile.encryption_at_host = AAZBoolType(
@@ -2128,10 +2150,16 @@ class List(AAZCommand):
 
             proxy_agent_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
             proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.value.Element.properties.virtual_machine_profile.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -2296,59 +2324,25 @@ class _ListHelper:
 
         _schema.id = cls._schema_disk_encryption_set_parameters_read.id
 
-    _schema_instance_view_status_read = None
+    _schema_host_endpoint_settings_read = None
 
     @classmethod
-    def _build_schema_instance_view_status_read(cls, _schema):
-        if cls._schema_instance_view_status_read is not None:
-            _schema.code = cls._schema_instance_view_status_read.code
-            _schema.display_status = cls._schema_instance_view_status_read.display_status
-            _schema.level = cls._schema_instance_view_status_read.level
-            _schema.message = cls._schema_instance_view_status_read.message
-            _schema.time = cls._schema_instance_view_status_read.time
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
             return
 
-        cls._schema_instance_view_status_read = _schema_instance_view_status_read = AAZObjectType()
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
 
-        instance_view_status_read = _schema_instance_view_status_read
-        instance_view_status_read.code = AAZStrType()
-        instance_view_status_read.display_status = AAZStrType(
-            serialized_name="displayStatus",
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
         )
-        instance_view_status_read.level = AAZStrType()
-        instance_view_status_read.message = AAZStrType()
-        instance_view_status_read.time = AAZStrType()
+        host_endpoint_settings_read.mode = AAZStrType()
 
-        _schema.code = cls._schema_instance_view_status_read.code
-        _schema.display_status = cls._schema_instance_view_status_read.display_status
-        _schema.level = cls._schema_instance_view_status_read.level
-        _schema.message = cls._schema_instance_view_status_read.message
-        _schema.time = cls._schema_instance_view_status_read.time
-
-    _schema_key_vault_secret_reference_read = None
-
-    @classmethod
-    def _build_schema_key_vault_secret_reference_read(cls, _schema):
-        if cls._schema_key_vault_secret_reference_read is not None:
-            _schema.secret_url = cls._schema_key_vault_secret_reference_read.secret_url
-            _schema.source_vault = cls._schema_key_vault_secret_reference_read.source_vault
-            return
-
-        cls._schema_key_vault_secret_reference_read = _schema_key_vault_secret_reference_read = AAZObjectType()
-
-        key_vault_secret_reference_read = _schema_key_vault_secret_reference_read
-        key_vault_secret_reference_read.secret_url = AAZStrType(
-            serialized_name="secretUrl",
-            flags={"required": True},
-        )
-        key_vault_secret_reference_read.source_vault = AAZObjectType(
-            serialized_name="sourceVault",
-            flags={"required": True},
-        )
-        cls._build_schema_sub_resource_read(key_vault_secret_reference_read.source_vault)
-
-        _schema.secret_url = cls._schema_key_vault_secret_reference_read.secret_url
-        _schema.source_vault = cls._schema_key_vault_secret_reference_read.source_vault
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_sub_resource_read = None
 

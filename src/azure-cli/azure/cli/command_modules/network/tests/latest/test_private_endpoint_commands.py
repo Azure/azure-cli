@@ -1090,7 +1090,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
             'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
@@ -1106,7 +1106,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,
@@ -4593,7 +4593,7 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
     def test_chsm_private_link_resource(self, resource_group):
         # Define Params
         self.kwargs.update({
-            'chsm_name': self.create_random_name('cli-test-chsm-plr-', 24),
+            'chsm_name': self.create_random_name('cli-test-chsm-plr-', 22),
             'loc': 'ukwest',
             'rg': resource_group,
             'type': 'Microsoft.HardwareSecurityModules/cloudHsmClusters',
@@ -4615,7 +4615,7 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
     def test_chsm_private_endpoint_connection(self, resource_group):
         # Define Params
         self.kwargs.update({
-            'chsm_name': self.create_random_name('cli-test-chsm-pe-', 24),
+            'chsm_name': self.create_random_name('cli-test-chsm-pe-', 22),
             'loc': 'ukwest',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
@@ -4710,6 +4710,132 @@ class NetworkPrivateLinkCloudHsmClustersScenarioTest(ScenarioTest):
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
         self.cmd('az resource delete --name {chsm_name} -g {rg} --resource-type {type}')
+
+class NetworkPrivateLinkPaymentHsmClustersScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_phsm_plr_rg')
+    def test_phsm_private_link_resource(self, resource_group):
+        # Define Params
+        self.kwargs.update({
+            'phsm_name': self.create_random_name('cli-phsm-pl-', 21),
+            'loc': 'eastus2euap',
+            'rg': resource_group,
+            'type': 'Microsoft.HardwareSecurityModules/paymentHsmClusters',
+            'properties': '{ \\"sku\\": { \\"family\\": \\"B\\", \\"name\\": \\"Payments_v2\\" }, \\"location\\": \\"eastus2euap\\", \\"properties\\": { }, \\"tags\\": { \\"UseMockHfc\\": \\"true\\" } }'
+        })
+
+        # Create PHSM Resource
+        self.cmd('resource create -g {rg} -n {phsm_name} --resource-type {type} --location {loc} --is-full-object --properties "{properties}"')
+
+        # Show resource was created
+        self.cmd('network private-link-resource list '
+                 '--name {phsm_name} '
+                 '-g {rg} '
+                 '--type {type}',
+             checks=[self.check('length(@)', 2),
+                 self.check("length([?properties.groupId == 'management'])", 1),
+                 self.check("length([?properties.groupId == 'application'])", 1)])
+        self.cmd('resource delete --name {phsm_name} -g {rg} --resource-type {type}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_phsm_pe')
+    def test_phsm_private_endpoint_connection(self, resource_group):
+        # Define Params
+        self.kwargs.update({
+            'phsm_name': self.create_random_name('cli-phsm-pe-', 21),
+            'loc': 'eastus2euap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'rg': resource_group,
+            'type': 'Microsoft.HardwareSecurityModules/paymentHsmClusters',
+            'properties': '{\\"sku\\": { \\"family\\": \\"B\\", \\"name\\": \\"Payments_v2\\" }, \\"location\\": \\"eastus2euap\\", \\"properties\\": { }, \\"tags\\": { \\"UseMockHfc\\": \\"true\\" } }'
+        })
+
+        # Prepare phsm and network
+        hsm = self.cmd('resource create -g {rg} -n {phsm_name} --resource-type {type} --location {loc} --is-full-object --properties "{properties}"').get_output_in_json()
+        self.kwargs['hsm_id'] = hsm['id']
+        self.cmd('network vnet create '
+                 '-n {vnet} '
+                 '-g {rg} '
+                 '-l {loc} '
+                 '--subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update '
+                 '-n {subnet} '
+                 '--vnet-name {vnet} '
+                 '-g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create '
+                      '-g {rg} '
+                      '-n {pe} '
+                      '--vnet-name {vnet} '
+                      '--subnet {subnet} '
+                      '-l {loc} '
+                      '--connection-name {pe_connection} '
+                      '--private-connection-resource-id {hsm_id} '
+                      '--group-id management').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the private endpoint connection
+        result = self.cmd('network private-endpoint-connection list --name {phsm_name} -g {rg} --type {type}',
+                          checks=self.check('length(@)', 1)).get_output_in_json()
+
+        self.kwargs['hsm_pe_id'] = result[0]['id']
+
+        self.cmd('network private-endpoint-connection show '
+                 '--id {hsm_pe_id}',
+                 checks=self.check('id', '{hsm_pe_id}'))
+        self.kwargs['hsm_pe_name'] = self.kwargs['hsm_pe_id'].split('/')[-1]
+        self.cmd('network private-endpoint-connection show  '
+                 '--resource-name {phsm_name} '
+                 '-g {rg} '
+                 '--name {hsm_pe_name} '
+                 '--type {type}',
+                 checks=self.check('name', '{hsm_pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+
+        self.cmd('network private-endpoint-connection approve '
+                 '--resource-name {phsm_name} '
+                 '--name {hsm_pe_name} '
+                 '-g {rg} '
+                 '--type Microsoft.HardwareSecurityModules/paymentHsmClusters '
+                 '--description "{approval_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded', False))
+
+        self.cmd('network private-endpoint-connection reject '
+                 '--id {hsm_pe_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
+
+        self.cmd('network private-endpoint-connection show --id {hsm_pe_id}',
+                 checks=self.check('properties.provisioningState', 'Succeeded', False))
+
+        self.cmd('network private-endpoint-connection list --id {hsm_id}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network private-endpoint-connection delete --id {hsm_pe_id} -y')
+
+        # clear resources
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+        time.sleep(60)
+        self.cmd('az resource delete --name {phsm_name} -g {rg} --resource-type {type}')
 
 class NetworkPrivateLinkCosmosDBPostgresScenarioTest(ScenarioTest):
 
@@ -5097,6 +5223,155 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
             time.sleep(600) # Wait for 10 minutes
             state = self.get_provisioning_state_for_mongocluster_resource()
         print("creation succeeded!")
+
+
+class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
+    def test_private_link_resource_horizondb_cluster(self, resource_group):
+        self.kwargs.update({
+            'cluster_name': self.create_random_name(prefix='clitest', length=15),
+            'sub': self.get_subscription_id(),
+            'location': 'uksouth',
+            'api_version': '2026-01-20-preview',
+            'resource_type': 'Microsoft.HorizonDB/clusters',
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}',
+            'body': self._get_horizondb_cluster_body()
+        })
+
+        self.cmd('az rest --method "PUT" --headers "{headers}" '
+                 '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                 'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}" '
+                 '--body "{body}"')
+        self.check_provisioning_state_for_horizondb_cluster()
+
+        self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} '
+                 '--type {resource_type}',
+                 checks=[self.check('length(@)', 1)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
+    def test_private_endpoint_connection_horizondb_cluster(self, resource_group):
+        from azure.mgmt.core.tools import resource_id
+
+        namespace = 'Microsoft.HorizonDB'
+        instance_type = 'clusters'
+        resource_name = self.create_random_name(prefix='clitest', length=15)
+        target_resource_id = resource_id(
+            subscription=self.get_subscription_id(),
+            resource_group=resource_group,
+            namespace=namespace,
+            type=instance_type,
+            name=resource_name,
+        )
+        self.kwargs.update({
+            'cluster_name': resource_name,
+            'target_resource_id': target_resource_id,
+            'location': 'uksouth',
+            'resource_type': 'Microsoft.HorizonDB/clusters',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'sub': self.get_subscription_id(),
+            'api_version': '2026-01-20-preview',
+            'headers': '{\\"Content-Type\\":\\"application/json\\"}',
+            'body': self._get_horizondb_cluster_body()
+        })
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        self.cmd('az rest --method "PUT" --headers "{headers}" '
+                 '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                 'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}" '
+                 '--body "{body}"')
+        self.check_provisioning_state_for_horizondb_cluster()
+
+        target_private_link_resource = self.cmd(
+            'az network private-link-resource list --id {target_resource_id}').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} --manual-request').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        list_private_endpoint_conn = self.cmd(
+            'az network private-endpoint-connection list --id {target_resource_id}').get_output_in_json()
+        self.kwargs.update({
+            'pec_id': list_private_endpoint_conn[0]['id'],
+            'pec_name': list_private_endpoint_conn[0]['name']
+        })
+
+        self.cmd('az network private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {cluster_name} -n {pec_name} '
+                 '-g {rg} --type {resource_type}',
+                 checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending'))
+
+        self.kwargs.update({
+            'approval_desc': 'Approved.',
+            'rejection_desc': 'Rejected.'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {cluster_name} --resource-group {rg} '
+            '--name {pec_name} --type {resource_type} --description "{approval_desc}"',
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+        self.cmd('az network private-endpoint-connection list --id {target_resource_id}',
+                 checks=[self.check('length(@)', 1)])
+
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
+
+    def _get_horizondb_cluster_body(self):
+        return ('{\\"location\\": \\"uksouth\\", '
+                '\\"properties\\": {'
+                '\\"createMode\\": \\"Default\\", '
+                '\\"version\\": \\"17\\", '
+                '\\"administratorLogin\\": \\"admin123\\", '
+                '\\"administratorLoginPassword\\": \\"aBcD1234!@#$\\", '
+                '\\"vCores\\": 2, '
+                '\\"replicaCount\\": 1, '
+                '\\"network\\": {\\"publicNetworkAccess\\": \\"Enabled\\"}, '
+                '\\"highAvailability\\": {\\"mode\\": \\"Disabled\\"}, '
+                '\\"aiModelManagement\\": 1'
+                '}}')
+
+    def get_provisioning_state_for_horizondb_cluster(self):
+        response = self.cmd('az rest --method "GET" '
+                            '--url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/'
+                            'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}"'
+                            ).get_output_in_json()
+
+        properties = response.get('properties') or {}
+        return properties.get('provisioningState') or properties.get('state') or response.get('status')
+
+    def check_provisioning_state_for_horizondb_cluster(self):
+        time.sleep(10)
+        count = 0
+        print("checking status of creation...........")
+        state = self.get_provisioning_state_for_horizondb_cluster()
+        print(state)
+        while state not in ["Succeeded", "Ready"]:
+            if state in ["Failed", "Canceled"]:
+                print("creation failed!")
+                self.assertTrue(False)
+            if count == 15:
+                print("TimeOut after waiting for 15 mins!")
+                self.assertTrue(False)
+            print("instance not yet created. waiting for 1 more min...")
+            time.sleep(60)
+            count += 1
+            state = self.get_provisioning_state_for_horizondb_cluster()
+        print("Cluster creation succeeded!")
 
 
 class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):

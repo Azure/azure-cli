@@ -30,9 +30,6 @@ class Create(AAZCommand):
 
     :example: For --summarized-gateway-prefixes with address-prefixes
         az network vnet create --resource-group rg1 --name test-vnet --location eastus --address-prefixes 10.0.0.0/16 --summarized-gateway-prefixes address-prefixes="[10.0.0.0/16]"
-
-    :example: For --summarized-gateway-prefixes with ipam-pool-prefix-allocations
-        az network vnet create -g {rg} -n {vnet} --address-prefixes 10.0.0.0/16 --summarized-gateway-prefixes ipam-pool-prefix-allocations="[{id:<pool-resource-id>,number-of-ip-addresses:10}]"
     """
 
     _aaz_info = {

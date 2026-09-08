@@ -80,6 +80,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.enable_broker_on_mac = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
+        self.agentic_session = False
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -241,6 +242,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnMac', str(self.enable_broker_on_mac))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
+        set_custom_properties(result, 'AgenticSession', str(self.agentic_session))
 
         return result
 
@@ -500,6 +502,11 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+
+
+@decorators.suppress_all_exceptions()
+def set_agentic_session(agentic_session):
+    _session.agentic_session = agentic_session
 # endregion
 
 

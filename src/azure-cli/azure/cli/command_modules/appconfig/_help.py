@@ -286,6 +286,8 @@ examples:
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
     text: az appconfig kv set --endpoint https://contoso.azconfig.io --key color --value red --auth-mode login
+  - name: Set a key-value with a description.
+    text: az appconfig kv set -n MyAppConfiguration --key color --value red --description "The theme color"
 """
 
 helps['appconfig kv set-keyvault'] = """
@@ -296,6 +298,8 @@ examples:
     text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
   - name: Set a keyvault reference with null label and multiple tags using connection string.
     text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
+  - name: Set a keyvault reference with a description.
+    text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --description "Reference to the host secret"
 """
 
 helps['appconfig kv set-snapshot-reference'] = """
@@ -308,6 +312,8 @@ examples:
     text: az appconfig kv set-snapshot-reference --endpoint https://contoso.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
   - name: Set a snapshot reference with tags using connection string.
     text: az appconfig kv set-snapshot-reference --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
+  - name: Set a snapshot reference with a description.
+    text: az appconfig kv set-snapshot-reference -n MyAppConfiguration --key MySnapshotRef --snapshot-name MySnapshot --description "Reference to MySnapshot"
 """
 
 helps['appconfig kv show'] = """
@@ -698,6 +704,38 @@ helps['appconfig snapshot'] = """
     short-summary: Manage snapshots associated with an app configuration store.
     """
 
+helps['appconfig network-security-perimeter-configuration'] = """
+    type: group
+    short-summary: Manage network security perimeter configurations for an App Configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration list'] = """
+    type: command
+    short-summary: List all network security perimeter configurations for an App Configuration store.
+    examples:
+        - name: List all network security perimeter configurations for an App Configuration store.
+          text:
+            az appconfig network-security-perimeter-configuration list --store-name MyAppConfiguration -g MyResourceGroup
+    """
+
+helps['appconfig network-security-perimeter-configuration show'] = """
+    type: command
+    short-summary: Show a specific network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Show a network security perimeter configuration by name.
+          text:
+            az appconfig network-security-perimeter-configuration show --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
+helps['appconfig network-security-perimeter-configuration reconcile'] = """
+    type: command
+    short-summary: Force a refresh of the specified network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Reconcile a network security perimeter configuration.
+          text:
+            az appconfig network-security-perimeter-configuration reconcile --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
 helps['appconfig snapshot create'] = """
     type: command
     short-summary: Create an app configuration snapshot.
@@ -714,6 +752,9 @@ helps['appconfig snapshot create'] = """
         - name: Create a snapshot of all keys starting with 'Test' and have tags 'tag1=value1' and 'tag2=value2'.
           text:
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\", \\"tags\\":[\\"tag1=value1\\", \\"tag2=value2\\"]}'
+        - name: Create a snapshot MySnapshot with a description.
+          text:
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"Test*\\"}' --description "Snapshot of Test key-values"
     """
 
 helps['appconfig snapshot show'] = """

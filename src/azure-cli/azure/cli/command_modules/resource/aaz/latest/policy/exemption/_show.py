@@ -24,9 +24,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-01-preview",
+        "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2022-07-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -50,6 +50,9 @@ class Show(AAZCommand):
             options=["-n", "--name"],
             help="The name of the policy exemption.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
+            ),
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
@@ -120,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -160,7 +163,7 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -185,7 +188,7 @@ class Show(AAZCommand):
             properties.expires_on = AAZStrType(
                 serialized_name="expiresOn",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
@@ -196,9 +199,6 @@ class Show(AAZCommand):
             properties.resource_selectors = AAZListType(
                 serialized_name="resourceSelectors",
             )
-
-            metadata = cls._schema_on_200.properties.metadata
-            metadata.Element = AAZAnyType()
 
             policy_definition_reference_ids = cls._schema_on_200.properties.policy_definition_reference_ids
             policy_definition_reference_ids.Element = AAZStrType()

@@ -668,7 +668,8 @@ def process_vpn_connection_create_namespace(cmd, namespace):
 
     _normalize_shared_key_fields(namespace)
 
-    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
+    has_gateway = any([namespace.local_gateway2, namespace.vnet_gateway2])
+    if has_gateway and not (namespace.shared_key or auth == 'certificate'):
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
     if namespace.express_route_circuit2 and namespace.shared_key:
@@ -971,7 +972,5 @@ def process_appgw_waf_policy_update(cmd, namespace):    # pylint: disable=unused
     rule_group_name = namespace.rule_group_name
     rules = namespace.rules
 
-    if rules is None and rule_group_name is not None:
-        raise CLIError('--rules and --rule-group-name must be provided at the same time')
     if rules is not None and rule_group_name is None:
-        raise CLIError('--rules and --rule-group-name must be provided at the same time')
+        raise CLIError('--group-name must be provided when --rule is specified')

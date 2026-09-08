@@ -194,14 +194,16 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(1024)
         logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
         logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
                              '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
-                             '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
-            storage_account, share, expiry, logged_in_user)).output
+                             '{} --user-delegation-tid {}'.format(
+            storage_account, share, expiry, logged_in_user, current_tenant)).output
         self.assertIn('&sig=', share_sas)
         self.assertIn('skoid=', share_sas)
         self.assertIn('sktid=', share_sas)

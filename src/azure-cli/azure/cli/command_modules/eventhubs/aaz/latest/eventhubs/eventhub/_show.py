@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an Event Hubs description for the specified Event Hub.
+
+    :example: EventHubGet
+        az eventhubs eventhub show --resource-group Default-NotificationHubs-AustraliaEast --namespace-name sdk-Namespace-716 --event-hub-name sdk-EventHub-10
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -57,7 +60,7 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -136,7 +139,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -284,8 +287,8 @@ class Show(AAZCommand):
             retention_description.cleanup_policy = AAZStrType(
                 serialized_name="cleanupPolicy",
             )
-            retention_description.min_compaction_lag_in_mins = AAZIntType(
-                serialized_name="minCompactionLagInMins",
+            retention_description.min_compaction_lag_time_in_minutes = AAZIntType(
+                serialized_name="minCompactionLagTimeInMinutes",
             )
             retention_description.retention_time_in_hours = AAZIntType(
                 serialized_name="retentionTimeInHours",

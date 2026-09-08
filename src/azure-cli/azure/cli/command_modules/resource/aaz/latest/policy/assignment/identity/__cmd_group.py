@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "policy assignment identity",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Managed identity of the policy assignment.
+    """Manage identity of the policy assignment.
 
     The system or user assigned managed identity used by the enclosing policy assignment for remediation tasks.
     """

@@ -672,6 +672,24 @@ def load_arguments(self, _):
             'scale_settings_capacity', options_list=['--scale-capacity', '--scale-settings-capacity'],
             help='Cognitive Services account deployment scale settings capacity.')
 
+    with self.argument_context('cognitiveservices account managed-compute-deployment') as c:
+        c.argument('deployment_name', help='Managed compute deployment name.')
+
+    with self.argument_context('cognitiveservices account managed-compute-deployment create') as c:
+        c.argument('model', help='AzureML registry model URI '
+                   '(e.g., azureml://registries/{registry}/models/{model}/versions/{version}).')
+        c.argument('deployment_template', options_list=['--deployment-template'],
+                   help='AzureML registry deployment template URI '
+                   '(e.g., azureml://registries/{registry}/deploymenttemplates/{template}/versions/{version}).')
+        c.argument('accelerator_type', options_list=['--accelerator-type'],
+                   help='GPU accelerator type (e.g., H100_80GB).')
+        c.argument('version_upgrade_option', options_list=['--version-upgrade-option'],
+                   help='Version upgrade policy. Allowed values: OnceNewDefaultVersionAvailable, '
+                   'OnceCurrentVersionExpired, NoAutoUpgrade.')
+
+    with self.argument_context('cognitiveservices account managed-compute-deployment update') as c:
+        c.argument('tags', tags_type)
+
     with self.argument_context('cognitiveservices account commitment-plan') as c:
         c.argument('commitment_plan_name', help='Cognitive Services account commitment plan name')
         c.argument('plan_type', help='Cognitive Services account commitment plan type')
@@ -780,3 +798,18 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account connection') as c:
         c.argument('connection_name', help='Cognitive Services account connection name')
         c.argument('file', help='Path to the connection file in JSON or YAML format.')
+
+    with self.argument_context('cognitiveservices account compute') as c:
+        c.argument('compute_name', help='Cognitive Services account compute name.')
+
+    with self.argument_context('cognitiveservices account compute create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   help='Location for the compute resource.')
+        c.argument('pool_name', arg_group='Pool', help='Name of the compute pool.')
+        c.argument('instance_type', arg_group='Pool',
+                   help='VM instance type for the pool (e.g. Standard_DS3_v2).')
+        c.argument('node_count', arg_group='Pool', type=int,
+                   help='Number of nodes in the pool.')
+        c.argument('vm_priority', arg_group='Pool',
+                   help='VM priority for the pool (e.g. Dedicated, LowPriority). '
+                        'If omitted, the service default is used.')

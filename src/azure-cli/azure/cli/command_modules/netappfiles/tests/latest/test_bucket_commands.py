@@ -15,9 +15,9 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-LOCATION = "eastus"
+LOCATION = "westus"
 TEST_BUCKET_FQDN = "bucket.test.example.com"
-VNET_LOCATION = "eastus"
+VNET_LOCATION = "westus"
 POOL_DEFAULT = "--service-level Premium --size 4"
 VOLUME_DEFAULT = "--service-level Premium --usage-threshold 100"
 

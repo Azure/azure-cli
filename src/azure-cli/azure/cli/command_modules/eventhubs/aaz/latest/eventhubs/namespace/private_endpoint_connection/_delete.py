@@ -17,12 +17,15 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a Private Endpoint Connection.
+
+    :example: NameSpacePrivateEndPointConnectionDelete
+        az eventhubs namespace private-endpoint-connection delete --resource-group ArunMonocle --namespace-name sdk-Namespace-3285 --private-endpoint-connection-name 928c44d5-b7c6-423b-b6fa-811e0c27b3e0
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -49,6 +52,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -154,7 +158,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

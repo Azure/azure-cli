@@ -1656,10 +1656,12 @@ examples:
 
 helps['sql server deleted-server list'] = """
 type: command
-short-summary: List all deleted SQL servers in a specific location.
+short-summary: List all deleted SQL servers in a location or subscription.
 examples:
   - name: List all deleted servers in a specific location.
     text: az sql server deleted-server list --location westus2
+  - name: List all deleted servers in the subscription.
+    text: az sql server deleted-server list
 """
 
 helps['sql server dns-alias'] = """

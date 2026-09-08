@@ -103,7 +103,7 @@ def transform_usage_output(result):
     result['billableQuantity'] = str(result.get('billableQuantity', None))
     result['pretaxCost'] = str(result.get('pretaxCost', None))
     if 'meterDetails' in result:
-        result['meterDetails']['totalIncludedQuantity'] = str(result['meterDetails'].get('pretaxStandardRate', None))
+        result['meterDetails']['totalIncludedQuantity'] = str(result['meterDetails'].get('totalIncludedQuantity', None))
         result['meterDetails']['pretaxStandardRate'] = str(result['meterDetails'].get('pretaxStandardRate', None))
     else:
         result['meterDetails'] = None
@@ -246,7 +246,7 @@ def pricesheet_show_properties(result):
     result['includedQuantity'] = str(result['includedQuantity'])
     result['unitPrice'] = str(result['unitPrice'])
     if 'meterDetails' in result:
-        result['meterDetails']['totalIncludedQuantity'] = str(result['meterDetails'].get('pretaxStandardRate', None))
+        result['meterDetails']['totalIncludedQuantity'] = str(result['meterDetails'].get('totalIncludedQuantity', None))
         result['meterDetails']['pretaxStandardRate'] = str(result['meterDetails'].get('pretaxStandardRate', None))
     else:
         result['meterDetails'] = None

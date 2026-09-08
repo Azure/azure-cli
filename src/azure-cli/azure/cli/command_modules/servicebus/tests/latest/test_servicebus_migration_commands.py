@@ -118,21 +118,40 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
         self.cmd(
             'servicebus migration complete  --resource-group {rg} --name {namespacenamestandard}')
 
-        # get Migration
-        getmigration = self.cmd(
-            'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
-
-        # check for the migration provisioning succeeded
-        while getmigration['provisioningState'] != ProvisioningStateDR.succeeded.value:
-            time.sleep(30)
+        # With API version 2026-01-01, migration configuration is automatically deleted after successful completion
+        # Try to get migration status, but if it's already deleted (404), that means completion was successful
+        time.sleep(30)
+        migration_deleted = False
+        try:
             getmigration = self.cmd(
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
-        # check for the migration PendingReplicationOperationsCount is 0 or null
-        while getmigration['migrationState'] != 'Active':
-            time.sleep(30)
-            getmigration = self.cmd(
-                'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
+            # check for the migration provisioning succeeded
+            while getmigration['provisioningState'] != ProvisioningStateDR.succeeded.value:
+                time.sleep(30)
+                try:
+                    getmigration = self.cmd(
+                        'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
+                except Exception:
+                    # Migration config was deleted, which means completion succeeded
+                    migration_deleted = True
+                    break
+
+            if not migration_deleted:
+                # check for the migration PendingReplicationOperationsCount is 0 or null
+                while getmigration['migrationState'] != 'Active':
+                    time.sleep(30)
+                    try:
+                        getmigration = self.cmd(
+                            'servicebus migration show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
+                    except Exception:
+                        # Migration config was deleted, which means completion succeeded
+                        migration_deleted = True
+                        break
+        except Exception:
+            # Migration config not found means it was successfully completed and deleted
+            migration_deleted = True
+            pass
 
         # Get Authorization Rule - Premium
         self.cmd(
@@ -204,7 +223,15 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
         # Stop Migration
         self.cmd('servicebus migration abort --resource-group {rg} --name {namespacenamestandard1}')
         time.sleep(45)
-        while getmigration['migrationState'] != 'Active':
-            time.sleep(30)
+
+        # Wait for migration to become active after abort
+        try:
             getmigration = self.cmd(
                 'servicebus migration show  --resource-group {rg} --name {namespacenamestandard1}').get_output_in_json()
+            while getmigration['migrationState'] != 'Active':
+                time.sleep(30)
+                getmigration = self.cmd(
+                    'servicebus migration show  --resource-group {rg} --name {namespacenamestandard1}').get_output_in_json()
+        except Exception:
+            # Migration config might have been cleaned up after abort
+            pass

@@ -47,7 +47,8 @@ def load_arguments(self, _):
                    name_type,
                    help='Name of cluster.')
         c.argument('tags',
-                   tags_type)
+                   tags_type,
+                   help='Tags to be assigned to the openShiftCluster resource. ' + tags_type.settings.get('help', ''))
 
         c.argument('pull_secret',
                    help='Pull secret of cluster.',

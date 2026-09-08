@@ -30,11 +30,11 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policyassignments", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policyassignments", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.authorization/policyassignments", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policyassignments", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policyassignments", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.authorization/policyassignments", "2025-11-01"],
         ]
     }
 
@@ -58,10 +58,11 @@ class List(AAZCommand):
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
             help={"short-summary": "The management group.", "long-summary": "Indicates that policy assignments whose scope covers the management group with the given name are to be listed."},
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            help={"short-summary": "The resource group.", "long-summary": "Indicates that policy assignments whose scope covers the resource group with the given name are to be listed."},
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
             help={"short-summary": "Additional properties to include in output", "long-summary": "Comma-separated list of additional properties to include in the command output. Supported values are 'LatestDefinitionVersion, EffectiveDefinitionVersion'."},
@@ -144,7 +145,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -180,7 +181,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -250,11 +253,15 @@ class List(AAZCommand):
             properties.enforcement_mode = AAZStrType(
                 serialized_name="enforcementMode",
             )
+            properties.instance_id = AAZStrType(
+                serialized_name="instanceId",
+                flags={"read_only": True},
+            )
             properties.latest_definition_version = AAZStrType(
                 serialized_name="latestDefinitionVersion",
                 flags={"read_only": True},
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.non_compliance_messages = AAZListType(
                 serialized_name="nonComplianceMessages",
             )
@@ -272,9 +279,9 @@ class List(AAZCommand):
             properties.scope = AAZStrType(
                 flags={"read_only": True},
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            properties.self_serve_exemption_settings = AAZObjectType(
+                serialized_name="selfServeExemptionSettings",
+            )
 
             non_compliance_messages = cls._schema_on_200.value.Element.properties.non_compliance_messages
             non_compliance_messages.Element = AAZObjectType()
@@ -318,6 +325,15 @@ class List(AAZCommand):
             selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
             selectors.Element = AAZObjectType()
             _ListHelper._build_schema_selector_read(selectors.Element)
+
+            self_serve_exemption_settings = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings
+            self_serve_exemption_settings.enabled = AAZBoolType()
+            self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
+            )
+
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -387,7 +403,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -423,7 +439,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -493,11 +511,15 @@ class List(AAZCommand):
             properties.enforcement_mode = AAZStrType(
                 serialized_name="enforcementMode",
             )
+            properties.instance_id = AAZStrType(
+                serialized_name="instanceId",
+                flags={"read_only": True},
+            )
             properties.latest_definition_version = AAZStrType(
                 serialized_name="latestDefinitionVersion",
                 flags={"read_only": True},
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.non_compliance_messages = AAZListType(
                 serialized_name="nonComplianceMessages",
             )
@@ -515,9 +537,9 @@ class List(AAZCommand):
             properties.scope = AAZStrType(
                 flags={"read_only": True},
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            properties.self_serve_exemption_settings = AAZObjectType(
+                serialized_name="selfServeExemptionSettings",
+            )
 
             non_compliance_messages = cls._schema_on_200.value.Element.properties.non_compliance_messages
             non_compliance_messages.Element = AAZObjectType()
@@ -561,6 +583,15 @@ class List(AAZCommand):
             selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
             selectors.Element = AAZObjectType()
             _ListHelper._build_schema_selector_read(selectors.Element)
+
+            self_serve_exemption_settings = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings
+            self_serve_exemption_settings.enabled = AAZBoolType()
+            self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
+            )
+
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -634,7 +665,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -670,7 +701,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -740,11 +773,15 @@ class List(AAZCommand):
             properties.enforcement_mode = AAZStrType(
                 serialized_name="enforcementMode",
             )
+            properties.instance_id = AAZStrType(
+                serialized_name="instanceId",
+                flags={"read_only": True},
+            )
             properties.latest_definition_version = AAZStrType(
                 serialized_name="latestDefinitionVersion",
                 flags={"read_only": True},
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.non_compliance_messages = AAZListType(
                 serialized_name="nonComplianceMessages",
             )
@@ -762,9 +799,9 @@ class List(AAZCommand):
             properties.scope = AAZStrType(
                 flags={"read_only": True},
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            properties.self_serve_exemption_settings = AAZObjectType(
+                serialized_name="selfServeExemptionSettings",
+            )
 
             non_compliance_messages = cls._schema_on_200.value.Element.properties.non_compliance_messages
             non_compliance_messages.Element = AAZObjectType()
@@ -808,6 +845,15 @@ class List(AAZCommand):
             selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
             selectors.Element = AAZObjectType()
             _ListHelper._build_schema_selector_read(selectors.Element)
+
+            self_serve_exemption_settings = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings
+            self_serve_exemption_settings.enabled = AAZBoolType()
+            self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
+            )
+
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.self_serve_exemption_settings.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(

@@ -290,7 +290,7 @@ def transform_immutability_policy(result):
 
 def transform_restore_policy_output(result):
     if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
-        del result.restore_policy.last_enabled_time
+        result.restore_policy.last_enabled_time = None
     return result
 
 
@@ -403,6 +403,8 @@ def transform_queue_policy_json_output(result):
 
 
 def transform_queue_policy_output(result):
+    if not result:
+        return result
     result = todict(result)
     if result['start']:
         result['start'] = parser.parse(result['start'])

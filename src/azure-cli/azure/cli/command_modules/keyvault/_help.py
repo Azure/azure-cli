@@ -975,6 +975,46 @@ examples:
         az keyvault wait-hsm --hsm-name MyHSM --created
 """
 
+helps['keyvault ekm-connection'] = """
+type: group
+short-summary: Manage External Key Manager (EKM) connection for a Managed HSM.
+"""
+
+helps['keyvault ekm-connection create'] = """
+type: command
+short-summary: Create the EKM connection.
+"""
+
+helps['keyvault ekm-connection update'] = """
+type: command
+short-summary: Update the EKM connection.
+"""
+
+helps['keyvault ekm-connection show'] = """
+type: command
+short-summary: Show the EKM connection.
+"""
+
+helps['keyvault ekm-connection check'] = """
+type: command
+short-summary: Check connectivity and authentication with the EKM proxy.
+"""
+
+helps['keyvault ekm-connection delete'] = """
+type: command
+short-summary: Delete the EKM connection.
+"""
+
+helps['keyvault ekm-connection certificate'] = """
+type: group
+short-summary: Manage EKM proxy certificate information.
+"""
+
+helps['keyvault ekm-connection certificate show'] = """
+type: command
+short-summary: Show the EKM proxy client certificate.
+"""
+
 helps['keyvault security-domain'] = """
 type: group
 short-summary: Manage security domain operations.

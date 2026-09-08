@@ -629,8 +629,8 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
 
     def test_staticsite_identity_remove(self):
-        from azure.mgmt.web.models import ManagedServiceIdentityType, Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties
-        get_models = lambda s: ManagedServiceIdentityType if s == "ManagedServiceIdentityType" else Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties
+        from azure.mgmt.web.models import ManagedServiceIdentityType, UserAssignedIdentity
+        get_models = lambda s: ManagedServiceIdentityType if s == "ManagedServiceIdentityType" else UserAssignedIdentity
         self.mock_cmd.get_models.side_effect = get_models
 
         remove_identity(self.mock_cmd, self.rg1, self.name1)
@@ -657,7 +657,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         from ast import literal_eval
         reset_envelope = literal_eval(str(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"]))
-        self.assertEqual(reset_envelope["repository_token"], self.token1)
+        self.assertEqual(reset_envelope["properties"]["repositoryToken"], self.token1)
 
     @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")
     def test_functions_link(self, *args, **kwargs):

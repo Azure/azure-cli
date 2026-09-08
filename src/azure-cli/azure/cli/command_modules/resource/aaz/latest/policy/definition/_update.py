@@ -24,10 +24,10 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
         ]
     }
 
@@ -58,7 +58,7 @@ class Update(AAZCommand):
             help="The name of the policy definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
 
@@ -77,7 +77,13 @@ class Update(AAZCommand):
             help={"short-summary": "The display name of the policy definition.", "long-summary": "The display name of the policy definition is not part of its ID, allowing for longer and more flexible naming."},
             nullable=True,
         )
-        _args_schema.metadata = AAZDictArg(
+        _args_schema.external_evaluation_enforcement_settings = AAZObjectArg(
+            options=["--external-settings", "--external-evaluation-enforcement-settings"],
+            arg_group="Properties",
+            help="The details of the source of external evaluation results required by the policy during enforcement evaluation.",
+            nullable=True,
+        )
+        _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
             help={"short-summary": "The policy definition metadata.", "long-summary": "The policy definition metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
@@ -95,7 +101,7 @@ class Update(AAZCommand):
             help={"short-summary": "The policy rule parameter definitions.", "long-summary": "The definitions for parameters used in the policy rule. The keys are the parameter names."},
             nullable=True,
         )
-        _args_schema.rules = AAZDictArg(
+        _args_schema.rules = AAZAnyTypeArg(
             options=["--rule", "--rules"],
             arg_group="Properties",
             help="The policy rule.",
@@ -108,8 +114,42 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        metadata = cls._args_schema.metadata
-        metadata.Element = AAZAnyTypeArg(
+        external_evaluation_enforcement_settings = cls._args_schema.external_evaluation_enforcement_settings
+        external_evaluation_enforcement_settings.endpoint_settings = AAZObjectArg(
+            options=["endpoint-settings"],
+            help="The settings of an external endpoint providing evaluation results.",
+            nullable=True,
+        )
+        external_evaluation_enforcement_settings.missing_token_action = AAZStrArg(
+            options=["missing-token-action"],
+            help="What to do when evaluating an enforcement policy that requires an external evaluation and the token is missing. Possible values are Audit and Deny and language expressions are supported.",
+            nullable=True,
+        )
+        external_evaluation_enforcement_settings.result_lifespan = AAZStrArg(
+            options=["result-lifespan"],
+            help="The lifespan of the endpoint invocation result after which it's no longer valid. Value is expected to follow the ISO 8601 duration format and language expressions are supported.",
+            nullable=True,
+        )
+        external_evaluation_enforcement_settings.role_definition_ids = AAZListArg(
+            options=["role-definition-ids"],
+            help="An array of the role definition Ids the assignment's MSI will need in order to invoke the endpoint.",
+            nullable=True,
+        )
+
+        endpoint_settings = cls._args_schema.external_evaluation_enforcement_settings.endpoint_settings
+        endpoint_settings.details = AAZAnyTypeArg(
+            options=["details"],
+            help="The details of the endpoint.",
+            nullable=True,
+        )
+        endpoint_settings.kind = AAZStrArg(
+            options=["kind"],
+            help="The kind of the endpoint.",
+            nullable=True,
+        )
+
+        role_definition_ids = cls._args_schema.external_evaluation_enforcement_settings.role_definition_ids
+        role_definition_ids.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -134,7 +174,7 @@ class Update(AAZCommand):
             help="General metadata for the parameter.",
             nullable=True,
         )
-        _element.schema = AAZDictArg(
+        _element.schema = AAZAnyTypeArg(
             options=["schema"],
             help="Provides validation of parameter inputs during assignment using a self-defined JSON schema. This property is only supported for object-type parameters and follows the Json.NET Schema 2019-09 implementation. You can learn more about using schemas at https://json-schema.org/ and test draft schemas at https://www.jsonschemavalidator.net/.",
             nullable=True,
@@ -148,16 +188,6 @@ class Update(AAZCommand):
 
         allowed_values = cls._args_schema.params.Element.allowed_values
         allowed_values.Element = AAZAnyTypeArg(
-            nullable=True,
-        )
-
-        schema = cls._args_schema.params.Element.schema
-        schema.Element = AAZAnyTypeArg(
-            nullable=True,
-        )
-
-        rules = cls._args_schema.rules
-        rules.Element = AAZAnyTypeArg(
             nullable=True,
         )
         return cls._args_schema
@@ -246,7 +276,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -325,7 +355,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -404,7 +434,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -495,7 +525,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -559,15 +589,28 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("displayName", AAZStrType, ".display_name")
-                properties.set_prop("metadata", AAZDictType, ".metadata")
+                properties.set_prop("externalEvaluationEnforcementSettings", AAZObjectType, ".external_evaluation_enforcement_settings")
+                properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("mode", AAZStrType, ".mode")
                 properties.set_prop("parameters", AAZDictType, ".params")
-                properties.set_prop("policyRule", AAZDictType, ".rules")
+                properties.set_prop("policyRule", AAZAnyType, ".rules")
                 properties.set_prop("version", AAZStrType, ".version")
 
-            metadata = _builder.get(".properties.metadata")
-            if metadata is not None:
-                metadata.set_elements(AAZAnyType, ".")
+            external_evaluation_enforcement_settings = _builder.get(".properties.externalEvaluationEnforcementSettings")
+            if external_evaluation_enforcement_settings is not None:
+                external_evaluation_enforcement_settings.set_prop("endpointSettings", AAZObjectType, ".endpoint_settings")
+                external_evaluation_enforcement_settings.set_prop("missingTokenAction", AAZStrType, ".missing_token_action")
+                external_evaluation_enforcement_settings.set_prop("resultLifespan", AAZStrType, ".result_lifespan")
+                external_evaluation_enforcement_settings.set_prop("roleDefinitionIds", AAZListType, ".role_definition_ids")
+
+            endpoint_settings = _builder.get(".properties.externalEvaluationEnforcementSettings.endpointSettings")
+            if endpoint_settings is not None:
+                endpoint_settings.set_prop("details", AAZAnyType, ".details")
+                endpoint_settings.set_prop("kind", AAZStrType, ".kind")
+
+            role_definition_ids = _builder.get(".properties.externalEvaluationEnforcementSettings.roleDefinitionIds")
+            if role_definition_ids is not None:
+                role_definition_ids.set_elements(AAZStrType, ".")
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -578,7 +621,7 @@ class Update(AAZCommand):
                 _elements.set_prop("allowedValues", AAZListType, ".allowed_values")
                 _elements.set_prop("defaultValue", AAZAnyType, ".default_value")
                 _elements.set_prop("metadata", AAZFreeFormDictType, ".metadata")
-                _elements.set_prop("schema", AAZDictType, ".schema")
+                _elements.set_prop("schema", AAZAnyType, ".schema")
                 _elements.set_prop("type", AAZStrType, ".type")
 
             allowed_values = _builder.get(".properties.parameters{}.allowedValues")
@@ -588,14 +631,6 @@ class Update(AAZCommand):
             metadata = _builder.get(".properties.parameters{}.metadata")
             if metadata is not None:
                 metadata.set_anytype_elements(".")
-
-            schema = _builder.get(".properties.parameters{}.schema")
-            if schema is not None:
-                schema.set_elements(AAZAnyType, ".")
-
-            policy_rule = _builder.get(".properties.policyRule")
-            if policy_rule is not None:
-                policy_rule.set_elements(AAZAnyType, ".")
 
             return _instance_value
 
@@ -648,10 +683,13 @@ class _UpdateHelper:
         properties.display_name = AAZStrType(
             serialized_name="displayName",
         )
-        properties.metadata = AAZDictType()
+        properties.external_evaluation_enforcement_settings = AAZObjectType(
+            serialized_name="externalEvaluationEnforcementSettings",
+        )
+        properties.metadata = AAZAnyType()
         properties.mode = AAZStrType()
         properties.parameters = AAZDictType()
-        properties.policy_rule = AAZDictType(
+        properties.policy_rule = AAZAnyType(
             serialized_name="policyRule",
         )
         properties.policy_type = AAZStrType(
@@ -660,8 +698,26 @@ class _UpdateHelper:
         properties.version = AAZStrType()
         properties.versions = AAZListType()
 
-        metadata = _schema_policy_definition_read.properties.metadata
-        metadata.Element = AAZAnyType()
+        external_evaluation_enforcement_settings = _schema_policy_definition_read.properties.external_evaluation_enforcement_settings
+        external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+            serialized_name="endpointSettings",
+        )
+        external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+            serialized_name="missingTokenAction",
+        )
+        external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+            serialized_name="resultLifespan",
+        )
+        external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+            serialized_name="roleDefinitionIds",
+        )
+
+        endpoint_settings = _schema_policy_definition_read.properties.external_evaluation_enforcement_settings.endpoint_settings
+        endpoint_settings.details = AAZAnyType()
+        endpoint_settings.kind = AAZStrType()
+
+        role_definition_ids = _schema_policy_definition_read.properties.external_evaluation_enforcement_settings.role_definition_ids
+        role_definition_ids.Element = AAZStrType()
 
         parameters = _schema_policy_definition_read.properties.parameters
         parameters.Element = AAZObjectType()
@@ -674,17 +730,11 @@ class _UpdateHelper:
             serialized_name="defaultValue",
         )
         _element.metadata = AAZFreeFormDictType()
-        _element.schema = AAZDictType()
+        _element.schema = AAZAnyType()
         _element.type = AAZStrType()
 
         allowed_values = _schema_policy_definition_read.properties.parameters.Element.allowed_values
         allowed_values.Element = AAZAnyType()
-
-        schema = _schema_policy_definition_read.properties.parameters.Element.schema
-        schema.Element = AAZAnyType()
-
-        policy_rule = _schema_policy_definition_read.properties.policy_rule
-        policy_rule.Element = AAZAnyType()
 
         versions = _schema_policy_definition_read.properties.versions
         versions.Element = AAZStrType()

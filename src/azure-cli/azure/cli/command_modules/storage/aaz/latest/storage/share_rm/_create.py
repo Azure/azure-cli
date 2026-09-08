@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "storage share-rm create",
 )
 class Create(AAZCommand):
-    """Create a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share. 
+    """Create a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share.
 
     :example: Create a new Azure file share 'myfileshare' with metadata and quota as 10 GB under the storage     account 'mystorageaccount'(account name) in resource group 'MyResourceGroup'.
         az storage share-rm create -g MyResourceGroup --storage-account mystorageaccount --name myfileshare --quota 10 --metadata key1=value1 key2=value2
@@ -76,6 +76,10 @@ class Create(AAZCommand):
                 max_length=63,
                 min_length=3,
             ),
+        )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="Optional, used to expand the properties within share's properties. Valid values are: snapshots. Should be passed as a string with delimiter ','",
         )
 
         # define Arg Group "Properties"
@@ -215,6 +219,9 @@ class Create(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2024-01-01",
                     required=True,

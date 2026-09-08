@@ -20,7 +20,7 @@ def create_dce(cmd, cluster_subscription, cluster_resource_group_name, cluster_n
     from azure.cli.command_modules.acs._client_factory import get_resources_client
     resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
     try:
-        resources.begin_create_or_update_by_id(
+        poller = resources.begin_create_or_update_by_id(
             dce_resource_id,
             DC_API,
             {
@@ -30,6 +30,7 @@ def create_dce(cmd, cluster_subscription, cluster_resource_group_name, cluster_n
                 "properties": {}
             }
         )
+        poller.result()
         return dce_resource_id
     except Exception as error:
         raise CLIError(error)

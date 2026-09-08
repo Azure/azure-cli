@@ -59,10 +59,36 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     start_hour = raw_parameters.get("start_hour")
     schedule_type = raw_parameters.get("schedule_type")
 
-    if weekday is None or start_hour is None:
-        raise RequiredArgumentMissingError('Please specify --weekday and --start-hour for default maintenance configuration, or use --config-file instead.')
+    # If schedule_type is provided, use maintenanceWindow format for the default config
     if schedule_type is not None:
-        raise MutuallyExclusiveArgumentError('--schedule-type is not supported for default maintenance configuration.')
+        if weekday is not None or start_hour is not None:
+            raise MutuallyExclusiveArgumentError('--weekday and --start-hour cannot be used together with --schedule-type for default maintenance configuration.')
+        if schedule_type != CONST_WEEKLY_MAINTENANCE_SCHEDULE:
+            raise InvalidArgumentValueError('--schedule-type for default maintenance configuration must be Weekly.')
+        if raw_parameters.get("interval_weeks") is not None:
+            raise InvalidArgumentValueError('--interval-weeks cannot be specified for default maintenance configuration; the interval is always 1 week.')
+        offending = [p for p in ("interval_days", "interval_months", "day_of_month", "week_index")
+                     if raw_parameters.get(p) is not None]
+        if offending:
+            flags = ", ".join("--" + p.replace("_", "-") for p in offending)
+            raise MutuallyExclusiveArgumentError(
+                f'{flags} cannot be used for default maintenance configuration.')
+        if raw_parameters.get("day_of_week") is None:
+            raise RequiredArgumentMissingError('--day-of-week is required for default maintenance configuration when --schedule-type Weekly is specified.')
+        maintenance_window_parameters = {**raw_parameters, "interval_weeks": 1}
+        maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
+        MaintenanceConfiguration = (
+            maintenance_configuration_models.MaintenanceConfiguration
+        )
+        maintenanceConfiguration = MaintenanceConfiguration()
+        # utc_offset and start_date are intentionally not validated here: the RP accepts the full
+        # MaintenanceWindow schema (including these optional fields) for all maintenance config types.
+        maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, maintenance_window_parameters)
+        return maintenanceConfiguration
+
+    # Legacy timeInWeek format
+    if weekday is None or start_hour is None:
+        raise RequiredArgumentMissingError('Please specify --weekday and --start-hour, or --schedule-type Weekly with --day-of-week, --start-time, and --duration for default maintenance configuration, or use --config-file instead.')
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     TimeInWeek = (
@@ -73,13 +99,13 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     timeInWeek_dict["day"] = weekday
     timeInWeek_dict["hour_slots"] = [start_hour]
     timeInWeek = TimeInWeek(**timeInWeek_dict)
-    Result = (
+    MaintenanceConfiguration = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
-    result = Result()
-    result.time_in_week = [timeInWeek]
-    result.not_allowed_time = []
-    return result
+    maintenanceConfiguration = MaintenanceConfiguration()
+    maintenanceConfiguration.time_in_week = [timeInWeek]
+    maintenanceConfiguration.not_allowed_time = []
+    return maintenanceConfiguration
 
 
 def constructDedicatedMaintenanceConfiguration(cmd, raw_parameters):
@@ -89,12 +115,12 @@ def constructDedicatedMaintenanceConfiguration(cmd, raw_parameters):
         raise MutuallyExclusiveArgumentError('--weekday and --start-hour are only applicable to default maintenance configuration.')
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-    Result = (
+    MaintenanceConfiguration = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
-    result = Result()
-    result.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
-    return result
+    maintenanceConfiguration = MaintenanceConfiguration()
+    maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
+    return maintenanceConfiguration
 
 
 def constructMaintenanceWindow(cmd, raw_parameters):

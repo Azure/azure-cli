@@ -1,0 +1,868 @@
+{
+  "properties": {
+    "deploymentStackResourceId": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Resources/deploymentStacks/testStack_9ef16884f0dad7d0e5de3d3ec57",
+    "retentionInterval": "P1D",
+    "provisioningState": "Succeeded",
+    "deploymentStackLastModified": "2026-02-23T16:44:05+00:00",
+    "deploymentExtensions": [
+      {
+        "name": "Contoso",
+        "version": "2.0.0"
+      },
+      {
+        "name": "Kubernetes",
+        "version": "2.0.0",
+        "configId": "kubeConfigHash",
+        "config": {
+          "kubeconfig": {
+            "keyVaultReference": {
+              "keyVault": {
+                "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/myRg/providers/Microsoft.KeyVault/vaults/kubeConfigVault"
+              },
+              "secretName": "kubeConfigSecretName"
+            }
+          },
+          "namespace": {
+            "value": "default"
+          }
+        }
+      }
+    ],
+    "changes": {
+      "resourceChanges": [
+        {
+          "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
+          "type": "Microsoft.Test/testA",
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": "None",
+            "after": "DenyDelete"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
+              "location": "westus",
+              "name": "resourceA",
+              "type": "Microsoft.Test/testA",
+              "properties": {
+                "property1": "resourceA-before"
+              }
+            },
+            "after": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
+              "location": "westus",
+              "name": "resourceA",
+              "type": "Microsoft.Test/testA",
+              "properties": {
+                "property1": "resourceA-after"
+              }
+            },
+            "delta": [
+              {
+                "path": "properties.properties1",
+                "changeType": "Modify",
+                "before": "resourceA-before",
+                "after": "resourceA-after",
+                "children": []
+              }
+            ]
+          },
+          "changeType": "Modify",
+          "changeCertainty": "Definite"
+        },
+        {
+          "changeType": "Delete",
+          "changeCertainty": "Definite",
+          "extension": {
+            "name": "Contoso",
+            "version": "2.0.0"
+          },
+          "type": "Contoso/example",
+          "identifiers": {
+            "name": "defResource"
+          },
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "Unmanaged"
+          },
+          "denyStatusChange": {
+            "before": "NotSupported",
+            "after": "None"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "defResource"
+              },
+              "type": "Contoso/example",
+              "properties": {
+                "property1": "resourceDef-before"
+              }
+            },
+            "after": null,
+            "delta": []
+          }
+        },
+        {
+          "changeType": "Unsupported",
+          "changeCertainty": "Potential",
+          "extension": {
+            "name": "Contoso",
+            "version": "2.0.0"
+          },
+          "type": "Contoso/noPreview",
+          "identifiers": null,
+          "managementStatusChange": {
+            "before": null,
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": null,
+            "after": "NotSupported"
+          },
+          "resourceConfigurationChanges": {
+            "before": null,
+            "after": {
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": null,
+              "type": "Contoso/noPreview",
+              "properties": {
+                "property1": "noPreview-after"
+              }
+            },
+            "delta": []
+          }
+        },
+        {
+          "changeType": "Modify",
+          "changeCertainty": "Definite",
+          "apiVersion": "v1",
+          "extension": {
+            "name": "Contoso",
+            "version": "2.0.0"
+          },
+          "type": "Contoso/example",
+          "identifiers": {
+            "name": "abcResource"
+          },
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": "NotSupported",
+            "after": "NotSupported"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "abcResource"
+              },
+              "type": "Contoso/example",
+              "properties": {
+                "property1": "abcResource-before"
+              }
+            },
+            "after": {
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "abcResource"
+              },
+              "type": "Contoso/example",
+              "properties": {
+                "property1": "abcResource-after"
+              }
+            },
+            "delta": [
+              {
+                "path": "properties.properties1",
+                "changeType": "Modify",
+                "before": "resourceA-before",
+                "after": "resourceA-after",
+                "children": []
+              },
+              {
+                "after": {
+                  "type": "object",
+                  "value": {
+                    "enabled": true,
+                    "values": [
+                      1,
+                      2,
+                      3
+                    ]
+                  }
+                },
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "properties.someConfig"
+              },
+              {
+                "before": null,
+                "after": [
+                  "one",
+                  "two"
+                ],
+                "changeType": "delete",
+                "children": [],
+                "path": "properties.some.deeply.nested.array"
+              }
+            ]
+          }
+        },
+        {
+          "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testB/resourceB",
+          "type": "Microsoft.Test/testB",
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": "None",
+            "after": "DenyDelete"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testB/resourceB",
+              "location": "westus",
+              "name": "resourceB",
+              "type": "Microsoft.Test/testB",
+              "properties": {
+                "property1": "resourceB"
+              }
+            },
+            "after": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testB/resourceB",
+              "location": "westus",
+              "name": "resourceB",
+              "type": "Microsoft.Test/testB",
+              "properties": {
+                "property1": "resourceB"
+              }
+            },
+            "delta": []
+          },
+          "changeType": "NoChange",
+          "changeCertainty": "Definite"
+        },
+        {
+          "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD",
+          "type": "Microsoft.Test/testD",
+          "managementStatusChange": {
+            "before": "NotManaged",
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": "None",
+            "after": "DenyDelete"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD",
+              "location": "westus",
+              "name": "resourceD",
+              "type": "Microsoft.Test/testD",
+              "properties": {
+                "property1": "resourceD"
+              }
+            },
+            "delta": []
+          },
+          "changeType": "Create",
+          "changeCertainty": "Definite"
+        },
+        {
+          "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC",
+          "type": "Microsoft.Test/testC",
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": "None",
+            "after": "DenyDelete"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC",
+              "location": "westus",
+              "name": "resourceC",
+              "type": "Microsoft.Test/testC",
+              "properties": {
+                "property1": "resourceC-before"
+              }
+            },
+            "after": {
+              "apiVersion": "2021-05-01",
+              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC",
+              "location": "westus",
+              "name": "resourceC",
+              "type": "Microsoft.Test/testC",
+              "properties": {
+                "property1": "resourceC-potential-after"
+              }
+            },
+            "delta": [
+              {
+                "path": "properties.properties1",
+                "changeType": "Modify",
+                "before": "resourceC-before",
+                "after": "resourceC-potential-after",
+                "children": []
+              }
+            ]
+          },
+          "changeType": "Modify",
+          "changeCertainty": "Potential"
+        },
+        {
+          "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC",
+          "type": "Microsoft.Test/testC",
+          "managementStatusChange": {
+            "before": "Managed",
+            "after": "NotManaged"
+          },
+          "denyStatusChange": {
+            "before": "None",
+            "after": "None"
+          },
+          "changeType": "Delete",
+          "changeCertainty": "Potential"
+        },
+        {
+          "changeType": "Create",
+          "changeCertainty": "Definite",
+          "extension": {
+            "name": "Kubernetes",
+            "version": "2.0.0",
+            "configId": "kubeConfigHash",
+            "config": {
+              "namespace": {
+                "value": "myNs"
+              },
+              "kubeconfig": {
+                "keyVaultReference": {
+                  "keyVault": {
+                    "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault"
+                  },
+                  "secretName": "mySecret"
+                }
+              }
+            }
+          },
+          "type": "app/Deployment",
+          "identifiers": {
+            "name": "kubeAppDeployment"
+          },
+          "managementStatusChange": {
+            "before": null,
+            "after": "Managed"
+          },
+          "denyStatusChange": {
+            "before": null,
+            "after": "NotApplicable"
+          },
+          "resourceConfigurationChanges": {
+            "before": null,
+            "after": {
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Kubernetes",
+                "version": "2.0.0",
+                "configId": "kubeConfigHash"
+              },
+              "type": "app/Deployment",
+              "properties": {
+                "property1": "kubeAppDeployment-after"
+              }
+            },
+            "delta": [
+              {
+                "path": "properties.property1",
+                "changeType": "Modify",
+                "before": "kubeAppDeployment-before",
+                "after": "kubeAppDeployment-after",
+                "children": []
+              }
+            ]
+          }
+        },
+        {
+          "id": "/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.Web/sites/web-gwfjnc7423h2a/providers/Microsoft.Insights/diagnosticSettings/diag-web-gwfjnc7423h2a",
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "managementStatusChange": {
+            "before": "managed",
+            "after": "managed"
+          },
+          "denyStatusChange": {
+            "before": "none",
+            "after": "none"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "apiVersion": "2021-05-01-preview",
+              "id": "/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.Web/sites/web-gwfjnc7423h2a/providers/Microsoft.Insights/diagnosticSettings/diag-web-gwfjnc7423h2a",
+              "name": "diag-web-gwfjnc7423h2a",
+              "properties": {
+                "logs": [
+                  {
+                    "category": "AppServiceHTTPLogs",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceConsoleLogs",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceAppLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceAuditLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceIPSecAuditLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServicePlatformLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceAuthenticationLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "days": 0,
+                      "enabled": false
+                    }
+                  }
+                ],
+                "workspaceId": "/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.OperationalInsights/workspaces/law-gwfjnc7423h2a"
+              },
+              "type": "Microsoft.Insights/diagnosticSettings"
+            },
+            "after": {
+              "apiVersion": "2021-05-01-preview",
+              "id": "/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.Web/sites/web-gwfjnc7423h2a/providers/Microsoft.Insights/diagnosticSettings/diag-web-gwfjnc7423h2a",
+              "name": "diag-web-gwfjnc7423h2a",
+              "properties": {
+                "logs": [
+                  {
+                    "category": "AppServiceHTTPLogs",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AppServiceConsoleLogs",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "DanteFunLogs",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "DanteMetrics",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false
+                    }
+                  },
+                  {
+                    "category": "AllMetrics",
+                    "enabled": false,
+                    "retentionPolicy": {
+                      "enabled": false
+                    }
+                  }
+                ],
+                "workspaceId": "/subscriptions/648e207a-a8cf-4a20-a557-59ee31ea46a3/resourceGroups/WhatIfTestNew/providers/Microsoft.OperationalInsights/workspaces/law-gwfjnc7423h2a"
+              },
+              "type": "Microsoft.Insights/diagnosticSettings"
+            },
+            "delta": [
+              {
+                "path": "properties.nestedArrays",
+                "changeType": "array",
+                "children": [
+                  {
+                    "path": "0",
+                    "changeType": "create",
+                    "after": [],
+                    "children": []
+                  },
+                  {
+                    "path": "1",
+                    "changeType": "create",
+                    "after": [
+                      "1",
+                      "2"
+                    ],
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "path": "properties.logs",
+                "changeType": "array",
+                "children": [
+                  {
+                    "path": "3",
+                    "changeType": "delete",
+                    "before": {
+                      "category": "AppServiceAuditLogs",
+                      "enabled": false,
+                      "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "path": "4",
+                    "changeType": "delete",
+                    "before": {
+                      "category": "AppServiceIPSecAuditLogs",
+                      "enabled": false,
+                      "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "path": "5",
+                    "changeType": "delete",
+                    "before": {
+                      "category": "AppServicePlatformLogs",
+                      "enabled": false,
+                      "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "path": "6",
+                    "changeType": "delete",
+                    "before": {
+                      "category": "AppServiceAuthenticationLogs",
+                      "enabled": false,
+                      "retentionPolicy": {
+                        "days": 0,
+                        "enabled": false
+                      }
+                    },
+                    "children": []
+                  },
+                  {
+                    "path": "0",
+                    "changeType": "modify",
+                    "children": [
+                      {
+                        "path": "enabled",
+                        "changeType": "modify",
+                        "before": true,
+                        "after": false,
+                        "children": []
+                      },
+                      {
+                        "path": "retentionPolicy.days",
+                        "changeType": "delete",
+                        "before": 0,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "path": "1",
+                    "changeType": "modify",
+                    "children": [
+                      {
+                        "path": "retentionPolicy.days",
+                        "changeType": "delete",
+                        "before": 0,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "path": "2",
+                    "changeType": "modify",
+                    "children": [
+                      {
+                        "path": "category",
+                        "changeType": "modify",
+                        "before": "AppServiceAppLogs",
+                        "after": "DanteFunLogs",
+                        "children": []
+                      },
+                      {
+                        "path": "enabled",
+                        "changeType": "modify",
+                        "before": false,
+                        "after": true,
+                        "children": []
+                      },
+                      {
+                        "path": "retentionPolicy.days",
+                        "changeType": "delete",
+                        "before": 0,
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "path": "properties.metrics",
+                "changeType": "array",
+                "children": [
+                  {
+                    "path": "0",
+                    "changeType": "modify",
+                    "children": [
+                      {
+                        "path": "category",
+                        "changeType": "modify",
+                        "before": "AllMetrics",
+                        "after": "DanteMetrics",
+                        "children": []
+                      },
+                      {
+                        "path": "retentionPolicy.days",
+                        "changeType": "delete",
+                        "before": 0,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "path": "1",
+                    "changeType": "create",
+                    "after": {
+                      "category": "AllMetrics",
+                      "enabled": false,
+                      "retentionPolicy": {
+                        "enabled": false
+                      }
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          "changeType": "modify",
+          "changeCertainty": "definite"
+        }
+      ],
+      "deploymentScopeChange": {
+        "before": "ThisIsBefore",
+        "after": "ThisIsAfter"
+      },
+      "denySettingsChange": {
+        "before": {
+          "mode": "None",
+          "excludedPrincipals": [],
+          "excludedActions": [],
+          "applyToChildScopes": false
+        },
+        "after": {
+          "mode": "DenyDelete",
+          "excludedPrincipals": [
+            "004afc20-146e-4932-a8b5-3098461c46a5",
+            "e6a513a0-b872-4355-82b9-47645fb30d3a"
+          ],
+          "excludedActions": [],
+          "applyToChildScopes": true
+        },
+        "delta": [
+          {
+            "path": "Mode",
+            "changeType": "Modify",
+            "before": "None",
+            "after": "DenyDelete"
+          },
+          {
+            "path": "ApplyToChildScopes",
+            "changeType": "Modify",
+            "before": "False",
+            "after": "True"
+          },
+          {
+            "path": "ExcludedPrincipals",
+            "changeType": "Array",
+            "children": [
+              {
+                "changeType": "Create",
+                "after": "004afc20-146e-4932-a8b5-3098461c46a5"
+              },
+              {
+                "changeType": "Create",
+                "after": "e6a513a0-b872-4355-82b9-47645fb30d3a"
+              }
+            ]
+          },
+          {
+            "path": "ArrayOfMixed",
+            "changeType": "Array",
+            "children": [
+              {
+                "path": "0",
+                "changeType": "Modify",
+                "children": [
+                  {
+                    "path": "properties.something",
+                    "changeType": "Modify",
+                    "before": "B4",
+                    "after": "Now"
+                  }
+                ]
+              },
+              {
+                "path": "1",
+                "changeType": "Create",
+                "after": "now",
+                "before": "b4"
+              },
+              {
+                "path": "2",
+                "changeType": "Delete",
+                "before": "iWasDeleted"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "diagnostics": [
+      {
+        "level": "Warning",
+        "code": "NoSupportForExtensibleResources",
+        "message": "Extensible resources are currently not supported"
+      },
+      {
+        "level": "Warning",
+        "code": "Abc",
+        "message": "Xyz"
+      },
+      {
+        "level": "Info",
+        "code": "InfoCode",
+        "message": "InfoMessage"
+      },
+      {
+        "level": "Error",
+        "code": "ErrorCode",
+        "message": "ErrorMessage"
+      },
+      {
+        "level": "Error",
+        "code": "ErrorCode",
+        "message": "This is an error diagnostic with a target.",
+        "target": "/subscriptions/d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/tests/testResource"
+      }
+    ],
+    "correlationId": "14958d2b-08d9-4b9a-a9ce-7fcfa172fda5",
+    "actionOnUnmanage": {
+      "resources": "Delete",
+      "resourceGroups": "Detach",
+      "managementGroups": "Detach",
+      "resourcesWithoutDeleteSupport": "Fail"
+    },
+    "deploymentScope": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1",
+    "denySettings": {
+      "mode": "DenyDelete",
+      "applyToChildScopes": true,
+      "excludedPrincipals": [
+        "004afc20-146e-4932-a8b5-3098461c46a5",
+        "e6a513a0-b872-4355-82b9-47645fb30d3a"
+      ],
+      "excludedActions": []
+    },
+    "parametersLink": {
+      "uri": "https://MyParameters.json"
+    },
+    "templateLink": {
+      "uri": "https://MyTemplate.json"
+    },
+    "bypassStackOutOfSyncError": false
+  },
+  "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Resources/deploymentStacksWhatIfResults/testWhatIf_c04b8bc4f3cbe14fb0670419042",
+  "type": "Microsoft.Resources/deploymentStacksWhatIfResults",
+  "name": "testWhatIf_c04b8bc4f3cbe14fb0670419042"
+}

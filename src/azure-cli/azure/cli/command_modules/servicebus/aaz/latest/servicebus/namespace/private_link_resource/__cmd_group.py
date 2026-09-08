@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus namespace private-link-resource",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage servicebus namespace private link resources.
+    """private-link-resource
     """
     pass
 

@@ -31,7 +31,9 @@ from ._models import (KeyValue,
 from ._utils import (get_appconfig_data_client,
                      prep_filter_for_url_encoding,
                      validate_feature_flag_name,
-                     resolve_store_metadata)
+                     resolve_store_metadata,
+                     get_store_name_from_connection_string,
+                     get_store_name_from_endpoint)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter,
@@ -43,7 +45,7 @@ logger = get_logger(__name__)
 # Feature commands #
 
 
-def warn_if_app_insights_not_set(cmd, store_name):
+def warn_if_app_insights_not_set(cmd, store_name=None, connection_string=None, endpoint=None):
     """
     Check if Application Insights resource is set for the App Configuration store.
     Emits a warning if not set or if the check cannot be completed.
@@ -51,6 +53,14 @@ def warn_if_app_insights_not_set(cmd, store_name):
     from ._client_factory import cf_configstore
 
     try:
+        # When the store name is not provided directly (e.g. the command used --endpoint or
+        # --connection-string instead of --name), derive it so the App Insights link can be
+        # resolved via the management plane.
+        if not store_name:
+            store_name = (get_store_name_from_connection_string(connection_string)
+                          if connection_string
+                          else get_store_name_from_endpoint(endpoint))
+
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
         configstore_client = cf_configstore(cmd.cli_ctx)
         store = configstore_client.get(resource_group_name, store_name)
@@ -118,7 +128,7 @@ def set_feature(cmd,
     if telemetry_enabled is not None:
         default_value[FeatureFlagConstants.TELEMETRY] = {FeatureFlagConstants.ENABLED: telemetry_enabled}
         if telemetry_enabled:
-            warn_if_app_insights_not_set(cmd, name)
+            warn_if_app_insights_not_set(cmd, name, connection_string, endpoint)
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 

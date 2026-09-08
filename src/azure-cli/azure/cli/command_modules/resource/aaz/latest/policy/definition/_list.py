@@ -30,11 +30,11 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.authorization/policydefinitions", "2024-05-01"],
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
         ]
     }
 
@@ -124,7 +124,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -160,7 +160,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -188,10 +190,13 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.external_evaluation_enforcement_settings = AAZObjectType(
+                serialized_name="externalEvaluationEnforcementSettings",
+            )
+            properties.metadata = AAZAnyType()
             properties.mode = AAZStrType()
             properties.parameters = AAZDictType()
-            properties.policy_rule = AAZDictType(
+            properties.policy_rule = AAZAnyType(
                 serialized_name="policyRule",
             )
             properties.policy_type = AAZStrType(
@@ -200,8 +205,26 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+                serialized_name="endpointSettings",
+            )
+            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+                serialized_name="missingTokenAction",
+            )
+            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+                serialized_name="resultLifespan",
+            )
+            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+                serialized_name="roleDefinitionIds",
+            )
+
+            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings.details = AAZAnyType()
+            endpoint_settings.kind = AAZStrType()
+
+            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids.Element = AAZStrType()
 
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
@@ -214,17 +237,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
-
-            policy_rule = cls._schema_on_200.value.Element.properties.policy_rule
-            policy_rule.Element = AAZAnyType()
 
             versions = cls._schema_on_200.value.Element.properties.versions
             versions.Element = AAZStrType()
@@ -294,7 +311,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -330,7 +347,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -358,10 +377,13 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.external_evaluation_enforcement_settings = AAZObjectType(
+                serialized_name="externalEvaluationEnforcementSettings",
+            )
+            properties.metadata = AAZAnyType()
             properties.mode = AAZStrType()
             properties.parameters = AAZDictType()
-            properties.policy_rule = AAZDictType(
+            properties.policy_rule = AAZAnyType(
                 serialized_name="policyRule",
             )
             properties.policy_type = AAZStrType(
@@ -370,8 +392,26 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+                serialized_name="endpointSettings",
+            )
+            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+                serialized_name="missingTokenAction",
+            )
+            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+                serialized_name="resultLifespan",
+            )
+            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+                serialized_name="roleDefinitionIds",
+            )
+
+            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings.details = AAZAnyType()
+            endpoint_settings.kind = AAZStrType()
+
+            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids.Element = AAZStrType()
 
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
@@ -384,17 +424,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
-
-            policy_rule = cls._schema_on_200.value.Element.properties.policy_rule
-            policy_rule.Element = AAZAnyType()
 
             versions = cls._schema_on_200.value.Element.properties.versions
             versions.Element = AAZStrType()
@@ -464,7 +498,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -500,7 +534,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -528,10 +564,13 @@ class List(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZDictType()
+            properties.external_evaluation_enforcement_settings = AAZObjectType(
+                serialized_name="externalEvaluationEnforcementSettings",
+            )
+            properties.metadata = AAZAnyType()
             properties.mode = AAZStrType()
             properties.parameters = AAZDictType()
-            properties.policy_rule = AAZDictType(
+            properties.policy_rule = AAZAnyType(
                 serialized_name="policyRule",
             )
             properties.policy_type = AAZStrType(
@@ -540,8 +579,26 @@ class List(AAZCommand):
             properties.version = AAZStrType()
             properties.versions = AAZListType()
 
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
+            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+                serialized_name="endpointSettings",
+            )
+            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+                serialized_name="missingTokenAction",
+            )
+            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+                serialized_name="resultLifespan",
+            )
+            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+                serialized_name="roleDefinitionIds",
+            )
+
+            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings.details = AAZAnyType()
+            endpoint_settings.kind = AAZStrType()
+
+            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids.Element = AAZStrType()
 
             parameters = cls._schema_on_200.value.Element.properties.parameters
             parameters.Element = AAZObjectType()
@@ -554,17 +611,11 @@ class List(AAZCommand):
                 serialized_name="defaultValue",
             )
             _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZDictType()
+            _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
             allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            schema = cls._schema_on_200.value.Element.properties.parameters.Element.schema
-            schema.Element = AAZAnyType()
-
-            policy_rule = cls._schema_on_200.value.Element.properties.policy_rule
-            policy_rule.Element = AAZAnyType()
 
             versions = cls._schema_on_200.value.Element.properties.versions
             versions.Element = AAZStrType()

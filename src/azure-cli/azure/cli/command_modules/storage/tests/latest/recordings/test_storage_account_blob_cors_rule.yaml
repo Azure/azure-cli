@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -n -g --allowed-origins --allowed-methods --allowed-headers --max-age
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:01 GMT
+      - Tue, 12 May 2026 10:21:37 GMT
       expires:
       - '-1'
       pragma:
@@ -39,7 +39,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/ea4e9acf-d3b0-4791-a072-2e583d00d703
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/2822042f-6208-4301-b0be-656009c5d1dd
       x-ms-throttling-version:
       - v2
     status:
@@ -47,9 +47,10 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"cors": {"corsRules": [{"allowedOrigins": ["http://*.contoso.com",
-      "http://www.fabrikam.com"], "allowedMethods": ["PUT", "GET"], "maxAgeInSeconds":
-      200, "exposedHeaders": [], "allowedHeaders": ["x-ms-meta-data*"]}]}, "deleteRetentionPolicy":
-      {"enabled": false, "allowPermanentDelete": false}}}'
+      "http://www.fabrikam.com"], "allowedMethods": ["PUT", "GET"], "allowedHeaders":
+      ["x-ms-meta-data*"], "exposedHeaders": [], "maxAgeInSeconds": 200}]}, "deleteRetentionPolicy":
+      {"allowPermanentDelete": false, "enabled": false}, "staticWebsite": {"enabled":
+      false}}}'
     headers:
       Accept:
       - application/json
@@ -60,27 +61,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '309'
+      - '346'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --allowed-origins --allowed-methods --allowed-headers --max-age
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '578'
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:03 GMT
+      - Tue, 12 May 2026 10:21:39 GMT
       expires:
       - '-1'
       pragma:
@@ -92,7 +93,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/f88ba734-0ac0-4283-b979-bc92dfcc3b73
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/72526c3c-c173-420a-b640-559747c23639
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-ms-throttling-version:
@@ -114,12 +115,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
@@ -128,7 +129,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:05 GMT
+      - Tue, 12 May 2026 10:21:44 GMT
       expires:
       - '-1'
       pragma:
@@ -140,7 +141,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/61d3ee95-d790-4eae-b883-a7c03cc9474b
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/f1748b05-2f3f-4004-b701-1a26f229d0ce
       x-ms-throttling-version:
       - v2
     status:
@@ -160,12 +161,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[{"allowedOrigins":["http://*.contoso.com","http://www.fabrikam.com"],"allowedMethods":["PUT","GET"],"maxAgeInSeconds":200,"exposedHeaders":[""],"allowedHeaders":["x-ms-meta-data*"]}]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
@@ -174,7 +175,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:06 GMT
+      - Tue, 12 May 2026 10:21:46 GMT
       expires:
       - '-1'
       pragma:
@@ -186,15 +187,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/80035ec2-1ce1-4520-9d28-9ba8ff180809
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/621a4a95-e363-43cd-8f6b-98927201e91f
       x-ms-throttling-version:
       - v2
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"enabled":
-      false, "allowPermanentDelete": false}}}'
+    body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"allowPermanentDelete":
+      false, "enabled": false}, "staticWebsite": {"enabled": false}}}'
     headers:
       Accept:
       - application/json
@@ -205,27 +206,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '119'
+      - '156'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '365'
+      - '399'
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:08 GMT
+      - Tue, 12 May 2026 10:21:48 GMT
       expires:
       - '-1'
       pragma:
@@ -237,9 +240,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/473f0f86-f1e6-44c5-92f5-548d0bce0e43
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/3e4d3eed-dad3-46c2-bd7e-7b1548cc689c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '198'
+      - '199'
       x-ms-throttling-version:
       - v2
     status:
@@ -259,12 +262,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2025-08-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"staticWebsite":{"enabled":false},"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false}}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_blob_cors000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"allowPermanentDelete":false,"enabled":false},"staticWebsite":{"enabled":false}}}'
     headers:
       cache-control:
       - no-cache
@@ -273,7 +276,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:28:09 GMT
+      - Tue, 12 May 2026 10:21:51 GMT
       expires:
       - '-1'
       pragma:
@@ -285,7 +288,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/f9940468-a054-4e3b-94ba-a9b9e35b3dc6
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/a21c032b-a05e-4392-bdbe-eee8dc466ac2
       x-ms-throttling-version:
       - v2
     status:

@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-01-preview",
+        "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2022-07-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -56,6 +56,9 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="The name of the policy exemption.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
+            ),
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
@@ -87,15 +90,17 @@ class Create(AAZCommand):
             options=["-e", "--exemption-category"],
             arg_group="Properties",
             help={"short-summary": "The policy exemption category.", "long-summary": "The policy exemption category. Possible values are Mitigated and Waiver."},
-            required=True,
             enum={"Mitigated": "Mitigated", "Waiver": "Waiver"},
         )
         _args_schema.expires_on = AAZDateTimeArg(
             options=["--expires-on"],
             arg_group="Properties",
             help={"short-summary": "The expiration date and time.", "long-summary": "The expiration date and time of the policy exemption in UTC ISO 8601 format, e.g. yyyy-MM-ddTHH:mm:ssZ."},
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
         )
-        _args_schema.metadata = AAZDictArg(
+        _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
             help={"short-summary": "The policy exemption metadata.", "long-summary": "The policy exemption metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
@@ -104,7 +109,6 @@ class Create(AAZCommand):
             options=["-a", "--policy-assignment"],
             arg_group="Properties",
             help={"short-summary": "The policy assignment to exempt.", "long-summary": "The resource ID of the policy assignment to exempt."},
-            required=True,
         )
         _args_schema.policy_definition_reference_ids = AAZListArg(
             options=["-r", "--policy-definition-reference-ids"],
@@ -116,9 +120,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help={"short-summary": "The resource selectors list to filter policies by resource properties.", "long-summary": "The collection of resource selector expressions used to filter policy exemption applicability by certain resource property values."},
         )
-
-        metadata = cls._args_schema.metadata
-        metadata.Element = AAZAnyTypeArg()
 
         policy_definition_reference_ids = cls._args_schema.policy_definition_reference_ids
         policy_definition_reference_ids.Element = AAZStrArg()
@@ -147,7 +148,7 @@ class Create(AAZCommand):
         _element.kind = AAZStrArg(
             options=["kind"],
             help="The selector kind.",
-            enum={"policyDefinitionReferenceId": "policyDefinitionReferenceId", "resourceLocation": "resourceLocation", "resourceType": "resourceType", "resourceWithoutLocation": "resourceWithoutLocation"},
+            enum={"groupPrincipalId": "groupPrincipalId", "policyDefinitionReferenceId": "policyDefinitionReferenceId", "resourceLocation": "resourceLocation", "resourceType": "resourceType", "resourceWithoutLocation": "resourceWithoutLocation", "userPrincipalId": "userPrincipalId"},
         )
         _element.not_in = AAZListArg(
             options=["not-in"],
@@ -223,7 +224,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -248,7 +249,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -257,14 +258,10 @@ class Create(AAZCommand):
                 properties.set_prop("displayName", AAZStrType, ".display_name")
                 properties.set_prop("exemptionCategory", AAZStrType, ".exemption_category", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("expiresOn", AAZStrType, ".expires_on")
-                properties.set_prop("metadata", AAZDictType, ".metadata")
+                properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("policyAssignmentId", AAZStrType, ".policy_assignment", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("policyDefinitionReferenceIds", AAZListType, ".policy_definition_reference_ids")
                 properties.set_prop("resourceSelectors", AAZListType, ".resource_selectors")
-
-            metadata = _builder.get(".properties.metadata")
-            if metadata is not None:
-                metadata.set_elements(AAZAnyType, ".")
 
             policy_definition_reference_ids = _builder.get(".properties.policyDefinitionReferenceIds")
             if policy_definition_reference_ids is not None:
@@ -324,7 +321,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200_201.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -349,7 +346,7 @@ class Create(AAZCommand):
             properties.expires_on = AAZStrType(
                 serialized_name="expiresOn",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
@@ -360,9 +357,6 @@ class Create(AAZCommand):
             properties.resource_selectors = AAZListType(
                 serialized_name="resourceSelectors",
             )
-
-            metadata = cls._schema_on_200_201.properties.metadata
-            metadata.Element = AAZAnyType()
 
             policy_definition_reference_ids = cls._schema_on_200_201.properties.policy_definition_reference_ids
             policy_definition_reference_ids.Element = AAZStrType()

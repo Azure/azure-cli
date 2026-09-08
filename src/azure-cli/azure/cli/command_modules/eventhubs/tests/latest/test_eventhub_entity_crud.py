@@ -21,7 +21,7 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_create_update(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus2',
+            'loc': 'eastus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -54,11 +54,11 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
             'capturesizelimit': 314572799,
             'archinvenameformat': '{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}'
         })
-        storage_account = self.cmd('storage account create -n {storageaccount} -g {rg} -l westus --sku Standard_LRS').get_output_in_json()
+        storage_account = self.cmd('storage account create -n {storageaccount} -g {rg} -l westus --sku Standard_LRS --allow-shared-key-access false').get_output_in_json()
 
         self.kwargs.update({'storageid': storage_account['id']})
 
-        container = self.cmd('storage container create -n {containername} -g {rg} --account-name {storageaccount}').get_output_in_json()
+        container = self.cmd('storage container create -n {containername} -g {rg} --account-name {storageaccount} --auth-mode login').get_output_in_json()
 
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}')
 
@@ -127,12 +127,12 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.assertEqual(eh4['retentionDescription']['cleanupPolicy'], "Compact")
 
         storage_account1 = self.cmd(
-            'storage account create -n {storageaccount1} -g {rg} -l westus --sku Standard_LRS').get_output_in_json()
+            'storage account create -n {storageaccount1} -g {rg} -l westus --sku Standard_LRS --allow-shared-key-access false').get_output_in_json()
 
         self.kwargs.update({'storageid1': storage_account1['id']})
 
         container = self.cmd(
-            'storage container create -n {containername1} -g {rg} --account-name {storageaccount1}').get_output_in_json()
+            'storage container create -n {containername1} -g {rg} --account-name {storageaccount1} --auth-mode login').get_output_in_json()
         eh5 = self.cmd(
             'eventhubs eventhub create -g {rg} -n {eventhubname5} --namespace-name {namespacename} --partition-count 15 --enable-capture true --capture-interval 100 --capture-size-limit 314572799 '
             '--destination-name {destinationname} --storage-account {storageid1} --blob-container {containername1} --archive-name-format {archinvenameformat} --cleanup-policy Compact').get_output_in_json()
@@ -152,16 +152,23 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.kwargs.update({'id2': identity2['id']})
         self.kwargs.update({'id3': identity2['principalId']})
 
+        # Wait for identity to propagate to Microsoft Graph
+        time.sleep(120)
+
         storage_account2 = self.cmd(
-            'storage account create -n {storageaccount2} -g {rg} -l westus --sku Standard_RAGRS ').get_output_in_json()
+            'storage account create -n {storageaccount2} -g {rg} -l westus --sku Standard_RAGRS --allow-shared-key-access false').get_output_in_json()
 
         self.kwargs.update({'storageid2': storage_account2['id']})
 
         container = self.cmd(
-            'storage container create -n {containername2} -g {rg} --account-name {storageaccount2}').get_output_in_json()
+            'storage container create -n {containername2} -g {rg} --account-name {storageaccount2} --auth-mode login').get_output_in_json()
 
+        # Grant Storage Blob Data Contributor role to the managed identity
         '''self.cmd(
-            'az role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')'''
+            'role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')'''
+
+        # Wait for role assignment to propagate
+        time.sleep(60)
 
         self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium '

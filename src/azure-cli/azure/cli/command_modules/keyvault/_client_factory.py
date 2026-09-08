@@ -244,6 +244,26 @@ def data_plane_azure_keyvault_security_domain_client(cli_ctx, command_args):
                                 verify_challenge_resource=False, **client_kwargs)
 
 
+def data_plane_azure_keyvault_ekm_client(cli_ctx, command_args):
+    from azure.keyvault.administration import KeyVaultEkmClient
+
+    # Reuse the existing login + URL resolution behavior.
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
+
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
+
+    client_kwargs = prepare_client_kwargs_track2(cli_ctx)
+    client_kwargs.pop('http_logging_policy')
+    return KeyVaultEkmClient(
+        vault_url=vault_url,
+        credential=credential,
+        verify_challenge_resource=False,
+        **client_kwargs)
+
+
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
     version = str(get_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)

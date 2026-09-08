@@ -85,12 +85,12 @@ class Update(AAZCommand):
         )
         _args_schema.nat_gateway = AAZStrArg(
             options=["--nat-gateway"],
-            help="Name or ID of a NAT gateway to attach. Use null to detach it.",
+            help="Name or identifier of a NAT gateway to attach. Use null to detach it.",
             nullable=True,
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
-            help="Name or ID of a network security group (NSG). Use null to detach it.",
+            help="Name or identifier of a network security group (NSG). Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
@@ -110,7 +110,7 @@ class Update(AAZCommand):
         )
         _args_schema.route_table = AAZResourceIdArg(
             options=["--route-table"],
-            help="Name or ID of a route table to associate with the subnet. Use null to detach it.",
+            help="Name or identifier of a route table to associate with the subnet. Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
@@ -140,7 +140,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.delegated_services.Element
         _element.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             nullable=True,
         )
         _element.name = AAZStrArg(
@@ -167,7 +167,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.policies.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
@@ -215,7 +215,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
@@ -339,7 +339,7 @@ class Update(AAZCommand):
         sub_resource_update = cls._args_sub_resource_update
         sub_resource_update.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             nullable=True,
         )
 

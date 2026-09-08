@@ -1398,6 +1398,163 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         self.cmd('network application-gateway delete --name {appgw} --resource-group {rg}')
 
+class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_ssl_cert_hsm', location='uksouth')
+    def test_network_app_gateway_ssl_cert_managed_hsm(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        init_admin = logged_in_user['id'] if logged_in_user is not None else ''
+
+        self.kwargs.update({
+            'ag': 'ag-hsm-test',
+            'ip': 'pip-hsm-test',
+            'identity': 'id-hsm-test',
+            'hsm_name': self.create_random_name('clihsm', 24),
+            'init_admin': init_admin,
+            'cert_name': 'hsmSslCert',
+            'cert_name2': 'hsmSslCert2',
+            'listener_name': 'hsmListener',
+        })
+
+        # create managed identity
+        identity_result = self.cmd('identity create -g {rg} -n {identity}').get_output_in_json()
+        self.kwargs['identity_id'] = identity_result['id']
+        self.kwargs['identity_principal'] = identity_result['principalId']
+
+        # create Managed HSM
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l uksouth '
+                 '--administrators {init_admin} --retention-days 7')
+
+        # activate HSM by downloading security domain
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = tempfile.mkdtemp()
+        self.kwargs.update({
+            'sd_cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'sd_cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'sd_cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'sd.json').replace('\\', '\\\\'),
+        })
+        self.cmd('keyvault security-domain download --hsm-name {hsm_name} '
+                 '--sd-wrapping-keys {sd_cert0} {sd_cert1} {sd_cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
+
+        # grant signed-in user and identity access to create keys in HSM
+        from unittest import mock
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {init_admin} --scope /keys')
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {identity_principal} --scope /keys')
+
+        # create keys in Managed HSM
+        kid = self.cmd('keyvault key create --hsm-name {hsm_name} -n mykey1'
+                       ).get_output_in_json()['key']['kid']
+        kid2 = self.cmd('keyvault key create --hsm-name {hsm_name} -n mykey2'
+                        ).get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'hsm_key_id': kid,
+            'hsm_key_id2': kid2,
+        })
+
+        # read public cert data from existing test cert file
+        cert_file = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        with open(cert_file, 'r') as f:
+            lines = f.read().strip().split('\n')
+        pub_cert_data = ''.join(l.strip() for l in lines if not l.startswith('-----'))
+        self.kwargs['pub_cert_data'] = pub_cert_data
+
+        # create public IP and application gateway with identity
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku Standard_v2 --public-ip-address {ip} '
+                 '--identity {identity_id} --priority 1001 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        # test validation: --hsm key-id without public-cert-data should fail
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n badCert --hsm key-id={hsm_key_id}',
+                 expect_failure=True)
+
+        # test ssl-cert create with --hsm key-id and public-cert-data
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n {cert_name} --hsm key-id={hsm_key_id} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                 ])
+
+        # test ssl-cert show returns hsm block
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                     self.exists('hsm'),
+                 ])
+
+        # test ssl-cert update to change hsm key-id
+        self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name {ag} '
+                 '-n {cert_name} --hsm key-id={hsm_key_id2} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test creating a listener preserves the existing HSM-backed certificate
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} '
+                 '-n port_443 --port 443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} '
+                 '-n {listener_name} --frontend-ip appGatewayFrontendIP '
+                 '--frontend-port port_443 --ssl-cert {cert_name} '
+                 '--host-name contoso.com',
+                 checks=[
+                     self.check('name', '{listener_name}'),
+                     self.check('hostName', 'contoso.com'),
+                     self.check("contains(sslCertificate.id, '{cert_name}')", True),
+                 ])
+
+        # test parent show and update preserve the HSM-backed certificate
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check('sslCertificates[0].hsm.keyId', '{hsm_key_id2}'),
+            self.exists('sslCertificates[0].hsm.publicCertData'),
+        ])
+        self.cmd('network application-gateway update -g {rg} -n {ag} --tags hsm=preserved',
+                 checks=self.check('tags.hsm', 'preserved'))
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                     self.exists('hsm.publicCertData'),
+                 ])
+
+        # test ssl-cert list includes the hsm cert
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{cert_name}'),
+                     self.check('[0].hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test ssl-cert create a second hsm cert
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n {cert_name2} --hsm key-id={hsm_key_id} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name2}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                 ])
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 2)])
+
+        # test ssl-cert delete
+        self.cmd('network application-gateway ssl-cert delete -g {rg} --gateway-name {ag} '
+                 '-n {cert_name2} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --updated')
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 1)])
+
+
 class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
     def _create_ag(self):
@@ -3231,6 +3388,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'policy_type': 'OWASP',
             'policy_version': 3.2,
             'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
+            'empty_rule_group_name': 'REQUEST-920-PROTOCOL-ENFORCEMENT',
             'rule_id': '921120'
         })
 
@@ -3291,6 +3449,19 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--version {policy_version} '
                  '--group-name {rule_group_name}',
                  checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {empty_rule_group_name}',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 0),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName',
+                                self.kwargs['empty_rule_group_name']),
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
@@ -5300,7 +5471,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
-    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering')
     def test_network_route_table_disable_peering_route(self, resource_group):
         self.kwargs.update({
             'table': 'cli-test-rt-peering',
@@ -5342,6 +5513,61 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete -g {rg} -n {table}')
         self.cmd('network route-table delete -g {rg} -n {table2}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_ecmp', location='eastasia')
+    def test_network_route_table_ecmp_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-ecmp',
+            'route': 'ecmp-route',
+            'ip1': '10.0.0.1',
+            'ip2': '10.0.0.2',
+            'ip3': '10.0.0.3',
+            'prefix': '10.1.0.0/16'
+        })
+
+        # create route table
+        self.cmd('network route-table create -n {table} -g {rg}')
+
+        # create route with VirtualApplianceEcmp next hop type and ECMP IP addresses
+        self.cmd('network route-table route create --address-prefix {prefix} -n {route} -g {rg} '
+                 '--next-hop-type VirtualApplianceEcmp --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # show route and verify ECMP next hop properties
+        self.cmd('network route-table route show -g {rg} --route-table-name {table} -n {route}',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # list routes and verify ECMP properties
+        self.cmd('network route-table route list -g {rg} --route-table-name {table}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].nextHopType', 'VirtualApplianceEcmp')
+                 ])
+
+        # update route to change ECMP IP addresses (add a third IP)
+        self.cmd('network route-table route update -g {rg} -n {route} --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2},{ip3}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 3),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('nextHop.nextHopIpAddresses[2]', '{ip3}')
+                 ])
+
+        self.cmd('network route-table route delete -g {rg} --route-table-name {table} -n {route}')
+        self.cmd('network route-table delete -g {rg} -n {table}')
+
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
@@ -5366,7 +5592,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.0',
                  checks=self.check('available', False))
 
-        self.cmd('network vnet list -g {rg}', checks=[
+        self.cmd('network vnet list', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True)
         ])
@@ -5374,7 +5600,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
-        self.cmd("network vnet list -o table -g {rg}")
+        self.cmd("network vnet list -o table")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
@@ -7830,6 +8056,109 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer('cli_test_traffic_manager_record_type')
+    def test_network_traffic_manager_record_type(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile-rt',
+            'dns': self.create_random_name('testtmrt', 20),
+            'endpoint': 'myendpoint-rt',
+        })
+
+        # Create a profile with record-type A
+        self.cmd(
+            'network traffic-manager profile create -n {tm} -g {rg} '
+            '--routing-method priority --unique-dns-name {dns} --record-type A',
+            checks=[
+                self.check('TrafficManagerProfile.recordType', 'A'),
+            ]
+        )
+
+        # Verify record-type is returned on show
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', 'A'),
+                self.check('dnsConfig.relativeName', '{dns}'),
+            ]
+        )
+
+        # Verify record-type is returned on list
+        self.cmd(
+            'network traffic-manager profile list -g {rg}',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].recordType', 'A'),
+            ]
+        )
+
+        # Clean up
+        self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
+    @ResourceGroupPreparer('cli_test_traffic_manager_record_type_update')
+    def test_network_traffic_manager_record_type_update(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile-rtu',
+            'dns': self.create_random_name('testtmrtu', 20),
+            'endpoint': 'myendpoint-rtu',
+        })
+
+        # Create a profile without record-type
+        self.cmd(
+            'network traffic-manager profile create -n {tm} -g {rg} '
+            '--routing-method priority --unique-dns-name {dns}',
+            checks=[
+                self.check('TrafficManagerProfile.recordType', None),
+            ]
+        )
+
+        # Show and confirm no record-type
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', None),
+            ]
+        )
+
+        # Add an endpoint with IPv4 target
+        self.cmd(
+            'network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} '
+            '--type externalEndpoints --weight 50 --target 10.0.0.1',
+            checks=[
+                self.check('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'),
+            ]
+        )
+
+        # Show and confirm still no record-type
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', None),
+                self.check('length(endpoints)', 1),
+            ]
+        )
+
+        # Update the profile to set record-type A
+        self.cmd(
+            'network traffic-manager profile update -n {tm} -g {rg} --record-type A',
+            checks=[
+                self.check('recordType', 'A'),
+            ]
+        )
+
+        # Show and confirm record-type is set and endpoint still exists
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', 'A'),
+                self.check('length(endpoints)', 1),
+                self.check('endpoints[0].name', '{endpoint}'),
+            ]
+        )
+
+        # Clean up
+        self.cmd('network traffic-manager endpoint delete -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
+        self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
 
 class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 
@@ -8510,6 +8839,98 @@ class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
             provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
 
         # Ensure that the provisioning state is 'Succeeded' after reimaging
+        self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_network_virtual_appliance_migration')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_virtual_appliance_migration(self, resource_group):
+        from time import sleep
+
+        # Variables to use in the test
+        subscriptionId = self.get_subscription_id()
+        self.kwargs.update({
+            'vwan': 'clitestvwan',  # Virtual WAN name
+            'vhub': 'clivhub',  # Virtual Hub name
+            'nva_name': 'clivirtualappliancemigration',  # NVA name
+            'rg': resource_group,
+            'subscription': subscriptionId,
+            'migration_type': 'MigrateToNewILBArchitecture',
+        })
+
+        # Add the required extension
+        self.cmd('extension add -n virtual-wan')
+
+        # Create Virtual WAN
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
+            self.check('name', '{vwan}'),
+            self.check('type', 'Microsoft.Network/virtualWans')
+        ])
+
+        # Create Virtual Hub within the Virtual WAN
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.5.0.0/16 --sku Standard', checks=[
+            self.check('name', '{vhub}'),
+        ])
+
+        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+        retry_count = 0
+        while routing_state != 'Provisioned':
+            if retry_count == 20:
+                break
+            retry_count += 1
+            sleep(360)
+            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
+
+        # Create the NVA
+        self.cmd('network virtual-appliance create -n {nva_name} -g {rg} --vhub {vhub} --vendor "checkpoint" '
+                 '--scale-unit 2 -v latest --asn 64512 --init-config "echo $abc"',
+                 checks=[
+                     self.check('name', '{nva_name}'),
+                     self.check('virtualApplianceAsn', 64512),
+                     self.check('cloudInitConfiguration', 'echo $abc')
+                 ])
+
+        # Phase 1: prepare the migration to the new ILB architecture
+        self.cmd('network virtual-appliance migration prepare -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Prepare migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 2: execute the migration
+        self.cmd('network virtual-appliance migration execute -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Execute migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
+        # Phase 3: commit the migration to finalize the new ILB architecture
+        self.cmd('network virtual-appliance migration commit -g {rg} -n {nva_name} --migration-type {migration_type}')
+
+        # Ensure that the provisioning state is 'Succeeded' after committing the migration
+        provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"Commit migration did not complete successfully. Last known provisioningState: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
+
         self.cmd('network virtual-appliance show -g {rg} -n {nva_name}',
                  checks=[
                      self.check('provisioningState', 'Succeeded')
@@ -9355,6 +9776,66 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
+    @ResourceGroupPreparer(name_prefix='test_vna_ip_version', location='eastus')
+    def test_network_virtual_network_appliance_private_ip_address_version(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'vnet-ipv4',
+            'vnet2': 'vnet-dualstack',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'vna_ipv4': 'vna-ipv4',
+            'vna_dualstack': 'vna-dualstack',
+        })
+
+        # create vnet/subnet for IPv4 vna
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefixes {vnet_address}')
+        self.kwargs['subnet1_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet1} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        # create vna with --private-ip-address-version IPv4
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna_ipv4} '
+            '--bandwidth-in-gbps 50 --subnet \"{{id:{subnet1_id}}}\" '
+            '--private-ip-address-version IPv4'
+        )
+
+        self.cmd('network virtual-network-appliance show -g {rg} -n {vna_ipv4}', checks=[
+            self.check('privateIPAddressVersion', 'IPv4'),
+            self.check('bandwidthInGbps', 50),
+        ])
+
+        # create vnet/subnet for DualStack vna (need both IPv4 and IPv6 address spaces)
+        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefixes {vnet_address} fd00:db8::/48')
+        self.kwargs['subnet2_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet2} '
+            '--address-prefixes {subnet_address} fd00:db8::/64 '
+            '--default-outbound false --query id'
+        ).get_output_in_json()
+
+        # create vna with --private-ip-address-version DualStack
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna_dualstack} '
+            '--bandwidth-in-gbps 100 --subnet \"{{id:{subnet2_id}}}\" '
+            '--private-ip-address-version DualStack'
+        )
+
+        self.cmd('network virtual-network-appliance show -g {rg} -n {vna_dualstack}', checks=[
+            self.check('privateIPAddressVersion', 'DualStack'),
+            self.check('bandwidthInGbps', 100),
+        ])
+
+        # verify list output includes both fields
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}', checks=[
+            self.check('length(@)', 2),
+        ]).get_output_in_json()
+
+        for vna in vna_list:
+            self.assertIn('privateIPAddressVersion', vna)
+            self.assertIn('bandwidthInGbps', vna)
+
 
 class DdosCustomPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_ddos_cuspol', location='eastus')
@@ -9400,6 +9881,11 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
             self.check('name', '{policy_name}'),
         ])
 
+        self.cmd('network ddos-custom-policy list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{policy_name}'),
+        ])
+
         self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --set detectionRules[0].name={detection_rule_name3}', checks=[
             self.check('length(detectionRules)', 2),
             self.check('detectionRules[0].name', '{detection_rule_name3}'),
@@ -9418,6 +9904,105 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_lb', location='eastus')
+    def test_ddos_custom_policy_attach_to_lb_fip(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'pip_name': 'pip1',
+            'lb_name': 'lb1',
+            'fip_name': 'fip1',
+        })
+
+        dcp = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} '
+                       '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                       '--traffic-type Tcp --packets-per-second 1000000', checks=[
+            self.check('name', '{policy_name}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id'] = dcp['id']
+
+        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard --allocation-method Static')
+        self.cmd('network lb create -g {rg} -n {lb_name} --sku Standard '
+                 '--public-ip-address {pip_name} --frontend-ip-name {fip_name}')
+
+        # Attach the DDoS custom policy to the LB frontend IP configuration
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb_name} -n {fip_name} '
+                 '--ddos-settings ddos-custom-policy={{id:{dcp_id}}}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network lb frontend-ip show -g {rg} --lb-name {lb_name} -n {fip_name}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb_name} -n {fip_name} '
+                 '--ddos-settings ddos-custom-policy=null', checks=[
+            self.check('ddosSettings.ddosCustomPolicy', None),
+        ])
+
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_pip', location='eastus')
+    def test_ddos_custom_policy_attach_to_public_ip(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'policy_name2': 'policy2',
+            'pip_name': 'pip1',
+        })
+
+        dcp = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} '
+                       '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                       '--traffic-type Tcp --packets-per-second 1000000', checks=[
+            self.check('name', '{policy_name}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id'] = dcp['id']
+
+        dcp2 = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name2} '
+                        '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                        '--traffic-type Tcp --packets-per-second 2000000', checks=[
+            self.check('name', '{policy_name2}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id2'] = dcp2['id']
+
+        # A DDoS custom policy can only be attached to an instance-level public IP,
+        # i.e. a public IP associated with a NIC's IP configuration. Create the public
+        # IP and associate it with a NIC to make it eligible.
+        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard '
+                 '--allocation-method Static', checks=[
+            self.check('publicIp.name', '{pip_name}'),
+            self.check('publicIp.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n nic1 --vnet-name vnet1 --subnet subnet1 '
+                 '--public-ip-address {pip_name}')
+
+        # Attach the DDoS custom policy to the (now instance-level) public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {pip_name}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        # Replace the attached policy on the existing public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy id={dcp_id2}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id2}'),
+        ])
+
+        # Remove the policy from the public IP
+        self.cmd('network public-ip update -g {rg} -n {pip_name} '
+                 '--ddos-custom-policy null', checks=[
+            self.check('ddosSettings.ddosCustomPolicy', None),
+        ])
+
+        self.cmd('network nic delete -g {rg} -n nic1')
+        self.cmd('network public-ip delete -g {rg} -n {pip_name}')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name2} -y')
 
 
 class NetworkPrivateEndpointScenarioTest(ScenarioTest):

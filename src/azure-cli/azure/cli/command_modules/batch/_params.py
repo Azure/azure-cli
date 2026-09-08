@@ -376,7 +376,7 @@ def load_arguments(self, _):
                          'since the specified time.')
 
     with self.argument_context('batch pool create') as c:
-        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://learn.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
+        c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://learn.microsoft.com/rest/api/batchservice/pools/create-pool?tabs=HTTP#request-body')
         c.argument('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
                    help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview. Set true to enable.')
         c.argument('caching',

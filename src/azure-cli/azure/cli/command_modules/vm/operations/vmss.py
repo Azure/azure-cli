@@ -10,7 +10,8 @@ from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Start as _Start,
                                Create as _VMSSCreate,
                                Show as _VMSSShow,
-                               Patch as _VMSSPatch)
+                               Patch as _VMSSPatch,
+                               List as _VMSSList)
 from azure.cli.core.aaz import AAZUndefined, has_value
 from .._vm_utils import IdentityType
 
@@ -131,6 +132,32 @@ class VMSSIdentityRemove(_VMSSPatch):
                 )
 
             return self.on_error(session.http_response)
+
+
+class VMSSList(_VMSSList):
+    class VirtualMachineScaleSetsList(_VMSSList.VirtualMachineScaleSetsList):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualMachineScaleSetsListAll(_VMSSList.VirtualMachineScaleSetsListAll):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
 
 def convert_show_result_to_snake_case(result):
@@ -444,6 +471,10 @@ def convert_show_result_to_snake_case(result):
     if "hardwareProfile" in virtual_machine_profile:
         virtual_machine_profile["hardware_profile"] = virtual_machine_profile["hardwareProfile"]
         virtual_machine_profile.pop("hardwareProfile")
+    if "interconnectBlockProfile" in virtual_machine_profile:
+        virtual_machine_profile["interconnect_block_profile"] = virtual_machine_profile[
+            "interconnectBlockProfile"]
+        virtual_machine_profile.pop("interconnectBlockProfile")
     if "licenseType" in virtual_machine_profile:
         virtual_machine_profile["license_type"] = virtual_machine_profile["licenseType"]
         virtual_machine_profile.pop("licenseType")
@@ -497,10 +528,19 @@ def convert_show_result_to_snake_case(result):
         billing_profile["max_price"] = billing_profile["maxPrice"]
         billing_profile.pop("maxPrice")
 
+    interconnect_block_profile = virtual_machine_profile.get("interconnect_block_profile", {}) or {}
+    if "interconnectBlock" in interconnect_block_profile:
+        interconnect_block_profile["interconnect_block"] = interconnect_block_profile["interconnectBlock"]
+        interconnect_block_profile.pop("interconnectBlock")
+
     capacity_reservation = virtual_machine_profile.get("capacity_reservation", {}) or {}
     if "capacityReservationGroup" in capacity_reservation:
         capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
         capacity_reservation.pop("capacityReservationGroup")
+    if "disableCapacityReservationAssignment" in capacity_reservation:
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            capacity_reservation["disableCapacityReservationAssignment"]
+        capacity_reservation.pop("disableCapacityReservationAssignment")
 
     diagnostics_profile = virtual_machine_profile.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:
@@ -553,6 +593,9 @@ def convert_show_result_to_snake_case(result):
             protected_settings_from_key_vault.pop("sourceVault")
 
     hardware_profile = virtual_machine_profile.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSizeProperties" in hardware_profile:
         hardware_profile["vm_size_properties"] = hardware_profile["vmSizeProperties"]
         hardware_profile.pop("vmSizeProperties")
@@ -889,6 +932,9 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in wire_server:
         wire_server["in_vm_access_control_profile_reference_id"] = wire_server["inVMAccessControlProfileReferenceId"]
         wire_server.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in wire_server:
+        wire_server["use_local_file_rules"] = wire_server["useLocalFileRules"]
+        wire_server.pop("useLocalFileRules")
 
     uefi_settings = security_profile.get("uefi_settings", {}) or {}
     if "secureBootEnabled" in uefi_settings:

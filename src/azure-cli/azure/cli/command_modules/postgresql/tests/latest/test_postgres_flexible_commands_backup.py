@@ -28,7 +28,7 @@ class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
         attempts = 0
         while attempts < 10:
-            backups = self.cmd('postgres flexible-server backup list -g {} -n {}'
+            backups = self.cmd('postgres flexible-server backup list -g {} -s {}'
                             .format(resource_group, server)).get_output_in_json()
             attempts += 1
             if len(backups) > 0:
@@ -38,7 +38,7 @@ class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         backups_length = len(backups)
         self.assertTrue(backups_length > 0)
 
-        automatic_backup = self.cmd('postgres flexible-server backup show -g {} -n {} --backup-name {}'
+        automatic_backup = self.cmd('postgres flexible-server backup show -g {} -s {} -n {}'
                                     .format(resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
@@ -46,22 +46,22 @@ class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         # Create on-demand backup
         backup_name = self.create_random_name(F'backup', 16)
 
-        self.cmd('postgres flexible-server backup create -g {} -n {} --backup-name {}'
+        self.cmd('postgres flexible-server backup create -g {} -s {} -n {}'
                 .format(resource_group, server, backup_name),
                 checks=[JMESPathCheck('name', backup_name)])
 
         # Confirm that on-demand backup is created
-        backups_update = self.cmd('postgres flexible-server backup list -g {} -n {}'
+        backups_update = self.cmd('postgres flexible-server backup list -g {} -s {}'
                         .format(resource_group, server)).get_output_in_json()
 
         self.assertTrue(backups_length < len(backups_update))
 
         # Delete on-demand backup
-        self.cmd('postgres flexible-server backup delete -g {} -n {} --backup-name {} --yes'
+        self.cmd('postgres flexible-server backup delete -g {} -s {} -n {} --yes'
                 .format(resource_group, server, backup_name))
 
         # Confirm that on-demand backup is deleted
-        backups_update = self.cmd('postgres flexible-server backup list -g {} -n {}'
+        backups_update = self.cmd('postgres flexible-server backup list -g {} -s {}'
                         .format(resource_group, server)).get_output_in_json()
 
         self.assertTrue(backups_length == len(backups_update))

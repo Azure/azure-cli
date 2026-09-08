@@ -756,10 +756,11 @@ class AzureBatchDataPlaneCommand:
     def _resolve_track1_type_hint(self, type_hint):
         """Resolve type hints to the legacy track1 type string format."""
         args = get_args(type_hint)
+        none_type = None.__class__
 
         # Optional[T] / Union[..., None] -> select the best non-None candidate.
-        if type(None) in args:
-            non_none_args = [arg for arg in args if arg is not type(None)]
+        if none_type in args:
+            non_none_args = [arg for arg in args if arg is not none_type]
             preferred_args = [arg for arg in non_none_args if arg != str] or non_none_args
             selected = preferred_args[0] if preferred_args else type_hint
             return self.convert_to_track1_type(str(selected))

@@ -15,16 +15,16 @@ from azure.cli.core.aaz import *
     "network traffic-manager profile show",
 )
 class Show(AAZCommand):
-    """Get the details of a traffic manager profile.
+    """Get a Traffic Manager profile.
 
     :example: Get the details of a traffic manager profile.
         az network traffic-manager profile show -g MyResourceGroup -n MyTmProfile
     """
 
     _aaz_info = {
-        "version": "2022-04-01",
+        "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2024-04-01-preview"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
@@ -178,6 +178,9 @@ class Show(AAZCommand):
             )
             properties.profile_status = AAZStrType(
                 serialized_name="profileStatus",
+            )
+            properties.record_type = AAZStrType(
+                serialized_name="recordType",
             )
             properties.traffic_routing_method = AAZStrType(
                 serialized_name="trafficRoutingMethod",

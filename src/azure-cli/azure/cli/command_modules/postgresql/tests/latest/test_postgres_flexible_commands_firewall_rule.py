@@ -35,7 +35,7 @@ class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
         result = self.cmd('postgres flexible-server create -g {} -n {} --public-access {} -l {}'
                           .format(resource_group, servers[0], 'all', location)).get_output_in_json()
 
-        self.cmd('postgres flexible-server firewall-rule show -g {} -n {} -r {}'
+        self.cmd('postgres flexible-server firewall-rule show -g {} -s {} -n {}'
                  .format(resource_group, servers[0], result["firewallName"]),
                  checks=[JMESPathCheck('startIpAddress', '0.0.0.0'),
                          JMESPathCheck('endIpAddress', '255.255.255.255')])
@@ -44,7 +44,7 @@ class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
         result = self.cmd('postgres flexible-server create -g {} -n {} --public-access {} -l {}'
                           .format(resource_group, servers[1], '0.0.0.0', location)).get_output_in_json()
 
-        self.cmd('postgres flexible-server firewall-rule show -g {} -n {} -r {}'
+        self.cmd('postgres flexible-server firewall-rule show -g {} -s {} -n {}'
                  .format(resource_group, servers[1], result["firewallName"]),
                  checks=[JMESPathCheck('startIpAddress', '0.0.0.0'),
                          JMESPathCheck('endIpAddress', '0.0.0.0')])
@@ -53,7 +53,7 @@ class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
         result = self.cmd('postgres flexible-server create -g {} -n {} --public-access {} -l {}'
                           .format(resource_group, servers[2], '10.0.0.0-12.0.0.0', location)).get_output_in_json()
 
-        self.cmd('postgres flexible-server firewall-rule show -g {} -n {} -r {}'
+        self.cmd('postgres flexible-server firewall-rule show -g {} -s {} -n {}'
                  .format(resource_group, servers[2], result["firewallName"]),
                  checks=[JMESPathCheck('startIpAddress', '10.0.0.0'),
                          JMESPathCheck('endIpAddress', '12.0.0.0')])
@@ -62,7 +62,7 @@ class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
         result = self.cmd('postgres flexible-server create -g {} -n {} -l {} --yes'
                           .format(resource_group, servers[3], location)).get_output_in_json()
 
-        firewall_rule = self.cmd('postgres flexible-server firewall-rule show -g {} -n {} -r {}'
+        firewall_rule = self.cmd('postgres flexible-server firewall-rule show -g {} -s {} -n {}'
                                  .format(resource_group, servers[3], result["firewallName"])).get_output_in_json()
         self.assertEqual(firewall_rule['startIpAddress'], firewall_rule['endIpAddress'])
 
@@ -80,28 +80,28 @@ class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, servers[4]),
                  checks=[JMESPathCheck('network.publicNetworkAccess', "Enabled")])
 
-        self.cmd('postgres flexible-server firewall-rule create -g {} --name {} --rule-name {} '
+        self.cmd('postgres flexible-server firewall-rule create -g {} --server-name {} --name {} '
                  '--start-ip-address {} --end-ip-address {} '
                  .format(resource_group, servers[4], firewall_rule_name, start_ip_address, end_ip_address),
                  checks=firewall_rule_checks)
 
-        self.cmd('postgres flexible-server firewall-rule show -g {} --name {} --rule-name {} '
+        self.cmd('postgres flexible-server firewall-rule show -g {} --server-name {} --name {} '
                  .format(resource_group, servers[4], firewall_rule_name),
                  checks=firewall_rule_checks)
 
         new_start_ip_address = '9.9.9.9'
-        self.cmd('postgres flexible-server firewall-rule update -g {} --name {} --rule-name {} --start-ip-address {}'
+        self.cmd('postgres flexible-server firewall-rule update -g {} --server-name {} --name {} --start-ip-address {}'
                  .format(resource_group, servers[4], firewall_rule_name, new_start_ip_address),
                  checks=[JMESPathCheck('startIpAddress', new_start_ip_address)])
 
         new_end_ip_address = '13.13.13.13'
-        self.cmd('postgres flexible-server firewall-rule update -g {} --name {} --rule-name {} --end-ip-address {}'
+        self.cmd('postgres flexible-server firewall-rule update -g {} --server-name {} --name {} --end-ip-address {}'
                  .format(resource_group, servers[4], firewall_rule_name, new_end_ip_address))
 
-        self.cmd('postgres flexible-server firewall-rule list -g {} -n {}'
+        self.cmd('postgres flexible-server firewall-rule list -g {} -s {}'
                  .format(resource_group, servers[4]), checks=[JMESPathCheck('length(@)', 1)])
 
-        self.cmd('postgres flexible-server firewall-rule delete --rule-name {} -g {} --name {} --yes'
+        self.cmd('postgres flexible-server firewall-rule delete --name {} -g {} --server-name {} --yes'
                  .format(firewall_rule_name, resource_group, servers[4]), checks=NoneCheck())
 
         # Clean up

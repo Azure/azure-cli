@@ -4,7 +4,8 @@
 set -exv
 
 export USERNAME=azureuser
-
+# Pinned UBI 8/9 images contain an older Expat incompatible with current Python 3.12 pyexpat.
+dnf update -y expat
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
 dnf install git findutils $PYTHON_PACKAGE-pip -y
@@ -15,7 +16,10 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-python -m pip install --upgrade pip setuptools
+# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources).
+# scripts/ci/build.sh builds with `python -m build --no-isolation`, so this pin is the setuptools the build uses.
+# `build` is the PEP 517 frontend that script invokes.
+python -m pip install --upgrade pip "setuptools<81" build
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.

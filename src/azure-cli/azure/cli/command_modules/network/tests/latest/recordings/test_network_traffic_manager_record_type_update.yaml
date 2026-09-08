@@ -1,0 +1,457 @@
+interactions:
+- request:
+    body: '{"location": "global", "name": "mytmprofile-rtu", "properties": {"dnsConfig":
+      {"relativeName": "testtmrtu000002", "ttl": 30}, "monitorConfig": {"path": "/",
+      "port": 80, "protocol": "HTTP"}, "profileStatus": "Enabled", "trafficRoutingMethod":
+      "Priority"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '254'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --routing-method --unique-dns-name
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":null}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '744'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:04 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0ad5f21d-ae69-4b02-ad3f-df93019dc86e/westus/6c0ebd15-1680-4ebc-9e42-f9bc9dc8321c
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 6CB512E169434E2CBF5CD095B068C49F Ref B: BL2AA2010205035 Ref C: 2026-06-05T18:49:02Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":null}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '754'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-msedge-ref:
+      - 'Ref A: EC35FD5A4353498684C2FA84E8C45B85 Ref B: MNZ221060609025 Ref C: 2026-06-05T18:49:06Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "myendpoint-rtu", "properties": {"target": "10.0.0.1", "weight":
+      50}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --profile-name -g --type --weight --target
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu/externalEndpoints/myendpoint-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu\/externalEndpoints\/myendpoint-rtu","name":"myendpoint-rtu","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"10.0.0.1","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:09 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0ad5f21d-ae69-4b02-ad3f-df93019dc86e/westus/45ce61d6-b0a7-4617-a30d-a4f21d5757e6
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 030AAD011D2D4B72A86714DD2982F59C Ref B: BL2AA2010205039 Ref C: 2026-06-05T18:49:07Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"CheckingEndpoints","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu\/externalEndpoints\/myendpoint-rtu","name":"myendpoint-rtu","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"10.0.0.1","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":null}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:11 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-msedge-ref:
+      - 'Ref A: 388AD1EBDA144F20A16D03BF87625AF9 Ref B: BL2AA2010205049 Ref C: 2026-06-05T18:49:10Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --record-type
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"CheckingEndpoints","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu\/externalEndpoints\/myendpoint-rtu","name":"myendpoint-rtu","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"10.0.0.1","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":null}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:12 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-msedge-ref:
+      - 'Ref A: 9E9AEA0AB6554F54A11C1173F019471F Ref B: BL2AA2010204037 Ref C: 2026-06-05T18:49:12Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile-rtu",
+      "location": "global", "name": "mytmprofile-rtu", "properties": {"dnsConfig":
+      {"relativeName": "testtmrtu000002", "ttl": 30}, "endpoints": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile-rtu/externalEndpoints/myendpoint-rtu",
+      "name": "myendpoint-rtu", "properties": {"alwaysServe": "Disabled", "endpointMonitorStatus":
+      "CheckingEndpoint", "endpointStatus": "Enabled", "priority": 1, "target": "10.0.0.1",
+      "weight": 50}, "type": "Microsoft.Network/trafficManagerProfiles/externalEndpoints"}],
+      "monitorConfig": {"intervalInSeconds": 30, "path": "/", "port": 80, "profileMonitorStatus":
+      "CheckingEndpoints", "protocol": "HTTP", "timeoutInSeconds": 10, "toleratedNumberOfFailures":
+      3}, "profileStatus": "Enabled", "recordType": "A", "trafficRoutingMethod": "Priority",
+      "trafficViewEnrollmentStatus": "Disabled"}, "tags": {}, "type": "Microsoft.Network/trafficManagerProfiles"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1206'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --record-type
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"CheckingEndpoints","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu\/externalEndpoints\/myendpoint-rtu","name":"myendpoint-rtu","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"10.0.0.1","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":"A"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1319'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:14 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0ad5f21d-ae69-4b02-ad3f-df93019dc86e/eastus2/0941a525-550b-4c01-b918-6b31c0f1830e
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: C75BE42E2C074709869C1444A94374C1 Ref B: MNZ221060619017 Ref C: 2026-06-05T18:49:13Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu","name":"mytmprofile-rtu","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Priority","dnsConfig":{"relativeName":"testtmrtu000002","fqdn":"testtmrtu000002.tmpreview.watmtest.azure-test.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"CheckingEndpoints","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_record_type_update000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile-rtu\/externalEndpoints\/myendpoint-rtu","name":"myendpoint-rtu","type":"Microsoft.Network\/trafficManagerProfiles\/externalEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":null,"target":"10.0.0.1","weight":50,"priority":1,"endpointLocation":null,"minChildEndpoints":null,"alwaysServe":"Disabled"}}],"trafficViewEnrollmentStatus":"Disabled","maxReturn":null,"recordType":"A"}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1319'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:15 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-msedge-ref:
+      - 'Ref A: 087648F184694AD1987515F318FFDBDE Ref B: BL2AA2010204047 Ref C: 2026-06-05T18:49:15Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager endpoint delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --profile-name -t -n
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu/ExternalEndpoints/myendpoint-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"properties":{"boolean":true}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '31'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:18 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0ad5f21d-ae69-4b02-ad3f-df93019dc86e/westus/11bc5b1e-0191-45da-9eca-2f0cf3263bab
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 7AB439D25B8D4697B2DD3F4CEC21B1A4 Ref B: MNZ221060609031 Ref C: 2026-06-05T18:49:16Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_record_type_update000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile-rtu?api-version=2024-04-01-preview
+  response:
+    body:
+      string: '{"properties":{"boolean":true}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '31'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 05 Jun 2026 18:49:22 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0ad5f21d-ae69-4b02-ad3f-df93019dc86e/westus/d54d4d01-acad-4f66-8a11-ed57c2662405
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 059FF207D8EE4D5D839F3D80DCE0768A Ref B: BL2AA2010204027 Ref C: 2026-06-05T18:49:18Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

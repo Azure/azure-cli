@@ -206,7 +206,7 @@ def _stream_artifact_logs(log_file_sas,
         colorama.init()
 
     try:
-        response = requests.get(log_file_sas, timeout=3, verify=False, stream=True)
+        response = requests.get(log_file_sas, timeout=3, stream=True)
         response.raise_for_status()
     except KeyboardInterrupt:
         return

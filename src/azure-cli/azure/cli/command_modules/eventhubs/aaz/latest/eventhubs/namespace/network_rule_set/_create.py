@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create NetworkRuleSet for a Namespace.
+
+    :example: NameSpaceNetworkRuleSetCreate
+        az eventhubs namespace network-rule-set create --resource-group ResourceGroup --namespace-name sdk-Namespace-6019 --default-action Deny --ip-rules "[{action:Allow,ip-mask:1.1.1.1},{action:Allow,ip-mask:1.1.1.2},{action:Allow,ip-mask:1.1.1.3},{action:Allow,ip-mask:1.1.1.4},{action:Allow,ip-mask:1.1.1.5}]" --virtual-network-rules "[{ignore-missing-endpoint:True,subnet:/subscriptions/subscriptionid/resourcegroups/resourcegroupid/providers/Microsoft.Network/virtualNetworks/myvn/subnets/subnet2},{ignore-missing-endpoint:False,subnet:/subscriptions/subscriptionid/resourcegroups/resourcegroupid/providers/Microsoft.Network/virtualNetworks/myvn/subnets/subnet3},{ignore-missing-endpoint:False,subnet:/subscriptions/subscriptionid/resourcegroups/resourcegroupid/providers/Microsoft.Network/virtualNetworks/myvn/subnets/subnet6}]"
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networkrulesets/default", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networkrulesets/default", "2026-07-01-preview"],
         ]
     }
 
@@ -46,6 +49,7 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -179,7 +183,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

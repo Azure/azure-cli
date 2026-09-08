@@ -626,6 +626,7 @@ def load_arguments(self, _):
         c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
                    help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan associated with the public IP. Can only be set if `--protection-mode` is Enabled.')
+        c.argument('ddos_custom_policy', help='Name or ID of a DDoS custom policy associated with the public IP. Note: A DDoS custom policy can only be attached to an instance-level public IP (a public IP associated with a NIC/VM) or a Load Balancer frontend IP configuration; attaching one to a standalone public IP is rejected by the service.')
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope)) as c:
@@ -641,6 +642,7 @@ def load_arguments(self, _):
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+        c.argument('record_type', help='When record type is set, a traffic manager profile will allow only endpoints that match this type.', arg_type=get_enum_type(['A', 'AAAA', 'CNAME']))
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
         c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])

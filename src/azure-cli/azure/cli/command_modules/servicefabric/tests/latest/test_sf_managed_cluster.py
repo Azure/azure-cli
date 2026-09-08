@@ -16,28 +16,29 @@ from azure.core.exceptions import HttpResponseError
 
 class ServiceFabricManagedClustersTests(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_basic_cluster(self):
+    def test_managed_basic_cluster(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_basic_cluster"
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_managed_basic_cluster",
+            'node_type_tags': "SFRP.WaitTimeBetweenUD=00:00:10"
         })
 
         cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.clusterState', 'WaitingForNodes')]).get_output_in_json()
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --tags {node_type_tags}',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         # 'InvalidParameter - Cluster must have at least one active primary node type'
         with self.assertRaisesRegex(HttpResponseError, 'Cluster must have at least one active primary node type'):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('clusterState', 'Ready'),
+                 checks=[self.check('properties.clusterState', 'Ready'),
                  self.check('tags', cluster["tags"])])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
@@ -47,15 +48,15 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    def test_network_security_rule(self):
+    def test_managed_network_security_rule(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'vm_image_sku': '2022-datacenter-azure-edition',
             'vm_size': 'Standard_D2s_v3',
-            'tags': "SFRP.DisableDefaultOutboundAccess=True SFRP.EnableDiagnosticMI=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_network_security_rule",
+            'tags': "SFRP.DisableDefaultOutboundAccess=True SFRP.EnableDiagnosticMI=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_managed_network_security_rule",
             'name': self.create_random_name('NSR-', 10),
             'access': 'allow',
             'inv_access': 'deny',
@@ -79,45 +80,46 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'deny_dest_port_ranges': '19000 19080',
             'deny_source_addr_prefix': 'Internet',
             'deny_dest_addr_prefix': '*',
+            'node_type_tags': "SFRP.WaitTimeBetweenUD=00:00:10"
         })
 
         cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.clusterState', 'WaitingForNodes')]).get_output_in_json()
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --vm-image-sku {vm_image_sku} --vm-size {vm_size}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --vm-image-sku {vm_image_sku} --vm-size {vm_size} --tags {node_type_tags}',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
                 '--name {deny_name} --access {deny_access} --description {deny_description} --direction {deny_direction} --protocol {deny_protocol} --priority {deny_priority} --source-port-range {deny_source_port_range} --dest-port-ranges {deny_dest_port_ranges}'
                 ' --source-addr-prefix {deny_source_addr_prefix} --dest-addr-prefix {deny_dest_addr_prefix}',
-                checks=[self.check('provisioningState', 'Succeeded'),
-                        self.check('networkSecurityRules[0].destinationAddressPrefix', '*'),
-                        self.check('networkSecurityRules[0].sourceAddressPrefix', 'Internet'),
-                        self.check('networkSecurityRules[0].protocol', '*'),
-                        self.check('networkSecurityRules[0].direction', 'inbound'),
-                        self.check('networkSecurityRules[0].access', 'deny'),
-                        self.check('networkSecurityRules[0].priority', 1300),
-                        self.check('networkSecurityRules[0].sourcePortRange', '*'),
-                        self.check('networkSecurityRules[0].destinationPortRanges[0]', '19000'),
-                        self.check('networkSecurityRules[0].destinationPortRanges[1]', '19080')])
+                checks=[self.check('properties.provisioningState', 'Succeeded'),
+                        self.check('properties.networkSecurityRules[0].destinationAddressPrefix', '*'),
+                        self.check('properties.networkSecurityRules[0].sourceAddressPrefix', 'Internet'),
+                        self.check('properties.networkSecurityRules[0].protocol', '*'),
+                        self.check('properties.networkSecurityRules[0].direction', 'inbound'),
+                        self.check('properties.networkSecurityRules[0].access', 'deny'),
+                        self.check('properties.networkSecurityRules[0].priority', 1300),
+                        self.check('properties.networkSecurityRules[0].sourcePortRange', '*'),
+                        self.check('properties.networkSecurityRules[0].destinationPortRanges[0]', '19000'),
+                        self.check('properties.networkSecurityRules[0].destinationPortRanges[1]', '19080')])
 
         self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
                 '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --source-port-ranges {source_port_ranges} --dest-port-ranges {dest_port_ranges}'
                 ' --source-addr-prefixes {source_addr_prefixes} --dest-addr-prefixes {dest_addr_prefixes}',
-                checks=[self.check('provisioningState', 'Succeeded'),
-                        self.check('networkSecurityRules[1].destinationAddressPrefixes[0]', '194.69.104.0/25'),
-                        self.check('networkSecurityRules[1].sourceAddressPrefixes[1]', '167.220.0.0/23'),
-                        self.check('networkSecurityRules[1].protocol', '*'),
-                        self.check('networkSecurityRules[1].direction', 'inbound'),
-                        self.check('networkSecurityRules[1].access', 'allow'),
-                        self.check('networkSecurityRules[1].priority', 1200),
-                        self.check('networkSecurityRules[1].sourcePortRanges[0]', '1-1000'),
-                        self.check('networkSecurityRules[1].destinationPortRanges[1]', '2200-65535')])
+                checks=[self.check('properties.provisioningState', 'Succeeded'),
+                        self.check('properties.networkSecurityRules[1].destinationAddressPrefixes[0]', '194.69.104.0/25'),
+                        self.check('properties.networkSecurityRules[1].sourceAddressPrefixes[1]', '167.220.0.0/23'),
+                        self.check('properties.networkSecurityRules[1].protocol', '*'),
+                        self.check('properties.networkSecurityRules[1].direction', 'inbound'),
+                        self.check('properties.networkSecurityRules[1].access', 'allow'),
+                        self.check('properties.networkSecurityRules[1].priority', 1200),
+                        self.check('properties.networkSecurityRules[1].sourcePortRanges[0]', '1-1000'),
+                        self.check('properties.networkSecurityRules[1].destinationPortRanges[1]', '2200-65535')])
         
         self.cmd('az sf managed-cluster network-security-rule update -g {rg} -c {cluster_name} '
                 '--name {name} --access {inv_access} --direction {inv_direction} --priority {update_priority}',
-                checks=[self.check('provisioningState', 'Succeeded'),])
+                checks=[self.check('properties.provisioningState', 'Succeeded'),])
         
         self.cmd('az sf managed-cluster network-security-rule get -g {rg} -c {cluster_name} --name {name}',
                  checks=[self.check('access', 'deny'),
@@ -128,11 +130,11 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                 checks=[self.check('length(@)', 2)])
         
         self.cmd('az sf managed-cluster network-security-rule delete -g {rg} -c {cluster_name} --name {name}',
-                checks=[self.check('provisioningState', 'Succeeded')])
+                checks=[self.check('properties.provisioningState', 'Succeeded')])
         
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                checks=[self.check('clusterState', 'Ready'),
-                        self.check('length(networkSecurityRules)', 1)])
+                checks=[self.check('properties.clusterState', 'Ready'),
+                        self.check('length(properties.networkSecurityRules)', 1)])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
@@ -141,34 +143,34 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    def test_node_type_update(self):
+    def test_managed_node_type_update(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'clusterTags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_node_type_update",
+            'clusterTags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_managed_node_type_update",
             'nodeTypeTags': "SFRP.WaitTimeBetweenUD=00:00:10",
             'nodeTypeTags2': "SFRP.WaitTimeBetweenUD=00:00:11"
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1 --tags {clusterTags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes'),
-                         self.check('clusterUpgradeMode', 'Automatic'),
-                         self.check('clusterUpgradeCadence', 'Wave1')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.clusterState', 'WaitingForNodes'),
+                         self.check('properties.clusterUpgradeMode', 'Automatic'),
+                         self.check('properties.clusterUpgradeCadence', 'Wave1')])
 
         self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2 --tags {nodeTypeTags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('dataDiskType', 'Premium_LRS'),
-                         self.check('isStateless', False),
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.dataDiskType', 'Premium_LRS'),
+                         self.check('properties.isStateless', False),
                          self.check('tags', {'SFRP.WaitTimeBetweenUD': '00:00:10'})])
         
         self.cmd('az sf managed-node-type update -g {rg} -c {cluster_name} -n pnt --vm-size Standard_DS3_v2 --tags {nodeTypeTags2}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('vmSize', 'Standard_DS3_v2'),
-                         self.check('dataDiskType', 'Premium_LRS'),
-                         self.check('vmInstanceCount', 5),
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.vmSize', 'Standard_DS3_v2'),
+                         self.check('properties.dataDiskType', 'Premium_LRS'),
+                         self.check('properties.vmInstanceCount', 5),
                          self.check('tags', {'SFRP.WaitTimeBetweenUD': '00:00:11'})])
         
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
@@ -178,34 +180,35 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    def test_node_type_operation(self):
+    def test_managed_node_type_operation(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_node_type_operation"
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_managed_node_type_operation",
+            'node_type_tags': "SFRP.WaitTimeBetweenUD=00:00:10"
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1 --tags {tags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes'),
-                         self.check('clusterUpgradeMode', 'Automatic'),
-                         self.check('clusterUpgradeCadence', 'Wave1')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.clusterState', 'WaitingForNodes'),
+                         self.check('properties.clusterUpgradeMode', 'Automatic'),
+                         self.check('properties.clusterUpgradeCadence', 'Wave1')])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('dataDiskType', 'Premium_LRS'),
-                         self.check('isStateless ', False)])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2 --tags {node_type_tags}',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.dataDiskType', 'Premium_LRS'),
+                         self.check('properties.isStateless ', False)])
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 1)])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6 --is-stateless --multiple-placement-groups',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('dataDiskType', 'StandardSSD_LRS'),
-                         self.check('isStateless ', True),
-                         self.check('multiplePlacementGroups ', True)])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n snt --instance-count 6 --is-stateless --multiple-placement-groups --tags {node_type_tags}',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.dataDiskType', 'StandardSSD_LRS'),
+                         self.check('properties.isStateless ', True),
+                         self.check('properties.multiplePlacementGroups ', True)])
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
                  checks=[self.check('length(@)', 2)])
@@ -243,37 +246,38 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment --enable-rbac-authorization false')
-    def test_cert_and_ext(self, key_vault, resource_group):
+    @KeyVaultPreparer(name_prefix='sfmc-cli-kv-', location='eastasia', additional_params='--enabled-for-deployment --enabled-for-template-deployment --enable-rbac-authorization false')
+    def test_managed_cert_and_ext(self, key_vault, resource_group):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'cert_tp2': '123BDACDCDFB2C7B250192C6078E47D1E1DB7777',
             'loc': 'eastasia',
-            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfmc-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'extName': 'csetest',
             'publisher': 'Microsoft.Compute',
             'extType': 'BGInfo',
             'extVer': '2.1',
             'kv_name': key_vault,
-            'cert_name': self.create_random_name('sfrp-cli-', 24),
-            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_cert_and_ext"
+            'cert_name': self.create_random_name('sfmc-cli-', 24),
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_managed_cert_and_ext",
+            'node_type_tags': "SFRP.WaitTimeBetweenUD=00:00:10"
         })
 
         self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
-                 checks=[self.check('provisioningState', 'Succeeded'),
-                         self.check('clusterState', 'WaitingForNodes')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.clusterState', 'WaitingForNodes')])
 
-        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --tags {node_type_tags}',
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         # add extension
         self.cmd('az sf managed-node-type vm-extension add -g {rg} -c {cluster_name} -n pnt '
                  ' --extension-name {extName} --publisher {publisher} --extension-type {extType} --type-handler-version {extVer} --auto-upgrade-minor-version',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-node-type show -g {rg} -c {cluster_name} -n pnt',
-                 checks=[self.check('length(vmExtensions)', 1)])
+                 checks=[self.check('length(properties.vmExtensions)', 1)])
 
         # add secret
         kv = self.cmd('keyvault show -n {kv_name} -g {rg}').get_output_in_json()
@@ -284,24 +288,24 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
 
         self.cmd('az sf managed-node-type vm-secret add -g {rg} -c {cluster_name} -n pnt '
                  ' --source-vault-id {kv_id} --certificate-url {cert_secret_id} --certificate-store my',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-node-type show -g {rg} -c {cluster_name} -n pnt',
-                 checks=[self.check('length(vmSecrets)', 1)])
+                 checks=[self.check('length(properties.vmSecrets)', 1)])
 
         # add client cert
         self.cmd('az sf managed-cluster client-certificate add -g {rg} -c {cluster_name} --thumbprint {cert_tp2}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('length(clients)', 2)])
+                 checks=[self.check('length(properties.clients)', 2)])
 
         # delete client cert
         self.cmd('az sf managed-cluster client-certificate delete -g {rg} -c {cluster_name} --thumbprint {cert_tp2}',
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
-                 checks=[self.check('length(clients)', 1)])
+                 checks=[self.check('length(properties.clients)', 1)])
 
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 

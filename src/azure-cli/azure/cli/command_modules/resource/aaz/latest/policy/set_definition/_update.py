@@ -27,10 +27,10 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
         ]
     }
 
@@ -61,7 +61,7 @@ class Update(AAZCommand):
             help="The name of the policy set definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
 
@@ -80,7 +80,7 @@ class Update(AAZCommand):
             help={"short-summary": "The display name of the policy set definition.", "long-summary": "The display name of the policy set definition is not part of its ID, allowing for longer and more flexible naming."},
             nullable=True,
         )
-        _args_schema.metadata = AAZDictArg(
+        _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
             help={"short-summary": "The policy set definition metadata.", "long-summary": "The policy set definition metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
@@ -110,11 +110,6 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        metadata = cls._args_schema.metadata
-        metadata.Element = AAZAnyTypeArg(
-            nullable=True,
-        )
-
         params = cls._args_schema.params
         params.Element = AAZObjectArg(
             nullable=True,
@@ -136,7 +131,7 @@ class Update(AAZCommand):
             help="General metadata for the parameter.",
             nullable=True,
         )
-        _element.schema = AAZDictArg(
+        _element.schema = AAZAnyTypeArg(
             options=["schema"],
             help="Provides validation of parameter inputs during assignment using a self-defined JSON schema. This property is only supported for object-type parameters and follows the Json.NET Schema 2019-09 implementation. You can learn more about using schemas at https://json-schema.org/ and test draft schemas at https://www.jsonschemavalidator.net/.",
             nullable=True,
@@ -150,11 +145,6 @@ class Update(AAZCommand):
 
         allowed_values = cls._args_schema.params.Element.allowed_values
         allowed_values.Element = AAZAnyTypeArg(
-            nullable=True,
-        )
-
-        schema = cls._args_schema.params.Element.schema
-        schema.Element = AAZAnyTypeArg(
             nullable=True,
         )
 
@@ -322,7 +312,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -401,7 +391,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -480,7 +470,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -571,7 +561,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -635,15 +625,11 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("displayName", AAZStrType, ".display_name")
-                properties.set_prop("metadata", AAZDictType, ".metadata")
+                properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyDefinitionGroups", AAZListType, ".definition_groups")
                 properties.set_prop("policyDefinitions", AAZListType, ".definitions", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("version", AAZStrType, ".version")
-
-            metadata = _builder.get(".properties.metadata")
-            if metadata is not None:
-                metadata.set_elements(AAZAnyType, ".")
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -654,7 +640,7 @@ class Update(AAZCommand):
                 _elements.set_prop("allowedValues", AAZListType, ".allowed_values")
                 _elements.set_prop("defaultValue", AAZAnyType, ".default_value")
                 _elements.set_prop("metadata", AAZFreeFormDictType, ".metadata")
-                _elements.set_prop("schema", AAZDictType, ".schema")
+                _elements.set_prop("schema", AAZAnyType, ".schema")
                 _elements.set_prop("type", AAZStrType, ".type")
 
             allowed_values = _builder.get(".properties.parameters{}.allowedValues")
@@ -664,10 +650,6 @@ class Update(AAZCommand):
             metadata = _builder.get(".properties.parameters{}.metadata")
             if metadata is not None:
                 metadata.set_anytype_elements(".")
-
-            schema = _builder.get(".properties.parameters{}.schema")
-            if schema is not None:
-                schema.set_elements(AAZAnyType, ".")
 
             policy_definition_groups = _builder.get(".properties.policyDefinitionGroups")
             if policy_definition_groups is not None:
@@ -756,7 +738,7 @@ class _UpdateHelper:
         properties.display_name = AAZStrType(
             serialized_name="displayName",
         )
-        properties.metadata = AAZDictType()
+        properties.metadata = AAZAnyType()
         properties.parameters = AAZDictType()
         properties.policy_definition_groups = AAZListType(
             serialized_name="policyDefinitionGroups",
@@ -771,9 +753,6 @@ class _UpdateHelper:
         properties.version = AAZStrType()
         properties.versions = AAZListType()
 
-        metadata = _schema_policy_set_definition_read.properties.metadata
-        metadata.Element = AAZAnyType()
-
         parameters = _schema_policy_set_definition_read.properties.parameters
         parameters.Element = AAZObjectType()
 
@@ -785,14 +764,11 @@ class _UpdateHelper:
             serialized_name="defaultValue",
         )
         _element.metadata = AAZFreeFormDictType()
-        _element.schema = AAZDictType()
+        _element.schema = AAZAnyType()
         _element.type = AAZStrType()
 
         allowed_values = _schema_policy_set_definition_read.properties.parameters.Element.allowed_values
         allowed_values.Element = AAZAnyType()
-
-        schema = _schema_policy_set_definition_read.properties.parameters.Element.schema
-        schema.Element = AAZAnyType()
 
         policy_definition_groups = _schema_policy_set_definition_read.properties.policy_definition_groups
         policy_definition_groups.Element = AAZObjectType()

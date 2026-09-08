@@ -1708,12 +1708,12 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storageblob-app-2',
+            'account': 'servicelinkerstoragee'
         })     
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn_' + '_'.join(opt_out_list)
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 
@@ -1725,16 +1725,16 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  '--secret --client-type dotnet --opt-out {}'.format(name, source_id, 
                                                                      target_id, ' '.join(opt_out_list)))
 
-        # list connection
-        connections = self.cmd(
-            'webapp connection list --source-id {}'.format(source_id),
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+
+        # show connection to verify it was created correctly
+        self.cmd(
+            'webapp connection show --id {}'.format(connection_id),
             checks = [
-                self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'dotnet')
+                self.check('authInfo.authType', 'secret'),
+                self.check('clientType', 'dotnet')
             ]
-        ).get_output_in_json()
-        connection_id = connections[0].get('id')
+        )
 
         validate_connection(connection_id)
         self.cmd('webapp connection validate --id {}'.format(connection_id))
@@ -1810,8 +1810,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storageblob-app-2',
+            'account': 'servicelinkerstoragee'
         })     
 
         # prepare params
@@ -1867,8 +1867,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'service-connector-int-test',
             'target_resource_group': 'service-connector-int-test',
-            'site': 'servicelinker-optouttest-e2e',
-            'account': 'servicelinkerinttest'
+            'site': 'servicelinker-optouttest-e2e-2',
+            'account': 'servicelinkerinttestt'
         })     
 
         # prepare params

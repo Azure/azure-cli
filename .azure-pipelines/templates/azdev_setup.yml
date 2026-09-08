@@ -15,8 +15,9 @@ steps:
       python -m venv env
       chmod +x env/bin/activate
       . env/bin/activate
-      python -m pip install -U pip
-      pip install azdev
+
+      python -m pip install -U pip "setuptools<81"
+      pip install --upgrade "azdev==0.2.13"
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then

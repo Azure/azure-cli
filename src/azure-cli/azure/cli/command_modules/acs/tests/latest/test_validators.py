@@ -1933,5 +1933,118 @@ class TestCustomCATrustCertificates(unittest.TestCase):
         self.assertTrue('--custom-ca-trust-certificates can only be set for linux nodepools' in str(cm.exception), msg=str(cm.exception))
 
 
+class ArtifactStreamingNamespace:
+    def __init__(self, os_type, enable_artifact_streaming=False, disable_artifact_streaming=False):
+        self.os_type = os_type
+        self.enable_artifact_streaming = enable_artifact_streaming
+        self.disable_artifact_streaming = disable_artifact_streaming
+
+
+class TestArtifactStreaming(unittest.TestCase):
+    def test_valid_linux_enable(self):
+        validators.validate_artifact_streaming(
+            ArtifactStreamingNamespace("Linux", enable_artifact_streaming=True)
+        )
+
+    def test_valid_linux_disable(self):
+        validators.validate_artifact_streaming(
+            ArtifactStreamingNamespace("Linux", disable_artifact_streaming=True)
+        )
+
+    def test_fail_if_enable_and_disable_are_set(self):
+        with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace(
+                    "Linux",
+                    enable_artifact_streaming=True,
+                    disable_artifact_streaming=True,
+                )
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "Cannot specify both --enable-artifact-streaming and --disable-artifact-streaming at the same time.",
+        )
+
+    def test_fail_if_enable_for_windows(self):
+        with self.assertRaises(ArgumentUsageError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace("Windows", enable_artifact_streaming=True)
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "--enable-artifact-streaming can only be set for Linux nodepools",
+        )
+
+    def test_fail_if_disable_for_windows(self):
+        with self.assertRaises(ArgumentUsageError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace("Windows", disable_artifact_streaming=True)
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "--disable-artifact-streaming can only be set for Linux nodepools",
+        )
+
+
+class TestValidateSshKey(unittest.TestCase):
+    def _default_key(self):
+        import os
+        return os.path.expanduser(os.path.join("~", ".ssh", "id_rsa.pub"))
+
+    def test_skip_for_automatic_sku(self):
+        # Default ssh_key_value (expanded like the CLI does) should be treated as
+        # "not explicitly provided" and skipped without error.
+        default_key = self._default_key()
+        namespace = SimpleNamespace(
+            no_ssh_key=False,
+            generate_ssh_keys=False,
+            ssh_key_value=default_key,
+            sku="automatic",
+        )
+        validators.validate_ssh_key(namespace)
+        self.assertEqual(namespace.ssh_key_value, default_key)
+
+    def test_skip_for_automatic_sku_case_insensitive(self):
+        default_key = self._default_key()
+        namespace = SimpleNamespace(
+            no_ssh_key=False,
+            generate_ssh_keys=False,
+            ssh_key_value=default_key,
+            sku="Automatic",
+        )
+        validators.validate_ssh_key(namespace)
+        self.assertEqual(namespace.ssh_key_value, default_key)
+
+    def test_automatic_sku_with_generate_ssh_keys_errors(self):
+        namespace = SimpleNamespace(
+            no_ssh_key=False,
+            generate_ssh_keys=True,
+            ssh_key_value=self._default_key(),
+            sku="automatic",
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_ssh_key(namespace)
+
+    def test_automatic_sku_with_explicit_ssh_key_value_errors(self):
+        namespace = SimpleNamespace(
+            no_ssh_key=False,
+            generate_ssh_keys=False,
+            ssh_key_value="ssh-rsa AAAAB3NzaC1yc2Euser@host",
+            sku="automatic",
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_ssh_key(namespace)
+
+    def test_no_ssh_key_still_skips(self):
+        namespace = SimpleNamespace(
+            no_ssh_key=True,
+            generate_ssh_keys=False,
+            ssh_key_value=None,
+            sku="base",
+        )
+        validators.validate_ssh_key(namespace)
+        self.assertIsNone(namespace.ssh_key_value)
+
+
 if __name__ == "__main__":
     unittest.main()

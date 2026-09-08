@@ -125,6 +125,15 @@ def get_k8s_extension_module(module_name):
         )
 
 
+def _is_config_setting_enabled(config_settings, key, default=False):
+    value = config_settings.get(key)
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() == "true"
+
+
 def check_if_extension_is_installed(cmd, resource_group, cluster_name) -> bool:
     client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
     client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
@@ -180,25 +189,23 @@ def get_extension_installed_and_cluster_configs_v1(
         config_settings = extension.configuration_settings
 
         if is_extension_installed and config_settings is not None:
-            is_cli_operation_active = config_settings.get("global.cli.activeControl", "False") == "True"
+            is_cli_operation_active = _is_config_setting_enabled(config_settings, "global.cli.activeControl")
             if is_cli_operation_active:
-                is_azureDisk_enabled = (
-                    config_settings.get("global.cli.storagePool.azureDisk.enabled", "False") == "True"
+                is_azureDisk_enabled = _is_config_setting_enabled(
+                    config_settings, "global.cli.storagePool.azureDisk.enabled"
                 )
-                is_elasticSan_enabled = (
-                    config_settings.get("global.cli.storagePool.elasticSan.enabled", "False") == "True"
+                is_elasticSan_enabled = _is_config_setting_enabled(
+                    config_settings, "global.cli.storagePool.elasticSan.enabled"
                 )
-                is_ephemeralDisk_nvme_enabled = (
-                    config_settings.get("global.cli.storagePool.ephemeralDisk.nvme.enabled", "False") == "True"
+                is_ephemeralDisk_nvme_enabled = _is_config_setting_enabled(
+                    config_settings, "global.cli.storagePool.ephemeralDisk.nvme.enabled"
                 )
-                is_ephemeralDisk_localssd_enabled = (
-                    config_settings.get("global.cli.storagePool.ephemeralDisk.temp.enabled", "False") == "True"
+                is_ephemeralDisk_localssd_enabled = _is_config_setting_enabled(
+                    config_settings, "global.cli.storagePool.ephemeralDisk.temp.enabled"
                 )
                 cpu_value = config_settings.get("global.cli.resources.ioEngine.cpu", "1")
-                enable_ephemeral_bypass_annotation = (
-                    config_settings.get(
-                        "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation", "False"
-                    ) == "True"
+                enable_ephemeral_bypass_annotation = _is_config_setting_enabled(
+                    config_settings, "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation"
                 )
                 perf_tier = config_settings.get(
                     "global.cli.storagePool.ephemeralDisk.nvme.perfTier",
@@ -273,11 +280,11 @@ def get_extension_installed_and_cluster_configs(
         config_settings = extension.configuration_settings
 
         if is_extension_installed and config_settings is not None:
-            is_ephemeral_disk_enabled = (
-                config_settings.get("csiDriverConfigs.local-csi-driver.enabled", "False") == "True"
+            is_ephemeral_disk_enabled = _is_config_setting_enabled(
+                config_settings, "csiDriverConfigs.local-csi-driver.enabled"
             )
-            is_elastic_san_enabled = (
-                config_settings.get("csiDriverConfigs.azuresan-csi-driver.enabled", "False") == "True"
+            is_elastic_san_enabled = _is_config_setting_enabled(
+                config_settings, "csiDriverConfigs.azuresan-csi-driver.enabled"
             )
 
     except:  # pylint: disable=bare-except

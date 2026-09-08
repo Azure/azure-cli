@@ -2273,6 +2273,53 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14.attach_mc(mc_14)
         self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
 
+        network_profile_14_0 = self.models.ContainerServiceNetworkProfile(
+            outbound_type=CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        )
+        mc_14_0 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14_0,
+            sku=self.models.ManagedClusterSKU(name="Base"),
+        )
+        ctx_14_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"sku": "base"}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_14_0.agentpool_context = mock.MagicMock()
+        ctx_14_0.agentpool_context.get_vnet_subnet_id.return_value = None
+        ctx_14_0.attach_mc(mc_14_0)
+        self.assertEqual(ctx_14_0.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY)
+
+        hosted_system_profile_existing_byo = self.models.ManagedClusterHostedSystemProfile()
+        hosted_system_profile_existing_byo.system_node_subnet_id = (
+            "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys"
+        )
+        hosted_system_profile_existing_byo.node_subnet_id = (
+            "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        )
+        mc_existing_byo = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14,
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+            hosted_system_profile=hosted_system_profile_existing_byo,
+        )
+        for outbound_type in [
+            CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+        ]:
+            ctx_existing_byo = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict({"outbound_type": outbound_type}),
+                self.models,
+                DecoratorMode.UPDATE,
+            )
+            ctx_existing_byo.agentpool_context = mock.MagicMock()
+            ctx_existing_byo.agentpool_context.get_vnet_subnet_id.return_value = None
+            ctx_existing_byo.attach_mc(mc_existing_byo)
+            self.assertEqual(ctx_existing_byo.get_outbound_type(), outbound_type)
+
         ctx_14_1 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -2286,7 +2333,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14_1.agentpool_context.get_vnet_subnet_id.return_value = None
         with self.assertRaisesRegex(
             RequiredArgumentMissingError,
-            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+            "Automatic cluster using Managed System Pool BYO VNet",
         ):
             ctx_14_1.get_outbound_type()
 
@@ -2303,7 +2350,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14_2.agentpool_context.get_vnet_subnet_id.return_value = None
         with self.assertRaisesRegex(
             RequiredArgumentMissingError,
-            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+            "Automatic cluster using Managed System Pool BYO VNet",
         ):
             ctx_14_2.get_outbound_type()
 
@@ -2343,6 +2390,71 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_17.agentpool_context.get_vnet_subnet_id.return_value = None
         with self.assertRaises(InvalidArgumentValueError):
             ctx_17.get_outbound_type()
+
+        # update to UDR on a BYO VNet cluster (subnet known from agentpool) should succeed
+        ctx_18 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_18.agentpool_context = mock.MagicMock()
+        ctx_18.agentpool_context.get_vnet_subnet_id.return_value = "test_vnet_subnet_id"
+        self.assertEqual(
+            ctx_18.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
+        )
+
+        # update to userAssignedNATGateway on a BYO VNet cluster (subnet known from agentpool) should succeed
+        ctx_18_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_18_1.agentpool_context = mock.MagicMock()
+        ctx_18_1.agentpool_context.get_vnet_subnet_id.return_value = "test_vnet_subnet_id"
+        self.assertEqual(
+            ctx_18_1.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        )
+
+        # update to UDR on a managed VNet cluster (no subnet) should fail with a clear error,
+        # not ask for --vnet-subnet-id (which is not registered for 'aks update')
+        ctx_19 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_19.agentpool_context = mock.MagicMock()
+        ctx_19.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters using a custom",
+        ):
+            ctx_19.get_outbound_type()
+
+        # update to userAssignedNATGateway on a managed VNet cluster (no subnet) should fail with a clear error
+        ctx_20 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {"outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_20.agentpool_context = mock.MagicMock()
+        ctx_20.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters using a custom",
+        ):
+            ctx_20.get_outbound_type()
 
     def test_get_network_plugin_mode(self):
         # default
@@ -7048,6 +7160,26 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_set_up_linux_profile_automatic_sku_skips_ssh_key(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "admin_username": "azureuser",
+                "no_ssh_key": False,
+                "ssh_key_value": "unused-for-managed-system-pool",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+
+        dec_mc_1 = dec_1.set_up_linux_profile(mc_1)
+
+        self.assertIs(dec_mc_1, mc_1)
+        self.assertIsNone(dec_mc_1.linux_profile)
+
     def test_set_up_windows_profile(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -8995,6 +9127,56 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
         self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
 
+    def test_set_up_azure_monitor_profile_defers_control_plane_on_create(self):
+        # Greenfield --enable-control-plane-metrics must NOT set control_plane.enabled
+        # on the initial cluster PUT. It is deferred to the addon_put step in
+        # postprocessing (after DCRA creation) so the CCP collector pod is only
+        # scheduled once its DCRA exists.
+        dec = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_metrics": True,
+                "enable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        dec.context.attach_mc(mc)
+        dec_mc = dec.set_up_azure_monitor_profile(mc)
+
+        # Parent AMP metrics is enabled on the initial PUT...
+        self.assertIsNotNone(dec_mc.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc.azure_monitor_profile.metrics)
+        # The initial PUT sets enabled=False; addon_put flips it to True after prerequisites.
+        self.assertFalse(dec_mc.azure_monitor_profile.metrics.enabled)
+        # ...but control_plane is deferred and must be None here.
+        self.assertIsNone(dec_mc.azure_monitor_profile.metrics.control_plane)
+        # Intermediate flag still set so postprocessing runs the prereqs/addon_put.
+        self.assertTrue(dec.context.get_intermediate("azuremonitormetrics_addon_enabled"))
+
+    def test_set_up_azure_monitor_profile_create_cp_without_amp_raises(self):
+        # --enable-control-plane-metrics without --enable-azure-monitor-metrics on create
+        # must fail validation early.
+        dec = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        dec.context.attach_mc(mc)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec.set_up_azure_monitor_profile(mc)
+
     def test_set_up_azure_service_mesh(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -9769,6 +9951,71 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             node_provisioning_profile=self.models.ManagedClusterNodeProvisioningProfile(
                 mode="Auto",
                 default_node_pools="None",
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+    def test_set_up_upstream_kubescheduler_user_configuration(self):
+        # Test default behavior - no configuration
+        dec_0 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.set_up_upstream_kubescheduler_user_configuration(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Test enabling upstream kubescheduler user configuration
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_upstream_kubescheduler_user_configuration(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.MANAGED_BY_CRD
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # Test with existing scheduler profile
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.DEFAULT
+                )
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_upstream_kubescheduler_user_configuration(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.MANAGED_BY_CRD
+                )
             ),
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
@@ -16913,6 +17160,265 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
         self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_enable_control_plane_metrics_requires_parent_metrics(self):
+        # Update path: --enable-control-plane-metrics on a cluster that has neither
+        # Azure Monitor metrics already enabled nor --enable-azure-monitor-metrics in
+        # the same command must raise RequiredArgumentMissingError.
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        dec.context.attach_mc(mc)
+
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec.context.get_enable_control_plane_metrics()
+
+    def test_update_enable_control_plane_metrics_already_enabled_cluster_succeeds(self):
+        # Update path: --enable-control-plane-metrics on a cluster that already has
+        # Azure Monitor metrics enabled should succeed without requiring
+        # --enable-azure-monitor-metrics.
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+            ),
+        )
+        dec.context.attach_mc(mc)
+
+        self.assertTrue(dec.context.get_enable_control_plane_metrics())
+
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        self.assertIsNotNone(dec_mc.azure_monitor_profile.metrics.control_plane)
+        self.assertTrue(dec_mc.azure_monitor_profile.metrics.control_plane.enabled)
+
+    def test_update_enable_control_plane_metrics_with_disable_metrics_raises(self):
+        # Update path: --enable-control-plane-metrics combined with
+        # --disable-azure-monitor-metrics in the same command must be rejected to
+        # avoid producing an inconsistent payload.
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_control_plane_metrics": True,
+                "disable_azure_monitor_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+            ),
+        )
+        dec.context.attach_mc(mc)
+
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec.context.get_enable_control_plane_metrics()
+
+    def test_update_enable_control_plane_metrics_with_disable_control_plane_raises(self):
+        # --enable-control-plane-metrics together with --disable-control-plane-metrics
+        # in the same command must raise MutuallyExclusiveArgumentError.
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_control_plane_metrics": True,
+                "disable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+            ),
+        )
+        dec.context.attach_mc(mc)
+
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec.context.get_enable_control_plane_metrics()
+
+    def test_update_disable_control_plane_metrics_sets_enabled_false(self):
+        # --disable-control-plane-metrics on a cluster that has it enabled should
+        # produce a payload with control_plane.enabled=False.
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_control_plane_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(
+                    enabled=True,
+                    control_plane=self.models.ManagedClusterAzureMonitorProfileMetricsControlPlane(
+                        enabled=True
+                    ),
+                )
+            ),
+        )
+        dec.context.attach_mc(mc)
+
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        self.assertIsNotNone(dec_mc.azure_monitor_profile.metrics.control_plane)
+        self.assertFalse(dec_mc.azure_monitor_profile.metrics.control_plane.enabled)
+
+    def test_update_upstream_kubescheduler_user_configuration(self):
+        # Test default behavior - no configuration change
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_upstream_kubescheduler_user_configuration(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Test enabling upstream kubescheduler user configuration
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_upstream_kubescheduler_user_configuration(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.MANAGED_BY_CRD
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # Test disabling upstream kubescheduler user configuration
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_upstream_kubescheduler_user_configuration(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.DEFAULT
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # Test mutual exclusivity - should raise exception when both enable and disable are specified
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_upstream_kubescheduler_user_configuration": True,
+                "disable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_3.update_upstream_kubescheduler_user_configuration(mc_3)
+
+        # Test enabling with existing scheduler profile being updated
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.DEFAULT
+                )
+            ),
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_upstream_kubescheduler_user_configuration(mc_4)
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.MANAGED_BY_CRD
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+        # Test disabling with existing scheduler profile being updated
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_upstream_kubescheduler_user_configuration": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.MANAGED_BY_CRD
+                )
+            ),
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.update_upstream_kubescheduler_user_configuration(mc_5)
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            scheduler_profile=self.models.SchedulerProfile(
+                upstream=self.models.SchedulerInstanceProfile(
+                    scheduler_config_mode=self.models.SchedulerConfigMode.DEFAULT
+                )
+            ),
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
 
 if __name__ == "__main__":

@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2026-03-01-preview"],
         ]
     }
 
@@ -173,6 +173,13 @@ class Create(AAZCommand):
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
         )
+        _args_schema.knowledge_retrieval = AAZStrArg(
+            options=["--knowledge-retrieval"],
+            arg_group="Properties",
+            help="Specifies the billing plan for agentic retrieval on the Azure AI Search service.",
+            nullable=True,
+            enum={"free": "free", "standard": "standard"},
+        )
         _args_schema.upgrade_available = AAZStrArg(
             options=["--upgrade-available"],
             arg_group="Properties",
@@ -191,6 +198,59 @@ class Create(AAZCommand):
             help="Describes how a search service should enforce compliance if it finds objects that aren't encrypted with the customer-managed key.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "Unspecified": "Unspecified"},
         )
+        encryption_with_cmk.service_level_encryption_key = AAZObjectArg(
+            options=["service-level-encryption-key"],
+            help="Describes the customer-managed key configuration for encrypting the search service.",
+        )
+
+        service_level_encryption_key = cls._args_schema.encryption_with_cmk.service_level_encryption_key
+        service_level_encryption_key.access_credentials = AAZObjectArg(
+            options=["access-credentials"],
+            help="Optional Azure Active Directory credentials used for accessing your Azure Key Vault.",
+        )
+        service_level_encryption_key.identity = AAZObjectArg(
+            options=["identity"],
+            help="An explicit managed identity to use for this encryption key.",
+            nullable=True,
+        )
+        service_level_encryption_key.key_vault_key_name = AAZStrArg(
+            options=["key-vault-key-name"],
+            help="The name of your Azure Key Vault key to be used to encrypt your data at rest.",
+        )
+        service_level_encryption_key.key_vault_key_version = AAZStrArg(
+            options=["key-vault-key-version"],
+            help="The version of your Azure Key Vault key to be used to encrypt your data at rest.",
+        )
+        service_level_encryption_key.key_vault_uri = AAZStrArg(
+            options=["key-vault-uri"],
+            help="The URI of your Azure Key Vault that contains the key to be used to encrypt your data at rest.",
+        )
+
+        access_credentials = cls._args_schema.encryption_with_cmk.service_level_encryption_key.access_credentials
+        access_credentials.application_id = AAZStrArg(
+            options=["application-id"],
+            help="The application (client) ID of an App Registration in the tenant.",
+        )
+        access_credentials.application_secret = AAZPasswordArg(
+            options=["application-secret"],
+            help="An AAD client secret that was generated for the App Registration used to authenticate with Azure Key Vault.",
+        )
+
+        identity = cls._args_schema.encryption_with_cmk.service_level_encryption_key.identity
+        identity.odata_type = AAZStrArg(
+            options=["@odata.type"],
+            help="A URI fragment specifying the type of identity.",
+            required=True,
+            enum={"#Microsoft.Azure.Search.DataNoneIdentity": "#Microsoft.Azure.Search.DataNoneIdentity", "#Microsoft.Azure.Search.DataUserAssignedIdentity": "#Microsoft.Azure.Search.DataUserAssignedIdentity"},
+        )
+        identity.federated_identity_client_id = AAZStrArg(
+            options=["federated-identity-client-id"],
+            help="Optional multi-tenant app registration client ID configured to federate with the user-assigned identity.",
+        )
+        identity.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="The fully qualified Azure resource ID of a user-assigned managed identity assigned to the search service.",
+        )
 
         # define Arg Group "Service"
 
@@ -206,9 +266,9 @@ class Create(AAZCommand):
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
             arg_group="Service",
-            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
+            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions. 'serverless': Serverless tier with auto-scaling capabilities.",
             required=True,
-            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
+            enum={"basic": "basic", "free": "free", "serverless": "serverless", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -301,7 +361,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -345,6 +405,7 @@ class Create(AAZCommand):
                 properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
                 properties.set_prop("endpoint", AAZStrType, ".endpoint")
                 properties.set_prop("hostingMode", AAZStrType, ".hosting_mode")
+                properties.set_prop("knowledgeRetrieval", AAZStrType, ".knowledge_retrieval", typ_kwargs={"nullable": True})
                 properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -368,6 +429,26 @@ class Create(AAZCommand):
             encryption_with_cmk = _builder.get(".properties.encryptionWithCmk")
             if encryption_with_cmk is not None:
                 encryption_with_cmk.set_prop("enforcement", AAZStrType, ".enforcement")
+                encryption_with_cmk.set_prop("serviceLevelEncryptionKey", AAZObjectType, ".service_level_encryption_key")
+
+            service_level_encryption_key = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey")
+            if service_level_encryption_key is not None:
+                service_level_encryption_key.set_prop("accessCredentials", AAZObjectType, ".access_credentials")
+                service_level_encryption_key.set_prop("identity", AAZObjectType, ".identity", typ_kwargs={"nullable": True})
+                service_level_encryption_key.set_prop("keyVaultKeyName", AAZStrType, ".key_vault_key_name")
+                service_level_encryption_key.set_prop("keyVaultKeyVersion", AAZStrType, ".key_vault_key_version")
+                service_level_encryption_key.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
+
+            access_credentials = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey.accessCredentials")
+            if access_credentials is not None:
+                access_credentials.set_prop("applicationId", AAZStrType, ".application_id")
+                access_credentials.set_prop("applicationSecret", AAZStrType, ".application_secret")
+
+            identity = _builder.get(".properties.encryptionWithCmk.serviceLevelEncryptionKey.identity")
+            if identity is not None:
+                identity.set_prop("@odata.type", AAZStrType, ".odata_type", typ_kwargs={"flags": {"required": True}})
+                identity.set_prop("federatedIdentityClientId", AAZStrType, ".federated_identity_client_id")
+                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             network_rule_set = _builder.get(".properties.networkRuleSet")
             if network_rule_set is not None:
@@ -488,6 +569,10 @@ class Create(AAZCommand):
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
             )
+            properties.knowledge_retrieval = AAZStrType(
+                serialized_name="knowledgeRetrieval",
+                nullable=True,
+            )
             properties.network_rule_set = AAZObjectType(
                 serialized_name="networkRuleSet",
             )
@@ -553,6 +638,46 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             encryption_with_cmk.enforcement = AAZStrType()
+            encryption_with_cmk.service_level_encryption_key = AAZObjectType(
+                serialized_name="serviceLevelEncryptionKey",
+            )
+
+            service_level_encryption_key = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key
+            service_level_encryption_key.access_credentials = AAZObjectType(
+                serialized_name="accessCredentials",
+            )
+            service_level_encryption_key.identity = AAZObjectType(
+                nullable=True,
+            )
+            service_level_encryption_key.key_vault_key_name = AAZStrType(
+                serialized_name="keyVaultKeyName",
+            )
+            service_level_encryption_key.key_vault_key_version = AAZStrType(
+                serialized_name="keyVaultKeyVersion",
+            )
+            service_level_encryption_key.key_vault_uri = AAZStrType(
+                serialized_name="keyVaultUri",
+            )
+
+            access_credentials = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key.access_credentials
+            access_credentials.application_id = AAZStrType(
+                serialized_name="applicationId",
+            )
+            access_credentials.application_secret = AAZStrType(
+                serialized_name="applicationSecret",
+            )
+
+            identity = cls._schema_on_200_201.properties.encryption_with_cmk.service_level_encryption_key.identity
+            identity.odata_type = AAZStrType(
+                serialized_name="@odata.type",
+                flags={"required": True},
+            )
+            identity.federated_identity_client_id = AAZStrType(
+                serialized_name="federatedIdentityClientId",
+            )
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
 
             network_rule_set = cls._schema_on_200_201.properties.network_rule_set
             network_rule_set.bypass = AAZStrType()

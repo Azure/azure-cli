@@ -448,6 +448,14 @@ def validate_snapshot_import(namespace):
             raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
 
 
+def validate_public_network_args(namespace):
+    if namespace.enable_public_network is not None and namespace.public_network_access is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+    if namespace.public_network_access is not None and namespace.public_network_access.lower() == 'securedbyperimeter':
+        logger.warning("The 'SecuredByPerimeter' value is currently in preview.")
+
+
 def validate_sku(namespace):
     if namespace.sku.lower() == 'free':
         if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica or namespace.enable_arm_private_network_access):  # pylint: disable=too-many-boolean-expressions

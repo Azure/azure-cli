@@ -114,6 +114,8 @@ def convert_show_result_to_snake_case(result):
         new_result["additional_capabilities"] = result["additionalCapabilities"]
     if "availabilitySet" in result:
         new_result["availability_set"] = result["availabilitySet"]
+    if "capacityReservation" in result:
+        new_result["capacity_reservation"] = result["capacityReservation"]
     if "diagnosticsProfile" in result:
         new_result["diagnostics_profile"] = result["diagnosticsProfile"]
     if "hardwareProfile" in result:
@@ -147,6 +149,15 @@ def convert_show_result_to_snake_case(result):
     if "ultraSSDEnabled" in additional_capabilities:
         additional_capabilities["ultra_ssd_enabled"] = additional_capabilities["ultraSSDEnabled"]
         additional_capabilities.pop("ultraSSDEnabled")
+
+    capacity_reservation = new_result.get("capacity_reservation", {}) or {}
+    if "capacityReservationGroup" in capacity_reservation:
+        capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
+        capacity_reservation.pop("capacityReservationGroup")
+    if "disableCapacityReservationAssignment" in capacity_reservation:
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            capacity_reservation["disableCapacityReservationAssignment"]
+        capacity_reservation.pop("disableCapacityReservationAssignment")
 
     diagnostics_profile = new_result.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:

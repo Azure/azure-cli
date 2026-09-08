@@ -162,6 +162,40 @@ class NatGatewayScenarioTests(ScenarioTest):
         self.cmd('az network nat gateway delete -g {rg} -n {name}')
 
     @ResourceGroupPreparer(location='eastus2')
+    def test_natgateway_nat64(self, resource_group, resource_group_location):
+        """Test --nat64 (Enabled/Disabled) on StandardV2 NAT gateway create and update."""
+        self.kwargs.update({
+            'name': 'ng-nat64',
+            'location': resource_group_location,
+        })
+
+        # create with --nat64 Enabled
+        self.cmd(
+            'az network nat gateway create -g {rg} -n {name} --sku StandardV2 --nat64 Enabled',
+            checks=[
+                self.check('sku.name', 'StandardV2'),
+                self.check('nat64', 'Enabled'),
+            ]
+        )
+
+        # update --nat64 to Disabled
+        self.cmd(
+            'az network nat gateway update -g {rg} -n {name} --nat64 Disabled',
+            checks=[self.check('nat64', 'Disabled')]
+        )
+
+        self.cmd('az network nat gateway show -g {rg} -n {name}',
+                 checks=self.check('nat64', 'Disabled'))
+
+        self.cmd('az network nat gateway list -g {rg}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].nat64', 'Disabled'),
+                 ])
+
+        self.cmd('az network nat gateway delete -g {rg} -n {name}')
+
+    @ResourceGroupPreparer(location='eastus2')
     def test_natgateway_empty_create(self, resource_group, resource_group_location):
         self.kwargs.update({
             'name': "ng1",

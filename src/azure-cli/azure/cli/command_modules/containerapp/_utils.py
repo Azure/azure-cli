@@ -142,7 +142,7 @@ def _create_role_assignment(cli_ctx, role, assignee, scope=None):
     definitions_client = auth_client.role_definitions
 
     assignment_name = uuid.uuid4()
-    role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+    role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
     role_id = role_defs[0].id
 
     api_version = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION, max_api='2015-07-01')
@@ -895,23 +895,6 @@ def _remove_env_vars(existing_env_vars, remove_env_vars):
             logger.warning("Environment variable {} does not exist.".format(old_env_var))  # pylint: disable=logging-format-interpolation
 
 
-def _remove_env_vars(existing_env_vars, remove_env_vars):
-    for old_env_var in remove_env_vars:
-
-        # Check if updating existing env var
-        is_existing = False
-        for index, value in enumerate(existing_env_vars):
-            existing_env_var = value
-            if existing_env_var["name"].lower() == old_env_var.lower():
-                is_existing = True
-                existing_env_vars.pop(index)
-                break
-
-        # If not updating existing env var, add it as a new env var
-        if not is_existing:
-            logger.warning("Environment variable {} does not exist.".format(old_env_var))  # pylint: disable=logging-format-interpolation
-
-
 def _add_or_update_tags(containerapp_def, tags):
     if 'tags' not in containerapp_def:
         if tags:
@@ -1344,14 +1327,14 @@ def queue_acr_build(cmd, registry_rg, registry_name, img_name, src_dir, dockerfi
     # So we need to update the docker_file_path
     docker_file_path = docker_file_in_tar
 
-    OS, Architecture = cmd.get_models('OS', 'Architecture', resource_type=ResourceType.MGMT_CONTAINERREGISTRY, operation_group='runs')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', resource_type=ResourceType.MGMT_CONTAINERREGISTRYTASKS, operation_group='runs')
     # Default platform values
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
     platform_variant = None
 
     DockerBuildRequest, PlatformProperties = cmd.get_models('DockerBuildRequest', 'PlatformProperties',
-                                                            resource_type=ResourceType.MGMT_CONTAINERREGISTRY, operation_group='runs')
+                                                            resource_type=ResourceType.MGMT_CONTAINERREGISTRYTASKS, operation_group='runs')
     docker_build_request = DockerBuildRequest(
         image_names=[img_name],
         is_push_enabled=True,

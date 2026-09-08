@@ -434,7 +434,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('[0].deleted', True)
         })
 
-        time.sleep(30)
+        if self.is_live:
+            time.sleep(30)
         self.kwargs['version'] = \
             self.cmd('storage share-rm list --storage-account {sa} -g {rg} --include-deleted --query [0].version -o tsv'
                      ).output.strip('\n')

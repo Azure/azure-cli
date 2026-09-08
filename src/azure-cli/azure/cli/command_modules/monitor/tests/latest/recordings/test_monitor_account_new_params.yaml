@@ -1,0 +1,140 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --enable-access-using-resource-permissions --public-network-access
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_np000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_np000001","name":"cli_test_monitor_account_np000001","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '265'
+      content-type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"metrics": {"enableAccessUsingResourcePermissions":
+      true}, "publicNetworkAccess": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --enable-access-using-resource-permissions --public-network-access
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_np000001/providers/Microsoft.Monitor/accounts/ac000002?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"accountId":"47928ef5-569f-4e5f-c274-g29de66f3f39","metrics":{"prometheusQueryEndpoint":"https://ac000002-newparam.westus.prometheus.monitor.azure.com","internalId":"mac_47928ef5-569f-4e5f-c274-g29de66f3f39","enableAccessUsingResourcePermissions":true},"provisioningState":"Succeeded","defaultIngestionSettings":{"dataCollectionRuleResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionRules/ac000002","dataCollectionEndpointResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionEndpoints/ac000002"},"publicNetworkAccess":"Disabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_np000001/providers/microsoft.monitor/accounts/ac000002","name":"ac000002","type":"Microsoft.Monitor/accounts","etag":"\"b40196db-0000-0800-0000-7937cc5b1111\"","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-05-16T05:00:00.0000000Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-05-16T05:00:00.0000000Z"}}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2021-06-03-preview, 2023-04-01, 2023-04-03, 2023-06-01-preview,
+        2024-04-01-preview, 2024-04-03-preview, 2024-10-01-preview, 2024-10-03-preview,
+        2025-05-01-preview, 2025-05-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '1250'
+      content-type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --enable-access-using-resource-permissions
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_np000001/providers/Microsoft.Monitor/accounts/ac000002?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"accountId":"47928ef5-569f-4e5f-c274-g29de66f3f39","metrics":{"prometheusQueryEndpoint":"https://ac000002-newparam.westus.prometheus.monitor.azure.com","internalId":"mac_47928ef5-569f-4e5f-c274-g29de66f3f39","enableAccessUsingResourcePermissions":true},"provisioningState":"Succeeded","defaultIngestionSettings":{"dataCollectionRuleResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionRules/ac000002","dataCollectionEndpointResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionEndpoints/ac000002"},"publicNetworkAccess":"Disabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_np000001/providers/microsoft.monitor/accounts/ac000002","name":"ac000002","type":"Microsoft.Monitor/accounts","etag":"\"b40196db-0000-0800-0000-7937cc5b1111\"","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-05-16T05:00:00.0000000Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-05-16T05:00:00.0000000Z"}}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2021-06-03-preview, 2023-04-01, 2023-04-03, 2023-06-01-preview,
+        2024-04-01-preview, 2024-04-03-preview, 2024-10-01-preview, 2024-10-03-preview,
+        2025-05-01-preview, 2025-05-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '1250'
+      content-type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"metrics": {"enableAccessUsingResourcePermissions":
+      false}, "publicNetworkAccess": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor account update
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --enable-access-using-resource-permissions
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_account_np000001/providers/Microsoft.Monitor/accounts/ac000002?api-version=2025-10-03
+  response:
+    body:
+      string: '{"properties":{"accountId":"47928ef5-569f-4e5f-c274-g29de66f3f39","metrics":{"prometheusQueryEndpoint":"https://ac000002-newparam.westus.prometheus.monitor.azure.com","internalId":"mac_47928ef5-569f-4e5f-c274-g29de66f3f39","enableAccessUsingResourcePermissions":false},"provisioningState":"Succeeded","defaultIngestionSettings":{"dataCollectionRuleResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionRules/ac000002","dataCollectionEndpointResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MA_ac000002_westus_managed/providers/Microsoft.Insights/dataCollectionEndpoints/ac000002"},"publicNetworkAccess":"Disabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_account_np000001/providers/microsoft.monitor/accounts/ac000002","name":"ac000002","type":"Microsoft.Monitor/accounts","etag":"\"b40196db-0000-0800-0000-7937cc5b2222\"","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-05-16T05:00:00.0000000Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-05-16T05:01:00.0000000Z"}}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2021-06-03-preview, 2023-04-01, 2023-04-03, 2023-06-01-preview,
+        2024-04-01-preview, 2024-04-03-preview, 2024-10-01-preview, 2024-10-03-preview,
+        2025-05-01-preview, 2025-05-03-preview, 2025-10-03
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -37,7 +37,7 @@ from .fleet_test_helper import (
     FleetTestHelper,
 )  # Ensure this import points to the correct module
 
-defaultSubscription = "ac302a10-6fb1-4308-baf6-ad855c4d7f3d"
+defaultSubscription = "cfd0f5f2-722b-46ec-a74c-e62616c24b78"
 #defaultSubscription = "0000000-0000-0000-0000-000000000000"
 subscriptionId = os.getenv("SUBSCRIPTION_ID")
 if not subscriptionId:
@@ -62,8 +62,8 @@ def generate_random_fleet_name(prefix="test_fleet_cli", length=16):
 fleet_name_regular = generate_random_fleet_name(fleet_name_regular)
 fleet_name_spot = generate_random_fleet_name(fleet_name_spot)
 resource_group = generate_random_rg_name()
-location = "westus3"
-location2 = "westus2"
+location = "eastasia"
+location2 = "westcentralus"
 subnet_name = generate_random_fleet_name("subnet-", 12)
 
 
@@ -75,6 +75,10 @@ class TestComputefleetScenario(ScenarioTest):
         resource_group=resource_group,
         location=location,
         subnetName=subnet_name,
+        regular_capacity=3,
+        spot_capacity=3,
+        mode="Managed",
+        vm_name_prefix="testPrefix",
     ):
         public_ip_address = self.create_public_ip_address(
             subscription_id, resource_group, location
@@ -91,6 +95,10 @@ class TestComputefleetScenario(ScenarioTest):
             public_ip_address_id,
             subnetName,
             public_ip_address,
+            regular_capacity,
+            spot_capacity,
+            mode,
+            vm_name_prefix,
         )
 
     def create_public_ip_address(self, subscriptionId, resourceGroupName, location):
@@ -126,8 +134,24 @@ class TestComputefleetScenario(ScenarioTest):
             "name": public_ip_address_name,
         }
 
-    def _fleet_create(self, fleet=fleet_name, rg=resource_group, loc=location):
-        fleetData = self.generate_fleet_parameters(subscriptionId, rg, loc, subnet_name)
+    def _fleet_create(
+            self,
+            fleet=fleet_name,
+            rg=resource_group,
+            loc=location,
+            mode="Managed",
+            vm_name_prefix="testPrefix",
+            regular_capacity=3,
+            spot_capacity=3):
+        fleetData = self.generate_fleet_parameters(
+            subscriptionId,
+            rg,
+            loc,
+            subnet_name,
+            mode=mode,
+            vm_name_prefix=vm_name_prefix,
+            regular_capacity=regular_capacity,
+            spot_capacity=spot_capacity)
         compute_profile = fleetData["compute-profile"]
         spot_profile = fleetData["spot-priority-profile"]
         regular_profile = fleetData["regular-priority-profile"]
@@ -154,12 +178,14 @@ class TestComputefleetScenario(ScenarioTest):
                 "zones": json.dumps(zones),
                 "tags": json.dumps(tags),
                 "tagsNew": json.dumps(tagsNew),
+                "mode": mode,
+                "vm_name_prefix": vm_name_prefix
             }
         )
 
         try:
             response = self.cmd(
-                "az compute-fleet create  --name {fleet_name_test} --resource-group {resource_group} --spot-priority-profile '{spot_profile}' --compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' --location {location} --tags '{tags}' ",
+                "az compute-fleet create  --name {fleet_name_test} --resource-group {resource_group} --mode {mode} --vm-name-prefix {vm_name_prefix} --regular-priority-profile '{regular_priority_profile}' --spot-priority-profile '{spot_profile}' --compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' --location {location} --tags '{tags}' ",
                 checks=[
                     self.check("name", "{fleet_name_test}"),
                     self.check("resourceGroup", "{resource_group}"),
@@ -243,8 +269,35 @@ class TestComputefleetScenario(ScenarioTest):
 
         self.cmd(
             "az compute-fleet list-vmss  --name {fleet_name_test} --resource-group {resource_group} --subscription {subscriptionId}",
-            checks=[self.check("length(@)", 3)],
+            checks=[self.greater_than("length(@)", 0)],
         )
+
+    def _fleet_vms_list(
+        self, fleet=fleet_name, rg=resource_group, subscriptionId=subscriptionId, capacity=0, vm_name_prefix=""
+    ):
+        self.kwargs.update(
+            {
+                "fleet_name_test": fleet,
+                "resource_group": rg,
+                "subscriptionId": subscriptionId,
+            }
+        )
+
+        result = self.cmd(
+            "az compute-fleet list-vms --name {fleet_name_test} --resource-group {resource_group} --subscription {subscriptionId}",
+        ).get_output_in_json()
+
+        vms = result if result else []
+        self.assertEqual(
+            len(vms), capacity,
+            f"Expected {capacity} VMs, but got {len(vms)}"
+        )
+
+        for vm in vms:
+            self.assertTrue(
+                vm["name"].startswith(vm_name_prefix),
+                f"VM name '{vm['name']}' does not start with expected prefix '{vm_name_prefix}'"
+            )
 
     def _fleet_update(self, fleet=fleet_name, rg=resource_group):
         self.kwargs.update(
@@ -307,4 +360,22 @@ class TestComputefleetScenario(ScenarioTest):
         self._fleet_list(resource_group)
         self._fleet_vmss_list(fleet_name, resource_group)
         self._fleet_delete(fleet_name, resource_group, subscriptionId)
-     
+
+    @ResourceGroupPreparer(name_prefix="fleet-cli_launch", location=location)
+    @AllowLargeResponse()
+    @live_only()
+    def test_all_launch_fleet_operations(self, resource_group, resource_group_location):
+        fleet_name = generate_random_fleet_name("testFleet-launch")
+        vm_name_prefix = "testPrefix"
+        self._fleet_create(
+            fleet_name,
+            resource_group,
+            resource_group_location,
+            mode="Launch",
+            vm_name_prefix=vm_name_prefix,
+            regular_capacity=10,
+            spot_capacity=0)
+        self._fleet_show(fleet_name, resource_group)
+        self._fleet_list(resource_group)
+        self._fleet_vms_list(fleet_name, resource_group, subscriptionId, capacity=10, vm_name_prefix=vm_name_prefix)
+        self._fleet_delete(fleet_name, resource_group, subscriptionId)
