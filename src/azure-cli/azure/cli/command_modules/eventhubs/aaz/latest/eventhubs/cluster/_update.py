@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an instance of an Event Hubs Cluster.
+
+    :example: ClusterPut
+        az eventhubs cluster update --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -92,7 +95,6 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="Provisioning state of the Cluster.",
         )
-
         _args_schema.supports_scaling = AAZBoolArg(
             options=["--supports-scaling"],
             arg_group="Properties",
@@ -204,7 +206,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -303,7 +305,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

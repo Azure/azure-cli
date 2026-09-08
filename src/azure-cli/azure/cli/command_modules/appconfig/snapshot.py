@@ -26,7 +26,8 @@ def create_snapshot(cmd,
                     endpoint=None,
                     retention_period=None,
                     composition_type=None,
-                    tags=None):
+                    tags=None,
+                    description=None):
 
     client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -44,7 +45,8 @@ def create_snapshot(cmd,
             configurationSettingsFilters,
             composition_type=composition_type,
             retention_period=retention_period,
-            tags=tags)
+            tags=tags,
+            description=description)
 
         # Poll snapshot creation status
         while config_snapshot_poller.status() != ProvisioningStatus.SUCCEEDED:

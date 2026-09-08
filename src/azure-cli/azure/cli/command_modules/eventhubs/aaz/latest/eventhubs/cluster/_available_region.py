@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class AvailableRegion(AAZCommand):
     """List the quantity of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
+
+    :example: ListAvailableClusters
+        az eventhubs cluster available-region
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.eventhub/availableclusterregions", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.eventhub/availableclusterregions", "2026-07-01-preview"],
         ]
     }
 
@@ -98,7 +101,7 @@ class AvailableRegion(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

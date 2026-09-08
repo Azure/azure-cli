@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an Event Hubs consumer group as a nested resource within a Namespace.
+
+    :example: ConsumerGroupCreate
+        az eventhubs eventhub consumer-group create --resource-group ArunMonocle --namespace-name sdk-Namespace-2661 --eventhub-name sdk-EventHub-6681 --consumer-group-name sdk-ConsumerGroup-5563 --user-metadata New consumergroup
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -156,7 +159,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
