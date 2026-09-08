@@ -76,7 +76,7 @@ SRC_DIR = PROJECT_ROOT / "src"
 AZURE_CLI_CORE_DIR = SRC_DIR / "azure-cli-core"
 REQUIREMENTS_FILES = {
     "linux": SRC_DIR / "azure-cli" / "requirements.py3.Linux.txt",
-    "macos": SRC_DIR / "azure-cli" / "requirements.py3.Darwin.txt",
+    "macos": SRC_DIR / "azure-cli" / "requirements.py3.Darwin.Standalone.txt",
 }
 
 # Package configuration

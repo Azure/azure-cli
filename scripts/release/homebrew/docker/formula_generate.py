@@ -99,8 +99,7 @@ def collect_resources_dict() -> dict:
 
 def resource_filter(name: str) -> bool:
     # TODO remove need for any filters and delete this method.
-    # The standalone cask bundles the macOS broker runtime; the Homebrew Core formula uses plain MSAL.
-    return not name.startswith('azure-cli') and name not in ('futures', 'jeepney', 'entrypoints', 'pymsalruntime')
+    return not name.startswith('azure-cli') and name not in ('futures', 'jeepney', 'entrypoints')
 
 
 def last_bottle_hash():
