@@ -13,7 +13,7 @@ VERSION = "2.90.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
-    with open("azure/cli/core/__init__.py", "r", encoding="utf-8") as f:
+    with open('azure/cli/core/__init__.py', 'r', encoding='utf-8') as f:
         content = f.read()
 except OSError:
     pass
@@ -23,70 +23,70 @@ else:
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
-        print("Could not find __version__ in azure/cli/core/__init__.py")
+        print('Could not find __version__ in azure/cli/core/__init__.py')
         sys.exit(1)
     if m.group(1) != VERSION:
         print('Expected __version__ = "{}"; found "{}"'.format(VERSION, m.group(1)))
         sys.exit(1)
 
 CLASSIFIERS = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Intended Audience :: System Administrators",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "License :: OSI Approved :: MIT License",
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Intended Audience :: System Administrators',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
-    "argcomplete~=3.5.2",
-    "azure-cli-telemetry==1.1.0.*",
-    "azure-core~=1.39.0",
-    "azure-mgmt-core>=1.2.0,<2",
-    "cryptography",
+    'argcomplete~=3.5.2',
+    'azure-cli-telemetry==1.1.0.*',
+    'azure-core~=1.39.0',
+    'azure-mgmt-core>=1.2.0,<2',
+    'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
     'distro; sys_platform == "linux"',
-    "humanfriendly~=10.0",
-    "jmespath",
-    "knack~=0.14.0",
-    "microsoft-security-utilities-secret-masker~=1.0.0b4",
-    "msal-extensions==1.3.1",
+    'humanfriendly~=10.0',
+    'jmespath',
+    'knack~=0.14.0',
+    'microsoft-security-utilities-secret-masker~=1.0.0b4',
+    'msal-extensions==1.3.1',
     'msal[broker]==1.36.0; sys_platform == "win32" or sys_platform == "darwin"',
     'msal==1.36.0; sys_platform != "win32" and sys_platform != "darwin"',
-    "packaging>=20.9",
+    'packaging>=20.9',
     # pkginfo>=1.12.0 reads the spec-defined wheel METADATA / unpacked .dist-info
     # layout produced by modern wheel/setuptools (no metadata.json). Required so
     # WheelExtension.get_metadata works without the legacy wheel==0.30.0 artifact.
-    "pkginfo>=1.12.0",
+    'pkginfo>=1.12.0',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
     'psutil>=5.9; sys_platform != "cygwin"',
-    "PyJWT>=2.1.0",
-    "pyopenssl>=17.1.0",  # https://github.com/pyca/pyopenssl/pull/612
-    "py-deviceid",
-    "requests[socks]",
+    'PyJWT>=2.1.0',
+    'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
+    'py-deviceid',
+    'requests[socks]',
 ]
 
-with open("README.rst", "r", encoding="utf-8") as f:
+with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 
 setup(
-    name="azure-cli-core",
+    name='azure-cli-core',
     version=VERSION,
-    description="Microsoft Azure Command-Line Tools Core Module",
+    description='Microsoft Azure Command-Line Tools Core Module',
     long_description=README,
-    license="MIT",
-    author="Microsoft Corporation",
-    author_email="azpycli@microsoft.com",
-    url="https://github.com/Azure/azure-cli",
+    license='MIT',
+    author='Microsoft Corporation',
+    author_email='azpycli@microsoft.com',
+    url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires=">=3.10.0",
-    package_data={"azure.cli.core": ["auth/landing_pages/*.html", "commandIndex.latest.json", "helpIndex.latest.json"]},
+    python_requires='>=3.10.0',
+    package_data={'azure.cli.core': ['auth/landing_pages/*.html', 'commandIndex.latest.json', 'helpIndex.latest.json']}
 )
