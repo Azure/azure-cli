@@ -70,112 +70,119 @@ def _relative_age(iso_value):
         return None
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    delta = datetime.now(timezone.utc) - dt
-    total_seconds = int(delta.total_seconds())
+    total_seconds = int((datetime.now(timezone.utc) - dt).total_seconds())
     if total_seconds < 0:
-        return 'in the future'
-    if total_seconds < 60:
-        return 'just now'
-    minutes = total_seconds // 60
-    if minutes < 60:
-        return '{}m ago'.format(minutes)
-    hours = minutes // 60
-    rem_min = minutes % 60
-    if hours < 24:
-        return '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
-    days = hours // 24
-    rem_hours = hours % 24
-    return '{}d {}h ago'.format(days, rem_hours) if rem_hours else '{}d ago'.format(days)
+        age = 'in the future'
+    elif total_seconds < 60:
+        age = 'just now'
+    else:
+        minutes = total_seconds // 60
+        if minutes < 60:
+            age = '{}m ago'.format(minutes)
+        else:
+            hours, rem_min = divmod(minutes, 60)
+            if hours < 24:
+                age = '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
+            else:
+                days, rem_hours = divmod(hours, 24)
+                age = '{}d {}h ago'.format(days, rem_hours) if rem_hours else '{}d ago'.format(days)
+    return age
 
 
-def render_report(payload):
-    """Print the human-readable report: BUILT-IN CHECKS + SITE RUNTIME ERROR
-    RECOMMENDATION. Invoked when ``--report`` is passed."""
+def _out(*objs):
+    print_styled_text(*objs, file=sys.stdout)
 
-    def _out(*objs):
-        print_styled_text(*objs, file=sys.stdout)
 
-    def _row(*objs):
-        _out(list(objs))
+def _row(*objs):
+    _out(list(objs))
 
-    def _labeled(label, value, style=Style.PRIMARY):
-        """Emit '<label><value>' with hanging indent so wrapped continuation
-        lines align under the value column."""
-        text = '' if value is None else str(value)
-        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
-        indent = ' ' * len(label)
-        body_w = max(20, term_w - len(label))
-        lines = textwrap.wrap(text, width=body_w) or [text]
-        _row((style, label), (style, lines[0]))
-        for cont in lines[1:]:
-            _row((style, indent), (style, cont))
 
-    config_check = payload.get('configCheck') or {}
-    config_check_failed = payload.get('configCheck') is None
-    config_check_status = payload.get('configCheckStatus')
-    config_check_message = payload.get('configCheckMessage')
+def _labeled(label, value, style=Style.PRIMARY):
+    """Emit a labeled value with wrapped lines aligned below the value."""
+    text = '' if value is None else str(value)
+    term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
+    indent = ' ' * len(label)
+    lines = textwrap.wrap(text, width=max(20, term_w - len(label))) or [text]
+    _row((style, label), (style, lines[0]))
+    for continuation in lines[1:]:
+        _row((style, indent), (style, continuation))
+
+
+def _details_level(setting):
+    raw = setting.get('DetailsLevel')
+    if raw is None:
+        raw = setting.get('detailsLevel')
+    level = raw.strip().lower() if isinstance(raw, str) else ''
+    return level if level in ('info', 'warning', 'error') else 'info'
+
+
+def _style_for_level(level):
+    if level == 'error':
+        return Style.ERROR
+    if level == 'warning':
+        return Style.WARNING
+    return Style.SUCCESS
+
+
+def _get_settings(config_check):
     settings = config_check.get('Settings') or config_check.get('settings') or []
     if not isinstance(settings, list):
-        settings = []
-    settings = [s for s in settings if isinstance(s, dict)]
-    runtime_error = payload.get('runtimeError')
+        return []
+    return [setting for setting in settings if isinstance(setting, dict)]
 
-    def _details_level(setting):
-        # KuduLite tags each check with DetailsLevel: 'info' | 'warning' | 'error'.
-        raw = setting.get('DetailsLevel')
-        if raw is None:
-            raw = setting.get('detailsLevel')
-        if isinstance(raw, str):
-            level = raw.strip().lower()
-            if level in ('info', 'warning', 'error'):
-                return level
-        return 'info'
 
-    def _style_for_level(level):
-        if level == 'error':
-            return Style.ERROR
-        if level == 'warning':
-            return Style.WARNING
-        return Style.SUCCESS
+def _render_snapshot_metadata(payload, config_check):
+    machine_name = config_check.get('MachineName') or config_check.get('machineName')
+    requested_machine_name = payload.get('requestedMachineName')
+    instance_id = config_check.get('InstanceId') or config_check.get('instanceId')
+    written_at_raw = config_check.get('WrittenAt') or config_check.get('writtenAt')
+    if isinstance(machine_name, str):
+        machine_name = machine_name.strip()
+    if isinstance(requested_machine_name, str):
+        requested_machine_name = requested_machine_name.strip()
+    if isinstance(written_at_raw, str):
+        written_at_raw = written_at_raw.strip()
 
-    def _is_issue(level):
-        return level in ('warning', 'error')
+    instance_value = machine_name or requested_machine_name or _short_id(instance_id)
+    if instance_value:
+        _labeled('Instance:     ', instance_value, Style.HIGHLIGHT)
+    if written_at_raw:
+        _labeled('Last Updated: ', _format_dt(written_at_raw) or str(written_at_raw), Style.HIGHLIGHT)
+    if instance_value or written_at_raw:
+        _out()
 
-    any_issue = any(_is_issue(_details_level(s)) for s in settings)
 
-    # Show the runtime error section only when the ARM lastErrorTimestamp is
-    # within the freshness window. The payload already carries the pre-computed
-    # 'isRecent' signal so structured-payload consumers can apply the same gate
-    # (see _RUNTIME_ERROR_FRESHNESS_MINUTES / _runtime_error_is_recent in custom.py).
-    show_runtime = bool(runtime_error and runtime_error.get('isRecent'))
+def _render_settings_table(settings):
+    term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
+    setting_w = max(20, min(40, max(len(str(s.get('Setting') or '')) for s in settings) + 2))
+    value_w = max(15, min(30, max(len(str(s.get('Value') or '')) for s in settings) + 2))
+    header = '{sname:<{sw}}{vname:<{vw}}{dname}'.format(
+        sname='Setting', sw=setting_w, vname='Value', vw=value_w, dname='Details')
+    _row((Style.HIGHLIGHT, header))
+    _row((Style.SECONDARY, '{s}{v}{d}'.format(
+        s=('─' * (setting_w - 2)).ljust(setting_w),
+        v=('─' * (value_w - 2)).ljust(value_w),
+        d='─' * 40)))
 
-    # ---- Section 1: Built-in checks ----
+    for setting in settings:
+        name = str(setting.get('Setting') or '')
+        value = str(setting.get('Value') if setting.get('Value') is not None else '')
+        details = str(setting.get('Details') or '')
+        prefix = '{s:<{sw}}{v:<{vw}}'.format(s=name, sw=setting_w, v=value, vw=value_w)
+        lines = textwrap.wrap(details, width=max(20, term_w - len(prefix))) or [details]
+        details_style = _style_for_level(_details_level(setting))
+        _row((Style.PRIMARY, prefix), (details_style, lines[0]))
+        for continuation in lines[1:]:
+            _row((Style.PRIMARY, ' ' * len(prefix)), (details_style, continuation))
+
+
+def _render_config_checks(payload, config_check, settings):
     _out()
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
-    if not config_check_failed:
-        machine_name = config_check.get('MachineName') or config_check.get('machineName')
-        requested_machine_name = payload.get('requestedMachineName')
-        instance_id = config_check.get('InstanceId') or config_check.get('instanceId')
-        written_at_raw = config_check.get('WrittenAt') or config_check.get('writtenAt')
-        if isinstance(machine_name, str):
-            machine_name = machine_name.strip()
-        if isinstance(requested_machine_name, str):
-            requested_machine_name = requested_machine_name.strip()
-        if isinstance(written_at_raw, str):
-            written_at_raw = written_at_raw.strip()
-        instance_value = machine_name or requested_machine_name or _short_id(instance_id)
-        if instance_value:
-            _labeled('Instance:     ', instance_value, Style.HIGHLIGHT)
-        if written_at_raw:
-            written_at = _format_dt(written_at_raw) or str(written_at_raw)
-            _labeled('Last Updated: ', written_at, Style.HIGHLIGHT)
-        if machine_name or written_at_raw:
-            _out()
-
-    if config_check_failed:
-        if config_check_status == 404:
-            message = config_check_message or (
+    if payload.get('configCheck') is None:
+        if payload.get('configCheckStatus') == 404:
+            message = payload.get('configCheckMessage') or (
                 'Configuration check feature is currently disabled. Please try again later.')
             _row((Style.WARNING, message))
         else:
@@ -183,79 +190,63 @@ def render_report(payload):
                   'Failed to retrieve built-in configuration checks. Please try again. '
                   'If the issue persists, restart the application (\'az webapp restart\') and confirm the SCM (Kudu) '
                   'is running and reachable.'))
-    elif not settings:
+        return
+
+    _render_snapshot_metadata(payload, config_check)
+    if not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:
-        term_w = shutil.get_terminal_size(fallback=(120, 40)).columns
-        setting_w = max(20, min(40, max(len(str(s.get('Setting') or '')) for s in settings) + 2))
-        value_w = max(15, min(30, max(len(str(s.get('Value') or '')) for s in settings) + 2))
+        _render_settings_table(settings)
 
-        header = '{sname:<{sw}}{vname:<{vw}}{dname}'.format(
-            sname='Setting', sw=setting_w, vname='Value', vw=value_w, dname='Details')
-        _row((Style.HIGHLIGHT, header))
-        _row((Style.SECONDARY, '{s}{v}{d}'.format(
-            s=('─' * (setting_w - 2)).ljust(setting_w),
-            v=('─' * (value_w - 2)).ljust(value_w),
-            d='─' * 40)))
-        for setting in settings:
-            name_v = str(setting.get('Setting') or '')
-            value_v = str(setting.get('Value') if setting.get('Value') is not None else '')
-            details_v = str(setting.get('Details') or '')
-            details_style = _style_for_level(_details_level(setting))
-            prefix = '{s:<{sw}}{v:<{vw}}'.format(
-                s=name_v, sw=setting_w, v=value_v, vw=value_w)
-            details_w = max(20, term_w - len(prefix))
-            detail_lines = textwrap.wrap(details_v, width=details_w) or [details_v]
-            _row((Style.PRIMARY, prefix), (details_style, detail_lines[0]))
-            cont_indent = ' ' * len(prefix)
-            for cont in detail_lines[1:]:
-                _row((Style.PRIMARY, cont_indent), (details_style, cont))
 
-    # ---- Section 2: Site runtime error recommendation ----
-    # Rendered only when the ARM lastErrorTimestamp is within the last 15
-    # minutes. Applied consistently regardless of whether the built-in
-    # checks succeeded, failed, or reported no issues.
+def _render_runtime_error(runtime_error):
+    _out()
+    _out()
+    _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
+    _out()
+    timestamp_raw = runtime_error.get('lastErrorTimestamp')
+    timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
+    age = _relative_age(timestamp_raw) if timestamp else None
+    if age:
+        timestamp = '{} ({})'.format(timestamp, age)
+
+    fields = [
+        ('Instance               ', _short_id(runtime_error.get('instanceId'))),
+        ('State                  ', runtime_error.get('state')),
+        ('Last Error             ', runtime_error.get('lastError')),
+        ('Last Error Details     ', runtime_error.get('lastErrorDetails')),
+        ('Last Error Timestamp   ', timestamp),
+    ]
+    for label, value in fields:
+        if value:
+            _labeled(label, value)
+    _out()
+
+
+def _render_hints(payload, any_issue):
+    resource_group = payload.get('resourceGroup') or '<resource-group>'
+    site_name = payload.get('name') or '<site-name>'
+    _out()
+    _out((Style.WARNING, '▶ Hint:'))
+    if any_issue:
+        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, resource_group))
+        _out('  Update flagged config:       az webapp config set -n {} -g {} '
+             '--settings KEY=VALUE'.format(site_name, resource_group))
+    _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(
+        site_name, resource_group))
+
+
+def render_report(payload):
+    """Print built-in checks, a recent runtime recommendation, and hints."""
+    config_check = payload.get('configCheck') or {}
+    settings = _get_settings(config_check)
+    runtime_error = payload.get('runtimeError')
+    show_runtime = bool(runtime_error and runtime_error.get('isRecent'))
+    any_issue = any(_details_level(setting) in ('warning', 'error') for setting in settings)
+
+    _render_config_checks(payload, config_check, settings)
     if show_runtime:
-        _out()
-        _out()
-        _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
-        _out()
-        state = str(runtime_error.get('state') or '')
-        last_error = str(runtime_error.get('lastError') or '')
-        details = str(runtime_error.get('lastErrorDetails') or '')
-        timestamp_raw = runtime_error.get('lastErrorTimestamp')
-        timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
-        if timestamp:
-            age = _relative_age(timestamp_raw if isinstance(timestamp_raw, str) else None)
-            if age:
-                timestamp = '{} ({})'.format(timestamp, age)
-
-        instance_short = _short_id(runtime_error.get('instanceId'))
-        if instance_short:
-            _labeled('Instance               ', instance_short)
-        if state:
-            _labeled('State                  ', state)
-        if last_error:
-            _labeled('Last Error             ', last_error)
-        if details:
-            _labeled('Last Error Details     ', details)
-        if timestamp:
-            _labeled('Last Error Timestamp   ', timestamp)
-
-        _out()
-
-    # ---- Section 3: Suggested next steps ----
-    # Show actionable next steps when either source found a problem. Config
-    # update commands require a flagged built-in check; application logs are
-    # useful for both configuration findings and runtime errors.
+        _render_runtime_error(runtime_error)
     if any_issue or show_runtime:
-        rg = payload.get('resourceGroup') or '<resource-group>'
-        site_name = payload.get('name') or '<site-name>'
-        _out()
-        _out((Style.WARNING, '▶ Hint:'))
-        if any_issue:
-            _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
-                 '--settings KEY=VALUE'.format(site_name, rg))
-            _out('  Update flagged config:       az webapp config set -n {} -g {} '
-                 '--settings KEY=VALUE'.format(site_name, rg))
-        _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(site_name, rg))
+        _render_hints(payload, any_issue)
