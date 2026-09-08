@@ -218,14 +218,14 @@ def _get_database_server_endpoint(sql_server_hostname, cloud_name):
 
 def _get_endpoint_fallback_value(cloud_name):
     def _get_cloud_endpoint_fallback_value(endpoint_name):
-        endpoint_mapper = {c.name: c.endpoints.__dict__.get(endpoint_name, None) for c in HARD_CODED_CLOUD_LIST}
+        endpoint_mapper = {c.name: c.endpoints.__dict__.get(endpoint_name, None) for c in _INTERNAL_CLOUD_LIST}
         return endpoint_mapper.get(cloud_name, None)
     return _get_cloud_endpoint_fallback_value
 
 
 def _get_suffix_fallback_value(cloud_name):
     def _get_cloud_suffix_fallback_value(suffix_name):
-        suffix_mapper = {c.name: c.suffixes.__dict__.get(suffix_name, None) for c in HARD_CODED_CLOUD_LIST}
+        suffix_mapper = {c.name: c.suffixes.__dict__.get(suffix_name, None) for c in _INTERNAL_CLOUD_LIST}
         return suffix_mapper.get(cloud_name, None)
     return _get_cloud_suffix_fallback_value
 
@@ -354,6 +354,10 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureCloud = 'AzureCloud'
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
+    # AzureGermanCloud (Microsoft Cloud Germany) has been decommissioned and is no longer
+    # offered to end users. It is kept here only for internal reference (e.g. endpoint/suffix
+    # fallback lookups and migrating away from any lingering AzureGermanCloud configuration).
+    AzureGermanCloud = 'AzureGermanCloud'
     AzureBleuCloud = 'AzureBleuCloud'
 
 
@@ -464,6 +468,35 @@ AZURE_US_GOV_CLOUD = Cloud(
         acr_login_server_endpoint='.azurecr.us',
         synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
+# AzureGermanCloud (Microsoft Cloud Germany) has been decommissioned. This definition is
+# intentionally NOT added to HARD_CODED_CLOUD_LIST so it is not exposed to end users. It is
+# retained for internal reference only, so that endpoint/suffix fallback lookups can still
+# resolve any lingering AzureGermanCloud configuration.
+AZURE_GERMAN_CLOUD = Cloud(
+    CloudNameEnum.AzureGermanCloud,
+    endpoints=CloudEndpoints(
+        management='https://management.core.cloudapi.de/',
+        resource_manager='https://management.microsoftazure.de',
+        sql_management='https://management.core.cloudapi.de:8443/',
+        batch_resource_id='https://batch.cloudapi.de/',
+        gallery='https://gallery.cloudapi.de/',
+        active_directory='https://login.microsoftonline.de',
+        active_directory_resource_id='https://management.core.cloudapi.de/',
+        active_directory_graph_resource_id='https://graph.cloudapi.de/',
+        microsoft_graph_resource_id='https://graph.microsoft.de',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases.json',
+        media_resource_id='https://rest.media.cloudapi.de',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de',
+        portal='https://portal.microsoftazure.de'),
+    suffixes=CloudSuffixes(
+        storage_endpoint='core.cloudapi.de',
+        keyvault_dns='.vault.microsoftazure.de',
+        mhsm_dns='.managedhsm.microsoftazure.de',
+        sql_server_hostname='.database.cloudapi.de',
+        mysql_server_endpoint='.mysql.database.cloudapi.de',
+        postgresql_server_endpoint='.postgres.database.cloudapi.de',
+        mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
+
 AZURE_BLEU_CLOUD = Cloud(
     CloudNameEnum.AzureBleuCloud,
     endpoints=CloudEndpoints(
@@ -494,6 +527,11 @@ AZURE_BLEU_CLOUD = Cloud(
         synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
 HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_BLEU_CLOUD]
+
+# Clouds used for internal endpoint/suffix fallback lookups only. This includes the
+# decommissioned AzureGermanCloud so that its endpoints/suffixes can still be resolved
+# internally, without exposing it to end users via HARD_CODED_CLOUD_LIST / KNOWN_CLOUDS.
+_INTERNAL_CLOUD_LIST = HARD_CODED_CLOUD_LIST + [AZURE_GERMAN_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():
