@@ -39,6 +39,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          show_startup_log,
                                                          troubleshoot_config,
                                                          _extract_runtime_error,
+                                                         _log_webapp_troubleshoot_config_tip,
                                                          create_webapp)
 from azure.cli.command_modules.appservice.commands import transform_troubleshoot_config_output
 
@@ -56,6 +57,24 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestTroubleshootConfigDiscovery(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_tip_is_shown_for_linux_webapp(self, logger_mock):
+        _log_webapp_troubleshoot_config_tip('myApp', 'myRG', True)
+
+        logger_mock.warning.assert_called_once_with(
+            "Tip: run 'az webapp troubleshoot config --name %s --resource-group %s --report' "
+            "to validate app configuration and see recent runtime errors.",
+            'myApp', 'myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_tip_is_hidden_for_windows_webapp(self, logger_mock):
+        _log_webapp_troubleshoot_config_tip('myApp', 'myRG', False)
+
+        logger_mock.warning.assert_not_called()
 
 
 class TestWebappMocked(unittest.TestCase):
@@ -2076,6 +2095,8 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('pl0sdlwk000r7s', printed_text)
         self.assertIn('Last Updated:', printed_text)
         self.assertIn('2026-09-02 17:30:00 UTC', printed_text)
+        self.assertLess(printed_text.index('Instance:'), printed_text.index('BUILT-IN CHECKS'))
+        self.assertLess(printed_text.index('Last Updated:'), printed_text.index('BUILT-IN CHECKS'))
         self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
         self.assertIn('ImagePullUnauthorizedFailure', printed_text)
         self.assertIn('Last Error', printed_text)

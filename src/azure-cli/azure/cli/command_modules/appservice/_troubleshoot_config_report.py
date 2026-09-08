@@ -148,8 +148,6 @@ def _render_snapshot_metadata(payload, config_check):
         _labeled('Instance:     ', instance_value, Style.HIGHLIGHT)
     if written_at_raw:
         _labeled('Last Updated: ', _format_dt(written_at_raw) or str(written_at_raw), Style.HIGHLIGHT)
-    if instance_value or written_at_raw:
-        _out()
 
 
 def _render_settings_table(settings):
@@ -177,6 +175,8 @@ def _render_settings_table(settings):
 
 
 def _render_config_checks(payload, config_check, settings):
+    if payload.get('configCheck') is not None:
+        _render_snapshot_metadata(payload, config_check)
     _out()
     _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
     _out()
@@ -192,7 +192,6 @@ def _render_config_checks(payload, config_check, settings):
                   'is running and reachable.'))
         return
 
-    _render_snapshot_metadata(payload, config_check)
     if not settings:
         _row((Style.WARNING, 'No built-in configuration checks reported.'))
     else:

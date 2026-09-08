@@ -389,7 +389,16 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                         multicontainer_config_type, sitecontainers_app,
                                         deployment_source_url, deployment_local_git]):
         logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    _log_webapp_troubleshoot_config_tip(name, resource_group_name, is_linux)
     return webapp
+
+
+def _log_webapp_troubleshoot_config_tip(name, resource_group_name, is_linux):
+    if not is_linux:
+        return
+    logger.warning("Tip: run 'az webapp troubleshoot config --name %s --resource-group %s --report' "
+                   "to validate app configuration and see recent runtime errors.",
+                   name, resource_group_name)
 
 
 def _enable_basic_auth(cmd, app_name, slot_name, resource_group, enabled):
