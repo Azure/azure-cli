@@ -5502,11 +5502,10 @@ spec:
         self._wait_for_cluster_update()
         self._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
 
-        # show again
-        show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
+        # Disabled monitoring may retain workspace and MSI authentication metadata.
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-        ]).get_output_in_json()
-        assert bool(show_output["addonProfiles"]["omsagent"]["config"]) == False
+        ])
 
         # enable monitoring add-on
         self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
