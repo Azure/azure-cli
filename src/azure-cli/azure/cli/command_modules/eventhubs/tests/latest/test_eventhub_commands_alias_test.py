@@ -20,8 +20,8 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
     def test_eh_alias(self, resource_group):
         from azure.mgmt.eventhub.models import ProvisioningStateDR
         self.kwargs.update({
-            'loc_south': 'SouthCentralUS',
-            'loc_north': 'NorthCentralUS',
+            'loc_south': 'eastus',
+            'loc_north': 'eastus',
             'rg': resource_group,
             'namespacenameprimary': self.create_random_name(prefix='eh-nscli', length=20),
             'namespacenamesecondary': self.create_random_name(prefix='eh-nscli', length=20),
@@ -112,6 +112,8 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
             time.sleep(30)
             getaliasafterbreak = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
+        time.sleep(600)
+
         # Create alias
         secondary_alias = self.cmd('eventhubs georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}').get_output_in_json()
         self.assertEqual(secondary_alias["role"], "Primary")
@@ -144,7 +146,7 @@ class EHgeorecoveryCURDScenarioTest(ScenarioTest):
         # Delete Alias
         self.cmd('eventhubs georecovery-alias delete  --resource-group {rg} --namespace-name {namespacenamesecondary} --alias {aliasname}')
 
-        time.sleep(30)
+        time.sleep(300)
 
         # create alias using georecovery-alias create command
 

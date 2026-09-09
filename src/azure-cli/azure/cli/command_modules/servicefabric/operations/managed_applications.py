@@ -12,7 +12,9 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands import LongRunningOperation
 from azure.mgmt.servicefabricmanagedclusters.models import (ApplicationTypeResource,
                                                             ApplicationTypeVersionResource,
+                                                            ApplicationTypeVersionResourceProperties,
                                                             ApplicationResource,
+                                                            ApplicationResourceProperties,
                                                             ApplicationUpgradePolicy,
                                                             ApplicationHealthPolicy,
                                                             NamedPartitionScheme,
@@ -76,10 +78,12 @@ def create_app(cmd,
                 return app
 
         new_app_type_version = _format_app_version(cmd.cli_ctx, resource_group_name, cluster_name, application_type_name, application_type_version)
-        appResource = ApplicationResource(version=new_app_type_version,
-                                          parameters=application_parameters,
-                                          location=location,
-                                          tags=tags)
+        appResource = ApplicationResource(
+            properties=ApplicationResourceProperties(
+                version=new_app_type_version,
+                parameters=application_parameters),
+            location=location,
+            tags=tags)
         appResource.name = application_name
         poller = client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -120,30 +124,30 @@ def update_app(cmd,
         # appResourceUpdate: ApplicationResourceUpdate = ApplicationResourceUpdate()
 
         if application_type_version:
-            appResource.version = _replace_app_version(appResource.version, application_type_version)
+            appResource.properties.version = _replace_app_version(appResource.properties.version, application_type_version)
         if application_parameters:
-            appResource.parameters.update(application_parameters)
+            appResource.properties.parameters.update(application_parameters)
         if tags:
             appResource.tags = tags
 
-        appResource.upgrade_policy = _set_upgrade_policy(currentApp.upgrade_policy,
-                                                         force_restart,
-                                                         recreate_application,
-                                                         upgrade_replica_set_check_timeout,
-                                                         instance_close_delay_duration,
-                                                         failure_action,
-                                                         upgrade_mode,
-                                                         health_check_retry_timeout,
-                                                         health_check_wait_duration,
-                                                         health_check_stable_duration,
-                                                         upgrade_domain_timeout,
-                                                         upgrade_timeout,
-                                                         consider_warning_as_error,
-                                                         default_service_type_max_percent_unhealthy_partitions_per_service,
-                                                         default_service_type_max_percent_unhealthy_replicas_per_partition,
-                                                         default_service_type_max_percent_unhealthy_services,
-                                                         max_percent_unhealthy_deployed_applications,
-                                                         service_type_health_policy_map)
+        appResource.properties.upgrade_policy = _set_upgrade_policy(currentApp.properties.upgrade_policy,
+                                                                    force_restart,
+                                                                    recreate_application,
+                                                                    upgrade_replica_set_check_timeout,
+                                                                    instance_close_delay_duration,
+                                                                    failure_action,
+                                                                    upgrade_mode,
+                                                                    health_check_retry_timeout,
+                                                                    health_check_wait_duration,
+                                                                    health_check_stable_duration,
+                                                                    upgrade_domain_timeout,
+                                                                    upgrade_timeout,
+                                                                    consider_warning_as_error,
+                                                                    default_service_type_max_percent_unhealthy_partitions_per_service,
+                                                                    default_service_type_max_percent_unhealthy_replicas_per_partition,
+                                                                    default_service_type_max_percent_unhealthy_services,
+                                                                    max_percent_unhealthy_deployed_applications,
+                                                                    service_type_health_policy_map)
 
         # TODO: change to patch once the fix is supported in the rp
         # client.applications.update(resource_group_name, cluster_name, application_name, appResourceUpdate)
@@ -203,13 +207,16 @@ def create_app_type_version(cmd,
     location = _get_managed_cluster_location(cmd.cli_ctx, resource_group_name, cluster_name)
     create_app_type(cmd, client, resource_group_name, cluster_name, application_type_name)
     try:
-        appTypeVerions = client.application_type_versions.list_by_application_types(resource_group_name, cluster_name, application_type_name)
-        for appTypeVerion in appTypeVerions:
-            if appTypeVerion.name.lower() == version.lower():
+        appTypeVersions = client.application_type_versions.list_by_application_types(resource_group_name, cluster_name, application_type_name)
+        for appTypeVersion in appTypeVersions:
+            if appTypeVersion.name.lower() == version.lower():
                 logger.error("Application type version '%s' already exists", version)
-                return appTypeVerion
+                return appTypeVersion
 
-        appTypeVersionResource = ApplicationTypeVersionResource(app_package_url=package_url, location=location, tags=tags)
+        appTypeVersionResource = ApplicationTypeVersionResource(properties=ApplicationTypeVersionResourceProperties(
+                                                                app_package_url=package_url),
+                                                                location=location,
+                                                                tags=tags)
         logger.info("Creating application type version %s:%s", application_type_name, version)
         poller = client.application_type_versions.begin_create_or_update(resource_group_name,
                                                                          cluster_name,
@@ -236,8 +243,9 @@ def update_app_type_version(client,
             application_type_name,
             version)
 
-        if package_url is not None:
-            currentAppTypeVersion.app_package_url = package_url
+        if package_url is None:
+            raise InvalidArgumentValueError("Package URL must be provided to update the application type version.")
+        currentAppTypeVersion.properties.app_package_url = package_url
 
         if tags is not None:
             currentAppTypeVersion.tags = tags
@@ -304,7 +312,6 @@ def create_service(cmd,
         elif state.lower() == ServiceKind.STATEFUL.lower():
             properties = StatefulServiceProperties(
                 service_type_name=service_type,
-                instance_count=instance_count,
                 partition_description=_set_partition_description(partition_scheme, partition_names, partition_count, low_key, high_key),
                 min_replica_set_size=min_replica_set_size,
                 target_replica_set_size=target_replica_set_size
@@ -645,7 +652,7 @@ def _set_upgrade_policy(current_upgrade_policy,
         current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_replicas_per_partition \
             = default_service_type_max_percent_unhealthy_replicas_per_partition
     if default_service_type_max_percent_unhealthy_services is not None:
-        current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_partitions_per_service \
+        current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_services \
             = default_service_type_max_percent_unhealthy_services
 
     if max_percent_unhealthy_deployed_applications is not None:

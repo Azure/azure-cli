@@ -43,6 +43,9 @@ from ._flexible_server_util import (
 logger = get_logger(__name__)
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
+# Compute tiers ordered from lowest to highest capability.
+PG_TIER_RANK = {'burstable': 0, 'generalpurpose': 1, 'memoryoptimized': 2}
+
 
 # pylint: disable=import-outside-toplevel, raise-missing-from, unbalanced-tuple-unpacking
 def _get_resource_group_from_server_name(cli_ctx, server_name):
@@ -156,6 +159,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
@@ -199,7 +203,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
                                    standby_availability_zone, zone, tier, single_az, instance)
     pg_version_validator(version, list_location_capability_info['server_versions'])
-    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                      geo_redundant_backup, instance,
+                      federated_client_id=federated_client_id,
+                      backup_federated_client_id=backup_federated_client_id)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
@@ -377,7 +384,9 @@ def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported
 
 
 def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
-                      geo_redundant_backup=None, instance=None):
+                      geo_redundant_backup=None, instance=None,
+                      federated_client_id=None, backup_federated_client_id=None):
+
     if bool(byok_identity is None) ^ bool(byok_key is None):
         raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
                                  'Provide --identity and --key together.')
@@ -390,6 +399,20 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
        byok_identity.lower() == backup_byok_identity.lower():
         raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
                                  'Provide different identities for --identity and --backup-identity.')
+
+    if (federated_client_id or backup_federated_client_id) and byok_identity is None:
+        if instance is None:
+            raise ArgumentUsageError('To use --federated-client-id or --geo-backup-federated-client-id, '
+                                     'provide --identity and --key together.')
+        if not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault'):
+            logger.warning('You cannot update data encryption properties on a server '
+                           'that was not created with data encryption..')
+
+    if bool(federated_client_id is not None) and bool(backup_federated_client_id is not None) and \
+       federated_client_id.lower() == backup_federated_client_id.lower():
+        raise ArgumentUsageError('The primary federated client ID and backup federated client ID cannot be the same. '
+                                 'Provide different IDs for --federated-client-id and '
+                                 '--geo-backup-federated-client-id.')
 
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
@@ -890,6 +913,19 @@ def pg_restore_validator(compute_tier, **args):
     if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
         raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with '
                               '--storage-type set to "PremiumV2_LRS".')
+
+
+def pg_restore_tier_validator(target_tier, source_tier, sku_info):
+    _pg_tier_validator(target_tier, sku_info)
+    target_rank = PG_TIER_RANK.get(target_tier.lower())
+    source_rank = PG_TIER_RANK.get(source_tier.lower())
+    if target_rank is not None and source_rank is not None and target_rank < source_rank:
+        raise ValidationError('Invalid value for --tier. The restored server must not go below the source server '
+                              'compute tier. The source server compute tier is {}.'.format(source_tier))
+
+
+def pg_restore_sku_validator(sku_name, sku_info, tier):
+    _pg_sku_name_validator(sku_name, sku_info, tier, None)
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,

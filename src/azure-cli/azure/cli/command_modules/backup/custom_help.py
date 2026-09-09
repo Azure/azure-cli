@@ -364,9 +364,9 @@ def replace_min_value_in_subtask(response):
     # For a task in progress: replace min_value in start and end times with null.
     tasks_list = response.properties.extended_info.tasks_list
     for task in tasks_list:
-        if task.start_time == datetime.min:
+        if getattr(task, 'start_time', None) == datetime.min:
             task.start_time = None
-        if task.end_time == datetime.min:
+        if getattr(task, 'end_time', None) == datetime.min:
             task.end_time = None
     return response
 
@@ -666,6 +666,36 @@ def get_subscription_from_id(arm_id):
     # [^/]+                  Match one or more characters that are not a forward slash
     m = re.search('(?<=/subscriptions/)[^/]+', arm_id)
     return m.group(0)
+
+
+def set_container_subscription_id(item):
+    # For an Azure VM backup item, surface the subscription of the protected VM (container) in the
+    # response as 'containerSubscriptionId'. It is parsed from the item's sourceResourceId, which for a
+    # Cross Subscription Backup item points to a subscription different from the vault's subscription.
+    if item is None or not hasattr(item, 'properties'):
+        return item
+    properties = item.properties
+    backup_management_type = getattr(properties, 'backup_management_type', None)
+    source_resource_id = getattr(properties, 'source_resource_id', None)
+    if (backup_management_type is not None and backup_management_type.lower() == 'azureiaasvm' and
+            source_resource_id):
+        properties.container_subscription_id = get_subscription_from_id(source_resource_id)
+    return item
+
+
+def set_job_container_subscription_id(job):
+    # For an Azure VM backup/restore job, surface the subscription of the protected VM (container) in the
+    # response as 'containerSubscriptionId'. It is read from the job's extendedInfo property bag, which
+    # contains the "VM Subscription ID" for Cross Subscription Backup jobs.
+    if job is None or not hasattr(job, 'properties'):
+        return job
+    extended_info = getattr(job.properties, 'extended_info', None)
+    if extended_info is None:
+        return job
+    property_bag = getattr(extended_info, 'property_bag', None)
+    if property_bag and 'VM Subscription ID' in property_bag:
+        job.properties.container_subscription_id = property_bag['VM Subscription ID']
+    return job
 
 
 def get_operation_id_from_header(header):

@@ -678,6 +678,7 @@ def load_arguments(self, _):
             action="store_true",
             help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -945,6 +946,9 @@ def load_arguments(self, _):
             action="store_true",
             help="Disable managed installation of Gateway API CRDs."
         )
+        c.argument("enable_upstream_kubescheduler_user_configuration", action="store_true")
+        c.argument("disable_upstream_kubescheduler_user_configuration", action="store_true")
+
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
         c.argument("if_none_match")
@@ -1156,6 +1160,7 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('enable_managed_dranet', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
         c.argument("message_of_the_day", validator=validate_message_of_the_day)
@@ -1190,6 +1195,7 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('enable_managed_dranet', action='store_true')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
         c.argument("enable_fips_image", action="store_true")
         c.argument("disable_fips_image", action="store_true")
@@ -1230,6 +1236,20 @@ def load_arguments(self, _):
 
     with self.argument_context("aks nodepool manual-scale delete") as c:
         c.argument("current_vm_sizes")
+
+    with self.argument_context("aks nodepool auto-scale add") as c:
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale update") as c:
+        c.argument("current_node_vm_size")
+        c.argument("node_vm_size")
+        c.argument("min_count", type=int)
+        c.argument("max_count", type=int)
+
+    with self.argument_context("aks nodepool auto-scale delete") as c:
+        c.argument("current_node_vm_size")
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
@@ -1286,6 +1306,21 @@ def load_arguments(self, _):
 
     with self.argument_context('aks trustedaccess rolebinding update') as c:
         c.argument('roles', help='comma-separated roles: Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer,...')
+
+    with self.argument_context('aks identity-binding') as c:
+        c.argument('cluster_name', help='Name of the managed cluster.')
+
+    for scope in ['aks identity-binding show', 'aks identity-binding create', 'aks identity-binding delete']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--name', '-n'], required=True,
+                       help='Name of the identity binding.')
+
+    with self.argument_context('aks identity-binding create') as c:
+        c.argument(
+            'managed_identity_resource_id',
+            options_list=['--managed-identity-resource-id'],
+            help='The resource ID of the managed identity to use.',
+        )
 
     with self.argument_context('aks mesh enable-ingress-gateway') as c:
         c.argument('ingress_gateway_type',

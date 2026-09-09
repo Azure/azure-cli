@@ -25,9 +25,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2025-07-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -178,6 +178,7 @@ class Show(AAZCommand):
             properties.idle_timeout_in_minutes = AAZIntType(
                 serialized_name="idleTimeoutInMinutes",
             )
+            properties.nat64 = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -198,33 +199,37 @@ class Show(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.service_gateway = AAZObjectType(
+                serialized_name="serviceGateway",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.service_gateway)
             properties.source_virtual_network = AAZObjectType(
                 serialized_name="sourceVirtualNetwork",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.source_virtual_network)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
 
             public_ip_addresses = cls._schema_on_200.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_addresses_v6 = cls._schema_on_200.properties.public_ip_addresses_v6
             public_ip_addresses_v6.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_addresses_v6.Element)
 
             public_ip_prefixes = cls._schema_on_200.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_prefixes.Element)
 
             public_ip_prefixes_v6 = cls._schema_on_200.properties.public_ip_prefixes_v6
             public_ip_prefixes_v6.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200.properties.subnets
             subnets.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(subnets.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200.sku
             sku.name = AAZStrType()
@@ -241,20 +246,20 @@ class Show(AAZCommand):
 class _ShowHelper:
     """Helper class for Show"""
 
-    _schema_sub_resource_read = None
+    _schema_common_sub_resource_read = None
 
     @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
 
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
 
-        _schema.id = cls._schema_sub_resource_read.id
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Show"]

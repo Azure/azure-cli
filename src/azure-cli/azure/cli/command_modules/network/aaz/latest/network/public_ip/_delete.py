@@ -22,9 +22,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipaddresses/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipaddresses/{}", "2025-07-01"],
         ]
     }
 
@@ -58,7 +58,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.PublicIPAddressesDelete(ctx=self.ctx)()
+        yield self.PublicIpAddressOperationGroupDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +69,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class PublicIPAddressesDelete(AAZHttpOperation):
+    class PublicIpAddressOperationGroupDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -142,7 +142,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }

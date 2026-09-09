@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace nsp-configuration",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Network Security Perimeter Configuration
+    """Manage Nsp Configurations
     """
     pass
 

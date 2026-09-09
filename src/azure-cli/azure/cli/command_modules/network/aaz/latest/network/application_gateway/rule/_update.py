@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a rule.
+
+    :example: Update a rule use a new HTTP listener.
+        az network application-gateway rule update -g MyResourceGroup --gateway-name MyAppGateway -n MyRule --http-listener MyNewBackendListener
     """
 
     _aaz_info = {
-        "version": "2024-10-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2024-10-01", "properties.requestRoutingRules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.requestRoutingRules[]"],
         ]
     }
 
@@ -91,6 +94,13 @@ class Update(AAZCommand):
             help="Name or ID of the HTTP settings. If only one exists, omit to use as default.",
             nullable=True,
         )
+        _args_schema.entra_jwt_validation_config = AAZObjectArg(
+            options=["--entra-jwt-config", "--entra-jwt-validation-config"],
+            arg_group="Properties",
+            help="Entra JWT validation configuration resource of the application gateway.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.entra_jwt_validation_config)
         _args_schema.http_listener = AAZStrArg(
             options=["--http-listener"],
             arg_group="Properties",
@@ -241,7 +251,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-10-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -340,7 +350,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-10-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -405,6 +415,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("backendAddressPool", AAZObjectType)
                 properties.set_prop("backendHttpSettings", AAZObjectType)
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("entraJWTValidationConfig", AAZObjectType, ".entra_jwt_validation_config"))
                 properties.set_prop("httpListener", AAZObjectType)
                 properties.set_prop("priority", AAZIntType, ".priority")
                 properties.set_prop("redirectConfiguration", AAZObjectType)
@@ -722,6 +733,9 @@ class _UpdateHelper:
         properties.enable_http2 = AAZBoolType(
             serialized_name="enableHttp2",
         )
+        properties.entra_jwt_validation_configs = AAZListType(
+            serialized_name="entraJWTValidationConfigs",
+        )
         properties.firewall_policy = AAZObjectType(
             serialized_name="firewallPolicy",
         )
@@ -940,6 +954,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_application_gateway_read.properties.backend_settings_collection.Element.properties
+        properties.enable_l4_client_ip_preservation = AAZBoolType(
+            serialized_name="enableL4ClientIpPreservation",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -966,6 +983,38 @@ class _UpdateHelper:
         custom_error_configurations = _schema_application_gateway_read.properties.custom_error_configurations
         custom_error_configurations.Element = AAZObjectType()
         cls._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+
+        entra_jwt_validation_configs = _schema_application_gateway_read.properties.entra_jwt_validation_configs
+        entra_jwt_validation_configs.Element = AAZObjectType()
+
+        _element = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        properties = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element.properties
+        properties.audiences = AAZListType()
+        properties.client_id = AAZStrType(
+            serialized_name="clientId",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+        )
+        properties.un_authorized_request_action = AAZStrType(
+            serialized_name="unAuthorizedRequestAction",
+        )
+
+        audiences = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element.properties.audiences
+        audiences.Element = AAZStrType()
 
         frontend_ip_configurations = _schema_application_gateway_read.properties.frontend_ip_configurations
         frontend_ip_configurations.Element = AAZObjectType()
@@ -1308,6 +1357,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_application_gateway_read.properties.probes.Element.properties
+        properties.enable_probe_proxy_protocol_header = AAZBoolType(
+            serialized_name="enableProbeProxyProtocolHeader",
+        )
         properties.host = AAZStrType()
         properties.interval = AAZIntType()
         properties.match = AAZObjectType()
@@ -1421,6 +1473,10 @@ class _UpdateHelper:
             serialized_name="backendHttpSettings",
         )
         cls._build_schema_sub_resource_read(properties.backend_http_settings)
+        properties.entra_jwt_validation_config = AAZObjectType(
+            serialized_name="entraJWTValidationConfig",
+        )
+        cls._build_schema_sub_resource_read(properties.entra_jwt_validation_config)
         properties.http_listener = AAZObjectType(
             serialized_name="httpListener",
         )
@@ -1586,6 +1642,7 @@ class _UpdateHelper:
 
         properties = _schema_application_gateway_read.properties.ssl_certificates.Element.properties
         properties.data = AAZStrType()
+        properties.hsm = AAZObjectType()
         properties.key_vault_secret_id = AAZStrType(
             serialized_name="keyVaultSecretId",
         )
@@ -1597,6 +1654,14 @@ class _UpdateHelper:
         properties.public_cert_data = AAZStrType(
             serialized_name="publicCertData",
             flags={"read_only": True},
+        )
+
+        hsm = _schema_application_gateway_read.properties.ssl_certificates.Element.properties.hsm
+        hsm.key_id = AAZStrType(
+            serialized_name="keyId",
+        )
+        hsm.public_cert_data = AAZStrType(
+            serialized_name="publicCertData",
         )
 
         ssl_profiles = _schema_application_gateway_read.properties.ssl_profiles
@@ -1632,6 +1697,9 @@ class _UpdateHelper:
         )
 
         client_auth_configuration = _schema_application_gateway_read.properties.ssl_profiles.Element.properties.client_auth_configuration
+        client_auth_configuration.verify_client_auth_mode = AAZStrType(
+            serialized_name="verifyClientAuthMode",
+        )
         client_auth_configuration.verify_client_cert_issuer_dn = AAZBoolType(
             serialized_name="verifyClientCertIssuerDN",
         )
@@ -1975,6 +2043,9 @@ class _UpdateHelper:
         frontend_ip_configuration_read.zones = AAZListType()
 
         properties = _schema_frontend_ip_configuration_read.properties
+        properties.ddos_settings = AAZObjectType(
+            serialized_name="ddosSettings",
+        )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
         )
@@ -2018,6 +2089,12 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.public_ip_prefix)
         properties.subnet = AAZObjectType()
         cls._build_schema_subnet_read(properties.subnet)
+
+        ddos_settings = _schema_frontend_ip_configuration_read.properties.ddos_settings
+        ddos_settings.ddos_custom_policy = AAZObjectType(
+            serialized_name="ddosCustomPolicy",
+        )
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
 
         inbound_nat_pools = _schema_frontend_ip_configuration_read.properties.inbound_nat_pools
         inbound_nat_pools.Element = AAZObjectType()
@@ -2159,7 +2236,9 @@ class _UpdateHelper:
         network_interface_ip_configuration_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        network_interface_ip_configuration_read.type = AAZStrType()
+        network_interface_ip_configuration_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
         properties = _schema_network_interface_ip_configuration_read.properties
         properties.application_gateway_backend_address_pools = AAZListType(
@@ -2657,6 +2736,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_network_interface_read.properties.private_link_service.properties
+        properties.access_mode = AAZStrType(
+            serialized_name="accessMode",
+        )
         properties.alias = AAZStrType(
             flags={"read_only": True},
         )
@@ -2908,6 +2990,9 @@ class _UpdateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.record_types = AAZStrType(
+            serialized_name="recordTypes",
+        )
         properties.retention_policy = AAZObjectType(
             serialized_name="retentionPolicy",
         )
@@ -3022,6 +3107,9 @@ class _UpdateHelper:
         properties.application_security_groups = AAZListType(
             serialized_name="applicationSecurityGroups",
         )
+        properties.billing_sku = AAZStrType(
+            serialized_name="billingSku",
+        )
         properties.custom_dns_configs = AAZListType(
             serialized_name="customDnsConfigs",
         )
@@ -3030,6 +3118,9 @@ class _UpdateHelper:
         )
         properties.ip_configurations = AAZListType(
             serialized_name="ipConfigurations",
+        )
+        properties.ip_version_type = AAZStrType(
+            serialized_name="ipVersionType",
         )
         properties.manual_private_link_service_connections = AAZListType(
             serialized_name="manualPrivateLinkServiceConnections",
@@ -3292,6 +3383,10 @@ class _UpdateHelper:
         cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
+        ddos_settings.ddos_custom_policy = AAZObjectType(
+            serialized_name="ddosCustomPolicy",
+        )
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
         ddos_settings.ddos_protection_plan = AAZObjectType(
             serialized_name="ddosProtectionPlan",
         )
@@ -3344,6 +3439,7 @@ class _UpdateHelper:
         properties.idle_timeout_in_minutes = AAZIntType(
             serialized_name="idleTimeoutInMinutes",
         )
+        properties.nat64 = AAZStrType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -3364,6 +3460,10 @@ class _UpdateHelper:
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.service_gateway = AAZObjectType(
+            serialized_name="serviceGateway",
+        )
+        cls._build_schema_sub_resource_read(properties.service_gateway)
         properties.source_virtual_network = AAZObjectType(
             serialized_name="sourceVirtualNetwork",
         )
@@ -3445,7 +3545,9 @@ class _UpdateHelper:
         security_rule_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        security_rule_read.type = AAZStrType()
+        security_rule_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
         properties = _schema_security_rule_read.properties
         properties.access = AAZStrType(
@@ -3560,7 +3662,9 @@ class _UpdateHelper:
         subnet_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        subnet_read.type = AAZStrType()
+        subnet_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
         properties = _schema_subnet_read.properties
         properties.address_prefix = AAZStrType(
@@ -3632,6 +3736,10 @@ class _UpdateHelper:
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
         )
+        properties.service_gateway = AAZObjectType(
+            serialized_name="serviceGateway",
+        )
+        cls._build_schema_sub_resource_read(properties.service_gateway)
         properties.sharing_scope = AAZStrType(
             serialized_name="sharingScope",
         )
@@ -3778,6 +3886,9 @@ class _UpdateHelper:
         properties.disable_bgp_route_propagation = AAZBoolType(
             serialized_name="disableBgpRoutePropagation",
         )
+        properties.disable_peering_route = AAZStrType(
+            serialized_name="disablePeeringRoute",
+        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -3803,7 +3914,9 @@ class _UpdateHelper:
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType()
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
         properties = _schema_subnet_read.properties.route_table.properties.routes.Element.properties
         properties.address_prefix = AAZStrType(
@@ -3812,6 +3925,9 @@ class _UpdateHelper:
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
             flags={"read_only": True},
+        )
+        properties.next_hop = AAZObjectType(
+            serialized_name="nextHop",
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -3824,6 +3940,15 @@ class _UpdateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+
+        next_hop = _schema_subnet_read.properties.route_table.properties.routes.Element.properties.next_hop
+        next_hop.next_hop_ip_addresses = AAZListType(
+            serialized_name="nextHopIpAddresses",
+            flags={"required": True},
+        )
+
+        next_hop_ip_addresses = _schema_subnet_read.properties.route_table.properties.routes.Element.properties.next_hop.next_hop_ip_addresses
+        next_hop_ip_addresses.Element = AAZStrType()
 
         subnets = _schema_subnet_read.properties.route_table.properties.subnets
         subnets.Element = AAZObjectType()
@@ -3925,7 +4050,9 @@ class _UpdateHelper:
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType()
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
         properties = _schema_subnet_read.properties.service_endpoint_policies.Element.properties.service_endpoint_policy_definitions.Element.properties
         properties.description = AAZStrType()

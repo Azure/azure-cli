@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -122,11 +123,10 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
             logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
                            end_ip_address)
 
-    parameters = {
-        'name': firewall_rule_name,
-        'start_ip_address': start_ip_address,
-        'end_ip_address': end_ip_address
-    }
+    parameters = models.FirewallRule(
+        start_ip_address=start_ip_address,
+        end_ip_address=end_ip_address
+    )
 
     return client.begin_create_or_update(
         resource_group_name,
@@ -277,7 +277,8 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
+        # Setting to None omits created_time from the serialized output (matches prior behavior).
+        f.created_time = None
         files.append(f)
 
     return files
@@ -944,8 +945,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
         storage = models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
                                  auto_io_scaling=source_server_object.storage.auto_io_scaling,
-                                 log_on_disk=accelerated_logs,
-                                 storage_redundancy=source_server_object.storage.storage_redundancy)
+                                 log_on_disk=accelerated_logs)
 
         backup = models.Backup(backup_retention_days=backup_retention, geo_redundant_backup=geo_redundant_backup)
 
@@ -1006,7 +1006,8 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
                                        high_availability=None, standby_availability_zone=None, maintenance_window=None,
                                        tags=None, replication_role=None, byok_identity=None, backup_byok_identity=None,
                                        byok_key=None, backup_byok_key=None, disable_data_encryption=False,
-                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None):
+                                       public_access=None, maintenance_policy_patch_strategy=None, backup_interval=None,
+                                       maintenance_batch=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -1064,14 +1065,22 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
     if backup_interval:
         instance.backup.backup_interval_hours = backup_interval
 
+    if maintenance_batch and not maintenance_window:
+        raise CLIError('--maintenance-batch can only be used together with an enabled --maintenance-window.')
+
     if maintenance_window:
         # if disabled is pass in reset to default values
         if maintenance_window.lower() == "disabled":
+            if maintenance_batch:
+                raise CLIError('--maintenance-batch cannot be used when disabling the maintenance window.')
             day_of_week = start_hour = start_minute = 0
             custom_window = "Disabled"
+            instance.maintenance_window.batch_of_maintenance = None
         else:
             day_of_week, start_hour, start_minute = parse_maintenance_window(maintenance_window)
             custom_window = "Enabled"
+            if maintenance_batch:
+                instance.maintenance_window.batch_of_maintenance = maintenance_batch
 
         # set values - if maintenance_window when is None when created then create a new object
         instance.maintenance_window.day_of_week = day_of_week
@@ -1321,7 +1330,17 @@ def flexible_parameter_update_batch(client, server_name, resource_group_name, so
         value=configurations
     )
 
-    return client.begin_batch_update(resource_group_name, server_name, parameters)
+    # The batch update is a long-running operation whose final response body is empty with the
+    # current SDK, so surface the operation status to keep the command output meaningful.
+    poller = client.begin_batch_update(resource_group_name, server_name, parameters)
+    poller.result()
+    return {'status': poller.status()}
+
+
+def flexible_backup_delete(client, resource_group_name, server_name, backup_name):
+    # Invoke the operation as a bound method so the SDK api-version validation decorator
+    # receives the client as its first positional argument.
+    return client.begin_delete(resource_group_name, server_name, backup_name)
 
 
 # Replica commands
@@ -1838,13 +1857,13 @@ def flexible_server_ad_admin_set(cmd, client, resource_group_name, server_name, 
                 parameters={'identity': id_param}),
             cmd.cli_ctx, 'Adding identity {} to server {}'.format(identity, server_name))
 
-    parameters = {
-        'administratorType': 'ActiveDirectory',
-        'login': login,
-        'sid': sid,
-        'tenant_id': get_tenant_id(),
-        'identity_resource_id': identity
-    }
+    parameters = models.AzureADAdministrator(
+        administrator_type='ActiveDirectory',
+        login=login,
+        sid=sid,
+        tenant_id=get_tenant_id(),
+        identity_resource_id=identity
+    )
 
     resolve_poller(client.begin_create_or_update(
         resource_group_name=resource_group_name,
@@ -2029,6 +2048,51 @@ def migrate_firewall_rules_from_single_to_flex(db_context, cmd, source_server_id
                              start_ip=rule.start_ip_address,
                              end_ip=rule.end_ip_address,
                              firewall_rule_name=rule.name)
+
+
+def _fm_settings_payload(state, uami=None):
+    """
+    Build the ARM request body for a FabricMirroringSetting ('Default').
+    The 1.1.0b3 SDK model is nested: properties.state / properties.identityResourceId.
+    """
+    # Build the ARM request body. In SDK 1.1.0b3 the model is nested
+    # (properties.state / properties.identityResourceId), NOT flattened. A plain dict is
+    # accepted by the (typespec-generated) SDK and avoids the model-name/flatten mismatch.
+    props = {'state': state}
+    if uami:
+        props['identityResourceId'] = uami
+    return {'properties': props}
+
+
+def flexible_server_mirroring_enable(cmd, client, resource_group_name, server_name, identity_resource_id):
+    """
+    'Enable' translates to PUT the 'Default' FabricMirroringSettings with state=Enabled and UAMI.
+    The Swagger limits settings name to 'Default'.
+    """
+    if not identity_resource_id:
+        raise RequiredArgumentMissingError(
+            "Parameter --identity-resource-id is required when enabling fabric mirroring."
+        )
+
+    payload = _fm_settings_payload(state='Enabled', uami=identity_resource_id)
+
+    # Long-running operation
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Enable Fabric mirroring')
+
+
+def flexible_server_mirroring_disable(cmd, client, resource_group_name, server_name):
+    """
+    'Disable' translates to PUT the 'Default' FabricMirroringSettings with state=Disabled.
+    identityResourceId can be omitted when disabling<97>service will deactivate/clean bindings.
+    """
+    payload = _fm_settings_payload(state='Disabled', uami=None)
+    poller = (getattr(client, 'begin_create_or_update', None) or getattr(client, 'begin_put'))(
+        resource_group_name, server_name, 'Default', payload
+    )
+    return resolve_poller(poller, cmd.cli_ctx, 'Disable Fabric mirroring')
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods

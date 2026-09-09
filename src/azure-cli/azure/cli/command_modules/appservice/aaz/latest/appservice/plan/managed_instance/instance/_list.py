@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "appservice plan managed-instance instance list",
-    is_preview=True,
 )
 class List(AAZCommand):
     """List instances for a managed instance App Service plan.

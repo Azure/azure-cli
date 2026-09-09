@@ -1,0 +1,46 @@
+# Fetch a pre-minted GitHub PAT from Azure Key Vault for later steps.
+# The Azure service connection needs Key Vault Secrets User (RBAC) or Get secret permission.
+parameters:
+- name: azureSubscription
+  type: string
+- name: keyVaultName
+  type: string
+- name: secretName
+  type: string
+- name: outputVariable
+  type: string
+  default: GH_TOKEN
+- name: execCondition
+  type: string
+  default: succeeded()
+
+steps:
+- task: AzurePowerShell@5
+  displayName: Get GitHub PAT from Key Vault
+  condition: ${{ parameters.execCondition }}
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    azurePowerShellVersion: LatestVersion
+    pwsh: true
+    ScriptType: InlineScript
+    Inline: |
+      $keyVaultName = '${{ parameters.keyVaultName }}'
+      $secretName = '${{ parameters.secretName }}'
+      $outputVariable = '${{ parameters.outputVariable }}'
+
+      if ($outputVariable -notmatch '^[A-Za-z_][A-Za-z0-9_.]*$') {
+        throw "outputVariable must be an Azure Pipelines variable name. Got: '$outputVariable'"
+      }
+
+      try {
+        $ghToken = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretName -AsPlainText
+      }
+      catch {
+        throw "Failed to retrieve GitHub PAT secret '$secretName' from vault '$keyVaultName'. $($_.Exception.Message)"
+      }
+
+      if ([string]::IsNullOrWhiteSpace($ghToken)) {
+        throw "GitHub PAT secret '$secretName' in vault '$keyVaultName' was empty or not found."
+      }
+
+      Write-Host "##vso[task.setvariable variable=$outputVariable;issecret=true]$ghToken"

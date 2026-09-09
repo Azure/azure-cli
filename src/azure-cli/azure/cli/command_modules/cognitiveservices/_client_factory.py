@@ -117,5 +117,9 @@ def cf_managed_compute_deployments(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).managed_compute_deployments
 
 
+def cf_computes(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).computes
+
+
 def cf_project_connections(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).project_connections

@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an Event Hubs consumer group as a nested resource within a Namespace.
+
+    :example: ConsumerGroupCreate
+        az eventhubs eventhub consumer-group update --resource-group ArunMonocle --namespace-name sdk-Namespace-2661 --eventhub-name sdk-EventHub-6681 --consumer-group-name sdk-ConsumerGroup-5563
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -69,6 +72,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -174,7 +178,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -265,7 +269,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

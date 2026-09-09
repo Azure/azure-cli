@@ -798,3 +798,18 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account connection') as c:
         c.argument('connection_name', help='Cognitive Services account connection name')
         c.argument('file', help='Path to the connection file in JSON or YAML format.')
+
+    with self.argument_context('cognitiveservices account compute') as c:
+        c.argument('compute_name', help='Cognitive Services account compute name.')
+
+    with self.argument_context('cognitiveservices account compute create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   help='Location for the compute resource.')
+        c.argument('pool_name', arg_group='Pool', help='Name of the compute pool.')
+        c.argument('instance_type', arg_group='Pool',
+                   help='VM instance type for the pool (e.g. Standard_DS3_v2).')
+        c.argument('node_count', arg_group='Pool', type=int,
+                   help='Number of nodes in the pool.')
+        c.argument('vm_priority', arg_group='Pool',
+                   help='VM priority for the pool (e.g. Dedicated, LowPriority). '
+                        'If omitted, the service default is used.')

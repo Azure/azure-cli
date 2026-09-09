@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2026-04-01"],
         ]
     }
 
@@ -122,7 +122,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -186,6 +186,9 @@ class Show(AAZCommand):
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
+            properties.reservation_type = AAZStrType(
+                serialized_name="reservationType",
+            )
             properties.sharing_profile = AAZObjectType(
                 serialized_name="sharingProfile",
             )
@@ -215,9 +218,17 @@ class Show(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             _element.statuses = AAZListType()
             _element.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.statuses
@@ -237,10 +248,17 @@ class Show(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
+
+            used_reserved_count_by_subscription = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
 
             virtual_machines_allocated = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()

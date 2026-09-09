@@ -14,6 +14,7 @@ from pathlib import Path
 
 from knack.log import get_logger
 from azure.cli.core.decorators import retry
+from azure.cli.core.util import sdk_no_wait
 
 import azure.core.rest
 
@@ -30,7 +31,8 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     ManagedNetworkSettingsEx, \
     OutboundRuleBasicResource, FqdnOutboundRule, \
     PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
-    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination
+    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination, \
+    Compute, ClusterComputeProperties, Pool
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import (
     BadRequestError,
@@ -2638,3 +2640,51 @@ def project_connection_update(
     """
     project_connection = ConnectionUpdateContent(properties=instance.properties)
     return project_connection
+
+
+def compute_begin_create_or_update(
+        client, resource_group_name, account_name, compute_name,
+        location, pool_name, instance_type, node_count,
+        vm_priority=None, no_wait=False):
+    """
+    Create a compute resource for Azure Cognitive Services account.
+    """
+    properties = ClusterComputeProperties(
+        pools=[
+            Pool(
+                name=pool_name,
+                instance_type=instance_type,
+                node_count=node_count,
+                vm_priority=vm_priority,
+            )
+        ],
+    )
+    # The service also requires the location inside properties (not just on the outer
+    # Compute envelope). The SDK's ClusterComputeProperties class does not declare
+    # 'location' as a kwarg, so it is set via the underlying dict-backed model.
+    properties["location"] = location
+    resource = Compute(location=location, properties=properties)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        account_name=account_name,
+        compute_name=compute_name,
+        resource=resource,
+    )
+
+
+def compute_list(client, resource_group_name, account_name):
+    return client.list(resource_group_name, account_name)
+
+
+def compute_show(client, resource_group_name, account_name, compute_name):
+    return client.get(resource_group_name, account_name, compute_name)
+
+
+def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name, account_name, compute_name,
+    )

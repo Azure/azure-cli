@@ -5,6 +5,7 @@
 import json
 import os
 import re
+import time
 
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.core.util import get_file_json
@@ -27,6 +28,8 @@ from azure.mgmt.core.tools import parse_resource_id, resource_id
 from knack.log import get_logger
 
 logger = get_logger(__name__)
+_DCR_TABLE_READINESS_MAX_RETRIES = 5
+_DCR_TABLE_READINESS_RETRY_DELAY_SECONDS = 15
 # mapping for azure public cloud
 # log analytics workspaces cannot be created in WCUS region due to capacity limits
 # so mapped to EUS per discussion with log analytics team
@@ -77,6 +80,25 @@ AzureCloudLocationToOmsRegionCodeMap = {
     "westus2": "WUS2",
     "westus3": "USW3",
 }
+
+
+def _create_or_update_dcr_with_table_readiness_retry(resources, dcr_resource_id, api_version, body):
+    general_attempts = 0
+    readiness_retries = 0
+    while True:
+        try:
+            return resources.begin_create_or_update_by_id(dcr_resource_id, api_version, body)
+        except (CLIError, HttpResponseError) as ex:
+            if "invalidoutputtable" in str(ex).casefold():
+                if readiness_retries >= _DCR_TABLE_READINESS_MAX_RETRIES:
+                    raise
+                readiness_retries += 1
+                time.sleep(_DCR_TABLE_READINESS_RETRY_DELAY_SECONDS)
+                continue
+
+            general_attempts += 1
+            if general_attempts >= 3:
+                raise
 
 
 AzureCloudRegionToOmsRegionMap = {
@@ -657,26 +679,17 @@ def ensure_container_insights_for_monitoring(
             )
 
             resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
-            for _ in range(3):
-                try:
-                    if enable_syslog:
-                        resources.begin_create_or_update_by_id(
-                            dcr_resource_id,
-                            "2022-06-01",
-                            json.loads(dcr_creation_body_with_syslog)
-                        )
-                    else:
-                        resources.begin_create_or_update_by_id(
-                            dcr_resource_id,
-                            "2022-06-01",
-                            json.loads(dcr_creation_body_without_syslog)
-                        )
-                    error = None
-                    break
-                except CLIError as e:
-                    error = e
-            else:
-                raise error
+            dcr_creation_body = (
+                dcr_creation_body_with_syslog
+                if enable_syslog
+                else dcr_creation_body_without_syslog
+            )
+            _create_or_update_dcr_with_table_readiness_retry(
+                resources,
+                dcr_resource_id,
+                "2022-06-01",
+                json.loads(dcr_creation_body),
+            )
 
         if create_dcra:
             # only create or delete the association between the DCR and cluster

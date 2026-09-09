@@ -17,14 +17,14 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Get an AuthorizationRule for an Event Hub by rule name.
 
-    :example: shows the details of Authorizationrule
-        az eventhubs eventhub authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
+    :example: EventHubAuthorizationRuleGet
+        az eventhubs eventhub authorization-rule show --resource-group ArunMonocle --namespace-name sdk-Namespace-960 --eventhub-name sdk-EventHub-532 --authorization-rule-name sdk-Authrules-2513
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/authorizationrules/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -69,6 +69,7 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -151,7 +152,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

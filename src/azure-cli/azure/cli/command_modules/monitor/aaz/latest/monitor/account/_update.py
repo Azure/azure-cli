@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-04-03",
+        "version": "2025-10-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2023-04-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03"],
         ]
     }
 
@@ -59,12 +59,35 @@ class Update(AAZCommand):
             required=True,
         )
 
-        # define Arg Group "AzureMonitorWorkspaceProperties"
+        # define Arg Group "Identity"
+
+        # define Arg Group "Metrics"
+
+        _args_schema = cls._args_schema
+        _args_schema.enable_access_using_resource_permissions = AAZBoolArg(
+            options=["--enable-access-using-resource-permissions", "--enable-res-perm"],
+            arg_group="Metrics",
+            help="Flag that indicates whether to enable access using resource permissions.",
+            nullable=True,
+        )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.public_network_access = AAZStrArg(
+            options=["--public-network-access"],
+            arg_group="Properties",
+            help="Gets or sets allow or disallow public network access to Azure Monitor Workspace",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
+        # define Arg Group "Resource"
 
         _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="AzureMonitorWorkspaceProperties",
+            arg_group="Resource",
             help="Resource tags.",
             nullable=True,
         )
@@ -82,7 +105,7 @@ class Update(AAZCommand):
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
-        self.AzureMonitorWorkspacesCreate(ctx=self.ctx)()
+        self.AzureMonitorWorkspacesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -153,7 +176,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -188,7 +211,7 @@ class Update(AAZCommand):
 
             return cls._schema_on_200
 
-    class AzureMonitorWorkspacesCreate(AAZHttpOperation):
+    class AzureMonitorWorkspacesCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -236,7 +259,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -294,7 +317,18 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZIdentityObjectType)
+            _builder.set_prop("properties", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("metrics", AAZObjectType)
+                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+
+            metrics = _builder.get(".properties.metrics")
+            if metrics is not None:
+                metrics.set_prop("enableAccessUsingResourcePermissions", AAZBoolType, ".enable_access_using_resource_permissions")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -319,8 +353,8 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_azure_monitor_workspace_resource_read(cls, _schema):
         if cls._schema_azure_monitor_workspace_resource_read is not None:
-            _schema.etag = cls._schema_azure_monitor_workspace_resource_read.etag
             _schema.id = cls._schema_azure_monitor_workspace_resource_read.id
+            _schema.identity = cls._schema_azure_monitor_workspace_resource_read.identity
             _schema.location = cls._schema_azure_monitor_workspace_resource_read.location
             _schema.name = cls._schema_azure_monitor_workspace_resource_read.name
             _schema.properties = cls._schema_azure_monitor_workspace_resource_read.properties
@@ -332,12 +366,10 @@ class _UpdateHelper:
         cls._schema_azure_monitor_workspace_resource_read = _schema_azure_monitor_workspace_resource_read = AAZObjectType()
 
         azure_monitor_workspace_resource_read = _schema_azure_monitor_workspace_resource_read
-        azure_monitor_workspace_resource_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
         azure_monitor_workspace_resource_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        azure_monitor_workspace_resource_read.identity = AAZIdentityObjectType()
         azure_monitor_workspace_resource_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -357,6 +389,37 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        identity = _schema_azure_monitor_workspace_resource_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_azure_monitor_workspace_resource_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
+
+        _element = _schema_azure_monitor_workspace_resource_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
         properties = _schema_azure_monitor_workspace_resource_read.properties
         properties.account_id = AAZStrType(
             serialized_name="accountId",
@@ -366,9 +429,7 @@ class _UpdateHelper:
             serialized_name="defaultIngestionSettings",
             flags={"read_only": True},
         )
-        properties.metrics = AAZObjectType(
-            flags={"read_only": True},
-        )
+        properties.metrics = AAZObjectType()
         properties.private_endpoint_connections = AAZListType(
             serialized_name="privateEndpointConnections",
             flags={"read_only": True},
@@ -379,7 +440,6 @@ class _UpdateHelper:
         )
         properties.public_network_access = AAZStrType(
             serialized_name="publicNetworkAccess",
-            flags={"read_only": True},
         )
 
         default_ingestion_settings = _schema_azure_monitor_workspace_resource_read.properties.default_ingestion_settings
@@ -387,12 +447,28 @@ class _UpdateHelper:
             serialized_name="dataCollectionEndpointResourceId",
             flags={"read_only": True},
         )
+        default_ingestion_settings.data_collection_rule_immutable_id = AAZStrType(
+            serialized_name="dataCollectionRuleImmutableId",
+            flags={"read_only": True},
+        )
         default_ingestion_settings.data_collection_rule_resource_id = AAZStrType(
             serialized_name="dataCollectionRuleResourceId",
             flags={"read_only": True},
         )
+        default_ingestion_settings.ingestion_endpoints = AAZObjectType(
+            serialized_name="ingestionEndpoints",
+            flags={"read_only": True},
+        )
+
+        ingestion_endpoints = _schema_azure_monitor_workspace_resource_read.properties.default_ingestion_settings.ingestion_endpoints
+        ingestion_endpoints.metrics = AAZStrType(
+            flags={"read_only": True},
+        )
 
         metrics = _schema_azure_monitor_workspace_resource_read.properties.metrics
+        metrics.enable_access_using_resource_permissions = AAZBoolType(
+            serialized_name="enableAccessUsingResourcePermissions",
+        )
         metrics.internal_id = AAZStrType(
             serialized_name="internalId",
             flags={"read_only": True},
@@ -459,8 +535,8 @@ class _UpdateHelper:
         tags = _schema_azure_monitor_workspace_resource_read.tags
         tags.Element = AAZStrType()
 
-        _schema.etag = cls._schema_azure_monitor_workspace_resource_read.etag
         _schema.id = cls._schema_azure_monitor_workspace_resource_read.id
+        _schema.identity = cls._schema_azure_monitor_workspace_resource_read.identity
         _schema.location = cls._schema_azure_monitor_workspace_resource_read.location
         _schema.name = cls._schema_azure_monitor_workspace_resource_read.name
         _schema.properties = cls._schema_azure_monitor_workspace_resource_read.properties

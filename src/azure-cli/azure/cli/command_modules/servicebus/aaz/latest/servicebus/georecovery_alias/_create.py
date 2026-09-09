@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/disasterrecoveryconfigs/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}/disasterrecoveryconfigs/{}", "2026-01-01"],
         ]
     }
 
@@ -73,7 +73,6 @@ class Create(AAZCommand):
         )
         _args_schema.partner_namespace = AAZStrArg(
             options=["--partner-namespace"],
-            required=True,
             arg_group="Properties",
             help="ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing",
         )
@@ -148,7 +147,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }

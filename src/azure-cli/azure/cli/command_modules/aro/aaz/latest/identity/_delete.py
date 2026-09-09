@@ -10,6 +10,7 @@
 
 from azure.cli.core.aaz import *
 
+
 class Delete(AAZCommand):
     """Delete the identity.
     """

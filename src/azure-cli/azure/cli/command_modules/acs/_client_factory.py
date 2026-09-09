@@ -39,6 +39,10 @@ def cf_managed_namespaces(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_namespaces
 
 
+def cf_identity_bindings(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).identity_bindings
+
+
 def cf_agent_pools(cli_ctx, *_):
     return get_container_service_client(cli_ctx).agent_pools
 

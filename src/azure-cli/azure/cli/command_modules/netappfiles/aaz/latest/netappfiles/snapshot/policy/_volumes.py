@@ -24,9 +24,9 @@ class Volumes(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}/volumes", "2026-05-01"],
         ]
     }
 
@@ -135,7 +135,7 @@ class Volumes(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -222,6 +222,9 @@ class Volumes(AAZCommand):
             properties.baremetal_tenant_id = AAZStrType(
                 serialized_name="baremetalTenantId",
                 flags={"read_only": True},
+            )
+            properties.breakthrough_mode = AAZStrType(
+                serialized_name="breakthroughMode",
             )
             properties.capacity_pool_resource_id = AAZStrType(
                 serialized_name="capacityPoolResourceId",

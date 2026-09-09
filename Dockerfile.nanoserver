@@ -50,7 +50,8 @@ WORKDIR azure-cli
 USER ContainerUser
 
 RUN python -m pip install --upgrade pip
-RUN pip install wheel
+# `build` is the PEP 517 frontend used to build the wheels below.
+RUN pip install wheel build
 
 SHELL ["pwsh.exe", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
@@ -65,7 +66,7 @@ foreach($f in $folder) \
 { \
     try { \
         Push-Location $f; \
-        & python.exe setup.py bdist_wheel -d $wheels; \
+        & python.exe -m build --wheel --no-isolation --outdir $wheels; \
     } \
     finally { \
         Pop-Location \

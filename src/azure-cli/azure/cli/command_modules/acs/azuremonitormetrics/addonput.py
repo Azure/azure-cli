@@ -22,6 +22,7 @@ def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_na
             if getattr(mc.azure_monitor_profile.metrics, "enabled", None) is False:
                 mc.azure_monitor_profile.metrics.enabled = True
     try:
-        client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+        poller = client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+        poller.result()
     except Exception as e:
         raise UnknownError(e)
