@@ -63,7 +63,7 @@ az self-test --debug
 if [ $? != 0 ]
 then
     exit_code=1
-    echo "Failed to verify"
+    echo "az self-test --debug failed"
 fi
 
 exit $exit_code
