@@ -6,7 +6,6 @@ Release History
 2.90.0
 ++++++
 * Minor fixes
-* `az cloud`: Update `AzureBleuCloud` well-known endpoints and suffixes
 
 2.89.1
 ++++++
