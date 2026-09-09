@@ -225,15 +225,17 @@ def _render_runtime_error(runtime_error):
 def _render_hints(payload, any_issue):
     resource_group = payload.get('resourceGroup') or '<resource-group>'
     site_name = payload.get('name') or '<site-name>'
+    slot = payload.get('slot')
+    slot_arg = ' --slot {}'.format(slot) if slot else ''
     _out()
     _out((Style.WARNING, '▶ Hint:'))
     if any_issue:
-        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {} '
-             '--settings KEY=VALUE'.format(site_name, resource_group))
-        _out('  Update flagged config:       az webapp config set -n {} -g {} '
-             '--settings KEY=VALUE'.format(site_name, resource_group))
-    _out('  Check application logs:      az webapp log tail -n {} -g {}'.format(
-        site_name, resource_group))
+        _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {}{} '
+             '--settings KEY=VALUE'.format(site_name, resource_group, slot_arg))
+        _out('  Review config options:       az webapp config set -n {} -g {}{} '
+             '--help'.format(site_name, resource_group, slot_arg))
+    _out('  Check application logs:      az webapp log tail -n {} -g {}{}'.format(
+        site_name, resource_group, slot_arg))
 
 
 def render_report(payload):

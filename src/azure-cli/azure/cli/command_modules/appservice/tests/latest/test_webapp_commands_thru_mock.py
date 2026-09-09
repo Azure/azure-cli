@@ -2314,10 +2314,15 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
             return_value=True)
         client_factory_patch = mock.patch(
             'azure.cli.command_modules.appservice.custom.web_client_factory')
+        subscription_id_patch = mock.patch(
+            'azure.cli.core.commands.client_factory.get_subscription_id',
+            return_value='00000000-0000-0000-0000-000000000000')
         is_linux_patch.start()
         client_factory_patch.start()
+        subscription_id_patch.start()
         self.addCleanup(is_linux_patch.stop)
         self.addCleanup(client_factory_patch.stop)
+        self.addCleanup(subscription_id_patch.stop)
 
     def _scm_response(self, status_code=200, json_data=None):
         resp = mock.MagicMock()
@@ -2764,7 +2769,8 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
-            result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+            result = troubleshoot_config(
+                _get_test_cmd(), 'myRG', 'myApp', slot='staging', report=True)
 
         self.assertIsNone(result)
         printed_text = self._printed_text(print_mock)
@@ -2780,6 +2786,16 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('Last Error', printed_text)
         self.assertIn('Last Error Details', printed_text)
         self.assertIn('Last Error Timestamp', printed_text)
+        self.assertIn(
+            'az webapp config appsettings set -n myApp -g myRG '
+            '--slot staging --settings KEY=VALUE',
+            printed_text)
+        self.assertIn(
+            'az webapp config set -n myApp -g myRG --slot staging --help',
+            printed_text)
+        self.assertIn(
+            'az webapp log tail -n myApp -g myRG --slot staging',
+            printed_text)
         # Removed labels should NOT appear.
         self.assertNotIn('Last runtime error', printed_text)
         self.assertNotIn('Action:', printed_text)
@@ -2912,7 +2928,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('Hint:', printed_text)
         self.assertIn('az webapp log tail', printed_text)
         self.assertNotIn('Update flagged app setting', printed_text)
-        self.assertNotIn('Update flagged config', printed_text)
+        self.assertNotIn('Review config options', printed_text)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',

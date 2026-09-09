@@ -6941,6 +6941,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
             _safe_response_message(last_body_text) if last_status == 404 else None
         ),
         'requestedMachineName': instance,
+        'slot': slot,
         'runtimeError': runtime_error,
     }
     if report:
@@ -6952,6 +6953,7 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
     payload.pop('configCheckStatus', None)
     payload.pop('configCheckMessage', None)
     payload.pop('requestedMachineName', None)
+    payload.pop('slot', None)
     if runtime_error is not None:
         runtime_error.pop('isRecent', None)
     return payload
