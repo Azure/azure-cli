@@ -127,7 +127,7 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
     rule_instance = None
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    for rule in list(access_rules):
+    for rule in (list(access_rules) if access_rules is not None else []):
         if rule_name and input_rule_types == 0:
             if rule.name and rule.name.lower() == rule_name.lower() and rule.action == action:
                 rule_instance = rule
