@@ -115,8 +115,7 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
         # register storage account
         protection_containers_client = protection_containers_cf(cmd.cli_ctx)
         properties = AzureStorageContainer(backup_management_type="AzureStorage",
-                                           source_resource_id=storage_account.properties.container_id,
-                                           workload_type="AzureFileShare")
+                                           source_resource_id=storage_account.properties.container_id)
         param = ProtectionContainerResource(properties=properties)
         result = protection_containers_client.begin_register(vault_name, resource_group_name, fabric_name,
                                                              storage_account.name, param, polling=False,
