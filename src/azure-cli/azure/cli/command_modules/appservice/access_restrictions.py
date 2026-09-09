@@ -21,6 +21,12 @@ logger = get_logger(__name__)
 ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdid', 'x-fd-healthprobe']
 
 
+def _update_webapp_access_restrictions(cmd, resource_group_name, name, slot, properties):
+    config = {'properties': properties}
+    return _generic_site_operation(
+        cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, config)
+
+
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     access_restrictions = [r.as_dict() for r in (configs.ip_security_restrictions or [])]
@@ -100,8 +106,9 @@ def add_webapp_access_restriction(
         logger.info(http_headers)
         rule_instance.headers = _parse_http_headers(http_headers=http_headers)
 
-    result = _generic_site_operation(
-        cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    property_name = 'scmIpSecurityRestrictions' if scm_site else 'ipSecurityRestrictions'
+    result = _update_webapp_access_restrictions(
+        cmd, resource_group_name, name, slot, {property_name: access_rules})
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
 
 
@@ -154,25 +161,25 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
 
     access_rules.remove(rule_instance)
 
-    result = _generic_site_operation(
-        cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    property_name = 'scmIpSecurityRestrictions' if scm_site else 'ipSecurityRestrictions'
+    result = _update_webapp_access_restrictions(
+        cmd, resource_group_name, name, slot, {property_name: access_rules})
     return result.scm_ip_security_restrictions if scm_site else result.ip_security_restrictions
 
 
 def set_webapp_access_restriction(cmd, resource_group_name, name, use_same_restrictions_for_scm_site=None,
                                   default_action=None, scm_default_action=None, slot=None):
-    configs = get_site_configs(cmd, resource_group_name, name, slot)
+    properties = {}
 
     if use_same_restrictions_for_scm_site is not None:
-        setattr(configs, 'scm_ip_security_restrictions_use_main', bool(use_same_restrictions_for_scm_site))
+        properties['scmIpSecurityRestrictionsUseMain'] = bool(use_same_restrictions_for_scm_site)
     if default_action is not None:
-        setattr(configs, 'ip_security_restrictions_default_action', default_action)
+        properties['ipSecurityRestrictionsDefaultAction'] = default_action
     if scm_default_action is not None:
-        setattr(configs, 'scm_ip_security_restrictions_default_action', scm_default_action)
+        properties['scmIpSecurityRestrictionsDefaultAction'] = scm_default_action
 
-    app_config = _generic_site_operation(
-        cmd.cli_ctx, resource_group_name, name, 'update_configuration',
-        slot, configs)
+    app_config = _update_webapp_access_restrictions(
+        cmd, resource_group_name, name, slot, properties)
     app_use_main = app_config.scm_ip_security_restrictions_use_main
     app_default_action = app_config.ip_security_restrictions_default_action
     app_scm_default_action = app_config.scm_ip_security_restrictions_default_action
