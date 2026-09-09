@@ -1879,6 +1879,20 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                         "The addon {} is not installed.".format(addon))
             addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
+        if addon == CONST_MONITORING_ADDON_NAME:
+            monitor_profile = getattr(instance, "azure_monitor_profile", None)
+            if getattr(monitor_profile, "container_insights", None) is not None:
+                # Reset the canonical profile along with the legacy addon config.
+                # Otherwise its old enabled/workspace/flow-log values survive the PUT.
+                ContainerInsights = cmd.get_models(
+                    'ManagedClusterAzureMonitorProfileContainerInsights',
+                    resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+                    operation_group='managed_clusters',
+                )
+                monitor_profile.container_insights = ContainerInsights(
+                    enabled=enable,
+                    log_analytics_workspace_resource_id=workspace_resource_id if enable else None,
+                )
 
     instance.addon_profiles = addon_profiles
 
