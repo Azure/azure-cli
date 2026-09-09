@@ -2834,8 +2834,8 @@ def _validate_capacity_reservation_group(cmd, namespace):
     if getattr(namespace, 'capacity_reservation_group', None) is not None and \
             getattr(namespace, 'disable_capacity_reservation_assignment', None) is True:
         raise MutuallyExclusiveArgumentError(
-            "You can only specify one of --capacity-reservation-group and "
-            "--disable-capacity-reservation-assignment")
+            "--capacity-reservation-group cannot be used when --disable-capacity-reservation-assignment is set to true."
+        )
 
     if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
