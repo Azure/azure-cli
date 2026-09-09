@@ -20,7 +20,7 @@ def _common_client_factory(cli_ctx, **_):
 
 
 def _backup_client_factory(cli_ctx, **_):
-    from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+    from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
@@ -115,6 +115,10 @@ def backup_protectable_items_cf(cli_ctx, *_):
 
 def backup_protected_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protected_items
+
+
+def configure_source_scan_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).configure_source_scan
 
 
 def backup_protected_items_crr_cf(cli_ctx, *_):

@@ -10,7 +10,7 @@ import azure.cli.command_modules.backup.custom_help as helper
 
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
@@ -21,7 +21,7 @@ from azure.cli.command_modules.backup._client_factory import protection_containe
     resources_cf, backup_protected_items_cf, protected_items_cf
 from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 from knack.log import get_logger
@@ -148,8 +148,10 @@ def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_
     item_properties.source_resource_id = protectable_item.properties.parent_container_fabric_id
     item = ProtectedItemResource(properties=item_properties)
 
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, item, cls=helper.get_pipeline_response)
+    result = helper.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, item,
+                                      cls=helper.get_pipeline_response, polling=False))
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -201,7 +203,7 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
-    protectable_items_paged = backup_protectable_items_client.list(vault_name, resource_group_name, filter_string)
+    protectable_items_paged = backup_protectable_items_client.list(vault_name, resource_group_name, filter=filter_string)
     protectable_items = helper.get_list_from_paged_response(protectable_items_paged)
     result = protectable_items
     if helper.is_native_name(storage_account_name):
@@ -337,7 +339,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
         'endDate': query_end_date})
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
+    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
     if tier:
@@ -426,8 +428,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     helper.validate_update_policy_request(existing_policy, policy, yes)
 
     # Update policy
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
+    result = helper.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, afs_item,
+                                      cls=helper.get_pipeline_response, polling=False))
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -458,8 +462,10 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
+    result = helper.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, afs_item,
+                                      cls=helper.get_pipeline_response, polling=False))
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -541,7 +547,7 @@ def list_protectable_containers(cli_ctx, resource_group_name, vault_name):
         'backupManagementType': "AzureStorage"})
 
     client = protectable_containers_cf(cli_ctx)
-    paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter_string)
+    paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter=filter_string)
     return helper.get_list_from_paged_response(paged_containers)
 
 

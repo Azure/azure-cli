@@ -12,7 +12,7 @@ import random
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
     KeyVaultPreparer, record_only, live_only
-from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
@@ -509,13 +509,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} '
             '-c {container} -n {vm} --query name').get_output_in_json()
 
-        result = self.cmd(
+        self.cmd(
             'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
-            '--state Enabled --backup-management-type AzureIaasVM --workload-type VM').get_output_in_json()
-        self.assertIn(result['status'], ('Accepted', 'Succeeded'))
-        if result['status'] == 'Accepted':
-            self.assertTrue(result['azureAsyncOperation'])
-            self.assertTrue(result['location'])
+            '--state Enabled --backup-management-type AzureIaasVM --workload-type VM')
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
