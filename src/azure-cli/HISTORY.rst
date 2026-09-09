@@ -68,6 +68,7 @@ Release History
 **Container app**
 
 * `az containerapp job update`: Fix crash for `--no-wait` parameter (#33807)
+* `az containerapp logs show`: Use the replica log stream endpoint for console logs
 
 **Key Vault**
 
