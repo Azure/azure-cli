@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import errno
 import json
 import logging
 import os
@@ -66,10 +67,14 @@ class Session(MutableMapping):
         try:
             fd, temp_name = tempfile.mkstemp(dir=directory, prefix=os.path.basename(target) + '.',
                                              suffix='.tmp')
-        except OSError:
-            # The directory is not writable, which happens in locked down containers and CI
-            # images. Writing in place still works there, so keep the old behaviour rather than
-            # failing a save that used to succeed.
+        except OSError as ex:
+            if ex.errno not in (errno.EACCES, errno.EPERM, errno.EROFS):
+                # Anything else, a full disk for instance, would also break the in place write and
+                # would lose the file doing it, so let it surface instead.
+                raise
+            # The directory is not writable but the file is, which happens in locked down
+            # containers and CI images. Writing in place still works there, so keep the old
+            # behaviour rather than failing a save that used to succeed.
             with open(self.filename, 'w', encoding=self._encoding) as f:
                 json.dump(self.data, f)
             return

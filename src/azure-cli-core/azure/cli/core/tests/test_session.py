@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import errno
 import json
 import os
+import shutil
 import stat
 import tempfile
 import unittest
+from unittest import mock
 
 from azure.cli.core._session import Session
 
@@ -17,6 +20,9 @@ class TestSession(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
         self.filename = os.path.join(self.dir, 'test.json')
+
+    def tearDown(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
 
     def _session(self, data):
         session = Session()
@@ -96,6 +102,27 @@ class TestSession(unittest.TestCase):
             self.assertEqual(self._read(), {'a': 1})
         finally:
             os.chmod(self.dir, 0o700)
+
+    def test_save_does_not_fall_back_when_the_temporary_file_fails_for_another_reason(self):
+        # The in place write would also fail on a full disk, and it would lose the file doing it,
+        # so only a permission problem should reach the fallback.
+        with open(self.filename, 'w', encoding='utf-8-sig') as f:
+            json.dump({'kept': True}, f)
+
+        with mock.patch('tempfile.mkstemp', side_effect=OSError(errno.ENOSPC, 'No space left')):
+            with self.assertRaises(OSError):
+                self._session({'a': 1}).save()
+
+        self.assertEqual(self._read(), {'kept': True})
+
+    def test_save_falls_back_on_a_read_only_file_system(self):
+        with open(self.filename, 'w', encoding='utf-8-sig') as f:
+            json.dump({}, f)
+
+        with mock.patch('tempfile.mkstemp', side_effect=OSError(errno.EROFS, 'Read-only file system')):
+            self._session({'a': 1}).save()
+
+        self.assertEqual(self._read(), {'a': 1})
 
     def test_load_reads_back_what_save_wrote(self):
         self._session({'a': 1}).save()
