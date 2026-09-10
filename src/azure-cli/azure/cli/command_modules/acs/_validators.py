@@ -397,6 +397,25 @@ def validate_outbound_type_sku_for_update(namespace):
         )
 
 
+def _reject_nat_gateway_mixed_ip_allocation(namespace):
+    """Managed outbound IP counts and BYO outbound IPs/prefixes are mutually exclusive (pick one).
+
+    Mirrors the RP contract: a NAT gateway profile cannot carry both AKS-managed outbound IPs
+    (--nat-gateway-managed-outbound-ip-count / --nat-gateway-managed-outbound-ipv6-count) and
+    user-provided outbound IPs / IP prefixes.
+    """
+    has_managed = (getattr(namespace, 'nat_gateway_managed_outbound_ip_count', None) is not None or
+                   getattr(namespace, 'nat_gateway_managed_outbound_ipv6_count', None) is not None)
+    has_byo = (getattr(namespace, 'nat_gateway_outbound_ip_ids', None) is not None or
+               getattr(namespace, 'nat_gateway_outbound_ip_prefix_ids', None) is not None)
+    if has_managed and has_byo:
+        raise MutuallyExclusiveArgumentError(
+            "--nat-gateway-managed-outbound-ip-count / --nat-gateway-managed-outbound-ipv6-count "
+            "cannot be combined with --nat-gateway-outbound-ips / --nat-gateway-outbound-ip-prefixes. "
+            "Choose either AKS-managed outbound IPs or your own outbound IPs/IP prefixes."
+        )
+
+
 def validate_nat_gateway_v2_params(namespace):
     """Validate the V2-only NAT gateway params on create.
 
@@ -404,8 +423,10 @@ def validate_nat_gateway_v2_params(namespace):
     gateway outbound type at the StandardV2 tier; the Standard (V1) SKU cannot carry them. Omitting
     --outbound-type-sku is tolerated and defaults to StandardV2 where the region supports it, so only
     an explicit Standard SKU is rejected here (region availability is enforced by the RP). On create
-    --outbound-type must be set explicitly to managedNATGateway.
+    --outbound-type must be set explicitly to managedNATGateway. Managed outbound IP counts and BYO
+    outbound IPs/prefixes are mutually exclusive.
     """
+    _reject_nat_gateway_mixed_ip_allocation(namespace)
     v2_params = [
         getattr(namespace, 'nat_gateway_managed_outbound_ipv6_count', None),
         getattr(namespace, 'nat_gateway_outbound_ip_ids', None),
@@ -430,8 +451,9 @@ def validate_nat_gateway_v2_params_for_update(namespace):
     the RP preserves the cluster's existing SKU (which may be Standard), so the V2-only params
     require an explicit --outbound-type-sku StandardV2. --outbound-type may be omitted when the
     cluster is already managed NAT gateway; an explicit non-managed-NAT-gateway outbound type is
-    also rejected.
+    also rejected. Managed outbound IP counts and BYO outbound IPs/prefixes are mutually exclusive.
     """
+    _reject_nat_gateway_mixed_ip_allocation(namespace)
     v2_params = [
         getattr(namespace, 'nat_gateway_managed_outbound_ipv6_count', None),
         getattr(namespace, 'nat_gateway_outbound_ip_ids', None),

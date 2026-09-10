@@ -2051,6 +2051,7 @@ class TestNatGatewayV2Validators(unittest.TestCase):
         defaults = {
             "nat_gateway_sku": None,
             "outbound_type": None,
+            "nat_gateway_managed_outbound_ip_count": None,
             "nat_gateway_managed_outbound_ipv6_count": None,
             "nat_gateway_outbound_ip_ids": None,
             "nat_gateway_outbound_ip_prefix_ids": None,
@@ -2101,6 +2102,18 @@ class TestNatGatewayV2Validators(unittest.TestCase):
             validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=0))
         with self.assertRaises(InvalidArgumentValueError):
             validators.validate_nat_gateway_managed_outbound_ipv6_count(self._ns(nat_gateway_managed_outbound_ipv6_count=17))
+
+    def test_managed_ip_counts_and_byo_ips_mutually_exclusive(self):
+        # Managed outbound IP counts cannot be combined with BYO outbound IPs/prefixes (create + update).
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ip_count=2, nat_gateway_outbound_ip_ids="/sub/ip", outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, nat_gateway_outbound_ip_prefix_ids="/sub/pfx", outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_nat_gateway_v2_params_for_update(self._ns(nat_gateway_managed_outbound_ip_count=2, nat_gateway_outbound_ip_ids="/sub/ip", nat_gateway_sku="StandardV2"))
+        # Managed-only and BYO-only (IPs and prefixes together) remain valid.
+        validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
+        validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_outbound_ip_ids="/sub/ip", nat_gateway_outbound_ip_prefix_ids="/sub/pfx", outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
 
 
 if __name__ == "__main__":
