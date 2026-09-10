@@ -274,6 +274,34 @@ class TestParser(unittest.TestCase):
                 parser.parse_args('test new-ext reset pos1 pos2'.split())  # test positional args
             self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
 
+        # test dynamic extension install with the command rerun after installation.
+        # The command must be rerun via run_az_cmd (args as a list, no shell) to avoid command injection.
+        from knack.util import CommandResultItem
+        run_az_cmd_args = []
+
+        def mock_run_az_cmd(args, out_file=None):  # pylint: disable=unused-argument
+            run_az_cmd_args.append(args)
+            return CommandResultItem(None, exit_code=0)
+
+        with mock.patch.object(logging.Logger, 'error', mock_log_error), \
+                mock.patch.object(azure.cli.core.extension.operations, 'add_extension', mock_add_extension), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_command_tree',
+                                  mock_ext_cmd_tree_load), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install, '_get_extension_use_dynamic_install_config',
+                                  return_value='yes_without_prompt'), \
+                mock.patch.object(azure.cli.core.extension.dynamic_install,
+                                  '_get_extension_run_after_dynamic_install_config', return_value=True), \
+                mock.patch.object(azure.cli.core.util, 'run_az_cmd', mock_run_az_cmd):
+            with self.assertRaises(SystemExit) as cm:
+                parser.parse_args(['test', 'new-ext', 'create', '--opt', 'enum_2 & echo injected'])
+            # exit code comes from the rerun result
+            self.assertEqual(cm.exception.code, 0)
+            # args are passed as a list without the 'az' entry point, so no shell can reinterpret them
+            self.assertEqual(run_az_cmd_args,
+                             [['test', 'new-ext', 'create', '--opt', 'enum_2 & echo injected']])
+            # error message is only for telemetry, it should not be printed again
+            self.assertEqual(len(logger_msgs), 7)
+
 
 class VerifyError:  # pylint: disable=too-few-public-methods
 

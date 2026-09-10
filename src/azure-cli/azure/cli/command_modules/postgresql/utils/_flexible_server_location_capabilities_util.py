@@ -95,6 +95,7 @@ def _postgres_parse_list_capability(result, is_offer_restriction_check_required=
                 tier_dict["supported_storageV2_throughput"] = storage_edition.supported_storage_mb[0].supported_throughput
                 tier_dict["supported_storageV2_throughput_max"] = storage_edition.supported_storage_mb[0].supported_maximum_throughput
 
+        tier_dict["default_sku_name"] = tier_info.default_sku_name
         tier_dict["skus"] = skus
         tier_dict["storage_sizes"] = storage_sizes
         tiers_dict[tier_name] = tier_dict

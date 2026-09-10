@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class BreakPair(AAZCommand):
     """This operation disables the Disaster Recovery and stops replicating changes from primary to secondary namespaces
+
+    :example: EHAliasBreakPairing
+        az eventhubs georecovery-alias break-pair --resource-group exampleResourceGroup --namespace-name sdk-Namespace-8859 --alias sdk-DisasterRecovery-3814
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/breakpairing", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/breakpairing", "2026-07-01-preview"],
         ]
     }
 
@@ -57,6 +60,7 @@ class BreakPair(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -131,7 +135,7 @@ class BreakPair(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

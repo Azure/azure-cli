@@ -35,6 +35,7 @@ from azure.cli.command_modules.sql.custom import (
     ResourceIdType)
 from datetime import datetime, timedelta
 
+
 # Constants
 server_name_prefix = 'clitestserver'
 server_name_max_length = 62
@@ -194,8 +195,8 @@ class SqlServerExternalGovernanceTests(ScenarioTest):
                      JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westus')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westus')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -285,7 +286,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westus')
     def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
@@ -318,7 +319,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group, server_name), checks=NoneCheck())
 
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westus')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -370,7 +371,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westus')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -8159,8 +8160,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_mgmt(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
@@ -8168,7 +8169,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         database_name = 'CLI1'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8205,6 +8206,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
                         JMESPathCheck('replicationMode', 'Async'),
                         JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('linkMode', 'SingleDatabase'),
                         JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
                         JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
                         JMESPathCheck('seedingMode', seeding_mode),
@@ -8227,6 +8229,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
                         JMESPathCheck('replicationMode', 'Async'),
                         JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('linkMode', 'SingleDatabase'),
                         JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
                         JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
                         JMESPathCheck('seedingMode', seeding_mode),
@@ -8243,15 +8246,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_planned_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8310,15 +8313,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_first_forced_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link1'
         instance_ag_name = 'AG_CLI1_MI'
         partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
         databases = "[{database-name:CLI1}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Primary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8378,15 +8381,15 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_box_first_failover(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
         partner_ag_name = 'AG_PS4'
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8454,8 +8457,8 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @record_only()
     def test_sql_mi_link_error_handling(self):
-        rg = 'DaniRG'
-        mi_name = 'chimera-canary-gpv2-01'
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
         box_name = 'wwi-2022-sql02'
         link_name = 'Link4'
         instance_ag_name = 'AG_PS4_MI'
@@ -8463,7 +8466,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
         replication_mode = 'Async'
         databases = "[{database-name:PS4}]"
         empty_databases = "[]"
-        partner_endpoint = 'tcp://10.0.1.8:5022'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
         instance_link_role = 'Secondary'
         failover_mode = 'Manual'
         seeding_mode = 'Automatic'
@@ -8592,7 +8595,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
             self.cmd(
                 'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
         except Exception as e:
-            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            expected_message = "A planned failover of Azure SQL Managed Instance link cannot be initiated from the secondary instance. Initiate failover from the primary instance for this link."
             if expected_message in str(e):
                 pass
             else:
@@ -8607,6 +8610,294 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                 pass
             else:
                 raise e
+
+
+class SqlManagedInstanceMultiDatabaseLinkScenarioTest(ScenarioTest):
+    def _wait_for_databases(self, expected_count, timeout=30, interval=5):
+        deadline = time.monotonic() + timeout
+        last_count = 0
+
+        while time.monotonic() < deadline:
+            result = self.cmd(
+                'sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}')
+            link = result.get_output_in_json()
+            last_count = len(link.get('databases') or [])
+
+            if last_count == expected_count:
+                return result
+
+            if self.in_recording:
+                time.sleep(interval)
+            else:
+                # Playback consumes recorded responses sequentially without waiting.
+                continue
+
+        self.fail(
+            'Timed out waiting for {} databases. Last observed database count: {}'.format(
+                expected_count, last_count))
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_mgmt(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink1'
+        instance_ag_name = 'AG_multilink1_MI'
+        partner_ag_name = 'AG_multilink1'
+        replication_mode = 'Async'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'None'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'database_names': database_names,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # show link
+        link = self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('name', link_name),
+            JMESPathCheck('resourceGroup', rg),
+            JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('replicationMode', replication_mode),
+            JMESPathCheck('instanceLinkRole', instance_link_role),
+            JMESPathCheck('linkMode', link_mode),
+            JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+            JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+            JMESPathCheck('seedingMode', seeding_mode),
+            JMESPathCheck('failoverMode', failover_mode),
+            JMESPathCheck('partnerEndpoint', partner_endpoint),
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'link_id': link['id']
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi link show --ids {link_id}',
+                 checks=[
+                     JMESPathCheck('name', link_name),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
+                     JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+                     JMESPathCheck('replicationMode', replication_mode),
+                     JMESPathCheck('instanceLinkRole', instance_link_role),
+                     JMESPathCheck('linkMode', link_mode),
+                     JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                     JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                     JMESPathCheck('seedingMode', seeding_mode),
+                     JMESPathCheck('failoverMode', failover_mode),
+                     JMESPathCheck('partnerEndpoint', partner_endpoint),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_update_databases(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink2'
+        instance_ag_name = 'AG_multilink2_MI'
+        partner_ag_name = 'AG_multilink2'
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Primary'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+            'databases': databases,
+            'database_names': database_names,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link with two databases
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # wait for initial databases
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # add database db3 to the link
+        databases = "[{database-name:db1},{database-name:db2},{database-name:db3}]"
+        database_names = ['db1', 'db2', 'db3']
+        self.kwargs.update({
+            'databases': databases,
+            'database_names': database_names,
+        })
+        self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}"')
+
+        # wait for database to be added
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # remove databases db2 and db3, leaving only db1
+        databases = "[{database-name:db1}]"
+        database_names = ['db1']
+        self.kwargs.update({
+            'databases': databases,
+            'database_names': database_names,
+        })
+        self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}"')
+
+        # wait for databases to be removed
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_multi_database_link_error_handling(self):
+        rg = 'ivankostic-rg'
+        mi_name = 'ivan-mi-25'
+        link_name = 'multilink1'
+        invalid_link_name = 'MultiLink1'
+        instance_ag_name = 'AG_multilink1_MI'
+        partner_ag_name = 'AG_multilink1'
+        databases = "[{database-name:db1},{database-name:db2}]"
+        database_names = ['db1', 'db2']
+        partner_endpoint = 'tcp://172.16.1.130:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'None'
+        seeding_mode = 'Automatic'
+        link_mode = 'MultiDatabase'
+        single_database_link_mode = 'SingleDatabase'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'link_name': link_name,
+            'invalid_link_name': invalid_link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'databases': databases,
+            'database_names': database_names,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'link_mode': link_mode,
+            'single_database_link_mode': single_database_link_mode,
+        })
+
+        # no links on the instance
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # multiple databases are not valid for a single-database link
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {single_database_link_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected single-database link creation with multiple databases to fail.')
+
+        # omitting link mode defaults to a single-database link
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected link creation with multiple databases and no link mode to fail.')
+
+        # multi-database link names must be lowercase
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {invalid_link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+        except Exception as e:
+            expected_message = "Multi-database Distributed Availability Group name can only be made up of lowercase letters"
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected multi-database link creation with an uppercase name to fail.')
+
+        # create valid link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases "{databases}" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode} --link-mode {link_mode}')
+
+        # wait for the databases to be created
+        self._wait_for_databases(len(database_names)).assert_with_checks([
+            JMESPathCheck('length(databases)', len(database_names)),
+            JMESPathCheck('sort_by(databases, &databaseName)[].databaseName', database_names),
+            JMESPathCheck('instanceLinkRole', instance_link_role),
+            JMESPathCheck('linkMode', link_mode),
+        ])
+
+        # updating a multi-database link requires a database list
+        try:
+            self.cmd('sql mi link update -g {rg} --instance-name {mi_name} --name {link_name}')
+        except Exception as e:
+            expected_message = "Multi-database Distributed Availability Group Add or Remove databases request body has empty or Invalid Databases."
+            if expected_message not in str(e):
+                raise e
+        else:
+            self.fail('Expected multi-database link update without databases to fail.')
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
@@ -9099,7 +9390,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  '--soft-delete-retention-days 100',
                  expect_failure=True)
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_boundary_values(self, resource_group, resource_group_location):
         """
         Test boundary values for soft-delete-retention-days: 0, 1, and 7.
@@ -9110,7 +9401,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         server_name_7 = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-        location = 'centralus'
+        location = 'westus'
 
         # Test with retention_days = 0 (disabled)
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -9148,16 +9439,19 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server_name_7))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_create_without_soft_delete(self, resource_group, resource_group_location):
         """
         Test creating a server without specifying soft-delete-retention-days.
-        Should use default value (0 = disabled).
+        Semantics:
+        - retentionDays == -1 -> soft delete was never configured (this test's expectation)
+        - retentionDays ==  0 -> soft delete was explicitly disabled
+        - retentionDays 1..7  -> soft delete is enabled with that retention window
         """
         server_name = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-        location = 'centralus'
+        location = 'westus'
 
         # Create server without soft delete parameter
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -9167,25 +9461,23 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
-                     JMESPathCheck('resourceGroup', resource_group)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', -1)])
 
-        # Verify soft delete is disabled by default (retentionDays should be 0, -1, or None)
-        result = self.cmd('sql server show -g {} --name {}'
-                         .format(resource_group, server_name)).get_output_in_json()
-        
-        # Azure may return 0, -1, or None for disabled soft delete
-        retention_days = result.get('retentionDays', 0)
-        self.assertIn(retention_days, [0, -1, None], 
-                     f"Expected retentionDays to be 0, -1, or None, but got {retention_days}")
+        # Verify via show as well: retentionDays must be -1 (never configured)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('retentionDays', -1)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_enable_on_create(self, resource_group, resource_group_location):
         """Test enabling soft delete with retention days on server creation"""
         server_name = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         retention_days = 5
-        location = 'centralus'
+        location = 'westus'
 
         # Create server with soft delete enabled with retention days
         server = self.cmd('sql server create -g {} --name {} -l {} '
@@ -9214,8 +9506,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
 
         # Note: ResourceGroupPreparer automatically handles cleanup
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
-    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @SqlServerPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_disable_on_existing(self, resource_group, resource_group_location, server):
         """Test disabling soft delete on an existing server"""
         # First enable soft delete on the server with 7 days retention
@@ -9242,8 +9534,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('retentionDays', 0)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
-    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @SqlServerPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_update_retention_existing(self, resource_group, resource_group_location, server):
         """Test updating retention days on existing server"""
         retention_days_1 = 3
@@ -9277,8 +9569,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
-    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @SqlServerPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_toggle_multiple_times(self, resource_group, resource_group_location, server):
         """
         Test toggling soft delete on and off multiple times to ensure state changes work correctly.
@@ -9307,8 +9599,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('retentionDays', 0)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
-    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @SqlServerPreparer(name_prefix='softdelete', location='westus')
     def test_sql_server_soft_delete_update_same_value(self, resource_group, resource_group_location, server):
         """
         Test updating soft delete retention to the same value (idempotent operation).
@@ -9337,7 +9629,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_soft_delete_complete_recovery_workflow(self, resource_group, resource_group_location):
         """Test complete soft delete workflow: create server with 2-day retention, delete, restore, and cleanup"""
@@ -9346,7 +9638,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         retention_days = 2
-        location = 'centralus'
+        location = 'westus'
 
         # Create server with soft delete enabled and 2-day retention
         server = self.cmd('sql server create -g {} --name {} -l {} '
@@ -9383,14 +9675,19 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                                   checks=[
                                       JMESPathCheck('name', server_name),
                                       JMESPathCheck('location', location),
-                                      JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+                                      JMESPathCheck('resourceGroup', resource_group),
+                                      JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+
+        # Ensure retention policy is preserved on the restored server.
+        self.assertEqual(restored_server.get('retentionDays'), retention_days)
 
         # Verify restored server exists and shows it was restored successfully
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
 
         # Disable soft delete on the restored server
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
@@ -9469,13 +9766,21 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         print(f"DEBUG: Looking for server: {server_name}")
         print(f"DEBUG: Server names in list: {[s.get('name', 'NO_NAME') for s in deleted_servers_list]}")
 
-        # Verify our deleted server is in the list by checking FQDN
-        # The Azure API returns name=None, so we extract the server name from FQDN
-        # FQDN format: {servername}.{domain}, e.g., servername.sqltest-eg1.mscds.com
-        deleted_server_found = any(s.get('fullyQualifiedDomainName', '').startswith(server_name + '.') 
-                                   for s in deleted_servers_list)
-        self.assertTrue(deleted_server_found, 
-                       f"Deleted server {server_name} not found in deleted servers list")
+        # Verify our deleted server is in the list and key fields are populated.
+        # The Azure API may return name=None, so match by FQDN prefix.
+        deleted_server_from_list = next(
+            (s for s in deleted_servers_list
+             if s.get('fullyQualifiedDomainName', '').startswith(server_name + '.')),
+            None)
+        self.assertIsNotNone(
+            deleted_server_from_list,
+            f"Deleted server {server_name} not found in deleted servers list")
+
+        self.assertTrue(deleted_server_from_list.get('deletionTime'),
+                        'Expected deletionTime to be present for deleted server entry')
+        list_original_id = deleted_server_from_list.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", list_original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", list_original_id)
 
         # Test deleted-server show command by name
         deleted_server = self.cmd('sql server deleted-server show --name {} --location {}'
@@ -9490,6 +9795,10 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         fqdn = deleted_server.get('fullyQualifiedDomainName', '')
         self.assertTrue(fqdn.startswith(server_name + '.'),
                        f"Expected FQDN to start with {server_name}., but got {fqdn}")
+
+        show_original_id = deleted_server.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", show_original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", show_original_id)
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
     @AllowLargeResponse(size_kb=9999)
@@ -9509,26 +9818,22 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
         # ===== SCENARIO 1: Create without soft-delete -> Update password -> Enable soft-delete =====
         server1 = self.create_random_name('sdtest1', server_name_max_length)
-        
-        # Create server without soft-delete parameter
-        result1 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+
+        # Create server without soft-delete parameter.
+        # Semantics: -1 = never configured, 0 = disabled, 1..7 = enabled.
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
                 .format(resource_group, server1, location, admin_login, base_password),
                 checks=[
-                    JMESPathCheck('name', server1)]).get_output_in_json()
-        # Validate retention_days is either -1 or 0 (both indicate not configured)
-        self.assertIn(result1['retentionDays'], [-1, 0], 
-                     f"Expected retentionDays to be -1 or 0, got {result1['retentionDays']}")
-        initial_retention = result1['retentionDays']
-        
-        # Update password only - retention_days should remain unchanged
-        result1_updated = self.cmd('sql server update -g {} --name {} --admin-password {}'
+                    JMESPathCheck('name', server1),
+                    JMESPathCheck('retentionDays', -1)])
+
+        # Update password only - retention_days must remain -1 (never configured)
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
                 .format(resource_group, server1, new_password),
                 checks=[
-                    JMESPathCheck('name', server1)]).get_output_in_json()
-        # Should remain the same as initial value
-        self.assertEqual(result1_updated['retentionDays'], initial_retention,
-                        f"Expected retentionDays to remain {initial_retention}, got {result1_updated['retentionDays']}")
-        
+                    JMESPathCheck('name', server1),
+                    JMESPathCheck('retentionDays', -1)])
+
         # Enable soft-delete with 5 days retention
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 5'
                 .format(resource_group, server1),
@@ -9538,16 +9843,14 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
         # ===== SCENARIO 2: Create without soft-delete -> Update soft-delete AND password together =====
         server2 = self.create_random_name('sdtest2', server_name_max_length)
-        
-        # Create server without soft-delete parameter
-        result2 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+
+        # Create server without soft-delete parameter (retentionDays == -1: never configured)
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
                 .format(resource_group, server2, location, admin_login, base_password),
                 checks=[
-                    JMESPathCheck('name', server2)]).get_output_in_json()
-        # Validate retention_days is either -1 or 0 (both indicate not configured)
-        self.assertIn(result2['retentionDays'], [-1, 0],
-                     f"Expected retentionDays to be -1 or 0, got {result2['retentionDays']}")
-        
+                    JMESPathCheck('name', server2),
+                    JMESPathCheck('retentionDays', -1)])
+
         # Update both soft-delete (3 days) and password together
         self.cmd('sql server update -g {} --name {} --admin-password {} --soft-delete-retention-days 3'
                 .format(resource_group, server2, new_password),
@@ -9622,6 +9925,80 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
         # Verify command succeeds and returns a list (even if empty)
         self.assertIsInstance(deleted_servers, list)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_without_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server list without location returns subscription-wide deleted servers.
+        '''
+        server_name = self.create_random_name('delall', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+
+        # Create a server with soft delete enabled so it appears in deleted-server listings.
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, 7),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        deleted_servers = self.cmd('sql server deleted-server list',
+                                   checks=[
+                                       JMESPathCheckGreaterThan('length(@)', 0)
+                                   ]).get_output_in_json()
+
+        self.assertIsInstance(deleted_servers, list)
+        deleted_server = next(
+            (s for s in deleted_servers
+             if s.get('fullyQualifiedDomainName', '').startswith(server_name + '.')),
+            None)
+        self.assertIsNotNone(
+            deleted_server,
+            f"Deleted server {server_name} not found in subscription-wide deleted servers list")
+
+        self.assertTrue(deleted_server.get('deletionTime'),
+                        'Expected deletionTime to be present for subscription-wide deleted server entry')
+        original_id = deleted_server.get('originalId', '').lower()
+        self.assertIn(f"/resourcegroups/{resource_group.lower()}/", original_id)
+        self.assertIn(f"/servers/{server_name.lower()}", original_id)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_show_wrong_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server show fails when location does not match deleted server location.
+        '''
+        server_name = self.create_random_name('delwrong', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        wrong_location = 'eastus2' if location.lower() != 'eastus2' else 'westus2'
+
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, 7),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        self.cmd('sql server deleted-server show --name {} --location {}'
+                 .format(server_name, wrong_location),
+                 expect_failure=True)
 
     @live_only()
     def test_sql_deleted_server_show_not_found(self):

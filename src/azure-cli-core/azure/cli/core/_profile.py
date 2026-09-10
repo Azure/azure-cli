@@ -443,8 +443,8 @@ class Profile:
         """
         account = self.get_subscription()
         managed_identity_type, _ = Profile._parse_managed_identity_account(account)
-        if managed_identity_type or (in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID)):
-            raise AuthenticationError("VM SSH currently doesn't support managed identity or Cloud Shell.")
+        if managed_identity_type:
+            raise AuthenticationError("VM SSH currently doesn't support managed identity.")
 
         credential, _, _ = self.get_login_credentials(sdk_credential=False)
         from .auth.constants import ACCESS_TOKEN

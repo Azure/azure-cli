@@ -519,7 +519,7 @@ AZURE_BLEU_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
         synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
-HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, AZURE_BLEU_CLOUD]
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_BLEU_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():

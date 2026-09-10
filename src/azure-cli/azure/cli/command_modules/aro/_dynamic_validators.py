@@ -8,22 +8,18 @@ import ipaddress
 import re
 from itertools import tee
 
+from azure.cli.command_modules.aro._rbac import has_role_assignment_on_resource
+from azure.cli.command_modules.aro._validators import validate_vnet, validate_cidr
+from azure.cli.command_modules.aro.aaz.latest.network.vnet import Show as vnet_show
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
+from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import (
-    CLIInternalError,
-    InvalidArgumentValueError,
-    RequiredArgumentMissingError
-)
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
-from azure.cli.command_modules.aro._validators import validate_vnet, validate_cidr
-from azure.cli.command_modules.aro._rbac import has_role_assignment_on_resource
-from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
-from azure.cli.command_modules.aro.aaz.latest.network.vnet import Show as vnet_show
-
 from knack.log import get_logger
+import azure.cli.command_modules.aro.custom
 
 
 logger = get_logger(__name__)
@@ -334,8 +330,7 @@ def dyn_validate_version():
         if namespace.location is None:
             get_default_location_from_resource_group(cmd, namespace)
 
-        from azure.cli.command_modules.aro.custom import aro_get_versions
-        versions = aro_get_versions(namespace.client, namespace.location)
+        versions = azure.cli.command_modules.aro.custom.aro_get_versions(namespace.client, namespace.location)
 
         found = False
         for version in versions:

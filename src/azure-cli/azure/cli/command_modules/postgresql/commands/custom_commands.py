@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from functools import cmp_to_key
 from importlib import import_module
 from urllib.parse import quote
 from knack.log import get_logger
@@ -33,16 +32,17 @@ from ..utils._flexible_server_util import (
     generate_missing_parameters,
     generate_password,
     get_current_time,
-    get_postgres_skus,
+    get_postgres_default_sku,
     get_postgres_tiers,
     parse_maintenance_window,
     resolve_poller)
 from ..utils.validators import (
     build_network_configuration,
     check_resource_group,
-    compare_sku_names,
     pg_arguments_validator,
     pg_byok_validator,
+    pg_restore_sku_validator,
+    pg_restore_tier_validator,
     pg_restore_validator,
     resolve_private_dns_zone_id,
     validate_and_format_restore_point_in_time,
@@ -105,11 +105,9 @@ def flexible_server_create(cmd, client,
             tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
             try:
                 sku_info = list_location_capability_info['sku_info']
-                skus = list(get_postgres_skus(sku_info, tier.lower()))
-                skus = sorted(skus, key=cmp_to_key(compare_sku_names))
-                sku_name = skus[0]
+                sku_name = get_postgres_default_sku(sku_info, tier)
             except:
-                raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+                raise CLIError('Incorrect value for --tier. Allowed values: {}'.format(tiers))
         # default to the latest version
         if version is None:
             supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])
@@ -332,7 +330,7 @@ def flexible_server_restore(cmd, client,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
                             byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                             federated_client_id=None, backup_federated_client_id=None,
-                            storage_type=None, yes=False):
+                            storage_type=None, sku_name=None, tier=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -372,7 +370,23 @@ def flexible_server_restore(cmd, client,
                           federated_client_id=federated_client_id,
                           backup_federated_client_id=backup_federated_client_id)
 
-        pg_restore_validator(source_server_object.sku.tier, storage_type=storage_type)
+        if sku_name or tier:
+            sku_info = get_postgres_location_capability_info(cmd, location)['sku_info']
+            if tier:
+                pg_restore_tier_validator(tier, source_server_object.sku.tier, sku_info)
+            else:
+                tier = source_server_object.sku.tier
+            if sku_name:
+                pg_restore_sku_validator(sku_name, sku_info, tier)
+            else:
+                sku_name = get_postgres_default_sku(sku_info, tier)
+                logger.warning('--sku-name was not specified. The restored server will use the default compute '
+                               'size \'%s\' for the %s tier.', sku_name, tier)
+        else:
+            tier = source_server_object.sku.tier
+            sku_name = source_server_object.sku.name
+
+        pg_restore_validator(tier, storage_type=storage_type)
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
@@ -381,6 +395,7 @@ def flexible_server_restore(cmd, client,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone,
+            sku=postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier),
             storage=storage
         )
 
@@ -408,6 +423,9 @@ def flexible_server_restore(cmd, client,
                                                                                              federated_client_id=federated_client_id,
                                                                                              backup_federated_client_id=backup_federated_client_id)
 
+    # Let argument validation errors surface as-is instead of being masked as "not found".
+    except CLIError:
+        raise
     except Exception as e:
         raise ResourceNotFoundError(e)
 

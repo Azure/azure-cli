@@ -1,0 +1,898 @@
+{
+  "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/deploymentStacksWhatIfResults/testing1",
+  "location": null,
+  "name": "testing1",
+  "properties": {
+    "actionOnUnmanage": {
+      "managementGroups": "detach",
+      "resourceGroups": "detach",
+      "resources": "detach",
+      "resourcesWithoutDeleteSupport": "fail"
+    },
+    "changes": {
+      "denySettingsChange": {
+        "after": {
+          "applyToChildScopes": false,
+          "excludedActions": [],
+          "excludedPrincipals": [],
+          "mode": "None"
+        },
+        "before": {
+          "applyToChildScopes": false,
+          "excludedActions": [],
+          "excludedPrincipals": [],
+          "mode": "None"
+        },
+        "delta": []
+      },
+      "deploymentScopeChange": null,
+      "resourceChanges": [
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "modify",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2022-02-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm",
+              "location": "westus2",
+              "name": "wv-spec-mjwo5pow6lmvm",
+              "properties": {
+                "description": "Updated description with nested content changes",
+                "displayName": "WhatIf visual validation updated"
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "Microsoft.Resources/templateSpecs"
+            },
+            "before": {
+              "apiVersion": "2022-02-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm",
+              "location": "westus2",
+              "name": "wv-spec-mjwo5pow6lmvm",
+              "properties": {
+                "description": "Baseline description",
+                "displayName": "WhatIf visual validation"
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "Microsoft.Resources/templateSpecs"
+            },
+            "delta": [
+              {
+                "after": "Updated description with nested content changes",
+                "before": "Baseline description",
+                "changeType": "modify",
+                "children": [],
+                "path": "properties.description"
+              },
+              {
+                "after": "WhatIf visual validation updated",
+                "before": "WhatIf visual validation",
+                "changeType": "modify",
+                "children": [],
+                "path": "properties.displayName"
+              }
+            ]
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Resources/templateSpecs",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "modify",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm/versions/v1",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2022-02-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm/versions/v1",
+              "location": "westus2",
+              "name": "v1",
+              "properties": {
+                "mainTemplate": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "2.0.0.0",
+                  "outputs": {
+                    "nested": {
+                      "type": "object",
+                      "value": {
+                        "enabled": true,
+                        "values": [
+                          1,
+                          2,
+                          3
+                        ]
+                      }
+                    },
+                    "state": {
+                      "type": "string",
+                      "value": "after"
+                    }
+                  },
+                  "parameters": {
+                    "message": {
+                      "defaultValue": "hello",
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "nestedObject": {
+                      "level1": {
+                        "addedArray": [
+                          "one",
+                          "two"
+                        ],
+                        "addedBoolean": true,
+                        "level2": "after"
+                      }
+                    }
+                  }
+                }
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "Microsoft.Resources/templateSpecs/versions"
+            },
+            "before": {
+              "apiVersion": "2022-02-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/templateSpecs/wv-spec-mjwo5pow6lmvm/versions/v1",
+              "location": "westus2",
+              "name": "v1",
+              "properties": {
+                "mainTemplate": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "outputs": {
+                    "state": {
+                      "type": "string",
+                      "value": "before"
+                    }
+                  },
+                  "variables": {
+                    "nestedObject": {
+                      "level1": {
+                        "level2": "before"
+                      }
+                    }
+                  }
+                }
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "Microsoft.Resources/templateSpecs/versions"
+            },
+            "delta": [
+              {
+                "after": "2.0.0.0",
+                "before": "1.0.0.0",
+                "changeType": "modify",
+                "children": [],
+                "path": "properties.mainTemplate.contentVersion"
+              },
+              {
+                "after": "after",
+                "before": "before",
+                "changeType": "modify",
+                "children": [],
+                "path": "properties.mainTemplate.outputs.state.value"
+              },
+              {
+                "after": {
+                  "type": "object",
+                  "value": {
+                    "enabled": true,
+                    "values": [
+                      1,
+                      2,
+                      3
+                    ]
+                  }
+                },
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "properties.mainTemplate.outputs.nested"
+              },
+              {
+                "after": "after",
+                "before": "before",
+                "changeType": "modify",
+                "children": [],
+                "path": "properties.mainTemplate.variables.nestedObject.level1.level2"
+              },
+              {
+                "after": [
+                  "one",
+                  "two"
+                ],
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "properties.mainTemplate.variables.nestedObject.level1.addedArray"
+              },
+              {
+                "after": true,
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "properties.mainTemplate.variables.nestedObject.level1.addedBoolean"
+              },
+              {
+                "after": {
+                  "message": {
+                    "defaultValue": "hello",
+                    "type": "string"
+                  }
+                },
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "properties.mainTemplate.parameters"
+              }
+            ]
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Resources/templateSpecs/versions",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "create",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvcreatemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "notManaged"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvcreatemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvcreatemjwo5pow6lmvm",
+              "properties": {
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "minimumTlsVersion": "TLS1_2",
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "definite-create"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "before": null,
+            "delta": []
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "modify",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvmodmjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvmodmjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvmodmjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_GRS"
+              },
+              "tags": {
+                "modifiedTag": "after",
+                "newTag": "created-in-updated-template",
+                "owner": "what-if-visual-validation",
+                "scenario": "modify-primitives-and-object"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "before": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvmodmjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvmodmjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "modifiedTag": "before",
+                "oldTag": "deleted-in-updated-template",
+                "owner": "what-if-visual-validation",
+                "scenario": "modify-primitives-and-object"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "delta": [
+              {
+                "after": "Standard_GRS",
+                "before": "Standard_LRS",
+                "changeType": "modify",
+                "children": [],
+                "path": "sku.name"
+              },
+              {
+                "after": "after",
+                "before": "before",
+                "changeType": "modify",
+                "children": [],
+                "path": "tags.modifiedTag"
+              },
+              {
+                "after": null,
+                "before": "deleted-in-updated-template",
+                "changeType": "delete",
+                "children": [],
+                "path": "tags.oldTag"
+              },
+              {
+                "after": "created-in-updated-template",
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "tags.newTag"
+              }
+            ]
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "noChange",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvsamemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvsamemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvsamemjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "no-change"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "before": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvsamemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvsamemjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "no-change"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "delta": []
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "create",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "notManaged"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "1999-12-31",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar",
+              "name": "bar",
+              "properties": {
+                "source": "duplicate-diagnostic.bicep"
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "RP.Namespace/widgets"
+            },
+            "before": null,
+            "delta": []
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "RP.Namespace/widgets",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "create",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "notManaged"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "1999-12-31",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo",
+              "name": "foo",
+              "properties": {
+                "source": "duplicate-diagnostic.bicep"
+              },
+              "resourceGroup": "whatif-change-40011",
+              "type": "RP.Namespace/widgets"
+            },
+            "before": null,
+            "delta": []
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "RP.Namespace/widgets",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "potential",
+          "changeType": "create",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotcreatemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "notManaged"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2023-05-01",
+              "condition": "[greater(int(utcNow('%f')), 4)]",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotcreatemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvpotcreatemjwo5pow6lmvm",
+              "properties": {
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "minimumTlsVersion": "TLS1_2",
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "potential-create"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "before": null,
+            "delta": []
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "potential",
+          "changeType": "modify",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "managed",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": {
+            "after": {
+              "apiVersion": "2023-05-01",
+              "condition": "[greater(int(utcNow('%f')), 4)]",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvpotremovemjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "potential-remove"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "before": {
+              "apiVersion": "2023-05-01",
+              "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm",
+              "kind": "StorageV2",
+              "location": "westus2",
+              "name": "wvpotremovemjwo5pow6lmvm",
+              "properties": {
+                "accessTier": "Hot",
+                "allowBlobPublicAccess": false,
+                "allowCrossTenantReplication": false,
+                "allowSharedKeyAccess": false,
+                "defaultToOAuthAuthentication": true,
+                "encryption": {
+                  "keySource": "Microsoft.Storage"
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "networkAcls": {
+                  "bypass": "None",
+                  "defaultAction": "Allow"
+                },
+                "publicNetworkAccess": "Disabled",
+                "supportsHttpsTrafficOnly": true
+              },
+              "resourceGroup": "whatif-change-40011",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "tags": {
+                "owner": "what-if-visual-validation",
+                "scenario": "potential-remove"
+              },
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            "delta": [
+              {
+                "after": "[greater(int(utcNow('%f')), 4)]",
+                "before": null,
+                "changeType": "create",
+                "children": [],
+                "path": "condition"
+              }
+            ]
+          },
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "potential",
+          "changeType": "detach",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "notManaged",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": null,
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "detach",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/networkSecurityGroups/wv-nsg-mjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "notManaged",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": null,
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Network/networkSecurityGroups",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "detach",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/routeTables/wv-routes-mjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "notManaged",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": null,
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Network/routeTables",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "detach",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Network/virtualNetworks/wv-vnet-mjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "notManaged",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": null,
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Network/virtualNetworks",
+          "unsupportedReason": null
+        },
+        {
+          "apiVersion": null,
+          "changeCertainty": "definite",
+          "changeType": "detach",
+          "denyStatusChange": {
+            "after": "none",
+            "before": "none"
+          },
+          "deploymentId": null,
+          "extension": null,
+          "id": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvremovemjwo5pow6lmvm",
+          "identifiers": null,
+          "managementStatusChange": {
+            "after": "notManaged",
+            "before": "managed"
+          },
+          "resourceConfigurationChanges": null,
+          "resourceGroup": "whatif-change-40011",
+          "symbolicName": null,
+          "type": "Microsoft.Storage/storageAccounts",
+          "unsupportedReason": null
+        }
+      ]
+    },
+    "correlationId": "be984b97-6ab0-45a6-99e5-3741ced7430e",
+    "debugSetting": null,
+    "denySettings": {
+      "applyToChildScopes": false,
+      "excludedActions": [],
+      "excludedPrincipals": [],
+      "mode": "none"
+    },
+    "deploymentScope": null,
+    "deploymentStackLastModified": "2026-07-20T18:16:19+00:00",
+    "deploymentStackResourceId": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Resources/deploymentStacks/baseline-stack-40011",
+    "description": null,
+    "diagnostics": [
+      {
+        "additionalInfo": [],
+        "code": "ResourceDeployedMultipleTimes",
+        "level": "warning",
+        "message": "The resource '/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo' is defined multiple times in this deployment. Only the final state of the resource is shown.",
+        "target": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo"
+      },
+      {
+        "additionalInfo": [],
+        "code": "ResourceDeployedMultipleTimes",
+        "level": "warning",
+        "message": "The resource '/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar' is defined multiple times in this deployment. Only the final state of the resource is shown.",
+        "target": "/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar"
+      }
+    ],
+    "error": null,
+    "extensionConfigs": null,
+    "externalInputDefinitions": null,
+    "externalInputs": null,
+    "parameters": {},
+    "parametersLink": null,
+    "provisioningState": "succeeded",
+    "retentionInterval": "1 day, 0:00:00",
+    "template": null,
+    "templateLink": null,
+    "validationLevel": null
+  },
+  "resourceGroup": "whatif-change-40011",
+  "systemData": null,
+  "tags": {},
+  "type": "Microsoft.Resources/deploymentStacksWhatIfResults"
+}

@@ -626,6 +626,7 @@ def load_arguments(self, _):
         c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
                    help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan associated with the public IP. Can only be set if `--protection-mode` is Enabled.')
+        c.argument('ddos_custom_policy', help='Name or ID of a DDoS custom policy associated with the public IP. Note: A DDoS custom policy can only be attached to an instance-level public IP (a public IP associated with a NIC/VM) or a Load Balancer frontend IP configuration; attaching one to a standalone public IP is rejected by the service.')
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope)) as c:

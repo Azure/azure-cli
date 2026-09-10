@@ -1030,3 +1030,40 @@ helps['cognitiveservices account project connection update'] = """
     - name: Update a connection API Key.
       text: az cognitiveservices account project connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
 """
+
+helps['cognitiveservices account compute'] = """
+    type: group
+    short-summary: Manage compute resources for Azure Cognitive Services accounts.
+"""
+
+helps['cognitiveservices account compute create'] = """
+    type: command
+    short-summary: Create a compute resource for Azure Cognitive Services account.
+    examples:
+    - name: Create a compute resource.
+      text: az cognitiveservices account compute create -g MyResourceGroup -n MyAccount --compute-name my-compute --location westus2 --pool-name my-pool --instance-type Standard_DS3_v2 --node-count 1
+"""
+
+helps['cognitiveservices account compute delete'] = """
+    type: command
+    short-summary: Delete a compute resource from Azure Cognitive Services account.
+    examples:
+    - name: Delete a compute resource.
+      text: az cognitiveservices account compute delete -g MyResourceGroup -n MyAccount --compute-name my-compute
+"""
+
+helps['cognitiveservices account compute show'] = """
+    type: command
+    short-summary: Show a compute resource for Azure Cognitive Services account.
+    examples:
+    - name: Show a compute resource.
+      text: az cognitiveservices account compute show -g MyResourceGroup -n MyAccount --compute-name my-compute
+"""
+
+helps['cognitiveservices account compute list'] = """
+    type: command
+    short-summary: List all compute resources for Azure Cognitive Services account.
+    examples:
+    - name: List compute resources.
+      text: az cognitiveservices account compute list -g MyResourceGroup -n MyAccount
+"""

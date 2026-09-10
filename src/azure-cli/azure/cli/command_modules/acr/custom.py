@@ -79,7 +79,8 @@ def acr_create(cmd,
                role_assignment_mode=None,
                regional_endpoints=None,
                data_endpoint_enabled=None,
-               endpoint_protocol=None):
+               endpoint_protocol=None,
+               writable_cache_repos=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -121,6 +122,9 @@ def acr_create(cmd,
 
     if endpoint_protocol is not None:
         registry.endpoint_protocol = endpoint_protocol
+
+    if writable_cache_repos is not None:
+        registry.writable_cache_repos = writable_cache_repos
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -169,7 +173,8 @@ def acr_update_custom(cmd,
                       allow_metadata_search=None,
                       role_assignment_mode=None,
                       regional_endpoints=None,
-                      endpoint_protocol=None):
+                      endpoint_protocol=None,
+                      writable_cache_repos=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -203,6 +208,9 @@ def acr_update_custom(cmd,
 
     if endpoint_protocol is not None:
         instance.endpoint_protocol = endpoint_protocol
+
+    if writable_cache_repos is not None:
+        instance.writable_cache_repos = writable_cache_repos
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)

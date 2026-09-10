@@ -6,14 +6,36 @@
 import unittest
 from unittest import mock
 
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
+from azure.cli.command_modules.appservice._constants import ISOLATED_V4_SKUS
 from azure.cli.command_modules.appservice._validators import (
     _normalize_http_headers,
     _normalize_ip_address_list,
+    _validate_asp_sku,
     _validate_ip_address_existence,
     _validate_service_tag_existence,
 )
+from azure.cli.command_modules.appservice.utils import get_sku_tier
+
+
+class ValidateAppServicePlanSkuTest(unittest.TestCase):
+    def test_isolated_v4_skus_are_supported_for_ase_plans(self):
+        for sku in ISOLATED_V4_SKUS:
+            with self.subTest(sku=sku):
+                self.assertEqual(get_sku_tier(sku), 'IsolatedV4')
+                _validate_asp_sku(sku, app_service_environment='ase', zone_redundant=False)
+
+    def test_isolated_v4_skus_support_zone_redundancy(self):
+        for sku in ISOLATED_V4_SKUS:
+            with self.subTest(sku=sku):
+                _validate_asp_sku(sku, app_service_environment='ase', zone_redundant=True)
+
+    def test_isolated_v4_skus_require_ase(self):
+        for sku in ISOLATED_V4_SKUS:
+            with self.subTest(sku=sku):
+                with self.assertRaises(ValidationError):
+                    _validate_asp_sku(sku, app_service_environment=None, zone_redundant=False)
 
 
 class _StubRule:

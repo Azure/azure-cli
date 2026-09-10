@@ -18,6 +18,18 @@ from azure.cli.testsdk.utilities import GraphClientPasswordReplacer
 from azure.cli.command_modules.acs.tests.latest.recording_processors import MOCK_GUID, MOCK_SECRET
 
 
+ENV_VAR_FORCE_RESOURCE_GROUP_LOCATION = "AZURE_CLI_TEST_FORCE_RESOURCE_GROUP_LOCATION"
+
+
+def _normalize_optional_live_test_setting(value):
+    if value is None:
+        return None
+    value = value.strip()
+    if value in {"", "''", '""', "\\'\\'", '\\"\\"'}:
+        return None
+    return value
+
+
 class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
     """
     Override to support overriding the default location in test cases using this custom preparer with specific
@@ -46,9 +58,16 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
             key,
         )
 
-        # use environment variable to modify the default value of location
+        # A force location is used by managed live-test environments that must
+        # keep every resource group in one compliance-approved region.
+        force_location = _normalize_optional_live_test_setting(
+            os.environ.get(ENV_VAR_FORCE_RESOURCE_GROUP_LOCATION)
+        )
         self.dev_setting_location = os.environ.get(dev_setting_location, None)
-        if not preserve_default_location and self.dev_setting_location:
+        if force_location:
+            self.location = force_location
+            self.dev_setting_location = force_location
+        elif not preserve_default_location and self.dev_setting_location:
             self.location = self.dev_setting_location
         else:
             self.dev_setting_location = location
@@ -176,14 +195,18 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
             dev_setting_sp_password,
             key,
         )
+        self.dev_setting_sp_name = _normalize_optional_live_test_setting(self.dev_setting_sp_name)
+        self.dev_setting_sp_password = _normalize_optional_live_test_setting(self.dev_setting_sp_password)
 
     def __call__(self, fn):
-        if not self.dev_setting_sp_password:
-            return unittest.skip("skip test case that requires service principal as password is not provided")(fn)
+        if not self.dev_setting_sp_name or not self.dev_setting_sp_password:
+            return unittest.skip(
+                "skip test case that requires service principal credentials as they are not provided"
+            )(fn)
         return super().__call__(fn)
 
     def create_resource(self, name, **kwargs):
-        if not self.dev_setting_sp_password:
+        if not self.dev_setting_sp_name or not self.dev_setting_sp_password:
             return
         else:
             # call AbstractPreparer.moniker to make resource counts and self.resource_moniker consistent between live

@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2026-04-01"],
         ]
     }
 
@@ -122,7 +122,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -500,9 +500,15 @@ class Show(AAZCommand):
             sku_profile.allocation_strategy = AAZStrType(
                 serialized_name="allocationStrategy",
             )
+            sku_profile.automatic_sku_migration_policy = AAZObjectType(
+                serialized_name="automaticSkuMigrationPolicy",
+            )
             sku_profile.vm_sizes = AAZListType(
                 serialized_name="vmSizes",
             )
+
+            automatic_sku_migration_policy = cls._schema_on_200.properties.sku_profile.automatic_sku_migration_policy
+            automatic_sku_migration_policy.enabled = AAZBoolType()
 
             vm_sizes = cls._schema_on_200.properties.sku_profile.vm_sizes
             vm_sizes.Element = AAZObjectType()
@@ -588,6 +594,9 @@ class Show(AAZCommand):
             virtual_machine_profile.hardware_profile = AAZObjectType(
                 serialized_name="hardwareProfile",
             )
+            virtual_machine_profile.interconnect_block_profile = AAZObjectType(
+                serialized_name="interconnectBlockProfile",
+            )
             virtual_machine_profile.license_type = AAZStrType(
                 serialized_name="licenseType",
             )
@@ -656,6 +665,9 @@ class Show(AAZCommand):
                 serialized_name="capacityReservationGroup",
             )
             _ShowHelper._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
+            capacity_reservation.disable_capacity_reservation_assignment = AAZBoolType(
+                serialized_name="disableCapacityReservationAssignment",
+            )
 
             diagnostics_profile = cls._schema_on_200.properties.virtual_machine_profile.diagnostics_profile
             diagnostics_profile.boot_diagnostics = AAZObjectType(
@@ -737,6 +749,9 @@ class Show(AAZCommand):
             provision_after_extensions.Element = AAZStrType()
 
             hardware_profile = cls._schema_on_200.properties.virtual_machine_profile.hardware_profile
+            hardware_profile.processor_mode = AAZStrType(
+                serialized_name="processorMode",
+            )
             hardware_profile.vm_size_properties = AAZObjectType(
                 serialized_name="vmSizeProperties",
             )
@@ -749,17 +764,37 @@ class Show(AAZCommand):
                 serialized_name="vCPUsPerCore",
             )
 
+            interconnect_block_profile = cls._schema_on_200.properties.virtual_machine_profile.interconnect_block_profile
+            interconnect_block_profile.interconnect_block = AAZObjectType(
+                serialized_name="interconnectBlock",
+            )
+            _ShowHelper._build_schema_api_entity_reference_read(interconnect_block_profile.interconnect_block)
+
             network_profile = cls._schema_on_200.properties.virtual_machine_profile.network_profile
             network_profile.health_probe = AAZObjectType(
                 serialized_name="healthProbe",
             )
             _ShowHelper._build_schema_api_entity_reference_read(network_profile.health_probe)
+            network_profile.interconnect_group_profile = AAZObjectType(
+                serialized_name="interconnectGroupProfile",
+            )
             network_profile.network_api_version = AAZStrType(
                 serialized_name="networkApiVersion",
             )
             network_profile.network_interface_configurations = AAZListType(
                 serialized_name="networkInterfaceConfigurations",
             )
+
+            interconnect_group_profile = cls._schema_on_200.properties.virtual_machine_profile.network_profile.interconnect_group_profile
+            interconnect_group_profile.interconnect_group = AAZObjectType(
+                serialized_name="interconnectGroup",
+            )
+            _ShowHelper._build_schema_sub_resource_read(interconnect_group_profile.interconnect_group)
+            interconnect_group_profile.subgroups = AAZListType()
+
+            subgroups = cls._schema_on_200.properties.virtual_machine_profile.network_profile.interconnect_group_profile.subgroups
+            subgroups.Element = AAZObjectType()
+            _ShowHelper._build_schema_sub_resource_read(subgroups.Element)
 
             network_interface_configurations = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations
             network_interface_configurations.Element = AAZObjectType()
@@ -910,6 +945,9 @@ class Show(AAZCommand):
             ip_tags.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags.Element
+            _element.first_party_service_tag_id = AAZStrType(
+                serialized_name="firstPartyServiceTagId",
+            )
             _element.ip_tag_type = AAZStrType(
                 serialized_name="ipTagType",
             )
@@ -1184,6 +1222,9 @@ class Show(AAZCommand):
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
+            storage_profile.disk_api_version = AAZStrType(
+                serialized_name="diskApiVersion",
+            )
             storage_profile.disk_controller_type = AAZStrType(
                 serialized_name="diskControllerType",
             )
@@ -1368,6 +1409,7 @@ class _ShowHelper:
         if cls._schema_host_endpoint_settings_read is not None:
             _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
             _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            _schema.use_local_file_rules = cls._schema_host_endpoint_settings_read.use_local_file_rules
             return
 
         cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
@@ -1377,9 +1419,13 @@ class _ShowHelper:
             serialized_name="inVMAccessControlProfileReferenceId",
         )
         host_endpoint_settings_read.mode = AAZStrType()
+        host_endpoint_settings_read.use_local_file_rules = AAZBoolType(
+            serialized_name="useLocalFileRules",
+        )
 
         _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
         _schema.mode = cls._schema_host_endpoint_settings_read.mode
+        _schema.use_local_file_rules = cls._schema_host_endpoint_settings_read.use_local_file_rules
 
     _schema_sub_resource_read = None
 
@@ -1401,6 +1447,7 @@ class _ShowHelper:
     @classmethod
     def _build_schema_virtual_machine_scale_set_managed_disk_parameters_read(cls, _schema):
         if cls._schema_virtual_machine_scale_set_managed_disk_parameters_read is not None:
+            _schema.additional_disk_properties = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties
             _schema.disk_encryption_set = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
             _schema.security_profile = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
             _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
@@ -1409,6 +1456,9 @@ class _ShowHelper:
         cls._schema_virtual_machine_scale_set_managed_disk_parameters_read = _schema_virtual_machine_scale_set_managed_disk_parameters_read = AAZObjectType()
 
         virtual_machine_scale_set_managed_disk_parameters_read = _schema_virtual_machine_scale_set_managed_disk_parameters_read
+        virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties = AAZObjectType(
+            serialized_name="additionalDiskProperties",
+        )
         virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set = AAZObjectType(
             serialized_name="diskEncryptionSet",
         )
@@ -1420,6 +1470,49 @@ class _ShowHelper:
             serialized_name="storageAccountType",
         )
 
+        additional_disk_properties = _schema_virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties
+        additional_disk_properties.managed_disk_properties = AAZObjectType(
+            serialized_name="managedDiskProperties",
+        )
+
+        managed_disk_properties = _schema_virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties.managed_disk_properties
+        managed_disk_properties.availability_policy = AAZObjectType(
+            serialized_name="availabilityPolicy",
+        )
+        managed_disk_properties.bursting_enabled = AAZBoolType(
+            serialized_name="burstingEnabled",
+        )
+        managed_disk_properties.disk_access_id = AAZStrType(
+            serialized_name="diskAccessId",
+        )
+        managed_disk_properties.disk_iops_read_only = AAZIntType(
+            serialized_name="diskIOPSReadOnly",
+        )
+        managed_disk_properties.disk_m_bps_read_only = AAZIntType(
+            serialized_name="diskMBpsReadOnly",
+        )
+        managed_disk_properties.logical_sector_size = AAZIntType(
+            serialized_name="logicalSectorSize",
+        )
+        managed_disk_properties.max_shares = AAZIntType(
+            serialized_name="maxShares",
+        )
+        managed_disk_properties.network_access_policy = AAZStrType(
+            serialized_name="networkAccessPolicy",
+        )
+        managed_disk_properties.optimized_for_frequent_attach = AAZBoolType(
+            serialized_name="optimizedForFrequentAttach",
+        )
+        managed_disk_properties.performance_plus = AAZBoolType(
+            serialized_name="performancePlus",
+        )
+        managed_disk_properties.tier = AAZStrType()
+
+        availability_policy = _schema_virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties.managed_disk_properties.availability_policy
+        availability_policy.action_on_disk_delay = AAZStrType(
+            serialized_name="actionOnDiskDelay",
+        )
+
         security_profile = _schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
         security_profile.disk_encryption_set = AAZObjectType(
             serialized_name="diskEncryptionSet",
@@ -1429,6 +1522,7 @@ class _ShowHelper:
             serialized_name="securityEncryptionType",
         )
 
+        _schema.additional_disk_properties = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.additional_disk_properties
         _schema.disk_encryption_set = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
         _schema.security_profile = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
         _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type

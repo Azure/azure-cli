@@ -187,6 +187,11 @@ def flexible_replica_promote(cmd, client, resource_group_name, name, promote_mod
             )
         )
 
+    # The service requires sourceServerResourceId in the PATCH body when promoting a replica.
+    # Populate it from the replica server's existing source server resource ID.
+    if server_object.source_server_resource_id:
+        params['properties']['sourceServerResourceId'] = server_object.source_server_resource_id
+
     return client.begin_update(resource_group_name, name, params)
 
 

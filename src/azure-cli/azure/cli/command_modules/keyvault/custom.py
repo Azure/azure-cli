@@ -321,9 +321,10 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
     # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
+    # Hybrid models in azure-mgmt-keyvault>=14 are dict-native, so property keys must use wire names (camelCase)
     parameters = ManagedHsm(location=location,
                             sku=ManagedHsmSku(name='Standard_B1', family='B'),
-                            properties={'tenant_id': tenant_id, 'create_mode': 'Recover'})
+                            properties={'tenantId': tenant_id, 'createMode': 'Recover'})
 
     return sdk_no_wait(
         no_wait, client.begin_create_or_update,

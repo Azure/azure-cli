@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2023-04-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.monitor/accounts/{}", "2025-10-03"],
         ]
     }
 
@@ -119,7 +119,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-03",
+                    "api-version", "2025-10-03",
                     required=True,
                 ),
             }
@@ -152,21 +152,17 @@ class Wait(AAZWaitCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType(
-                flags={"read_only": True},
-            )
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200.properties = AAZObjectType()
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
@@ -174,6 +170,37 @@ class Wait(AAZWaitCommand):
             _WaitHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType(
+                nullable=True,
+            )
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
                 flags={"read_only": True},
             )
 
@@ -186,9 +213,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="defaultIngestionSettings",
                 flags={"read_only": True},
             )
-            properties.metrics = AAZObjectType(
-                flags={"read_only": True},
-            )
+            properties.metrics = AAZObjectType()
             properties.private_endpoint_connections = AAZListType(
                 serialized_name="privateEndpointConnections",
                 flags={"read_only": True},
@@ -199,7 +224,6 @@ class Wait(AAZWaitCommand):
             )
             properties.public_network_access = AAZStrType(
                 serialized_name="publicNetworkAccess",
-                flags={"read_only": True},
             )
 
             default_ingestion_settings = cls._schema_on_200.properties.default_ingestion_settings
@@ -207,12 +231,28 @@ class Wait(AAZWaitCommand):
                 serialized_name="dataCollectionEndpointResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.data_collection_rule_immutable_id = AAZStrType(
+                serialized_name="dataCollectionRuleImmutableId",
+                flags={"read_only": True},
+            )
             default_ingestion_settings.data_collection_rule_resource_id = AAZStrType(
                 serialized_name="dataCollectionRuleResourceId",
                 flags={"read_only": True},
             )
+            default_ingestion_settings.ingestion_endpoints = AAZObjectType(
+                serialized_name="ingestionEndpoints",
+                flags={"read_only": True},
+            )
+
+            ingestion_endpoints = cls._schema_on_200.properties.default_ingestion_settings.ingestion_endpoints
+            ingestion_endpoints.metrics = AAZStrType(
+                flags={"read_only": True},
+            )
 
             metrics = cls._schema_on_200.properties.metrics
+            metrics.enable_access_using_resource_permissions = AAZBoolType(
+                serialized_name="enableAccessUsingResourcePermissions",
+            )
             metrics.internal_id = AAZStrType(
                 serialized_name="internalId",
                 flags={"read_only": True},

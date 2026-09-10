@@ -20,11 +20,15 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
+    _create_or_update_dcr_with_table_readiness_retry,
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_agentpool_auto_scale_add,
+    aks_agentpool_auto_scale_delete,
+    aks_agentpool_auto_scale_update,
     aks_agentpool_get_rollback_versions,
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
@@ -57,7 +61,9 @@ from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
 from azure.cli.core.azclierror import (
+    ClientRequestError,
     InvalidArgumentValueError,
+    RequiredArgumentMissingError,
 )
 
 
@@ -1017,6 +1023,169 @@ class TestAKSCommand(unittest.TestCase):
         self.assertIsNone(machines_pool.orchestrator_version)
         self.assertEqual(vmss_pool.orchestrator_version, "1.25.0")
 
+    @staticmethod
+    def _build_vms_agentpool(
+        pool_type="VirtualMachines",
+        manual_profiles=None,
+        autoscale_profiles=None,
+    ):
+        if manual_profiles is None:
+            manual_profiles = []
+        instance = mock.Mock()
+        instance.properties = mock.Mock()
+        instance.properties.type_properties_type = pool_type
+        instance.type_properties_type = pool_type
+        instance.virtual_machines_profile = mock.Mock()
+        instance.virtual_machines_profile.scale = mock.Mock()
+        instance.virtual_machines_profile.scale.manual = manual_profiles
+        instance.virtual_machines_profile.scale.autoscale = autoscale_profiles
+        return instance
+
+    def test_aks_agentpool_auto_scale_add_success(self):
+        class AutoScaleProfile:
+            def __init__(self, size, min_count, max_count):
+                self.size = size
+                self.min_count = min_count
+                self.max_count = max_count
+
+        instance = self._build_vms_agentpool(autoscale_profiles=None)
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+        self.cmd.get_models = mock.Mock(return_value=AutoScaleProfile)
+
+        result = aks_agentpool_auto_scale_add(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D4s_v3",
+            2,
+            5,
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(len(instance.virtual_machines_profile.scale.autoscale), 1)
+        profile = instance.virtual_machines_profile.scale.autoscale[0]
+        self.assertEqual(profile.size, "Standard_D4s_v3")
+        self.assertEqual(profile.min_count, 2)
+        self.assertEqual(profile.max_count, 5)
+
+    def test_aks_agentpool_auto_scale_add_non_vms_pool(self):
+        instance = self._build_vms_agentpool(pool_type="VirtualMachineScaleSets", autoscale_profiles=[])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaises(ClientRequestError):
+            aks_agentpool_auto_scale_add(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+                1,
+                3,
+            )
+
+    def test_aks_agentpool_auto_scale_update_missing_required(self):
+        with self.assertRaises(RequiredArgumentMissingError):
+            aks_agentpool_auto_scale_update(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D2s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_update_profile_not_found(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "doesn't exist"):
+            aks_agentpool_auto_scale_update(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+                min_count=2,
+            )
+
+    def test_aks_agentpool_auto_scale_update_success(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+
+        result = aks_agentpool_auto_scale_update(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D2s_v3",
+            node_vm_size="Standard_D8s_v3",
+            min_count=2,
+            max_count=6,
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(profile.size, "Standard_D8s_v3")
+        self.assertEqual(profile.min_count, 2)
+        self.assertEqual(profile.max_count, 6)
+
+    def test_aks_agentpool_auto_scale_delete_non_vms_pool(self):
+        instance = self._build_vms_agentpool(pool_type="VirtualMachineScaleSets", autoscale_profiles=[])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaises(ClientRequestError):
+            aks_agentpool_auto_scale_delete(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D2s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_delete_profile_not_found(self):
+        profile = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile])
+        self.client.get = mock.Mock(return_value=instance)
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "doesn't exist"):
+            aks_agentpool_auto_scale_delete(
+                self.cmd,
+                self.client,
+                "rg",
+                "mc",
+                "np",
+                "Standard_D4s_v3",
+            )
+
+    def test_aks_agentpool_auto_scale_delete_success(self):
+        profile_1 = mock.Mock(size="Standard_D2s_v3", min_count=1, max_count=3)
+        profile_2 = mock.Mock(size="Standard_D4s_v3", min_count=2, max_count=5)
+        instance = self._build_vms_agentpool(autoscale_profiles=[profile_1, profile_2])
+        self.client.get = mock.Mock(return_value=instance)
+        self.client.begin_create_or_update = mock.Mock(return_value="ok")
+
+        result = aks_agentpool_auto_scale_delete(
+            self.cmd,
+            self.client,
+            "rg",
+            "mc",
+            "np",
+            "Standard_D4s_v3",
+        )
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(len(instance.virtual_machines_profile.scale.autoscale), 1)
+        self.assertEqual(instance.virtual_machines_profile.scale.autoscale[0].size, "Standard_D2s_v3")
+
 
 class TestRunCommand(unittest.TestCase):
     def test_get_command_context_invalid_file(self):
@@ -1619,6 +1788,140 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
             aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
 
         mock_sdk_no_wait.assert_not_called()
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_warns_node_image_only_for_node_os_channel(
+        self, mock_sdk_no_wait, mock_cf_managed_clusters
+    ):
+        rollback_version = mock.Mock(
+            orchestrator_version="1.34.8",
+            node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
+            timestamp=datetime.datetime(2026, 8, 5),
+        )
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])
+        client.get.return_value = mock.Mock()
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(
+            auto_upgrade_profile=mock.Mock(
+                upgrade_channel=mock.Mock(value="none"),
+                node_os_upgrade_channel=mock.Mock(value="NodeImage"),
+            )
+        )
+
+        with mock.patch("azure.cli.command_modules.acs.custom.logger.warning") as mock_warning:
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_warning.assert_called_once()
+        warning = mock_warning.call_args.args[0]
+        self.assertIn("The orchestrator version rollback will proceed", warning)
+        self.assertIn("the node image rollback will not succeed", warning)
+        self.assertNotIn("Rollback will not succeed until auto-upgrade is disabled", warning)
+        mock_sdk_no_wait.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.acs._client_factory.cf_managed_clusters")
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_rollback_prioritizes_upgrade_channel_warning(
+        self, mock_sdk_no_wait, mock_cf_managed_clusters
+    ):
+        rollback_version = mock.Mock(
+            orchestrator_version="1.34.8",
+            node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
+            timestamp=datetime.datetime(2026, 8, 5),
+        )
+        client = mock.Mock()
+        client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])
+        client.get.return_value = mock.Mock()
+        mock_cf_managed_clusters.return_value.get.return_value = mock.Mock(
+            auto_upgrade_profile=mock.Mock(
+                upgrade_channel=mock.Mock(value="stable"),
+                node_os_upgrade_channel=mock.Mock(value="NodeImage"),
+            )
+        )
+
+        with mock.patch("azure.cli.command_modules.acs.custom.logger.warning") as mock_warning:
+            aks_agentpool_rollback(self.cmd, client, "rg", "cluster", "nodepool1")
+
+        mock_warning.assert_called_once()
+        warning = mock_warning.call_args.args[0]
+        self.assertIn("Rollback will not succeed until auto-upgrade is disabled", warning)
+        self.assertNotIn("nodeOSUpgradeChannel", warning)
+        self.assertNotIn("The orchestrator version rollback will proceed", warning)
+        mock_sdk_no_wait.assert_called_once()
+
+
+class DcrTableReadinessRetryTest(unittest.TestCase):
+    def setUp(self):
+        patcher = mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.time.sleep",
+            return_value=None,
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_sleep = patcher.start()
+        self.resources = mock.Mock()
+
+    def test_succeeds_without_retry(self):
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, self.resources.begin_create_or_update_by_id.return_value)
+        self.resources.begin_create_or_update_by_id.assert_called_once_with(
+            "dcr-id", "2022-06-01", {"properties": {}}
+        )
+        self.mock_sleep.assert_not_called()
+
+    def test_retries_invalid_output_table_with_delay(self):
+        expected = mock.Mock()
+        self.resources.begin_create_or_update_by_id.side_effect = [
+            CLIError("invalidoutputtable: output table is not ready"),
+            CLIError("INVALIDOUTPUTTABLE: output table is not ready"),
+            expected,
+        ]
+
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, expected)
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.assertEqual(self.mock_sleep.call_count, 2)
+
+    def test_raises_after_readiness_retry_limit(self):
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "InvalidOutputTable: output table is not ready"
+        )
+
+        with self.assertRaisesRegex(CLIError, "InvalidOutputTable"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(
+            self.resources.begin_create_or_update_by_id.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES + 1,
+        )
+        self.assertEqual(
+            self.mock_sleep.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+    def test_other_errors_keep_three_attempt_limit(self):
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "unrelated failure"
+        )
+
+        with self.assertRaisesRegex(CLIError, "unrelated failure"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.mock_sleep.assert_not_called()
 
 
 if __name__ == "__main__":

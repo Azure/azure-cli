@@ -17,14 +17,14 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Delete an AuthorizationRule for a Namespace.
 
-    :example: Deletes the Authorizationrule of the namespace
-        az eventhubs namespace authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
+    :example: NameSpaceAuthorizationRuleDelete
+        az eventhubs namespace authorization-rule delete --resource-group ArunMonocle --namespace-name sdk-Namespace-8980 --authorization-rule-name sdk-Authrules-8929
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/authorizationrules/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/authorizationrules/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -59,6 +59,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -135,7 +136,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

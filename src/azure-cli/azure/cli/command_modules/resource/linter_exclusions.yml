@@ -27,3 +27,21 @@ stack sub validate:
 stack mg:
   rule_exclusions:
   - require_wait_command_if_no_wait
+
+stack-whatif group:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
+
+stack-whatif sub:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
+
+stack-whatif sub create:
+  parameters:
+     deployment_resource_group:
+       rule_exclusions:
+       - parameter_should_not_end_in_resource_group
+
+stack-whatif mg:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
