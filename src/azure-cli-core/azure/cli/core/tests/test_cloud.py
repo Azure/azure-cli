@@ -21,6 +21,8 @@ from azure.cli.core.cloud import (Cloud,
                                   update_cloud,
                                   cloud_is_registered,
                                   AZURE_PUBLIC_CLOUD,
+                                  AZURE_CHINA_CLOUD,
+                                  AZURE_US_GOV_CLOUD,
                                   KNOWN_CLOUDS,
                                   update_cloud,
                                   CloudEndpointNotSetException,
@@ -244,6 +246,26 @@ class TestCloud(unittest.TestCase):
             for k, v1 in cloud.suffixes.__dict__.items():
                 v2 = metadata_url_cloud.suffixes.__dict__[k]
                 self.assertEqual(v1, v2)
+
+    def test_log_analytics_resource_id_sovereign_clouds(self):
+        """Regression test: log_analytics_resource_id must be set for all supported sovereign clouds
+        so that 'az vm monitor log show' and related Log Analytics data-plane commands work."""
+        clouds_with_log_analytics = [
+            (AZURE_PUBLIC_CLOUD, 'https://api.loganalytics.io'),
+            (AZURE_CHINA_CLOUD, 'https://api.loganalytics.azure.cn'),
+            (AZURE_US_GOV_CLOUD, 'https://api.loganalytics.us'),
+        ]
+        for cloud, expected_endpoint in clouds_with_log_analytics:
+            with self.subTest(cloud=cloud.name):
+                self.assertTrue(
+                    cloud.endpoints.has_endpoint_set('log_analytics_resource_id'),
+                    msg="log_analytics_resource_id not set for {}".format(cloud.name)
+                )
+                self.assertEqual(
+                    cloud.endpoints.log_analytics_resource_id,
+                    expected_endpoint,
+                    msg="Unexpected log_analytics_resource_id value for {}".format(cloud.name)
+                )
 
 
 if __name__ == '__main__':

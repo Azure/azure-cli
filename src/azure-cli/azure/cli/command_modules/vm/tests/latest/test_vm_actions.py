@@ -649,5 +649,75 @@ class TestActions(unittest.TestCase):
             process_gallery_image_version_namespace(cmd, np)
 
 
+class TestLogAnalyticsDataPlaneClient(unittest.TestCase):
+    """Tests for cf_log_analytics_data_plane endpoint resolution across sovereign clouds."""
+
+    def _make_mock_cli_ctx(self, has_endpoint=True, endpoint_value='https://api.loganalytics.io',
+                           cloud_name='AzureCloud'):
+        cli_ctx = mock.MagicMock()
+        cli_ctx.cloud.name = cloud_name
+        if has_endpoint:
+            cli_ctx.cloud.endpoints.has_endpoint_set.return_value = True
+            cli_ctx.cloud.endpoints.log_analytics_resource_id = endpoint_value
+        else:
+            cli_ctx.cloud.endpoints.has_endpoint_set.return_value = False
+        return cli_ctx
+
+    @mock.patch('azure.monitor.query.LogsQueryClient')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_cf_log_analytics_data_plane_public_cloud(self, mock_profile_cls, mock_client_cls):
+        from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_plane
+        mock_profile_cls.return_value.get_login_credentials.return_value = ('cred', None, None)
+        cli_ctx = self._make_mock_cli_ctx(has_endpoint=True, endpoint_value='https://api.loganalytics.io')
+        cf_log_analytics_data_plane(cli_ctx, None)
+        mock_client_cls.assert_called_once_with(
+            'cred',
+            endpoint='https://api.loganalytics.io/v1',
+            audience='https://api.loganalytics.io'
+        )
+
+    @mock.patch('azure.monitor.query.LogsQueryClient')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_cf_log_analytics_data_plane_china_cloud(self, mock_profile_cls, mock_client_cls):
+        from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_plane
+        mock_profile_cls.return_value.get_login_credentials.return_value = ('cred', None, None)
+        cli_ctx = self._make_mock_cli_ctx(
+            has_endpoint=True,
+            endpoint_value='https://api.loganalytics.azure.cn',
+            cloud_name='AzureChinaCloud'
+        )
+        cf_log_analytics_data_plane(cli_ctx, None)
+        mock_client_cls.assert_called_once_with(
+            'cred',
+            endpoint='https://api.loganalytics.azure.cn/v1',
+            audience='https://api.loganalytics.azure.cn'
+        )
+
+    @mock.patch('azure.monitor.query.LogsQueryClient')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_cf_log_analytics_data_plane_usgov_cloud(self, mock_profile_cls, mock_client_cls):
+        from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_plane
+        mock_profile_cls.return_value.get_login_credentials.return_value = ('cred', None, None)
+        cli_ctx = self._make_mock_cli_ctx(
+            has_endpoint=True,
+            endpoint_value='https://api.loganalytics.us',
+            cloud_name='AzureUSGovernment'
+        )
+        cf_log_analytics_data_plane(cli_ctx, None)
+        mock_client_cls.assert_called_once_with(
+            'cred',
+            endpoint='https://api.loganalytics.us/v1',
+            audience='https://api.loganalytics.us'
+        )
+
+    def test_cf_log_analytics_data_plane_missing_endpoint_raises_clear_error(self):
+        from azure.cli.command_modules.vm._client_factory import cf_log_analytics_data_plane
+        cli_ctx = self._make_mock_cli_ctx(has_endpoint=False, cloud_name='AzureCustomCloud')
+        with self.assertRaises(CLIError) as cm:
+            cf_log_analytics_data_plane(cli_ctx, None)
+        self.assertIn('AzureCustomCloud', str(cm.exception))
+        self.assertIn('az cloud update', str(cm.exception))
+
+
 if __name__ == '__main__':
     unittest.main()
