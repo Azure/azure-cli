@@ -1049,6 +1049,12 @@ jobs:
           distro: bookworm
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
+        Trixie ${{ arch.name }}:
+          # 13
+          deb_system: debian
+          distro: trixie
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -1109,6 +1115,11 @@ jobs:
         Bookworm ${{ arch.name }}:
           deb_system: debian
           distro: bookworm
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Trixie ${{ arch.name }}:
+          deb_system: debian
+          distro: trixie
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
   pool:
