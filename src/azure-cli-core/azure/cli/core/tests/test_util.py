@@ -17,7 +17,8 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin,
+     _is_wsl_interop_enabled, _open_url_in_wsl_browser, wsl_browser_open)
 from azure.cli.core.mock import DummyCli
 
 
@@ -179,8 +180,9 @@ class TestUtils(unittest.TestCase):
 
     @mock.patch('shutil.which', autospec=True)
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
     @mock.patch('webbrowser.get', autospec=True)
-    def test_can_launch_browser(self, webbrowser_get_mock, get_platform_mock, which_mock):
+    def test_can_launch_browser(self, webbrowser_get_mock, wsl_interop_mock, get_platform_mock, which_mock):
         import webbrowser
 
         # Windows is always fine
@@ -207,6 +209,7 @@ class TestUtils(unittest.TestCase):
         get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
         browser_mock = mock.MagicMock()
         browser_mock.name = 'www-browser'
+        webbrowser_get_mock.side_effect = None
         webbrowser_get_mock.return_value = browser_mock
         assert can_launch_browser()
 
@@ -222,6 +225,51 @@ class TestUtils(unittest.TestCase):
         webbrowser_get_mock.side_effect = webbrowser.Error
         which_mock.return_value = False
         assert not can_launch_browser()
+        self.assertTrue(wsl_interop_mock.called)
+
+    @mock.patch('azure.cli.core.util._get_platform_info', autospec=True,
+                return_value=('linux', '5.10.16.3-microsoft-standard-WSL2'))
+    @mock.patch('os.listdir', autospec=True, return_value=['status', 'WSLInterop-late'])
+    def test_is_wsl_interop_enabled_with_late_entry(self, listdir_mock, _):
+        m = mock.mock_open(read_data='enabled\ninterpreter /init\n')
+        with mock.patch('builtins.open', m):
+            assert _is_wsl_interop_enabled()
+
+        listdir_mock.assert_called_once_with('/proc/sys/fs/binfmt_misc')
+        m.assert_called_once_with('/proc/sys/fs/binfmt_misc/WSLInterop-late', 'r')
+
+    @mock.patch('azure.cli.core.util._open_url_in_wsl_browser', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
+    @mock.patch('azure.cli.core.util._get_platform_info', autospec=True,
+                return_value=('linux', '5.10.16.3-microsoft-standard-WSL2'))
+    def test_wsl_browser_open_uses_wsl_browser(self, _, wsl_interop_mock, open_url_mock):
+        import webbrowser
+
+        original_open = webbrowser.open
+        with wsl_browser_open():
+            assert webbrowser.open('https://login.example.com')
+
+        open_url_mock.assert_called_once_with('https://login.example.com')
+        wsl_interop_mock.assert_called()
+        self.assertEqual(webbrowser.open, original_open)
+
+    @mock.patch('subprocess.call', autospec=True)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
+    def test_open_url_in_wsl_browser_rejects_non_http_url(self, _, subprocess_call_mock):
+        assert not _open_url_in_wsl_browser('/C:/Windows/System32/calc.exe')
+        assert not _open_url_in_wsl_browser('https:')
+        subprocess_call_mock.assert_not_called()
+
+    @mock.patch('subprocess.call', autospec=True, return_value=0)
+    @mock.patch('azure.cli.core.util._is_wsl_interop_enabled', autospec=True, return_value=True)
+    def test_open_url_in_wsl_browser_passes_url_by_env(self, _, subprocess_call_mock):
+        url = 'https://login.example.com/path?x=1&y=2'
+
+        assert _open_url_in_wsl_browser(url)
+
+        cmd = subprocess_call_mock.call_args.args[0]
+        self.assertNotIn(url, cmd)
+        self.assertEqual(subprocess_call_mock.call_args.kwargs['env']['AZURE_CLI_WSL_BROWSER_URL'], url)
 
     def test_configured_default_setter(self):
         config = mock.MagicMock()
