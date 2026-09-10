@@ -7,6 +7,7 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta
+from urllib.parse import quote
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
 from azure.cli.core._profile import Profile
 from azure.cli.core.style import print_styled_text
@@ -30,8 +31,14 @@ NEW_LINE = '\x1b[1L'
 ERASE_IN_LINE = '\x1b[0K'
 
 
-_SURVEY_URL = "https://go.microsoft.com/fwlink/?linkid=2201856&ID={installation_id}&v={version}&d={day}"
+_SURVEY_BASE_URL = "https://customervoice.microsoft.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR9387UQwLnRLnWswOo2Ri-1UNFRJVEJNMjc1Q0M5WTdXMVVESlI4S1hBMSQlQCN0PWcu"
 _SURVEY_LEARN_MORE_URL = "https://go.microsoft.com/fwlink/?linkid=2203309"
+
+
+def build_survey_url(installation_id, version, day):
+    """Build survey URL with hidden context metadata via Customer Voice ctx parameter."""
+    ctx = json.dumps({"installationId": installation_id, "version": version, "day": str(day)})
+    return f"{_SURVEY_BASE_URL}&ctx={quote(ctx)}"
 
 
 def should_prompt(cli):
