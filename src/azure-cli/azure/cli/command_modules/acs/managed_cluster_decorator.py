@@ -452,7 +452,12 @@ class AKSManagedClusterContext(BaseAKSContext):
             valid_keys = list(
                 k.replace("_", "-") for k in attribute_list(self.models.ManagedClusterPropertiesAutoScalerProfile())
             )
-            for key in cluster_autoscaler_profile.keys():
+            boolean_keys = {
+                "daemonset-eviction-for-empty-nodes",
+                "daemonset-eviction-for-occupied-nodes",
+                "ignore-daemonsets-utilization",
+            }
+            for key, value in cluster_autoscaler_profile.items():
                 if not key:
                     raise InvalidArgumentValueError("Empty key specified for cluster-autoscaler-profile")
                 if key not in valid_keys:
@@ -461,6 +466,13 @@ class AKSManagedClusterContext(BaseAKSContext):
                             key, ", ".join(valid_keys)
                         )
                     )
+                if key in boolean_keys and not isinstance(value, bool):
+                    if not isinstance(value, str) or value.lower() not in ("true", "false"):
+                        raise InvalidArgumentValueError(
+                            "Value '{}' for cluster-autoscaler-profile key '{}' must be either 'true' or 'false'."
+                            .format(value, key)
+                        )
+                    cluster_autoscaler_profile[key] = value.lower() == "true"
         return cluster_autoscaler_profile
 
     # pylint: disable=no-self-use
@@ -4819,7 +4831,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return node_os_upgrade_channel
 
-    def _get_cluster_autoscaler_profile(self, read_only: bool = False) -> Union[Dict[str, str], None]:
+    def _get_cluster_autoscaler_profile(
+        self,
+        read_only: bool = False
+    ) -> Union[Dict[str, Union[str, bool]], None]:
         """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
         This function will call function "__validate_cluster_autoscaler_profile" to parse and verify the parameter
@@ -4849,7 +4864,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # dynamic completion for update mode only
         if not read_only and self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
-                # shallow copy should be enough for string-to-string dictionary
+                # shallow copy is enough for a dictionary of scalar values
                 copy_of_raw_dict = dict(self.mc.auto_scaler_profile)
                 new_options_dict = dict(cluster_autoscaler_profile.items())
                 copy_of_raw_dict.update(new_options_dict)
@@ -4858,7 +4873,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
-    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
+    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, Union[str, bool]], None]:
         """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
         This function will call function "__validate_cluster_autoscaler_profile" to parse and verify the parameter
