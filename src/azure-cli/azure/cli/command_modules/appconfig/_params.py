@@ -21,7 +21,7 @@ from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_n
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
-                          validate_feature_query_fields, validate_filter_parameters,
+                          validate_feature_query_fields, validate_enhanced_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode, validate_snapshot_reference,
@@ -46,6 +46,12 @@ def load_arguments(self, _):
         help='Customize output fields for Feature Flags.',
         validator=validate_feature_query_fields,
         arg_type=get_enum_type(['name', 'key', 'label', 'locked', 'last_modified', 'state', 'description', 'conditions'])
+    )
+    enhanced_feature_fields_arg_type = CLIArgumentType(
+        nargs='+',
+        help='Customize output fields for Enhanced Feature Flags.',
+        validator=validate_enhanced_feature_query_fields,
+        arg_type=get_enum_type(['name', 'enabled', 'label', 'description', 'conditions', 'variants', 'allocation', 'tags', 'last_modified'])
     )
     snapshot_fields_arg_type = CLIArgumentType(
         nargs='+',
@@ -463,6 +469,28 @@ def load_arguments(self, _):
         c.argument('feature', help='Name of the feature whose filters you want to be displayed. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, display filters from the feature flag with null label by default.")
         c.argument('all_', help="List all filters associated with a feature flag.")
+
+    with self.argument_context('appconfig enhanced-feature-flag') as c:
+        c.argument('name', arg_type=data_plane_name_arg_type)
+        c.argument('feature', validator=validate_feature, help="Name of the enhanced feature flag. Enhanced feature flag name cannot contain the '%' or ':' characters.")
+        c.argument('label', help="If no label specified, uses the null label.")
+
+    with self.argument_context('appconfig enhanced-feature-flag set') as c:
+        c.argument('description', help='Description of the enhanced feature flag to be set.')
+        c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
+                   help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of an enhanced feature flag.')
+        c.argument('telemetry_enabled', arg_type=get_three_state_flag(), help='Enable or disable telemetry for the enhanced feature flag.')
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('appconfig enhanced-feature-flag show') as c:
+        c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
+
+    with self.argument_context('appconfig enhanced-feature-flag list') as c:
+        c.argument('feature', validator=validate_feature, help='Name of the enhanced feature flag to be listed. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix.')
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")
+        c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
+        c.argument('all_', help="List all enhanced feature flags.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, list all enhanced feature flags with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig replica') as c:
         c.argument('store_name', arg_type=store_name_arg_type)
