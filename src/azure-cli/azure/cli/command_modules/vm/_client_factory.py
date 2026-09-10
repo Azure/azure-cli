@@ -37,8 +37,20 @@ def cf_log_analytics_data_plane(cli_ctx, _):
     """Initialize Log Analytics data client for use with CLI."""
     from azure.monitor.query import LogsQueryClient
     from azure.cli.core._profile import Profile
+    from knack.util import CLIError
+
+    if not cli_ctx.cloud.endpoints.has_endpoint_set('log_analytics_resource_id'):
+        raise CLIError(
+            "The Log Analytics query data-plane endpoint is not configured for cloud '{cloud}'. "
+            "This feature may not be available in '{cloud}'. "
+            "If you believe this is an error, configure the endpoint with: "
+            "az cloud update --endpoint-log-analytics-resource-id <endpoint-url>".format(
+                cloud=cli_ctx.cloud.name
+            )
+        )
+
     profile = Profile(cli_ctx=cli_ctx)
     cred, _, _ = profile.get_login_credentials()
     api_version = 'v1'
-    return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version,
-                           audience=cli_ctx.cloud.endpoints.log_analytics_resource_id)
+    endpoint = cli_ctx.cloud.endpoints.log_analytics_resource_id
+    return LogsQueryClient(cred, endpoint=endpoint + '/' + api_version, audience=endpoint)
