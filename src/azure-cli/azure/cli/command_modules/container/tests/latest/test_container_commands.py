@@ -1431,6 +1431,70 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory)])
 
+
+class ContainerEnvVarsFileTest(unittest.TestCase):
+    """Unit tests for the _load_env_vars_from_file helper in custom.py."""
+
+    def _load(self, content, secure=False):
+        """Write content to a temp JSON file and call the helper."""
+        from azure.cli.command_modules.container.custom import _load_env_vars_from_file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json',
+                                         delete=False, encoding='utf-8') as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+        try:
+            return _load_env_vars_from_file(tmp_path, secure=secure)
+        finally:
+            import os
+            os.unlink(tmp_path)
+
+    def test_valid_json_returns_list_of_dicts(self):
+        result = self._load('{"KEY1": "value1", "KEY2": "value2"}')
+        self.assertEqual(len(result), 2)
+        names = {item['name'] for item in result}
+        self.assertIn('KEY1', names)
+        self.assertIn('KEY2', names)
+        for item in result:
+            self.assertIn('value', item)
+            self.assertNotIn('secureValue', item)
+
+    def test_secure_true_uses_secure_value_key(self):
+        result = self._load('{"SECRET": "my_secret"}', secure=True)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], 'SECRET')
+        self.assertIn('secureValue', result[0])
+        self.assertNotIn('value', result[0])
+        self.assertEqual(result[0]['secureValue'], 'my_secret')
+
+    def test_special_characters_preserved(self):
+        content = '{"KEY": "value with \\"quotes\\" and ^carets^"}'
+        result = self._load(content)
+        self.assertEqual(result[0]['value'], 'value with "quotes" and ^carets^')
+
+    def test_non_string_value_converted_with_warning(self):
+        result = self._load('{"PORT": 8080}')
+        self.assertEqual(result[0]['value'], '8080')
+
+    def test_invalid_json_raises_cli_error(self):
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            self._load('not valid json')
+
+    def test_non_dict_json_raises_cli_error(self):
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            self._load('[{"name": "KEY", "value": "val"}]')
+
+    def test_empty_dict_returns_empty_list(self):
+        result = self._load('{}')
+        self.assertEqual(result, [])
+
+    def test_missing_file_raises_cli_error(self):
+        from azure.cli.command_modules.container.custom import _load_env_vars_from_file
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            _load_env_vars_from_file('/nonexistent/path/env.json')
+
         # Test delete
         self.cmd('container container-group-profile delete -g {rg} -n {container_group_profile_name} -y')
 
