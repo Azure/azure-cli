@@ -88,7 +88,7 @@ def register_providers():
     _register_one_provider('Microsoft.App/managedEnvironments', '2024-02-02-preview', True)
     _register_one_provider('Microsoft.FluidRelay/fluidRelayServers', '2025-03-10-preview', True)
     _register_one_provider('Microsoft.VideoIndexer/accounts', '2025-04-01', True)
-    _register_one_provider('Microsoft.Security/privateLinks', '2025-09-01-preview', True)
+    _register_one_provider('Microsoft.Security/privateLinks', '2026-01-01', True)
     _register_one_provider('Microsoft.Maps/accounts', '2023-12-01-preview', True)
     _register_one_provider('Microsoft.DurableTask/schedulers', '2026-02-01', True)
 
