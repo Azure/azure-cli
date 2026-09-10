@@ -218,6 +218,9 @@ def _upgrade_on_windows():
 
     from azure.cli.core.util import rmtree_with_retry
 
+    # MSI exit codes that indicate a successful install (3010/1641 = success, restart required).
+    _MSI_SUCCESS_CODES = {0, 1641, 3010}
+
     if platform.architecture()[0] == '32bit':
         msi_url = 'https://aka.ms/installazurecliwindows'
     else:
@@ -231,9 +234,39 @@ def _upgrade_on_windows():
 
     msi_path = _download_from_url(msi_url, msi_dir)
 
-    subprocess.Popen(['msiexec.exe', '/i', msi_path])
-    logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
-                   "please run `az upgrade` again after completing the upgrade.")
+    # Run msiexec in passive mode (progress bar, no user interaction) and wait for completion.
+    # This allows us to verify the new installation afterwards.
+    logger.warning("Installing Azure CLI MSI. A progress window will appear — please wait for it to finish.")
+    result = subprocess.run(['msiexec.exe', '/i', msi_path, '/passive'], check=False)
+
+    if result.returncode not in _MSI_SUCCESS_CODES:
+        logger.warning(
+            "MSI installation failed (exit code %d). The MSI file is saved at '%s'. "
+            "You can install it manually or re-run `az upgrade`.",
+            result.returncode, msi_path)
+        sys.exit(result.returncode)
+
+    if result.returncode in (1641, 3010):
+        logger.warning("The upgrade was applied but a system restart is required before the new CLI is active.")
+
+    # Verify that the new installation can be launched.  On machines enforcing Device Guard /
+    # Windows Defender Application Control (WDAC) policies the newly installed python.exe may be
+    # blocked, leaving the CLI unusable even though the MSI reported success.
+    try:
+        subprocess.check_output('az version -o json', shell=True, timeout=30)
+        logger.warning("Upgrade finished. Run `az upgrade` again to update any installed extensions.")
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        logger.warning(
+            "The MSI was installed successfully, but running 'az version' failed. "
+            "This likely means that Device Guard / Windows Defender Application Control (WDAC) "
+            "or a similar code integrity policy is blocking the newly installed CLI binary.\n"
+            "To restore the previous working CLI, reinstall the previous MSI version.\n"
+            "The new MSI is still available at '%s' if you need to retry.\n"
+            "See https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md "
+            "for troubleshooting steps.",
+            msi_path)
+        sys.exit(1)
+
     sys.exit(0)
 
 

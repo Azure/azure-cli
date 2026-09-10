@@ -7,11 +7,16 @@ import os
 import sys
 import subprocess
 
-python_version = os.listdir('/usr/lib64/az/lib/')[0]
-root_dir = f'/usr/lib64/az/lib/{python_version}/site-packages/azure/cli/command_modules'
+# Support both /usr/lib64/az (Fedora/RHEL) and /usr/lib/az (Azure Linux).
+# AZ_LIB_DIR can be set explicitly by the caller (e.g. test_azurelinux_in_docker.sh);
+# fall back to auto-detection based on which directory was actually created by the RPM.
+az_lib_base = os.environ.get('AZ_LIB_DIR') or ('/usr/lib64/az' if os.path.isdir('/usr/lib64/az') else '/usr/lib/az')
+
+python_version = os.listdir(f'{az_lib_base}/lib/')[0]
+root_dir = f'{az_lib_base}/lib/{python_version}/site-packages/azure/cli/command_modules'
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
-pytest_base_cmd = f'PYTHONPATH=/usr/lib64/az/lib/{python_version}/site-packages python -m pytest -v --forked -p no:warnings --log-level=WARN'
+pytest_base_cmd = f'PYTHONPATH={az_lib_base}/lib/{python_version}/site-packages python -m pytest -v --forked -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n logical'.format(pytest_base_cmd)
 
 # cloud: https://github.com/Azure/azure-cli/pull/14994
