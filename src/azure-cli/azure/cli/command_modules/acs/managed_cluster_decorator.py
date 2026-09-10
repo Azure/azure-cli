@@ -9208,6 +9208,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     config = monitoring_addon_profile.config or {}
                     config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
                     mc.addon_profiles[monitoring_addon_key].config = config
+            # Newer API responses contain both representations; keep the canonical
+            # profile consistent with the legacy addon flag in the outgoing PUT.
+            container_insights = getattr(mc.azure_monitor_profile, "container_insights", None)
+            if container_insights is not None:
+                container_insights.container_network_logs = (
+                    "Enabled" if container_network_logs_enabled else "Disabled"
+                )
 
         # When CNL or HLSM flags are provided, mark that monitoring postprocessing is needed
         # so the DCR gets updated with the correct streams
