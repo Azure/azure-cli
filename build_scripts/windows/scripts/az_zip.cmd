@@ -3,10 +3,14 @@
 :: Copyright (C) Microsoft Corporation. All Rights Reserved.
 ::
 
-@IF EXIST "%~dp0\..\python.exe" (
-  SET AZ_INSTALLER=ZIP
-  "%~dp0\..\python.exe" -IBm azure.cli %*
-) ELSE (
-  echo Failed to load python executable.
-  exit /b 1
-)
+@echo off
+setlocal
+
+IF NOT EXIST "%~dp0\..\python.exe" GOTO pynotfound
+SET AZ_INSTALLER=ZIP
+"%~dp0\..\python.exe" -IBm azure.cli %*
+GOTO end
+:pynotfound
+echo Failed to load python executable.
+exit /b 1
+:end

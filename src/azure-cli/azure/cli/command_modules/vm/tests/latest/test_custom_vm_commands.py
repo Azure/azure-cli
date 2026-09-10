@@ -14,6 +14,7 @@ from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disabl
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT,
                                                  _get_extension_instance_name,
+                                                 _reset_windows_admin,
                                                  get_boot_log)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
@@ -165,6 +166,35 @@ class TestVmCustom(unittest.TestCase):
 
         # assert
         self.assertEqual(result, 'extension-name')
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm_extension.VMExtensionCreate')
+    def test_reset_windows_admin_special_chars_in_password(self, mock_ext_create_cls):
+        """Verify that passwords with shell metacharacters are passed verbatim via protected_settings."""
+        cmd = _get_test_cmd()
+
+        # Fake VM instance with minimal required keys
+        vm_instance = {
+            'location': 'westus',
+            'name': 'myvm',
+            'resources': [],
+            'instanceView': {},
+        }
+
+        special_passwords = ['Test)123', 'P@ss(word&1|2^3', 'abc)def(ghi']
+        for password in special_passwords:
+            mock_poller = mock.MagicMock()
+            mock_instance = mock.MagicMock(return_value=mock_poller)
+            mock_ext_create_cls.return_value = mock_instance
+
+            _reset_windows_admin(cmd, vm_instance, 'rg', 'AzureUser', password, no_wait=True)
+
+            # Verify the password was passed verbatim in protected_settings
+            kwargs = mock_instance.call_args.kwargs
+            command_args = kwargs['command_args'] if 'command_args' in kwargs \
+                else mock_instance.call_args.args[0]
+            protected = command_args['protected_settings']
+            self.assertEqual(protected, {'Password': password},
+                             f"Password '{password}' was not passed verbatim in protected_settings")
 
 
 class TestVMBootLog(unittest.TestCase):
