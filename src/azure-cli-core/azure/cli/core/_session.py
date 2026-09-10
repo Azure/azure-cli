@@ -6,6 +6,8 @@
 import json
 import logging
 import os
+import stat
+import tempfile
 import time
 from collections.abc import MutableMapping
 
@@ -50,9 +52,45 @@ class Session(MutableMapping):
             self.save()
 
     def save(self):
-        if self.filename:
+        if not self.filename:
+            return
+
+        # Write to a temporary file in the same directory and rename it over the target, so the
+        # file on disk is never observably incomplete. Opening the target with 'w' truncates it
+        # in place, which leaves a window where a concurrent process reads zero or half a
+        # document. That reader then fails to parse it and load() overwrites it with defaults,
+        # so a process that only meant to read destroys the data.
+        target = os.path.realpath(self.filename)
+        directory = os.path.dirname(target) or os.curdir
+
+        try:
+            fd, temp_name = tempfile.mkstemp(dir=directory, prefix=os.path.basename(target) + '.',
+                                             suffix='.tmp')
+        except OSError:
+            # The directory is not writable, which happens in locked down containers and CI
+            # images. Writing in place still works there, so keep the old behaviour rather than
+            # failing a save that used to succeed.
             with open(self.filename, 'w', encoding=self._encoding) as f:
                 json.dump(self.data, f)
+            return
+
+        try:
+            with os.fdopen(fd, 'w', encoding=self._encoding) as f:
+                json.dump(self.data, f)
+            # mkstemp creates the file 0o600. Carry over the permissions of the file being
+            # replaced so a save does not silently tighten them.
+            try:
+                os.chmod(temp_name, stat.S_IMODE(os.stat(target).st_mode))
+            except OSError:
+                pass
+            os.replace(temp_name, target)
+        except BaseException:
+            # BaseException so that an interrupt does not leave the temporary file behind.
+            try:
+                os.remove(temp_name)
+            except OSError:
+                pass
+            raise
 
     def save_with_retry(self, retries=5):
         for _ in range(retries - 1):
