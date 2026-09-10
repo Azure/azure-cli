@@ -458,7 +458,7 @@ class WaitCommandOperation(BaseCommandOperation):
             time.sleep(interval)
 
         progress_indicator.end()
-        return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
+        raise CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
     @staticmethod
     def _get_provisioning_state(instance):
