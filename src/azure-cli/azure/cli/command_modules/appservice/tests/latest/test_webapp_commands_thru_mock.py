@@ -1643,6 +1643,37 @@ class _TypespecContainerSettings(Mapping):
         return len(self._data)
 
 
+class TestStackRuntimeDotnetLinux(unittest.TestCase):
+
+    @staticmethod
+    def _new_helper(runtime_name):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._stacks = [
+            helper.Runtime(
+                display_name=runtime_name,
+                configs={'linux_fx_version': runtime_name},
+                linux=True)
+        ]
+        return helper
+
+    def test_resolve_legacy_dotnet_11_with_canonical_catalog(self):
+        helper = self._new_helper('dotnet|11')
+
+        runtime = helper.resolve('DOTNETCORE|11.0', linux=True)
+
+        self.assertEqual(runtime.display_name, 'dotnet|11')
+        self.assertEqual(runtime.configs['linux_fx_version'], 'dotnet|11')
+
+    def test_resolve_canonical_dotnet_11_with_legacy_catalog(self):
+        helper = self._new_helper('DOTNETCORE|11.0')
+
+        runtime = helper.resolve('dotnet|11', linux=True)
+
+        self.assertEqual(runtime.display_name, 'DOTNETCORE|11.0')
+        self.assertEqual(runtime.configs['linux_fx_version'], 'DOTNETCORE|11.0')
+
+
 class TestStackRuntimeJavaSELinux(unittest.TestCase):
     """Regression tests for `az webapp list-runtimes` Linux Java SE parsing.
 

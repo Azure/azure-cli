@@ -7635,6 +7635,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             old_to_new_linux = {
                 "dotnet|5.0": "dotnetcore|5.0",
                 "dotnet|6.0": "dotnetcore|6.0",
+                "dotnet|11": "dotnetcore|11.0",
+                "dotnetcore|11.0": "dotnet|11",
             }
             if linux:
                 display_name = old_to_new_linux.get(display_name)
