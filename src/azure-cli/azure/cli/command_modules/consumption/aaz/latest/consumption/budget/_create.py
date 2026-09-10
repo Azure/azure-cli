@@ -264,7 +264,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("amount", AAZFloatType, ".amount", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("category", AAZStrType, ".category", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("filters", AAZObjectType, ".filters")
+                properties.set_prop("filter", AAZObjectType, ".filters")
                 properties.set_prop("notifications", AAZDictType, ".notifications")
                 properties.set_prop("timeGrain", AAZStrType, ".time_grain", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("timePeriod", AAZObjectType, ".time_period", typ_kwargs={"flags": {"required": True}})
