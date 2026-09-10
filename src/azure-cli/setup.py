@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices==15.0.0b4',  # 15.0.0b4 version supports compute operations which is in PrPr, pls don't remove it without consulting our team
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
-    'azure-mgmt-containerregistry==15.1.0b2',
+    'azure-mgmt-containerregistry==15.1.0b3',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
     'azure-mgmt-containerservice~=41.6.0',
     'azure-mgmt-cosmosdb==10.0.0',
