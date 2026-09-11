@@ -224,6 +224,10 @@ def get_mysql_tiers(sku_info):
     return list(sku_info.keys())
 
 
+def normalize_mysql_tier(tier):
+    return 'MemoryOptimized' if tier == 'BusinessCritical' else tier
+
+
 def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     params = {'serverName': server_name} if server_name else None
@@ -475,16 +479,6 @@ def get_user_confirmation(message, yes=False):
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
-
-
-def replace_memory_optimized_tier(result):
-    result = _get_list_from_paged_response(result)
-    for capability in result:
-        for edition_idx, edition in enumerate(capability.supported_flexible_server_editions):
-            if edition.name == 'MemoryOptimized':
-                capability.supported_flexible_server_editions[edition_idx].name = 'BusinessCritical'
-
-    return result
 
 
 def _is_resource_name(resource):
