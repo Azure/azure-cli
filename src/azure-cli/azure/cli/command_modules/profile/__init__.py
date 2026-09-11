@@ -81,7 +81,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('redirect_port', type=int,
                        help='Port for the local server used by interactive browser authentication. By default, '
                             'an available ephemeral port is selected. Valid values are from 1 to 65535. The command '
-                            'fails if the specified port is unavailable. This option is only supported with '
+                            'fails if the specified port is unavailable. ADFS only supports port 8400. This option is '
+                            'only supported with '
                             'interactive browser authentication and disables WAM and automatic fallback to device '
                             'code.')
 

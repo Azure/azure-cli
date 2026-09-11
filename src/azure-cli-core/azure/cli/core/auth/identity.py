@@ -10,7 +10,7 @@ import re
 import sys
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.azclierror import ClientRequestError
+from azure.cli.core.azclierror import ClientRequestError, InvalidArgumentValueError
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -163,8 +163,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
 
+        if self._is_adfs and redirect_port not in (None, 8400):
+            raise InvalidArgumentValueError('--redirect-port must be 8400 when authenticating with ADFS.')
+
         # For AAD, use port 0 to let the system choose an unused ephemeral port unless one is explicitly requested.
-        # ADFS only allows port 8400 by default.
+        # ADFS only allows port 8400.
         port = redirect_port if redirect_port is not None else (8400 if self._is_adfs else None)
         try:
             result = self._msal_app.acquire_token_interactive(

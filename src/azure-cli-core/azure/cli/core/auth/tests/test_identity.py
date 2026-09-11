@@ -11,7 +11,7 @@ from unittest import mock
 
 from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, ServicePrincipalStore,
                                           _get_authority_url)
-from azure.cli.core.azclierror import ClientRequestError
+from azure.cli.core.azclierror import ClientRequestError, InvalidArgumentValueError
 from knack.util import CLIError
 
 # CERTIFICATE section in sp_cert.pem
@@ -70,6 +70,22 @@ class TestIdentity(unittest.TestCase):
 
                 self.assertEqual(
                     expected_port, identity._msal_app_instance.acquire_token_interactive.call_args.kwargs['port'])
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_redirect_port_adfs(self, _):
+        identity = Identity('https://login.microsoftonline.com')
+        identity._is_adfs = True
+        identity._msal_app_instance = mock.MagicMock()
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, '--redirect-port must be 8400'):
+            identity.login_with_auth_code(['scope'], redirect_port=4242)
+
+        identity._msal_app_instance.acquire_token_interactive.assert_not_called()
+        identity._msal_app_instance.acquire_token_interactive.return_value = {'access_token': 'test_token'}
+
+        identity.login_with_auth_code(['scope'], redirect_port=8400)
+
+        self.assertEqual(8400, identity._msal_app_instance.acquire_token_interactive.call_args.kwargs['port'])
 
     @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
     def test_login_with_auth_code_redirect_port_unavailable(self, _):
