@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import errno
 import os
 import re
 import unittest
@@ -10,6 +11,7 @@ from unittest import mock
 
 from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, ServicePrincipalStore,
                                           _get_authority_url)
+from azure.cli.core.azclierror import ClientRequestError
 from knack.util import CLIError
 
 # CERTIFICATE section in sp_cert.pem
@@ -44,6 +46,65 @@ with open(TEST_CERT) as f:
 
 
 class TestIdentity(unittest.TestCase):
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_redirect_port(self, _):
+        identity = Identity('https://login.microsoftonline.com')
+        identity._msal_app_instance = mock.MagicMock()
+        identity._msal_app_instance.acquire_token_interactive.return_value = {'access_token': 'test_token'}
+
+        identity.login_with_auth_code(['scope'], redirect_port=4242)
+
+        self.assertEqual(4242, identity._msal_app_instance.acquire_token_interactive.call_args.kwargs['port'])
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_default_ports(self, _):
+        for is_adfs, expected_port in ((False, None), (True, 8400)):
+            with self.subTest(is_adfs=is_adfs):
+                identity = Identity('https://login.microsoftonline.com')
+                identity._is_adfs = is_adfs
+                identity._msal_app_instance = mock.MagicMock()
+                identity._msal_app_instance.acquire_token_interactive.return_value = {'access_token': 'test_token'}
+
+                identity.login_with_auth_code(['scope'])
+
+                self.assertEqual(
+                    expected_port, identity._msal_app_instance.acquire_token_interactive.call_args.kwargs['port'])
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_redirect_port_unavailable(self, _):
+        identity = Identity('https://login.microsoftonline.com')
+        identity._msal_app_instance = mock.MagicMock()
+        bind_error = OSError(errno.EADDRINUSE, 'Address already in use')
+        identity._msal_app_instance.acquire_token_interactive.side_effect = bind_error
+
+        with self.assertRaisesRegex(ClientRequestError, 'Redirect port 4242 is unavailable'):
+            identity.login_with_auth_code(['scope'], redirect_port=4242)
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_redirect_port_permission_denied(self, _):
+        identity = Identity('https://login.microsoftonline.com')
+        identity._msal_app_instance = mock.MagicMock()
+        try:
+            try:
+                raise PermissionError(errno.EACCES, 'Permission denied')
+            except PermissionError:
+                raise ValueError("Can't listen on port 4242. You may try port 0.")
+        except ValueError as ex:
+            bind_error = ex
+        identity._msal_app_instance.acquire_token_interactive.side_effect = bind_error
+
+        with self.assertRaisesRegex(ClientRequestError, 'Redirect port 4242 is unavailable'):
+            identity.login_with_auth_code(['scope'], redirect_port=4242)
+
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    def test_login_with_auth_code_unrelated_value_error(self, _):
+        identity = Identity('https://login.microsoftonline.com')
+        identity._msal_app_instance = mock.MagicMock()
+        identity._msal_app_instance.acquire_token_interactive.side_effect = ValueError('unrelated')
+
+        with self.assertRaisesRegex(ValueError, 'unrelated'):
+            identity.login_with_auth_code(['scope'], redirect_port=4242)
 
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")

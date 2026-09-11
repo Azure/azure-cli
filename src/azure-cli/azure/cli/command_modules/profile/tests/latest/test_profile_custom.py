@@ -10,6 +10,7 @@ from azure.cli.command_modules.profile.custom import (
     list_subscriptions, get_access_token, login, logout, account_clear, _remove_adal_token_cache)
 
 from azure.cli.core._profile import _TENANT_LEVEL_ACCOUNT_NAME
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
@@ -195,6 +196,45 @@ class ProfileCommandTest(unittest.TestCase):
             f.write("test_token_cache")
         assert _remove_adal_token_cache()
         assert not os.path.exists(adal_token_cache)
+
+
+class TestLoginRedirectPort(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.profile.custom.sys')
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_redirect_port_passed_to_profile(self, profile_mock, sys_mock):
+        profile_mock.return_value.login.return_value = []
+        sys_mock.stdin.isatty.return_value = False
+        sys_mock.stdout.isatty.return_value = False
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        login(cmd, redirect_port=4242)
+
+        self.assertEqual(4242, profile_mock.return_value.login.call_args.kwargs['redirect_port'])
+
+    def test_redirect_port_must_be_valid(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, '--redirect-port must be between 1 and 65535'):
+            login(cmd, redirect_port=65536)
+
+    def test_redirect_port_rejects_device_code(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    '--redirect-port and --use-device-code cannot be used together'):
+            login(cmd, redirect_port=4242, use_device_code=True)
+
+    def test_redirect_port_rejects_noninteractive_authentication(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        for kwargs in ({'username': 'user'}, {'password': 'secret'}, {'service_principal': True}, {'identity': True}):
+            with self.subTest(kwargs=kwargs), self.assertRaises(MutuallyExclusiveArgumentError):
+                login(cmd, redirect_port=4242, **kwargs)
 
 
 class TestLoginSubscriptionFilter(unittest.TestCase):

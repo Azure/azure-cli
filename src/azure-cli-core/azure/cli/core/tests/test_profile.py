@@ -329,10 +329,39 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
+        with mock.patch.object(cli.config, 'getboolean', return_value=True):
+            subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
 
         # assert
         login_with_auth_code_mock.assert_called_once()
+        self.assertIsNone(login_with_auth_code_mock.call_args.kwargs['redirect_port'])
+        self.assertTrue(login_with_auth_code_mock.call_args.args[0]._enable_broker_on_windows)
+        get_user_credential_mock.assert_called()
+        self.assertEqual(self.subscription1_with_tenant_info_output, subs)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=False)
+    def test_login_with_auth_code_redirect_port_without_browser(self, can_launch_browser_mock,
+                                                                login_with_auth_code_mock,
+                                                                get_user_credential_mock,
+                                                                create_subscription_client_mock):
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        profile = Profile(cli_ctx=cli, storage={'subscriptions': None})
+        with mock.patch.object(cli.config, 'getboolean', return_value=True):
+            subs = profile.login(True, None, None, False, None, redirect_port=4242)
+
+        login_with_auth_code_mock.assert_called_once()
+        self.assertEqual(4242, login_with_auth_code_mock.call_args.kwargs['redirect_port'])
+        self.assertFalse(login_with_auth_code_mock.call_args.args[0]._enable_broker_on_windows)
         get_user_credential_mock.assert_called()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
@@ -351,7 +380,7 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
 
         # assert
         login_with_device_code_mock.assert_called_once()
@@ -373,7 +402,7 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
 
         # assert
         login_with_device_code_mock.assert_called_once()

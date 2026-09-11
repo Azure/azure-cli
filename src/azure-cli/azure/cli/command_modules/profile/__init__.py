@@ -77,6 +77,14 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help="Use device code flow. Azure CLI will also use this if it can't launch a browser, "
                             "e.g. in remote SSH or Cloud Shell.")
 
+            # Interactive browser flow
+            c.argument('redirect_port', type=int,
+                       help='Port for the local server used by interactive browser authentication. By default, '
+                            'an available ephemeral port is selected. Valid values are from 1 to 65535. The command '
+                            'fails if the specified port is unavailable. This option is only supported with '
+                            'interactive browser authentication and disables WAM and automatic fallback to device '
+                            'code.')
+
             # Service principal
             c.argument('service_principal', action='store_true',
                        help='Log in with a service principal.')
