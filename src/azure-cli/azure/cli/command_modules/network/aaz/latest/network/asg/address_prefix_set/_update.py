@@ -63,7 +63,7 @@ class Update(AAZCommand):
             help="Space-separated list of IPv4 or IPv6 address prefixes in CIDR notation.",
             nullable=True,
         )
-        _args_schema.address_prefixes.Element = AAZStrArg(nullable=True)
+        _args_schema.address_prefixes.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
