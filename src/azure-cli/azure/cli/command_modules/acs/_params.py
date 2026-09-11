@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025,
+    CONST_NAT_GATEWAY_SKU_STANDARD, CONST_NAT_GATEWAY_SKU_STANDARD_V2,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_NONE,
@@ -119,7 +120,11 @@ from azure.cli.command_modules.acs._validators import (
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
     validate_load_balancer_sku, validate_max_surge, validate_max_unavailable,
     validate_nat_gateway_idle_timeout,
-    validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
+    validate_nat_gateway_managed_outbound_ip_count,
+    validate_nat_gateway_managed_outbound_ipv6_count,
+    validate_nat_gateway_v2_params, validate_nat_gateway_v2_params_for_update,
+    validate_network_policy,
+    validate_outbound_type_sku, validate_outbound_type_sku_for_update,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
     validate_nodepool_tags, validate_nodes_count, validate_os_sku,
     validate_pod_subnet_id, validate_ppg, validate_priority,
@@ -197,6 +202,7 @@ pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDU
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
+nat_gateway_skus = [CONST_NAT_GATEWAY_SKU_STANDARD, CONST_NAT_GATEWAY_SKU_STANDARD_V2]
 sku_names = [CONST_MANAGED_CLUSTER_SKU_NAME_BASE, CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC]
 sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
@@ -428,8 +434,21 @@ def load_arguments(self, _):
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_managed_outbound_ipv6_count',
+                   options_list=['--nat-gateway-managed-outbound-ipv6-count', '--nat-gw-ipv6-count'],
+                   type=int, validator=validate_nat_gateway_managed_outbound_ipv6_count,
+                   help='NAT gateway managed outbound IPv6 count. Only valid with --outbound-type '
+                        'managedNATGateway and --outbound-type-sku StandardV2.')
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
-        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
+        c.argument('nat_gateway_sku', options_list=['--outbound-type-sku'], arg_type=get_enum_type(nat_gateway_skus), validator=validate_outbound_type_sku)
+        c.argument('nat_gateway_outbound_ip_ids', options_list=['--nat-gateway-outbound-ips', '--nat-gw-ips'],
+                   help='Comma-separated public IP resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('nat_gateway_outbound_ip_prefix_ids',
+                   options_list=['--nat-gateway-outbound-ip-prefixes', '--nat-gw-prefixes'],
+                   help='Comma-separated public IP prefix resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types), validator=validate_nat_gateway_v2_params)
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_plugin_mode', arg_type=get_enum_type(network_plugin_modes))
         c.argument('network_policy', validator=validate_network_policy)
@@ -695,11 +714,24 @@ def load_arguments(self, _):
         c.argument("load_balancer_sku", arg_type=get_enum_type([CONST_LOAD_BALANCER_SKU_STANDARD]), validator=validate_load_balancer_sku)
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_managed_outbound_ipv6_count',
+                   options_list=['--nat-gateway-managed-outbound-ipv6-count', '--nat-gw-ipv6-count'],
+                   type=int, validator=validate_nat_gateway_managed_outbound_ipv6_count,
+                   help='NAT gateway managed outbound IPv6 count. Only valid with --outbound-type '
+                        'managedNATGateway and --outbound-type-sku StandardV2.')
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
+        c.argument('nat_gateway_sku', options_list=['--outbound-type-sku'], arg_type=get_enum_type(nat_gateway_skus), validator=validate_outbound_type_sku_for_update)
+        c.argument('nat_gateway_outbound_ip_ids', options_list=['--nat-gateway-outbound-ips', '--nat-gw-ips'],
+                   help='Comma-separated public IP resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('nat_gateway_outbound_ip_prefix_ids',
+                   options_list=['--nat-gateway-outbound-ip-prefixes', '--nat-gw-prefixes'],
+                   help='Comma-separated public IP prefix resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy', arg_type=get_enum_type(network_policies))
-        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types), validator=validate_nat_gateway_v2_params_for_update)
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
