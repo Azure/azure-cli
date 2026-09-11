@@ -391,7 +391,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('version', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
-        c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
+        c.argument('auto_scale_iops', default='Enabled', arg_type=auto_scale_iops_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
         c.argument('backup_byok_key', arg_type=backup_key_arg_type)
