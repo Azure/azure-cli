@@ -3,12 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import errno
 import json
 import os
 import re
 import sys
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.azclierror import ClientRequestError, InvalidArgumentValueError
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -145,7 +147,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
-    def login_with_auth_code(self, scopes, claims_challenge=None):
+    def login_with_auth_code(self, scopes, claims_challenge=None, redirect_port=None):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
@@ -161,14 +163,27 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
 
-        # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
-        # on port 8400 from the old design. However, ADFS only allows port 8400.
-        result = self._msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
-            success_template=success_template, error_template=error_template,
-            parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
-            enable_msa_passthrough=True,
-            claims_challenge=claims_challenge)
+        if self._is_adfs and redirect_port not in (None, 8400):
+            raise InvalidArgumentValueError('--redirect-port must be 8400 when authenticating with ADFS.')
+
+        # For AAD, use port 0 to let the system choose an unused ephemeral port unless one is explicitly requested.
+        # ADFS only allows port 8400.
+        port = redirect_port if redirect_port is not None else (8400 if self._is_adfs else None)
+        try:
+            result = self._msal_app.acquire_token_interactive(
+                scopes, prompt='select_account', port=port,
+                success_template=success_template, error_template=error_template,
+                parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
+                enable_msa_passthrough=True,
+                claims_challenge=claims_challenge)
+        except (OSError, ValueError) as ex:
+            is_bind_error = (isinstance(ex, OSError) and ex.errno in (errno.EADDRINUSE, errno.EACCES))
+            is_wrapped_permission_error = isinstance(ex, ValueError) and isinstance(ex.__context__, PermissionError)
+            if redirect_port is not None and (is_bind_error or is_wrapped_permission_error):
+                raise ClientRequestError(
+                    "Redirect port {} is unavailable.".format(redirect_port),
+                    recommendation="Free the port or choose another value for --redirect-port.") from ex
+            raise
         return check_result(result)
 
     def login_with_device_code(self, scopes, claims_challenge=None):
