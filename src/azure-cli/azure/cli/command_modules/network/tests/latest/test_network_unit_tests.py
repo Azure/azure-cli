@@ -24,6 +24,39 @@ class TestNetworkUnitTests(unittest.TestCase):
             self.assertIsNotNone(hsm.key_id)
             self.assertIsNotNone(hsm.public_cert_data)
 
+    def test_virtual_appliance_ilb_migration_allows_null_body(self):
+        from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.network.aaz.latest.network.virtual_appliance.migration import (
+            Commit, Execute, Prepare)
+
+        commands = (
+            (Prepare, Prepare.NetworkVirtualAppliancesPrepareMigration),
+            (Execute, Execute.NetworkVirtualAppliancesExecuteMigration),
+            (Commit, Commit.NetworkVirtualAppliancesCommitMigration),
+        )
+        for command, operation_type in commands:
+            schema = command._build_arguments_schema()
+            self.assertFalse(schema.migration_type.to_cmd_arg('migration_type').type.settings['required'])
+
+            with self.subTest(command=command.__name__, body='null'):
+                ctx = AAZCommandCtx(DummyCli(), schema, {})
+                operation = object.__new__(operation_type)
+                operation.ctx = ctx
+                self.assertIsNone(operation.content)
+
+            with self.subTest(command=command.__name__, body='explicit'):
+                ctx = AAZCommandCtx(DummyCli(), schema, {
+                    'migration_type': 'MigrateToNewOSVersion',
+                })
+                operation = object.__new__(operation_type)
+                operation.ctx = ctx
+                self.assertEqual(operation.content, {
+                    'properties': {
+                        'migrationType': 'MigrateToNewOSVersion',
+                    }
+                })
+
     def test_network_get_nic_ip_config(self):
         from azure.cli.command_modules.network.custom import _get_nic_ip_config
 

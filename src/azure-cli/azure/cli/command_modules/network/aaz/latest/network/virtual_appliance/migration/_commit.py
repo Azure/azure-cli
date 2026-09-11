@@ -22,7 +22,7 @@ class Commit(AAZCommand):
     cannot be reversed with `abort`.
 
     :example: Commit the migration of a Network Virtual Appliance to the new internal load balancer (ILB) architecture.
-        az network virtual-appliance migration commit -n MyName -g MyRG --migration-type MigrateToNewILBArchitecture
+        az network virtual-appliance migration commit -n MyName -g MyRG
     """
 
     _aaz_info = {
@@ -65,8 +65,7 @@ class Commit(AAZCommand):
         _args_schema.migration_type = AAZStrArg(
             options=["--migration-type"],
             arg_group="Properties",
-            help="The type of migration workflow to commit for the Network Virtual Appliance. Must match the type used in the prepare and execute phases.",
-            required=True,
+            help="The type of migration workflow to commit for the Network Virtual Appliance. If omitted, the migration defaults to MigrateToNewILBArchitecture. Otherwise, it must match the type used in the prepare and execute phases.",
             enum={"MigrateToNewILBArchitecture": "MigrateToNewILBArchitecture", "MigrateToNewOSVersion": "MigrateToNewOSVersion"},
         )
         return cls._args_schema
@@ -177,7 +176,7 @@ class Commit(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("migrationType", AAZStrType, ".migration_type", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("migrationType", AAZStrType, ".migration_type")
 
             return self.serialize_content(_content_value)
 
