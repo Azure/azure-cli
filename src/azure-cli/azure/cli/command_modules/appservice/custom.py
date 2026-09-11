@@ -6926,11 +6926,9 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
     except ValueError as ex:
         logger.warning("Failed to parse site runtime status response: %s", ex)
 
-    # Annotate the runtime error so the report renderer can apply its
-    # 15-minute recommendation window.
-    if runtime_error is not None:
-        runtime_error['isRecent'] = _runtime_error_is_recent(
-            runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES)
+    if runtime_error is not None and not _runtime_error_is_recent(
+            runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES):
+        runtime_error = None
 
     payload = {
         'name': name,
@@ -6942,8 +6940,9 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
         ),
         'requestedMachineName': instance,
         'slot': slot,
-        'runtimeError': runtime_error,
     }
+    if runtime_error is not None:
+        payload['runtimeError'] = runtime_error
     if report:
         from azure.cli.command_modules.appservice import _troubleshoot_config_report
         _troubleshoot_config_report.render_report(payload)
@@ -6954,8 +6953,6 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
     payload.pop('configCheckMessage', None)
     payload.pop('requestedMachineName', None)
     payload.pop('slot', None)
-    if runtime_error is not None:
-        runtime_error.pop('isRecent', None)
     return payload
 
 

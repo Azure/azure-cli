@@ -243,7 +243,7 @@ def render_report(payload):
     config_check = payload.get('configCheck') or {}
     settings = _get_settings(config_check)
     runtime_error = payload.get('runtimeError')
-    show_runtime = bool(runtime_error and runtime_error.get('isRecent'))
+    show_runtime = bool(runtime_error)
     any_issue = any(_details_level(setting) in ('warning', 'error') for setting in settings)
 
     _render_config_checks(payload, config_check, settings)
