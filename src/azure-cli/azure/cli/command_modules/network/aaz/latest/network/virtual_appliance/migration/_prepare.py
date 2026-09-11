@@ -22,7 +22,7 @@ class Prepare(AAZCommand):
     stages the resources required to perform it.
 
     :example: Prepare a Network Virtual Appliance for migration to the new internal load balancer (ILB) architecture.
-        az network virtual-appliance migration prepare -n MyName -g MyRG --migration-type MigrateToNewILBArchitecture
+        az network virtual-appliance migration prepare -n MyName -g MyRG
     """
 
     _aaz_info = {
@@ -65,8 +65,7 @@ class Prepare(AAZCommand):
         _args_schema.migration_type = AAZStrArg(
             options=["--migration-type"],
             arg_group="Properties",
-            help="The type of migration workflow to prepare for the Network Virtual Appliance.",
-            required=True,
+            help="The type of migration workflow to prepare for the Network Virtual Appliance. If omitted, the migration defaults to MigrateToNewILBArchitecture.",
             enum={"MigrateToNewILBArchitecture": "MigrateToNewILBArchitecture", "MigrateToNewOSVersion": "MigrateToNewOSVersion"},
         )
         _args_schema.marketplace_version = AAZStrArg(
@@ -183,7 +182,7 @@ class Prepare(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("marketPlaceVersion", AAZStrType, ".marketplace_version")
-                properties.set_prop("migrationType", AAZStrType, ".migration_type", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("migrationType", AAZStrType, ".migration_type")
 
             return self.serialize_content(_content_value)
 

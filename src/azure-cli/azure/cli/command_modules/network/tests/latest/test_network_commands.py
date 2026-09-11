@@ -8859,7 +8859,6 @@ class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
             'nva_name': 'clivirtualappliancemigration',  # NVA name
             'rg': resource_group,
             'subscription': subscriptionId,
-            'migration_type': 'MigrateToNewILBArchitecture',
         })
 
         # Add the required extension
@@ -8895,7 +8894,7 @@ class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
                  ])
 
         # Phase 1: prepare the migration to the new ILB architecture
-        self.cmd('network virtual-appliance migration prepare -g {rg} -n {nva_name} --migration-type {migration_type}')
+        self.cmd('network virtual-appliance migration prepare -g {rg} -n {nva_name}')
 
         provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
         retry_count = 0
@@ -8907,7 +8906,7 @@ class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
             provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
 
         # Phase 2: execute the migration
-        self.cmd('network virtual-appliance migration execute -g {rg} -n {nva_name} --migration-type {migration_type}')
+        self.cmd('network virtual-appliance migration execute -g {rg} -n {nva_name}')
 
         provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
         retry_count = 0
@@ -8919,7 +8918,7 @@ class NetworkVirtualApplianceMigrationScenarioTest(ScenarioTest):
             provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
 
         # Phase 3: commit the migration to finalize the new ILB architecture
-        self.cmd('network virtual-appliance migration commit -g {rg} -n {nva_name} --migration-type {migration_type}')
+        self.cmd('network virtual-appliance migration commit -g {rg} -n {nva_name}')
 
         # Ensure that the provisioning state is 'Succeeded' after committing the migration
         provisioning_state = self.cmd('network virtual-appliance show -g {rg} -n {nva_name}').get_output_in_json()['provisioningState']
