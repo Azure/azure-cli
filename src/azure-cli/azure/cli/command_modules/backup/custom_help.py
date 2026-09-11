@@ -727,12 +727,13 @@ def set_job_container_subscription_id(job):
     # contains the "VM Subscription ID" for Cross Subscription Backup jobs.
     if job is None or not hasattr(job, 'properties'):
         return job
-    extended_info = getattr(job.properties, 'extended_info', None)
+    extended_info = get_model_property(job.properties, 'extended_info', 'extendedInfo')
     if extended_info is None:
         return job
-    property_bag = getattr(extended_info, 'property_bag', None)
+    property_bag = get_model_property(extended_info, 'property_bag', 'propertyBag')
     if property_bag and 'VM Subscription ID' in property_bag:
-        job.properties.container_subscription_id = property_bag['VM Subscription ID']
+        set_model_property(job.properties, 'container_subscription_id', 'containerSubscriptionId',
+                           property_bag['VM Subscription ID'])
     return job
 
 

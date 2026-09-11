@@ -1098,7 +1098,8 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
 
         # fetch AutoProtectionPolicy for SQLInstance and SQLAG
         if protectable_item_type and protectable_item_type.lower() in ['sqlinstance', 'sqlavailabilitygroupcontainer']:
-            setattr(item.properties, "auto_protection_policy", None)
+            cust_help.set_model_property(
+                item.properties, "auto_protection_policy", "autoProtectionPolicy", None)
             filter_string = cust_help.get_filter_string({
                 'backupManagementType': "AzureWorkload",
                 'itemType': protectable_item_type,
@@ -1108,11 +1109,13 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
             paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
 
             if paged_protection_intents:
-                item.properties.auto_protection_policy = paged_protection_intents[0].properties.policy_id
+                cust_help.set_model_property(
+                    item.properties, "auto_protection_policy", "autoProtectionPolicy",
+                    paged_protection_intents[0].properties.policy_id)
 
         # fetch NodesList for SQLAG
         if protectable_item_type and protectable_item_type.lower() == 'sqlavailabilitygroupcontainer':
-            setattr(item.properties, "nodes_list", None)
+            cust_help.set_model_property(item.properties, "nodes_list", "nodesList", None)
             container = None
             try:
                 container = protection_containers_client.get(vault_name, resource_group_name, fabric_name,
@@ -1120,7 +1123,8 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
             except:  # pylint: disable=bare-except
                 continue
             if container and container.properties.extended_info:
-                item.properties.nodes_list = container.properties.extended_info.nodes_list
+                cust_help.set_model_property(
+                    item.properties, "nodes_list", "nodesList", container.properties.extended_info.nodes_list)
 
 
 def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region):

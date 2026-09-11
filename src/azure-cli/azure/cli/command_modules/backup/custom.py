@@ -1835,9 +1835,11 @@ def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_r
         azure_region = secondary_region_map[vault_location]
         client = backup_crr_job_details_cf(cmd.cli_ctx)
         response = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
-        return cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
+        response = cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
+        return cust_help.serialize_hybrid_model(response)
     response = client.get(vault_name, resource_group_name, name)
-    return cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
+    response = cust_help.set_job_container_subscription_id(cust_help.replace_min_value_in_subtask(response))
+    return cust_help.serialize_hybrid_model(response)
 
 
 def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):

@@ -391,8 +391,9 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 
 def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type=None):
-    return common.list_associated_items_for_policy(client, resource_group_name, vault_name, name,
-                                                   backup_management_type)
+    items = common.list_associated_items_for_policy(
+        client, resource_group_name, vault_name, name, backup_management_type)
+    return custom_help.serialize_hybrid_model(items)
 
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
