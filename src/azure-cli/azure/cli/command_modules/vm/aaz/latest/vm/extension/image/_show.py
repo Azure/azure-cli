@@ -26,9 +26,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2026-04-01"],
         ]
     }
 
@@ -145,7 +145,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -190,6 +190,10 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -200,6 +204,10 @@ class Show(AAZCommand):
                 serialized_name="computeRole",
                 flags={"required": True},
             )
+            properties.extension_feature_metadata = AAZObjectType(
+                serialized_name="extensionFeatureMetadata",
+                flags={"read_only": True},
+            )
             properties.handler_schema = AAZStrType(
                 serialized_name="handlerSchema",
                 flags={"required": True},
@@ -208,11 +216,61 @@ class Show(AAZCommand):
                 serialized_name="operatingSystem",
                 flags={"required": True},
             )
+            properties.release_category = AAZStrType(
+                serialized_name="releaseCategory",
+                flags={"read_only": True},
+            )
+            properties.release_notes = AAZStrType(
+                serialized_name="releaseNotes",
+                flags={"read_only": True},
+            )
+            properties.run_profile = AAZStrType(
+                serialized_name="runProfile",
+                flags={"read_only": True},
+            )
             properties.supports_multiple_extensions = AAZBoolType(
                 serialized_name="supportsMultipleExtensions",
             )
+            properties.urgency_level = AAZStrType(
+                serialized_name="urgencyLevel",
+                flags={"read_only": True},
+            )
             properties.vm_scale_set_enabled = AAZBoolType(
                 serialized_name="vmScaleSetEnabled",
+            )
+
+            extension_feature_metadata = cls._schema_on_200.properties.extension_feature_metadata
+            extension_feature_metadata.extension_feature_tags = AAZListType(
+                serialized_name="extensionFeatureTags",
+            )
+
+            extension_feature_tags = cls._schema_on_200.properties.extension_feature_metadata.extension_feature_tags
+            extension_feature_tags.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.extension_feature_metadata.extension_feature_tags.Element
+            _element.key = AAZStrType(
+                flags={"required": True},
+            )
+            _element.value = AAZStrType()
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.tags
