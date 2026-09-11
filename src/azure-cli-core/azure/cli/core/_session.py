@@ -68,12 +68,12 @@ class Session(MutableMapping):
             fd, temp_name = tempfile.mkstemp(dir=directory, prefix=os.path.basename(target) + '.',
                                              suffix='.tmp')
         except OSError as ex:
-            if ex.errno not in (errno.EACCES, errno.EPERM, errno.EROFS):
-                # Anything else, a full disk for instance, would also break the in place write and
-                # would lose the file doing it, so let it surface instead.
+            if ex.errno not in (errno.EACCES, errno.EPERM):
+                # Anything else, a full disk or a read only file system, would break the in place
+                # write too, so there is nothing to fall back to and it should surface.
                 raise
-            # The directory is not writable but the file is, which happens in locked down
-            # containers and CI images. Writing in place still works there, so keep the old
+            # The directory denies writes but the file itself is writable, which happens in locked
+            # down containers and CI images. Writing in place still works there, so keep the old
             # behaviour rather than failing a save that used to succeed.
             with open(self.filename, 'w', encoding=self._encoding) as f:
                 json.dump(self.data, f)
