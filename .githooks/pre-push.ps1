@@ -26,22 +26,31 @@ if ($editableLocation) {
 # Get extension repo paths and join them with spaces
 $Extensions = (azdev extension repo list -o tsv) -join ' '
 
-# Fetch upstream/dev branch
-Write-Host "Fetching upstream/dev branch..." -ForegroundColor Green
-git fetch upstream dev
+# Detect the remote pointing to Azure/azure-cli
+$remoteLines = git remote -v | Select-String -Pattern "Azure/azure-cli" | Select-String -Pattern "\(fetch\)"
+$UpstreamRemote = if ($remoteLines) { ($remoteLines[0] -split "\s+")[0] } else { $null }
+if (-not $UpstreamRemote) {
+    Write-Host "Error: No remote found pointing to Azure/azure-cli. Please run 'git remote add upstream https://github.com/Azure/azure-cli.git' first." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Using remote: $UpstreamRemote" -ForegroundColor Cyan
+
+# Fetch remote dev branch
+Write-Host "Fetching $UpstreamRemote/dev branch..." -ForegroundColor Green
+git fetch $UpstreamRemote dev
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to fetch upstream/dev branch. Please run 'git remote add upstream https://github.com/Azure/azure-cli.git' first." -ForegroundColor Red
+    Write-Host "Error: Failed to fetch $UpstreamRemote/dev branch." -ForegroundColor Red
     exit 1
 }
 
 # Check if current branch needs rebasing
-$mergeBase = git merge-base HEAD upstream/dev
-$upstreamHead = git rev-parse upstream/dev
+$mergeBase = git merge-base HEAD "$UpstreamRemote/dev"
+$upstreamHead = git rev-parse "$UpstreamRemote/dev"
 Write-Host "Initial mergeBase: $mergeBase" -ForegroundColor Cyan
 
 if ($mergeBase -ne $upstreamHead) {
     Write-Host ""
-    Write-Host "Your branch is not up to date with upstream/dev." -ForegroundColor Yellow
+    Write-Host "Your branch is not up to date with $UpstreamRemote/dev." -ForegroundColor Yellow
     Write-Host "Would you like to automatically rebase and setup? [Y/n]" -ForegroundColor Yellow
 
     try {
@@ -55,14 +64,14 @@ if ($mergeBase -ne $upstreamHead) {
     }
 
     if ($input -match '^[Yy]$') {
-        Write-Host "Rebasing with upstream/dev..." -ForegroundColor Green
-        git rebase upstream/dev
+        Write-Host "Rebasing with $UpstreamRemote/dev..." -ForegroundColor Green
+        git rebase "$UpstreamRemote/dev"
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Rebase failed. Please resolve conflicts and try again." -ForegroundColor Red
             exit 1
         }
         Write-Host "Rebase completed successfully." -ForegroundColor Green
-        $mergeBase = git merge-base HEAD upstream/dev
+        $mergeBase = git merge-base HEAD "$UpstreamRemote/dev"
         Write-Host "Updated mergeBase: $mergeBase" -ForegroundColor Cyan
 
         Write-Host "Running azdev setup..." -ForegroundColor Green
