@@ -491,7 +491,7 @@ class TagScenarioTest(ScenarioTest):
         self.kwargs['public_ip_id'] = public_ip['publicIp']['id']
         self.cmd('resource tag --ids {public_ip_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
 
-        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vault_id} --no-wait', checks=self.is_empty())
         self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
         self.cmd('resource delete --id {public_ip_id}', checks=self.is_empty())
 
