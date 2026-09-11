@@ -74,9 +74,11 @@ class Session(MutableMapping):
                 raise
             # The directory denies writes but the file itself is writable, which happens in locked
             # down containers and CI images. Writing in place still works there, so keep the old
-            # behaviour rather than failing a save that used to succeed.
+            # behaviour rather than failing a save that used to succeed. Serialize first so that
+            # unserializable data raises before the file is opened and truncated.
+            content = json.dumps(self.data)
             with open(self.filename, 'w', encoding=self._encoding) as f:
-                json.dump(self.data, f)
+                f.write(content)
             return
 
         try:

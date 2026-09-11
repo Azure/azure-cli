@@ -92,6 +92,7 @@ class TestSession(unittest.TestCase):
             self.assertEqual(json.load(f), {'a': 2})
 
     @unittest.skipIf(os.name == 'nt', 'directory permissions are not enforced the same way on Windows')
+    @unittest.skipIf(hasattr(os, 'geteuid') and os.geteuid() == 0, 'root ignores the directory mode')
     def test_save_still_writes_when_the_directory_is_not_writable(self):
         # Locked down containers and build images mount the config directory read only while
         # leaving the file itself writable. A save that used to succeed there must keep working.
@@ -115,6 +116,28 @@ class TestSession(unittest.TestCase):
                 self._session({'a': 1}).save()
 
         self.assertEqual(self._read(), {'kept': True})
+
+    def test_save_falls_back_without_losing_the_file_when_the_data_is_bad(self):
+        # The fallback must keep the same guarantee as the atomic path: data that cannot be
+        # serialized has to fail before the target is opened.
+        with open(self.filename, 'w', encoding='utf-8-sig') as f:
+            json.dump({'kept': True}, f)
+
+        with mock.patch('tempfile.mkstemp', side_effect=OSError(errno.EACCES, 'Permission denied')):
+            with self.assertRaises(TypeError):
+                self._session({'a': 'fine', 'b': {1, 2}}).save()
+
+        self.assertEqual(self._read(), {'kept': True})
+
+    def test_save_uses_the_fallback_when_the_directory_denies_permission(self):
+        # Runs everywhere, including as root where the directory mode would not stop mkstemp.
+        with open(self.filename, 'w', encoding='utf-8-sig') as f:
+            json.dump({}, f)
+
+        with mock.patch('tempfile.mkstemp', side_effect=OSError(errno.EACCES, 'Permission denied')):
+            self._session({'a': 1}).save()
+
+        self.assertEqual(self._read(), {'a': 1})
 
     def test_load_reads_back_what_save_wrote(self):
         self._session({'a': 1}).save()
