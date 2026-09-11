@@ -13,6 +13,11 @@ helps['bot create'] = """
     type: command
     short-summary: Create a new v4 SDK bot.
     long-summary: Create a new v4 SDK bot.
+    examples:
+        - name: Create a new v4 SDK bot.
+          text: |-
+            az bot create -g rg -n bot --appid id --app-type MultiTenant
+
 """
 helps['bot show'] = """
     type: command
