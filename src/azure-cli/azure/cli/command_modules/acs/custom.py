@@ -58,6 +58,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_SUBNET_ID,
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
+    CONST_KUBELOGIN_LATEST_RELEASE_URL,
+    CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
@@ -2573,6 +2575,44 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
                        install_dir, cli)
 
 
+# get the latest version of kubelogin
+def _get_latest_kubelogin_version(cloud_name, gh_token=None):
+    if cloud_name.lower() == 'azurechinacloud':
+        latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
+        logger.warning(
+            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+
+    latest_release_url = CONST_KUBELOGIN_LATEST_RELEASE_URL
+    logger.warning(
+        'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+    try:
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+    # pylint: disable=broad-except
+    except Exception as ex:
+        # the GitHub API is rate limited to 60 requests per hour per IP address for unauthenticated
+        # requests, fall back to the version file published as a release asset, which is not rate limited
+        logger.warning(
+            'Failed to get the latest version of kubelogin from "%s" (%s), falling back to "%s"',
+            latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL)
+        try:
+            latest_version = _urlopen_read(CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL).decode('UTF-8').strip()
+        # pylint: disable=broad-except
+        except Exception as fallback_ex:
+            raise CLIError(
+                'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}). Please retry later or '
+                'specify the version with "--kubelogin-version".'.format(
+                    latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, fallback_ex))
+        if not re.match(r'^v?\d+\.\d+\.\d+', latest_version):
+            raise CLIError(
+                'Unexpected version "{}" returned by "{}". Please retry later or specify the version with '
+                '"--kubelogin-version".'.format(latest_version, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL))
+        # the version file holds the release tag (e.g. "v0.2.19"), normalize it in case the prefix is missing
+        return latest_version if latest_version.startswith('v') else 'v' + latest_version
+
+
 # install kubelogin
 def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None, gh_token=None):
     """
@@ -2587,13 +2627,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
-        if cloud_name.lower() == 'azurechinacloud':
-            latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        logger.warning(
-            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
-        client_version = json.loads(latest_release)['tag_name'].strip()
+        client_version = _get_latest_kubelogin_version(cloud_name, gh_token=gh_token)
     else:
         client_version = "v%s" % client_version
 

@@ -236,6 +236,14 @@ ADDONS = {
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
 
+# consts for install-cli command
+CONST_KUBELOGIN_LATEST_RELEASE_URL = "https://api.github.com/repos/Azure/kubelogin/releases/latest"
+# plain text file published as a kubelogin release asset, used as a fallback when the GitHub API is
+# unavailable (e.g. when the unauthenticated rate limit is hit)
+CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL = (
+    "https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt"
+)
+
 # consts for maintenance configuration schedule type
 CONST_DAILY_MAINTENANCE_SCHEDULE = "Daily"
 CONST_WEEKLY_MAINTENANCE_SCHEDULE = "Weekly"
