@@ -58,6 +58,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
     create_kubelogin_zip,
     get_test_data_file_path,
 )
+from azure.cli.core.azclierror import ClientRequestError
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -889,7 +890,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             HTTPError(CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, 500, 'internal server error', None, None),
         ]
 
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ClientRequestError):
             _get_latest_kubelogin_version('azurecloud')
         self.assertEqual(mock_urlopen_read.call_count, 2)
 
@@ -902,7 +903,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             b'<html>not found</html>',
         ]
 
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ClientRequestError):
             _get_latest_kubelogin_version('azurecloud')
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')

@@ -2601,14 +2601,15 @@ def _get_latest_kubelogin_version(cloud_name, gh_token=None):
             latest_version = _urlopen_read(CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL).decode('UTF-8').strip()
         # pylint: disable=broad-except
         except Exception as fallback_ex:
-            raise CLIError(
-                'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}). Please retry later or '
-                'specify the version with "--kubelogin-version".'.format(
-                    latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, fallback_ex))
+            raise ClientRequestError(
+                'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}).'.format(
+                    latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, fallback_ex),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
         if not re.match(r'^v?\d+\.\d+\.\d+', latest_version):
-            raise CLIError(
-                'Unexpected version "{}" returned by "{}". Please retry later or specify the version with '
-                '"--kubelogin-version".'.format(latest_version, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL))
+            raise ClientRequestError(
+                'Unexpected version "{}" returned by "{}".'.format(
+                    latest_version, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
         # the version file holds the release tag (e.g. "v0.2.19"), normalize it in case the prefix is missing
         return latest_version if latest_version.startswith('v') else 'v' + latest_version
 
