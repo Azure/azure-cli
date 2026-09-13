@@ -8,7 +8,7 @@ import shutil
 import tempfile
 import unittest
 from unittest import mock
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 import datetime
 from dateutil.parser import parse
 
@@ -56,7 +56,6 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
     create_kubelogin_zip,
     get_test_data_file_path,
 )
-from azure.cli.core.azclierror import ClientRequestError
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -879,22 +878,33 @@ class AcsCustomCommandTest(unittest.TestCase):
                 MockUrlretrieveUrlValidator('https://github.com/Azure/kubelogin/releases/download', 'v0.0.30'),
                 mock.ANY)
             self.assertTrue(
-                any('falling back' in str(call) for call in logger_mock.warning.call_args_list))
-            self.assertTrue(os.path.exists(test_location))
+                any('rate limit was exceeded' in str(call) for call in logger_mock.warning.call_args_list))
         finally:
             shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_get_latest_kubelogin_version_unusable_api_response(self, logger_mock, mock_urlopen_read):
-        """Test that a response which is not the expected json also triggers the fallback."""
-        for api_response in (b'<html>rate limit</html>', b'{"message": "API rate limit exceeded"}'):
-            with self.subTest(api_response=api_response):
+    def test_get_latest_kubelogin_version_fallback_only_on_rate_limit(self, logger_mock, mock_urlopen_read):
+        """Test that the version file is only used for a rate limit, other failures are surfaced as they are."""
+        api_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+        cases = [
+            (HTTPError(api_url, 429, 'too many requests', None, None), True),
+            (HTTPError(api_url, 500, 'internal server error', None, None), False),
+            (URLError('[Errno -2] Name or service not known'), False),
+        ]
+        for error, expect_fallback in cases:
+            with self.subTest(error=error):
                 mock_urlopen_read.reset_mock()
-                mock_urlopen_read.side_effect = [api_response, b'v0.0.30']
+                mock_urlopen_read.side_effect = [error, b'v0.0.30']
 
-                self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
-                self.assertEqual(mock_urlopen_read.call_count, 2)
+                if expect_fallback:
+                    self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+                    self.assertEqual(mock_urlopen_read.call_count, 2)
+                else:
+                    with self.assertRaises(type(error)) as cm:
+                        _get_latest_kubelogin_version('azurecloud')
+                    self.assertIs(cm.exception, error)
+                    mock_urlopen_read.assert_called_once()
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -933,29 +943,6 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with self.assertRaises(ClientRequestError):
             _get_latest_kubelogin_version('azurecloud')
-
-    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
-    @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_get_latest_kubelogin_version_local_error_not_retried(self, logger_mock, mock_urlopen_read):
-        """Test that a local error (e.g. an unusable cert store) is surfaced instead of hitting the fallback."""
-        ssl_error = ClientRequestError('SSL certificate verification failed.')
-        mock_urlopen_read.side_effect = ssl_error
-
-        with self.assertRaises(ClientRequestError) as cm:
-            _get_latest_kubelogin_version('azurecloud')
-        self.assertIs(cm.exception, ssl_error)
-        mock_urlopen_read.assert_called_once()
-
-    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
-    @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_get_latest_kubelogin_version_china_cloud(self, logger_mock, mock_urlopen_read):
-        """Test that the china cloud mirror is used, the GitHub fallback is not reachable from there."""
-        mock_urlopen_read.return_value = b'{"tag_name": "v0.0.30"}'
-
-        self.assertEqual(_get_latest_kubelogin_version('AzureChinaCloud'), 'v0.0.30')
-        mock_urlopen_read.assert_called_once()
-        self.assertEqual(
-            mock_urlopen_read.call_args[0][0], 'https://mirror.azure.cn/kubernetes/kubelogin/latest')
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)

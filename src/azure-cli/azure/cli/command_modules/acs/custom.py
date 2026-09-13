@@ -2589,11 +2589,13 @@ def _get_latest_kubelogin_version(cloud_name, gh_token=None):
     try:
         latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
         return json.loads(latest_release)['tag_name'].strip()
-    except (OSError, ValueError, KeyError) as ex:
-        # fall back to the version file, it is not subject to the GitHub API rate limit
+    except URLError as ex:
+        # the GitHub api answers with 403 or 429 when the rate limit is exceeded
+        if getattr(ex, 'code', None) not in (403, 429):
+            raise
         logger.warning(
-            'Failed to get the latest version of kubelogin from "%s" (%s), falling back to "%s"',
-            latest_release_url, ex, fallback_url)
+            'The GitHub api rate limit was exceeded (%s), getting the latest version of kubelogin from "%s"',
+            ex, fallback_url)
         try:
             latest_version = _urlopen_read(fallback_url).decode('UTF-8').strip()
         except OSError as fallback_ex:
