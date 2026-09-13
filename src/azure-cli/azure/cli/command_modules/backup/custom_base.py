@@ -13,7 +13,7 @@ from azure.cli.command_modules.backup._client_factory import protection_policies
     backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf, vaults_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 # pylint: disable=import-error
 
@@ -42,9 +42,9 @@ def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, 
         raise ValidationError("Multiple items found. Please use native container and item names.")
 
     # Item-level validation (state, workload specifics)
-    from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectionState
-    if item.properties.protection_state not in [ProtectionState.protected,
-                                                ProtectionState.protection_stopped]:
+    from azure.mgmt.recoveryservicesbackup.models import ProtectionState
+    if item.properties.protection_state not in [ProtectionState.PROTECTED,
+                                                ProtectionState.PROTECTION_STOPPED]:
         raise ValidationError(f"Reconfiguration only supported for items in states: Protected or "
                               f"ProtectionStopped. Current state: "
                               f"{item.properties.protection_state}")

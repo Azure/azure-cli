@@ -10,7 +10,7 @@ import azure.cli.command_modules.backup.custom_help as helper
 
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
@@ -21,7 +21,7 @@ from azure.cli.command_modules.backup._client_factory import protection_containe
     resources_cf, backup_protected_items_cf, protected_items_cf
 from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 from knack.log import get_logger
@@ -440,15 +440,15 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
     afs_item_properties = AzureFileshareProtectedItem()
     afs_item_properties.policy_id = ''
     if retain_recovery_points_as_per_policy:
-        afs_item_properties.protection_state = ProtectionState.backups_suspended
+        afs_item_properties.protection_state = ProtectionState.BACKUPS_SUSPENDED
     else:
-        afs_item_properties.protection_state = ProtectionState.protection_stopped
+        afs_item_properties.protection_state = ProtectionState.PROTECTION_STOPPED
     afs_item_properties.source_resource_id = item.properties.source_resource_id
     afs_item = ProtectedItemResource(properties=afs_item_properties)
 
     # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if afs_item.properties.protection_state == ProtectionState.protection_stopped:
+    if afs_item.properties.protection_state == ProtectionState.PROTECTION_STOPPED:
         if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
                                              vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario

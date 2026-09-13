@@ -15,10 +15,15 @@ from knack.prompting import prompt_y_n
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.activestamp.models import OperationStatusValues, JobStatus
-from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
-
+from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues
 from azure.cli.core.util import CLIError
+
+try:
+    from azure.mgmt.recoveryservicesbackup.models import CrrJobRequest
+except ImportError:
+    def CrrJobRequest(*_args, **_kwargs):
+        raise CLIError('This operation is not supported by the installed Recovery Services Backup SDK.')
+
 from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
@@ -413,11 +418,14 @@ def get_target_path(resource_type, path, logical_name, data_directory_paths):
 # Tracking Utilities
 # pylint: disable=inconsistent-return-statements
 def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
-    if operation_status.properties:
-        recovery_target = operation_status.properties.recovery_target
-        return recovery_target.client_scripts
+    if operation_status.status != OperationStatusValues.SUCCEEDED.value:
+        raise CLIError('Provisioning access to the recovery point failed with status: {}.'.format(
+            operation_status.status))
+
+    return operation_id
 
 
 # pylint: disable=inconsistent-return-statements
@@ -436,7 +444,7 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
-    while operation_status.status == OperationStatusValues.in_progress.value:
+    while operation_status.status == OperationStatusValues.IN_PROGRESS.value:
         time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
@@ -458,7 +466,7 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
-    while operation_status.status == OperationStatusValues.in_progress.value:
+    while operation_status.status == OperationStatusValues.IN_PROGRESS.value:
         time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
@@ -507,7 +515,7 @@ def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, contain
 
 
 def job_in_progress(job_status):
-    return job_status in [JobStatus.in_progress.value, JobStatus.cancelling.value]
+    return job_status in ['InProgress', 'Cancelling']
 
 # List Utilities
 
