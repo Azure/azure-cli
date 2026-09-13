@@ -1400,11 +1400,11 @@ def page_blob_tier_validator_track2(cmd, namespace):
 
     try:
         namespace.premium_page_blob_tier = getattr(cmd.get_models(
-            '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier'), namespace.tier)
+            '_generated.models._enums#PremiumPageBlobAccessTier'), namespace.tier)
     except AttributeError:
         from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
         tier_names = get_blob_tier_names_track2(
-            cmd.cli_ctx, '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier')
+            cmd.cli_ctx, '_generated.models._enums#PremiumPageBlobAccessTier')
         raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(tier_names)))
 
 
