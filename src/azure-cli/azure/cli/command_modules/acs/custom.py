@@ -58,8 +58,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_SUBNET_ID,
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
-    CONST_KUBELOGIN_LATEST_RELEASE_URL,
-    CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
@@ -2584,31 +2582,34 @@ def _get_latest_kubelogin_version(cloud_name, gh_token=None):
         latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
         return json.loads(latest_release)['tag_name'].strip()
 
-    latest_release_url = CONST_KUBELOGIN_LATEST_RELEASE_URL
+    latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+    # plain text file published as a release asset, it is not subject to the GitHub API rate limit
+    # of 60 requests per hour per IP address for unauthenticated requests
+    fallback_url = 'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt'
     logger.warning(
         'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+    # OSError covers URLError/HTTPError (e.g. a 403 when rate limited), ValueError and KeyError cover a
+    # response that is not the expected json. A ClientRequestError raised by _urlopen_read is not caught,
+    # it reports a local issue (e.g. an unusable cert store) that the fallback url would hit as well.
     try:
         latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
         return json.loads(latest_release)['tag_name'].strip()
-    # pylint: disable=broad-except
-    except Exception as ex:
-        # the GitHub API is rate limited to 60 requests per hour per IP address for unauthenticated
-        # requests, fall back to the version file published as a release asset, which is not rate limited
+    except (OSError, ValueError, KeyError) as ex:
         logger.warning(
             'Failed to get the latest version of kubelogin from "%s" (%s), falling back to "%s"',
-            latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL)
+            latest_release_url, ex, fallback_url)
         try:
-            latest_version = _urlopen_read(CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL).decode('UTF-8').strip()
-        # pylint: disable=broad-except
-        except Exception as fallback_ex:
+            # the token is deliberately not sent here, the release asset is served by a redirect to a
+            # storage endpoint which rejects requests carrying an unexpected Authorization header
+            latest_version = _urlopen_read(fallback_url).decode('UTF-8').strip()
+        except OSError as fallback_ex:
             raise ClientRequestError(
                 'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}).'.format(
-                    latest_release_url, ex, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, fallback_ex),
+                    latest_release_url, ex, fallback_url, fallback_ex),
                 recommendation='Please retry later, or specify a version with --kubelogin-version.')
         if not re.match(r'^v?\d+\.\d+\.\d+', latest_version):
             raise ClientRequestError(
-                'Unexpected version "{}" returned by "{}".'.format(
-                    latest_version, CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL),
+                'Unexpected version "{}" returned by "{}".'.format(latest_version, fallback_url),
                 recommendation='Please retry later, or specify a version with --kubelogin-version.')
         # the version file holds the release tag (e.g. "v0.2.19"), normalize it in case the prefix is missing
         return latest_version if latest_version.startswith('v') else 'v' + latest_version

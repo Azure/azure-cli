@@ -17,8 +17,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
-    CONST_KUBELOGIN_LATEST_RELEASE_URL,
-    CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
@@ -70,6 +68,10 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
+
+
+GITHUB_API_URL = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+VERSION_FILE_URL = 'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt'
 
 
 class AcsCustomCommandTest(unittest.TestCase):
@@ -857,9 +859,8 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_latest_version_fallback(self, logger_mock, mock_url_retrieve, mock_urlopen_read):
-        """Test that the version file is used when the GitHub API fails, e.g. due to rate limiting."""
-        rate_limited = HTTPError(CONST_KUBELOGIN_LATEST_RELEASE_URL, 403, 'rate limit exceeded', None, None)
-        mock_urlopen_read.side_effect = [rate_limited, b'v0.0.30']
+        """Test that the version file is used to install kubelogin when the GitHub API is rate limited."""
+        mock_urlopen_read.side_effect = [HTTPError(GITHUB_API_URL, 403, 'rate limit exceeded', None, None), b'v0.0.30']
         mock_url_retrieve.side_effect = create_kubelogin_zip
 
         try:
@@ -867,12 +868,13 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
 
             k8s_install_kubelogin(
-                mock.MagicMock(), client_version='latest', install_location=test_location, arch="amd64")
+                mock.MagicMock(), client_version='latest', install_location=test_location,
+                arch="amd64", gh_token='ghp_test_token_123')
 
-            # the version file is downloaded without the GitHub API
-            self.assertEqual(mock_urlopen_read.call_count, 2)
-            self.assertEqual(
-                mock_urlopen_read.call_args_list[1][0][0], CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL)
+            fallback_call = mock_urlopen_read.call_args_list[1]
+            self.assertEqual(fallback_call[0][0], VERSION_FILE_URL)
+            # the release asset is served by a redirect that rejects an unexpected Authorization header
+            self.assertIsNone(fallback_call.kwargs.get('gh_token'))
             # the version from the version file is used to build the download url
             mock_url_retrieve.assert_called_with(
                 MockUrlretrieveUrlValidator('https://github.com/Azure/kubelogin/releases/download', 'v0.0.30'),
@@ -883,23 +885,44 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_unusable_api_response(self, logger_mock, mock_urlopen_read):
+        """Test that a response which is not the expected json also triggers the fallback."""
+        for api_response in (b'<html>rate limit</html>', b'{"message": "API rate limit exceeded"}'):
+            mock_urlopen_read.reset_mock()
+            mock_urlopen_read.side_effect = [api_response, b'v0.0.30']
+
+            self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+            self.assertEqual(mock_urlopen_read.call_count, 2)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_fallback_without_tag_prefix(self, logger_mock, mock_urlopen_read):
+        """Test that a bare version is normalized to the release tag used to build the download url."""
+        mock_urlopen_read.side_effect = [HTTPError(GITHUB_API_URL, 403, 'rate limited', None, None), b'0.0.30\n']
+
+        self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_get_latest_kubelogin_version_all_sources_fail(self, logger_mock, mock_urlopen_read):
         """Test that a clear error is raised when both the GitHub API and the version file are unavailable."""
         mock_urlopen_read.side_effect = [
-            HTTPError(CONST_KUBELOGIN_LATEST_RELEASE_URL, 403, 'rate limit exceeded', None, None),
-            HTTPError(CONST_KUBELOGIN_LATEST_VERSION_FALLBACK_URL, 500, 'internal server error', None, None),
+            HTTPError(GITHUB_API_URL, 403, 'rate limit exceeded', None, None),
+            HTTPError(VERSION_FILE_URL, 500, 'internal server error', None, None),
         ]
 
-        with self.assertRaises(ClientRequestError):
+        with self.assertRaises(ClientRequestError) as cm:
             _get_latest_kubelogin_version('azurecloud')
-        self.assertEqual(mock_urlopen_read.call_count, 2)
+        # both failures are reported so a rate limit can be told apart from an outage
+        self.assertIn('403', str(cm.exception))
+        self.assertIn('500', str(cm.exception))
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_get_latest_kubelogin_version_unexpected_fallback_content(self, logger_mock, mock_urlopen_read):
         """Test that content which is not a version (e.g. an html error page) is rejected."""
         mock_urlopen_read.side_effect = [
-            HTTPError(CONST_KUBELOGIN_LATEST_RELEASE_URL, 403, 'rate limit exceeded', None, None),
+            HTTPError(GITHUB_API_URL, 403, 'rate limit exceeded', None, None),
             b'<html>not found</html>',
         ]
 
@@ -908,8 +931,21 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_local_error_not_retried(self, logger_mock, mock_urlopen_read):
+        """Test that a local error (e.g. an unusable cert store) is surfaced instead of hitting the fallback."""
+        ssl_error = ClientRequestError('SSL certificate verification failed.')
+        mock_urlopen_read.side_effect = ssl_error
+
+        with self.assertRaises(ClientRequestError) as cm:
+            _get_latest_kubelogin_version('azurecloud')
+        # the original actionable error is preserved and the fallback url is not requested
+        self.assertIs(cm.exception, ssl_error)
+        mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_get_latest_kubelogin_version_china_cloud(self, logger_mock, mock_urlopen_read):
-        """Test that the china cloud mirror is used as is, without the GitHub fallback."""
+        """Test that the china cloud mirror is used, the GitHub fallback is not reachable from there."""
         mock_urlopen_read.return_value = b'{"tag_name": "v0.0.30"}'
 
         self.assertEqual(_get_latest_kubelogin_version('AzureChinaCloud'), 'v0.0.30')
