@@ -18,7 +18,7 @@ class TestMoveIpConfigurationsAAZCommand(unittest.TestCase):
         self.assertIn('network vnet move-ip-configurations', command_table)
 
     def test_move_ip_configurations_command_schema(self):
-        from azure.cli.command_modules.network.aaz.latest.network.vnet._move_ip_configurations import (
+        from azure.cli.command_modules.network.aaz.latest.network.vnet import (
             MoveIpConfigurations,
         )
 
