@@ -14566,7 +14566,7 @@ spec:
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.observability.enabled", True),
                 self.check("addonProfiles.omsagent.enabled", True),
-                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
+                self.check("azureMonitorProfile.containerInsights.containerNetworkLogs", "Enabled"),
             ],
         )
 
@@ -14587,7 +14587,7 @@ spec:
             ],
         )
         self._wait_for_cluster_property(
-            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"
+            "azureMonitorProfile.containerInsights.containerNetworkLogs", "Disabled"
         )
 
         # update: enable high log scale mode independently via aks update
@@ -14613,7 +14613,7 @@ spec:
             ],
         )
         self._wait_for_cluster_property(
-            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"
+            "azureMonitorProfile.containerInsights.containerNetworkLogs", "Enabled"
         )
 
         # delete

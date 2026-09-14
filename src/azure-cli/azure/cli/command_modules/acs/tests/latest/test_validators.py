@@ -2046,5 +2046,241 @@ class TestValidateSshKey(unittest.TestCase):
         self.assertIsNone(namespace.ssh_key_value)
 
 
+class TestAzureMonitorLogsValidators(unittest.TestCase):
+    def test_enable_azure_monitor_logs_with_monitoring_addon_errors(self):
+        namespace = SimpleNamespace(enable_azure_monitor_logs=True, enable_addons="monitoring")
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_azure_monitor_logs_and_enable_addons(namespace)
+
+    def test_enable_azure_monitor_logs_with_other_addon_passes(self):
+        namespace = SimpleNamespace(enable_azure_monitor_logs=True, enable_addons="http_application_routing")
+        validators.validate_azure_monitor_logs_and_enable_addons(namespace)
+
+    def test_monitoring_addon_without_azure_monitor_logs_passes(self):
+        namespace = SimpleNamespace(enable_azure_monitor_logs=False, enable_addons="monitoring")
+        validators.validate_azure_monitor_logs_and_enable_addons(namespace)
+
+    def test_enable_and_disable_azure_monitor_logs_errors(self):
+        namespace = SimpleNamespace(enable_azure_monitor_logs=True, disable_azure_monitor_logs=True)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_azure_monitor_logs_enable_disable(namespace)
+
+    def test_only_enable_azure_monitor_logs_passes(self):
+        namespace = SimpleNamespace(
+            enable_azure_monitor_logs=True,
+            disable_azure_monitor_logs=False,
+            enable_msi_auth_for_monitoring=None,
+        )
+        validators.validate_azure_monitor_logs_enable_disable(namespace)
+
+    def test_create_explicit_legacy_msi_auth_flag_errors(self):
+        namespace = SimpleNamespace(
+            enable_azure_monitor_logs=True,
+            enable_addons=None,
+            enable_msi_auth_for_monitoring=False,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_azure_monitor_logs_and_enable_addons(namespace)
+
+    def test_create_default_msi_auth_flag_passes(self):
+        # On create the flag defaults to True, which is indistinguishable from explicit use.
+        namespace = SimpleNamespace(
+            enable_azure_monitor_logs=True,
+            enable_addons=None,
+            enable_msi_auth_for_monitoring=True,
+        )
+        validators.validate_azure_monitor_logs_and_enable_addons(namespace)
+
+    def test_update_explicit_msi_auth_flag_errors(self):
+        for value in (True, False):
+            namespace = SimpleNamespace(
+                enable_azure_monitor_logs=True,
+                disable_azure_monitor_logs=False,
+                enable_msi_auth_for_monitoring=value,
+            )
+            with self.assertRaises(MutuallyExclusiveArgumentError):
+                validators.validate_azure_monitor_logs_enable_disable(namespace)
+
+    def test_msi_auth_flag_without_azure_monitor_logs_passes(self):
+        namespace = SimpleNamespace(
+            enable_azure_monitor_logs=False,
+            disable_azure_monitor_logs=False,
+            enable_msi_auth_for_monitoring=False,
+        )
+        validators.validate_azure_monitor_logs_enable_disable(namespace)
+
+
+def _ci_settings_namespace(**kwargs):
+    defaults = {
+        "syslog_port": None,
+        "enable_prometheus_metrics_scraping": False,
+        "disable_prometheus_metrics_scraping": False,
+        "enable_azure_monitor_logs": False,
+        "disable_azure_monitor_logs": False,
+    }
+    defaults.update(kwargs)
+    return SimpleNamespace(**defaults)
+
+
+class TestContainerInsightsSettingsValidators(unittest.TestCase):
+    def test_enable_and_disable_prometheus_scraping_errors(self):
+        namespace = _ci_settings_namespace(
+            enable_prometheus_metrics_scraping=True,
+            disable_prometheus_metrics_scraping=True,
+            enable_azure_monitor_logs=True,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_container_insights_settings_for_create(namespace)
+
+    def test_syslog_port_out_of_range_errors(self):
+        namespace = _ci_settings_namespace(syslog_port=70000, enable_azure_monitor_logs=True)
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_container_insights_settings_for_create(namespace)
+
+    def test_syslog_port_zero_errors(self):
+        namespace = _ci_settings_namespace(syslog_port=0, enable_azure_monitor_logs=True)
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.validate_container_insights_settings_for_create(namespace)
+
+    def test_settings_without_enable_azure_monitor_logs_errors_on_create(self):
+        namespace = _ci_settings_namespace(syslog_port=28330)
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_container_insights_settings_for_create(namespace)
+
+    def test_settings_with_enable_azure_monitor_logs_passes_on_create(self):
+        namespace = _ci_settings_namespace(
+            syslog_port=28330,
+            enable_prometheus_metrics_scraping=True,
+            enable_azure_monitor_logs=True,
+        )
+        validators.validate_container_insights_settings_for_create(namespace)
+
+    def test_settings_with_disable_azure_monitor_logs_errors(self):
+        namespace = _ci_settings_namespace(syslog_port=28330, disable_azure_monitor_logs=True)
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_container_insights_settings_for_update(namespace)
+
+    def test_settings_on_update_defer_enablement_check(self):
+        namespace = _ci_settings_namespace(syslog_port=28330)
+        validators.validate_container_insights_settings_for_update(namespace)
+
+    def test_no_settings_passes(self):
+        validators.validate_container_insights_settings_for_create(_ci_settings_namespace())
+
+
+def _otel_namespace(**kwargs):
+    defaults = {
+        "enable_opentelemetry_metrics": False,
+        "disable_opentelemetry_metrics": False,
+        "opentelemetry_metrics_port_http": None,
+        "opentelemetry_metrics_port_grpc": None,
+        "enable_opentelemetry_logs_traces": False,
+        "disable_opentelemetry_logs_traces": False,
+        "opentelemetry_logs_traces_port_http": None,
+        "opentelemetry_logs_traces_port_grpc": None,
+        "enable_azure_monitor_metrics": False,
+        "enable_azure_monitor_logs": False,
+        "enable_addons": None,
+    }
+    defaults.update(kwargs)
+    return SimpleNamespace(**defaults)
+
+
+class TestOpenTelemetryValidators(unittest.TestCase):
+    def test_port_out_of_range_errors(self):
+        namespace = _otel_namespace(opentelemetry_metrics_port_http=70000)
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_opentelemetry_ports(namespace)
+
+    def test_duplicate_ports_error(self):
+        namespace = _otel_namespace(
+            opentelemetry_metrics_port_http=4318,
+            opentelemetry_logs_traces_port_http=4318,
+        )
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_opentelemetry_ports(namespace)
+
+    def test_distinct_ports_pass(self):
+        namespace = _otel_namespace(
+            opentelemetry_metrics_port_http=4318,
+            opentelemetry_metrics_port_grpc=4317,
+            opentelemetry_logs_traces_port_http=4320,
+            opentelemetry_logs_traces_port_grpc=4319,
+        )
+        validators.validate_opentelemetry_ports(namespace)
+
+    def test_enable_and_disable_otel_metrics_errors(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_metrics=True,
+            disable_opentelemetry_metrics=True,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_opentelemetry_metrics_dependencies(namespace)
+
+    def test_otel_metrics_without_azure_monitor_metrics_errors_on_create(self):
+        namespace = _otel_namespace(enable_opentelemetry_metrics=True)
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_opentelemetry_metrics_dependencies(namespace)
+
+    def test_otel_metrics_with_azure_monitor_metrics_passes_on_create(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_metrics=True,
+            enable_azure_monitor_metrics=True,
+        )
+        validators.validate_opentelemetry_metrics_dependencies(namespace)
+
+    def test_otel_metrics_on_update_defers_dependency_check(self):
+        namespace = _otel_namespace(enable_opentelemetry_metrics=True)
+        validators.validate_opentelemetry_metrics_dependencies_for_update(namespace)
+
+    def test_enable_and_disable_otel_logs_traces_errors(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_logs_traces=True,
+            disable_opentelemetry_logs_traces=True,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            validators.validate_opentelemetry_logs_traces_dependencies(namespace)
+
+    def test_otel_logs_traces_without_azure_monitor_logs_errors_on_create(self):
+        namespace = _otel_namespace(enable_opentelemetry_logs_traces=True)
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_opentelemetry_logs_traces_dependencies(namespace)
+
+    def test_otel_logs_traces_with_azure_monitor_logs_passes_on_create(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_logs_traces=True,
+            enable_azure_monitor_logs=True,
+        )
+        validators.validate_opentelemetry_logs_traces_dependencies(namespace)
+
+    def test_otel_logs_traces_with_monitoring_addon_passes_on_create(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_logs_traces=True,
+            enable_addons="monitoring",
+        )
+        validators.validate_opentelemetry_logs_traces_dependencies(namespace)
+
+    def test_otel_logs_traces_on_update_defers_dependency_check(self):
+        namespace = _otel_namespace(enable_opentelemetry_logs_traces=True)
+        validators.validate_opentelemetry_logs_traces_dependencies_for_update(namespace)
+
+    def test_aggregate_create_validator_runs_all_checks(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_metrics=True,
+            enable_azure_monitor_metrics=True,
+            opentelemetry_metrics_port_http=4318,
+            opentelemetry_metrics_port_grpc=4318,
+        )
+        with self.assertRaises(ArgumentUsageError):
+            validators.validate_azure_monitor_and_opentelemetry_for_create(namespace)
+
+    def test_aggregate_update_validator_passes_for_valid_namespace(self):
+        namespace = _otel_namespace(
+            enable_opentelemetry_metrics=True,
+            opentelemetry_metrics_port_grpc=4317,
+        )
+        validators.validate_azure_monitor_and_opentelemetry_for_update(namespace)
+
+
 if __name__ == "__main__":
     unittest.main()

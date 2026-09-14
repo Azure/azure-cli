@@ -24,6 +24,13 @@ Release History
 * `az aks nodepool rollback`: Show an accurate warning when only the node OS upgrade channel is enabled (#33854)
 * Implement enable/disable flags for user-defined scheduler configuration (#33934)
 * `az aks update`: Fix Azure Container Storage configuration detection for lowercase and boolean extension settings (#33938)
+* `az aks create`, `az aks update`: Add `--enable-azure-monitor-logs` to onboard Container Insights through the Azure Monitor profile using managed identity authentication
+* `az aks update`: Add `--disable-azure-monitor-logs` to offboard Container Insights
+* `az aks create`, `az aks update`: Add `--syslog-port`, `--enable-prometheus-metrics-scraping` and `--disable-prometheus-metrics-scraping` to tune the Azure Monitor Container Insights configuration
+* `az aks create`, `az aks update`: Add `--enable-opentelemetry-metrics`, `--disable-opentelemetry-metrics`, `--opentelemetry-metrics-port-http` and `--opentelemetry-metrics-port-grpc` for the OpenTelemetry metrics receiver
+* `az aks create`, `az aks update`: Add `--enable-opentelemetry-logs-traces`, `--disable-opentelemetry-logs-traces`, `--opentelemetry-logs-traces-port-http` and `--opentelemetry-logs-traces-port-grpc` for the OpenTelemetry logs and traces receiver
+* `az aks create`, `az aks update`: Write container network logs to `azureMonitorProfile.containerInsights.containerNetworkLogs` instead of the monitoring addon configuration, and reject `--enable-container-network-logs` on clusters using legacy shared key authentication
+* `az aks create`, `az aks update`, `az aks enable-addons`: Deprecate `--enable-msi-auth-for-monitoring` in favor of `--enable-azure-monitor-logs`
 
 **App Config**
 

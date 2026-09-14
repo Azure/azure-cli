@@ -22,6 +22,7 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs.addonconfiguration import (
     _create_or_update_dcr_with_table_readiness_retry,
     ensure_default_log_analytics_workspace_for_monitoring,
+    warn_on_legacy_monitoring_auth,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
@@ -1922,6 +1923,42 @@ class DcrTableReadinessRetryTest(unittest.TestCase):
 
         self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
         self.mock_sleep.assert_not_called()
+
+
+class TestWarnOnLegacyMonitoringAuth(unittest.TestCase):
+    def _warn_mock(self):
+        return mock.patch("azure.cli.command_modules.acs.addonconfiguration.logger.warning")
+
+    def test_warns_for_explicit_false_with_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring")
+        warn.assert_called_once()
+        self.assertIn("legacy shared key authentication", warn.call_args[0][0])
+
+    def test_warns_when_monitoring_is_one_of_several_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring,virtual-node")
+        warn.assert_called_once()
+
+    def test_no_warning_when_msi_auth_is_true(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(True, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_when_msi_auth_is_not_specified(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(None, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_without_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "virtual-node")
+        warn.assert_not_called()
+
+    def test_no_warning_without_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, None)
+        warn.assert_not_called()
 
 
 if __name__ == "__main__":

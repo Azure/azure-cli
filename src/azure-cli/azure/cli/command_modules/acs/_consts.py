@@ -160,6 +160,13 @@ CONST_MONITORING_ADDON_NAME = "omsagent"
 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = "logAnalyticsWorkspaceResourceID"
 CONST_MONITORING_USING_AAD_MSI_AUTH = "useAADAuth"
 
+# container network logs (azureMonitorProfile.containerInsights.containerNetworkLogs)
+CONST_CONTAINER_NETWORK_LOGS_ENABLED = "Enabled"
+CONST_CONTAINER_NETWORK_LOGS_DISABLED = "Disabled"
+# legacy omsagent addon config key, superseded by containerNetworkLogs on the Azure Monitor
+# profile path. Only read, to keep recognizing clusters onboarded before the switch.
+CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS = "enableRetinaNetworkFlags"
+
 # virtual node
 CONST_VIRTUAL_NODE_ADDON_NAME = "aciConnector"
 CONST_VIRTUAL_NODE_SUBNET_NAME = "SubnetName"
