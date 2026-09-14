@@ -22,8 +22,7 @@ class TestAddressPrefixSetAAZCommands(unittest.TestCase):
         self.assertIn('network asg address-prefix-set create', child_commands)
 
     def test_address_prefix_set_command_schemas(self):
-        from azure.cli.command_modules.network.aaz.latest.network.asg.address_prefix_set._create import Create
-        from azure.cli.command_modules.network.aaz.latest.network.asg.address_prefix_set._update import Update
+        from azure.cli.command_modules.network.aaz.latest.network.asg.address_prefix_set import Create, Update
 
         create_schema = Create._build_arguments_schema()
         self.assertTrue(create_schema.resource_group._required)
