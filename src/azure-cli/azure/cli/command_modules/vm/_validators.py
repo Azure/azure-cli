@@ -2831,11 +2831,12 @@ def validate_edge_zone(cmd, namespace):  # pylint: disable=unused-argument
 
 
 def _validate_capacity_reservation_group(cmd, namespace):
-    if getattr(namespace, 'capacity_reservation_group', None) is not None and \
-            getattr(namespace, 'disable_capacity_reservation_assignment', None) is True:
+    if (namespace.disable_capacity_reservation_assignment is True and
+            namespace.capacity_reservation_group is not None and
+            namespace.capacity_reservation_group != 'None'):
         raise MutuallyExclusiveArgumentError(
-            "--capacity-reservation-group cannot be used when --disable-capacity-reservation-assignment is set to true."
-        )
+            "--capacity-reservation-group must be omitted or set to None when "
+            "--disable-capacity-reservation-assignment is true.")
 
     if namespace.capacity_reservation_group and namespace.capacity_reservation_group != 'None':
 
