@@ -1014,3 +1014,215 @@ def validate_artifact_streaming(namespace):
             raise ArgumentUsageError('--enable-artifact-streaming can only be set for Linux nodepools')
         if disable_artifact_streaming:
             raise ArgumentUsageError('--disable-artifact-streaming can only be set for Linux nodepools')
+
+
+def _reject_msi_auth_flag_with_azure_monitor_logs(namespace, explicit_values):
+    """Reject --enable-msi-auth-for-monitoring alongside --enable-azure-monitor-logs.
+
+    Onboarding through the Azure Monitor profile is managed identity only, so the auth flag has no
+    meaning there. ``explicit_values`` differs by command because the flag's default does: it is
+    ``True`` on create, where only an explicit ``false`` is distinguishable from the default, and
+    ``None`` on update, where any value is explicit.
+    """
+    if not getattr(namespace, "enable_azure_monitor_logs", False):
+        return
+    if getattr(namespace, "enable_msi_auth_for_monitoring", None) in explicit_values:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both '--enable-azure-monitor-logs' and "
+            "'--enable-msi-auth-for-monitoring'. '--enable-azure-monitor-logs' onboards through "
+            "the Azure Monitor profile, which always uses managed identity authentication."
+        )
+
+
+def validate_azure_monitor_logs_and_enable_addons(namespace):
+    """Validate that enable_azure_monitor_logs and enable_addons don't conflict."""
+    if getattr(namespace, "enable_azure_monitor_logs", False):
+        enable_addons = getattr(namespace, "enable_addons", None)
+        if enable_addons and "monitoring" in enable_addons:
+            raise ArgumentUsageError(
+                "Cannot specify both '--enable-azure-monitor-logs' and '--enable-addons monitoring'. "
+                "Use either '--enable-azure-monitor-logs' or '--enable-addons monitoring'."
+            )
+    # On create the flag defaults to True, so only an explicit false is detectable here.
+    _reject_msi_auth_flag_with_azure_monitor_logs(namespace, (False,))
+
+
+def validate_azure_monitor_logs_enable_disable(namespace):
+    """Validate that enable and disable azure monitor logs parameters don't conflict."""
+    if (
+        getattr(namespace, "enable_azure_monitor_logs", False) and
+        getattr(namespace, "disable_azure_monitor_logs", False)
+    ):
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both '--enable-azure-monitor-logs' and '--disable-azure-monitor-logs'. "
+            "Use either '--enable-azure-monitor-logs' or '--disable-azure-monitor-logs'."
+        )
+    # On update the flag defaults to None, so any value is an explicit use.
+    _reject_msi_auth_flag_with_azure_monitor_logs(namespace, (True, False))
+
+
+def _specified_container_insights_setting_flags(namespace):
+    """Return the AMP containerInsights tuning flags explicitly present on the command line."""
+    flags = []
+    if getattr(namespace, "syslog_port", None) is not None:
+        flags.append("--syslog-port")
+    if getattr(namespace, "enable_prometheus_metrics_scraping", False):
+        flags.append("--enable-prometheus-metrics-scraping")
+    if getattr(namespace, "disable_prometheus_metrics_scraping", False):
+        flags.append("--disable-prometheus-metrics-scraping")
+    return flags
+
+
+def _validate_container_insights_settings_common(namespace):
+    """Validations for the containerInsights tuning flags that do not depend on cluster state."""
+    if (
+        getattr(namespace, "enable_prometheus_metrics_scraping", False) and
+        getattr(namespace, "disable_prometheus_metrics_scraping", False)
+    ):
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-prometheus-metrics-scraping and "
+            "--disable-prometheus-metrics-scraping at the same time."
+        )
+
+    syslog_port = getattr(namespace, "syslog_port", None)
+    if syslog_port is not None and not 1 <= syslog_port <= 65535:
+        raise InvalidArgumentValueError(
+            f"--syslog-port must be a valid TCP port between 1 and 65535, got {syslog_port}."
+        )
+
+    flags = _specified_container_insights_setting_flags(namespace)
+    if flags and getattr(namespace, "disable_azure_monitor_logs", False):
+        raise ArgumentUsageError(
+            f"{', '.join(flags)} cannot be specified with --disable-azure-monitor-logs."
+        )
+
+
+def validate_container_insights_settings_for_create(namespace):
+    """Validate the containerInsights tuning flags for create operations."""
+    _validate_container_insights_settings_common(namespace)
+
+    flags = _specified_container_insights_setting_flags(namespace)
+    if flags and not getattr(namespace, "enable_azure_monitor_logs", False):
+        raise ArgumentUsageError(
+            f"{', '.join(flags)} requires Azure Monitor logs to be enabled. "
+            "Please add --enable-azure-monitor-logs to your command."
+        )
+
+
+def validate_container_insights_settings_for_update(namespace):
+    """Validate the containerInsights tuning flags for update operations."""
+    _validate_container_insights_settings_common(namespace)
+    # Whether Azure Monitor logs is already enabled on the cluster is only visible once the
+    # ManagedCluster has been fetched, so that dependency check is deferred to the decorator.
+
+
+def validate_opentelemetry_ports(namespace):
+    """Validate that the OpenTelemetry HTTP and gRPC ports are in range and all distinct."""
+    ports = [
+        ("--opentelemetry-metrics-port-http", getattr(namespace, "opentelemetry_metrics_port_http", None)),
+        ("--opentelemetry-metrics-port-grpc", getattr(namespace, "opentelemetry_metrics_port_grpc", None)),
+        ("--opentelemetry-logs-traces-port-http", getattr(namespace, "opentelemetry_logs_traces_port_http", None)),
+        ("--opentelemetry-logs-traces-port-grpc", getattr(namespace, "opentelemetry_logs_traces_port_grpc", None)),
+    ]
+
+    for flag, port in ports:
+        if port is not None and not 1 <= port <= 65535:
+            raise ArgumentUsageError(
+                f"OpenTelemetry port {flag} must be between 1 and 65535, got {port}."
+            )
+
+    # All specified OpenTelemetry ports (HTTP and gRPC, metrics and logs/traces) must be distinct
+    specified = [(flag, port) for flag, port in ports if port is not None]
+    for i, (flag_i, port_i) in enumerate(specified):
+        for flag_j, port_j in specified[i + 1:]:
+            if port_i == port_j:
+                raise ArgumentUsageError(
+                    "OpenTelemetry ports must all be different. "
+                    f"{flag_i} and {flag_j} cannot both be set to {port_i}."
+                )
+
+
+def validate_opentelemetry_metrics_dependencies(namespace):
+    """Validate OpenTelemetry metrics dependencies for create operations."""
+    enable_otlp_metrics = getattr(namespace, "enable_opentelemetry_metrics", False)
+    disable_otlp_metrics = getattr(namespace, "disable_opentelemetry_metrics", False)
+
+    if enable_otlp_metrics and disable_otlp_metrics:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-opentelemetry-metrics and --disable-opentelemetry-metrics "
+            "at the same time."
+        )
+
+    # For create operations, require explicit Azure Monitor metrics enablement
+    if enable_otlp_metrics and not getattr(namespace, "enable_azure_monitor_metrics", False):
+        raise ArgumentUsageError(
+            "OpenTelemetry metrics requires Azure Monitor metrics to be enabled. "
+            "Please add --enable-azure-monitor-metrics to your command."
+        )
+
+
+def validate_opentelemetry_metrics_dependencies_for_update(namespace):
+    """Validate OpenTelemetry metrics dependencies for update operations."""
+    enable_otlp_metrics = getattr(namespace, "enable_opentelemetry_metrics", False)
+    disable_otlp_metrics = getattr(namespace, "disable_opentelemetry_metrics", False)
+
+    if enable_otlp_metrics and disable_otlp_metrics:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-opentelemetry-metrics and --disable-opentelemetry-metrics "
+            "at the same time."
+        )
+    # Whether Azure Monitor metrics is already enabled on the cluster is only visible once the
+    # ManagedCluster has been fetched, so that dependency check is deferred to the decorator.
+
+
+def validate_opentelemetry_logs_traces_dependencies(namespace):
+    """Validate OpenTelemetry logs and traces dependencies for create operations."""
+    enable_otlp_logs = getattr(namespace, "enable_opentelemetry_logs_traces", False)
+    disable_otlp_logs = getattr(namespace, "disable_opentelemetry_logs_traces", False)
+
+    if enable_otlp_logs and disable_otlp_logs:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-opentelemetry-logs-traces and "
+            "--disable-opentelemetry-logs-traces at the same time."
+        )
+
+    # For create operations, Azure Monitor logs must be enabled by the same command, either
+    # through the Azure Monitor profile or the legacy monitoring addon.
+    enable_addons = getattr(namespace, "enable_addons", None)
+    azure_monitor_logs_enabled = (
+        getattr(namespace, "enable_azure_monitor_logs", False) or
+        (enable_addons and "monitoring" in enable_addons)
+    )
+    if enable_otlp_logs and not azure_monitor_logs_enabled:
+        raise ArgumentUsageError(
+            "OpenTelemetry logs and traces requires Azure Monitor logs to be enabled. "
+            "Please add --enable-azure-monitor-logs to your command."
+        )
+
+
+def validate_opentelemetry_logs_traces_dependencies_for_update(namespace):
+    """Validate OpenTelemetry logs and traces dependencies for update operations."""
+    enable_otlp_logs = getattr(namespace, "enable_opentelemetry_logs_traces", False)
+    disable_otlp_logs = getattr(namespace, "disable_opentelemetry_logs_traces", False)
+
+    if enable_otlp_logs and disable_otlp_logs:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify both --enable-opentelemetry-logs-traces and "
+            "--disable-opentelemetry-logs-traces at the same time."
+        )
+    # Whether Azure Monitor logs is already enabled on the cluster is only visible once the
+    # ManagedCluster has been fetched, so that dependency check is deferred to the decorator.
+
+
+def validate_azure_monitor_and_opentelemetry_for_create(namespace):
+    """Main validator for Azure Monitor and OpenTelemetry configurations for create operations."""
+    validate_opentelemetry_ports(namespace)
+    validate_opentelemetry_metrics_dependencies(namespace)
+    validate_opentelemetry_logs_traces_dependencies(namespace)
+
+
+def validate_azure_monitor_and_opentelemetry_for_update(namespace):
+    """Main validator for Azure Monitor and OpenTelemetry configurations for update operations."""
+    validate_opentelemetry_ports(namespace)
+    validate_opentelemetry_metrics_dependencies_for_update(namespace)
+    validate_opentelemetry_logs_traces_dependencies_for_update(namespace)

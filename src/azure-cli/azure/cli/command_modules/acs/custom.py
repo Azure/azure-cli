@@ -90,6 +90,7 @@ from azure.cli.command_modules.acs.addonconfiguration import (
     add_virtual_node_role_assignment,
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
+    warn_on_legacy_monitoring_auth,
 )
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -955,6 +956,20 @@ def aks_create(
     data_collection_settings=None,
     ampls_resource_id=None,
     enable_high_log_scale_mode=None,
+    # azure monitor logs (container insights on the azure monitor profile)
+    enable_azure_monitor_logs=False,
+    syslog_port=None,
+    enable_prometheus_metrics_scraping=False,
+    disable_prometheus_metrics_scraping=False,
+    # opentelemetry
+    enable_opentelemetry_metrics=False,
+    disable_opentelemetry_metrics=False,
+    opentelemetry_metrics_port_http=None,
+    opentelemetry_metrics_port_grpc=None,
+    enable_opentelemetry_logs_traces=False,
+    disable_opentelemetry_logs_traces=False,
+    opentelemetry_logs_traces_port_http=None,
+    opentelemetry_logs_traces_port_grpc=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -1223,6 +1238,26 @@ def aks_update(
     disable_control_plane_metrics=False,
     enable_azure_monitor_app_monitoring=False,
     disable_azure_monitor_app_monitoring=False,
+    # azure monitor logs (container insights on the azure monitor profile)
+    enable_azure_monitor_logs=False,
+    disable_azure_monitor_logs=False,
+    workspace_resource_id=None,
+    enable_msi_auth_for_monitoring=None,
+    enable_syslog=None,
+    data_collection_settings=None,
+    ampls_resource_id=None,
+    syslog_port=None,
+    enable_prometheus_metrics_scraping=False,
+    disable_prometheus_metrics_scraping=False,
+    # opentelemetry
+    enable_opentelemetry_metrics=False,
+    disable_opentelemetry_metrics=False,
+    opentelemetry_metrics_port_http=None,
+    opentelemetry_metrics_port_grpc=None,
+    enable_opentelemetry_logs_traces=False,
+    disable_opentelemetry_logs_traces=False,
+    opentelemetry_logs_traces_port_http=None,
+    opentelemetry_logs_traces_port_grpc=None,
     # azure container storage
     enable_azure_container_storage=None,
     disable_azure_container_storage=None,
@@ -1627,6 +1662,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       ampls_resource_id=None,
                       enable_high_log_scale_mode=None,
                       no_wait=False,):
+    warn_on_legacy_monitoring_auth(enable_msi_auth_for_monitoring, addons)
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
