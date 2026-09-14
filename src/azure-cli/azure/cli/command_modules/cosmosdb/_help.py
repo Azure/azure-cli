@@ -193,6 +193,11 @@ parameters:
       Usage:    --enable-burst-capacity true
       Default:  false
       The accepted values for the enable-burst-capacity are true and false.
+  - name: --enable-per-partition-automatic-failover
+    short-summary: Enable per-partition automatic failover for the account.
+    long-summary: |
+      Usage:    --enable-per-partition-automatic-failover true
+      The accepted values are true and false.
   - name: --enable-prpp-autoscale
     short-summary: Flag to Enable/Disable burst capacity feature
     long-summary: |
@@ -205,6 +210,8 @@ examples:
     crafted: true
   - name: Creates a new Azure Cosmos DB database account with two regions. UK South is zone redundant.
     text: az cosmosdb create -n myaccount -g mygroup --locations regionName=eastus failoverPriority=0 isZoneRedundant=False --locations regionName=uksouth failoverPriority=1 isZoneRedundant=True --enable-multiple-write-locations --network-acl-bypass AzureServices --network-acl-bypass-resource-ids /subscriptions/subId/resourceGroups/rgName/providers/Microsoft.Synapse/workspaces/wsName
+  - name: Create an account with per-partition automatic failover enabled.
+    text: az cosmosdb create -n myaccount -g mygroup --locations regionName=southcentralus failoverPriority=0 --locations regionName=eastus failoverPriority=1 --enable-per-partition-automatic-failover true
   - name: Create a new Azure Cosmos DB database account by restoring from an existing account in the given location
     text: az cosmosdb create -n restoredaccount -g mygroup --is-restore-request true --restore-source /subscriptions/2296c272-5d55-40d9-bc05-4d56dc2d7588/providers/Microsoft.DocumentDB/locations/westus/restorableDatabaseAccounts/d056a4f8-044a-436f-80c8-cd3edbc94c68 --restore-timestamp 2020-07-13T16:03:41+0000 --locations regionName=westus failoverPriority=0 isZoneRedundant=False
 """
@@ -972,6 +979,11 @@ parameters:
       Usage:    --enable-burst-capacity true
       Default:  false
       The accepted values for the enable-burst-capacity are true and false.
+  - name: --enable-per-partition-automatic-failover
+    short-summary: Enable per-partition automatic failover for the account.
+    long-summary: |
+      Usage:    --enable-per-partition-automatic-failover true
+      The accepted values are true and false.
   - name: --enable-prpp-autoscale
     short-summary: Flag to Enable/Disable burst capacity feature
     long-summary: |
@@ -984,6 +996,8 @@ examples:
     crafted: true
   - name: Creates a new Azure Cosmos DB database account with two regions. UK South is zone redundant.
     text: az cosmosdb update -n myaccount -g mygroup --locations regionName=eastus failoverPriority=0 isZoneRedundant=False --locations regionName=uksouth failoverPriority=1 isZoneRedundant=True --enable-multiple-write-locations --network-acl-bypass AzureServices --network-acl-bypass-resource-ids /subscriptions/subId/resourceGroups/rgName/providers/Microsoft.Synapse/workspaces/wsName
+  - name: Enable per-partition automatic failover on an account.
+    text: az cosmosdb update -n myaccount -g mygroup --enable-per-partition-automatic-failover true
 """
 
 helps['cosmosdb mongodb role'] = """
