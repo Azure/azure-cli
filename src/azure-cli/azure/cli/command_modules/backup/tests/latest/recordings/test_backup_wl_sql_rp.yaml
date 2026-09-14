@@ -13,21 +13,21 @@ interactions:
       ParameterSetName:
       - --backup-management-type -g -v -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkload%27+and+status+eq+%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2025-05-15T10:58:17.8387326Z","extendedInfo":{"hostServerName":"sql-clitestvm-d","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2026-09-14T02:52:24.890759Z","extendedInfo":{"hostServerName":"sqlclitestvm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":3,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":3}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"centraluseuap"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1265'
+      - '1295'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:03 GMT
+      - Mon, 14 Sep 2026 09:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -39,11 +39,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/5651a0ff-14d2-41a7-a81e-c2c2049b2208
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/2a9b5019-96d7-4e42-97ae-7f497f4c80e3
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: E95328E9A32F43F4BD0CA60577C85559 Ref B: SIN221080715047 Ref C: 2025-05-16T07:50:03Z'
+      - 'Ref A: 52DFBE1C2938408E828CC20734725AC0 Ref B: PNQ231110908040 Ref C: 2026-09-14T09:15:22Z'
     status:
       code: 200
       message: OK
@@ -61,21 +63,21 @@ interactions:
       ParameterSetName:
       - -v -g --backup-management-type
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkload%27+and+status+eq+%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2025-05-15T10:58:17.8387326Z","extendedInfo":{"hostServerName":"sql-clitestvm-d","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2026-09-14T02:52:24.890759Z","extendedInfo":{"hostServerName":"sqlclitestvm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":3,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":3}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"centraluseuap"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1265'
+      - '1295'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:04 GMT
+      - Mon, 14 Sep 2026 09:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -87,11 +89,63 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/500dafb7-c563-4592-bea8-5f994c17525d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/9799fc14-13da-44d5-9599-be2cf8c0951e
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: F24EAA057F2A42A6A302AA1AD02FB770 Ref B: SIN221080715039 Ref C: 2025-05-16T07:50:04Z'
+      - 'Ref A: B92D5598342949AB892AFF51FC679F54 Ref B: PNQ231110908031 Ref C: 2026-09-14T09:15:22Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type --workload-type -g -v -c
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectedItems?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1751'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 09:15:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/a20eef52-1b69-4277-8d00-265fc9dcca21
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 77DA577A125A42E4A1D294D1AA0B2D54 Ref B: PNQ231110906031 Ref C: 2026-09-14T09:15:24Z'
     status:
       code: 200
       message: OK
@@ -109,24 +163,21 @@ interactions:
       ParameterSetName:
       - --backup-management-type -g -v -c -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-14T08:05:47Z","recoveryPointCount":3,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2026-09-14T08:43:37Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1957'
+      - '1919'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:06 GMT
+      - Mon, 14 Sep 2026 09:15:24 GMT
       expires:
       - '-1'
       pragma:
@@ -138,62 +189,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/a923b207-6a30-4a7e-bc40-cbdf80821114
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/dbd4344e-1bba-4463-8e39-33fdceada725
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 317207C2A6B5443890C50A378C339B0E Ref B: SIN221080719003 Ref C: 2025-05-16T07:50:06Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup item show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --backup-management-type -g -v -c -n
-      User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1957'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 May 2025 07:50:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/1ee96996-2f96-4718-ab39-1e465aede67b
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-msedge-ref:
-      - 'Ref A: DEA58B51195D4CF0A7E1BE4F9E0E5EC5 Ref B: SIN221080711029 Ref C: 2025-05-16T07:50:07Z'
+      - 'Ref A: 023FD43111DB46FBB554875E29963B43 Ref B: PNQ231110909034 Ref C: 2026-09-14T09:15:24Z'
     status:
       code: 200
       message: OK
@@ -211,21 +213,21 @@ interactions:
       ParameterSetName:
       - -n -v -g --backup-management-type --query
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureWorkload%27+and+status+eq+%27Registered%27
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupProtectionContainers?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2025-05-15T10:58:17.8387326Z","extendedInfo":{"hostServerName":"sql-clitestvm-d","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","name":"VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","lastUpdatedTime":"2026-09-14T02:52:24.890759Z","extendedInfo":{"hostServerName":"sqlclitestvm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":3,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":3}}}]}},"friendlyName":"sql-clitestvm-donotuse2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"centraluseuap"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1265'
+      - '1295'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:09 GMT
+      - Mon, 14 Sep 2026 09:15:26 GMT
       expires:
       - '-1'
       pragma:
@@ -237,11 +239,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/15d63dd1-59d2-49b7-be4a-60f2db72a919
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/59287155-38aa-4e02-be37-6e47f58caab5
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 5AEE0769517343A182808D8F517811A9 Ref B: SIN221080719049 Ref C: 2025-05-16T07:50:08Z'
+      - 'Ref A: 7A1266113CEA4B9DB5031F174264975E Ref B: PNQ231110909036 Ref C: 2026-09-14T09:15:25Z'
     status:
       code: 200
       message: OK
@@ -259,24 +263,21 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-14T08:05:47Z","recoveryPointCount":3,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2026-09-14T08:43:37Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1957'
+      - '1919'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:10 GMT
+      - Mon, 14 Sep 2026 09:15:26 GMT
       expires:
       - '-1'
       pragma:
@@ -288,11 +289,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/a3b77b90-5939-46d2-b9f0-eaf50f479515
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/46a82bf4-e35b-4ffa-85c1-ec2353c13ba1
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 719E057F3A344F058DFDCB634CC8EE26 Ref B: SIN221080715023 Ref C: 2025-05-16T07:50:09Z'
+      - 'Ref A: 49BAD4F5F3CA4714A659DF1CCCC957A8 Ref B: PNQ231110909029 Ref C: 2026-09-14T09:15:26Z'
     status:
       code: 200
       message: OK
@@ -310,9 +313,206 @@ interactions:
       ParameterSetName:
       - -g -v -c -i --workload-type --query
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?api-version=2026-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/596671909329949","name":"596671909329949","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-14T08:43:37Z","type":"Full","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}},"recoveryPointProperties":{"isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/589225150788741","name":"589225150788741","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-14T08:12:22Z","type":"Full","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}},"recoveryPointProperties":{"isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/582474566659538","name":"582474566659538","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-14T08:05:47Z","type":"Full","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"Recovery-Point
+        having active dependencies for restore is not eligible for Archive Move. "}},"recoveryPointProperties":{"isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3282'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 09:15:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/9679efc8-140a-4610-a375-598cedd6faa1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 79A3DCFF3482462C8BDA0EC5F78CAE84 Ref B: PNQ231110908060 Ref C: 2026-09-14T09:15:27Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-14T08:05:47Z","recoveryPointCount":3,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2026-09-14T08:43:37Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1919'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 09:15:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/9c81a658-6921-44f9-94b8-4138c738cb00
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: B1DD99D7AD22457B812A609A15E9F4D5 Ref B: PNQ231110909034 Ref C: 2026-09-14T09:15:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?$filter=restorePointQueryType%20eq%20%27Log%27&api-version=2026-07-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
+    headers:
+      content-length:
+      - '603'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 09:15:29 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/5a3bf41d-4cd6-4b47-8f86-e325eb11721b
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 98EB2577189A438AA9C2348AD3E64742 Ref B: PNQ231110907034 Ref C: 2026-09-14T09:15:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-14T08:05:47Z","recoveryPointCount":3,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2026-09-14T08:43:37Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1919'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 09:15:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/5d0e1c33-dfb9-4061-8e06-55eefbc14df9
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1099'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: D6A089D209424F278A31859D275A681D Ref B: PNQ231110906036 Ref C: 2026-09-14T09:15:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show-log-chain
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -v -c -i --workload-type
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?$filter=restorePointQueryType%20eq%20%27Log%27&api-version=2026-07-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
@@ -324,7 +524,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:11 GMT
+      - Mon, 14 Sep 2026 09:15:30 GMT
       expires:
       - '-1'
       pragma:
@@ -336,209 +536,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/5fae0bba-f4ad-4f00-922c-e449f8dd22ec
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/090f7530-b2e3-437f-94ae-459b61327773
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: FF1259AEBC0347ED88BB1B0B60A2E6EB Ref B: SIN221080712035 Ref C: 2025-05-16T07:50:10Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1957'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 May 2025 07:50:13 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/6e071cfa-b8c8-4386-ba9d-fdf15e3951e1
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-msedge-ref:
-      - 'Ref A: B4D8345F9C2C49D4BCE2762EA534F4F7 Ref B: SIN221080715025 Ref C: 2025-05-16T07:50:12Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?api-version=2025-02-01&%24filter=restorePointQueryType+eq+%27Log%27
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '603'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 May 2025 07:50:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/37d2a98a-a05d-4ced-910f-b865fdc934eb
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-msedge-ref:
-      - 'Ref A: 8F81DA2812474B89AC2FDCCD71D2B10C Ref B: SIN221080712009 Ref C: 2025-05-16T07:50:13Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1957'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 May 2025 07:50:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/20f7beea-20dd-47d1-ac21-76cf53066947
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-msedge-ref:
-      - 'Ref A: 18252034DBF54BE1BF711FA19E0FB158 Ref B: SIN221080719037 Ref C: 2025-05-16T07:50:15Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup recoverypoint show-log-chain
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -c -i --workload-type
-      User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb/recoveryPoints?api-version=2025-02-01&%24filter=restorePointQueryType+eq+%27Log%27
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb/recoveryPoints/DefaultRangeRecoveryPoint","name":"DefaultRangeRecoveryPoint","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLPointInTimeRecoveryPoint","timeRanges":[],"type":"Log"}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '603'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 16 May 2025 07:50:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/9ee12d73-10ca-4fbe-8fe8-0e0fb6cfa1a2
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
-      x-msedge-ref:
-      - 'Ref A: 20924A47A0674B6A900075DE26213F95 Ref B: SIN221080715017 Ref C: 2025-05-16T07:50:16Z'
+      - 'Ref A: B38D50F3D55148939D278981270608B7 Ref B: PNQ231110907034 Ref C: 2026-09-14T09:15:31Z'
     status:
       code: 200
       message: OK
@@ -556,24 +560,21 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3BCompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sql-clitestvm-d","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"IRPending","lastBackupTime":"2025-05-16T07:30:53.1872863Z","lastBackupErrorDetail":{"code":"CloudInternalError","message":"Microsoft
-        Azure Backup encountered an internal error.","recommendations":["Wait for
-        a few minutes and then try the operation again. If the issue persists, please
-        contact Microsoft support."]},"protectedItemDataSourceId":"70370369587634","protectedItemHealthStatus":"IRPending","extendedInfo":{"recoveryPointCount":0,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb","name":"SQLDataBase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"msdb","serverName":"sqlclitestvm2","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"IRPending","lastBackupStatus":"Healthy","lastBackupTime":"2026-09-14T09:13:02.6110521Z","protectedItemDataSourceId":"862017990597360","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-14T08:05:47Z","recoveryPointCount":3,"policyState":"Consistent","recoveryModel":"SIMPLE"},"protectedItemType":"AzureVmWorkloadSQLDatabase","backupManagementType":"AzureWorkload","workloadType":"SQLDataBase","containerName":"VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","lastRecoveryPoint":"2026-09-14T08:43:37Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"centraluseuap","sourceSideScanInfo":{"sourceSideScanStatus":"NotApplicable","sourceSideScanSummary":"NotApplicable"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1957'
+      - '1919'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:19 GMT
+      - Mon, 14 Sep 2026 09:15:31 GMT
       expires:
       - '-1'
       pragma:
@@ -585,11 +586,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/91269aa0-cd9f-47d3-82a9-081906f6ab02
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/c35c11ac-e864-4332-ae93-bea27d6db432
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1098'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 8C6AC53A01FD480681264FFB36375597 Ref B: SIN221080711025 Ref C: 2025-05-16T07:50:18Z'
+      - 'Ref A: EB24DC52939D418F834CBCECFB906FE5 Ref B: PNQ231110909034 Ref C: 2026-09-14T09:15:32Z'
     status:
       code: 200
       message: OK
@@ -607,9 +610,9 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2026-07-01
   response:
     body:
       string: '{"value":[]}'
@@ -621,7 +624,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:20 GMT
+      - Mon, 14 Sep 2026 09:15:32 GMT
       expires:
       - '-1'
       pragma:
@@ -633,11 +636,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/48f9663b-8e9e-42e8-82e4-5831b83e14a3
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/fc71acc3-fdd9-4a39-964d-f1ae7eac38ba
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 196F5C0280624F30A2CC28286CC13698 Ref B: MAA201060513019 Ref C: 2025-05-16T07:50:19Z'
+      - 'Ref A: 9290F1B72E324A41BB57FCF2A76DA179 Ref B: PNQ231110909034 Ref C: 2026-09-14T09:15:32Z'
     status:
       code: 200
       message: OK
@@ -645,7 +648,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -657,27 +660,21 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bsql-clitest-rg%3Bsql-clitestvm-donotuse2/protectedItems/SQLDataBase%3Bmssqlserver%3Bmsdb?api-version=2026-07-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01&t=638829786222799658&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=Uip6Q9amlklS5Wzy-8ymZEGUMeItJyO4wnaqoBJSwkH1KhaeahQNHO7R6XmYTbDRWhAe1sidgTN1NesMGpfLqSsCrHqfOXzdGfeYk6HRpzZ8r0gxe3M2rdWVvsIJh9wG6UswLE-Wv4QC5RsyffdZ65OAShpVS2zLaRzx24_mSO0B13oOn3zj69zslQb1uc-vG7n_3u5CniCifqAU3I3hw_xMXtrLsf77cgH9MPyeFEbtUitNIOHojM1iMYDtYYBSmoY_DU9FYpXoyRi_qY0sXgKWkxQoXBsZm_sL9hPGumK1cvr8_LFjZ2pGhlxr2K1Qjgil2aavZ-uAuFLV9VpFNA&h=GxUD5EeABtXotatReFGCFHqs9s30z5ZwWn2oShoBbOg
-      cache-control:
-      - no-cache
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01&t=639249741343508682&c=MIIH9TCCBt2gAwIBAgIRAPDa4C9JdpzDdl9yhvBcNtYwDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgRVUyQyBDQSAwMTAeFw0yNjA3MjAyMzA3MDRaFw0yNzAxMTYwNTA3MDRaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvMG_1TlJEDKMeYOsWAHT_Jh_858a_gwgniwC3IPJ45K5JPiptb0NYk7IMNebwt4Lbo4PdyRC_Fw808v2nC4J76i561Tdv2539uNEBY-vdQ5CPd35_ZLt-kS9H1h-Qc288K1Ug7SPSoZXt0tKFxm_X85t3YZdcuNYqYxk9q1s0Lu0WYniiDqX_DqZ1csPfyHgtEZc8vBSVl5fIh3LKnH3pw7yPbYmUGuvgO0bYmXc9rT1HGyFIM5zqJFVUMQbtjM273_hVQHMoy-ZVo8lv63sa2iU3VPHMEKJZ7Q9DPsGpJ0Ir-SMT8c69lXO7Wv-0y64CjlMZ8sLZOQidVPRKRQ3NQIDAQABo4IE8jCCBO4wgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUxRuFdzygTcCV5LvwnnSoeHAkhgEwHwYDVR0jBBgwFoAUz1EBqulDLGR2G0rwqsDykvhPw7swggHiBgNVHR8EggHZMIIB1TB1oHOgcYZvaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzMwL2N1cnJlbnQuY3JsMHegdaBzhnFodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jcmxzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS8zMC9jdXJyZW50LmNybDBmoGSgYoZgaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzMwL2N1cnJlbnQuY3JsMHugeaB3hnVodHRwOi8vY2NtZWVhc3R1czJldWFwcGtpLmVhc3R1czJldWFwLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJldWFwaWNhMDEvMzAvY3VycmVudC5jcmwwggHnBggrBgEFBQcBAQSCAdkwggHVMHgGCCsGAQUFBzAChmxodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwegYIKwYBBQUHMAKGbmh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NhY2VydHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxL2NlcnQuY2VyMGkGCCsGAQUFBzAChl1odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwcgYIKwYBBQUHMAKGZmh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMTANBgkqhkiG9w0BAQsFAAOCAQEAm_gG_aSFikQfKF1IihOsfb6ZC4HFwKTGTh9Tq2Q0aiNHYrBKXvt2I5g-ZgV6EgMQ0or8btON08OrF2RQyXvT5C3tzv2WieKoM10xg_sHAMc1b0fhPMkcvWaCIcLZGbba9Qy0r2dpHd9KhYYz6U_JGtyoIC9Iwh3bj37AVBl2SzFKlq2bA0OsyoSd_h3qctXLNp8nFxfb6P7oBH1SDet_Yq2MCWezL87XbwmX-TESzwh_K5_pwCNgjbdui7Ym5hGLZaWEX6Q6HnkzgycnHt0_uqr5RcOpsGOSsW0tRnxAwnHWygcsKwBZO9O7gbREhyxtVQdJWSJtjT_fu3G6zqHtrQ&s=uxuJOvA-unSvMqfUqxBJCPDDJUHbsnGKpcbIViqce1mduagblXlMHShBBT1FZWZvTntEwriKlOxARO0G5PhVc0o28GPeyh4cgiWErA0TxjA5Gy70q5_w4sQAEXJ-dah2VL2Xjf7Pz7ds5_gloGu1QqG_1eT5mJWWVdqp88FAJHuKOFhdefX0dNcmzKVB3awZe6yGr4GkWEP9O8072VOYbHUljmzympK7BE1IO2MT8FqArD8NZFWpyosF_HMEwMgFPmZjB1EZ3-OsAXKYs0nEslKA3udjO1zx3Ptp02oeBSXIMNRYGVXNbHolLC1YvhVzmndvCfcWeXev_ohynRT2Tg&h=OaIvCwzKkbDokjkYfMgrA8w3rE15vlswzZ3L5iGqzEg
       content-length:
       - '0'
       date:
-      - Fri, 16 May 2025 07:50:22 GMT
-      expires:
-      - '-1'
+      - Mon, 14 Sep 2026 09:15:33 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperationResults/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01&t=638829786222956026&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=bQW3UwkyA2y9ElU51VvWeJ3PDq_AoXFMZDCJz_AU-CRwbNEUL5NnRDtWnA_RYXj2XvMEkA_3lJOe_PtxMBsLort4EMsM7CEUVmL3gX1OlSNIolvfGNkpfbZU6Y7zFhZcK1040n6xNEVM3x4yBrIwmLSYPmDZp_nmawtH-JGXuaR3P1FPPNIDW4rQVXqIaxpK9xXo59IYwSJzHn0A2iSVpQLPHE00rFIKVJFbc4p3dmnXjTlWYNOd8KKM58-I3KmdDx654lN5HfRMQkp3B4emP8yKYAA0uSw9uDC_MRSc3m1MMVHNU-h8g-uCTbqEwG9KwDpLXrqPxUqdSKIdQBTsjA&h=fmmq8NEygAqzdnfwdp81sZZmOkmRSNzOmrw2RVFA4Bs
-      pragma:
-      - no-cache
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperationResults/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01&t=639249741343508682&c=MIIH9TCCBt2gAwIBAgIRAPDa4C9JdpzDdl9yhvBcNtYwDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgRVUyQyBDQSAwMTAeFw0yNjA3MjAyMzA3MDRaFw0yNzAxMTYwNTA3MDRaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvMG_1TlJEDKMeYOsWAHT_Jh_858a_gwgniwC3IPJ45K5JPiptb0NYk7IMNebwt4Lbo4PdyRC_Fw808v2nC4J76i561Tdv2539uNEBY-vdQ5CPd35_ZLt-kS9H1h-Qc288K1Ug7SPSoZXt0tKFxm_X85t3YZdcuNYqYxk9q1s0Lu0WYniiDqX_DqZ1csPfyHgtEZc8vBSVl5fIh3LKnH3pw7yPbYmUGuvgO0bYmXc9rT1HGyFIM5zqJFVUMQbtjM273_hVQHMoy-ZVo8lv63sa2iU3VPHMEKJZ7Q9DPsGpJ0Ir-SMT8c69lXO7Wv-0y64CjlMZ8sLZOQidVPRKRQ3NQIDAQABo4IE8jCCBO4wgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUxRuFdzygTcCV5LvwnnSoeHAkhgEwHwYDVR0jBBgwFoAUz1EBqulDLGR2G0rwqsDykvhPw7swggHiBgNVHR8EggHZMIIB1TB1oHOgcYZvaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzMwL2N1cnJlbnQuY3JsMHegdaBzhnFodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jcmxzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS8zMC9jdXJyZW50LmNybDBmoGSgYoZgaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzMwL2N1cnJlbnQuY3JsMHugeaB3hnVodHRwOi8vY2NtZWVhc3R1czJldWFwcGtpLmVhc3R1czJldWFwLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWVhc3R1czJldWFwaWNhMDEvMzAvY3VycmVudC5jcmwwggHnBggrBgEFBQcBAQSCAdkwggHVMHgGCCsGAQUFBzAChmxodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwegYIKwYBBQUHMAKGbmh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NhY2VydHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxL2NlcnQuY2VyMGkGCCsGAQUFBzAChl1odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwcgYIKwYBBQUHMAKGZmh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMTANBgkqhkiG9w0BAQsFAAOCAQEAm_gG_aSFikQfKF1IihOsfb6ZC4HFwKTGTh9Tq2Q0aiNHYrBKXvt2I5g-ZgV6EgMQ0or8btON08OrF2RQyXvT5C3tzv2WieKoM10xg_sHAMc1b0fhPMkcvWaCIcLZGbba9Qy0r2dpHd9KhYYz6U_JGtyoIC9Iwh3bj37AVBl2SzFKlq2bA0OsyoSd_h3qctXLNp8nFxfb6P7oBH1SDet_Yq2MCWezL87XbwmX-TESzwh_K5_pwCNgjbdui7Ym5hGLZaWEX6Q6HnkzgycnHt0_uqr5RcOpsGOSsW0tRnxAwnHWygcsKwBZO9O7gbREhyxtVQdJWSJtjT_fu3G6zqHtrQ&s=hTkVdKpSygKbk7oPb_Vb4ou3s2M9o1wKrNDr73fBPpjXsmyeoOivgw9A0GrWf0VOoL_DDbDjW3BdmODwCuyq9C3T8mKngMjupFyi7j4djnaLNSp1JEMPNijNdqZ3k6BQuJMnCuQ1oSqy4zuUio_MzXWJ625tE0Ft_H_PJ2KvisHdF2OPgs6SvS-9Q1wDFkwBI3RbZNef1did04DIdrxSF2zwXqZQn9W3v77uPkKR44trlxE0QOnEM9PlllyaOp40a34wJHnf5CasdGT2L4r4tohQ1p5M_DOEsZ38MgTeCRUllGSvsxXNcg_Ui13_UJKYlUaN_KMl0TywM2cr7BFvjQ&h=0nx9avc5AORalyMaC0WfG1qAwV-aFkwV4B5TXi5ExRs
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -685,13 +682,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/62d94a67-3aba-4fb4-b38d-561caae0c3f1
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/2d6d997a-90bf-4772-b2d7-7cabe4f68e11
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
-      x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: DD0CFC03803343A3905B8EB60611225B Ref B: MAA201060515037 Ref C: 2025-05-16T07:50:20Z'
+      - 'Ref A: B6B34990CCFD4F6BBAEB771D957C3C8C Ref B: PNQ231110906040 Ref C: 2026-09-14T09:15:33Z'
     status:
       code: 202
       message: Accepted
@@ -709,12 +706,12 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"InProgress","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"InProgress","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -723,7 +720,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:22 GMT
+      - Mon, 14 Sep 2026 09:15:34 GMT
       expires:
       - '-1'
       pragma:
@@ -735,11 +732,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/06b33104-c129-4bc2-a63a-532ac8a47f86
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/b78e0353-ee74-4d59-9229-cfc8a90a60d5
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: C6ED1AC8260D4E33A8F8BB2FF413EF7A Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:22Z'
+      - 'Ref A: FE0D9D02BC454F58B082610BF55F7BAB Ref B: PNQ231110906040 Ref C: 2026-09-14T09:15:34Z'
     status:
       code: 200
       message: OK
@@ -757,12 +756,12 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"InProgress","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"InProgress","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -771,7 +770,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:28 GMT
+      - Mon, 14 Sep 2026 09:15:40 GMT
       expires:
       - '-1'
       pragma:
@@ -783,11 +782,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/1e6625fb-6fa0-4fe6-be73-b34fad385b84
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/7946224c-1f97-4ca2-8855-da00e994c205
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 37CF969EAC06450EB815B5E465689234 Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:28Z'
+      - 'Ref A: 2A93DEE3504E45649572EABCB4D19117 Ref B: PNQ231110907029 Ref C: 2026-09-14T09:15:40Z'
     status:
       code: 200
       message: OK
@@ -805,12 +806,12 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"InProgress","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"InProgress","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -819,7 +820,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:35 GMT
+      - Mon, 14 Sep 2026 09:15:47 GMT
       expires:
       - '-1'
       pragma:
@@ -831,11 +832,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/ad083c9b-2a5f-433e-9fec-7d25cd6d6a6b
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/36c33940-5514-4c29-9781-2f3876fc0eb9
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 82209A4B7CAF4AAC9F5C57FD19DECC75 Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:34Z'
+      - 'Ref A: 83B35721669C4E909434A3FE67B8A737 Ref B: PNQ231110908060 Ref C: 2026-09-14T09:15:46Z'
     status:
       code: 200
       message: OK
@@ -853,12 +856,12 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"InProgress","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"InProgress","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -867,7 +870,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:41 GMT
+      - Mon, 14 Sep 2026 09:15:53 GMT
       expires:
       - '-1'
       pragma:
@@ -879,11 +882,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/2e4e0ebe-cdad-4d1e-9f59-cdc2b5d5ba98
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/04f3c433-20b1-4cb7-8da8-38f6eae73beb
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '299'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: E0B9C76C243E4A2A92DE265340CFD36E Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:40Z'
+      - 'Ref A: 24557A345D3342D8BB503E1F816A3897 Ref B: PNQ231110906036 Ref C: 2026-09-14T09:15:52Z'
     status:
       code: 200
       message: OK
@@ -901,12 +906,12 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"InProgress","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"0001-01-01T00:00:00"}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"InProgress","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"0001-01-01T00:00:00"}'
     headers:
       cache-control:
       - no-cache
@@ -915,7 +920,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:47 GMT
+      - Mon, 14 Sep 2026 09:15:58 GMT
       expires:
       - '-1'
       pragma:
@@ -927,11 +932,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/4c76d3ad-d412-4691-aab3-be36b1ea6128
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/18821389-f1ff-4297-94d1-327e032b355e
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '298'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: F77B4FF24A1E4C29A9AAEDF133ACEB26 Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:46Z'
+      - 'Ref A: 12B0462A39BF40E6B30C192814154E22 Ref B: PNQ231110906054 Ref C: 2026-09-14T09:15:58Z'
     status:
       code: 200
       message: OK
@@ -949,25 +956,19 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/a0d2cffd-3f1d-40da-9409-c7e119adb556?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupOperations/d2123098-29c7-4da5-a22f-4ea5a80bdeb2?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"a0d2cffd-3f1d-40da-9409-c7e119adb556","name":"a0d2cffd-3f1d-40da-9409-c7e119adb556","status":"Succeeded","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"2025-05-16T07:50:21.9943295Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"9caf0375-4fd2-4e34-a8eb-1392761d0c93"}}'
+      string: '{"id":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","name":"d2123098-29c7-4da5-a22f-4ea5a80bdeb2","status":"Succeeded","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"2026-09-14T09:15:34.0993497Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"2c4fb0df-ce1e-477e-8753-d1f6bdda6b14"}}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
       - '304'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Mon, 14 Sep 2026 09:16:04 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -975,11 +976,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/bf270b9a-0732-469d-8a48-9d8c502530f9
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/5a757f73-e66b-4450-929f-8b74070e1426
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '297'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 3A54183EF9144D54BDA4B37BBBFC0ED7 Ref B: MAA201060514029 Ref C: 2025-05-16T07:50:53Z'
+      - 'Ref A: 26B7664FA30B4E619063801314A65BE1 Ref B: PNQ231110908034 Ref C: 2026-09-14T09:16:04Z'
     status:
       code: 200
       message: OK
@@ -997,21 +1000,21 @@ interactions:
       ParameterSetName:
       - -v -g -c --backup-management-type --workload-type -i -y --delete-backup-data
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupJobs/9caf0375-4fd2-4e34-a8eb-1392761d0c93?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupJobs/2c4fb0df-ce1e-477e-8753-d1f6bdda6b14?api-version=2026-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupJobs/9caf0375-4fd2-4e34-a8eb-1392761d0c93","name":"9caf0375-4fd2-4e34-a8eb-1392761d0c93","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT31.3425854S","extendedInfo":{"tasksList":[],"propertyBag":{"ContainerUniqueName":"Compute;sql-clitest-rg;sql-clitestvm-donotuse2"}},"isUserTriggered":true,"entityFriendlyName":"msdb","backupManagementType":"AzureWorkload","operation":"DeleteBackupData","status":"Completed","startTime":"2025-05-16T07:50:21.9943295Z","endTime":"2025-05-16T07:50:53.3369149Z","activityId":"692de4ac-322a-11f0-80ce-cc15311bf11f"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupJobs/2c4fb0df-ce1e-477e-8753-d1f6bdda6b14","name":"2c4fb0df-ce1e-477e-8753-d1f6bdda6b14","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLDataBase","duration":"PT31.4330743S","extendedInfo":{"tasksList":[],"propertyBag":{"ContainerUniqueName":"Compute;sql-clitest-rg;sql-clitestvm-donotuse2"}},"isUserTriggered":true,"entityFriendlyName":"msdb","backupManagementType":"AzureWorkload","operation":"DeleteBackupData","status":"Completed","startTime":"2026-09-14T09:15:34.0993497Z","endTime":"2026-09-14T09:16:05.532424Z","activityId":"d5b33c25-b01c-11f1-b10e-6045bde7ad9c"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '805'
+      - '804'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 16 May 2025 07:50:54 GMT
+      - Mon, 14 Sep 2026 09:16:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1023,11 +1026,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/southindia/d1bb2a13-8be9-4fa6-9e21-be44fd9e3997
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/centraluseuap/8fe79796-384c-4f53-92f4-b0058b2793fc
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '449'
+      - '249'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: FA400C9B1D8643DBA51F6850E5216F85 Ref B: MAA201060514033 Ref C: 2025-05-16T07:50:54Z'
+      - 'Ref A: 2866037D3C14471EACC00719B93B0454 Ref B: PNQ231110908040 Ref C: 2026-09-14T09:16:06Z'
     status:
       code: 200
       message: OK
