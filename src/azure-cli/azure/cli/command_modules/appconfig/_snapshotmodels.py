@@ -25,7 +25,8 @@ class SnapshotQueryFields(Enum):
     TAGS = 0x0100
     ETAG = 0x0200
     RETENTION_PERIOD = 0x0400
-    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | ETAG | RETENTION_PERIOD
+    DESCRIPTION = 0x0800
+    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | ETAG | RETENTION_PERIOD | DESCRIPTION
 
 
 class Snapshot:
@@ -54,6 +55,8 @@ class Snapshot:
         Dictionary of tags of the snapshot.
     :ivar int retention_period:
         Number of seconds for which an archived snapshot will be kept before being deleted.
+    :ivar str description:
+        Description of the snapshot.
     '''
 
     def __init__(self,
@@ -68,6 +71,7 @@ class Snapshot:
                  items_count=None,
                  tags=None,
                  retention_period=None,
+                 description=None,
                  ):
 
         self.name = name
@@ -81,6 +85,7 @@ class Snapshot:
         self.items_count = items_count
         self.tags = tags
         self.retention_period = retention_period
+        self.description = description
 
     def __str__(self):
         return "\nEtag: " + self.etag + \
@@ -93,7 +98,8 @@ class Snapshot:
             "\nSize: " + str(self.size) + \
             "\nItem count: " + str(self.items_count) + \
             "\nTags: " + (str(self.tags) if self.tags else '{}') + \
-            "\nRetention Period: " + str(self.retention_period)
+            "\nRetention Period: " + str(self.retention_period) + \
+            "\nDescription: " + (self.description if self.description else '')
 
     @classmethod
     def from_configuration_snapshot(cls, config_snapshot):
@@ -108,7 +114,8 @@ class Snapshot:
             size=config_snapshot.size,
             items_count=config_snapshot.items_count,
             tags=config_snapshot.tags,
-            retention_period=config_snapshot.retention_period
+            retention_period=config_snapshot.retention_period,
+            description=getattr(config_snapshot, 'description', None)
         )
 
 

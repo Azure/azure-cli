@@ -321,7 +321,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
                            "First upgrade {} server version to {} and try again.".format(replica.name, version_mapped))
 
     parameters = {
-        'version': version_mapped
+        'properties': {'version': version_mapped}
     }
 
     return resolve_poller(

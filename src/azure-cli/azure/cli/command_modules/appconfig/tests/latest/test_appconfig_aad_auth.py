@@ -21,7 +21,7 @@ from knack.util import CLIError
 from unittest import mock
 from azure.cli.testsdk import (ResourceGroupPreparer, live_only, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -107,7 +107,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
-        aad_store_prefix = get_resource_name_prefix('AADStore')
+        aad_store_prefix = 'AADStore'
         config_store_name = self.create_random_name(prefix=aad_store_prefix, length=24)
 
         location = 'eastus'
@@ -310,7 +310,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_user_token_audience(self, resource_group, location):
-        aad_store_prefix = get_resource_name_prefix('AADStore')
+        aad_store_prefix = 'AADStore'
         config_store_name = self.create_random_name(prefix=aad_store_prefix, length=24)
 
         location = 'eastus'

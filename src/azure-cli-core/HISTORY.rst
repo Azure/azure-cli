@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.90.0
+++++++
+* Minor fixes
+
 2.89.1
 ++++++
 * Allow SSH certificate flow in Cloud Shell (#33860)

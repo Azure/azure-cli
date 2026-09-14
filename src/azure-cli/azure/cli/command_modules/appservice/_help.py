@@ -1216,20 +1216,33 @@ short-summary: List available built-in stacks which can be used for function app
 
 helps['functionapp flex-migration'] = """
 type: group
-short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan.
+short-summary: Manage migration between Linux Consumption and Flex Consumption plans.
 """
 
 helps['functionapp flex-migration start'] = """
 type: command
-short-summary: Create a Flex Consumption app with the same settings as the provided Linux Consumption function app.
+short-summary: Migrate a Linux Consumption function app to Flex Consumption. Supports side-by-side (new app) or in-place (same app) upgrade.
 examples:
-  - name: Migrate a Linux Consumption function app to the Flex Consumption plan.
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan (side-by-side, creates a new app).
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount
 
   - name: Migrate a Linux Consumption function app to the Flex Consumption plan without migrating managed identity configurations.
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount --skip-managed-identities
+
+  - name: Upgrade a Linux Consumption function app to Flex Consumption in place (same app, same name).
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --in-place
+"""
+
+helps['functionapp flex-migration revert'] = """
+type: command
+short-summary: Revert an in-place upgraded Flex Consumption function app to Linux Consumption.
+examples:
+  - name: Revert a function app to Linux Consumption within its revert window.
+    text: >
+        az functionapp flex-migration revert --source-name MyFunctionApp --source-resource-group MyResourceGroup
 """
 
 helps['functionapp flex-migration list'] = """
@@ -2540,6 +2553,37 @@ parameters:
         per-instance Last runtime status and Startup summary) to stdout and
         returns no machine-readable output. Omit --report to keep the default
         structured payload that works with `-o json`, `-o yaml`, and `-o table`.
+"""
+
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect network-capture'] = """
+type: command
+short-summary: Collect and analyze a packet capture from a Linux web app container.
+long-summary: |
+  Runs a bounded tcpdump capture in one app container instance and analyzes it in Kudu.
+  The command does not download files locally; it returns authenticated Kudu links for
+  viewing the analysis report and downloading the raw pcap. Network captures can contain
+  credentials, cookies, request bodies, and other sensitive application data.
+
+    Use --collect-only to show only the raw packet capture link. Kudu still performs the
+    processing required to finalize the capture, but the analysis report link is omitted.
+
+    This command supports Linux web apps on dedicated App Service plans. Captures are
+    limited to one worker instance per command invocation. When --instance is omitted,
+    an interactive terminal prompts you to select from the app's current workers. Scripts
+    and other non-interactive callers must specify --instance. Capture duration defaults
+    to 60 seconds and can be changed with --duration.
+examples:
+  - name: Capture and analyze traffic for the default 60 seconds
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp
+  - name: Capture traffic for 30 seconds from a specific worker
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --instance 7c2d9 --duration 30
+  - name: Show only the raw packet capture link
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --collect-only
 """
 
 helps['functionapp log'] = """

@@ -195,6 +195,48 @@ class TestVMBootLog(unittest.TestCase):
         except ErrorToExitCommandEarly:
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
 
+    @mock.patch('azure.cli.command_modules.vm.custom.BootLogStreamWriter', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom._get_storage_management_client', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.custom.get_instance_view', autospec=True)
+    @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
+    def test_vm_boot_log_uses_keys_property(self, get_sdk_mock, get_instance_view_mock,
+                                            get_storage_client_mock, stream_writer_mock):
+        # azure-mgmt-storage>=25.0.0 renamed the account keys list from `keys` to
+        # `keys_property` (`.keys` now resolves to `MutableMapping.keys`).
+        blob_url = 'https://mystorage.blob.core.windows.net/bootdiagnostics/vm1.serialconsole.log'
+        get_instance_view_mock.return_value = {
+            'instanceView': {
+                'bootDiagnostics': {'serialConsoleLogBlobUri': blob_url}
+            }
+        }
+
+        storage_account = mock.MagicMock()
+        storage_account.primary_endpoints.blob = 'https://mystorage.blob.core.windows.net/'
+        storage_account.id = '/subscriptions/sub1/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/mystorage'
+        storage_account.name = 'mystorage'
+
+        storage_key = mock.MagicMock()
+        storage_key.value = 'the-account-key'
+        list_keys_result = mock.MagicMock(spec=['keys_property'])
+        list_keys_result.keys_property = [storage_key]
+
+        storage_client_mock = get_storage_client_mock.return_value
+        storage_client_mock.storage_accounts.list.return_value = [storage_account]
+        storage_client_mock.storage_accounts.list_keys.return_value = list_keys_result
+
+        blob_client_mock = mock.MagicMock()
+        blob_client_class_mock = mock.MagicMock()
+        blob_client_class_mock.from_blob_url.return_value = blob_client_mock
+        get_sdk_mock.return_value = blob_client_class_mock
+
+        cmd_mock = mock.MagicMock()
+        get_boot_log(cmd_mock, 'rg1', 'vm1')
+
+        blob_client_class_mock.from_blob_url.assert_called_once_with(
+            blob_url=blob_url, credential='the-account-key')
+        blob_client_mock.download_blob.assert_called_once_with(max_concurrency=1)
+        blob_client_mock.download_blob.return_value.readinto.assert_called_once()
+
 
 class FakedVM:  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):

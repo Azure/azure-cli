@@ -128,6 +128,7 @@ secondary_region_map = {
     "usnatwest": "usnateast",
     "usseceast": "ussecwest",
     "ussecwest": "usseceast",
+    "ussecwestcentral": "usseceast",
     "westcentralus": "westus2",
     "westeurope": "northeurope",
     "westindia": "southindia",

@@ -241,13 +241,17 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
         from azure.cli.core.extension.operations import add_extension
         add_extension(cli_ctx=cli_ctx, extension_name=ext_name, upgrade=True, allow_preview=extension_allow_preview)
         if run_after_extension_installed:
-            import subprocess
-            import platform
-            exit_code = subprocess.call(args, shell=platform.system() == 'Windows')
+            # Rerun the command with the CLI's own entry point instead of handing the raw argv back to a
+            # shell. The previous implementation used `subprocess.call(args, shell=True)` on Windows, which
+            # let cmd.exe reinterpret user-controlled arguments (e.g. `&`, `|`, `^`) and allowed command
+            # injection. `run_az_cmd` executes the command in-process with the args kept as a list, so no
+            # shell is involved.
+            from azure.cli.core.util import run_az_cmd
+            result = run_az_cmd(args[1:])
+            exit_code = getattr(result, 'exit_code', 0)
             # In this case, error msg is for telemetry recording purpose only.
-            # From UX perspective, the command will rerun in subprocess. Whether it succeeds or fails,
-            # mesages will be shown from the subprocess and this process should not print more message to
-            # interrupt that.
+            # From UX perspective, the command is rerun and its messages are already shown,
+            # so this process should not print more message to interrupt that.
             print_error = False
             error_msg = ("Extension {} dynamically installed{} and commands will be "
                          "rerun automatically.").format(ext_name, prompt_info)

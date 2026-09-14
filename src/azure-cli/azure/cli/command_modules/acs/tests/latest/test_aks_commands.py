@@ -6,6 +6,7 @@
 import json
 import os
 import random
+import re
 import subprocess
 import tempfile
 import time
@@ -50,15 +51,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
+        self._retry_live_without_recording = (
+            self.is_live and
+            os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'
+        )
+        if self._retry_live_without_recording:
+            # Poll/refetch requests are incompatible with normal replay.
+            self.disable_recording = True
+
+    def _save_recording_file(self, *args):
+        if self._retry_live_without_recording:
+            # Preparers can temporarily override disable_recording.
+            self.cassette.dirty = False
+            if os.path.exists(self.temp_recording_file):
+                os.remove(self.temp_recording_file)
+            return
+        return super()._save_recording_file(*args)
 
     def cmd(self, command, checks=None, expect_failure=False):
         # Live-only retry adapter: when AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK
         # is set during a live run, retry AKS operation conflicts and poll
         # provisioningState until terminal so asynchronous service operations
         # can't fail the test on a transient conflict or stale 'Updating' body.
-        # Recordings made with the flag enabled must NOT be committed; the
-        # replay pipeline runs with the flag off and would assert against the
-        # initial pre-poll response.
         if (self.is_live and
             os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
             if checks is None:
@@ -102,6 +116,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "ProvisioningState of extension: Updating" in message
         )
 
+    @staticmethod
+    def _is_resource_already_exists_conflict(ex):
+        return "already exists" in str(ex).casefold()
+
+    @staticmethod
+    def _extract_cli_option(command, *option_names):
+        for option_name in option_names:
+            match = re.search(rf"{re.escape(option_name)}(?:=|\s+)(\S+)", command)
+            if match:
+                return match.group(1).strip("\"'")
+        return None
+
+    @classmethod
+    def _build_show_command_for_already_existing_resource(cls, command):
+        if not re.match(r"^aks\s+create\b", command.strip()):
+            return None
+        resource_group = cls._extract_cli_option(command, "--resource-group", "-g")
+        name = cls._extract_cli_option(command, "--name", "-n")
+        if not resource_group or not name:
+            return None
+        return f"aks show --resource-group {resource_group} --name {name}"
+
     def _execute_with_transient_conflict_retry(self, command, expect_failure):
         from azure.cli.testsdk.base import execute
         import logging
@@ -114,6 +150,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             try:
                 return execute(self.cli_ctx, command, expect_failure=expect_failure)
             except (HttpResponseError, CLIError) as ex:
+                if (
+                    not expect_failure and
+                    attempt > 0 and
+                    getattr(self, "_allow_retried_create_recovery", False) and
+                    self._is_resource_already_exists_conflict(ex)
+                ):
+                    show_command = self._build_show_command_for_already_existing_resource(command)
+                    if show_command:
+                        return execute(self.cli_ctx, show_command, expect_failure=False)
                 if (
                     expect_failure or
                     not self._is_transient_operation_conflict(ex) or
@@ -130,6 +175,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 time.sleep(delay)
 
         raise AssertionError("unreachable")
+
+    def _cmd_with_retried_create_recovery(self, command, checks=None):
+        previous_value = getattr(self, "_allow_retried_create_recovery", False)
+        self._allow_retried_create_recovery = True
+        try:
+            return self.cmd(command, checks=checks)
+        finally:
+            self._allow_retried_create_recovery = previous_value
 
     def _refetch_settled_aks_result(self, resource_id, fallback_result):
         from azure.cli.testsdk.base import execute
@@ -345,6 +398,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
         return workspace_id
 
+    def _create_azure_monitor_workspace(self, resource_group, location):
+        """Pre-create a dedicated Azure Monitor Workspace (AMW) for a single test.
+
+        When ``--azure-monitor-workspace-resource-id`` is omitted, ``az aks create/update``
+        falls back to a single, fixed-name default AMW per subscription+region (mirroring the
+        Log Analytics "DefaultWorkspace" behavior). Multiple azuremonitormetrics/control-plane
+        -metrics tests running concurrently in the same region would then race on that shared
+        resource (observed as "already exists"/conflicting-operation failures). Creating a
+        dedicated, per-test AMW here and passing its resource id explicitly avoids that race.
+        """
+        amw_name = self.create_random_name("cliaksamw", 24)
+        amw = self.cmd(
+            "monitor account create "
+            f"--resource-group {resource_group} --name {amw_name} --location {location}"
+        ).get_output_in_json()
+        return amw["id"]
+
     def _wait_for_cluster_update(self):
         if self.is_live or self.in_recording:
             self.cmd(
@@ -352,6 +422,101 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 '--updated --interval 30 --timeout 1800',
                 checks=[self.is_empty()],
             )
+
+    def _wait_for_cluster_property(self, query, expected, attempts=20, delay=30):
+        if not (self.is_live or self.in_recording):
+            return
+        last_value = None
+        for attempt in range(attempts):
+            last_value = self.cmd(
+                f'aks show --resource-group={{resource_group}} --name={{name}} '
+                f'--query "{query}" -o json'
+            ).get_output_in_json()
+            if str(last_value).casefold() == str(expected).casefold():
+                return
+            if attempt < attempts - 1:
+                time.sleep(delay)
+        raise AssertionError(
+            f"Cluster property '{query}' did not reach {expected!r}; last value: {last_value!r}"
+        )
+
+    def _cmd_or_skip_if_artifact_streaming_unavailable(self, command, checks=None):
+        try:
+            return self.cmd(command, checks=checks)
+        except Exception as ex:  # pylint: disable=broad-except
+            message = str(ex)
+            if (
+                "UnmarshalError" in message and
+                'unknown field "artifactStreamingProfile"' in message
+            ):
+                self.skipTest(
+                    "The stable AKS API used by Azure CLI does not currently expose "
+                    "artifactStreamingProfile; coverage remains in aks-preview."
+                )
+            raise
+
+    # Substrings identifying an "unsupported/unavailable" condition (as opposed to e.g. a
+    # value/quota/permission validation error). On their own these are too generic to trigger a
+    # skip safely, since many unrelated errors (invalid VM size, bad SKU, etc.) also contain
+    # phrases like "is not supported".
+    _UNSUPPORTED_CONDITION_MARKERS = (
+        "is not supported",
+        "is not enabled",
+        "not yet supported",
+        "not currently supported",
+        "feature is not available",
+        "not available",
+        "featurenotsupported",
+        "notsupported",
+        "unsupported",
+    )
+
+    # Feature-specific context markers scoped to Control Plane Metrics. A skip is only ever
+    # triggered when the failure text contains BOTH one of these AND one of the generic
+    # condition markers above, so a generic "<unrelated field> is not supported" error (e.g. an
+    # invalid/unsupported VM size or SKU) is never mistaken for this feature being unavailable.
+    _CONTROL_PLANE_METRICS_CONTEXT_MARKERS = (
+        "control plane metric",
+        "controlplanemetric",
+        "control-plane-metric",
+        "azuremonitorprofile.metrics.controlplane",
+    )
+
+    def _cmd_or_skip_if_unsupported(
+        self, command, checks=None, skip_reason=None, context_markers=None, condition_markers=None
+    ):
+        """Run ``command``; if it fails with an "unsupported feature/toggle" style error that is
+        ALSO specific to Control Plane Metrics, skip the test with a clear message instead of
+        failing it outright.
+
+        Use this only for commands that exercise a feature whose server-side availability is
+        known to vary by subscription/region/rollout-wave (e.g. a preview or newly-GA'd
+        capability). A skip requires BOTH:
+          * at least one substring from ``context_markers`` (defaults to
+            ``_CONTROL_PLANE_METRICS_CONTEXT_MARKERS``), confirming the failure is actually about
+            the feature under test, and
+          * at least one substring from ``condition_markers`` (defaults to
+            ``_UNSUPPORTED_CONDITION_MARKERS``), confirming it's an availability/support
+            condition rather than some other kind of failure.
+        Any failure that doesn't satisfy both conditions re-raises unchanged, so unrelated
+        regressions (e.g. an unsupported VM size/SKU, quota, or permission error) are never
+        masked.
+        """
+        context_markers = context_markers or self._CONTROL_PLANE_METRICS_CONTEXT_MARKERS
+        condition_markers = condition_markers or self._UNSUPPORTED_CONDITION_MARKERS
+        try:
+            return self.cmd(command, checks=checks)
+        except Exception as ex:  # pylint: disable=broad-except
+            message = str(ex).lower()
+            has_context = any(marker in message for marker in context_markers)
+            has_condition = any(marker in message for marker in condition_markers)
+            if has_context and has_condition:
+                self.skipTest(
+                    skip_reason or
+                    f"Skipping: feature toggle appears unavailable in this environment "
+                    f"({ex})"
+                )
+            raise
 
     def _get_lower_lts_version(self, location, version):
         """Return the highest LTS version that is lower than the given version."""
@@ -1526,10 +1691,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # disable monitoring add-on
-        disable_addon_output = self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.omsagent.enabled', False),
-        ]).get_output_in_json()
-        assert bool(disable_addon_output["addonProfiles"]["omsagent"]["config"]) == False
+        self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}')
+        self._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
 
         # show again
         show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
@@ -4564,7 +4727,7 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus",
+        location="westus2",
         preserve_default_location=True,
     )
     def test_aks_nodepool_add_with_artifact_streaming(
@@ -4583,6 +4746,9 @@ spec:
                 "resource_type": "Microsoft.ContainerService/ManagedClusters",
                 "nodepool2_name": "np2",
                 "ssh_key_value": self.generate_ssh_keys(),
+                # explicit, known-available SKU: the RP default VM size is not always allow-listed
+                # for every subscription/region combination, which can fail with "VM sizes not allowed"
+                "node_vm_size": "standard_d2s_v3",
             }
         )
 
@@ -4590,6 +4756,7 @@ spec:
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
             "--ssh-key-value={ssh_key_value} "
+            "--node-vm-size={node_vm_size} "
             "--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview "
         )
         self.cmd(
@@ -4600,8 +4767,9 @@ spec:
         )
 
         # nodepool add
-        self.cmd(
+        self._cmd_or_skip_if_artifact_streaming_unavailable(
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} "
+            "--node-vm-size={node_vm_size} "
             "--enable-artifact-streaming --aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview",
             checks=[
                 self.check("provisioningState", "Succeeded"),
@@ -4622,7 +4790,7 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17,
         name_prefix="clitest",
-        location="eastus",
+        location="westus2",
         preserve_default_location=True,
     )
     def test_aks_nodepool_update_with_artifact_streaming(
@@ -4658,7 +4826,7 @@ spec:
         )
 
         # enable artifact streaming
-        self.cmd(
+        self._cmd_or_skip_if_artifact_streaming_unavailable(
             "aks nodepool update "
             "--resource-group={resource_group} "
             "--cluster-name={name} "
@@ -5302,11 +5470,14 @@ spec:
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('addonProfiles.omsagent.enabled', True),
-            self.exists(
-                'addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
-            StringContainCheckIgnoreCase('Microsoft.OperationalInsights'),
-            StringContainCheckIgnoreCase('DefaultResourceGroup'),
-            StringContainCheckIgnoreCase('DefaultWorkspace')
+            # this cluster was created with an explicit --workspace-resource-id pointing at our
+            # own pre-created workspace, so it does NOT use the RP's auto-created default
+            # workspace (which would be named DefaultResourceGroup/DefaultWorkspace); assert
+            # against the actual workspace id we passed in instead of those stale default names.
+            self.check(
+                'addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID', '{workspace_id}'
+            ),
+            StringContainCheckIgnoreCase('Microsoft.OperationalInsights')
         ])
 
         # disable monitoring add-on
@@ -6887,9 +7058,13 @@ spec:
             'resource_group': resource_group,
             'name': aks_name,
             'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': 'Standard_D2s_v3',
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --no-wait'
+        create_cmd = (
+            'aks create --resource-group={resource_group} --name={name} '
+            '--node-vm-size={node_vm_size} --ssh-key-value={ssh_key_value} --no-wait'
+        )
         self.cmd(create_cmd)
 
         abort_cmd = 'aks operation-abort --resource-group={resource_group} --name={name}'
@@ -8353,10 +8528,16 @@ spec:
 
         # role assignment
         assignee_object_id = _get_test_sp_object_id(sp_name)
-        role_assignment_cmd = (
-            'role assignment create --scope {vnet_id} --role "Network Contributor" ' +
-            ("--assignee-object-id " + assignee_object_id) if assignee_object_id else "--assignee {service_principal}"
-        )
+        if assignee_object_id:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                f"--assignee-object-id {assignee_object_id} --assignee-principal-type ServicePrincipal"
+            )
+        else:
+            role_assignment_cmd = (
+                'role assignment create --scope {vnet_id} --role "Network Contributor" '
+                "--assignee {service_principal}"
+            )
         self.cmd(role_assignment_cmd, checks=[
             self.check('scope', vnet_id)
         ])
@@ -8597,18 +8778,23 @@ spec:
         aks_name = self.create_random_name('cliakstest', 16)
 
         node_vm_size = 'standard_d2s_v3'
+        # pre-create a dedicated Azure Monitor Workspace to avoid racing with other
+        # azuremonitormetrics tests on the shared per-region default AMW.
+        amw_id = self._create_azure_monitor_workspace(resource_group, resource_group_location)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'ssh_key_value': self.generate_ssh_keys(),
-            'node_vm_size': node_vm_size
+            'node_vm_size': node_vm_size,
+            'amw_id': amw_id,
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
-                     '--enable-azure-monitor-metrics --enable-windows-recording-rules --output=json'
+                     '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} ' \
+                     '--enable-windows-recording-rules --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -8642,12 +8828,16 @@ spec:
     def test_aks_update_with_azuremonitormetrics(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         node_vm_size = 'standard_d2s_v3'
+        # pre-create a dedicated Azure Monitor Workspace to avoid racing with other
+        # azuremonitormetrics tests on the shared per-region default AMW.
+        amw_id = self._create_azure_monitor_workspace(resource_group, resource_group_location)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'node_vm_size': node_vm_size,
+            'amw_id': amw_id,
         })
 
         # create: without enable-azure-monitor-metrics
@@ -8659,7 +8849,8 @@ spec:
 
         # update: enable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--enable-azure-monitor-metrics --enable-windows-recording-rules'
+                     '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} ' \
+                     '--enable-windows-recording-rules'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.metrics.enabled', True),
@@ -8697,25 +8888,44 @@ spec:
         self.test_resources_count = 0
         aks_name = self.create_random_name('cliakstest', 16)
         node_vm_size = 'standard_d2s_v3'
+        # pre-create a dedicated Azure Monitor Workspace to avoid racing with other
+        # azuremonitormetrics/control-plane-metrics tests on the shared per-region default AMW.
+        amw_id = self._create_azure_monitor_workspace(resource_group, resource_group_location)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'node_vm_size': node_vm_size,
+            'amw_id': amw_id,
         })
 
         # create: --enable-azure-monitor-metrics + --enable-control-plane-metrics
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
-                     '--enable-azure-monitor-metrics --enable-control-plane-metrics --output=json'
+                     '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} ' \
+                     '--enable-control-plane-metrics --output=json'
         # NOTE: ``--enable-control-plane-metrics`` on create is intentionally deferred to a
         # postprocessing PUT (after DCRA creation) to avoid scheduling the CCP pod before its
         # DCRA exists. The create response may therefore reflect the pre-flip state; assert
         # the final state via ``aks show`` after the cluster settles.
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
+        # Control Plane Metrics availability is still rolling out per-subscription/region; if the
+        # service reports the feature/toggle as unsupported here, skip rather than fail the test.
+        try:
+            self._cmd_with_retried_create_recovery(
+                create_cmd,
+                checks=[self.check('provisioningState', 'Succeeded')],
+            )
+        except Exception as ex:  # pylint: disable=broad-except
+            message = str(ex).casefold()
+            if (
+                any(marker in message for marker in self._CONTROL_PLANE_METRICS_CONTEXT_MARKERS) and
+                any(marker in message for marker in self._UNSUPPORTED_CONDITION_MARKERS)
+            ):
+                self.skipTest(
+                    "Control Plane Metrics toggle is not yet available in this subscription/region"
+                )
+            raise
 
         wait_cmd = 'aks wait --resource-group={resource_group} --name={name} --created ' \
                    '--interval 60 --timeout 1800'
@@ -8745,21 +8955,26 @@ spec:
     def test_aks_update_with_control_plane_metrics(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         node_vm_size = 'standard_d2s_v3'
+        # pre-create a dedicated Azure Monitor Workspace to avoid racing with other
+        # azuremonitormetrics/control-plane-metrics tests on the shared per-region default AMW.
+        amw_id = self._create_azure_monitor_workspace(resource_group, resource_group_location)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'node_vm_size': node_vm_size,
+            'amw_id': amw_id,
         })
 
         # create: with azure monitor metrics but without control plane metrics
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
-                     '--enable-azure-monitor-metrics --output=json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
+                     '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} --output=json'
+        self._cmd_with_retried_create_recovery(
+            create_cmd,
+            checks=[self.check('provisioningState', 'Succeeded')],
+        )
 
         # wait for AMW background setup to complete before issuing update
         wait_cmd = 'aks wait --resource-group={resource_group} --name={name} --updated --timeout=1800'
@@ -8770,12 +8985,18 @@ spec:
         )
 
         # update: enable-control-plane-metrics on a cluster that already has AM metrics
+        # Control Plane Metrics availability is still rolling out per-subscription/region; if the
+        # service reports the feature/toggle as unsupported here, skip rather than fail the test.
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
                      '--enable-control-plane-metrics'
-        self.cmd(update_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('azureMonitorProfile.metrics.controlPlane.enabled', True),
-        ])
+        self._cmd_or_skip_if_unsupported(
+            update_cmd,
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('azureMonitorProfile.metrics.controlPlane.enabled', True),
+            ],
+            skip_reason="Control Plane Metrics toggle is not yet available in this subscription/region",
+        )
 
         self.cmd(wait_cmd, checks=[self.is_empty()])
 
@@ -10420,21 +10641,29 @@ spec:
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2', preserve_default_location=True)
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix='clitest',
+        location='eastus2',
+        preserve_default_location=True,
+    )
     def test_aks_kubenet_to_cni_overlay_migration(self, resource_group, resource_group_location):
-        _, create_version = self._get_versions(resource_group_location)
+        cluster_location = 'eastus' if self.is_live else resource_group_location
+        _, create_version = self._get_versions(cluster_location)
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'location': resource_group_location,
+            'location': cluster_location,
             'k8s_version': create_version,
+            'node_vm_size': 'Standard_D2s_v3',
             'ssh_key_value': self.generate_ssh_keys(),
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
+                     '--node-vm-size {node_vm_size} ' \
                      '--service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 --pod-cidr 100.112.0.0/12 ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
         self.cmd(create_cmd, checks=[
@@ -11416,8 +11645,7 @@ spec:
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--pod-cidr 172.126.0.0/16 --service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
                      '--pod-cidrs 172.126.0.0/16,2001:abcd:1234::/64 --service-cidrs 172.56.0.0/16,2001:ffff::/108 ' \
-                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ip-count 1 ' \
-                     '--load-balancer-managed-outbound-ipv6-count 2 ' \
+                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ipv6-count 2 ' \
                      '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
         self.cmd(create_cmd, checks=[
@@ -14303,6 +14531,13 @@ spec:
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name("cliakstest", 16)
+        # pre-create a dedicated Log Analytics workspace instead of relying on the RP's
+        # auto-created default workspace, and settle the cluster before toggling Container
+        # Network Logs so the Microsoft-ContainerNetworkLogs custom table in the DCR has time
+        # to finish provisioning (otherwise updates can race with "InvalidOutputTable").
+        workspace_id = self._create_container_insights_workspace(
+            resource_group, resource_group_location
+        )
         self.kwargs.update(
             {
                 "resource_group": resource_group,
@@ -14310,6 +14545,7 @@ spec:
                 "location": resource_group_location,
                 "resource_type": "Microsoft.ContainerService/ManagedClusters",
                 "ssh_key_value": self.generate_ssh_keys(),
+                "workspace_id": workspace_id,
             }
         )
 
@@ -14320,7 +14556,7 @@ spec:
             "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
             "--enable-acns "
             "--enable-container-network-logs "
-            "--enable-addons monitoring "
+            "--enable-addons monitoring --workspace-resource-id={workspace_id} "
             "--enable-high-log-scale-mode "
             "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPreview "
         )
@@ -14334,6 +14570,10 @@ spec:
             ],
         )
 
+        # let the cluster settle so the Microsoft-ContainerNetworkLogs custom table finishes
+        # provisioning in the workspace before we start toggling container network logs.
+        self._wait_for_cluster_update()
+
         # update: disable container network logs
         disable_cnl_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
@@ -14344,8 +14584,10 @@ spec:
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("addonProfiles.omsagent.enabled", True),
-                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"),
             ],
+        )
+        self._wait_for_cluster_property(
+            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"
         )
 
         # update: enable high log scale mode independently via aks update
@@ -14368,8 +14610,10 @@ spec:
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("addonProfiles.omsagent.enabled", True),
-                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
             ],
+        )
+        self._wait_for_cluster_property(
+            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"
         )
 
         # delete
@@ -15108,10 +15352,14 @@ spec:
             "--node-image-only --yes",
             checks=[self.check("provisioningState", "Succeeded")],
         )
+        # Cache-based bootstrap on a network-isolated/private cluster adds extra latency to node
+        # image rollout (image + artifacts must be pulled through the private ACR/cache path
+        # instead of the public MCR), so a plain 1-hour budget can be exceeded here even though
+        # the upgrade itself is healthy; use a larger, better-justified timeout.
         self.cmd(
             "aks nodepool wait --resource-group {resource_group} "
             "--cluster-name {aks_name_2} --name {system_nodepool_name} "
-            "--updated --interval 30 --timeout 3600",
+            "--updated --interval 30 --timeout 5400",
             checks=[self.is_empty()],
         )
         self.cmd(

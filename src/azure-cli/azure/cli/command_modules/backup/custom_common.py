@@ -39,7 +39,7 @@ tier_type_map = {'VaultStandard': 'HardenedRP',
                  'VaultArchive': 'ArchivedRP',
                  'Snapshot': 'InstantRP'}
 
-crr_not_supported_bmt = ["azurestorage", "mab"]
+crr_not_supported_bmt = ["mab"]
 
 default_resource_guard = "VaultProxy"
 

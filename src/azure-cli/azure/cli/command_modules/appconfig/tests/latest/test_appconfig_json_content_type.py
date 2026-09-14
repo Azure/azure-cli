@@ -14,7 +14,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 from azure.cli.command_modules.appconfig._constants import AIConfigConstants, FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -32,8 +32,8 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_json_content_type(self, resource_group, location):
-        src_config_store_prefix = get_resource_name_prefix('source')
-        dest_config_store_prefix = get_resource_name_prefix('destination')
+        src_config_store_prefix = 'source'
+        dest_config_store_prefix = 'destination'
         src_config_store_name = self.create_random_name(prefix=src_config_store_prefix, length=24)
         dest_config_store_name = self.create_random_name(prefix=dest_config_store_prefix, length=24)
 
