@@ -184,7 +184,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest-vm', parameter_name='vm_name',
                  resource_group_location_parameter_name='resource_group_location',
-                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME', image = "Win2022Datacenter"):
+                 resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME',
+                 image="Win2022Datacenter", create_public_ip=True):
         super().__init__(name_prefix, 15)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -195,6 +196,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
         self.image = image
+        self.create_public_ip = create_public_ip
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
@@ -202,6 +204,8 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
             self.location = self._get_resource_group_location(**kwargs)
             param_format = '-n {} -g {} --image {} --admin-username {} --admin-password {} '
             param_format += '--tags {} --nsg-rule None'
+            if not self.create_public_ip:
+                param_format += ' --public-ip-address ""'
             # param_format += '--tags {} --size {} --nsg-rule None'
             param_tags = 'MabUsed=Yes Owner=sisi Purpose=CLITest DeleteBy=12-2099 AutoShutdown=No'
             param_string = param_format.format(name, self.resource_group, self.image, name,

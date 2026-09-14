@@ -64,6 +64,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertTrue(value, "Expected a non-empty result from: {}".format(command))
         return value
 
+    def _wait_for_item_source_scan_status(self, expected_status):
+        command = (
+            'backup item show --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}'
+        )
+        item = None
+        actual_status = None
+        for _ in range(10):
+            item = self.cmd(command).get_output_in_json()
+            scan_info = item.get('properties', {}).get('sourceSideScanInfo') or {}
+            actual_status = scan_info.get('sourceSideScanStatus')
+            if actual_status == expected_status:
+                return item
+            if self.in_recording or self.is_live:
+                time.sleep(15)
+
+        self.assertEqual(expected_status, actual_status)
+        return item
+
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
@@ -512,7 +531,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
-    @VMPreparer()
+    @VMPreparer(create_public_ip=False)
     @ItemPreparer()
     def test_backup_item_source_scan_configuration(self, resource_group, vault_name, vm_name):
         self.kwargs.update({
@@ -521,7 +540,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm': vm_name
         })
 
-        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Enabled')
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Enabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
 
         # The registered-container and protected-item lists are eventually consistent and can
         # transiently return empty right after enable-for-vm, so poll until they resolve instead
@@ -533,9 +557,73 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} '
             '-c {container} -n {vm} --query name -o tsv')
 
+        item = self.cmd(
+            'backup item show --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}').get_output_in_json()
+        scan_info = item.get('properties', {}).get('sourceSideScanInfo') or {}
+        if scan_info.get('sourceSideScanStatus') == 'Configured':
+            self.cmd(
+                'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
+                '--state Disabled --backup-management-type AzureIaasVM --workload-type VM')
+            self._wait_for_item_source_scan_status('NotConfigured')
+
         self.cmd(
             'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
             '--state Enabled --backup-management-type AzureIaasVM --workload-type VM')
+        item = self._wait_for_item_source_scan_status('Configured')
+        self.assertIn('sourceSideScanSummary', item['properties']['sourceSideScanInfo'])
+
+        self.cmd(
+            'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
+            '--state Disabled --backup-management-type AzureIaasVM --workload-type VM')
+        item = self._wait_for_item_source_scan_status('NotConfigured')
+        self.assertIn('sourceSideScanSummary', item['properties']['sourceSideScanInfo'])
+
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Disabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
+        ])
+
+    @record_only()
+    def test_backup_source_scan_recovery_points(self):
+        self.kwargs.update({
+            'sub': ('6d875e77-e412-4d7d-9af4-8895278b4443'
+                    if self.in_recording or self.is_live else self.get_subscription_id()),
+            'rg': 'swbela-ransom-rg',
+            'vault': 'swbela-mdc-vault-1',
+            'vm': 'Sample-VM',
+            'rp': '1141447822743501'
+        })
+
+        self.cmd('backup vault show --subscription {sub} -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+
+        self.kwargs['container'] = self._resolve_backup_name(
+            'backup container show --subscription {sub} --backup-management-type AzureIaasVM -g {rg} -v {vault} '
+            '-n {vm} --query name -o tsv')
+        self.kwargs['item'] = self._resolve_backup_name(
+            'backup item show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} '
+            '-c {container} -n {vm} --query name -o tsv')
+
+        self.cmd(
+            'backup item show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}', checks=[
+                self.check('properties.sourceSideScanInfo.sourceSideScanStatus', 'Configured'),
+                self.check('properties.sourceSideScanInfo.sourceSideScanSummary', 'Suspicious')
+            ])
+
+        recovery_point = self.cmd(
+            'backup recoverypoint show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -i {item} -n {rp}').get_output_in_json()
+        properties = recovery_point['properties']
+        self.assertIn('threatStatus', properties)
+        self.assertIsNotNone(properties['threatStatus'])
+        self.assertIn('threatInfo', properties)
+        self.assertTrue(properties['threatInfo'])
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
