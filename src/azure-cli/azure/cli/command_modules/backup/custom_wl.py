@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 from knack.log import get_logger
 
-from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppContainerProtectionContainer, \
+from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
@@ -26,9 +26,13 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppConta
     UserAssignedManagedIdentityDetails, UserAssignedIdentityProperties, \
     AzureVmWorkloadSAPAseDatabaseProtectedItem, MoveRPAcrossTiersRequest
 
-from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
-
 from azure.cli.core.util import CLIError
+
+try:
+    from azure.mgmt.recoveryservicesbackup.models import CrossRegionRestoreRequest
+except ImportError:
+    def CrossRegionRestoreRequest(*_args, **_kwargs):
+        raise CLIError('This operation is not supported by the installed Recovery Services Backup SDK.')
 from azure.cli.command_modules.backup._validators import datetime_type, validate_wl_restore, validate_log_point_in_time
 from azure.cli.command_modules.backup._client_factory import protectable_containers_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
@@ -42,7 +46,7 @@ from azure.cli.command_modules.backup import custom, custom_base
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 
@@ -608,15 +612,15 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
 
     properties = _get_protected_item_instance(backup_item_type)
     if retain_recovery_points_as_per_policy:
-        properties.protection_state = ProtectionState.backups_suspended
+        properties.protection_state = ProtectionState.BACKUPS_SUSPENDED
     else:
-        properties.protection_state = ProtectionState.protection_stopped
+        properties.protection_state = ProtectionState.PROTECTION_STOPPED
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 
     # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if param.properties.protection_state == ProtectionState.protection_stopped:
+    if param.properties.protection_state == ProtectionState.PROTECTION_STOPPED:
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
                                                 vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario

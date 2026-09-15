@@ -11,7 +11,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from azure.mgmt.core.tools import is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.mgmt.recoveryservices import RecoveryServicesClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
@@ -21,7 +21,7 @@ from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuN
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
     CrossSubscriptionRestoreSettings, DeletedVaultUndeleteInputProperties, DeletedVaultUndeleteInput, \
     SoftDeleteSettings, CostManagementSettings, ImmutabilityConfiguration
-from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
     ILRRequestResource, IaasVMILRRegistrationRequest, \
@@ -29,11 +29,18 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
     UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, \
-    SecuredVMDetails
-from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
+    SecuredVMDetails, InstantItemRecoveryOperationResultRequest
+from azure.cli.core.util import CLIError
+
+try:
+    from azure.mgmt.recoveryservicesbackup.models import CrrJobRequest, CrossRegionRestoreRequest
+except ImportError:
+    def _unavailable_recoveryservicesbackup_model(*_args, **_kwargs):
+        raise CLIError('This operation is not supported by the installed Recovery Services Backup SDK.')
+
+    CrrJobRequest = CrossRegionRestoreRequest = _unavailable_recoveryservicesbackup_model
 
 import azure.cli.command_modules.backup._validators as validators
-from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as CoreResourceNotFoundError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError, ResourceNotFoundError
@@ -1702,7 +1709,16 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
     result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                               file_restore_request, cls=cust_help.get_pipeline_response)
 
-    client_scripts = cust_help.track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
+    operation_id = cust_help.track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
+    mount_script_request = InstantItemRecoveryOperationResultRequest(
+        provision_instant_item_recovery_operation_id=operation_id)
+    recovery_target = client.list_instant_item_recovery_operation_result(
+        resource_group_name=resource_group_name, vault_name=vault_name, fabric_name=fabric_name,
+        container_name=container_uri, protected_item_name=item_uri, recovery_point_id=rp_name,
+        body=mount_script_request)
+    client_scripts = recovery_target.client_scripts if recovery_target else None
+    if not client_scripts:
+        raise CLIError('Mount script details were not returned by the backup service.')
 
     if client_scripts[0].os_type == os_windows:
         _run_client_script_for_windows(client_scripts)
@@ -1740,7 +1756,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
 
     # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if vm_item.properties.protection_state == ProtectionState.protection_stopped:
+    if vm_item.properties.protection_state == ProtectionState.PROTECTION_STOPPED:
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
                                                 vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario
@@ -1969,9 +1985,9 @@ def _get_disable_protection_request(item, undelete=False,
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
         vm_item_properties.policy_id = ''
         if retain_recovery_points_as_per_policy:
-            vm_item_properties.protection_state = ProtectionState.backups_suspended
+            vm_item_properties.protection_state = ProtectionState.BACKUPS_SUSPENDED
         else:
-            vm_item_properties.protection_state = ProtectionState.protection_stopped
+            vm_item_properties.protection_state = ProtectionState.PROTECTION_STOPPED
         vm_item_properties.source_resource_id = item.properties.source_resource_id
         if undelete:
             vm_item_properties.is_rehydrate = True

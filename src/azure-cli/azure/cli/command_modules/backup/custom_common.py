@@ -9,9 +9,9 @@ from azure.cli.command_modules.backup._client_factory import backup_protected_it
     protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf, resource_guard_proxy_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
-from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType, \
+from azure.mgmt.recoveryservicesbackup.models import RecoveryPointTierStatus, RecoveryPointTierType, \
     UnlockDeleteRequest, TieringMode
-from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 # pylint: disable=import-error
 
