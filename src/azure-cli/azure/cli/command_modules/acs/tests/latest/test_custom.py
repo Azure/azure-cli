@@ -935,14 +935,18 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_get_latest_kubelogin_version_unexpected_fallback_content(self, logger_mock, mock_urlopen_read):
-        """Test that content which is not a version (e.g. an html error page) is rejected."""
-        mock_urlopen_read.side_effect = [
-            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
-            b'<html>not found</html>',
-        ]
+        """Test that content which is not exactly a version is rejected, not used to build the download url."""
+        for content in (b'<html>not found</html>', b'v0.0.30/../../evil', b'\xff\xfe\x00binary'):
+            with self.subTest(content=content):
+                mock_urlopen_read.reset_mock()
+                mock_urlopen_read.side_effect = [
+                    HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest',
+                              403, 'rate limited', None, None),
+                    content,
+                ]
 
-        with self.assertRaises(ClientRequestError):
-            _get_latest_kubelogin_version('azurecloud')
+                with self.assertRaises(ClientRequestError):
+                    _get_latest_kubelogin_version('azurecloud')
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)

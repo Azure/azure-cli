@@ -2597,15 +2597,15 @@ def _get_latest_kubelogin_version(cloud_name, gh_token=None):
             'The GitHub api rate limit was exceeded (%s), getting the latest version of kubelogin from "%s"',
             ex, fallback_url)
         try:
-            latest_version = _urlopen_read(fallback_url).decode('UTF-8').strip()
+            latest_version = _urlopen_read(fallback_url).decode('UTF-8', errors='replace').strip()
         except OSError as fallback_ex:
             raise ClientRequestError(
                 'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}).'.format(
                     latest_release_url, ex, fallback_url, fallback_ex),
                 recommendation='Please retry later, or specify a version with --kubelogin-version.')
-        if not re.match(r'^v?\d+\.\d+\.\d+', latest_version):
+        if not re.fullmatch(r'v?\d+\.\d+\.\d+', latest_version):
             raise ClientRequestError(
-                'Unexpected version "{}" returned by "{}".'.format(latest_version, fallback_url),
+                'Unexpected version "{}" returned by "{}".'.format(latest_version[:50], fallback_url),
                 recommendation='Please retry later, or specify a version with --kubelogin-version.')
         return latest_version if latest_version.startswith('v') else 'v' + latest_version
 
