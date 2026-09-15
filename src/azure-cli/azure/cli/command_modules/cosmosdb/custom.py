@@ -137,6 +137,7 @@ def cli_cosmosdb_create(cmd,
                         network_acl_bypass_resource_ids=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_retention_lock_expiration_timestamp=None,
                         backup_redundancy=None,
                         assign_identity=None,
                         default_identity=None,
@@ -205,6 +206,7 @@ def cli_cosmosdb_create(cmd,
                                     assign_identity=assign_identity,
                                     default_identity=default_identity,
                                     backup_retention=backup_retention,
+                                    backup_retention_lock_expiration_timestamp=backup_retention_lock_expiration_timestamp,
                                     databases_to_restore=databases_to_restore,
                                     gremlin_databases_to_restore=gremlin_databases_to_restore,
                                     tables_to_restore=tables_to_restore,
@@ -246,6 +248,7 @@ def _create_database_account(client,
                              network_acl_bypass_resource_ids=None,
                              backup_interval=None,
                              backup_retention=None,
+                             backup_retention_lock_expiration_timestamp=None,
                              backup_redundancy=None,
                              assign_identity=None,
                              default_identity=None,
@@ -362,6 +365,12 @@ def _create_database_account(client,
         )
         backup_policy.periodic_mode_properties = periodic_mode_properties
 
+    if backup_retention_lock_expiration_timestamp is not None:
+        if not isinstance(backup_policy, ContinuousModeBackupPolicy):
+            raise CLIError(
+                '--backup-retention-lock-expiration-timestamp can only be set with continuous backup policy.')
+        backup_policy.backup_retention_lock_expiration_timestamp = backup_retention_lock_expiration_timestamp
+
     analytical_storage_configuration = None
     if analytical_storage_schema_type is not None:
         analytical_storage_configuration = AnalyticalStorageConfiguration()
@@ -476,6 +485,7 @@ def cli_cosmosdb_update(client,
                         server_version=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_retention_lock_expiration_timestamp=None,
                         backup_redundancy=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
@@ -556,6 +566,14 @@ def cli_cosmosdb_update(client,
                     tier=continuous_tier
                 )
                 backup_policy.continuous_mode_properties = continuous_mode_properties
+
+    if backup_retention_lock_expiration_timestamp is not None:
+        if backup_policy is None:
+            backup_policy = existing.backup_policy
+        if not isinstance(backup_policy, ContinuousModeBackupPolicy):
+            raise CLIError(
+                '--backup-retention-lock-expiration-timestamp can only be set with continuous backup policy.')
+        backup_policy.backup_retention_lock_expiration_timestamp = backup_retention_lock_expiration_timestamp
 
     analytical_storage_configuration = None
     if analytical_storage_schema_type is not None:

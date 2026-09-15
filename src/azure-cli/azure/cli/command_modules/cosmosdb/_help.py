@@ -180,6 +180,11 @@ parameters:
     short-summary: Add table names to restore
     long-summary: |
         Usage:          --tables-to-restore tables=table1 [table2 ...]
+  - name: --backup-retention-lock-expiration-timestamp
+    short-summary: Set the retention lock expiration timestamp for continuous mode backups.
+    long-summary: |
+      Usage:    --backup-retention-lock-expiration-timestamp 2030-01-01T00:00:00Z
+      This option can only be used with a continuous backup policy.
   - name: --minimal-tls-version
     short-summary: Indicate the minimum allowed TLS version
     long-summary: |
@@ -214,6 +219,8 @@ examples:
     text: az cosmosdb create -n myaccount -g mygroup --locations regionName=southcentralus failoverPriority=0 --locations regionName=eastus failoverPriority=1 --enable-per-partition-automatic-failover true
   - name: Create a new Azure Cosmos DB database account by restoring from an existing account in the given location
     text: az cosmosdb create -n restoredaccount -g mygroup --is-restore-request true --restore-source /subscriptions/2296c272-5d55-40d9-bc05-4d56dc2d7588/providers/Microsoft.DocumentDB/locations/westus/restorableDatabaseAccounts/d056a4f8-044a-436f-80c8-cd3edbc94c68 --restore-timestamp 2020-07-13T16:03:41+0000 --locations regionName=westus failoverPriority=0 isZoneRedundant=False
+  - name: Create an account with a continuous backup retention lock.
+    text: az cosmosdb create -n myaccount -g mygroup --backup-policy-type Continuous --backup-retention-lock-expiration-timestamp 2030-01-01T00:00:00Z
 """
 
 helps['cosmosdb restore'] = """
@@ -966,6 +973,11 @@ parameters:
         Default:        single region account in the location of the specified resource group.
         Failover priority values are 0 for write regions and greater than 0 for read regions. A failover priority value must be unique and less than the total number of regions.
         Multiple locations can be specified by using more than one `--locations` argument.
+  - name: --backup-retention-lock-expiration-timestamp
+    short-summary: Push forward the retention lock expiration timestamp for continuous mode backups.
+    long-summary: |
+      Usage:    --backup-retention-lock-expiration-timestamp 2030-06-01T00:00:00Z
+      This option can only be used with a continuous backup policy.
   - name: --minimal-tls-version
     short-summary: Indicate the minimum allowed TLS version
     long-summary: |
@@ -998,6 +1010,8 @@ examples:
     text: az cosmosdb update -n myaccount -g mygroup --locations regionName=eastus failoverPriority=0 isZoneRedundant=False --locations regionName=uksouth failoverPriority=1 isZoneRedundant=True --enable-multiple-write-locations --network-acl-bypass AzureServices --network-acl-bypass-resource-ids /subscriptions/subId/resourceGroups/rgName/providers/Microsoft.Synapse/workspaces/wsName
   - name: Enable per-partition automatic failover on an account.
     text: az cosmosdb update -n myaccount -g mygroup --enable-per-partition-automatic-failover true
+  - name: Push forward a continuous backup retention lock.
+    text: az cosmosdb update -n myaccount -g mygroup --backup-retention-lock-expiration-timestamp 2030-06-01T00:00:00Z
 """
 
 helps['cosmosdb mongodb role'] = """
