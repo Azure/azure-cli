@@ -2515,6 +2515,8 @@ long-summary: >
     Runtime errors are surfaced only when they occurred within the last
     15 minutes. Older errors are omitted from both structured output and
     the `--report` view.
+    For a 24-hour lookback of runtime status and startup attempts, run
+    `az webapp troubleshoot status`.
 
     By default the command returns a structured payload so the standard
     `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
