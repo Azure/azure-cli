@@ -1052,13 +1052,14 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
             'ip': 'ip1',
             'name': 'name',
             'name1': 'name1',
+            'name2': 'name2',
         })
 
         # create an ag with ssl profile
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
             "network application-gateway create -n {gw} -g {rg} --public-ip-address {ip} --sku Standard_v2 --priority 1001 "
-            "--ssl-profile name={name} min-protocol-version=TLSv1_0 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
+            "--ssl-profile name={name} min-protocol-version=TLSv1_2 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
             checks=[
                 self.check("length(applicationGateway.sslProfiles)", 1),
                 self.check("applicationGateway.sslProfiles[0].properties.clientAuthConfiguration.verifyClientCertIssuerDN", True),
@@ -1067,15 +1068,18 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         )
         # set client cert revocation option
         self.cmd(
-            "network application-gateway update -n {gw} -g {rg} --ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP",
+            "network application-gateway update -n {gw} -g {rg} "
+            "--ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP "
+            "--set sslPolicy.policyType=Predefined sslPolicy.policyName=AppGwSslPolicy20170401S",
             checks=[
+                self.check("sslPolicy.policyName", "AppGwSslPolicy20170401S"),
                 self.check("sslProfiles[0].clientAuthConfiguration.verifyClientCertIssuerDN", True),
                 self.check("sslProfiles[0].clientAuthConfiguration.verifyClientRevocation", "OCSP"),
             ]
         )
 
         self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '
-                 '--client-auth-configuration True --min-protocol-version TLSv1_0 '
+                 '--client-auth-configuration True --min-protocol-version TLSv1_2 '
                  '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
                  checks=[self.check('length(sslProfiles)', 2)])
 
@@ -1088,6 +1092,31 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Passthrough '
+                 '--policy-type Custom --min-protocol-version TLSv1_2 '
+                 '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+                 checks=[
+                     self.check('length(sslProfiles)', 3),
+                     self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Passthrough'),
+                 ])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name2}',
+                 checks=[self.check('clientAuthConfiguration.verifyClientAuthMode', 'Passthrough')])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Strict',
+                 checks=[self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Strict')])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name2}',
+                 checks=[self.check('clientAuthConfiguration.verifyClientAuthMode', 'Strict')])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Passthrough',
+                 checks=[self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Passthrough')])
+
+        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name2}')
 
         self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ')
 
