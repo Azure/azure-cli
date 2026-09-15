@@ -8,6 +8,7 @@
 
 import json
 import sys
+import time
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
@@ -23,9 +24,33 @@ logger = get_logger(__name__)
 file_extensions = {True: '.bin', False: '.json'}
 
 
+class AzureCliTokenCache(PersistedTokenCache):
+    """A token cache that gracefully handles corrupted token cache files.
+
+    When the token cache file contains invalid JSON (e.g., due to incomplete or concurrent writes),
+    the cache is reset to a fresh empty state instead of raising an exception.
+    """
+
+    def _reload_if_necessary(self):
+        try:
+            super()._reload_if_necessary()
+        except json.JSONDecodeError as ex:
+            # The token cache file may be corrupted due to incomplete or concurrent writes.
+            # Reset the in-memory cache to empty so that the current operation can continue.
+            # The subsequent modify() call will persist this empty cache, overwriting the
+            # corrupted file on disk.
+            logger.warning("Failed to deserialize token cache '%s': %s. "
+                           "The in-memory cache will be reset to empty.",
+                           self._persistence.get_location(), ex)
+            self.deserialize(None)
+            # Update the sync marker so we don't keep retrying to reload the same
+            # corrupted file on every subsequent call until it's overwritten.
+            self._last_sync = time.time()
+
+
 def load_persisted_token_cache(location, encrypt):
     persistence = build_persistence(location, encrypt)
-    return PersistedTokenCache(persistence)
+    return AzureCliTokenCache(persistence)
 
 
 def load_secret_store(location, encrypt):
@@ -66,4 +91,8 @@ class SecretStore:
         try:
             return json.loads(self._persistence.load())
         except PersistenceNotFound:
+            return []
+        except json.JSONDecodeError as ex:
+            logger.warning("Failed to deserialize service principal entries '%s': %s. "
+                           "The entries will be treated as empty.", self._persistence.get_location(), ex)
             return []
