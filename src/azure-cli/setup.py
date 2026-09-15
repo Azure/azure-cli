@@ -81,7 +81,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerregistry==15.1.0b2',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
     'azure-mgmt-containerservice~=41.6.0',
-    'azure-mgmt-cosmosdb==10.0.0',
+    'azure-mgmt-cosmosdb==10.1.0b1',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-domainregistration==1.0.0b1',
