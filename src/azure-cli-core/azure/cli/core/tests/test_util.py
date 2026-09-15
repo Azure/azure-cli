@@ -585,6 +585,28 @@ class TestGetProperty(unittest.TestCase):
         self.assertEqual(getprop(self, 'new_props', "new_props"), "new_props")
 
 
+class TestShouldEncryptTokenCache(unittest.TestCase):
+    """The default is what a user who never touched the config runs with, so it is pinned here.
+
+    The live encryption tests all set core.encrypt_token_cache or its environment override, so
+    flipping the fallback back to plaintext would not fail any of them.
+    """
+
+    def test_encryption_is_on_by_default(self):
+        from azure.cli.core.util import should_encrypt_token_cache
+        cli = DummyCli()
+        # Nothing configured: the value the caller passes as fallback is what takes effect.
+        with mock.patch.object(cli.config, 'getboolean',
+                               side_effect=lambda section, option, fallback=None: fallback):
+            self.assertTrue(should_encrypt_token_cache(cli))
+
+    def test_config_can_turn_encryption_off(self):
+        from azure.cli.core.util import should_encrypt_token_cache
+        cli = DummyCli()
+        with mock.patch.object(cli.config, 'getboolean', return_value=False):
+            self.assertFalse(should_encrypt_token_cache(cli))
+
+
 class TestHandleException(unittest.TestCase):
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
