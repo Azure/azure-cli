@@ -6912,19 +6912,29 @@ def troubleshoot_config(cmd, resource_group_name, name, slot=None, instance=None
         sub=subscription_id, rg=resource_group_name, name=name,
         slot_seg=slot_segment, ver=api_version)
 
+    recommendation_instance = None
+    if isinstance(config_check, dict):
+        recommendation_instance = config_check.get('InstanceId') or config_check.get('instanceId')
+    if instance and not recommendation_instance:
+        _, machine_to_id = _map_arm_instance_ids(
+            cmd, subscription_id, resource_group_name, name, slot_segment, api_version)
+        requested_machine = str(instance).casefold()
+        recommendation_instance = next((
+            arm_instance_id for machine_name, arm_instance_id in machine_to_id.items()
+            if str(machine_name).casefold() == requested_machine
+        ), None)
+
     runtime_error = None
-    try:
-        arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
-        recommendation_instance = None
-        if isinstance(config_check, dict):
-            recommendation_instance = config_check.get('InstanceId') or config_check.get('instanceId')
-        runtime_error = _extract_runtime_error(arm_response, instance_id=recommendation_instance)
-    except HttpResponseError as ex:
-        logger.warning(
-            "Failed to retrieve site runtime status from '%s' (%s).",
-            arm_url, _http_error_status(ex))
-    except ValueError as ex:
-        logger.warning("Failed to parse site runtime status response: %s", ex)
+    if not instance or recommendation_instance:
+        try:
+            arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
+            runtime_error = _extract_runtime_error(arm_response, instance_id=recommendation_instance)
+        except HttpResponseError as ex:
+            logger.warning(
+                "Failed to retrieve site runtime status from '%s' (%s).",
+                arm_url, _http_error_status(ex))
+        except ValueError as ex:
+            logger.warning("Failed to parse site runtime status response: %s", ex)
 
     if runtime_error is not None and not _runtime_error_is_recent(
             runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MINUTES):

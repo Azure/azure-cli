@@ -862,7 +862,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
         c.argument('instance', options_list=['--instance'],
                    help='Filter configuration checks by worker machine name. The runtime error recommendation '
-                        'uses the corresponding instance ID returned by the configuration check.')
+                        'uses the corresponding ARM instance ID and never falls back to another worker.')
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(),
                    help='Print a human-readable report instead of the structured payload.')
 

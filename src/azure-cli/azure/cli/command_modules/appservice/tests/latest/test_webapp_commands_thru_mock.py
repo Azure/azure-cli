@@ -2389,8 +2389,6 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'WrittenAt': '',
                 'Settings': [],
             },
-            'configCheckStatus': 200,
-            'runtimeError': None,
         }
         with mock.patch(
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
@@ -2408,9 +2406,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'WrittenAt': '2026-09-02T17:30:00Z',
                 'Settings': [],
             },
-            'configCheckStatus': 200,
             'requestedMachineName': 'pl0sdlwk000r7s',
-            'runtimeError': None,
         }
         with mock.patch(
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
@@ -2429,8 +2425,6 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
                 'WrittenAt': '2026-09-02T17:30:00Z',
                 'Settings': [],
             },
-            'configCheckStatus': 200,
-            'runtimeError': None,
         }
         with mock.patch(
                 'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
@@ -2564,20 +2558,60 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('requests.get')
-    def test_troubleshoot_config_instance_filter_does_not_enumerate_on_404(
+    def test_troubleshoot_config_instance_filter_maps_worker_when_snapshot_is_missing(
             self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         requests_get_mock.return_value = self._scm_response(404)
-        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+        send_raw_request_mock.side_effect = [
+            self._arm_response({'value': [
+                {'name': 'website-instance-id',
+                 'properties': {'machineName': 'requested-instance'}},
+                {'name': 'other-instance-id',
+                 'properties': {'machineName': 'other-instance'}},
+            ]}),
+            self._arm_response({'properties': [
+                {'instanceId': 'website-instance-id', 'state': 'Stopped',
+                 'lastError': 'RequestedWorkerError', 'lastErrorTimestamp': fresh_ts},
+                {'instanceId': 'other-instance-id', 'state': 'Stopped',
+                 'lastError': 'OtherWorkerError', 'lastErrorTimestamp': fresh_ts},
+            ]}),
+        ]
 
-        troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='REQUESTED-INSTANCE')
 
         config_calls = [
             call for call in requests_get_mock.call_args_list
             if call.args and call.args[0] == 'https://myapp.scm.azurewebsites.net/api/troubleshoot/config'
         ]
         self.assertEqual(len(config_calls), 1)
+        self.assertEqual(send_raw_request_mock.call_count, 2)
+        self.assertIn('/instances?', send_raw_request_mock.call_args_list[0].args[2])
+        self.assertIn('/siteStatus?', send_raw_request_mock.call_args_list[1].args[2])
+        self.assertEqual(result['runtimeError']['instanceId'], 'website-instance-id')
+        self.assertEqual(result['runtimeError']['lastError'], 'RequestedWorkerError')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_instance_filter_does_not_fall_back_to_another_worker(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'value': [
+            {'name': 'other-instance-id',
+             'properties': {'machineName': 'other-instance'}},
+        ]})
+
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+
+        self.assertNotIn('runtimeError', result)
         self.assertEqual(send_raw_request_mock.call_count, 1)
-        self.assertIn('/siteStatus?', send_raw_request_mock.call_args.args[2])
+        self.assertIn('/instances?', send_raw_request_mock.call_args.args[2])
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
