@@ -5337,7 +5337,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 def _add_first_party_service_tag_argument(args_schema):
     from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
     args_schema.first_party_service_tag_id = AAZResourceIdArg(
-        options=["--first-party-service-tag-id"],
+        options=["--first-party-service-tag-id", "--fpst-id"],
         help="The resource ID of the first party service tag associated with the IP tag.",
         fmt=AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"

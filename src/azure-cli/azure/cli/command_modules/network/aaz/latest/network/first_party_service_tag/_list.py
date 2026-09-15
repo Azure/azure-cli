@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all the first party service tags in a subscription.
+
+    :example: List all first party service tags
+        az network first-party-service-tag list
     """
 
     _aaz_info = {

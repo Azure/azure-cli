@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a first party service tag.
+
+    :example: Create first party service tag
+        az network first-party-service-tag create --resource-group rg1 --first-party-service-tag-name myServiceTag
     """
 
     _aaz_info = {

@@ -617,7 +617,7 @@ def load_arguments(self, _):
         c.argument('name', completer=None)
         c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
-        c.argument('first_party_service_tag_id', help='The resource ID of the first party service tag associated with the IP tag. Requires exactly one value in `--ip-tags`.')
+        c.argument('first_party_service_tag_id', options_list=['--first-party-service-tag-id', '--fpst-id'], help='The resource ID of the first party service tag associated with the IP tag. Requires exactly one value in `--ip-tags`.')
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
 

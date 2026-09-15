@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the specified first party service tag.
+
+    :example: Get first party service tag
+        az network first-party-service-tag show --resource-group rg1 --first-party-service-tag-name myServiceTag
     """
 
     _aaz_info = {
