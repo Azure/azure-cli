@@ -849,11 +849,17 @@ short-summary: Manage throughput of SQL container under an Azure Cosmos DB accou
 helps['cosmosdb sql container throughput show'] = """
 type: command
 short-summary: Get the throughput of the SQL container under an Azure Cosmos DB SQL database.
+examples:
+  - name: Show container throughput settings, including throughput buckets when configured.
+    text: az cosmosdb sql container throughput show -g mygroup -a myaccount -d mydatabase -n mycontainer
 """
 
 helps['cosmosdb sql container throughput update'] = """
 type: command
 short-summary: Update the throughput of the SQL container under an Azure Cosmos DB SQL database.
+examples:
+  - name: Update container throughput while preserving configured throughput buckets.
+    text: az cosmosdb sql container throughput update -g mygroup -a myaccount -d mydatabase -n mycontainer --throughput 400
 """
 
 helps['cosmosdb sql container throughput migrate'] = """
