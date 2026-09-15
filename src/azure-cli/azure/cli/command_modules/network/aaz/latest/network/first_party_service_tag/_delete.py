@@ -12,19 +12,18 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network public-ip delete",
+    "network first-party-service-tag delete",
+    is_preview=True,
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a public IP address.
-
-    :example: Delete a public IP address.
-        az network public-ip delete -g MyResourceGroup -n MyIp
+    """Delete the specified first party service tag.
     """
 
     _aaz_info = {
         "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipaddresses/{}", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/firstpartyservicetags/{}", "2025-09-01"],
         ]
     }
 
@@ -45,11 +44,15 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the public IP address.",
+        _args_schema.first_party_service_tag_name = AAZStrArg(
+            options=["-n", "--name", "--first-party-service-tag-name"],
+            help="The name of the first party service tag.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$",
+                max_length=80,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -58,7 +61,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.PublicIpAddressOperationGroupDelete(ctx=self.ctx)()
+        yield self.FirstPartyServiceTagsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,7 +72,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class PublicIpAddressOperationGroupDelete(AAZHttpOperation):
+    class FirstPartyServiceTagsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -108,7 +111,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/firstPartyServiceTags/{firstPartyServiceTagName}",
                 **self.url_parameters
             )
 
@@ -124,7 +127,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "publicIpAddressName", self.ctx.args.name,
+                    "firstPartyServiceTagName", self.ctx.args.first_party_service_tag_name,
                     required=True,
                 ),
                 **self.serialize_url_param(

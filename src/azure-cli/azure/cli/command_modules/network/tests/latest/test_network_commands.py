@@ -562,6 +562,100 @@ class NetworkPublicIpWithSku(ScenarioTest):
         ])
 
 
+class NetworkFirstPartyServiceTagScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_first_party_service_tag', location='eastus2')
+    def test_network_first_party_service_tag(self, resource_group):
+        self.kwargs.update({
+            'service_tag': self.create_random_name('fpst-', 16),
+            'public_ip': self.create_random_name('pip-', 16),
+            'public_ip_prefix': self.create_random_name('pipprefix-', 24),
+        })
+
+        self.cmd(
+            'network first-party-service-tag create -g {rg} -n {service_tag} '
+            '--value /RnmRunners --tags environment=test --no-wait'
+        )
+        self.cmd('network first-party-service-tag wait -g {rg} -n {service_tag} --created')
+        service_tag = self.cmd(
+            'network first-party-service-tag show -g {rg} -n {service_tag}',
+            checks=[
+                self.check('name', '{service_tag}'),
+                self.exists('resourceGuid'),
+                self.check('value', '/RnmRunners'),
+                self.check('tags.environment', 'test'),
+            ]
+        ).get_output_in_json()
+        self.kwargs['service_tag_id'] = service_tag['id']
+
+        self.cmd(
+            'network first-party-service-tag list -g {rg}',
+            checks=self.check("length([?name == '{service_tag}'])", 1)
+        )
+        self.cmd(
+            'network first-party-service-tag list',
+            checks=self.check("length([?name == '{service_tag}'])", 1)
+        )
+        self.cmd(
+            'network first-party-service-tag update -g {rg} -n {service_tag} '
+            '--tags environment=updated --no-wait'
+        )
+        self.cmd('network first-party-service-tag wait -g {rg} -n {service_tag} --updated')
+        self.cmd(
+            'network first-party-service-tag show -g {rg} -n {service_tag}',
+            checks=self.check('tags.environment', 'updated')
+        )
+
+        self.cmd(
+            'network public-ip create -g {rg} -n {public_ip} --sku Standard '
+            '--ip-tags FirstPartyUsage=/Sql --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('publicIp.ipTags[0].ipTagType', 'FirstPartyUsage'),
+                self.check('publicIp.ipTags[0].tag', '/Sql'),
+                self.check('publicIp.ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip update -g {rg} -n {public_ip} '
+            '--ip-tags FirstPartyUsage=/SqlUpdated --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].tag', '/SqlUpdated'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip show -g {rg} -n {public_ip}',
+            checks=self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}')
+        )
+
+        self.cmd(
+            'network public-ip prefix create -g {rg} -n {public_ip_prefix} --length 30 '
+            '--ip-tags FirstPartyUsage=/Sql --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].ipTagType', 'FirstPartyUsage'),
+                self.check('ipTags[0].tag', '/Sql'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip prefix update -g {rg} -n {public_ip_prefix} '
+            '--ip-tags FirstPartyUsage=/SqlUpdated --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].tag', '/SqlUpdated'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip prefix show -g {rg} -n {public_ip_prefix}',
+            checks=self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}')
+        )
+
+        self.cmd('network public-ip delete -g {rg} -n {public_ip}')
+        self.cmd('network public-ip prefix delete -g {rg} -n {public_ip_prefix}')
+        self.cmd('network first-party-service-tag delete -g {rg} -n {service_tag} --no-wait')
+        self.cmd('network first-party-service-tag wait -g {rg} -n {service_tag} --deleted')
+
+
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
     def test_network_custom_ip_prefix_crud(self):
