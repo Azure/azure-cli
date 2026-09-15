@@ -118,6 +118,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('classic_alerts', arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether backup alerts from the classic solution should be received.')
         c.argument('public_network_access', arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether public network access for the vault should be enabled or disabled. It is enabled by default. For setting up private endpoints, it has to be disabled.')
+        c.argument('source_scan_state', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Configure the Source Scan state used by Microsoft Defender for Cloud threat detection.')
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(allowed_immutability_options), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(enable_disable_permadisable_options), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
@@ -231,6 +232,13 @@ def load_arguments(self, _):
         c.argument('backup_management_type', extended_backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list items in secondary region.')
+
+    with self.argument_context('backup item source-scan-configuration set') as c:
+        c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up Azure VM item.', id_part=None)
+        c.argument('container_name', container_name_type, id_part=None)
+        c.argument('backup_management_type', arg_type=get_enum_type(['AzureIaasVM']))
+        c.argument('workload_type', arg_type=get_enum_type(['VM']))
+        c.argument('state', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Source Scan state used by Microsoft Defender for Cloud threat detection.')
 
     # Policy
     with self.argument_context('backup policy') as c:
