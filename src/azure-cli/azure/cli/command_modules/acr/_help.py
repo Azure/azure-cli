@@ -1733,7 +1733,8 @@ examples:
 
 helps['acr connected-registry get-settings'] = """
 type: command
-short-summary: Retrieve information required to activate a connected registry, and creates or rotates the sync token credentials.
+short-summary: Retrieve information required to activate a connected registry, optionally generating SyncToken credentials.
+long-summary: ManagedIdentity settings do not require a sync token password and do not support --generate-password.
 examples:
   - name: Get the settings information required to install a connected registry without the password.
     text: >
@@ -1790,6 +1791,7 @@ examples:
 helps['acr connected-registry install renew-credentials'] = """
 type: command
 short-summary: Retrieve information required to activate a connected registry, and renews the sync token credentials.
+long-summary: Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
     text: >

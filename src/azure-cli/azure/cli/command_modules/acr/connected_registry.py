@@ -558,7 +558,44 @@ def acr_connected_registry_install_renew_credentials(cmd,
                                                '1', yes, resource_group_name)
 
 
-def acr_connected_registry_get_settings(cmd,
+def _resolve_parent_endpoint(connected_registry, parent_protocol):
+    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint \
+        or "<parent gateway endpoint>"
+    if connected_registry.parent.id:
+        parent_endpoint_protocol = parent_protocol
+    else:
+        if parent_protocol != "https":
+            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
+        parent_endpoint_protocol = "https"
+    return parent_gateway_endpoint, parent_endpoint_protocol
+
+
+def _build_connected_registry_settings(connected_registry_name,
+                                       parent_gateway_endpoint,
+                                       parent_endpoint_protocol,
+                                       auth_connection_fragment,
+                                       auth_env):
+    connection_string = (
+        "ConnectedRegistryName={};".format(connected_registry_name) +
+        auth_connection_fragment +
+        "ParentGatewayEndpoint={};".format(parent_gateway_endpoint) +
+        "ParentEndpointProtocol={}".format(parent_endpoint_protocol)
+    )
+    login_server_placeholder = (
+        "<Optional: connected registry login server. "
+        "More info at https://aka.ms/acr/connected-registry>"
+    )
+    settings = dict(auth_env)
+    settings.update({
+        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
+        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
+        "ACR_REGISTRY_CONNECTION_STRING": connection_string,
+        "ACR_REGISTRY_LOGIN_SERVER": login_server_placeholder,
+    })
+    return settings
+
+
+def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
                                         client,
                                         connected_registry_name,
                                         registry_name,
@@ -570,6 +607,35 @@ def acr_connected_registry_get_settings(cmd,
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+
+    if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
+        if generate_password:
+            raise ArgumentUsageError(
+                "argument error: --generate-password is not applicable for a connected registry "
+                "configured with ManagedIdentity authentication."
+            )
+        identity = getattr(connected_registry, 'identity', None)
+        user_assigned = identity.user_assigned_identities if identity else None
+        if not user_assigned:
+            raise CLIError(
+                "Connected registry '{}' is in ManagedIdentity mode but no user-assigned identity is "
+                "attached.".format(connected_registry_name))
+        # Spec §3.3: exactly one user-assigned identity is expected.
+        msi_resource_id, msi = next(iter(user_assigned.items()))
+        client_id = getattr(msi, 'client_id', None)
+        if not client_id:
+            raise CLIError(
+                "Client ID for user-assigned identity '{}' is not populated by the service yet.".format(
+                    msi_resource_id))
+        parent_gateway_endpoint, parent_endpoint_protocol = _resolve_parent_endpoint(
+            connected_registry, parent_protocol)
+        return _build_connected_registry_settings(
+            connected_registry_name,
+            parent_gateway_endpoint,
+            parent_endpoint_protocol,
+            auth_connection_fragment="ManagedIdentityClientId={};".format(client_id),
+            auth_env={},
+        )
 
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
     if generate_password:
@@ -599,31 +665,18 @@ def acr_connected_registry_get_settings(cmd,
         sync_username = sync_token_name
         sync_password = "<use --generate-password to generate a new password>"
 
-    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
-    if parent_gateway_endpoint is None or parent_gateway_endpoint == '':
-        parent_gateway_endpoint = "<parent gateway endpoint>"
-    parent_id = connected_registry.parent.id
-    # if parent_id is not none, parent is a connected registry
-    if parent_id:
-        parent_endpoint_protocol = parent_protocol
-    # if parent_id is none, parent is a cloud registry
-    else:
-        if parent_protocol != "https":
-            logger.warning("Parent endpoint protocol must be 'https' when parent is a cloud registry.")
-        parent_endpoint_protocol = "https"
-    connected_registry_login_server = "<Optional: connected registry login server. " + \
-        "More info at https://aka.ms/acr/connected-registry>"
-    connection_string = "ConnectedRegistryName=%s;" % connected_registry_name + \
-        "SyncTokenName=%s;SyncTokenPassword=%s;" % (sync_username, sync_password) + \
-        "ParentGatewayEndpoint=%s;ParentEndpointProtocol=%s" % (parent_gateway_endpoint, parent_endpoint_protocol)
-    return {
-        "SYNC_TOKEN_USER": sync_username,
-        "SYNC_TOKEN_PASSWORD": sync_password,
-        "ACR_REGISTRY_CERTIFICATE_VOLUME": "/var/acr/certs",
-        "ACR_REGISTRY_DATA_VOLUME": "/var/acr/data",
-        "ACR_REGISTRY_CONNECTION_STRING": connection_string,
-        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server
-    }
+    parent_gateway_endpoint, parent_endpoint_protocol = _resolve_parent_endpoint(
+        connected_registry, parent_protocol)
+    return _build_connected_registry_settings(
+        connected_registry_name,
+        parent_gateway_endpoint,
+        parent_endpoint_protocol,
+        auth_connection_fragment="SyncTokenName={};SyncTokenPassword={};".format(sync_username, sync_password),
+        auth_env={
+            "SYNC_TOKEN_USER": sync_username,
+            "SYNC_TOKEN_PASSWORD": sync_password,
+        },
+    )
 # endregion
 
 

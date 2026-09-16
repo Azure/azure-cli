@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Unit tests for managed-identity connected registry creation, permissions, and update."""
+"""Unit tests for managed-identity connected registry creation, permissions, update, and settings."""
 
 import unittest
 from unittest import mock
@@ -25,6 +25,7 @@ from azure.cli.command_modules.acr.connected_registry import (
     _build_user_assigned_identity,
     _get_current_auth_type,
     acr_connected_registry_create,
+    acr_connected_registry_get_settings,
     acr_connected_registry_permissions_show,
     acr_connected_registry_permissions_update,
     acr_connected_registry_update,
@@ -509,6 +510,157 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
                 self.assertNotIn('authType', serialized['properties']['syncProperties'])
                 client.begin_update.assert_called_once()
                 client.list.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# get-settings: MI-flavored connection string
+# ---------------------------------------------------------------------------
+
+
+class TestConnectedRegistryGetSettingsMI(unittest.TestCase):
+
+    def _invoke(self, cr, **kw):
+        with mock.patch(UPDATE_MODULE + '.validate_managed_registry',
+                        return_value=(None, TEST_RG)), \
+             mock.patch(UPDATE_MODULE + '.acr_connected_registry_show',
+                        return_value=cr):
+            return acr_connected_registry_get_settings(
+                cmd=_make_cmd(), client=mock.MagicMock(),
+                connected_registry_name=TEST_CR, registry_name=TEST_REGISTRY,
+                parent_protocol='https', resource_group_name=TEST_RG, **kw)
+
+    def test_generate_password_rejected_on_mi(self):
+        cr = _fake_cr(has_identity=True)
+        with self.assertRaises(ArgumentUsageError):
+            self._invoke(cr, generate_password='1', yes=True)
+
+    def test_missing_user_assigned_errors(self):
+        cr = _fake_cr(has_identity=True)
+        cr.identity.user_assigned_identities = None
+        with self.assertRaises(CLIError):
+            self._invoke(cr)
+
+    def test_missing_client_id_errors(self):
+        cr = _fake_cr(has_identity=True, client_id=None)
+        with self.assertRaises(CLIError):
+            self._invoke(cr)
+
+    def test_happy_path_returns_mi_connection_string(self):
+        cr = _fake_cr(has_identity=True, client_id='cid-happy')
+        result = self._invoke(cr)
+        self.assertIn('ManagedIdentityClientId=cid-happy',
+                      result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SyncTokenName', result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SYNC_TOKEN_USER', result)
+        self.assertNotIn('SYNC_TOKEN_PASSWORD', result)
+        self.assertNotIn('ACR_MANAGED_IDENTITY_CLIENT_ID', result)
+        self.assertNotIn('ACR_MANAGED_IDENTITY_RESOURCE_ID', result)
+
+    def test_source_settings_use_get_without_token_or_credential_calls(self):
+        cr = _fake_cr(has_identity=True, client_id='cid-happy')
+        cr.name = 'name-returned-by-get'
+        client = mock.MagicMock()
+        client.get.return_value = cr
+        with mock.patch(UPDATE_MODULE + '.validate_managed_registry', return_value=(None, TEST_RG)), \
+             mock.patch(UPDATE_MODULE + '.get_token_from_id') as token_lookup, \
+             mock.patch(UPDATE_MODULE + '.cf_acr_tokens') as token_factory, \
+             mock.patch('azure.cli.command_modules.acr._client_factory.cf_acr_token_credentials') as cred_factory, \
+             mock.patch('azure.cli.command_modules.acr.token.acr_token_credential_generate') as generate, \
+             mock.patch(UPDATE_MODULE + '.user_confirmation') as confirm:
+            result = acr_connected_registry_get_settings(
+                cmd=_make_cmd(), client=client,
+                connected_registry_name=TEST_CR, registry_name=TEST_REGISTRY,
+                parent_protocol='http', resource_group_name=TEST_RG)
+        client.get.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
+        self.assertEqual(client.method_calls, [mock.call.get(TEST_RG, TEST_REGISTRY, TEST_CR)])
+        token_lookup.assert_not_called()
+        token_factory.assert_not_called()
+        cred_factory.assert_not_called()
+        generate.assert_not_called()
+        confirm.assert_not_called()
+        # Preserve the pinned source format (including its request name), not a verified spec contract.
+        self.assertEqual(result, {
+            'ACR_REGISTRY_CERTIFICATE_VOLUME': '/var/acr/certs',
+            'ACR_REGISTRY_DATA_VOLUME': '/var/acr/data',
+            'ACR_REGISTRY_CONNECTION_STRING': (
+                'ConnectedRegistryName={};ManagedIdentityClientId=cid-happy;'
+                'ParentGatewayEndpoint=parent.example.com;ParentEndpointProtocol=https'.format(TEST_CR)),
+            'ACR_REGISTRY_LOGIN_SERVER': (
+                '<Optional: connected registry login server. '
+                'More info at https://aka.ms/acr/connected-registry>'),
+        })
+
+
+class TestConnectedRegistryGetSettingsSyncToken(unittest.TestCase):
+
+    def test_legacy_settings_passwords_endpoints_and_protocols(self):
+        token_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/'
+            'registries/{}/tokens/sync'.format(TEST_SUB, TEST_RG, TEST_REGISTRY))
+        parent_id = '/connectedRegistries/parent'
+        for auth_type, parent, gateway, protocol, password, expected_protocol in (
+                (None, None, 'parent.example.com', 'http', None, 'https'),
+                (AUTH_TYPE_SYNC_TOKEN, None, None, 'https', None, 'https'),
+                (AUTH_TYPE_SYNC_TOKEN, parent_id, '', 'http', None, 'http'),
+                (AUTH_TYPE_SYNC_TOKEN, parent_id, 'parent.example.com', 'https', None, 'https'),
+                (AUTH_TYPE_SYNC_TOKEN, None, 'parent.example.com', 'http', '1', 'https'),
+                (AUTH_TYPE_SYNC_TOKEN, parent_id, 'parent.example.com', 'http', '2', 'http')):
+            with self.subTest(auth_type=auth_type, parent=parent, gateway=gateway,
+                              protocol=protocol, password=password):
+                cr = _fake_cr(auth_type=auth_type, token_id=token_id, gateway_endpoint=gateway)
+                cr.parent.id = parent
+                cmd = _make_cmd()
+                credentials = mock.MagicMock()
+                credentials.username = 'generated-sync'
+                credentials.passwords = [
+                    mock.Mock(value='test-only-password-1'),
+                    mock.Mock(value='test-only-password-2'),
+                ]
+                credentials.passwords[0].name = 'password1'
+                credentials.passwords[1].name = 'password2'
+                with mock.patch(UPDATE_MODULE + '.validate_managed_registry', return_value=(None, TEST_RG)), \
+                     mock.patch(UPDATE_MODULE + '.acr_connected_registry_show', return_value=cr), \
+                     mock.patch(UPDATE_MODULE + '.user_confirmation') as confirm, \
+                     mock.patch('azure.cli.command_modules.acr._client_factory.cf_acr_token_credentials') as factory, \
+                     mock.patch('azure.cli.command_modules.acr.token.acr_token_credential_generate') as generate, \
+                     mock.patch(UPDATE_MODULE + '.LongRunningOperation') as lro:
+                    lro.return_value.return_value = credentials
+                    result = acr_connected_registry_get_settings(
+                        cmd=cmd, client=mock.MagicMock(),
+                        connected_registry_name=TEST_CR, registry_name=TEST_REGISTRY,
+                        parent_protocol=protocol, generate_password=password, yes=True,
+                        resource_group_name=TEST_RG)
+                username = credentials.username if password else 'sync'
+                expected_password = ('test-only-password-' + password if password else
+                                     '<use --generate-password to generate a new password>')
+                self.assertEqual(result, {
+                    'SYNC_TOKEN_USER': username,
+                    'SYNC_TOKEN_PASSWORD': expected_password,
+                    'ACR_REGISTRY_CERTIFICATE_VOLUME': '/var/acr/certs',
+                    'ACR_REGISTRY_DATA_VOLUME': '/var/acr/data',
+                    'ACR_REGISTRY_CONNECTION_STRING': (
+                        'ConnectedRegistryName={};SyncTokenName={};SyncTokenPassword={};'
+                        'ParentGatewayEndpoint={};ParentEndpointProtocol={}'.format(
+                            TEST_CR, username, expected_password,
+                            gateway or '<parent gateway endpoint>', expected_protocol)),
+                    'ACR_REGISTRY_LOGIN_SERVER': (
+                        '<Optional: connected registry login server. '
+                        'More info at https://aka.ms/acr/connected-registry>'),
+                })
+                if password:
+                    confirm.assert_called_once_with(
+                        "Are you sure you want to generate a new sync token 'sync' password{}?".format(password), True)
+                    factory.assert_called_once_with(cmd.cli_ctx)
+                    generate.assert_called_once_with(
+                        cmd, factory.return_value, TEST_REGISTRY, 'sync',
+                        password1=password == '1', password2=password == '2', resource_group_name=TEST_RG)
+                    lro.assert_called_once_with(cmd.cli_ctx)
+                    lro.return_value.assert_called_once_with(generate.return_value)
+                else:
+                    confirm.assert_not_called()
+                    factory.assert_not_called()
+                    generate.assert_not_called()
+                    lro.assert_not_called()
 
 
 if __name__ == '__main__':

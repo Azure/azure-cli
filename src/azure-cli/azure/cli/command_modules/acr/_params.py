@@ -570,7 +570,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicate whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 
         c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Specify the protocol used to communicate with its parent.', required=True)
-        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.')
+        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token. Not supported with ManagedIdentity authentication.')
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
