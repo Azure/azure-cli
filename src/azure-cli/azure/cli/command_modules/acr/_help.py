@@ -1628,6 +1628,10 @@ short-summary: Manage connected registry resources with Azure Container Registri
 helps['acr connected-registry create'] = """
 type: command
 short-summary: Create a connected registry for an Azure Container Registry.
+long-summary: |
+    ManagedIdentity authentication requires --identity and cannot be combined with --parent, --sync-token, or --repository.
+    ManagedIdentity connected registries must be top-level and cannot have children.
+    If --auth-type is omitted, SyncToken authentication is used.
 examples:
   - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
     text: |
@@ -1642,6 +1646,11 @@ examples:
         az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
             --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
+  - name: Create a connected registry that authenticates with its parent using a user-assigned managed identity.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['acr connected-registry delete'] = """

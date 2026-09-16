@@ -60,10 +60,19 @@ def _get_current_auth_type(connected_registry):
     return auth_type or AUTH_TYPE_SYNC_TOKEN
 
 
+def _build_user_assigned_identity(cmd, identity_resource_id):
+    """Wrap a single user-assigned identity resource ID in a ManagedServiceIdentity."""
+    ManagedServiceIdentity, UserAssignedIdentity = cmd.get_models('ManagedServiceIdentity', 'UserAssignedIdentity')
+    return ManagedServiceIdentity(
+        type=MSI_TYPE_USER_ASSIGNED,
+        user_assigned_identities={identity_resource_id: UserAssignedIdentity()}
+    )
+
+
 logger = get_logger(__name__)
 
 
-def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-many-statements
+def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -81,25 +90,38 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   notifications=None,
                                   garbage_collection_enabled=None,
                                   garbage_collection_schedule=None,
+                                  identity=None,
+                                  auth_type=None,
                                   yes=False):
 
-    if bool(sync_token_name) == bool(repositories):
-        raise CLIError("argument error: either --sync-token or --repository must be provided, but not both.")
+    is_managed_identity = auth_type == AUTH_TYPE_MANAGED_IDENTITY
+    if is_managed_identity:
+        if not identity or identity.isspace():
+            raise ArgumentUsageError(
+                "argument error: --identity <user-assigned-managed-identity-resource-id> is required "
+                "when --auth-type ManagedIdentity."
+            )
+        if sync_token_name is not None or repositories is not None:
+            raise ArgumentUsageError(
+                "argument error: --sync-token and --repository are not applicable when "
+                "--auth-type ManagedIdentity."
+            )
+        if parent_name is not None:
+            raise ArgumentUsageError(
+                "argument error: --parent is not applicable when --auth-type ManagedIdentity."
+            )
+    else:
+        if identity is not None:
+            raise ArgumentUsageError(
+                "argument error: --identity is only applicable with --auth-type ManagedIdentity."
+            )
+        if bool(sync_token_name) == bool(repositories):
+            raise CLIError("argument error: either --sync-token or --repository must be provided, but not both.")
     # Check needed since the sync token gateway actions must be at least 5 characters long.
     if len(connected_registry_name) < 5:
         raise InvalidArgumentValueError("argument error: Connected registry name must be at least 5 characters long.")
     subscription_id = get_subscription_id(cmd.cli_ctx)
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
-
-    if not registry.data_endpoint_enabled:
-        user_confirmation("Dedicated data endpoints must be enabled to use connected-registry. Enabling might " +
-                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
-                              registry_name), yes)
-        acr_update_custom(cmd, registry, data_endpoint_enabled=True)
-        registry_client = cf_acr_registries(cmd.cli_ctx)
-        LongRunningOperation(cmd.cli_ctx)(
-            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
-        )
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
@@ -107,6 +129,11 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     if parent_name:
         try:
             parent = acr_connected_registry_show(cmd, client, parent_name, registry_name, resource_group_name)
+            if _get_current_auth_type(parent) == AUTH_TYPE_MANAGED_IDENTITY:
+                raise ArgumentUsageError(
+                    "A connected registry using ManagedIdentity authentication cannot have children. "
+                    "Choose a SyncToken parent with --parent or omit --parent."
+                )
             connected_registry_list = list(client.list(resource_group_name, registry_name))
             family_tree, _ = _get_family_tree(connected_registry_list, None)
         except ErrorResponseException as ex:
@@ -119,10 +146,24 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
                            "please visit https://aka.ms/acr/connected-registry.")
+
+    if not registry.data_endpoint_enabled:
+        user_confirmation("Dedicated data endpoints must be enabled to use connected-registry. Enabling might " +
+                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
+                              registry_name), yes)
+        acr_update_custom(cmd, registry, data_endpoint_enabled=True)
+        registry_client = cf_acr_registries(cmd.cli_ctx)
+        LongRunningOperation(cmd.cli_ctx)(
+            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        )
+
+    if parent_name:
         _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name, parent.id,
                                      connected_registry_name, repositories, mode, False)
 
-    if sync_token_name:
+    if is_managed_identity:
+        sync_token_id = None
+    elif sync_token_name:
         sync_token_id = build_token_id(subscription_id, resource_group_name, registry_name, sync_token_name)
     else:
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
@@ -141,7 +182,6 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             'ConnectedRegistry', 'LoggingProperties', 'SyncProperties',
             'ParentProperties', 'GarbageCollectionProperties')
     connected_registry_create_parameters = ConnectedRegistry(
-        provisioning_state=None,
         mode=mode,
         parent=ParentProperties(
             id=parent.id if parent else None,
@@ -149,7 +189,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                 token_id=sync_token_id,
                 schedule=sync_schedule,
                 message_ttl=sync_message_ttl,
-                sync_window=sync_window
+                sync_window=sync_window,
+                auth_type=AUTH_TYPE_MANAGED_IDENTITY if is_managed_identity else AUTH_TYPE_SYNC_TOKEN,
             )
         ),
         client_token_ids=client_token_list,
@@ -161,7 +202,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             enabled=garbage_collection_enabled,
             schedule=garbage_collection_schedule
         ),
-        notifications_list=list(notifications_set) if notifications_set else None
+        notifications_list=list(notifications_set) if notifications_set else None,
+        identity=_build_user_assigned_identity(cmd, identity) if is_managed_identity else None,
     )
 
     try:
