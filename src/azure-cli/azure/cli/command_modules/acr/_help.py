@@ -1727,12 +1727,12 @@ examples:
 
 helps['acr connected-registry permissions'] = """
 type: group
-short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Manage the repository permissions across multiple connected registries. Only supported for connected registries configured with SyncToken authentication (output is derived from the sync-token scope map). Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry permissions update'] = """
 type: command
-short-summary: Add and remove repository permissions accross all the necessary connected registry sync scope maps.
+short-summary: Add and remove repository permissions across all the necessary connected registry sync scope maps. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
@@ -1747,7 +1747,7 @@ examples:
 
 helps['acr connected-registry permissions show'] = """
 type: command
-short-summary: Show the connected registry sync scope map information.
+short-summary: Show the connected registry sync scope map information. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Show details and attributes of a sync scope map for a connected registry.
     text: >

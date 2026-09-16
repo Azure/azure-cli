@@ -11,7 +11,9 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
+from azure.mgmt.containerregistry.models import ManagedServiceIdentityType
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps, cf_acr_registries
+from ._constants import ConnectedRegistryAuthType
 from ._utils import (
     build_token_id,
     create_default_scope_map,
@@ -40,6 +42,23 @@ REPO_SCOPES_BY_MODE = {
 }
 REPOSITORY = "repositories/"
 GATEWAY = "gateway/"
+
+AUTH_TYPE_SYNC_TOKEN = ConnectedRegistryAuthType.SYNC_TOKEN.value
+AUTH_TYPE_MANAGED_IDENTITY = ConnectedRegistryAuthType.MANAGED_IDENTITY.value
+MSI_TYPE_USER_ASSIGNED = ManagedServiceIdentityType.USER_ASSIGNED.value
+
+
+def _get_current_auth_type(connected_registry):
+    """Return the current auth type ('SyncToken' or 'ManagedIdentity') of a connected registry.
+
+    ``authType`` is the RP's canonical discriminator. Legacy resources predate the field and
+    deserialize as ``None`` — those are SyncToken by definition.
+    """
+    auth_type = connected_registry.parent.sync_properties.auth_type
+    # SDK deserializes auth_type as an ``AuthType`` enum; use ``.value`` when available.
+    auth_type = getattr(auth_type, 'value', auth_type)
+    return auth_type or AUTH_TYPE_SYNC_TOKEN
+
 
 logger = get_logger(__name__)
 
@@ -624,6 +643,12 @@ def acr_connected_registry_permissions_show(cmd,
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+    if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
+        raise ArgumentUsageError(
+            "'az acr connected-registry permissions show' is not supported for a connected registry "
+            "using ManagedIdentity authentication. View the managed identity's Azure role assignments "
+            "and ABAC conditions to determine its repository permissions."
+        )
     sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
     return get_scope_map_from_id(cmd, sync_token.scope_map_id)
 
@@ -653,6 +678,12 @@ def acr_connected_registry_permissions_update(cmd,
     family_tree, target_connected_registry = _get_family_tree(connected_registry_list, connected_registry_name)
     if target_connected_registry is None:
         raise CLIError("Connected registry '{}' doesn't exist.".format(connected_registry_name))
+    if _get_current_auth_type(target_connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
+        raise ArgumentUsageError(
+            "'az acr connected-registry permissions update' is not supported for a connected registry "
+            "using ManagedIdentity authentication. Update the ABAC conditions on the managed identity's "
+            "Azure role assignments to grant or revoke its repository permissions."
+        )
 
     # remove repo permissions from connected registry descendants.
     remove_actions = REPO_SCOPES_BY_MODE[ConnectedRegistryModes.READWRITE.value]
