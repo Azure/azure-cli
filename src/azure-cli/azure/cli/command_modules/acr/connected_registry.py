@@ -215,7 +215,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         raise CLIError(e)
 
 
-def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
+def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -230,12 +230,35 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                                   add_notifications=None,
                                   remove_notifications=None,
                                   garbage_collection_enabled=None,
-                                  garbage_collection_schedule=None):
+                                  garbage_collection_schedule=None,
+                                  identity=None,
+                                  auth_type=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+
+    # Only SyncToken -> ManagedIdentity migration is supported.
+    identity_update = None
+    sync_auth_type_update = None
+
+    if auth_type is not None or identity is not None:
+        if not auth_type:
+            raise ArgumentUsageError(
+                "argument error: --auth-type is required when --identity is provided during update."
+            )
+        if auth_type != AUTH_TYPE_MANAGED_IDENTITY:
+            raise ArgumentUsageError(
+                "argument error: only migration to --auth-type ManagedIdentity is supported."
+            )
+        if not identity or identity.isspace():
+            raise ArgumentUsageError(
+                "argument error: a non-empty --identity <user-assigned-managed-identity-resource-id> is required "
+                "when migrating to --auth-type ManagedIdentity."
+            )
+        identity_update = _build_user_assigned_identity(cmd, identity)
+        sync_auth_type_update = AUTH_TYPE_MANAGED_IDENTITY
 
     # Add or remove from the current client token id list
     if add_client_token_list is not None:
@@ -294,7 +317,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
         sync_properties=SyncUpdateProperties(
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
-            sync_window=sync_window
+            sync_window=sync_window,
+            auth_type=sync_auth_type_update,
         ),
         logging=LoggingProperties(
             log_level=log_level,
@@ -305,7 +329,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
             schedule=garbage_collection_schedule
         ),
         client_token_ids=client_token_list,
-        notifications_list=notifications_list
+        notifications_list=notifications_list,
+        identity=identity_update,
     )
 
     try:

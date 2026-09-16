@@ -3,11 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Unit tests for managed-identity connected registry creation and permissions."""
+"""Unit tests for managed-identity connected registry creation, permissions, and update."""
 
 import unittest
 from unittest import mock
 
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import ArgumentUsageError
 from knack.util import CLIError
 
@@ -26,6 +27,7 @@ from azure.cli.command_modules.acr.connected_registry import (
     acr_connected_registry_create,
     acr_connected_registry_permissions_show,
     acr_connected_registry_permissions_update,
+    acr_connected_registry_update,
     AUTH_TYPE_MANAGED_IDENTITY,
     AUTH_TYPE_SYNC_TOKEN,
     MSI_TYPE_USER_ASSIGNED,
@@ -40,6 +42,7 @@ TEST_MSI_ID = (
     '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ManagedIdentity/'
     'userAssignedIdentities/msi1'.format(TEST_SUB, TEST_RG)
 )
+TEST_MSI_ID2 = TEST_MSI_ID.replace('msi1', 'msi2')
 
 
 def _make_cmd():
@@ -346,6 +349,166 @@ class TestConnectedRegistryPermissionsMI(unittest.TestCase):
                     cmd=_make_cmd(), client=client,
                     connected_registry_name=TEST_CR, registry_name=TEST_REGISTRY,
                     add_repos=['r1'], resource_group_name=TEST_RG)
+
+
+# ---------------------------------------------------------------------------
+# update: input validation and PATCH shape
+# ---------------------------------------------------------------------------
+
+
+class TestConnectedRegistryUpdateMigration(unittest.TestCase):
+
+    def _patch_common(self):
+        p_validate = mock.patch(UPDATE_MODULE + '.validate_managed_registry',
+                                return_value=(None, TEST_RG))
+        p_subid = mock.patch(UPDATE_MODULE + '.get_subscription_id',
+                             return_value=TEST_SUB)
+        return p_validate, p_subid
+
+    def _run_update(self, current, **overrides):
+        client = mock.MagicMock()
+        cmd = _make_cmd()
+        cmd.get_models.side_effect = lambda *names: tuple(getattr(models, name) for name in names)
+        kwargs = dict(
+            cmd=cmd,
+            client=client,
+            registry_name=TEST_REGISTRY,
+            connected_registry_name=TEST_CR,
+            resource_group_name=TEST_RG,
+        )
+        kwargs.update(overrides)
+        p_validate, p_subid = self._patch_common()
+        with p_validate, p_subid, \
+             mock.patch(UPDATE_MODULE + '.acr_connected_registry_show', return_value=current):
+            acr_connected_registry_update(**kwargs)
+        return client
+
+    # ---- error paths ------------------------------------------------------
+
+    def test_identity_without_auth_type_errors(self):
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN)
+        for identity in (TEST_MSI_ID, '', ' ', '\t', '\n'):
+            with self.subTest(identity=identity):
+                client = mock.MagicMock()
+                with self.assertRaisesRegex(ArgumentUsageError, '--auth-type is required'):
+                    self._run_update(cur, client=client, identity=identity)
+                client.begin_update.assert_not_called()
+
+    def test_migration_eligibility_errors_are_deferred_to_rp(self):
+        for auth_type, state, identity in (
+                (AUTH_TYPE_SYNC_TOKEN, 'Online', TEST_MSI_ID),
+                (AUTH_TYPE_MANAGED_IDENTITY, 'Offline', TEST_MSI_ID2),
+                (AUTH_TYPE_MANAGED_IDENTITY, 'Offline', TEST_MSI_ID)):
+            with self.subTest(auth_type=auth_type, state=state, identity=identity):
+                cur = _fake_cr(auth_type=auth_type,
+                               has_identity=auth_type == AUTH_TYPE_MANAGED_IDENTITY,
+                               connection_state=state)
+                client = mock.MagicMock()
+                error = HttpResponseError(message='The requested migration is not allowed.')
+                client.begin_update.side_effect = error
+                with self.assertRaises(HttpResponseError) as caught:
+                    self._run_update(cur, client=client, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=identity)
+                self.assertIs(caught.exception, error)
+                client.begin_update.assert_called_once()
+                client.list.assert_not_called()
+
+    def test_migrate_to_mi_requires_identity(self):
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN)
+        for identity in (None, '', ' ', '\t', '\n'):
+            with self.subTest(identity=identity):
+                client = mock.MagicMock()
+                with self.assertRaisesRegex(ArgumentUsageError, 'non-empty --identity'):
+                    self._run_update(cur, client=client, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=identity)
+                client.begin_update.assert_not_called()
+
+    def test_migrate_to_sync_token_rejected(self):
+        cur = _fake_cr(has_identity=True, connection_state='Offline')
+        with self.assertRaises(ArgumentUsageError) as ctx:
+            self._run_update(cur, auth_type=AUTH_TYPE_SYNC_TOKEN)
+        self.assertIn('only migration to --auth-type ManagedIdentity is supported',
+                      str(ctx.exception))
+
+    # ---- success paths: assert PATCH body shape ---------------------------
+
+    def _extract_update_body(self, client):
+        # begin_update(resource_group_name=..., registry_name=...,
+        #              connected_registry_name=..., connected_registry_update_parameters=...)
+        self.assertTrue(client.begin_update.called)
+        _, kwargs = client.begin_update.call_args
+        return kwargs['connected_registry_update_parameters']
+
+    def test_migrate_sync_token_to_mi_sends_identity(self):
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state='Offline')
+        client = self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY,
+                                  identity=TEST_MSI_ID)
+        body = self._extract_update_body(client)
+        self.assertIsNotNone(body.identity)
+        self.assertEqual(body.identity.type, MSI_TYPE_USER_ASSIGNED)
+        self.assertIn(TEST_MSI_ID, body.identity.user_assigned_identities)
+        self.assertEqual(body.sync_properties.auth_type, AUTH_TYPE_MANAGED_IDENTITY)
+        serialized = body.as_dict()
+        self.assertEqual(serialized['identity'], {
+            'type': 'UserAssigned', 'userAssignedIdentities': {TEST_MSI_ID: {}}})
+        self.assertEqual(serialized['properties']['syncProperties'], {
+            'authType': AUTH_TYPE_MANAGED_IDENTITY})
+        self.assertNotIn('parent', serialized['properties'])
+        self.assertNotIn('tokenId', serialized['properties']['syncProperties'])
+
+    def test_migration_combines_with_ordinary_property_updates(self):
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state='Offline')
+        client = self._run_update(
+            cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=TEST_MSI_ID,
+            sync_window='PT4H', log_level='Debug', garbage_collection_enabled=False,
+            add_client_token_list=['client-token'], add_notifications=['image:latest'])
+        serialized = self._extract_update_body(client).as_dict()
+        token_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/'
+            'registries/{}/tokens/client-token'.format(TEST_SUB, TEST_RG, TEST_REGISTRY)
+        )
+        self.assertEqual(serialized, {
+            'identity': {'type': 'UserAssigned', 'userAssignedIdentities': {TEST_MSI_ID: {}}},
+            'properties': {
+                'syncProperties': {'authType': AUTH_TYPE_MANAGED_IDENTITY, 'syncWindow': 'PT4H'},
+                'logging': {'logLevel': 'Debug'},
+                'garbageCollection': {'enabled': False},
+                'clientTokenIds': [token_id],
+                'notificationsList': ['image:latest'],
+            },
+        })
+        client.begin_update.assert_called_once()
+        client.list.assert_not_called()
+
+    def test_ordinary_update_preserves_auth_on_either_mode(self):
+        token_prefix = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/'
+            'registries/{}/tokens/'.format(TEST_SUB, TEST_RG, TEST_REGISTRY)
+        )
+        for auth_type in (None, AUTH_TYPE_SYNC_TOKEN, AUTH_TYPE_MANAGED_IDENTITY):
+            with self.subTest(auth_type=auth_type):
+                cur = _fake_cr(auth_type=auth_type,
+                               has_identity=auth_type == AUTH_TYPE_MANAGED_IDENTITY,
+                               connection_state='Online')
+                cur.client_token_ids = [token_prefix + 'old-token']
+                cur.notifications_list = ['old:latest']
+                client = self._run_update(
+                    cur, add_client_token_list=['new-token'], remove_client_token_list=['old-token'],
+                    sync_schedule='0 12 * * *', sync_window='PT4H', sync_message_ttl='P2D',
+                    log_level='Information', sync_audit_logs_enabled='Enabled',
+                    garbage_collection_enabled=False, garbage_collection_schedule='0 0 * * *',
+                    add_notifications=['new:latest'], remove_notifications=['old:latest'])
+                serialized = self._extract_update_body(client).as_dict()
+                self.assertEqual(serialized, {'properties': {
+                    'syncProperties': {
+                        'schedule': '0 12 * * *', 'syncWindow': 'PT4H', 'messageTtl': 'P2D'},
+                    'logging': {'logLevel': 'Information', 'auditLogStatus': 'Enabled'},
+                    'garbageCollection': {'enabled': False, 'schedule': '0 0 * * *'},
+                    'clientTokenIds': [token_prefix + 'new-token'],
+                    'notificationsList': ['new:latest'],
+                }})
+                self.assertNotIn('identity', serialized)
+                self.assertNotIn('authType', serialized['properties']['syncProperties'])
+                client.begin_update.assert_called_once()
+                client.list.assert_not_called()
 
 
 if __name__ == '__main__':

@@ -603,6 +603,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
                    help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag())
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'], help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.')
+        c.argument('identity', help='Resource ID of a user-assigned managed identity. Requires --auth-type ManagedIdentity.')
+        c.argument('auth_type', arg_type=get_enum_type([ConnectedRegistryAuthType.MANAGED_IDENTITY.value]), options_list=['--auth-type'], help='Target authentication type. Only one-way migration from SyncToken to ManagedIdentity is supported. The service validates migration eligibility, including the required Offline state.')
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)

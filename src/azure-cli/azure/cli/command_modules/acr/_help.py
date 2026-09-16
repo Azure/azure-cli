@@ -1710,6 +1710,10 @@ examples:
 helps['acr connected-registry update'] = """
 type: command
 short-summary: Update a connected registry for an Azure Container Registry.
+long-summary: |
+    Only one-way migration from SyncToken to ManagedIdentity authentication is supported.
+    The service validates migration eligibility, including the required Offline state.
+    Run `az acr connected-registry deactivate` before invoking the migration.
 examples:
   - name: Update the connected registry client Tokens.
     text: |
@@ -1720,6 +1724,11 @@ examples:
     text: |
         az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
+  - name: Migrate an offline connected registry from SyncToken to ManagedIdentity authentication.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['acr connected-registry get-settings'] = """
