@@ -208,7 +208,8 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
-    protectable_items_paged = backup_protectable_items_client.list(vault_name, resource_group_name, filter=filter_string)
+    protectable_items_paged = backup_protectable_items_client.list(
+        vault_name, resource_group_name, filter=filter_string)
     protectable_items = helper.get_list_from_paged_response(protectable_items_paged)
     result = protectable_items
     if helper.is_native_name(storage_account_name):

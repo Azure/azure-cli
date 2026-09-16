@@ -236,8 +236,10 @@ def load_arguments(self, _):
     with self.argument_context('backup item source-scan-configuration set') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up Azure VM item.', id_part=None)
         c.argument('container_name', container_name_type, id_part=None)
-        c.argument('backup_management_type', arg_type=get_enum_type(['AzureIaasVM']))
-        c.argument('workload_type', arg_type=get_enum_type(['VM']))
+        c.argument('backup_management_type', arg_type=get_enum_type(['AzureIaasVM']),
+                   help='Type of backup management for the item.')
+        c.argument('workload_type', arg_type=get_enum_type(['VM']),
+                   help='Type of workload protected by the item.')
         c.argument('state', arg_type=get_enum_type(['Enabled', 'Disabled']), help='Source Scan state used by Microsoft Defender for Cloud threat detection.')
 
     # Policy

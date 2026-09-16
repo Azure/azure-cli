@@ -529,7 +529,8 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
+    recovery_points = client.list(
+        vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
     common.fetch_tier(paged_recovery_points)
     if use_secondary_region:
@@ -751,7 +752,8 @@ def disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, prot
         'itemName': protectable_item_name,
         'parentName': container_name})
 
-    protection_intents = backup_protection_intent_cf(cmd.cli_ctx).list(vault_name, resource_group_name, filter=filter_string)
+    protection_intents = backup_protection_intent_cf(cmd.cli_ctx).list(
+        vault_name, resource_group_name, filter=filter_string)
     paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
 
     if len(paged_protection_intents) != 1:
@@ -770,9 +772,11 @@ def list_workload_items(cmd, vault_name, resource_group_name, target_subscriptio
         'backupManagementType': container_type,
         'workloadItemType': workload_type})
 
-    workload_items_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
-                                                    subscription_id=target_subscription).backup_workload_items
-    items = workload_items_client.list(vault_name, resource_group_name, fabric_name, container_name, filter=filter_string)
+    workload_items_client = get_mgmt_service_client(
+        cmd.cli_ctx, RecoveryServicesBackupClient,
+        subscription_id=target_subscription).backup_workload_items
+    items = workload_items_client.list(
+        vault_name, resource_group_name, fabric_name, container_name, filter=filter_string)
     return cust_help.get_list_from_paged_response(items)
 
 
@@ -1139,7 +1143,8 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
+    recovery_points = client.list(
+        vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = cust_help.get_none_one_or_many(cust_help.get_list_from_paged_response(recovery_points))
     _check_none_and_many(paged_recovery_points, "Log time range")
     return paged_recovery_points.properties.time_ranges

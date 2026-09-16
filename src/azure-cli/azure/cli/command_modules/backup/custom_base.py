@@ -234,6 +234,7 @@ def list_recovery_points_with_hybrid_properties(
         is_ready_for_move, target_tier, tier, recommended_for_archive)
     return custom_help.serialize_hybrid_model(recovery_points)
 
+
 def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
                                    backup_management_type=None, workload_type=None, start_date=None, end_date=None,
                                    use_secondary_region=None):
