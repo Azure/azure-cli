@@ -13,6 +13,7 @@ from azure.cli.testsdk.preparers import ResourceGroupPreparer as _CliResourceGro
 from azure.cli.testsdk.preparers import StorageAccountPreparer as _CliStorageAccountPreparer
 from azure.cli.testsdk.utilities import StorageAccountKeyReplacer
 from azure.cli.testsdk.base import execute
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
@@ -78,6 +79,23 @@ class StorageAccountPreparer(_CliStorageAccountPreparer):
 class ResourceGroupPreparer(_CliResourceGroupPreparer):
     _MAX_DELETE_ATTEMPTS = 6
     _DELETE_RETRY_WAIT = 15
+
+    def process_request(self, request):
+        request = super().process_request(request)
+        request.uri = request.uri.replace(self.random_name.lower(), self.moniker.lower())
+        if is_text_payload(request) and request.body:
+            body = request.body.decode() if isinstance(request.body, bytes) else str(request.body)
+            request.body = body.replace(self.random_name.lower(), self.moniker.lower())
+        return request
+
+    def process_response(self, response):
+        response = super().process_response(response)
+        if response.get('body', {}).get('string'):
+            response['body']['string'] = response['body']['string'].replace(
+                self.random_name.lower(), self.moniker.lower())
+        self.replace_header(response, 'location', self.random_name.lower(), self.moniker.lower())
+        self.replace_header(response, 'azure-asyncoperation', self.random_name.lower(), self.moniker.lower())
+        return response
 
     def remove_resource(self, name, **kwargs):
         if self.dev_setting_name:

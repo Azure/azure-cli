@@ -530,8 +530,10 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     afs_item_properties.is_rehydrate = True
     afs_item = ProtectedItemResource(properties=afs_item_properties)
 
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
+    result = helper.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, afs_item,
+                                      cls=helper.get_pipeline_response, polling=False))
     return helper.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 

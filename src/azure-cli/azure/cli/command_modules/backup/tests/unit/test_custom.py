@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 from azure.mgmt.recoveryservices.models import SecuritySettings, SoftDeleteSettings, Vault, VaultProperties
 
 from azure.cli.command_modules.backup.custom import update_vault
+from azure.cli.command_modules.backup.custom_afs import undelete_protection
 from azure.cli.command_modules.backup.custom_base import set_item_source_scan_configuration
 
 
@@ -71,6 +72,46 @@ class BackupCustomTest(unittest.TestCase):
         self.assertEqual("vm;iaasvmcontainerv2;rg;vm", args[4])
         self.assertEqual("Enable", args[5].source_scan_action)
         self.assertIs(poller, result)
+
+    @patch('azure.cli.command_modules.backup.custom_afs.helper.track_backup_job')
+    @patch('azure.cli.command_modules.backup.custom_afs.helper.get_initial_pipeline_response')
+    def test_undelete_afs_protection_uses_lro(self, get_initial_pipeline_response, track_backup_job):
+        item = SimpleNamespace(
+            id=("/subscriptions/subscription/resourceGroups/resource-group/providers/"
+                "Microsoft.RecoveryServices/vaults/vault/backupFabrics/Azure/"
+                "protectionContainers/storagecontainer;storage;rg;account/"
+                "protectedItems/azurefileshare;share"),
+            properties=SimpleNamespace(
+                is_scheduled_for_deferred_delete=True,
+                source_resource_id="/subscriptions/subscription/resourceGroups/rg/providers/"
+                                   "Microsoft.Storage/storageAccounts/account"
+            )
+        )
+        cmd = SimpleNamespace(cli_ctx=Mock())
+        client = Mock()
+        poller = Mock()
+        initial_response = Mock()
+        tracked_job = Mock()
+        client.begin_create_or_update.return_value = poller
+        get_initial_pipeline_response.return_value = initial_response
+        track_backup_job.return_value = tracked_job
+
+        result = undelete_protection(cmd, client, "resource-group", "vault", item)
+
+        args = client.begin_create_or_update.call_args.args
+        kwargs = client.begin_create_or_update.call_args.kwargs
+        self.assertEqual(
+            ("vault", "resource-group", "Azure", "storagecontainer;storage;rg;account",
+             "azurefileshare;share"),
+            args[:5]
+        )
+        self.assertTrue(args[5].properties.is_rehydrate)
+        self.assertFalse(kwargs["polling"])
+        get_initial_pipeline_response.assert_called_once_with(poller)
+        track_backup_job.assert_called_once_with(
+            cmd.cli_ctx, initial_response, "vault", "resource-group"
+        )
+        self.assertIs(tracked_job, result)
 
 
 if __name__ == '__main__':

@@ -12,14 +12,14 @@ import os
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
-id_sql = '/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourceGroups/SQL-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2'
-item_id_sql = '/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourcegroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb'
-sub_sql = '5288acd1-ba79-4377-9205-9f220331a44a'
+id_sql = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/SQL-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2'
+item_id_sql = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourcegroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;sql-clitest-rg;sql-clitestvm-donotuse2/protectedItems/SQLDataBase;mssqlserver;msdb'
+sub_sql = '38304e13-357e-405e-9e9a-220351dcce8c'
 rg_sql = 'sql-clitest-rg'
 vault_sql = 'sql-clitestvault-donotuse'
 container_sql = 'VMAppContainer;Compute;sql-clitest-rg;sql-clitestvm-donotuse2'
 container_friendly_sql = 'sql-clitestvm-donotuse2'
-server_friendly_sql = 'sqlclitestvm2'
+server_friendly_sql = 'sql-clitestvm-d'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item1_sql = 'SQLDataBase;mssqlserver;msdb'
 item1_sql_fname = 'msdb'
