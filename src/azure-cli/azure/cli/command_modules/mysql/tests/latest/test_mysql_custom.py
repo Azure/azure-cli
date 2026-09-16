@@ -99,6 +99,26 @@ class MysqlFlexibleServerListSkusCustomTest(unittest.TestCase):
         self.assertEqual(
             'MemoryOptimized',
             result[0].supported_flexible_server_editions[0].name)
+class MysqlFlexibleServerAdvancedThreatProtectionCustomTest(unittest.TestCase):
+
+    def test_update_uses_properties_payload(self):
+        client = _FakeAdvancedThreatProtectionClient()
+
+        custom.flexible_server_advanced_threat_protection_update(
+            cmd=None,
+            client=client,
+            resource_group_name='rg',
+            server_name='server',
+            state='Enabled')
+
+        self.assertEqual('rg', client.resource_group_name)
+        self.assertEqual('server', client.server_name)
+        self.assertEqual('Default', client.advanced_threat_protection_name)
+        self.assertEqual({
+            'properties': {
+                'state': 'Enabled'
+            }
+        }, client.parameters)
 
 
 class _FakeFirewallRulesClient:
@@ -150,6 +170,14 @@ class _FakeArgumentContext:
         if args:
             settings['arg_type'] = args[0]
         self.registrations.append((self.command_name, argument_name, settings))
+class _FakeAdvancedThreatProtectionClient:
+
+    def begin_update(self, resource_group_name, server_name, advanced_threat_protection_name, parameters):
+        self.resource_group_name = resource_group_name
+        self.server_name = server_name
+        self.advanced_threat_protection_name = advanced_threat_protection_name
+        self.parameters = parameters
+        return parameters
 
 
 if __name__ == '__main__':

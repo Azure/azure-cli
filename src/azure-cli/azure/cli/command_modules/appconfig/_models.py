@@ -21,7 +21,8 @@ class QueryFields(Enum):
     LAST_MODIFIED = 0x020
     LOCKED = 0x040
     TAGS = 0x080
-    ALL = KEY | LABEL | VALUE | CONTENT_TYPE | ETAG | LAST_MODIFIED | LOCKED | TAGS
+    DESCRIPTION = 0x100
+    ALL = KEY | LABEL | VALUE | CONTENT_TYPE | ETAG | LAST_MODIFIED | LOCKED | TAGS | DESCRIPTION
 
 
 class KeyValue:
@@ -45,6 +46,8 @@ class KeyValue:
         Represents whether the key value entry is locked.
     :ivar str last_modified:
         A str representation of the datetime object representing the last time the key was modified.
+    :ivar str description:
+        Description of the entry.
     '''
 
     def __init__(self,
@@ -55,7 +58,8 @@ class KeyValue:
                  content_type=None,
                  etag=None,
                  locked=False,
-                 last_modified=None):
+                 last_modified=None,
+                 description=None):
         self.key = key
         self.value = value
         self.label = label
@@ -64,6 +68,7 @@ class KeyValue:
         self.etag = etag
         self.last_modified = last_modified.isoformat() if isinstance(last_modified, datetime) else str(last_modified)
         self.locked = locked
+        self.description = description
 
     def __str__(self):
         return "\nKey: " + self.key + \
@@ -71,9 +76,10 @@ class KeyValue:
                "\nLabel: " + (self.label if self.label else '') + \
                "\netag: " + self.etag + \
                "\nLast Modified: " + self.last_modified + \
-               "\nLocked: " + self.locked + \
+               "\nLocked: " + str(self.locked) + \
                "\nContent Type: " + self.content_type + \
-               "\nTags: " + (str(self.tags) if self.tags else '')
+               "\nTags: " + (str(self.tags) if self.tags else '') + \
+               "\nDescription: " + (self.description if self.description else '')
 
 
 def convert_configurationsetting_to_keyvalue(configuration_setting=None):
@@ -87,7 +93,8 @@ def convert_configurationsetting_to_keyvalue(configuration_setting=None):
                     last_modified=configuration_setting.last_modified,
                     tags=configuration_setting.tags,
                     locked=configuration_setting.read_only,
-                    etag=configuration_setting.etag)
+                    etag=configuration_setting.etag,
+                    description=getattr(configuration_setting, 'description', None))
 
 
 def convert_keyvalue_to_configurationsetting(keyvalue=None):
@@ -99,4 +106,5 @@ def convert_keyvalue_to_configurationsetting(keyvalue=None):
                                 value=keyvalue.value,
                                 tags=keyvalue.tags,
                                 read_only=keyvalue.locked,
-                                etag=keyvalue.etag)
+                                etag=keyvalue.etag,
+                                description=keyvalue.description)

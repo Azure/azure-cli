@@ -47,7 +47,9 @@ def flexible_server_advanced_threat_protection_update(cmd, client, resource_grou
     Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
     '''
     parameters = {
-        'state': state
+        'properties': {
+            'state': state
+        }
     }
     return client.begin_update(resource_group_name, server_name, models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
 
@@ -321,7 +323,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
                            "First upgrade {} server version to {} and try again.".format(replica.name, version_mapped))
 
     parameters = {
-        'version': version_mapped
+        'properties': {'version': version_mapped}
     }
 
     return resolve_poller(

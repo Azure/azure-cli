@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create PrivateEndpointConnections of service namespace.
+
+    :example: NameSpacePrivateEndPointConnectionCreate
+        az eventhubs namespace private-endpoint-connection create --resource-group ArunMonocle --namespace-name sdk-Namespace-2924 --private-endpoint-connection-name privateEndpointConnectionName --private-endpoint "{id:/subscriptions/dbedb4e0-40e6-4145-81f3-f1314c150774/resourceGroups/SDK-EventHub-8396/providers/Microsoft.Network/privateEndpoints/sdk-Namespace-2847}" --description testing --status Rejected --provisioning-state Succeeded
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -157,7 +160,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

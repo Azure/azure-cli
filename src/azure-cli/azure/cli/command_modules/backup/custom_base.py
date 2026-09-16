@@ -496,12 +496,13 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None, target_resource_group_name=None, tenant_id=None):
+                           target_folder=None, target_resource_group_name=None, tenant_id=None,
+                           use_secondary_region=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     backup_management_type, workload_type, use_secondary_region)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
@@ -511,7 +512,8 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
-                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id)
+                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id,
+                                             use_secondary_region=use_secondary_region)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
@@ -630,10 +632,13 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
+    if item.properties.backup_management_type.lower() == "azurestorage":
+        return custom_afs.undelete_protection(cmd, client, resource_group_name, vault_name, item)
+
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
-    return None
+    raise ValidationError("Undelete is not supported for this backup management type.")
 
 
 def list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,

@@ -5,8 +5,9 @@
 
 import json
 import os
+import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, PropertyMock
 
 from azure.cli.testsdk.checkers import JMESPathCheck
 from knack.util import CLIError
@@ -87,6 +88,42 @@ class TestShouldRetryForProvisioningState(unittest.TestCase):
 class TestCmdRetryDispatch(unittest.TestCase):
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
+    @patch(
+        'azure.cli.testsdk.scenario_tests.config.TestConfig.record_mode',
+        new_callable=PropertyMock,
+        return_value=True,
+    )
+    def test_retry_enabled_live_instance_disables_recording(self, _record_mode):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = AzureKubernetesServiceScenarioTest('runTest')
+
+        self.assertTrue(instance.disable_recording)
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
+    @patch(
+        'azure.cli.testsdk.scenario_tests.config.TestConfig.record_mode',
+        new_callable=PropertyMock,
+        return_value=True,
+    )
+    def test_retry_enabled_live_instance_never_saves_cassette(self, _record_mode):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = AzureKubernetesServiceScenarioTest('runTest')
+        instance.cassette = MagicMock()
+        instance.cassette.dirty = True
+        fd, temp_recording_file = tempfile.mkstemp()
+        os.close(fd)
+        instance.temp_recording_file = temp_recording_file
+
+        instance._save_recording_file()
+
+        self.assertFalse(instance.cassette.dirty)
+        self.assertFalse(os.path.exists(temp_recording_file))
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK': 'true'})
     def test_live_command_without_checks_uses_retry_path(self):
         from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
             AzureKubernetesServiceScenarioTest,
@@ -161,6 +198,192 @@ class TestWaitForClusterUpdate(unittest.TestCase):
             '--updated --interval 30 --timeout 1800',
             checks=['empty-check'],
         )
+
+
+class TestWaitForClusterProperty(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance(values, is_live=True, in_recording=False):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.is_live = is_live
+        instance.in_recording = in_recording
+        instance.cmd = MagicMock(
+            side_effect=[MockExecutionResult(value) for value in values]
+        )
+        return instance
+
+    @patch('time.sleep', return_value=None)
+    def test_polls_until_property_matches_case_insensitively(self, mock_sleep):
+        instance = self._make_instance(['true', 'False'])
+
+        instance._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
+
+        self.assertEqual(instance.cmd.call_count, 2)
+        mock_sleep.assert_called_once_with(30)
+
+    def test_replay_does_not_issue_poll_requests(self):
+        instance = self._make_instance([], is_live=False)
+
+        instance._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
+
+        instance.cmd.assert_not_called()
+
+    @patch('time.sleep', return_value=None)
+    def test_raises_when_property_never_matches(self, _mock_sleep):
+        instance = self._make_instance(['true', 'true'])
+
+        with self.assertRaisesRegex(AssertionError, 'last value'):
+            instance._wait_for_cluster_property(
+                'addonProfiles.omsagent.enabled', False, attempts=2
+            )
+
+
+class TestAlreadyExistsConflictHandling(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance():
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cli_ctx = MagicMock()
+        instance._allow_retried_create_recovery = False
+        return instance
+
+    def test_builds_show_command_for_create(self):
+        instance = self._make_instance()
+
+        command = instance._build_show_command_for_already_existing_resource(
+            'aks create -g rg --name cluster --node-count 1'
+        )
+
+        self.assertEqual(command, 'aks show --resource-group rg --name cluster')
+
+    def test_does_not_translate_non_create_command(self):
+        instance = self._make_instance()
+
+        self.assertIsNone(
+            instance._build_show_command_for_already_existing_resource(
+                'aks update -g rg -n cluster'
+            )
+        )
+
+    @patch.dict(os.environ, {
+        'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3',
+        'AZURE_CLI_TEST_OPERATION_BASE_DELAY': '0.01',
+    })
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_already_exists_after_transient_retry_uses_show(
+        self, mock_execute, _mock_random, mock_sleep
+    ):
+        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+        mock_execute.side_effect = [
+            CLIError('Another operation is in progress.'),
+            CLIError("The cluster 'cluster' already exists."),
+            expected,
+        ]
+        instance = self._make_instance()
+        instance._allow_retried_create_recovery = True
+
+        result = instance._execute_with_transient_conflict_retry(
+            'aks create --resource-group rg --name cluster', False
+        )
+
+        self.assertIs(result, expected)
+        mock_execute.assert_called_with(
+            instance.cli_ctx,
+            'aks show --resource-group rg --name cluster',
+            expect_failure=False,
+        )
+        mock_sleep.assert_called_once()
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3'})
+    @patch('time.sleep', return_value=None)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_first_attempt_already_exists_still_raises(
+        self, mock_execute, mock_sleep
+    ):
+        mock_execute.side_effect = CLIError("The cluster 'cluster' already exists.")
+
+        with self.assertRaisesRegex(CLIError, 'already exists'):
+            self._make_instance()._execute_with_transient_conflict_retry(
+                'aks create --resource-group rg --name cluster', False
+            )
+
+        mock_execute.assert_called_once()
+        mock_sleep.assert_not_called()
+
+    @patch.dict(os.environ, {
+        'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3',
+        'AZURE_CLI_TEST_OPERATION_BASE_DELAY': '0.01',
+    })
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_already_exists_without_explicit_recovery_still_raises(
+        self, mock_execute, _mock_random, _mock_sleep
+    ):
+        mock_execute.side_effect = [
+            CLIError('Another operation is in progress.'),
+            CLIError("The cluster 'cluster' already exists."),
+        ]
+
+        with self.assertRaisesRegex(CLIError, 'already exists'):
+            self._make_instance()._execute_with_transient_conflict_retry(
+                'aks create --resource-group rg --name cluster', False
+            )
+
+    def test_recovery_wrapper_restores_previous_state(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(return_value='result')
+
+        result = instance._cmd_with_retried_create_recovery(
+            'aks create -g rg -n cluster', checks=['check']
+        )
+
+        self.assertEqual(result, 'result')
+        instance.cmd.assert_called_once_with(
+            'aks create -g rg -n cluster', checks=['check']
+        )
+        self.assertFalse(instance._allow_retried_create_recovery)
+
+
+class TestArtifactStreamingStableApiHandling(unittest.TestCase):
+
+    def test_skips_only_exact_stable_api_unmarshal_error(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cmd = MagicMock(side_effect=CLIError(
+            'UnmarshalError: json: unknown field "artifactStreamingProfile"'
+        ))
+        instance.skipTest = MagicMock(side_effect=unittest.SkipTest('unsupported'))
+
+        with self.assertRaises(unittest.SkipTest):
+            instance._cmd_or_skip_if_artifact_streaming_unavailable('aks nodepool update')
+
+    def test_unrelated_unmarshal_error_propagates(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cmd = MagicMock(
+            side_effect=CLIError('UnmarshalError: json: unknown field "other"')
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'unknown field'):
+            instance._cmd_or_skip_if_artifact_streaming_unavailable(
+                'aks nodepool update'
+            )
+
+        instance.skipTest.assert_not_called()
 
 
 class TestCmdWithRetry(unittest.TestCase):
@@ -522,6 +745,114 @@ class TestSupportedVersionSelection(unittest.TestCase):
         instance.cmd.assert_called_once_with(
             '''az aks get-versions -l westus2 --query "values[?contains(capabilities.supportPlan, 'KubernetesOfficial')].patchVersions.keys(@)[]"'''
         )
+
+
+class TestCreateAzureMonitorWorkspace(unittest.TestCase):
+
+    def _make_instance(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        return object.__new__(AzureKubernetesServiceScenarioTest)
+
+    def test_creates_dedicated_workspace_and_returns_its_id(self):
+        instance = self._make_instance()
+        instance.create_random_name = MagicMock(return_value='cliaksamwabc123')
+        expected_id = (
+            '/subscriptions/sub/resourceGroups/rg/providers/'
+            'Microsoft.Monitor/accounts/cliaksamwabc123'
+        )
+        instance.cmd = MagicMock(
+            return_value=MockExecutionResult({'id': expected_id, 'name': 'cliaksamwabc123'})
+        )
+
+        workspace_id = instance._create_azure_monitor_workspace('rg', 'westus2')
+
+        self.assertEqual(workspace_id, expected_id)
+        instance.create_random_name.assert_called_once_with('cliaksamw', 24)
+        instance.cmd.assert_called_once_with(
+            'monitor account create --resource-group rg --name cliaksamwabc123 --location westus2'
+        )
+
+
+class TestCmdOrSkipIfUnsupported(unittest.TestCase):
+
+    def _make_instance(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        return object.__new__(AzureKubernetesServiceScenarioTest)
+
+    def test_returns_result_when_command_succeeds(self):
+        instance = self._make_instance()
+        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+        instance.cmd = MagicMock(return_value=expected)
+
+        result = instance._cmd_or_skip_if_unsupported('aks update ...', checks=[])
+
+        self.assertIs(result, expected)
+        instance.cmd.assert_called_once_with('aks update ...', checks=[])
+
+    def test_skips_test_when_error_matches_unsupported_marker(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError('Control plane metrics configuration is not supported yet.')
+        )
+        instance.skipTest = MagicMock(side_effect=unittest.SkipTest('skipped'))
+
+        with self.assertRaises(unittest.SkipTest):
+            instance._cmd_or_skip_if_unsupported(
+                'aks update --enable-control-plane-metrics',
+                skip_reason='Control Plane Metrics toggle is not yet available',
+            )
+
+        instance.skipTest.assert_called_once_with(
+            'Control Plane Metrics toggle is not yet available'
+        )
+
+    def test_reraises_when_error_does_not_match_marker(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(side_effect=CLIError('Some unrelated failure'))
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'Some unrelated failure'):
+            instance._cmd_or_skip_if_unsupported('aks update --enable-control-plane-metrics')
+
+        instance.skipTest.assert_not_called()
+
+    def test_reraises_unrelated_vm_size_not_supported_error(self):
+        # This message satisfies the generic "is not supported" condition marker, but has no
+        # Control Plane Metrics context, so it must NOT be treated as this feature being
+        # unavailable and must propagate as a real failure instead of being skipped.
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError(
+                '(VMSizeNotSupported) The VM size Standard_Foo is not supported in this region.'
+            )
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'VMSizeNotSupported'):
+            instance._cmd_or_skip_if_unsupported(
+                'aks create --node-vm-size Standard_Foo',
+                skip_reason='Control Plane Metrics toggle is not yet available',
+            )
+
+        instance.skipTest.assert_not_called()
+
+    def test_reraises_generic_unrelated_not_supported_error(self):
+        # A generic "not supported" failure with no feature-specific context at all (not even
+        # a recognizable resource type) must also propagate rather than being skipped.
+        instance = self._make_instance()
+        instance.cmd = MagicMock(
+            side_effect=CLIError('BadRequest: this configuration is not supported.')
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'BadRequest'):
+            instance._cmd_or_skip_if_unsupported('aks update --enable-defender')
+
+        instance.skipTest.assert_not_called()
 
 
 if __name__ == '__main__':

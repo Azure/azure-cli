@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
+
+    :example: NamespaceCreate
+        az eventhubs namespace update --resource-group ResurceGroupSample --namespace-name NamespaceSample
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -57,6 +60,17 @@ class Update(AAZCommand):
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+
+        # define Arg Group "ConfidentialCompute"
+
+        _args_schema = cls._args_schema
+        _args_schema.confidential_compute_mode = AAZStrArg(
+            options=["--mode", "--confidential-compute-mode"],
+            arg_group="ConfidentialCompute",
+            help="Setting to Enable or Disable Confidential Compute",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "GeoDataReplication"
@@ -432,7 +446,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -531,7 +545,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

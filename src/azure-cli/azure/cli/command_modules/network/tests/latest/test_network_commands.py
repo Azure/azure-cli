@@ -1413,6 +1413,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
             'init_admin': init_admin,
             'cert_name': 'hsmSslCert',
             'cert_name2': 'hsmSslCert2',
+            'listener_name': 'hsmListener',
         })
 
         # create managed identity
@@ -1499,6 +1500,33 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                  checks=[
                      self.check('name', '{cert_name}'),
                      self.check('hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test creating a listener preserves the existing HSM-backed certificate
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} '
+                 '-n port_443 --port 443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} '
+                 '-n {listener_name} --frontend-ip appGatewayFrontendIP '
+                 '--frontend-port port_443 --ssl-cert {cert_name} '
+                 '--host-name contoso.com',
+                 checks=[
+                     self.check('name', '{listener_name}'),
+                     self.check('hostName', 'contoso.com'),
+                     self.check("contains(sslCertificate.id, '{cert_name}')", True),
+                 ])
+
+        # test parent show and update preserve the HSM-backed certificate
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check('sslCertificates[0].hsm.keyId', '{hsm_key_id2}'),
+            self.exists('sslCertificates[0].hsm.publicCertData'),
+        ])
+        self.cmd('network application-gateway update -g {rg} -n {ag} --tags hsm=preserved',
+                 checks=self.check('tags.hsm', 'preserved'))
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                     self.exists('hsm.publicCertData'),
                  ])
 
         # test ssl-cert list includes the hsm cert
@@ -5484,6 +5512,61 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
         self.cmd('network route-table delete -g {rg} -n {table}')
         self.cmd('network route-table delete -g {rg} -n {table2}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_ecmp', location='eastasia')
+    def test_network_route_table_ecmp_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-ecmp',
+            'route': 'ecmp-route',
+            'ip1': '10.0.0.1',
+            'ip2': '10.0.0.2',
+            'ip3': '10.0.0.3',
+            'prefix': '10.1.0.0/16'
+        })
+
+        # create route table
+        self.cmd('network route-table create -n {table} -g {rg}')
+
+        # create route with VirtualApplianceEcmp next hop type and ECMP IP addresses
+        self.cmd('network route-table route create --address-prefix {prefix} -n {route} -g {rg} '
+                 '--next-hop-type VirtualApplianceEcmp --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # show route and verify ECMP next hop properties
+        self.cmd('network route-table route show -g {rg} --route-table-name {table} -n {route}',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 2)
+                 ])
+
+        # list routes and verify ECMP properties
+        self.cmd('network route-table route list -g {rg} --route-table-name {table}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].nextHopType', 'VirtualApplianceEcmp')
+                 ])
+
+        # update route to change ECMP IP addresses (add a third IP)
+        self.cmd('network route-table route update -g {rg} -n {route} --route-table-name {table} '
+                 '--next-hop next-hop-ip-addresses="[{ip1},{ip2},{ip3}]"',
+                 checks=[
+                     self.check('nextHopType', 'VirtualApplianceEcmp'),
+                     self.check('length(nextHop.nextHopIpAddresses)', 3),
+                     self.check('nextHop.nextHopIpAddresses[0]', '{ip1}'),
+                     self.check('nextHop.nextHopIpAddresses[1]', '{ip2}'),
+                     self.check('nextHop.nextHopIpAddresses[2]', '{ip3}')
+                 ])
+
+        self.cmd('network route-table route delete -g {rg} --route-table-name {table} -n {route}')
+        self.cmd('network route-table delete -g {rg} -n {table}')
 
 
 class NetworkVNetScenarioTest(ScenarioTest):

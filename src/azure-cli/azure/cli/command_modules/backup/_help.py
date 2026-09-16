@@ -297,8 +297,10 @@ helps['backup protection undelete'] = """
 type: command
 short-summary: Rehydrate an item from softdeleted state to stop protection with retained data state.
 examples:
-  - name: Rehydrate an item from softdeleted state to stop protection with retained data state.
+  - name: Rehydrate a VM item from softdeleted state to stop protection with retained data state.
     text: az backup protection undelete --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureIaasVM --workload-type VM
+  - name: Rehydrate an Azure File Share item from softdeleted state to stop protection with retained data state.
+    text: az backup protection undelete --container-name MyStorageAccount --item-name MyFileShare --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureStorage --workload-type AzureFileShare
 """
 
 helps['backup protection enable-for-azurewl'] = """
