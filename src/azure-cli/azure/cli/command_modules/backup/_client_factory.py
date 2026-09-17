@@ -20,17 +20,17 @@ def _common_client_factory(cli_ctx, **_):
 
 
 def _backup_client_factory(cli_ctx, **_):
-    from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+    from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
 
 
 def _backup_passive_client_factory(cli_ctx, **_):
-    from azure.mgmt.recoveryservicesbackup.passivestamp import RecoveryServicesBackupPassiveClient
+    from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupPassiveClient)
+    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
 
 
 def _storage_client_factory(cli_ctx, **_):
