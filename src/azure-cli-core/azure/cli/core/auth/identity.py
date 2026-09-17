@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+import threading
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -26,12 +27,17 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
+_CLIENT_ASSERTION_CALLBACK = 'client_assertion_callback'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
 AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
+
+# Sentinel value persisted as the client_assertion of a service principal entry to indicate that the OIDC
+# ID token should be fetched (and refreshed) on demand from the CI/CD provider instead of being a static token.
+FEDERATED_IDENTITY = "FEDERATED_IDENTITY"
 
 WAM_PROMPT = (
     "Select the account you want to log in with. "
@@ -257,6 +263,8 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
+        # command that prints a fresh federated token to stdout (provider-agnostic callback)
+        self.client_assertion_callback = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -294,12 +302,13 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None):
+                         client_assertion=None, client_assertion_callback=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token'
+            'client_assertion': 'my_federated_token',
+            'client_assertion_callback': 'my-get-token-command'
         }
         """
         entry = {}
@@ -311,11 +320,14 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
+        elif client_assertion_callback:
+            entry[_CLIENT_ASSERTION_CALLBACK] = client_assertion_callback
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
-        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
+        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
+                          _CLIENT_ASSERTION, _CLIENT_ASSERTION_CALLBACK]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -347,7 +359,19 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
         # }
         if self.client_assertion:
-            client_credential = {'client_assertion': self.client_assertion}
+            client_credential = {
+                'client_assertion': get_federated_id_token if self.client_assertion == FEDERATED_IDENTITY
+                else self.client_assertion}
+
+        # client_assertion_callback
+        # A user-provided command that prints a fresh federated token to stdout. Wrapped as a callable so
+        # MSAL re-runs it whenever a fresh assertion is needed (provider-agnostic refresh).
+        # {
+        #     "client_assertion": <callable returning a JWT>
+        # }
+        if self.client_assertion_callback:
+            client_credential = {
+                'client_assertion': _build_command_assertion_callback(self.client_assertion_callback)}
 
         return client_credential
 
@@ -456,3 +480,183 @@ def get_environment_credential():
         getenv(AZURE_TENANT_ID))
     credentials = ServicePrincipalCredential(sp_auth, authority=authority)
     return credentials
+
+
+# MSAL may invoke a client_assertion callback concurrently; this lock keeps the dispatcher fetch thread-safe.
+_federated_id_token_lock = threading.Lock()
+
+# Connect/read timeouts (seconds) for OIDC ID token requests, so a network stall fails fast on a
+# long-running CI job instead of hanging the whole token acquisition indefinitely.
+_OIDC_HTTP_TIMEOUT = (10, 30)
+
+
+def get_federated_id_token():
+    """Acquire a fresh OIDC ID token from the current CI/CD provider.
+
+    This is the dispatcher registered as MSAL's ``client_assertion`` callback. MSAL invokes it lazily every
+    time it needs a client assertion, so an expired ID token is transparently replaced with a fresh one for
+    as long as the underlying provider request token is valid. The provider is auto-detected from the
+    environment so that ``--federated-identity`` stays a single, provider-agnostic flag.
+
+    MSAL may invoke the client_assertion callback from concurrent token requests, so this is serialized with
+    a lock to avoid duplicate token fetches racing against each other.
+    """
+    with _federated_id_token_lock:
+        if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
+            return _get_id_token_github()
+        if 'SYSTEM_OIDCREQUESTURI' in os.environ or 'ARM_OIDC_REQUEST_URL' in os.environ:
+            return _get_id_token_azure_devops()
+        raise CLIError(
+            "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
+            "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
+            "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
+
+
+def _oidc_http_request(method, url, headers, provider):
+    """Issue an OIDC ID token HTTP request with an explicit timeout.
+
+    A missing timeout would let a stalled connection hang token acquisition forever on a long-running CI
+    job, so we bound it and surface a clear error on timeout or connection failure.
+    """
+    import requests
+    try:
+        return method(url, headers=headers, timeout=_OIDC_HTTP_TIMEOUT)
+    except requests.exceptions.Timeout:
+        raise CLIError('Timed out requesting an ID token from {}. Please retry.'.format(provider))
+    except requests.exceptions.RequestException as ex:
+        raise CLIError('Failed to reach the {} OIDC endpoint: {}'.format(provider, ex))
+
+
+def _get_id_token_github():
+    """Fetch a fresh OIDC ID token from the GitHub Actions token service.
+
+    Valid for the lifetime of the GitHub Actions request token (currently ~6 hours after the job starts).
+    https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers
+    """
+    from urllib.parse import quote
+    import requests
+
+    try:
+        request_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
+        request_url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
+    except KeyError as ex:
+        raise CLIError(
+            'Environment variable {} is not set. --federated-identity requires GitHub Actions with '
+            '"id-token: write" permission granted to the workflow.'.format(ex))
+
+    audience = quote('api://AzureADTokenExchange')
+    # Append the audience with the correct separator in case the request URL already has a query string.
+    separator = '&' if '?' in request_url else '?'
+    url = '{}{}audience={}'.format(request_url, separator, audience)
+    headers = {
+        'Authorization': 'bearer {}'.format(request_token),
+        'Accept': 'application/json; api-version=2.0',
+        'Content-Type': 'application/json'
+    }
+    response = _oidc_http_request(requests.get, url, headers, 'GitHub Actions')
+    if not response.ok:
+        raise CLIError('Failed to retrieve an ID token from GitHub Actions: {} {}'.format(
+            response.status_code, response.reason))
+    id_token = response.json().get('value')
+    if not id_token:
+        raise CLIError('GitHub Actions OIDC endpoint did not return an ID token.')
+    # Never log the token value itself.
+    logger.debug('Retrieved a fresh ID token from the GitHub Actions OIDC endpoint.')
+    return id_token
+
+
+def _get_id_token_azure_devops():
+    """Fetch a fresh OIDC ID token from Azure DevOps Pipelines.
+
+    Azure DevOps issues short-lived ID tokens (~5 min) and, unlike GitHub Actions, requires a POST to the
+    oidctoken API authenticated with the pipeline's System.AccessToken and targeting a specific service
+    connection. Because the token refresh runs in a later `az` process, all three inputs are read from the
+    environment following the documented Azure DevOps convention:
+
+    - request URL:   ARM_OIDC_REQUEST_URL, else SYSTEM_OIDCREQUESTURI
+    - access token:  ARM_OIDC_REQUEST_TOKEN, else SYSTEM_ACCESSTOKEN (the pipeline's System.AccessToken)
+    - service conn:  ARM_OIDC_AZURE_SERVICE_CONNECTION_ID
+
+    https://devblogs.microsoft.com/devops/introducing-azure-devops-id-token-refresh-and-terraform-task-version-5/
+    """
+    from urllib.parse import quote
+    import requests
+
+    request_url = os.environ.get('ARM_OIDC_REQUEST_URL') or os.environ.get('SYSTEM_OIDCREQUESTURI')
+    request_token = os.environ.get('ARM_OIDC_REQUEST_TOKEN') or os.environ.get('SYSTEM_ACCESSTOKEN')
+    service_connection_id = os.environ.get('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID')
+
+    missing = [name for name, value in (
+        ('ARM_OIDC_REQUEST_URL (or SYSTEM_OIDCREQUESTURI)', request_url),
+        ('ARM_OIDC_REQUEST_TOKEN (or SYSTEM_ACCESSTOKEN)', request_token),
+        ('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID', service_connection_id)) if not value]
+    if missing:
+        raise CLIError(
+            '--federated-identity on Azure DevOps requires the environment variable(s): {}. '
+            'System.AccessToken is not exposed to scripts by default, so map it explicitly and set the '
+            'service connection ID. See https://github.com/Azure/azure-cli/issues/28708 for guidance.'
+            .format(', '.join(missing)))
+
+    url = '{}?api-version=7.1&serviceConnectionId={}'.format(
+        request_url.rstrip('/'), quote(service_connection_id))
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'bearer {}'.format(request_token),
+        # Prevents the service from responding with a redirect HTTP status code.
+        'X-TFS-FedAuthRedirect': 'Suppress',
+    }
+    response = _oidc_http_request(requests.post, url, headers, 'Azure DevOps')
+    if not response.ok:
+        raise CLIError('Failed to retrieve an ID token from Azure DevOps: {} {}'.format(
+            response.status_code, response.reason))
+    id_token = response.json().get('oidcToken')
+    if not id_token:
+        raise CLIError('Azure DevOps OIDC endpoint did not return an ID token.')
+    # Never log the token value itself.
+    logger.debug('Retrieved a fresh ID token from the Azure DevOps OIDC endpoint.')
+    return id_token
+
+
+def _build_command_assertion_callback(command):
+    """Wrap a user-provided command as a callable that returns a fresh federated token.
+
+    This is the provider-agnostic escape hatch behind `az login --federated-token-callback`. The command
+    is expected to print a single OIDC token to stdout; MSAL invokes the returned callable whenever it
+    needs a fresh assertion, so refresh works with any CI/CD provider.
+
+    The command is parsed into an argument vector (with POSIX rules on every platform) and run WITHOUT a
+    shell (shell=False). Because the command is persisted in the service principal entry and re-executed on
+    every refresh, avoiding a shell prevents a tampered token cache from turning into arbitrary code
+    execution. Users who need shell features such as pipes or redirection should either point to a script
+    file or wrap the pipeline explicitly, e.g.
+    --federated-token-callback "bash -c 'curl ... | jq -r .value'".
+    On Windows, use forward slashes in paths or escape backslashes (POSIX parsing treats '\\' as an escape).
+    """
+    import shlex
+    # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
+    # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
+    args = shlex.split(command, posix=True)
+    if not args:
+        raise CLIError('--federated-token-callback: the command is empty.')
+
+    # MSAL may invoke the client_assertion callback from concurrent token requests; serialize the command
+    # execution so two requests don't run the callback command at the same time.
+    lock = threading.Lock()
+
+    def get_id_token():
+        import subprocess
+        with lock:
+            try:
+                result = subprocess.run(args, capture_output=True, text=True, check=True)
+            except FileNotFoundError:
+                raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0]))
+            except subprocess.CalledProcessError as ex:
+                raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
+                    ex.returncode, (ex.stderr or '').strip()))
+            id_token = result.stdout.strip()
+        if not id_token:
+            raise CLIError('--federated-token-callback command produced no output on stdout.')
+        # Never log the token value itself.
+        logger.debug('Retrieved a fresh ID token from the --federated-token-callback command.')
+        return id_token
+    return get_id_token
