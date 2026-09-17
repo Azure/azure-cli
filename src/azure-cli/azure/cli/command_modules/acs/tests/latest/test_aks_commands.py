@@ -141,6 +141,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             return None
         return f"aks show --resource-group {resource_group} --name {name}"
 
+    def _is_private_dns_role_assignment_pending(self, command, ex):
+        zone_id = getattr(self, "_private_dns_role_assignment_scope", None)
+        if not zone_id or not re.match(r"^aks\s+create\b", command.strip()):
+            return False
+        requested_zone = self._extract_cli_option(command, "--private-dns-zone")
+        message = str(ex).casefold()
+        return (
+            requested_zone is not None and requested_zone.casefold() == zone_id.casefold() and
+            "(resourcemissingpermissionerror)" in message and
+            f"resource {zone_id.casefold()}." in message and
+            "not allowed for action microsoft.network/privatednszones/read" in message
+        )
+
+    def _cmd_with_private_dns_role_assignment_retry(self, command, zone_id, checks=None):
+        # Only the caller that just granted this zone's role may retry propagation.
+        previous_scope = getattr(self, "_private_dns_role_assignment_scope", None)
+        self._private_dns_role_assignment_scope = zone_id
+        try:
+            return self.cmd(command, checks=checks)
+        finally:
+            self._private_dns_role_assignment_scope = previous_scope
+
     def _execute_with_transient_conflict_retry(self, command, expect_failure):
         from azure.cli.testsdk.base import execute
         import logging
@@ -169,13 +191,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                         return execute(self.cli_ctx, show_command, expect_failure=False)
                 if (
                     expect_failure or
-                    not self._is_transient_operation_conflict(ex) or
+                    not (
+                        self._is_transient_operation_conflict(ex) or
+                        self._is_private_dns_role_assignment_pending(command, ex)
+                    ) or
                     attempt == max_retries - 1
                 ):
                     raise
                 delay = min(base_delay * (2 ** attempt), max_delay) + random.uniform(0, 1)
                 logging.warning(
-                    "AKS operation is still in progress; retrying command in %.1f seconds (%d/%d)",
+                    "AKS operation or dependency is not ready; retrying command in %.1f seconds (%d/%d)",
                     delay,
                     attempt + 1,
                     max_retries,
@@ -1248,7 +1273,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--node-count=1 --fqdn-subdomain={subdomain_name} ' \
                      '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} ' \
                      '--enable-managed-identity --assign-identity {identity_resource_id} --ssh-key-value={ssh_key_value}'
-        self.cmd(create_cmd, checks=[
+        self._cmd_with_private_dns_role_assignment_retry(create_cmd, zone_id, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.exists('privateFqdn'),
             self.check('fqdnSubdomain', subdomain_name),

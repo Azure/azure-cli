@@ -192,6 +192,68 @@ class TestLiveConflictRecovery(unittest.TestCase):
         )
 
 
+class TestPrivateDnsRoleAssignmentRetry(unittest.TestCase):
+    ZONE = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/privateDnsZones/example'
+    COMMAND = f'aks create -g rg -n cluster --private-dns-zone={ZONE}'
+    ERROR = (
+        f'(ResourceMissingPermissionError) Permission to resource {ZONE}. '
+        'Check access result not allowed for action Microsoft.Network/privateDnsZones/read.'
+    )
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '2'})
+    @patch('time.sleep')
+    @patch('azure.cli.testsdk.base.execute')
+    def test_retries_just_assigned_zone_and_preserves_bounded_failure(self, execute, sleep):
+        instance = make_scenario()
+        instance._private_dns_role_assignment_scope = self.ZONE
+        error = CLIError(self.ERROR)
+        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+        execute.side_effect = [error, expected]
+        self.assertIs(instance._execute_with_transient_conflict_retry(self.COMMAND, False), expected)
+        sleep.assert_called_once()
+        execute.reset_mock(side_effect=True)
+        execute.side_effect = error
+        with self.assertRaises(CLIError) as raised:
+            instance._execute_with_transient_conflict_retry(self.COMMAND, False)
+        self.assertIs(raised.exception, error)
+        self.assertEqual(execute.call_count, 2)
+
+    def test_unrelated_permissions_commands_and_scopes_are_not_retryable(self):
+        for scope, command, message in (
+            (None, self.COMMAND, self.ERROR),
+            (self.ZONE + '-other', self.COMMAND, self.ERROR),
+            (self.ZONE, self.COMMAND + '-other', self.ERROR),
+            (self.ZONE, self.COMMAND.replace('aks create', 'aks update'), self.ERROR),
+            (self.ZONE, self.COMMAND, self.ERROR.replace('example.', 'example-other.')),
+            (self.ZONE, self.COMMAND, self.ERROR.replace('privateDnsZones/read', 'privateDnsZones/write')),
+            (self.ZONE, self.COMMAND, self.ERROR.replace('ResourceMissingPermissionError', 'AuthorizationFailed')),
+        ):
+            with self.subTest(scope=scope, command=command, message=message):
+                instance = make_scenario()
+                instance._private_dns_role_assignment_scope = scope
+                self.assertFalse(instance._is_private_dns_role_assignment_pending(command, CLIError(message)))
+
+    def test_scope_is_case_insensitive_and_restored_after_failure(self):
+        instance = make_scenario()
+        instance._private_dns_role_assignment_scope = self.ZONE.upper()
+        self.assertTrue(instance._is_private_dns_role_assignment_pending(self.COMMAND, CLIError(self.ERROR)))
+        instance.cmd.side_effect = CLIError('failed')
+        with self.assertRaises(CLIError):
+            instance._cmd_with_private_dns_role_assignment_retry(self.COMMAND, self.ZONE)
+        self.assertEqual(instance._private_dns_role_assignment_scope, self.ZONE.upper())
+
+    @patch('azure.cli.testsdk.base.execute')
+    @patch('time.sleep')
+    def test_expected_failure_is_not_retried(self, sleep, execute):
+        instance = make_scenario()
+        instance._private_dns_role_assignment_scope = self.ZONE
+        execute.side_effect = CLIError(self.ERROR)
+        with self.assertRaises(CLIError):
+            instance._execute_with_transient_conflict_retry(self.COMMAND, True)
+        execute.assert_called_once()
+        sleep.assert_not_called()
+
+
 class TestTestsdkExceptionDispatch(unittest.TestCase):
     def setUp(self):
         config = tempfile.TemporaryDirectory()
