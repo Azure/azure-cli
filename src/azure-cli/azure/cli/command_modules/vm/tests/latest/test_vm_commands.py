@@ -2565,6 +2565,9 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
         ])
 
     @live_only()
+    # Add live_only: Extension that is ready for testing isn’t accessible. The currently written using publicly
+    # available version of the extension, which has not yet been updated on the RP side.
+    # Required to re-record when it is ready.
     def test_vm_vmss_extension_image(self):
         self.kwargs.update({
             'loc': 'eastus',
