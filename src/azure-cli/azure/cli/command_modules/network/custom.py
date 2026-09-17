@@ -5208,10 +5208,11 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 # region PublicIPAddresses
 def _add_root_resource_guid(schema):
     from azure.cli.core.aaz import AAZStrType
-    schema.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
+    if not hasattr(schema, "resource_guid"):
+        schema.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
     return schema
 
 
@@ -5230,13 +5231,6 @@ class FirstPartyServiceTagShow(_FirstPartyServiceTagShow):
 
 
 class FirstPartyServiceTagList(_FirstPartyServiceTagList):
-    class FirstPartyServiceTagsListAll(_FirstPartyServiceTagList.FirstPartyServiceTagsListAll):
-        @classmethod
-        def _build_schema_on_200(cls):
-            schema = super()._build_schema_on_200()
-            _add_root_resource_guid(schema.value.Element)
-            return schema
-
     class FirstPartyServiceTagsList(_FirstPartyServiceTagList.FirstPartyServiceTagsList):
         @classmethod
         def _build_schema_on_200(cls):
@@ -5246,12 +5240,35 @@ class FirstPartyServiceTagList(_FirstPartyServiceTagList):
 
 
 class FirstPartyServiceTagUpdate(_FirstPartyServiceTagUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.value._registered = False
+        args_schema.location._registered = False
+        return args_schema
+
     class FirstPartyServiceTagsGet(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsGet):
         @classmethod
         def _build_schema_on_200(cls):
             return _add_root_resource_guid(super()._build_schema_on_200())
 
     class FirstPartyServiceTagsCreateOrUpdate(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsCreateOrUpdate):
+        @property
+        def method(self):
+            return "PATCH"
+
+        @property
+        def content(self):
+            from azure.cli.core.aaz import AAZObjectType, AAZDictType, AAZStrType
+            content, builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True}},
+            )
+            builder.set_prop("tags", AAZDictType, ".tags")
+            builder.get(".tags").set_elements(AAZStrType, ".")
+            return self.serialize_content(content)
+
         @classmethod
         def _build_schema_on_200_201(cls):
             return _add_root_resource_guid(super()._build_schema_on_200_201())
