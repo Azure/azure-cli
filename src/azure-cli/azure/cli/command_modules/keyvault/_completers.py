@@ -6,13 +6,15 @@
 from azure.cli.core.decorators import Completer
 from azure.cli.core._profile import Profile
 
+from ._validators import validate_vault_uri
+
 
 def get_keyvault_name_completion_list(resource_name):
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         func_name = 'list_properties_of_{}s'.format(resource_name)
-        vault = namespace.vault_base_url
+        vault = validate_vault_uri(cmd.cli_ctx, namespace.vault_base_url)
         profile = Profile(cli_ctx=cmd.cli_ctx)
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
@@ -40,7 +42,7 @@ def get_keyvault_version_completion_list(resource_name):
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         func_name = 'list_properties_of_{}_versions'.format(resource_name)
-        vault = namespace.vault_base_url
+        vault = validate_vault_uri(cmd.cli_ctx, namespace.vault_base_url)
         profile = Profile(cli_ctx=cmd.cli_ctx)
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
         if resource_name == 'key':
