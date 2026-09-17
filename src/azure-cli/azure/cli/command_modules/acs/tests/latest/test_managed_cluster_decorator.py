@@ -40,6 +40,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_CONTAINER_NETWORK_LOGS_ENABLED,
     CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+    CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
     CONST_LOAD_BALANCER_SKU_STANDARD,
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_APP_ROUTING_ISTIO_MODE_ENABLED,
@@ -17503,6 +17504,63 @@ class AKSAzureMonitorLogsCreateTestCase(unittest.TestCase):
             "/test_default_workspace_resource_id",
         )
 
+    def test_enable_azure_monitor_logs_rejected_on_service_principal_cluster(self):
+        """On create the service principal profile is populated from --service-principal before the
+        addon profiles are set up, so the rejection applies there too."""
+        dec = self._create_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="00000000-0000-0000-0000-000000000001", secret="secret"
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_default_log_analytics_workspace_for_monitoring",
+        ) as ensure_workspace_mock:
+            with self.assertRaises(ArgumentUsageError) as ctx:
+                dec._setup_azure_monitor_logs(mc)
+
+        self.assertIn("service principal", str(ctx.exception))
+        ensure_workspace_mock.assert_not_called()
+
+    def test_enable_azure_monitor_logs_allowed_on_msi_cluster(self):
+        """Managed identity clusters report clientId 'msi'."""
+        dec = self._create_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec.context.attach_mc(mc)
+        dec._setup_azure_monitor_logs(mc)
+        self.assertTrue(mc.azure_monitor_profile.container_insights.enabled)
+
+    def test_enable_azure_monitor_logs_allowed_without_service_principal_profile(self):
+        """A managed identity cluster may have no service principal profile at all."""
+        dec = self._create_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        dec._setup_azure_monitor_logs(mc)
+        self.assertTrue(mc.azure_monitor_profile.container_insights.enabled)
+
     def test_enable_azure_monitor_logs_applies_settings(self):
         dec = self._create_dec(
             {
@@ -17690,14 +17748,58 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
         )
         mc = self.models.ManagedCluster(location="test_location")
         dec.context.attach_mc(mc)
-        dec_mc = dec.update_azure_monitor_logs(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ) as ensure_mock:
+            dec_mc = dec.update_azure_monitor_logs(mc)
 
         container_insights = dec_mc.azure_monitor_profile.container_insights
         self.assertTrue(container_insights.enabled)
         self.assertEqual(
             container_insights.log_analytics_workspace_resource_id, "/test_workspace_resource_id"
         )
-        self.assertTrue(dec.context.get_intermediate("monitoring_addon_postprocessing_required"))
+        # A fresh enable must provision the DCR and the DCRA, otherwise the agent is deployed with
+        # no data collection rule attached and nothing is ingested.
+        ensure_mock.assert_called_once()
+        self.assertTrue(ensure_mock.call_args.kwargs["create_dcr"])
+        self.assertTrue(ensure_mock.call_args.kwargs["create_dcra"])
+        # And not queued for postprocessing, which would repeat the same work after the PUT.
+        self.assertFalse(
+            dec.context.get_intermediate(
+                "monitoring_addon_postprocessing_required", default_value=False
+            )
+        )
+
+    def test_enable_azure_monitor_logs_provisions_dcr_before_cluster_put(self):
+        """The DCR and the DCRA are provisioned while the profile is being built, not deferred to
+        postprocessing_after_mc_created.
+
+        Postprocessing runs after the cluster PUT, so the RP has already rolled out the ama-logs
+        DaemonSet by the time the DCRA appears. The agent then starts with nothing to download,
+        backs off for several minutes before retrying, ingests nothing for that whole window and
+        restarts once the configuration finally lands. 'az aks enable-addons -a monitoring' creates
+        the artifacts before its PUT, and this flag has to match that ordering.
+        """
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ) as ensure_mock:
+            dec.update_azure_monitor_logs(mc)
+
+        ensure_mock.assert_called_once()
+        self.assertTrue(ensure_mock.call_args.kwargs["aad_route"])
+        self.assertFalse(ensure_mock.call_args.kwargs["remove_monitoring"])
 
     def test_enable_azure_monitor_logs_on_legacy_auth_cluster_errors(self):
         dec = self._update_dec(
@@ -17733,10 +17835,17 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
             },
         )
         dec.context.attach_mc(mc)
-        dec_mc = dec.update_azure_monitor_logs(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
         self.assertTrue(dec_mc.azure_monitor_profile.container_insights.enabled)
 
-    def test_enable_azure_monitor_logs_detects_workspace_change(self):
+    def test_enable_azure_monitor_logs_rejected_when_already_enabled(self):
+        """Re-onboarding an already onboarded cluster is rejected, matching
+        'az aks enable-addons -a monitoring'."""
         dec = self._update_dec(
             {
                 "enable_azure_monitor_logs": True,
@@ -17753,12 +17862,150 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
             ),
         )
         dec.context.attach_mc(mc)
-        dec_mc = dec.update_azure_monitor_logs(mc)
-        self.assertTrue(dec.context.get_intermediate("monitoring_addon_postprocessing_required"))
+        with self.assertRaises(ArgumentUsageError) as ctx:
+            dec.update_azure_monitor_logs(mc)
+
+        message = str(ctx.exception)
+        self.assertIn("already enabled for this managed cluster", message)
+        self.assertIn("--disable-azure-monitor-logs", message)
+        # the original workspace is left untouched
         self.assertEqual(
-            dec_mc.azure_monitor_profile.container_insights.log_analytics_workspace_resource_id,
-            "/new_workspace_resource_id",
+            mc.azure_monitor_profile.container_insights.log_analytics_workspace_resource_id,
+            "/old_workspace_resource_id",
         )
+
+    def test_enable_azure_monitor_logs_rejected_before_provisioning_default_workspace(self):
+        """The already-enabled rejection must happen before a default workspace is created."""
+        dec = self._update_dec({"enable_azure_monitor_logs": True})
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="/old_workspace_resource_id",
+                ),
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_default_log_analytics_workspace_for_monitoring",
+        ) as ensure_workspace_mock:
+            with self.assertRaises(ArgumentUsageError):
+                dec.update_azure_monitor_logs(mc)
+
+        ensure_workspace_mock.assert_not_called()
+
+    def test_enable_azure_monitor_logs_allowed_when_container_insights_disabled(self):
+        """A disabled profile is a fresh onboarding, not a re-onboarding."""
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "/new_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=False,
+                    log_analytics_workspace_resource_id="/old_workspace_resource_id",
+                ),
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ) as ensure_mock:
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        container_insights = dec_mc.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(
+            container_insights.log_analytics_workspace_resource_id, "/new_workspace_resource_id"
+        )
+        # The DCR destination is rewritten up front, before the cluster PUT.
+        ensure_mock.assert_called_once()
+        self.assertTrue(ensure_mock.call_args.kwargs["create_dcr"])
+
+    def test_legacy_auth_rejection_wins_over_already_enabled_rejection(self):
+        """A legacy-auth cluster is also 'already enabled', but the migration message is the
+        actionable one, so it must be the error the user sees."""
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "false"},
+                )
+            },
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                ),
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with self.assertRaises(ArgumentUsageError) as ctx:
+            dec.update_azure_monitor_logs(mc)
+
+        self.assertIn("legacy", str(ctx.exception))
+
+    def test_enable_azure_monitor_logs_rejected_on_service_principal_cluster(self):
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="00000000-0000-0000-0000-000000000001"
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_default_log_analytics_workspace_for_monitoring",
+        ) as ensure_workspace_mock:
+            with self.assertRaises(ArgumentUsageError) as ctx:
+                dec.update_azure_monitor_logs(mc)
+
+        self.assertIn("service principal", str(ctx.exception))
+        # rejected before any workspace is provisioned on the user's behalf
+        ensure_workspace_mock.assert_not_called()
+
+    def test_enable_azure_monitor_logs_allowed_on_msi_cluster(self):
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        self.assertTrue(dec_mc.azure_monitor_profile.container_insights.enabled)
 
     def test_disable_azure_monitor_logs(self):
         dec = self._update_dec({"disable_azure_monitor_logs": True})
@@ -17769,6 +18016,8 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
                     enabled=True,
                     log_analytics_workspace_resource_id="/test_workspace_resource_id",
                     container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                    syslog_port=29000,
+                    disable_prometheus_metrics_scraping=True,
                 ),
             ),
         )
@@ -17783,11 +18032,195 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
         ensure_mock.assert_called_once()
         self.assertEqual(ensure_mock.call_args.kwargs["remove_monitoring"], True)
         self.assertEqual(ensure_mock.call_args.kwargs["aad_route"], True)
-        self.assertFalse(dec_mc.azure_monitor_profile.container_insights.enabled)
+
+        container_insights = dec_mc.azure_monitor_profile.container_insights
+        self.assertFalse(container_insights.enabled)
+        # Every behavioural field is reset, so a later re-enable starts from a clean profile.
         self.assertEqual(
-            dec_mc.azure_monitor_profile.container_insights.container_network_logs,
-            CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
         )
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+        # The workspace id is deliberately preserved: blanking it makes the RP mirror an empty
+        # string into the omsagent addon config, and ARM then rejects every later write of the
+        # cluster with LinkedInvalidPropertyId.
+        self.assertEqual(
+            container_insights.log_analytics_workspace_resource_id, "/test_workspace_resource_id"
+        )
+
+    def test_disable_azure_monitor_logs_emits_every_default_field(self):
+        """Every reset field must be present in the payload: the RP only overwrites fields it
+        receives, so a field left out would survive the disable."""
+        dec = self._update_dec({"disable_azure_monitor_logs": True})
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="/test_workspace_resource_id",
+                    syslog_port=29000,
+                ),
+            ),
+        )
+        dec.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        payload = dict(dec_mc.azure_monitor_profile.container_insights)
+        for field in (
+            "enabled",
+            "syslogPort",
+            "disablePrometheusMetricsScraping",
+            "containerNetworkLogs",
+        ):
+            self.assertIn(field, payload)
+
+    def test_disable_azure_monitor_logs_reset_survives_reenable(self):
+        """After a disable, re-enabling starts from a clean profile."""
+        dec_disable = self._update_dec({"disable_azure_monitor_logs": True})
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="/test_workspace_resource_id",
+                    container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                    syslog_port=29000,
+                    disable_prometheus_metrics_scraping=True,
+                ),
+            ),
+        )
+        dec_disable.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ):
+            dec_disable.update_azure_monitor_logs(mc)
+
+        dec_enable = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "/new_workspace_resource_id",
+            }
+        )
+        dec_enable.context.attach_mc(mc)
+        with patch.object(
+            dec_enable.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            dec_enable.update_azure_monitor_logs(mc)
+
+        container_insights = mc.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(
+            container_insights.log_analytics_workspace_resource_id, "/new_workspace_resource_id"
+        )
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
+        )
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+
+    def _mc_with_otlp_logs_traces(self, enabled=True):
+        return self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="/test_workspace_resource_id",
+                ),
+                app_monitoring=self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                    open_telemetry_logs_and_traces=self.models.
+                    ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces(
+                        enabled=enabled, http_port=8080, grpc_port=8081
+                    )
+                ),
+            ),
+        )
+
+    def test_disable_azure_monitor_logs_prompts_when_otlp_logs_and_traces_enabled(self):
+        dec = self._update_dec({"disable_azure_monitor_logs": True, "yes": False})
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        prompt_mock.assert_called_once()
+        self.assertIn("OpenTelemetry logs and traces", prompt_mock.call_args[0][0])
+        self.assertFalse(dec_mc.azure_monitor_profile.container_insights.enabled)
+        otlp_logs = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        self.assertFalse(otlp_logs.enabled)
+        self.assertIsNone(otlp_logs.http_port)
+        self.assertIsNone(otlp_logs.grpc_port)
+
+    def test_disable_azure_monitor_logs_aborts_when_confirmation_declined(self):
+        dec = self._update_dec({"disable_azure_monitor_logs": True, "yes": False})
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=False
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ) as ensure_mock:
+            with self.assertRaises(DecoratorEarlyExitException):
+                dec.update_azure_monitor_logs(mc)
+
+        # nothing was torn down and the profile is untouched
+        ensure_mock.assert_not_called()
+        self.assertTrue(mc.azure_monitor_profile.container_insights.enabled)
+        self.assertTrue(
+            mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_disable_azure_monitor_logs_skips_prompt_with_yes(self):
+        dec = self._update_dec({"disable_azure_monitor_logs": True, "yes": True})
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        prompt_mock.assert_not_called()
+        self.assertFalse(dec_mc.azure_monitor_profile.container_insights.enabled)
+
+    def test_disable_azure_monitor_logs_no_prompt_when_otlp_logs_disabled(self):
+        dec = self._update_dec({"disable_azure_monitor_logs": True, "yes": False})
+        mc = self._mc_with_otlp_logs_traces(enabled=False)
+        dec.context.attach_mc(mc)
+        self.client.get = Mock(return_value=mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_container_insights_for_monitoring",
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        prompt_mock.assert_not_called()
+        self.assertFalse(dec_mc.azure_monitor_profile.container_insights.enabled)
 
     def test_disable_azure_monitor_logs_noop_when_not_enabled(self):
         dec = self._update_dec({"disable_azure_monitor_logs": True})
@@ -18133,6 +18566,112 @@ class AKSOpenTelemetryUpdateTestCase(unittest.TestCase):
         dec.context.attach_mc(mc)
         with self.assertRaises(InvalidArgumentValueError):
             dec.update_azure_monitor_profile(mc)
+
+
+    def _mc_with_otlp_metrics(self):
+        mc = self._mc_with_monitoring()
+        mc.azure_monitor_profile.app_monitoring = (
+            self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                open_telemetry_metrics=(
+                    self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryMetrics(
+                        enabled=True, http_port=4318, grpc_port=4317
+                    )
+                ),
+            )
+        )
+        return mc
+
+    def test_disable_azure_monitor_metrics_also_disables_opentelemetry_metrics(self):
+        # OpenTelemetry metrics are ingested through the managed Prometheus pipeline that Azure
+        # Monitor metrics provisions, so disabling the parent has to take them down too.
+        dec = self._update_dec({"disable_azure_monitor_metrics": True, "yes": True})
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        dec.context.set_intermediate("subscription_id", "test_sub_id")
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_azure_monitor_profile_prerequisites"
+        ):
+            dec_mc = dec.update_azure_monitor_profile(mc)
+
+        self.assertFalse(dec_mc.azure_monitor_profile.metrics.enabled)
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics
+        self.assertFalse(otlp.enabled)
+        self.assertIsNone(otlp.http_port)
+        self.assertIsNone(otlp.grpc_port)
+
+    def test_disable_azure_monitor_metrics_prompts_when_opentelemetry_metrics_enabled(self):
+        dec = self._update_dec({"disable_azure_monitor_metrics": True, "yes": False})
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        dec.context.set_intermediate("subscription_id", "test_sub_id")
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_azure_monitor_profile_prerequisites"
+        ):
+            dec_mc = dec.update_azure_monitor_profile(mc)
+
+        prompt_mock.assert_called_once()
+        self.assertIn("OpenTelemetry metrics", prompt_mock.call_args[0][0])
+        self.assertFalse(dec_mc.azure_monitor_profile.metrics.enabled)
+        self.assertFalse(dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics.enabled)
+
+    def test_disable_azure_monitor_metrics_aborts_when_confirmation_declined(self):
+        dec = self._update_dec({"disable_azure_monitor_metrics": True, "yes": False})
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=False
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_azure_monitor_profile_prerequisites"
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec.update_azure_monitor_profile(mc)
+
+        # Nothing is mutated when the user declines.
+        self.assertTrue(mc.azure_monitor_profile.metrics.enabled)
+        self.assertTrue(mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics.enabled)
+
+    def test_disable_azure_monitor_metrics_no_prompt_when_opentelemetry_metrics_disabled(self):
+        dec = self._update_dec({"disable_azure_monitor_metrics": True, "yes": False})
+        mc = self._mc_with_monitoring()
+        dec.context.attach_mc(mc)
+        dec.context.set_intermediate("subscription_id", "test_sub_id")
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_azure_monitor_profile_prerequisites"
+        ):
+            dec_mc = dec.update_azure_monitor_profile(mc)
+
+        prompt_mock.assert_not_called()
+        self.assertFalse(dec_mc.azure_monitor_profile.metrics.enabled)
+
+    def test_disable_azure_monitor_metrics_noop_when_metrics_already_disabled(self):
+        # Nothing to turn off, so the OpenTelemetry metrics settings are left alone and no
+        # confirmation is asked for.
+        dec = self._update_dec({"disable_azure_monitor_metrics": True, "yes": False})
+        mc = self._mc_with_otlp_metrics()
+        mc.azure_monitor_profile.metrics.enabled = False
+        dec.context.attach_mc(mc)
+        dec.context.set_intermediate("subscription_id", "test_sub_id")
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n", return_value=True
+        ) as prompt_mock, patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator."
+            "ensure_azure_monitor_profile_prerequisites"
+        ) as prereq_mock:
+            dec_mc = dec.update_azure_monitor_profile(mc)
+
+        prompt_mock.assert_not_called()
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics
+        self.assertTrue(otlp.enabled)
+        self.assertEqual(otlp.http_port, 4318)
+        # Leftover DCR/DCRA cleanup is still driven by the flag, not by cluster state.
+        prereq_mock.assert_called_once()
 
 
 if __name__ == "__main__":

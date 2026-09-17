@@ -336,6 +336,7 @@ parameters:
     long-summary: |
         Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
         Cannot be combined with "--enable-addons monitoring" or with "--enable-msi-auth-for-monitoring".
+        Requires the cluster to use a managed identity; clusters created with service principal authentication are not supported.
   - name: --syslog-port
     type: int
     short-summary: TCP port that the Azure Monitor agent listens on for syslog data. Requires --enable-azure-monitor-logs.
@@ -1155,6 +1156,10 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+    long-summary: |
+        If OpenTelemetry metrics are enabled, they are disabled as well, since they are collected
+        through the managed Prometheus pipeline. Confirmation is requested first unless "--yes" is
+        specified.
   - name: --enable-control-plane-metrics --enable-cp-metrics
     type: bool
     short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
@@ -1173,9 +1178,14 @@ parameters:
     long-summary: |
         Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
         Clusters still using legacy shared key authentication must first migrate to managed identity authentication.
+        Requires the cluster to use a managed identity; clusters using service principal authentication are not supported.
+        Fails if Azure Monitor logs is already enabled on the cluster. To change the configuration, run "az aks update --disable-azure-monitor-logs" first.
   - name: --disable-azure-monitor-logs
     type: bool
     short-summary: Disable Azure Monitor logs (Container Insights) for the cluster.
+    long-summary: |
+        Disables Container Insights, removes the data collection rule association, and resets the Container Insights settings (syslog port, Prometheus scraping and container network logs) back to their defaults. The workspace is left recorded on the profile but is unused while disabled, and is replaced on the next enable.
+        If OpenTelemetry logs and traces are enabled they are disabled as well, and confirmation is requested first unless "--yes" is specified.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
