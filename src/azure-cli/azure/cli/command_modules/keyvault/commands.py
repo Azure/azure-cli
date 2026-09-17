@@ -220,6 +220,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret')
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
+        g.keyvault_custom('copy', 'copy_secret')
 
     # certificate track2
     with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
