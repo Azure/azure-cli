@@ -66,15 +66,19 @@ rm %{buildroot}%{cli_lib_dir}/pyvenv.cfg
 #     https://github.com/Azure/azure-cli/pull/20061
 #     - Fedora/CentOS/RedHat: relative path 'lib64'
 #     - Azure Linux: absolute path '/usr/lib'
-# The only solution left is to hard-code 'lib64' as we only release 64-bit RPM packages.
+# Azure Linux 4.0 removed the /usr/lib64 -> /usr/lib symlink that AZL3 carried, so we can no longer
+# hard-code 'lib64'. Instead, probe lib64 first (Fedora/RHEL) then fall back to lib (Azure Linux).
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
 # We make %{python_cmd} the default executable, but if there is a more precise match, such as python3.9, we prefer that.
 printf "#!/usr/bin/env bash
-bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
+bin_dir=\`cd \"\$(dirname \"\${BASH_SOURCE[0]}\")\"; pwd\`
 python_cmd=%{python_cmd}
 if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; fi
-AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
+for _az_pypath in \"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \"\$bin_dir/../lib/az/lib/${python_version}/site-packages\"; do
+  [ -d \"\$_az_pypath\" ] && break
+done
+AZ_INSTALLER=RPM PYTHONPATH=\"\$_az_pypath\" \$python_cmd -sm azure.cli \"\$@\"
 " > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
