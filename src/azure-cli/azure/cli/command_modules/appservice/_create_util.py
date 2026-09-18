@@ -113,8 +113,11 @@ def get_runtime_version_details(file_path, lang_name, stack_helper, is_linux=Fal
             version_detected = parse_node_version(file_path)[0]
             version_to_create = detect_node_version_tocreate(version_detected, versions, default_version)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
-        version_detected = "-"
-        version_to_create = default_version
+        version_detected = _detect_python_version(file_path)
+        if version_detected != "-" and version_detected in versions:
+            version_to_create = version_detected
+        else:
+            version_to_create = default_version
     elif lang_name.lower() == STATIC_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = "-"
@@ -169,10 +172,10 @@ def get_lang_from_content(src_path, html=False, is_linux=False):
     import fnmatch
     for _dirpath, _dirnames, files in os.walk(src_path):
         for file in files:
-            if html and (fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or
-                         fnmatch.fnmatch(file, "*shtml.")):
-                static_html_file = os.path.join(src_path, file)
-                break
+            if fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or \
+                    fnmatch.fnmatch(file, "*.shtml"):
+                if not static_html_file:
+                    static_html_file = os.path.join(_dirpath, file)
             if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
                 if not os.path.isfile(package_netcore_file):
@@ -200,7 +203,12 @@ def get_lang_from_content(src_path, html=False, is_linux=False):
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
-    else:  # TODO: Update the doc when the detection logic gets updated
+    elif static_html_file:
+        # Auto-detect static HTML even without --html flag
+        runtime_details_dict['language'] = STATIC_RUNTIME_NAME
+        runtime_details_dict['file_loc'] = static_html_file
+        runtime_details_dict['default_sku'] = 'F1'
+    else:
         raise CLIError("Could not auto-detect the runtime stack of your app.\n"
                        "HINT: Are you in the right folder?\n"
                        "For more information, see 'https://go.microsoft.com/fwlink/?linkid=2109470'")
@@ -286,6 +294,40 @@ def parse_node_version(file_path):
                     num = c + ".0"
                 version_detected.append(num)
     return version_detected or ['0.0']
+
+
+def _detect_python_version(file_path):
+    """Detect Python version from runtime.txt or .python-version in the project directory."""
+    import re
+    src_dir = os.path.dirname(file_path) if file_path else ''
+    if not src_dir:
+        return "-"
+
+    # Check runtime.txt (used by Azure/Heroku: "python-3.11.4")
+    runtime_txt = os.path.join(src_dir, 'runtime.txt')
+    if os.path.isfile(runtime_txt):
+        try:
+            with open(runtime_txt) as f:
+                content = f.read().strip().lower()
+                match = re.search(r'python-(\d+\.\d+)', content)
+                if match:
+                    return match.group(1)
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    # Check .python-version (used by pyenv: "3.11.4" or "3.11")
+    python_version_file = os.path.join(src_dir, '.python-version')
+    if os.path.isfile(python_version_file):
+        try:
+            with open(python_version_file) as f:
+                content = f.read().strip()
+                match = re.match(r'^(\d+\.\d+)', content)
+                if match:
+                    return match.group(1)
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    return "-"
 
 
 def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list):
@@ -412,8 +454,33 @@ def detect_os_from_src(src_dir, html=False, runtime=None):
         language = runtime.split(_StackRuntimeHelper.DEFAULT_DELIMETER)[0]
     else:
         language = get_lang_from_content(src_dir, html).get('language')
-    return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
-        or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
+    if language is None:
+        return OS_DEFAULT
+    lang_lower = language.lower()
+    # Python and Node are Linux-first; .NET Core / modern dotnet also default to Linux
+    if lang_lower in (NODE_RUNTIME_NAME, PYTHON_RUNTIME_NAME, NETCORE_RUNTIME_NAME, DOTNET_RUNTIME_NAME):
+        return "Linux"
+    # Static HTML sites can run on Linux via Node
+    if lang_lower == STATIC_RUNTIME_NAME:
+        return "Linux"
+    return OS_DEFAULT
+
+
+def validate_runtime_os_combo(language, version_used_create, os_name, stack_helper, is_linux):
+    """Validate that the runtime+OS combination is supported before creating resources.
+    Raises ValidationError with a helpful message if the combination is invalid."""
+    from azure.cli.core.azclierror import ValidationError
+    if not language or language.lower() == STATIC_RUNTIME_NAME:
+        return  # static doesn't need runtime validation
+    runtime_version = "{}|{}".format(language, version_used_create) if version_used_create != "-" else None
+    if runtime_version:
+        match = stack_helper.resolve(runtime_version, is_linux)
+        if not match:
+            raise ValidationError(
+                "The runtime '{}' is not supported on {os_name}. "
+                "Please check supported runtimes with: 'az webapp list-runtimes --os {os_name}'.\n"
+                "HINT: Try a different --os-type or --runtime value.".format(
+                    runtime_version, os_name=os_name))
 
 
 def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, client, is_linux=False, plan=None):
