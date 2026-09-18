@@ -19218,6 +19218,25 @@ class AKSOpenTelemetryUpdateTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             dec.update_azure_monitor_profile(mc)
 
+    def test_every_port_flag_is_rejected_alongside_its_disable(self):
+        # Each of the four ports is read separately before the enable/disable dispatch, so each
+        # one needs its own case: dropping any single read would silently accept the port again.
+        cases = [
+            ("disable_opentelemetry_metrics", "opentelemetry_metrics_port_http", True),
+            ("disable_opentelemetry_metrics", "opentelemetry_metrics_port_grpc", True),
+            ("disable_opentelemetry_logs_traces", "opentelemetry_logs_traces_port_http", False),
+            ("disable_opentelemetry_logs_traces", "opentelemetry_logs_traces_port_grpc", False),
+        ]
+        for disable_flag, port_flag, is_metrics in cases:
+            with self.subTest(disable=disable_flag, port=port_flag):
+                dec = self._update_dec({disable_flag: True, port_flag: 2331})
+                mc = self._mc_with_otlp_metrics() if is_metrics else self._mc_with_otlp_logs_traces()
+                dec.context.attach_mc(mc)
+                with self.assertRaises(InvalidArgumentValueError) as cm:
+                    dec.update_azure_monitor_profile(mc)
+                self.assertIn(port_flag.replace("_", "-"), str(cm.exception))
+                self.assertIn(disable_flag.replace("_", "-"), str(cm.exception))
+
     def test_disable_opentelemetry_metrics_without_port_still_disables(self):
         # The eager port reads must not disturb a plain disable.
         dec = self._update_dec({"disable_opentelemetry_metrics": True})
