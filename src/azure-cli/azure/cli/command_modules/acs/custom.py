@@ -15,6 +15,7 @@ from .aaz.latest.aks.safeguards._update import Update
 from .aaz.latest.aks.safeguards._create import Create
 import base64
 import errno
+import hashlib
 import io
 import json
 import os
@@ -26,6 +27,7 @@ import ssl
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 import threading
 import time
@@ -2383,6 +2385,212 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                         install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
                           kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
+
+
+_AKS_DESKTOP_RELEASES_API = 'https://api.github.com/repos/Azure/aks-desktop/releases'
+_AKS_DESKTOP_DOWNLOAD_PREFIX = 'https://github.com/Azure/aks-desktop/releases/download/'
+
+
+def _get_aks_desktop_platform():
+    system = platform.system()
+    machine = platform.machine().lower()
+    if machine in ('amd64', 'x86_64'):
+        arch = 'x64'
+    elif machine in ('aarch64', 'arm64', 'armv8', 'armv8l'):
+        arch = 'arm64'
+    elif system == 'Linux' and machine.startswith('armv7'):
+        arch = 'armv7l'
+    else:
+        raise ValidationError(
+            "AKS Desktop does not publish an artifact for architecture '{}'."
+            .format(machine or 'unknown'))
+
+    system_names = {
+        'Windows': 'win',
+        'Darwin': 'mac',
+        'Linux': 'linux',
+    }
+    if system not in system_names:
+        raise ValidationError(
+            "AKS Desktop does not support operating system '{}'."
+            .format(system or 'unknown'))
+    return system_names[system], arch
+
+
+def _get_aks_desktop_release(version=None):
+    requested_version = None
+    if version:
+        version = version[1:] if version.startswith('v') else version
+        if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', version):
+            raise InvalidArgumentValueError(
+                "AKS Desktop version '{}' is invalid. Specify a semantic version such as '0.9.1'."
+                .format(version))
+        requested_version = version
+        release_url = '{}/tags/v{}'.format(_AKS_DESKTOP_RELEASES_API, version)
+    else:
+        release_url = _AKS_DESKTOP_RELEASES_API + '/latest'
+
+    logger.warning('Getting AKS Desktop release metadata from "%s".', release_url)
+    try:
+        release = json.loads(_urlopen_read(release_url))
+    except (OSError, ValueError) as ex:
+        raise ClientRequestError(
+            'Failed to get AKS Desktop release metadata from "{}" ({}).'.format(release_url, ex),
+            recommendation='Please retry later, or specify a version with --version.')
+
+    tag = release.get('tag_name', '')
+    if not re.fullmatch(r'v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', tag):
+        raise ClientRequestError(
+            'The AKS Desktop release returned an invalid tag name.',
+            recommendation='Please retry later, or specify a version with --version.')
+    release_version = tag[1:] if tag.startswith('v') else tag
+    if requested_version and release_version != requested_version:
+        raise ClientRequestError(
+            "The AKS Desktop release metadata returned version '{}' instead of requested version '{}'."
+            .format(release_version, requested_version))
+    return release, release_version
+
+
+def _select_aks_desktop_asset(release, version, system, arch):
+    names = {
+        ('win', 'x64'): ['aks-desktop-{}-win-x64.exe'.format(version)],
+        ('win', 'arm64'): ['aks-desktop-{}-win-arm64.exe'.format(version)],
+        ('mac', 'x64'): ['aks-desktop-{}-mac-x64.dmg'.format(version)],
+        ('mac', 'arm64'): ['aks-desktop-{}-mac-arm64.dmg'.format(version)],
+        ('linux', 'x64'): [
+            'aks-desktop_{}-1_amd64.deb'.format(version),
+            'aks-desktop-{}-linux-x64.tar.gz'.format(version),
+        ],
+        ('linux', 'arm64'): ['aks-desktop-{}-linux-arm64.tar.gz'.format(version)],
+        ('linux', 'armv7l'): ['aks-desktop-{}-linux-armv7l.tar.gz'.format(version)],
+    }.get((system, arch), [])
+
+    assets = release.get('assets') or []
+    for name in names:
+        matches = [asset for asset in assets if asset.get('name') == name]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise ClientRequestError(
+                "The AKS Desktop release contains multiple artifacts matching '{}'."
+                .format(name))
+    raise ResourceNotFoundError(
+        "AKS Desktop version '{}' does not publish an artifact for {}/{}."
+        .format(version, system, arch))
+
+
+def _download_aks_desktop_asset(asset, destination):
+    from urllib.parse import urlparse
+    from urllib.request import (
+        build_opener,
+        HTTPRedirectHandler,
+        HTTPSHandler,
+        Request,
+    )
+
+    url = asset.get('browser_download_url', '')
+    if not url.startswith(_AKS_DESKTOP_DOWNLOAD_PREFIX):
+        raise ClientRequestError(
+            'The AKS Desktop release returned an unexpected download URL.')
+
+    class HttpsOnlyRedirectHandler(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            if urlparse(newurl).scheme != 'https':
+                raise ClientRequestError(
+                    'The AKS Desktop download redirected to an insecure URL.')
+            return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+    digest = asset.get('digest', '')
+    if not re.fullmatch(r'sha256:[0-9a-fA-F]{64}', digest):
+        raise ClientRequestError(
+            'The AKS Desktop release artifact does not include a valid SHA-256 digest.')
+
+    logger.warning('Downloading AKS Desktop from "%s".', url)
+    request = Request(url, headers={'User-Agent': 'azure-cli'})
+    opener = build_opener(HttpsOnlyRedirectHandler(), HTTPSHandler(context=_ssl_context()))
+    actual_digest = hashlib.sha256()
+    try:
+        with opener.open(request) as response, open(destination, 'wb') as output:
+            while True:
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                output.write(chunk)
+                actual_digest.update(chunk)
+    except OSError as ex:
+        raise ClientRequestError(
+            'Failed to download AKS Desktop from "{}" ({}).'.format(url, ex))
+
+    if actual_digest.hexdigest().lower() != digest.split(':', 1)[1].lower():
+        raise ClientRequestError(
+            'The downloaded AKS Desktop artifact did not match its published SHA-256 digest.')
+
+
+def _extract_aks_desktop_archive(archive_path, destination):
+    os.makedirs(destination, exist_ok=True)
+    destination_path = os.path.realpath(destination)
+    try:
+        with tarfile.open(archive_path, 'r:gz') as archive:
+            for member in archive.getmembers():
+                member_path = os.path.realpath(os.path.join(destination, member.name))
+                if os.path.commonpath((destination_path, member_path)) != destination_path:
+                    raise FileOperationError(
+                        'The AKS Desktop archive contains an unsafe path.')
+                if member.issym() or member.islnk():
+                    link_path = os.path.realpath(os.path.join(
+                        os.path.dirname(member_path), member.linkname))
+                    if os.path.commonpath((destination_path, link_path)) != destination_path:
+                        raise FileOperationError(
+                            'The AKS Desktop archive contains an unsafe link.')
+            archive.extractall(destination)  # nosec B202 - member paths are validated above
+    except (OSError, tarfile.TarError) as ex:
+        raise FileOperationError(
+            'Failed to extract the AKS Desktop archive ({}).'.format(ex))
+
+
+def _launch_aks_desktop_installer(installer_path, system, version):
+    try:
+        if system == 'win':
+            subprocess.run([installer_path], check=True)
+        elif system == 'mac':
+            subprocess.run(['open', installer_path], check=True)
+        elif installer_path.endswith('.deb'):
+            subprocess.run(['xdg-open', installer_path], check=True)
+        else:
+            install_dir = os.path.join(
+                os.path.expanduser('~'), '.local', 'share', 'aks-desktop', version)
+            _extract_aks_desktop_archive(installer_path, install_dir)
+            executable = next(
+                (os.path.join(root, name)
+                 for root, _, files in os.walk(install_dir)
+                 for name in files if name == 'aks-desktop'),
+                None)
+            if not executable:
+                raise FileOperationError(
+                    'The AKS Desktop archive does not contain the expected executable.')
+            os.chmod(executable, os.stat(executable).st_mode | stat.S_IXUSR)
+            subprocess.Popen([executable])
+            logger.warning('AKS Desktop was installed at "%s".', install_dir)
+    except FileNotFoundError as ex:
+        raise FileOperationError(
+            "The required installer launcher '{}' was not found.".format(ex.filename))
+    except subprocess.CalledProcessError as ex:
+        raise ClientRequestError(
+            'The AKS Desktop installer exited with code {}.'.format(ex.returncode))
+
+
+def aks_install_desktop(cmd, version=None):
+    del cmd
+    system, arch = _get_aks_desktop_platform()
+    release, release_version = _get_aks_desktop_release(version)
+    asset = _select_aks_desktop_asset(
+        release, release_version, system, arch)
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        installer_path = os.path.join(tmp_dir, asset['name'])
+        _download_aks_desktop_asset(asset, installer_path)
+        _launch_aks_desktop_installer(
+            installer_path, system, release_version)
 
 
 # determine the architecture for the binary based on platform.machine()

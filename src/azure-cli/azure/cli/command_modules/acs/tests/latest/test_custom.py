@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import hashlib
 import shutil
 import tempfile
 import unittest
@@ -25,9 +26,15 @@ from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
+    _download_aks_desktop_asset,
+    _get_aks_desktop_platform,
+    _get_aks_desktop_release,
     _get_command_context,
     _get_latest_kubelogin_version,
+    _launch_aks_desktop_installer,
+    _select_aks_desktop_asset,
     _update_addons,
+    aks_install_desktop,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
     aks_agentpool_auto_scale_update,
@@ -66,6 +73,8 @@ from azure.cli.core.azclierror import (
     ClientRequestError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
+    ResourceNotFoundError,
+    ValidationError,
 )
 
 
@@ -947,6 +956,100 @@ class AcsCustomCommandTest(unittest.TestCase):
 
                 with self.assertRaises(ClientRequestError):
                     _get_latest_kubelogin_version('azurecloud')
+
+    def test_aks_install_desktop_platform(self):
+        cases = [
+            ('Windows', 'AMD64', ('win', 'x64')),
+            ('Windows', 'arm64', ('win', 'arm64')),
+            ('Darwin', 'x86_64', ('mac', 'x64')),
+            ('Darwin', 'aarch64', ('mac', 'arm64')),
+            ('Linux', 'x86_64', ('linux', 'x64')),
+            ('Linux', 'armv7l', ('linux', 'armv7l')),
+        ]
+        for system, machine, expected in cases:
+            with self.subTest(system=system, machine=machine):
+                with mock.patch(
+                        'azure.cli.command_modules.acs.custom.platform.system',
+                        return_value=system), mock.patch(
+                            'azure.cli.command_modules.acs.custom.platform.machine',
+                            return_value=machine):
+                    self.assertEqual(_get_aks_desktop_platform(), expected)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.machine', return_value='mips64')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.system', return_value='Linux')
+    def test_aks_install_desktop_unsupported_architecture(self, _, __):
+        with self.assertRaises(ValidationError):
+            _get_aks_desktop_platform()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_specific_version(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        release, version = _get_aks_desktop_release('0.9.1')
+        self.assertEqual(version, '0.9.1')
+        self.assertEqual(release['tag_name'], 'v0.9.1')
+        mock_urlopen_read.assert_called_once_with(
+            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1')
+
+    def test_aks_install_desktop_selects_native_linux_package(self):
+        release = {
+            'assets': [
+                {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
+                {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
+            ]
+        }
+        asset = _select_aks_desktop_asset(
+            release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop_0.9.1-1_amd64.deb')
+
+    def test_aks_install_desktop_missing_asset(self):
+        with self.assertRaises(ResourceNotFoundError):
+            _select_aks_desktop_asset(
+                {'assets': []}, '0.9.1', 'mac', 'arm64')
+
+    @mock.patch('urllib.request.build_opener')
+    def test_aks_install_desktop_verifies_download_digest(self, mock_build_opener):
+        content = b'AKS Desktop'
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.side_effect = [content, b'']
+        mock_build_opener.return_value.open.return_value = response
+        asset = {
+            'browser_download_url':
+                'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                'aks-desktop-0.9.1-win-x64.exe',
+            'digest': 'sha256:' + hashlib.sha256(content).hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            destination = os.path.join(temp_dir, 'installer.exe')
+            _download_aks_desktop_asset(asset, destination)
+            with open(destination, 'rb') as downloaded:
+                self.assertEqual(downloaded.read(), content)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_aks_install_desktop_launches_without_shell(self, mock_run):
+        _launch_aks_desktop_installer(
+            'aks-desktop-0.9.1-win-x64.exe', 'win', '0.9.1')
+        mock_run.assert_called_once_with(
+            ['aks-desktop-0.9.1-win-x64.exe'], check=True)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset')
+    @mock.patch('azure.cli.command_modules.acs.custom._select_aks_desktop_asset')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform')
+    def test_aks_install_desktop_workflow(self, mock_platform, mock_release, mock_select,
+                                          mock_download, mock_launch):
+        mock_platform.return_value = ('mac', 'arm64')
+        mock_release.return_value = ({'assets': []}, '0.9.1')
+        mock_select.return_value = {'name': 'aks-desktop-0.9.1-mac-arm64.dmg'}
+
+        aks_install_desktop(mock.MagicMock(), version='0.9.1')
+
+        mock_select.assert_called_once_with(
+            {'assets': []}, '0.9.1', 'mac', 'arm64')
+        mock_download.assert_called_once()
+        mock_launch.assert_called_once_with(
+            mock.ANY, 'mac', '0.9.1')
+        self.assertFalse(os.path.exists(mock_download.call_args[0][1]))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
