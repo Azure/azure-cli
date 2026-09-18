@@ -2533,22 +2533,18 @@ def _download_aks_desktop_asset(asset, destination):
 
 
 def _extract_aks_desktop_archive(archive_path, destination):
+    if getattr(tarfile, 'data_filter', None) is None:
+        raise FileOperationError(
+            'Safe AKS Desktop archive extraction requires an updated Python with tarfile.data_filter support.')
     os.makedirs(destination, exist_ok=True)
-    destination_path = os.path.realpath(destination)
     try:
         with tarfile.open(archive_path, 'r:gz') as archive:
             for member in archive.getmembers():
-                member_path = os.path.realpath(os.path.join(destination, member.name))
-                if os.path.commonpath((destination_path, member_path)) != destination_path:
-                    raise FileOperationError(
-                        'The AKS Desktop archive contains an unsafe path.')
-                if member.issym() or member.islnk():
-                    link_path = os.path.realpath(os.path.join(
-                        os.path.dirname(member_path), member.linkname))
-                    if os.path.commonpath((destination_path, link_path)) != destination_path:
-                        raise FileOperationError(
-                            'The AKS Desktop archive contains an unsafe link.')
-            archive.extractall(destination)  # nosec B202 - member paths are validated above
+                # Older data filters resolve these names differently from extraction (CPython gh-149486).
+                if member.issym() and member.name.endswith(('/', '\\')):
+                    raise FileOperationError('The AKS Desktop archive contains an unsafe link name.')
+            # Check each member against the filesystem state left by earlier members.
+            archive.extractall(destination, filter='data')
     except (OSError, tarfile.TarError) as ex:
         raise FileOperationError(
             'Failed to extract the AKS Desktop archive ({}).'.format(ex))

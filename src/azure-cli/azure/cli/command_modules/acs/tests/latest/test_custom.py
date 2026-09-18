@@ -5,7 +5,9 @@
 
 import os
 import hashlib
+import io
 import shutil
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
@@ -27,6 +29,7 @@ from azure.cli.command_modules.acs.addonconfiguration import (
 )
 from azure.cli.command_modules.acs.custom import (
     _download_aks_desktop_asset,
+    _extract_aks_desktop_archive,
     _get_aks_desktop_platform,
     _get_aks_desktop_release,
     _get_command_context,
@@ -71,6 +74,7 @@ from azure.mgmt.containerservice.models import (
 )
 from azure.cli.core.azclierror import (
     ClientRequestError,
+    FileOperationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
     ResourceNotFoundError,
@@ -1073,6 +1077,85 @@ class AcsCustomCommandTest(unittest.TestCase):
             _download_aks_desktop_asset(asset, destination)
             with open(destination, 'rb') as downloaded:
                 self.assertEqual(downloaded.read(), content)
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
+    def test_aks_install_desktop_archive_rejects_unsafe_members(self):
+        cases = [
+            [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
+             ('dir/foo/../../outside', tarfile.REGTYPE, '')],
+            [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
+             ('dir/link', tarfile.REGTYPE, '')],
+            [('../outside', tarfile.REGTYPE, '')],
+            [('aks-desktop/', tarfile.SYMTYPE, '../outside')],
+            [('pipe', tarfile.FIFOTYPE, '')],
+        ]
+        for members in cases:
+            with self.subTest(members=members), tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                outside = os.path.join(temp_dir, 'outside')
+                with open(outside, 'wb') as sentinel:
+                    sentinel.write(b'unchanged')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    for name, member_type, linkname in members:
+                        member = tarfile.TarInfo(name)
+                        member.type = member_type
+                        member.linkname = linkname
+                        if member.isfile():
+                            member.size = len(b'overwrite')
+                            archive.addfile(member, io.BytesIO(b'overwrite'))
+                        else:
+                            archive.addfile(member)
+
+                # Exercise pre-3.14 defaults even when the test runs on newer Python.
+                with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                       staticmethod(tarfile.fully_trusted_filter)):
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                with open(outside, 'rb') as sentinel:
+                    self.assertEqual(sentinel.read(), b'unchanged')
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'pipe')))
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'aks-desktop')))
+
+    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
+    def test_aks_install_desktop_archive_preserves_safe_links(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            with tarfile.open(archive_path, 'w:gz') as archive:
+                member = tarfile.TarInfo('app/aks-desktop')
+                member.mode = 0o755
+                member.size = len(b'executable')
+                archive.addfile(member, io.BytesIO(b'executable'))
+                for name, member_type, target in [
+                    ('app/symlink', tarfile.SYMTYPE, 'aks-desktop'),
+                    ('app/hardlink', tarfile.LNKTYPE, 'app/aks-desktop'),
+                ]:
+                    member = tarfile.TarInfo(name)
+                    member.type = member_type
+                    member.linkname = target
+                    member.mode = 0o755
+                    archive.addfile(member)
+            _extract_aks_desktop_archive(archive_path, destination)
+            for name in ('aks-desktop', 'symlink', 'hardlink'):
+                with open(os.path.join(destination, 'app', name), 'rb') as executable:
+                    self.assertEqual(executable.read(), b'executable')
+            if os.name != 'nt':
+                self.assertTrue(os.stat(os.path.join(destination, 'app', 'aks-desktop')).st_mode & 0o100)
+
+    @mock.patch.object(tarfile, 'data_filter', None, create=True)
+    def test_aks_install_desktop_archive_requires_safe_extractor(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            with tarfile.open(archive_path, 'w:gz') as archive:
+                archive.addfile(tarfile.TarInfo('aks-desktop'))
+            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                   staticmethod(lambda member, path: member), create=True):
+                with self.assertRaisesRegex(FileOperationError, 'Python'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.exists(destination))
 
     @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
     def test_aks_install_desktop_launches_without_shell(self, mock_run):
