@@ -2209,6 +2209,27 @@ class TestOpenTelemetryValidators(unittest.TestCase):
         )
         validators.validate_opentelemetry_ports(namespace)
 
+    def test_logs_traces_only_duplicate_ports_rejected_by_aggregate_validator(self):
+        # A logs/traces-only command supplies no metrics flags at all. The aggregate validator is
+        # the single entry point the commands register, so it must still reach the port checks;
+        # otherwise duplicate HTTP/gRPC ports would be accepted for such commands.
+        for validator in (
+            validators.validate_azure_monitor_and_opentelemetry_for_create,
+            validators.validate_azure_monitor_and_opentelemetry_for_update,
+        ):
+            with self.subTest(validator=validator.__name__):
+                namespace = _otel_namespace(
+                    enable_opentelemetry_logs_traces=True,
+                    enable_azure_monitor_logs=True,
+                    opentelemetry_logs_traces_port_http=4318,
+                    opentelemetry_logs_traces_port_grpc=4318,
+                )
+                with self.assertRaises(ArgumentUsageError) as cm:
+                    validator(namespace)
+                self.assertIn("must all be different", str(cm.exception))
+                self.assertIn("--opentelemetry-logs-traces-port-http", str(cm.exception))
+                self.assertIn("--opentelemetry-logs-traces-port-grpc", str(cm.exception))
+
     def test_enable_and_disable_otel_metrics_errors(self):
         namespace = _otel_namespace(
             enable_opentelemetry_metrics=True,

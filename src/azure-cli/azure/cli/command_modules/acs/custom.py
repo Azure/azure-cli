@@ -1605,14 +1605,38 @@ def _remove_nulls(managed_clusters):
 
 
 # pylint: disable=line-too-long
-def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
+def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False, yes=False):
+    from azure.cli.command_modules.acs.managed_cluster_decorator import (
+        _is_opentelemetry_logs_traces_enabled,
+        _reset_container_insights_to_defaults,
+    )
+
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     monitoring_addon_key = get_monitoring_addon_key(
         instance.addon_profiles, CONST_MONITORING_ADDON_NAME
     )
+    disabling_monitoring = CONST_MONITORING_ADDON_NAME in [
+        ADDONS.get(addon.strip()) for addon in (addons or "").split(",")
+    ]
+
+    # OpenTelemetry logs and traces are collected by the Container Insights agent, so disabling the
+    # monitoring addon necessarily turns them off too. The confirmation is taken before any cleanup
+    # runs, otherwise declining the prompt would leave the DCR association already deleted.
+    opentelemetry_logs_traces_enabled = (
+        disabling_monitoring and _is_opentelemetry_logs_traces_enabled(instance)
+    )
+    if opentelemetry_logs_traces_enabled and not yes:
+        msg = (
+            "OpenTelemetry logs and traces are enabled on this cluster and are collected by "
+            "Azure Monitor logs. Disabling the monitoring addon will also disable OpenTelemetry "
+            "logs and traces. Do you want to continue?"
+        )
+        if not prompt_y_n(msg, default="n"):
+            return None
+
     try:
-        if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
+        if disabling_monitoring and monitoring_addon_key in instance.addon_profiles and \
                 instance.addon_profiles[monitoring_addon_key].enabled and \
                 CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
                 str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
@@ -1647,6 +1671,26 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
         enable=False,
         no_wait=no_wait
     )
+
+    if disabling_monitoring:
+        # The legacy addon and the AMP containerInsights profile are two views of the same feature,
+        # and the RP only copies a containerInsights field onto the cluster when that field is
+        # present on the request. Disabling therefore has to reset them explicitly, otherwise a
+        # later --enable-azure-monitor-logs silently re-onboards with the old syslog port, scraping
+        # choice and container network logs setting.
+        if instance.azure_monitor_profile and instance.azure_monitor_profile.container_insights:
+            _reset_container_insights_to_defaults(
+                instance.azure_monitor_profile.container_insights
+            )
+        # OpenTelemetry logs and traces ride on the Container Insights agent, so they go down with
+        # it. The confirmation for this was taken above.
+        if opentelemetry_logs_traces_enabled:
+            open_telemetry_logs_and_traces = (
+                instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+            )
+            open_telemetry_logs_and_traces.enabled = False
+            open_telemetry_logs_and_traces.http_port = None
+            open_telemetry_logs_and_traces.grpc_port = None
 
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)

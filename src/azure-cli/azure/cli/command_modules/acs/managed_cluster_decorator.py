@@ -11088,6 +11088,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # recorded here: the RP derives it, defaulting new onboardings (and re-enables of a disabled
         # addon) to managed identity.
         container_insights = self._ensure_container_insights(mc)
+
+        # The guards above reject clusters that are already enabled, so reaching here is always a
+        # genuine onboarding rather than a reconfigure. Start from the documented defaults so the
+        # result does not depend on what a previous onboarding left behind: the RP preserves any
+        # containerInsights field that is absent from the request, so a stale syslog port, scraping
+        # choice or container network logs setting would otherwise be inherited silently. Values
+        # the user asked for are applied on top of this below.
+        _reset_container_insights_to_defaults(container_insights)
         container_insights.enabled = True
         container_insights.log_analytics_workspace_resource_id = workspace_resource_id
 

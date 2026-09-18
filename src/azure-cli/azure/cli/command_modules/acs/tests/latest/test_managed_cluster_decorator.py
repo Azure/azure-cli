@@ -17810,6 +17810,84 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
             )
         )
 
+    def test_enable_azure_monitor_logs_starts_from_a_clean_profile(self):
+        """A re-enable must not inherit what the previous onboarding left behind.
+
+        The RP preserves any containerInsights field that is absent from the request, so an old
+        syslog port, scraping choice or container network logs setting would otherwise come back
+        silently on the next --enable-azure-monitor-logs.
+        """
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=False,
+                    log_analytics_workspace_resource_id="/stale_workspace",
+                    syslog_port=2832,
+                    disable_prometheus_metrics_scraping=True,
+                    container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                )
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        container_insights = dec_mc.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(
+            container_insights.log_analytics_workspace_resource_id, "/test_workspace_resource_id"
+        )
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
+        )
+
+    def test_enable_azure_monitor_logs_keeps_settings_asked_for_in_the_same_command(self):
+        """Starting from the defaults must not discard values supplied alongside the enable."""
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+                "enable_syslog": True,
+                "syslog_port": 2833,
+                "disable_prometheus_metrics_scraping": True,
+            }
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=False, syslog_port=2832
+                )
+            ),
+        )
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ):
+            dec_mc = dec.update_azure_monitor_logs(mc)
+
+        container_insights = dec_mc.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2833)
+        self.assertTrue(container_insights.disable_prometheus_metrics_scraping)
+
     def test_enable_azure_monitor_logs_provisions_dcr_before_cluster_put(self):
         """The DCR and the DCRA are provisioned while the profile is being built, not deferred to
         postprocessing_after_mc_created.
@@ -18874,6 +18952,84 @@ class AKSMonitoringDisableConfirmationTestCase(unittest.TestCase):
 
         self.assertNotIn("prompt_metrics", order)
         self.assertNotIn("prompt_logs", order)
+
+    def test_update_pipeline_collects_confirmations_before_monitoring_is_touched(self):
+        # The fix is an ordering guarantee inside the real update pipeline. Every other test in
+        # this class drives confirm_monitoring_disables by hand, so none of them notices if
+        # update_mc_profile_default stops calling it, or starts calling it after the monitoring
+        # handlers have already deleted collection resources.
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_update
+
+        raw_param_dict = {
+            name: param.default
+            for name, param in inspect.signature(aks_update).parameters.items()
+            if param.default is not param.empty
+        }
+        raw_param_dict.update({"resource_group_name": "test_rg_name", "name": "test_name"})
+
+        existing_mc = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[self.models.ManagedClusterAgentPoolProfile(name="nodepool1")],
+            network_profile=self.models.ContainerServiceNetworkProfile(load_balancer_sku="standard"),
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            identity_profile={
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_resource_id",
+                    client_id="test_client_id",
+                    object_id="test_object_id",
+                )
+            },
+        )
+
+        class _Client:
+            def get(self, rg, name):  # pylint: disable=unused-argument
+                return existing_mc
+
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd, _Client(), raw_param_dict, ResourceType.MGMT_CONTAINERSERVICE
+        )
+
+        order = []
+        real_confirm = AKSManagedClusterUpdateDecorator.confirm_monitoring_disables
+        real_update = AKSManagedClusterUpdateDecorator.update_azure_monitor_profile
+
+        def recording_confirm(self_, mc):
+            order.append("confirm_monitoring_disables")
+            return real_confirm(self_, mc)
+
+        def recording_update(self_, mc):
+            order.append("update_azure_monitor_profile")
+            return real_update(self_, mc)
+
+        prefix = "azure.cli.command_modules.acs.managed_cluster_decorator."
+        with patch(
+            prefix + "get_rg_location", return_value="test_location"
+        ), patch(
+            prefix + "Profile",
+            return_value=Mock(get_subscription_id=Mock(return_value="1234-5678-9012")),
+        ), patch.object(
+            AKSManagedClusterUpdateDecorator, "check_raw_parameters", return_value=True
+        ), patch.object(
+            AKSManagedClusterUpdateDecorator, "confirm_monitoring_disables", recording_confirm
+        ), patch.object(
+            AKSManagedClusterUpdateDecorator, "update_azure_monitor_profile", recording_update
+        ):
+            dec.update_mc_profile_default()
+
+        self.assertIn(
+            "confirm_monitoring_disables",
+            order,
+            "update_mc_profile_default no longer collects the monitoring disable confirmations, "
+            "so a declined prompt can leave a signal enabled without its collection resources.",
+        )
+        self.assertLess(
+            order.index("confirm_monitoring_disables"),
+            order.index("update_azure_monitor_profile"),
+            "the monitoring disable confirmations must be collected before "
+            "update_azure_monitor_profile runs any cleanup.",
+        )
 
 
 class AKSOpenTelemetryUpdateTestCase(unittest.TestCase):

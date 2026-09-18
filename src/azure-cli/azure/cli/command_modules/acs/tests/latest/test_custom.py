@@ -15,9 +15,13 @@ from dateutil.parser import parse
 import yaml
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
+    CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+    CONST_CONTAINER_NETWORK_LOGS_ENABLED,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
@@ -35,6 +39,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_agentpool_get_rollback_versions,
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
+    aks_disable_addons,
     aks_enable_addons,
     aks_stop,
     aks_upgrade,
@@ -2071,6 +2076,223 @@ class TestWarnOnLegacyMonitoringAuth(unittest.TestCase):
         with self._warn_mock() as warn:
             warn_on_legacy_monitoring_auth(False, " azure-policy , Monitoring ")
         warn.assert_called_once()
+
+
+class TestMonitoringValidatorRegistration(unittest.TestCase):
+    """The monitoring cross-flag validators must stay wired to the commands.
+
+    These validators inspect the whole namespace, so the CLI runs them for every invocation as
+    long as each is attached to at least one argument of the command -- it does not matter which
+    one. Nothing else asserts that they are still attached, and detaching one would silently drop
+    every cross-flag check it performs, leaving combinations such as
+    --enable-prometheus-metrics-scraping without --enable-azure-monitor-logs, or duplicate
+    OpenTelemetry HTTP/gRPC ports, accepted and then ignored.
+    """
+
+    def _arguments(self, command_name):
+        import argparse
+
+        from azure.cli.command_modules.acs import ContainerServiceCommandsLoader
+        from azure.cli.core.mock import DummyCli
+
+        class _Invocation:
+            def __init__(self, command_string):
+                self.data = {"command_string": command_string}
+                self.parser = argparse.ArgumentParser()
+
+        cli_ctx = DummyCli()
+        cli_ctx.invocation = _Invocation(command_name)
+        loader = ContainerServiceCommandsLoader(cli_ctx)
+        loader.load_command_table(command_name.split())
+        loader.command_table[command_name].load_arguments()
+        loader.load_arguments(command_name)
+        return {
+            dest: arg.settings
+            for dest, arg in loader.argument_registry.arguments.get(command_name, {}).items()
+        }
+
+    def test_validator_is_attached_to_create_and_update(self):
+        for command_name, validator_name in (
+            ("aks create", "validate_container_insights_settings_for_create"),
+            ("aks update", "validate_container_insights_settings_for_update"),
+            ("aks create", "validate_azure_monitor_and_opentelemetry_for_create"),
+            ("aks update", "validate_azure_monitor_and_opentelemetry_for_update"),
+        ):
+            arguments = self._arguments(command_name)
+            attached = [
+                dest
+                for dest, settings in arguments.items()
+                if getattr(settings.get("validator"), "__name__", "") == validator_name
+            ]
+            self.assertTrue(
+                attached,
+                "{} has no argument carrying {}, so its cross-flag validation never "
+                "runs.".format(command_name, validator_name),
+            )
+
+    def test_container_insights_flags_are_registered_on_create_and_update(self):
+        # The validators read these off the namespace, so they can only reject bad combinations
+        # while they remain registered on the command.
+        for command_name in ("aks create", "aks update"):
+            arguments = self._arguments(command_name)
+            for dest in (
+                "enable_prometheus_metrics_scraping",
+                "disable_prometheus_metrics_scraping",
+                "syslog_port",
+                "opentelemetry_metrics_port_http",
+                "opentelemetry_metrics_port_grpc",
+                "opentelemetry_logs_traces_port_http",
+                "opentelemetry_logs_traces_port_grpc",
+            ):
+                self.assertIn(dest, arguments, command_name)
+
+
+class AKSDisableAddonsMonitoringTestCase(unittest.TestCase):
+    """`az aks disable-addons -a monitoring` must behave like --disable-azure-monitor-logs."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    def _instance(self, otlp_logs_traces=True):
+        app_monitoring = self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
+        if otlp_logs_traces:
+            app_monitoring.open_telemetry_logs_and_traces = (
+                self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces(
+                    enabled=True, http_port=4320, grpc_port=4319
+                )
+            )
+        return self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "test_workspace",
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                    },
+                )
+            },
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace",
+                    syslog_port=2832,
+                    disable_prometheus_metrics_scraping=True,
+                    container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                ),
+                app_monitoring=app_monitoring,
+            ),
+        )
+
+    def _run(self, instance, addons="monitoring", answer=True, yes=False):
+        """Drive aks_disable_addons, recording prompts and cleanups in the order they happen."""
+        order = []
+        client = mock.MagicMock()
+        client.get.return_value = instance
+
+        def ask(msg, default=None):
+            order.append("prompt")
+            self.assertIn("OpenTelemetry logs and traces", msg)
+            return answer
+
+        def cleanup(*args, **kwargs):
+            order.append("dcra_cleanup")
+
+        def put(no_wait, put_func, rg, name, mc, **kwargs):
+            order.append("put")
+            return mc
+
+        with mock.patch(
+            "azure.cli.command_modules.acs.custom.get_subscription_id",
+            return_value="test_sub_id",
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.prompt_y_n", side_effect=ask
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring",
+            side_effect=cleanup,
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.sdk_no_wait", side_effect=put
+        ):
+            result = aks_disable_addons(
+                self.cmd, client, "test_rg", "test_name", addons, yes=yes
+            )
+        return order, result
+
+    def _assert_container_insights_reset(self, instance):
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertFalse(container_insights.enabled)
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
+        )
+
+    def test_declining_the_prompt_aborts_before_any_cleanup(self):
+        instance = self._instance()
+        order, result = self._run(instance, answer=False)
+
+        # The prompt has to come first, and declining must leave the cluster completely untouched.
+        self.assertEqual(order, ["prompt"])
+        self.assertIsNone(result)
+        self.assertTrue(instance.azure_monitor_profile.container_insights.enabled)
+        self.assertEqual(instance.azure_monitor_profile.container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_accepting_the_prompt_resets_settings_and_disables_opentelemetry(self):
+        instance = self._instance()
+        order, _ = self._run(instance)
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+        open_telemetry = (
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        )
+        self.assertFalse(open_telemetry.enabled)
+        self.assertIsNone(open_telemetry.http_port)
+        self.assertIsNone(open_telemetry.grpc_port)
+
+    def test_yes_skips_the_prompt(self):
+        instance = self._instance()
+        order, _ = self._run(instance, yes=True)
+
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_settings_are_reset_even_without_opentelemetry(self):
+        instance = self._instance(otlp_logs_traces=False)
+        order, _ = self._run(instance)
+
+        # Nothing to warn about, but a later --enable-azure-monitor-logs must still start clean.
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_monitoring_is_recognised_alongside_other_addons(self):
+        instance = self._instance()
+        order, _ = self._run(
+            instance,
+            addons="kube-dashboard,monitoring",
+        )
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_disabling_another_addon_leaves_monitoring_untouched(self):
+        instance = self._instance()
+        order, _ = self._run(instance, addons="kube-dashboard")
+
+        self.assertEqual(order, ["put"])
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
 
 
 if __name__ == "__main__":
