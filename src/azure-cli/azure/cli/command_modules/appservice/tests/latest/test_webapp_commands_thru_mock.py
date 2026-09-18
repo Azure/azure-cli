@@ -2420,9 +2420,15 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
     aggregate container's position in the response mattering.
     """
 
-    EXPECTED = {
+    EXPECTED_DISPLAY_NAMES = {
         'JAVA|25-java25', 'JAVA|21-java21', 'JAVA|17-java17', 'JAVA|11-java11', 'JAVA|8-jre8',
     }
+    # config field uses ':' delimiter so the value can be passed directly to 'az webapp create --runtime'
+    EXPECTED_CONFIGS = {
+        'JAVA:25-java25', 'JAVA:21-java21', 'JAVA:17-java17', 'JAVA:11-java11', 'JAVA:8-jre8',
+    }
+    # Keep EXPECTED as an alias for backward-compat with display_name-based assertions
+    EXPECTED = EXPECTED_DISPLAY_NAMES
 
     FULL_RUNTIMES = [
         {'runtimeVersion': '8', 'runtime': 'JAVA|8-jre8'},
@@ -2489,7 +2495,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         aggregate = self._minor('SE', _TypespecContainerSettings(
             {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_aggregate_javaNNRuntime_keys(self):
         # Fallback path: no 'runtimes' array, but the Mapping exposes individual
@@ -2505,7 +2511,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
             },
             is_auto_update=True))
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_aggregate_not_first_selected_by_auto_update(self):
         # The aggregate auto-update container must be chosen by its is_auto_update
@@ -2513,7 +2519,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         aggregate = self._minor('SE', _TypespecContainerSettings(
             {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
         stack = self._java_se_stack(self._patch_minors() + [aggregate])
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_typed_attrs_only_expose_java_8_11_but_mapping_has_all(self):
         # Reproduces the exact regression: the SDK types only java8_runtime /
@@ -2526,7 +2532,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         # Sanity-check the model: typed attrs cover only 8/11, additional_properties empty.
         self.assertEqual(aggregate.stack_settings.linux_container_settings.additional_properties, [])
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_runtimes_array_entries_flagged_auto_update(self):
         # Entries derived from the aggregate must be flagged auto-update so they
