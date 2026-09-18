@@ -547,6 +547,10 @@ Release History
 
 * `az containerapp env workload-profile add`: Simplify workload-profile creation with default profile name (#32713)
 
+**Container**
+
+* Fix #32899: `az container create` and `az container container-group-profile create`: Add `--environment-variables-file` and `--secure-environment-variables-file` parameters to load environment variables from a JSON file, allowing values that contain special shell characters such as double-quotes and carets that are stripped by PowerShell or CMD (#32899)
+
 **Event Hubs**
 
 * Fix #31108, #32073: `az eventhubs`: Regex updated for commands with `--namespace-name` arguments (#32472)
