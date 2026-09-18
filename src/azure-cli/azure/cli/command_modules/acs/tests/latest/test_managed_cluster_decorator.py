@@ -13955,6 +13955,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             is_private_cluster=None,
             ampls_resource_id=None,
             enable_high_log_scale_mode=None,
+            preserve_existing_dcr_settings=True,
         )
 
         dec_3 = AKSManagedClusterUpdateDecorator(
@@ -14057,6 +14058,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             is_private_cluster=None,
             ampls_resource_id=None,
             enable_high_log_scale_mode=True,
+            preserve_existing_dcr_settings=True,
         )
 
         # Case 6: Update postprocessing with camelCase addon key (omsAgent)
@@ -14107,6 +14109,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             is_private_cluster=None,
             ampls_resource_id=None,
             enable_high_log_scale_mode=True,
+            preserve_existing_dcr_settings=True,
         )
 
         # Case 7: Update with CNL enabled on an MSI cluster where monitoring was already enabled.
@@ -14171,6 +14174,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             is_private_cluster=None,
             ampls_resource_id=None,
             enable_high_log_scale_mode=True,
+            preserve_existing_dcr_settings=True,
         )
 
         # Case 8: Update with HLSM-only on an MSI cluster where monitoring was already enabled
@@ -14225,6 +14229,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             is_private_cluster=None,
             ampls_resource_id=None,
             enable_high_log_scale_mode=True,
+            preserve_existing_dcr_settings=True,
         )
 
     def test_put_mc(self):
@@ -17916,6 +17921,34 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
         ensure_mock.assert_called_once()
         self.assertTrue(ensure_mock.call_args.kwargs["aad_route"])
         self.assertFalse(ensure_mock.call_args.kwargs["remove_monitoring"])
+
+    def test_enable_azure_monitor_logs_does_not_inherit_leftover_dcr_settings(self):
+        """Re-enabling is a fresh onboarding, so the leftover DCR must not be carried over.
+
+        Disabling monitoring removes the association but leaves the DCR itself behind. If this
+        path preserved its settings, '--enable-azure-monitor-logs' would silently come back with
+        the previous onboarding's syslog, high log scale mode and custom data collection settings,
+        instead of the documented defaults the container insights profile is reset to.
+        """
+        dec = self._update_dec(
+            {
+                "enable_azure_monitor_logs": True,
+                "workspace_resource_id": "test_workspace_resource_id",
+            }
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        with patch.object(
+            dec.context.external_functions,
+            "ensure_container_insights_for_monitoring",
+            return_value=None,
+        ) as ensure_mock:
+            dec.update_azure_monitor_logs(mc)
+
+        ensure_mock.assert_called_once()
+        self.assertFalse(
+            ensure_mock.call_args.kwargs.get("preserve_existing_dcr_settings", False)
+        )
 
     def test_enable_azure_monitor_logs_on_legacy_auth_cluster_errors(self):
         dec = self._update_dec(

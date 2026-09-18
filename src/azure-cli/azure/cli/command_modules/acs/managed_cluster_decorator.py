@@ -12206,6 +12206,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         is_private_cluster=self.context.get_enable_private_cluster(),
                         ampls_resource_id=self.context.get_ampls_resource_id(),
                         enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
+                        # This is the reconfigure path: the cluster is already onboarded and only
+                        # the settings named on the command line should change. Everything else is
+                        # carried over from the existing DCR rather than reset to its default.
+                        preserve_existing_dcr_settings=True,
                     )
 
         # ingress appgw addon

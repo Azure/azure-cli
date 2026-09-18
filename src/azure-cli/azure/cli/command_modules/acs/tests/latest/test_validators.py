@@ -2180,6 +2180,8 @@ def _otel_namespace(**kwargs):
         "opentelemetry_logs_traces_port_grpc": None,
         "enable_azure_monitor_metrics": False,
         "enable_azure_monitor_logs": False,
+        "disable_azure_monitor_metrics": False,
+        "disable_azure_monitor_logs": False,
         "enable_addons": None,
     }
     defaults.update(kwargs)
@@ -2187,6 +2189,73 @@ def _otel_namespace(**kwargs):
 
 
 class TestOpenTelemetryValidators(unittest.TestCase):
+    PORT_DISABLE_COMBOS = [
+        ("opentelemetry_metrics_port_http", "--opentelemetry-metrics-port-http",
+         "disable_azure_monitor_metrics", "--disable-azure-monitor-metrics"),
+        ("opentelemetry_metrics_port_http", "--opentelemetry-metrics-port-http",
+         "disable_opentelemetry_metrics", "--disable-opentelemetry-metrics"),
+        ("opentelemetry_metrics_port_grpc", "--opentelemetry-metrics-port-grpc",
+         "disable_azure_monitor_metrics", "--disable-azure-monitor-metrics"),
+        ("opentelemetry_metrics_port_grpc", "--opentelemetry-metrics-port-grpc",
+         "disable_opentelemetry_metrics", "--disable-opentelemetry-metrics"),
+        ("opentelemetry_logs_traces_port_http", "--opentelemetry-logs-traces-port-http",
+         "disable_azure_monitor_logs", "--disable-azure-monitor-logs"),
+        ("opentelemetry_logs_traces_port_http", "--opentelemetry-logs-traces-port-http",
+         "disable_opentelemetry_logs_traces", "--disable-opentelemetry-logs-traces"),
+        ("opentelemetry_logs_traces_port_grpc", "--opentelemetry-logs-traces-port-grpc",
+         "disable_azure_monitor_logs", "--disable-azure-monitor-logs"),
+        ("opentelemetry_logs_traces_port_grpc", "--opentelemetry-logs-traces-port-grpc",
+         "disable_opentelemetry_logs_traces", "--disable-opentelemetry-logs-traces"),
+    ]
+
+    def test_port_with_matching_disable_rejected(self):
+        for port_attr, port_flag, disable_attr, disable_flag in self.PORT_DISABLE_COMBOS:
+            with self.subTest(port=port_flag, disable=disable_flag):
+                namespace = _otel_namespace(**{port_attr: 4318, disable_attr: True})
+                with self.assertRaises(InvalidArgumentValueError) as cm:
+                    validators.validate_opentelemetry_ports_not_disabled(namespace)
+                self.assertIn(port_flag, str(cm.exception))
+                self.assertIn(disable_flag, str(cm.exception))
+
+    def test_port_with_unrelated_disable_allowed(self):
+        # Disabling metrics must not reject a logs/traces port, and vice versa.
+        namespace = _otel_namespace(
+            opentelemetry_logs_traces_port_http=4318,
+            disable_azure_monitor_metrics=True,
+            disable_opentelemetry_metrics=True,
+        )
+        validators.validate_opentelemetry_ports_not_disabled(namespace)
+
+        namespace = _otel_namespace(
+            opentelemetry_metrics_port_http=4318,
+            disable_azure_monitor_logs=True,
+            disable_opentelemetry_logs_traces=True,
+        )
+        validators.validate_opentelemetry_ports_not_disabled(namespace)
+
+    def test_disable_without_ports_allowed(self):
+        namespace = _otel_namespace(
+            disable_azure_monitor_metrics=True,
+            disable_azure_monitor_logs=True,
+            disable_opentelemetry_metrics=True,
+            disable_opentelemetry_logs_traces=True,
+        )
+        validators.validate_opentelemetry_ports_not_disabled(namespace)
+
+    def test_port_disable_conflict_rejected_by_aggregate_validators(self):
+        # The aggregate validators are the entry points the commands register. The conflict has to
+        # be reachable through them, otherwise it is only caught in the decorator's port getters,
+        # which run after the Azure Monitor collection resources have already been deleted.
+        for aggregate in (
+            validators.validate_azure_monitor_and_opentelemetry_for_create,
+            validators.validate_azure_monitor_and_opentelemetry_for_update,
+        ):
+            for port_attr, port_flag, disable_attr, disable_flag in self.PORT_DISABLE_COMBOS:
+                with self.subTest(aggregate=aggregate.__name__, port=port_flag, disable=disable_flag):
+                    namespace = _otel_namespace(**{port_attr: 4318, disable_attr: True})
+                    with self.assertRaises(InvalidArgumentValueError):
+                        aggregate(namespace)
+
     def test_port_out_of_range_errors(self):
         namespace = _otel_namespace(opentelemetry_metrics_port_http=70000)
         with self.assertRaises(ArgumentUsageError):

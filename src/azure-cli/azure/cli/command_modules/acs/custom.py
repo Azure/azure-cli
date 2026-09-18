@@ -1605,6 +1605,30 @@ def _remove_nulls(managed_clusters):
 
 
 # pylint: disable=line-too-long
+def _validate_addons_for_disable(instance, addons):
+    """Validate every addon name and installed state before any cleanup runs.
+
+    aks_disable_addons deletes the monitoring data collection rule association before it builds the
+    updated cluster payload. _update_addons rejects unknown or not-installed addons, but by then the
+    association is already gone, and the raised error skips the cluster PUT — leaving monitoring
+    enabled on the cluster with nothing for the agent to collect into. Fail here instead, before
+    anything is deleted. The checks mirror _update_addons so the two cannot drift.
+    """
+    addon_profiles = instance.addon_profiles or {}
+    installed = {key.lower() for key in addon_profiles}
+    for addon_arg in addons.split(','):
+        if addon_arg not in ADDONS:
+            raise CLIError("Invalid addon name: {}.".format(addon_arg))
+        addon = ADDONS[addon_arg]
+        if addon == CONST_VIRTUAL_NODE_ADDON_NAME:
+            # Only Linux is supported for now, matching _update_addons.
+            addon += 'Linux'
+        # kube-dashboard is exempt: _update_addons synthesizes a disabled profile for it rather
+        # than failing, so disabling it on a cluster that never had it is not an error.
+        if addon.lower() not in installed and addon != CONST_KUBE_DASHBOARD_ADDON_NAME:
+            raise CLIError("The addon {} is not installed.".format(addon))
+
+
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False, yes=False):
     from azure.cli.command_modules.acs.managed_cluster_decorator import (
         _is_opentelemetry_logs_traces_enabled,
@@ -1616,8 +1640,13 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     monitoring_addon_key = get_monitoring_addon_key(
         instance.addon_profiles, CONST_MONITORING_ADDON_NAME
     )
+
+    # Every addon is validated up front, because the cleanup below is destructive and a later
+    # failure would skip the cluster PUT that is supposed to accompany it.
+    _validate_addons_for_disable(instance, addons)
+
     disabling_monitoring = CONST_MONITORING_ADDON_NAME in [
-        ADDONS.get(addon.strip()) for addon in (addons or "").split(",")
+        ADDONS.get(addon) for addon in addons.split(",")
     ]
 
     # OpenTelemetry logs and traces are collected by the Container Insights agent, so disabling the

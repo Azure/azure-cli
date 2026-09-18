@@ -1257,6 +1257,37 @@ def validate_opentelemetry_ports(namespace):
                 )
 
 
+def validate_opentelemetry_ports_not_disabled(namespace):
+    """Reject OpenTelemetry port flags that target a receiver being disabled.
+
+    The decorator's port getters enforce this too, but only after cleanup of the
+    Azure Monitor collection resources has already run. Validating here fails the
+    command before any destructive work happens.
+    """
+    metrics_disables = (
+        ("--disable-azure-monitor-metrics", "disable_azure_monitor_metrics"),
+        ("--disable-opentelemetry-metrics", "disable_opentelemetry_metrics"),
+    )
+    logs_traces_disables = (
+        ("--disable-azure-monitor-logs", "disable_azure_monitor_logs"),
+        ("--disable-opentelemetry-logs-traces", "disable_opentelemetry_logs_traces"),
+    )
+    ports = (
+        ("--opentelemetry-metrics-port-http", "opentelemetry_metrics_port_http", metrics_disables),
+        ("--opentelemetry-metrics-port-grpc", "opentelemetry_metrics_port_grpc", metrics_disables),
+        ("--opentelemetry-logs-traces-port-http", "opentelemetry_logs_traces_port_http", logs_traces_disables),
+        ("--opentelemetry-logs-traces-port-grpc", "opentelemetry_logs_traces_port_grpc", logs_traces_disables),
+    )
+    for port_flag, port_attr, disables in ports:
+        if getattr(namespace, port_attr, None) is None:
+            continue
+        for disable_flag, disable_attr in disables:
+            if getattr(namespace, disable_attr, False):
+                raise InvalidArgumentValueError(
+                    f"{port_flag} cannot be specified when {disable_flag} is used."
+                )
+
+
 def validate_opentelemetry_metrics_dependencies(namespace):
     """Validate OpenTelemetry metrics dependencies for create operations."""
     enable_otlp_metrics = getattr(namespace, "enable_opentelemetry_metrics", False)
@@ -1332,6 +1363,7 @@ def validate_opentelemetry_logs_traces_dependencies_for_update(namespace):
 def validate_azure_monitor_and_opentelemetry_for_create(namespace):
     """Main validator for Azure Monitor and OpenTelemetry configurations for create operations."""
     validate_opentelemetry_ports(namespace)
+    validate_opentelemetry_ports_not_disabled(namespace)
     validate_opentelemetry_metrics_dependencies(namespace)
     validate_opentelemetry_logs_traces_dependencies(namespace)
 
@@ -1339,5 +1371,6 @@ def validate_azure_monitor_and_opentelemetry_for_create(namespace):
 def validate_azure_monitor_and_opentelemetry_for_update(namespace):
     """Main validator for Azure Monitor and OpenTelemetry configurations for update operations."""
     validate_opentelemetry_ports(namespace)
+    validate_opentelemetry_ports_not_disabled(namespace)
     validate_opentelemetry_metrics_dependencies_for_update(namespace)
     validate_opentelemetry_logs_traces_dependencies_for_update(namespace)
