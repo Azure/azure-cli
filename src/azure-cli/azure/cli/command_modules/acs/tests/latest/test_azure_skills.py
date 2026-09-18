@@ -4,12 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+import io
 import os
+import ssl
 import tempfile
 import unittest
 from contextlib import ExitStack
+from email.message import Message
 from pathlib import Path
 from unittest import mock
+from urllib.error import HTTPError, URLError
+from urllib.request import HTTPSHandler, Request
+from urllib.response import addinfourl
 
 from knack.util import CLIError
 from azure.cli.command_modules.acs import _azure_skills as skills
@@ -18,6 +24,457 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
+
+
+class _Response(io.BytesIO):
+    def __init__(self, body=b'', headers=None):
+        super().__init__(body)
+        self.headers = Message()
+        for key, value in (headers or {}).items():
+            self.headers[key] = value
+        self.read_sizes = []
+
+    def read(self, size=-1):
+        self.read_sizes.append(size)
+        return super().read(size)
+
+
+class _SizedResponse(_Response):
+    """Produce large chunked responses without retaining them in memory."""
+
+    def __init__(self, size):
+        super().__init__()
+        self.remaining = size
+
+    def read(self, size=-1):
+        self.read_sizes.append(size)
+        count = min(size, self.remaining)
+        self.remaining -= count
+        return b'x' * count
+
+
+class ReleaseDownloadTests(unittest.TestCase):
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_annotated_tag_is_peeled_to_commit(self, api):
+        commit = 'a' * 40
+        tag_object = 'b' * 40
+        api.side_effect = [
+            {'tag_name': 'v1.2.49', 'draft': False, 'prerelease': False},
+            {'object': {'type': 'tag', 'sha': tag_object}},
+            {'object': {'type': 'commit', 'sha': commit}},
+        ]
+        result = skills.resolve_release('test-token')
+        self.assertEqual(result, skills.Release('v1.2.49', commit))
+        self.assertEqual(api.call_args_list, [
+            mock.call('/releases/latest', 'test-token'),
+            mock.call('/git/ref/tags/v1.2.49', 'test-token'),
+            mock.call('/git/tags/' + tag_object, 'test-token'),
+        ])
+
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_lightweight_tag_is_encoded_and_commit_normalized(self, api):
+        api.side_effect = [
+            {'tag_name': 'release/v1?#%', 'draft': False, 'prerelease': False,
+             'zipball_url': 'https://attacker.invalid/archive', 'target_commitish': 'main'},
+            {'object': {'type': 'commit', 'sha': 'A' * 40, 'url': 'https://attacker.invalid/commit'}},
+        ]
+        self.assertEqual(skills.resolve_release(), skills.Release('release/v1?#%', 'a' * 40))
+        self.assertEqual(api.call_args_list, [
+            mock.call('/releases/latest', None),
+            mock.call('/git/ref/tags/release%2Fv1%3F%23%25', None),
+        ])
+
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_invalid_stable_release_fields_are_rejected(self, api):
+        for changes in ({'tag_name': None}, {'tag_name': 1}, {'tag_name': ''},
+                        {'tag_name': 'x' * 256}, {'tag_name': 'v1\nAuthorization: bad'},
+                        {'tag_name': 'v1\x00'}, {'draft': True}, {'draft': 0},
+                        {'draft': None}, {'prerelease': True}, {'prerelease': 0},
+                        {'prerelease': None}):
+            with self.subTest(changes=changes):
+                api.reset_mock()
+                api.return_value = {'tag_name': 'v1', 'draft': False, 'prerelease': False}
+                api.return_value.update(changes)
+                with self.assertRaisesRegex(CLIError, 'invalid stable'):
+                    skills.resolve_release()
+                self.assertEqual(api.call_count, 1)
+        for missing in ('tag_name', 'draft', 'prerelease'):
+            with self.subTest(missing=missing):
+                api.return_value = {'tag_name': 'v1', 'draft': False, 'prerelease': False}
+                del api.return_value[missing]
+                with self.assertRaises(CLIError):
+                    skills.resolve_release()
+
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_invalid_git_objects_are_rejected(self, api):
+        for obj in (None, [], 'commit', {}, {'type': 'tree', 'sha': 'a' * 40},
+                    {'type': 'commit', 'sha': None}, {'type': 'commit', 'sha': 'a' * 39},
+                    {'type': 'commit', 'sha': 'g' * 40}, {'type': 'commit', 'sha': 'a' * 40 + '\n'},
+                    {'type': 'tag', 'sha': 'https://attacker.invalid'}):
+            with self.subTest(obj=obj):
+                api.side_effect = [{'tag_name': 'v1', 'draft': False, 'prerelease': False},
+                                   {'object': obj}]
+                with self.assertRaisesRegex(CLIError, 'resolve.*commit'):
+                    skills.resolve_release()
+
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_five_annotated_tag_hops_are_allowed(self, api):
+        api.side_effect = [
+            {'tag_name': 'v1', 'draft': False, 'prerelease': False},
+            *[{'object': {'type': 'tag', 'sha': str(index) * 40}} for index in range(5)],
+            {'object': {'type': 'commit', 'sha': 'a' * 40}},
+        ]
+        self.assertEqual(skills.resolve_release(), skills.Release('v1', 'a' * 40))
+        self.assertEqual(api.call_count, 7)
+
+    @mock.patch.object(skills, '_api_json', create=True)
+    def test_sixth_tag_hop_and_tag_cycles_are_rejected(self, api):
+        api.side_effect = [
+            {'tag_name': 'v1', 'draft': False, 'prerelease': False},
+            *[{'object': {'type': 'tag', 'sha': 'b' * 40}} for _ in range(6)],
+        ]
+        with self.assertRaisesRegex(CLIError, 'resolve.*commit'):
+            skills.resolve_release()
+        self.assertEqual(api.call_count, 7)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_metadata_and_archive_requests_keep_token_isolated(self, build):
+        responses = [_Response(b'{}'), _Response(b'archive', {'Content-Length': '7'})]
+        openers = [mock.Mock(), mock.Mock()]
+        for opener, response in zip(openers, responses):
+            opener.open.return_value = response
+        build.side_effect = openers
+        self.assertEqual(skills._api_json('/releases/latest', 'secret-token'), {})
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertEqual(destination.read_bytes(), b'archive')
+        metadata, archive = [opener.open.call_args.args[0] for opener in openers]
+        self.assertEqual(metadata.full_url, 'https://api.github.com/repos/microsoft/azure-skills/releases/latest')
+        self.assertEqual(metadata.get_header('Authorization'), 'Bearer secret-token')
+        self.assertEqual(archive.full_url, 'https://codeload.github.com/microsoft/azure-skills/zip/' + 'a' * 40)
+        self.assertIsNone(archive.get_header('Authorization'))
+        for call in build.call_args_list:
+            tls = next(handler for handler in call.args if isinstance(handler, HTTPSHandler))
+            self.assertTrue(tls._context.check_hostname)
+            self.assertEqual(tls._context.verify_mode, ssl.CERT_REQUIRED)
+        for opener, response in zip(openers, responses):
+            self.assertEqual(opener.open.call_args.kwargs, {'timeout': 30})
+            self.assertTrue(response.closed)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_anonymous_metadata_has_no_authorization(self, build):
+        response = _Response(b'{}')
+        build.return_value.open.return_value = response
+        skills._api_json('/releases/latest', None)
+        self.assertIsNone(build.return_value.open.call_args.args[0].get_header('Authorization'))
+        self.assertTrue(response.closed)
+
+    def test_metadata_redirect_rejects_token_bearing_request(self):
+        request = Request('https://api.github.com/repos/microsoft/azure-skills/releases/latest',
+                          headers={'Authorization': 'Bearer secret-token'})
+        for url in ('https://attacker.invalid/steal', 'https://api.github.com/another'):
+            with self.subTest(url=url), self.assertRaisesRegex(CLIError, 'redirect'):
+                skills._MetadataRedirectHandler().redirect_request(request, None, 302, 'Found', {}, url)
+
+    def test_archive_redirects_are_restricted_to_https_codeload_origin(self):
+        request = Request('https://codeload.github.com/microsoft/azure-skills/zip/' + 'a' * 40)
+        handler = skills._ArchiveRedirectHandler()
+        for url in ('https://attacker.invalid/zip', 'http://codeload.github.com/zip',
+                    'https://codeload.github.com.attacker.invalid/zip',
+                    'https://codeload.github.com:444/zip', 'https://user@codeload.github.com/zip'):
+            with self.subTest(url=url), self.assertRaisesRegex(CLIError, 'redirect'):
+                handler.redirect_request(request, None, 302, 'Found', {}, url)
+        redirected = handler.redirect_request(
+            request, None, 302, 'Found', {}, 'https://codeload.github.com/redirected')
+        self.assertEqual(redirected.full_url, 'https://codeload.github.com/redirected')
+        self.assertIsNone(redirected.get_header('Authorization'))
+
+    @mock.patch.object(HTTPSHandler, 'https_open')
+    def test_metadata_opener_rejects_redirect_before_second_request_and_closes_response(self, send):
+        for code in (301, 302, 303, 307, 308):
+            with self.subTest(code=code):
+                body = _Response(headers={'Location': 'https://attacker.invalid/steal'})
+                response = addinfourl(body, body.headers,
+                                     'https://api.github.com/repos/microsoft/azure-skills/releases/latest', code)
+                response.msg = 'Found'
+                send.reset_mock()
+                send.return_value = response
+                with self.assertRaisesRegex(CLIError, 'redirect'):
+                    skills._api_json('/releases/latest', 'secret-token')
+                self.assertEqual(send.call_count, 1)
+                self.assertTrue(response.closed)
+
+    @mock.patch.object(HTTPSHandler, 'https_open')
+    def test_archive_opener_rejects_redirect_before_second_request_and_closes_response(self, send):
+        body = _Response(headers={'Location': 'https://attacker.invalid/steal'})
+        response = addinfourl(body, body.headers,
+                             'https://codeload.github.com/microsoft/azure-skills/zip/' + 'a' * 40, 302)
+        response.msg = 'Found'
+        send.return_value = response
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaisesRegex(CLIError, 'redirect'):
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertEqual(send.call_count, 1)
+            self.assertTrue(response.closed)
+            self.assertFalse(destination.exists())
+
+    @mock.patch.object(HTTPSHandler, 'https_open')
+    def test_allowed_archive_redirect_closes_without_unbounded_body_read(self, send):
+        body = _SizedResponse(67108865)
+        body.headers['Location'] = '/microsoft/azure-skills/legacy.zip/' + 'a' * 40
+        redirect = addinfourl(body, body.headers, 'https://codeload.github.com/original', 302)
+        redirect.msg = 'Found'
+        final_body = _Response(b'zip')
+        final = addinfourl(final_body, final_body.headers, 'https://codeload.github.com/redirected', 200)
+        final.msg = 'OK'
+        send.side_effect = [redirect, final]
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertEqual(destination.read_bytes(), b'zip')
+        self.assertTrue(redirect.closed)
+        self.assertTrue(final.closed)
+        self.assertEqual(body.read_sizes, [])
+        self.assertEqual(send.call_count, 2)
+        for call in send.call_args_list:
+            self.assertIsNone(call.args[0].get_header('Authorization'))
+
+    @mock.patch.object(HTTPSHandler, 'https_open')
+    def test_archive_redirect_loop_is_bounded_and_every_response_closed(self, send):
+        responses = []
+
+        def redirect(request):
+            self.assertLess(len(responses), 12, 'Unbounded archive redirects')
+            body = _Response(headers={'Location': 'https://codeload.github.com/again'})
+            response = addinfourl(body, body.headers, request.full_url, 302)
+            response.msg = 'Found'
+            responses.append(response)
+            return response
+
+        send.side_effect = redirect
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaisesRegex(CLIError, 'redirect'):
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertFalse(destination.exists())
+        self.assertTrue(all(response.closed for response in responses))
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_metadata_rejects_malformed_json_and_nonobject_payloads(self, build):
+        for body in (b'{invalid secret-token', b'\xff', b'[]', b'null', b'42',
+                     b'"text"', b'[' * 2000 + b']' * 2000):
+            with self.subTest(body=body[:30]):
+                response = _Response(body)
+                build.return_value.open.return_value = response
+                with self.assertRaisesRegex(CLIError, 'metadata') as raised:
+                    skills._api_json('/releases/latest', 'secret-token')
+                self.assertNotIn('secret-token', str(raised.exception))
+                self.assertTrue(response.closed)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_metadata_checks_advertised_and_actual_one_mib_limits(self, build):
+        for response in (_Response(b'{}', {'Content-Length': '1048577'}),
+                         _SizedResponse(1048577)):
+            with self.subTest(headers=response.headers):
+                build.return_value.open.return_value = response
+                with self.assertRaisesRegex(CLIError, 'size limit'):
+                    skills._api_json('/releases/latest', None)
+                self.assertTrue(response.closed)
+                self.assertTrue(all(0 < size <= 65536 for size in response.read_sizes))
+                if response.headers:
+                    self.assertEqual(response.read_sizes, [])
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_metadata_allows_exact_limit(self, build):
+        body = b'{"value":"' + b'x' * (1048576 - 12) + b'"}'
+        self.assertEqual(len(body), 1048576)
+        response = _Response(body, {'Content-Length': '1048576'})
+        build.return_value.open.return_value = response
+        self.assertEqual(len(skills._api_json('/releases/latest', None)['value']), 1048564)
+        self.assertTrue(response.closed)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_truncated_or_invalid_content_length_is_rejected(self, build):
+        for length in ('3', '-1', 'unknown secret-token', '9' * 100):
+            with self.subTest(length=length):
+                response = _Response(b'{}', {'Content-Length': length})
+                build.return_value.open.return_value = response
+                with self.assertRaises(CLIError) as raised:
+                    skills._api_json('/releases/latest', 'secret-token')
+                self.assertNotIn('secret-token', str(raised.exception))
+                self.assertTrue(response.closed)
+
+    def test_copy_bounded_streams_and_enforces_actual_limit(self):
+        source = _Response(b'x' * 65537)
+        destination = io.BytesIO()
+        self.assertEqual(skills._copy_bounded(source, destination, 65537), 65537)
+        self.assertEqual(destination.getvalue(), b'x' * 65537)
+        self.assertEqual(source.read_sizes, [65536, 2, 1])
+        destination = io.BytesIO()
+        with self.assertRaisesRegex(CLIError, 'size limit'):
+            skills._copy_bounded(_Response(b'12345'), destination, 4)
+        self.assertEqual(destination.getvalue(), b'')
+        self.assertEqual(skills._copy_bounded(_Response(), io.BytesIO(), 0), 0)
+
+    @mock.patch('time.monotonic', side_effect=[0, 0, 121])
+    def test_copy_bounded_enforces_read_deadline(self, _clock):
+        source = _Response(b'data')
+        destination = io.BytesIO()
+        with self.assertRaisesRegex(CLIError, 'read deadline'):
+            skills._copy_bounded(source, destination, 10)
+        self.assertEqual(source.read_sizes, [11])
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_archive_checks_advertised_and_actual_64_mib_limits_and_cleans_up(self, build):
+        for response in (_Response(b'zip', {'Content-Length': '67108865'}),
+                         _SizedResponse(67108865)):
+            with self.subTest(headers=response.headers), tempfile.TemporaryDirectory() as directory:
+                build.return_value.open.return_value = response
+                destination = Path(directory) / 'archive.zip'
+                with self.assertRaisesRegex(CLIError, 'size limit'):
+                    skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+                self.assertFalse(destination.exists())
+                self.assertTrue(response.closed)
+                self.assertTrue(all(0 < size <= 65536 for size in response.read_sizes))
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_archive_read_deadline_closes_response_and_removes_partial_file(self, build):
+        response = _Response(b'partial')
+        build.return_value.open.return_value = response
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch('time.monotonic', side_effect=[0, 0, 121]):
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaisesRegex(CLIError, 'read deadline'):
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertFalse(destination.exists())
+            self.assertTrue(response.closed)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_archive_interrupted_read_closes_response_and_removes_partial_file(self, build):
+        response = _Response()
+        build.return_value.open.return_value = response
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(response, 'read', side_effect=[b'partial', OSError('secret-token')]):
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaisesRegex(CLIError, 'archive') as raised:
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertNotIn('secret-token', str(raised.exception))
+            self.assertFalse(destination.exists())
+            self.assertTrue(response.closed)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_archive_rejects_noncommit_identifiers_before_request(self, build):
+        for commit in ('main', '../outside', 'a' * 39, 'https://attacker.invalid'):
+            with self.subTest(commit=commit), tempfile.TemporaryDirectory() as directory:
+                destination = Path(directory) / 'archive.zip'
+                with self.assertRaises(CLIError):
+                    skills.download_archive(skills.Release('v1', commit), destination)
+                self.assertFalse(destination.exists())
+        build.assert_not_called()
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_tls_and_network_errors_are_sanitized(self, build):
+        for error in (URLError('secret-token'), ssl.SSLCertVerificationError('secret-token'),
+                      TimeoutError('secret-token')):
+            with self.subTest(error=type(error).__name__):
+                build.return_value.open.side_effect = error
+                with self.assertRaisesRegex(CLIError, 'metadata') as raised:
+                    skills._api_json('/releases/latest', 'secret-token')
+                self.assertNotIn('secret-token', str(raised.exception))
+                with tempfile.TemporaryDirectory() as directory:
+                    destination = Path(directory) / 'archive.zip'
+                    with self.assertRaisesRegex(CLIError, 'archive') as raised:
+                        skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+                    self.assertNotIn('secret-token', str(raised.exception))
+                    self.assertFalse(destination.exists())
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_http_error_guidance_distinguishes_limits_from_access_failures(self, build):
+        cases = [
+            (429, {}, b'', None, ('rate limit', '--gh-token'), ()),
+            (429, {}, b'secret-token', 'secret-token', ('rate limit', 'wait'), ('--gh-token',)),
+            (403, {'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '1700000000'},
+             b'', None, ('rate limit', '1700000000', '--gh-token'), ()),
+            (403, {'Retry-After': '60'}, b'', 'secret-token', ('rate limit', '60', 'wait'), ('--gh-token',)),
+            (403, {}, b'{"message":"API rate limit exceeded: secret-token"}',
+             'secret-token', ('rate limit', 'wait'), ('--gh-token',)),
+            (403, {}, b'{"message":"Forbidden: secret-token"}',
+             'secret-token', ('access', 'token'), ('rate limit',)),
+            (403, {'X-RateLimit-Remaining': '5'}, b'Forbidden',
+             None, ('access',), ('rate limit',)),
+            (401, {}, b'secret-token', 'secret-token', ('access', 'token'), ('rate limit',)),
+            (404, {}, b'secret-token', None, ('retry',), ('rate limit',)),
+            (500, {}, b'secret-token', None, ('retry',), ('rate limit',)),
+        ]
+        for code, headers, body, token, includes, excludes in cases:
+            with self.subTest(code=code, headers=headers, token=bool(token)):
+                response = _Response(body)
+                error = HTTPError('https://api.github.com/private', code, 'secret-token', headers, response)
+                build.return_value.open.side_effect = error
+                build.return_value.open.reset_mock()
+                with self.assertRaises(CLIError) as raised:
+                    skills._api_json('/releases/latest', token)
+                message = str(raised.exception)
+                self.assertIn('metadata', message)
+                self.assertIn(str(code), message)
+                self.assertNotIn('secret-token', message)
+                for text in includes:
+                    self.assertIn(text, message)
+                for text in excludes:
+                    self.assertNotIn(text, message)
+                self.assertTrue(response.closed)
+                self.assertEqual(build.return_value.open.call_count, 1)
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_error_metadata_is_numeric_and_error_body_is_bounded(self, build):
+        for headers in ({'X-RateLimit-Reset': 'secret-token', 'Retry-After': 'secret-token'},
+                        {'X-RateLimit-Reset': '9' * 10000, 'Retry-After': '-1'},
+                        {'X-RateLimit-Reset': '1e999', 'Retry-After': '1.5'}):
+            with self.subTest(headers=str(headers)[:80]):
+                response = _SizedResponse(1048577)
+                build.return_value.open.side_effect = HTTPError('https://api.github.com', 403,
+                                                                'secret-token', headers, response)
+                with self.assertRaises(CLIError) as raised:
+                    skills._api_json('/releases/latest', 'secret-token')
+                self.assertNotIn('secret-token', str(raised.exception))
+                self.assertNotIn('rate limit', str(raised.exception))
+                self.assertLess(len(str(raised.exception)), 500)
+                self.assertTrue(response.closed)
+                self.assertEqual(response.remaining, 0)
+                self.assertTrue(all(0 < size <= 65536 for size in response.read_sizes))
+
+    @mock.patch.object(skills, 'build_opener')
+    def test_archive_rate_limit_does_not_suggest_sending_a_token(self, build):
+        response = _Response(b'secret-token')
+        build.return_value.open.side_effect = HTTPError('https://codeload.github.com', 429,
+                                                        'secret-token', {'Retry-After': '60'}, response)
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaises(CLIError) as raised:
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            message = str(raised.exception)
+            self.assertIn('archive', message)
+            self.assertIn('429', message)
+            self.assertIn('wait', message)
+            self.assertIn('60', message)
+            self.assertNotIn('--gh-token', message)
+            self.assertTrue(response.closed)
+            self.assertFalse(destination.exists())
+
+    @mock.patch.object(skills, 'build_opener', create=True)
+    def test_archive_http_error_is_sanitized_and_closed(self, build):
+        response = _Response(b'secret-token')
+        build.return_value.open.side_effect = HTTPError('https://codeload.github.com', 503,
+                                                        'secret-token', {}, response)
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            with self.assertRaisesRegex(CLIError, 'archive.*503') as raised:
+                skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            self.assertNotIn('secret-token', str(raised.exception))
+            self.assertTrue(response.closed)
+            self.assertFalse(destination.exists())
 
 
 class AgentSelectionTests(unittest.TestCase):
