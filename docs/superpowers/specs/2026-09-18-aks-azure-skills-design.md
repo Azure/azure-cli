@@ -52,6 +52,11 @@ Add these options to the existing command:
 - `--skills-agents`: a space-separated list of `claude-code`, `codex`,
   `github-copilot`, and `pi`. Requires explicit `--install-azure-skills true`.
 
+Extend the existing `--gh-token` help to cover Azure skills release/commit API
+lookups as well as kubelogin. Do not add a separate skills token option or change
+existing kubelogin authentication behavior. The new skills request policy is
+specified below.
+
 Explicit true requires a nonempty agent list and bypasses the prompts. Validate
 these arguments before installing binaries, so invalid combinations do not
 perform partial work. Explicit false performs no skill detection, network
@@ -101,10 +106,29 @@ skills already discoverable through user-defined paths or installed plugins.
 Use the published `microsoft/azure-skills` distribution, not the development
 repository. Resolve its latest stable GitHub release only after consent or
 explicit opt-in, resolve that release tag to a commit, and download the archive
-for that commit. Report the release and commit in the installation summary.
+for that commit. Once resolved, report the repository, release, and commit before
+skill writes and in the final summary, including partial-failure summaries. These
+identify this attempt's source, not the origin of conflicting existing content.
 Do not add an arbitrary source URL, automatic update, or version-management
 interface in v1. TLS and the fixed upstream repository are the trust boundary;
 this does not claim an independently signed or immutable release artifact.
+
+Reuse an explicitly supplied `--gh-token` only for the new skills metadata
+requests to the fixed repository on `https://api.github.com`. Anonymous lookup
+remains supported when no token is supplied. Do not send the token with archive
+requests, forward it to other origins, or include it in logs or errors. Reject
+cross-origin redirects for authenticated metadata requests rather than forwarding
+authorization. This policy applies to the new skills requests; it does not
+refactor the existing kubelogin download path.
+
+For metadata HTTP 403/429 responses, report the failed operation and status and
+include rate-limit/reset or retry guidance when supported by response metadata.
+Do not label every 403 as rate limiting: authorization failures require guidance
+to check the supplied token's access. For anonymous rate limiting, recommend
+retrying after the limit resets or supplying `--gh-token`; authenticated rate
+limiting should recommend waiting rather than merely supplying another token.
+Fail the skills step using the optional-versus-explicit status policy below;
+do not silently fall back to an unversioned branch or retry indefinitely.
 
 Only install the payload under `.github/plugins/azure-skills/skills/`. Preserve
 each skill's relative resource layout. Validate the expected skill structure
@@ -121,17 +145,46 @@ untouched and reported. Clean temporary files on failure. Avoid writing through
 symlinked skill destinations in v1; report this limitation rather than guessing
 ownership. Do not create shared canonical symlinks between agent directories.
 
+## First-install lifecycle and manual recovery
+
+V1 is a first-install-only facility, not an updater or a resumable transaction.
+The no-op/idempotency guarantee applies to unchanged content from the same
+resolved bundle. Every invocation resolves latest again: if a release advances,
+previously installed skills may conflict, and a partial-install retry may leave
+skills from multiple releases. State this limitation in command help and conflict
+messages; do not promise that an explicit retry restores a coherent bundle.
+There is no persisted installation manifest or retained commit for retries in v1.
+
+For conflicts, provide the affected paths and this manual recovery guidance:
+
+1. Review the reported destinations and preserve any user modifications. Do not
+   assume conflicting files were created or are owned by this command.
+2. If replacement is wanted, move only the reviewed Azure skill directories to
+   a backup outside all agent skill discovery paths. To replace a partial or
+   mixed-version bundle coherently, review and back up its other Azure skill
+   directories too, not just those named as conflicts. Do not remove the entire
+   skills root or unrelated skills; shared-directory changes affect other agents.
+3. Rerun with `--install-azure-skills true --skills-agents <selected agents>`.
+   Explain that this also reruns binary installation and resolves the then-current
+   release. Preserve backups until the new installation has been checked.
+
+No automatic deletion, replacement, backup migration, or ownership inference is
+introduced by this guidance. A network-only retry can rerun directly, but must
+still disclose that the selected release may have changed.
+
 ## Outcomes and failure handling
 
 Report installed, already present, skipped/conflicting, and failed results with
 their destinations. Do not call a partial installation complete. Keep successful
 skill directories if a later directory fails; never undo completed binaries or
-unrelated files. A rerun can safely skip identical completed directories.
+unrelated files. Skip identical completed directories on a same-bundle rerun;
+use the lifecycle and recovery guidance above if upstream content has changed.
 
 - Binary failure: preserve existing failure behavior; do not attempt skills.
 - Declined/cancelled automatic offer: normal binary-install success.
 - Failure or conflict in the automatic optional step: clear warning and normal
-  binary-install success, including guidance for explicit retry.
+  binary-install success, including cause-specific retry or manual recovery
+  guidance rather than an unconditional instruction to rerun.
 - Failure or conflict with explicit skill installation: nonzero exit status,
   clearly stating whether binaries or some skills were already installed.
 
@@ -153,7 +206,14 @@ using mocked prompts/network and temporary homes; do not touch real agent homes.
   invalid input, all four targets, environment overrides, and shared-path notices.
 - Cover safe extraction, unexpected payloads, network errors, resource limits,
   filesystem permissions, existing identical/conflicting files, symlinks,
-  partial success, cleanup, and idempotent reruns.
+  partial success, cleanup, and same-bundle idempotent reruns.
+- Cover a release advancing between successful or partial installation attempts:
+  existing content stays untouched, conflicts and mixed-version risk are reported,
+  and manual recovery guidance does not imply automatic updates or deletion.
+- Cover anonymous/authenticated metadata requests, expanded `--gh-token` help,
+  rejection of cross-origin authenticated redirects, token-free archive requests
+  and logs, and 403/429 guidance for anonymous limits, authenticated limits, and
+  authorization failures. Preserve existing kubelogin authentication tests.
 - Check Windows path rules in unit tests and run platform-specific smoke checks
   where available. Exercise the numbered selector in a terminal.
 - Validate a real released payload in a temporary destination without installing
@@ -169,6 +229,10 @@ using mocked prompts/network and temporary homes; do not touch real agent homes.
 - Installed Knack 0.14.0 provides yes/no, text, and single-choice prompts, not a
   checkbox/multi-select widget. Read-only mocked probes confirmed this behavior.
 - Three-state flag behavior: `azure.cli.core.commands.parameters.get_three_state_flag`.
+- Existing GitHub token help: ACS `_params.py:1026`; kubelogin authenticated
+  release lookup and rate-limit fallback: `custom.py:2585–2620`, with tests in
+  `tests/latest/test_custom.py:822–884`. New skills requests need their own
+  explicit credential/redirect policy without changing those existing behaviors.
 - Distribution and upstream installation guidance:
   <https://github.com/microsoft/azure-skills>.
 - Agent discovery reference implementation:
