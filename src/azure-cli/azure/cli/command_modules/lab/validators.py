@@ -115,7 +115,10 @@ def _validate_expiration_date(args):
     if has_value(args.expiration_date):
         import datetime
         import dateutil.parser
-        if datetime.datetime.utcnow() >= dateutil.parser.parse(args.expiration_date.to_serialized_data()):
+        # AAZDateTimeArg normalizes --expiration-date into an offset-aware UTC timestamp, so "now"
+        # has to be offset-aware too. datetime.utcnow() is naive and the comparison raises TypeError.
+        if datetime.datetime.now(datetime.timezone.utc) >= \
+                dateutil.parser.parse(args.expiration_date.to_serialized_data()):
             raise ArgumentUsageError(
                 "Expiration date '{}' must be in future.".format(args.expiration_date.to_serialized_data()))
 
