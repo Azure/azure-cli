@@ -389,7 +389,9 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
             owned = True
             license_buffer = io.BytesIO()
             with bundle.open(license_member) as source:
-                _copy_bounded(source, license_buffer, min(FILE_LIMIT, EXPANDED_LIMIT))
+                written = _copy_bounded(source, license_buffer, min(FILE_LIMIT, EXPANDED_LIMIT))
+            if written != license_member.file_size:
+                raise CLIError('Azure skills archive LICENSE did not match its advertised size.')
             license_content = license_buffer.getvalue()
             total = 0
             for member, parts in payload:
@@ -399,7 +401,10 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                     continue
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 with bundle.open(member) as source, destination.open('xb') as output:
-                    total += _copy_bounded(source, output, min(FILE_LIMIT, EXPANDED_LIMIT - total))
+                    written = _copy_bounded(source, output, min(FILE_LIMIT, EXPANDED_LIMIT - total))
+                if written != member.file_size:
+                    raise CLIError(f'Azure skills archive member {member.filename} did not match its advertised size.')
+                total += written
                 if destination.name == 'SKILL.md':
                     _validate_skill_frontmatter(destination)
                 if os.name == 'posix':

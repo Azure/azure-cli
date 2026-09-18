@@ -220,11 +220,11 @@ class ArchiveTests(unittest.TestCase):
             self.assert_rejected('size limit')
 
     def test_actual_aggregate_budget_is_shared_across_streamed_members(self):
-        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/one': b'x', 'demo/two': b'y'})
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/one': b'x' * 100, 'demo/two': b'y'})
         original_open = zipfile.ZipFile.open
 
         def open_member(archive, member, *args, **kwargs):
-            if isinstance(member, zipfile.ZipInfo) and member.filename.rsplit('/', 1)[-1] in ('one', 'two'):
+            if isinstance(member, zipfile.ZipInfo) and member.filename.endswith('/two'):
                 return io.BytesIO(b'x' * 100)
             return original_open(archive, member, *args, **kwargs)
 
@@ -251,6 +251,30 @@ class ArchiveTests(unittest.TestCase):
                     data = b'not a zip archive'
                 self.archive.write_bytes(data)
                 self.assert_rejected()
+
+    def assert_crc_valid_short_member_rejected(self, name, content):
+        with zipfile.ZipFile(self.archive) as bundle:
+            local = bundle.getinfo(name).header_offset
+        data = bytearray(self.archive.read_bytes())
+        central = data.index(name.encode(), data.index(b'PK\x01\x02')) - 46
+        # Keep the actual bytes, compressed size, and CRC intact; overstate only the expanded size.
+        struct.pack_into('<I', data, local + 22, len(content) + 1)
+        struct.pack_into('<I', data, central + 24, len(content) + 1)
+        self.archive.write_bytes(data)
+        with zipfile.ZipFile(self.archive) as bundle:
+            self.assertEqual(bundle.getinfo(name).file_size, len(content) + 1)
+            self.assertEqual(bundle.read(name), content)
+            self.assertIsNone(bundle.testzip(), 'The malformed member must still pass CRC validation')
+        self.assert_rejected('advertised size')
+        self.assertEqual(self.archive.read_bytes(), data)
+
+    def test_rejects_crc_valid_empty_license_advertised_as_nonempty(self):
+        make_bundle(self.archive, license_content=b'', compression=zipfile.ZIP_STORED)
+        self.assert_crc_valid_short_member_rejected('bundle/LICENSE', b'')
+
+    def test_rejects_crc_valid_resource_shorter_than_advertised(self):
+        make_bundle(self.archive, compression=zipfile.ZIP_STORED)
+        self.assert_crc_valid_short_member_rejected(_PAYLOAD + 'demo/references/guide.md', b'Reference content\n')
 
     def test_requires_payload_and_immediate_skill_file_in_every_top_level_tree(self):
         for files in ({}, {'SKILL.md': _SKILL}, {'demo/readme': 'missing'},
