@@ -3,13 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import errno
 import importlib
 import io
 import os
+import shutil
 import socket
 import ssl
 import stat
 import struct
+import subprocess
 import tempfile
 import threading
 import time
@@ -380,6 +383,535 @@ class ArchiveTests(unittest.TestCase):
 
         with mock.patch.object(Path, 'open', fail_resource):
             self.assert_rejected()
+
+
+class PublicationTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.archive = self.root / 'bundle.zip'
+        make_bundle(self.archive)
+        self.trees = skills.stage_bundle(self.archive, self.root / 'staged')
+        self.destination = self.root / 'home/.pi/agent/skills'
+        self.target = skills.AgentTarget('pi', 'Pi', self.destination, True)
+        self.skill = self.destination / 'demo'
+        self.lock = self.destination.parent / '.az-azure-skills.lock'
+
+    def publish(self):
+        return skills.publish_skills(self.trees, [self.target])
+
+    def assert_clean(self):
+        self.assertFalse(self.lock.exists())
+        self.assertEqual(sorted(path.name for path in self.destination.parent.iterdir()), ['skills'])
+        self.assertEqual((self.trees[0] / 'references/guide.md').read_bytes(), b'Reference content\n')
+
+    def make_link(self, link, target, directory=True):
+        try:
+            link.symlink_to(target, target_is_directory=directory)
+        except NotImplementedError as error:
+            self.skipTest(f'Symlink creation unavailable: {error}')
+        except OSError as error:
+            if error.errno not in (errno.EPERM, errno.EACCES, errno.ENOSYS, errno.ENOTSUP):
+                raise
+            self.skipTest(f'Symlink creation unavailable: {error}')
+
+    def test_same_bundle_is_noop_and_local_edits_are_preserved(self):
+        first = self.publish()
+        self.assertEqual(first.installed, [self.skill])
+        self.assertEqual(first.already_present, [])
+        self.assertEqual(first.conflicts, [])
+        self.assertEqual(first.failures, [])
+        self.assertEqual((self.skill / 'LICENSE.azure-skills').read_bytes(), _LICENSE)
+        self.assertEqual((self.skill / 'child/SKILL.md').read_bytes(),
+                         b'---\nname: child\ndescription: Nested skill\n---\n')
+        second = self.publish()
+        self.assertEqual(second.already_present, [self.skill])
+        self.assertEqual(second.installed, [])
+        guide = self.skill / 'references/guide.md'
+        guide.write_bytes(b'local edit\n')
+        third = self.publish()
+        self.assertEqual(third.conflicts, [self.skill])
+        self.assertEqual(third.installed, [])
+        self.assertEqual(third.failures, [])
+        self.assertEqual(guide.read_bytes(), b'local edit\n')
+        self.assert_clean()
+
+    def test_report_defaults_are_independent_between_lists_and_invocations(self):
+        first, second = skills.InstallReport(), skills.InstallReport()
+        first.installed.append(self.skill)
+        first.failures.append((self.skill, 'failure'))
+        self.assertEqual(first.already_present, [])
+        self.assertEqual(first.conflicts, [])
+        self.assertEqual(second.installed, [])
+        self.assertEqual(second.already_present, [])
+        self.assertEqual(second.conflicts, [])
+        self.assertEqual(second.failures, [])
+        self.assertEqual(self.publish().installed, [self.skill])
+        self.assertEqual(self.publish().failures, [])
+
+    def test_extra_destination_files_conflict_without_touching_unrelated_content(self):
+        self.publish()
+        extra = self.skill / 'local.txt'
+        extra.write_bytes(b'local')
+        unrelated = self.destination / 'user-skill'
+        unrelated.mkdir()
+        (unrelated / 'SKILL.md').write_bytes(b'user content')
+        report = self.publish()
+        self.assertEqual(report.conflicts, [self.skill])
+        self.assertEqual(extra.read_bytes(), b'local')
+        self.assertEqual((unrelated / 'SKILL.md').read_bytes(), b'user content')
+        self.assert_clean()
+
+    def test_existing_empty_directory_and_regular_file_are_conflicts(self):
+        self.destination.mkdir(parents=True)
+        for directory in (True, False):
+            with self.subTest(directory=directory):
+                if directory:
+                    self.skill.mkdir()
+                else:
+                    self.skill.write_bytes(b'old file')
+                report = self.publish()
+                self.assertEqual(report.conflicts, [self.skill])
+                self.assertEqual(report.failures, [])
+                if directory:
+                    self.assertEqual(list(self.skill.iterdir()), [])
+                    self.skill.rmdir()
+                else:
+                    self.assertEqual(self.skill.read_bytes(), b'old file')
+                    self.skill.unlink()
+                self.assert_clean()
+
+    def test_complete_tree_comparison_checks_names_bytes_types_and_license(self):
+        self.publish()
+        changes = ['same-size-bytes', 'license', 'missing', 'case', 'type', 'empty-directory']
+        for change in changes:
+            with self.subTest(change=change):
+                shutil.rmtree(self.skill)
+                shutil.copytree(self.trees[0], self.skill)
+                guide = self.skill / 'references/guide.md'
+                if change == 'same-size-bytes':
+                    before = guide.stat()
+                    guide.write_bytes(b'X' * before.st_size)
+                    os.utime(guide, ns=(before.st_atime_ns, before.st_mtime_ns))
+                elif change == 'license':
+                    (self.skill / 'LICENSE.azure-skills').write_bytes(b'other license')
+                elif change == 'missing':
+                    guide.unlink()
+                elif change == 'case':
+                    guide.rename(guide.with_name('Guide.md'))
+                elif change == 'type':
+                    guide.unlink()
+                    guide.mkdir()
+                else:
+                    (self.skill / 'empty').mkdir()
+                self.assertFalse(skills._same_tree(self.trees[0], self.skill))
+                self.assertEqual(self.publish().conflicts, [self.skill])
+                self.assert_clean()
+
+    @unittest.skipUnless(os.name == 'posix', 'Unix executable permissions')
+    def test_publication_retains_executable_bits_and_ignores_other_permission_changes(self):
+        source = self.trees[0] / 'references/guide.md'
+        source.chmod(0o751)
+        self.publish()
+        guide = self.skill / 'references/guide.md'
+        self.assertEqual(guide.stat().st_mode & 0o111, 0o111)
+        guide.chmod(0o555)
+        self.assertEqual(self.publish().already_present, [self.skill])
+        guide.chmod(0o554)
+        self.assertEqual(self.publish().conflicts, [self.skill])
+        self.assertEqual(guide.stat().st_mode & 0o777, 0o554)
+
+    def test_symlinked_root_ancestor_and_dangling_ancestor_fail_before_writes(self):
+        for relative, dangling in [('skills', False), ('parent', False), ('parent', True)]:
+            with self.subTest(relative=relative, dangling=dangling), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                outside = root / 'outside'
+                if not dangling:
+                    outside.mkdir()
+                link = root / relative
+                self.make_link(link, outside)
+                destination = link if relative == 'skills' else link / 'agent/skills'
+                target = skills.AgentTarget('pi', 'Pi', destination, True)
+                report = skills.publish_skills(self.trees, [target])
+                self.assertEqual([path for path, _ in report.failures], [destination / 'demo'])
+                self.assertRegex(report.failures[0][1], 'symlink|reparse')
+                self.assertEqual(report.installed, [])
+                self.assertTrue(link.is_symlink())
+                if not dangling:
+                    self.assertEqual(list(outside.iterdir()), [])
+                else:
+                    self.assertFalse(outside.exists())
+                self.assertEqual(sorted(path.name for path in root.iterdir()),
+                                 sorted([relative] + ([] if dangling else ['outside'])))
+
+    def test_parent_traversal_does_not_hide_symlink_before_normalization(self):
+        outside = self.root / 'outside'
+        outside.mkdir()
+        link = self.root / 'alias'
+        self.make_link(link, outside)
+        destination = link / '../skills'
+        report = skills.publish_skills(self.trees, [skills.AgentTarget('pi', 'Pi', destination, True)])
+        self.assertEqual(len(report.failures), 1)
+        self.assertFalse((self.root / 'skills').exists())
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_symlinked_skill_entries_including_dangling_are_conflicts(self):
+        self.destination.mkdir(parents=True)
+        for target in (self.trees[0], self.root / 'missing'):
+            with self.subTest(target=target):
+                self.make_link(self.skill, target)
+                report = self.publish()
+                self.assertEqual(report.conflicts, [self.skill])
+                self.assertEqual(report.failures, [])
+                self.assertTrue(self.skill.is_symlink())
+                self.skill.unlink()
+                self.assert_clean()
+
+    def test_comparison_never_follows_nested_or_root_symlinks(self):
+        self.publish()
+        guide = self.skill / 'references/guide.md'
+        guide.unlink()
+        self.make_link(guide, self.trees[0] / 'references/guide.md', directory=False)
+        self.assertFalse(skills._same_tree(self.trees[0], self.skill))
+        self.assertFalse(skills._same_tree(self.skill, self.trees[0]))
+        self.assertEqual(self.publish().conflicts, [self.skill])
+        guide.unlink()
+        self.make_link(guide, self.root / 'absent', directory=False)
+        self.assertFalse(skills._same_tree(self.trees[0], self.skill))
+        alias = self.root / 'alias'
+        self.make_link(alias, self.trees[0])
+        self.assertFalse(skills._same_tree(self.trees[0], alias))
+        self.assertFalse(skills._same_tree(alias, self.trees[0]))
+
+    @unittest.skipUnless(hasattr(os, 'mkfifo'), 'FIFO creation unavailable')
+    def test_special_destination_file_is_conflict_without_reading_it(self):
+        self.publish()
+        guide = self.skill / 'references/guide.md'
+        guide.unlink()
+        os.mkfifo(guide)
+        self.assertEqual(self.publish().conflicts, [self.skill])
+        self.assertTrue(stat.S_ISFIFO(guide.lstat().st_mode))
+
+    def test_normalized_aliases_are_deduplicated_without_losing_selected_agent_labels(self):
+        self.destination.mkdir(parents=True)
+        other = skills.AgentTarget('claude-code', 'Claude Code',
+                                   self.destination.parent / 'skills/../skills', True)
+        targets = [self.target, other]
+        report = skills.publish_skills(self.trees, targets)
+        self.assertEqual(report.installed, [self.skill])
+        self.assertEqual(report.already_present, [])
+        self.assertEqual(report.failures, [])
+        self.assertEqual([(target.identifier, target.label) for target in targets],
+                         [('pi', 'Pi'), ('claude-code', 'Claude Code')])
+        self.assertEqual(skills.publish_skills(self.trees, targets).already_present, [self.skill])
+
+    def test_symlink_alias_is_not_deduplicated_into_an_approved_destination(self):
+        self.destination.mkdir(parents=True)
+        alias = self.root / 'alias'
+        self.make_link(alias, self.destination)
+        targets = [self.target, skills.AgentTarget('claude-code', 'Claude Code', alias, True)]
+        report = skills.publish_skills(self.trees, targets)
+        self.assertEqual(report.installed, [self.skill])
+        self.assertEqual([path for path, _ in report.failures], [alias / 'demo'])
+        self.assertTrue(alias.is_symlink())
+
+    def test_preexisting_lock_is_preserved_with_manual_recovery_guidance(self):
+        self.destination.parent.mkdir(parents=True)
+        self.lock.write_bytes(b'existing lock')
+        report = self.publish()
+        self.assertEqual(report.installed, [])
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertRegex(report.failures[0][1], 'no installation is running')
+        self.assertIn('manually', report.failures[0][1])
+        self.assertEqual(self.lock.read_bytes(), b'existing lock')
+        self.assertFalse(self.destination.exists())
+        self.assertEqual(list(self.destination.parent.iterdir()), [self.lock])
+
+    def test_preexisting_symlink_lock_is_not_followed_or_removed(self):
+        self.destination.parent.mkdir(parents=True)
+        outside = self.root / 'missing-lock-target'
+        self.make_link(self.lock, outside, directory=False)
+        report = self.publish()
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertTrue(self.lock.is_symlink())
+        self.assertFalse(outside.exists())
+        self.assertFalse(self.destination.exists())
+
+    @unittest.skipUnless(os.name == 'posix' and os.geteuid() != 0, 'Requires unprivileged Unix permissions')
+    def test_real_permission_failure_is_per_path_and_does_not_touch_existing_files(self):
+        self.destination.parent.mkdir(parents=True)
+        keep = self.destination.parent / 'keep'
+        keep.write_bytes(b'keep')
+        self.destination.parent.chmod(0o500)
+        try:
+            report = self.publish()
+        finally:
+            self.destination.parent.chmod(0o700)
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertRegex(report.failures[0][1].lower(), 'permission|denied')
+        self.assertEqual(keep.read_bytes(), b'keep')
+        self.assertFalse(self.lock.exists())
+        self.assertFalse(self.destination.exists())
+
+    def test_file_ancestor_is_a_failure_and_is_not_changed(self):
+        self.destination.parent.mkdir(parents=True)
+        self.destination.write_bytes(b'keep root file')
+        report = self.publish()
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertEqual(self.destination.read_bytes(), b'keep root file')
+        self.assertFalse(self.lock.exists())
+
+    def test_cooperative_concurrent_attempt_fails_lock_while_copy_is_outside_skills_root(self):
+        entered, release = threading.Event(), threading.Event()
+        results, observations = [], []
+        original_copytree = shutil.copytree
+
+        def pause_copy(source, destination, *args, **kwargs):
+            if Path(source) == self.trees[0]:
+                temporary = Path(destination).parent
+                observations.append((temporary.parent == self.destination.parent,
+                                     temporary.name.startswith('.'),
+                                     self.lock.exists(), self.skill.exists(),
+                                     self.lock.stat().st_mode & 0o777))
+                entered.set()
+                if not release.wait(5):
+                    raise OSError('Timed out waiting for concurrent publication test')
+            return original_copytree(source, destination, *args, **kwargs)
+
+        with mock.patch.object(skills.shutil, 'copytree', pause_copy):
+            worker = threading.Thread(target=lambda: results.append(self.publish()))
+            worker.start()
+            try:
+                self.assertTrue(entered.wait(5), 'Publication did not reach private copying')
+                concurrent = self.publish()
+                self.assertEqual([path for path, _ in concurrent.failures], [self.skill])
+                self.assertEqual(concurrent.installed, [])
+                self.assertTrue(self.lock.exists(), 'Losing attempt must not remove another installer lock')
+            finally:
+                release.set()
+                worker.join(5)
+        self.assertFalse(worker.is_alive())
+        self.assertEqual(observations[0][:4], (True, True, True, False))
+        if os.name == 'posix':
+            self.assertEqual(observations[0][4], 0o600)
+        self.assertEqual(results[0].installed, [self.skill])
+        self.assertEqual(self.publish().already_present, [self.skill])
+        self.assert_clean()
+
+    def test_copy_failure_cleans_partial_sibling_but_not_unowned_siblings(self):
+        self.destination.mkdir(parents=True)
+        unrelated = self.destination.parent / '.az-azure-skills-user'
+        unrelated.mkdir()
+        (unrelated / 'keep').write_bytes(b'keep')
+        original_copy = shutil.copyfile
+
+        def fail_copy(source, destination, *args, **kwargs):
+            result = original_copy(source, destination, *args, **kwargs)
+            if Path(source).name == 'guide.md':
+                raise OSError('injected disk failure after writing bytes')
+            return result
+
+        with mock.patch.object(skills.shutil, 'copyfile', fail_copy):
+            report = self.publish()
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertIn('injected disk failure', report.failures[0][1])
+        self.assertFalse(self.skill.exists())
+        self.assertFalse(self.lock.exists())
+        self.assertEqual((unrelated / 'keep').read_bytes(), b'keep')
+        self.assertEqual(sorted(path.name for path in self.destination.parent.iterdir()),
+                         ['.az-azure-skills-user', 'skills'])
+
+    def test_later_skill_failure_keeps_success_and_same_bundle_retry_is_noop_for_it(self):
+        make_bundle(self.archive, {'alpha/SKILL.md': _SKILL, 'beta/SKILL.md': _SKILL})
+        self.trees = skills.stage_bundle(self.archive, self.root / 'two-skills')
+        original_rename = Path.rename
+
+        def fail_beta(path, destination):
+            if Path(destination).name == 'beta':
+                raise PermissionError('injected beta rename failure')
+            return original_rename(path, destination)
+
+        with mock.patch.object(Path, 'rename', fail_beta):
+            first = self.publish()
+        self.assertEqual(first.installed, [self.destination / 'alpha'])
+        self.assertEqual([path for path, _ in first.failures], [self.destination / 'beta'])
+        self.assertFalse((self.destination / 'beta').exists())
+        self.assertEqual((self.destination / 'alpha/SKILL.md').read_bytes(), _SKILL.encode())
+        self.assertFalse(self.lock.exists())
+        self.assertEqual(list(self.destination.parent.iterdir()), [self.destination])
+        second = self.publish()
+        self.assertEqual(second.already_present, [self.destination / 'alpha'])
+        self.assertEqual(second.installed, [self.destination / 'beta'])
+        self.assertEqual(second.failures, [])
+
+    def test_failure_at_one_agent_does_not_stop_another_destination(self):
+        self.destination.parent.mkdir(parents=True)
+        self.lock.write_bytes(b'busy')
+        other = self.root / 'other/skills'
+        report = skills.publish_skills(self.trees, [self.target, skills.AgentTarget('codex', 'Codex', other, True)])
+        self.assertEqual(report.installed, [other / 'demo'])
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertEqual(self.lock.read_bytes(), b'busy')
+
+    def test_cross_release_retry_preserves_old_content_and_reports_conflict_alongside_new_skill(self):
+        self.publish()
+        second_archive = self.root / 'second.zip'
+        make_bundle(second_archive, {'demo/SKILL.md': _SKILL + 'New release\n', 'new/SKILL.md': _SKILL})
+        second_trees = skills.stage_bundle(second_archive, self.root / 'second')
+        report = skills.publish_skills(second_trees, [self.target])
+        self.assertEqual(report.conflicts, [self.skill])
+        self.assertEqual(report.installed, [self.destination / 'new'])
+        self.assertEqual(report.already_present, [])
+        self.assertEqual(report.failures, [])
+        self.assertEqual((self.skill / 'SKILL.md').read_bytes(), _SKILL.encode())
+        self.assertEqual((self.skill / 'references/guide.md').read_bytes(), b'Reference content\n')
+        self.assertEqual((self.destination / 'new/LICENSE.azure-skills').read_bytes(), _LICENSE)
+        repeated = skills.publish_skills(second_trees, [self.target])
+        self.assertEqual(repeated.conflicts, [self.skill])
+        self.assertEqual(repeated.already_present, [self.destination / 'new'])
+        self.assertEqual(repeated.installed, [])
+        self.assert_clean()
+
+    def test_partial_install_retry_with_new_release_does_not_update_earlier_success(self):
+        make_bundle(self.archive, {'alpha/SKILL.md': _SKILL, 'beta/SKILL.md': _SKILL})
+        first_trees = skills.stage_bundle(self.archive, self.root / 'first-release')
+        original_rename = Path.rename
+
+        def fail_beta(path, destination):
+            if Path(destination).name == 'beta':
+                raise PermissionError('injected first-release failure')
+            return original_rename(path, destination)
+
+        with mock.patch.object(Path, 'rename', fail_beta):
+            first = skills.publish_skills(first_trees, [self.target])
+        self.assertEqual(first.installed, [self.destination / 'alpha'])
+        self.assertEqual([path for path, _ in first.failures], [self.destination / 'beta'])
+        make_bundle(self.archive, {'alpha/SKILL.md': _SKILL + 'new alpha\n',
+                                   'beta/SKILL.md': _SKILL + 'new beta\n'})
+        second_trees = skills.stage_bundle(self.archive, self.root / 'next-release')
+        second = skills.publish_skills(second_trees, [self.target])
+        self.assertEqual(second.conflicts, [self.destination / 'alpha'])
+        self.assertEqual(second.installed, [self.destination / 'beta'])
+        self.assertEqual(second.already_present, [])
+        self.assertEqual((self.destination / 'alpha/SKILL.md').read_bytes(), _SKILL.encode())
+        self.assertEqual((self.destination / 'beta/SKILL.md').read_bytes(), (_SKILL + 'new beta\n').encode())
+        self.assert_clean()
+
+    def test_cancellation_with_cleanup_failure_still_stops_and_reports_cleanup_context(self):
+        make_bundle(self.archive, {'alpha/SKILL.md': _SKILL, 'beta/SKILL.md': _SKILL, 'gamma/SKILL.md': _SKILL})
+        self.trees = skills.stage_bundle(self.archive, self.root / 'three-skills')
+        original_copytree, original_rmtree = shutil.copytree, shutil.rmtree
+
+        def interrupt_beta(source, destination, *args, **kwargs):
+            if Path(source).name == 'beta':
+                Path(destination).mkdir()
+                raise KeyboardInterrupt()
+            return original_copytree(source, destination, *args, **kwargs)
+
+        def fail_cleanup(path, *args, **kwargs):
+            if (Path(path) / 'beta').exists():
+                raise PermissionError(errno.EACCES, 'injected cleanup failure', str(path))
+            return original_rmtree(path, *args, **kwargs)
+
+        with mock.patch.object(skills.shutil, 'copytree', interrupt_beta), \
+                mock.patch.object(skills.shutil, 'rmtree', fail_cleanup):
+            report = self.publish()
+        self.assertEqual(report.installed, [self.destination / 'alpha'])
+        self.assertEqual([path for path, _ in report.failures], [self.destination / 'beta'])
+        self.assertIn('cancel', report.failures[0][1].lower())
+        self.assertIn('injected cleanup failure', report.failures[0][1])
+        self.assertFalse(self.lock.exists())
+        self.assertEqual(list(self.destination.iterdir()), [self.destination / 'alpha'])
+
+    def test_cancellation_returns_prior_success_and_stops_remaining_skills_and_agents(self):
+        make_bundle(self.archive, {'alpha/SKILL.md': _SKILL, 'beta/SKILL.md': _SKILL, 'gamma/SKILL.md': _SKILL})
+        self.trees = skills.stage_bundle(self.archive, self.root / 'three-skills')
+        original_copytree = shutil.copytree
+        other = self.root / 'other/skills'
+
+        def interrupt_beta(source, destination, *args, **kwargs):
+            if Path(source).name == 'beta':
+                Path(destination).mkdir()
+                (Path(destination) / 'partial').write_bytes(b'partial')
+                raise KeyboardInterrupt()
+            return original_copytree(source, destination, *args, **kwargs)
+
+        with mock.patch.object(skills.shutil, 'copytree', interrupt_beta):
+            report = skills.publish_skills(self.trees, [self.target,
+                                                     skills.AgentTarget('codex', 'Codex', other, True)])
+        self.assertEqual(report.installed, [self.destination / 'alpha'])
+        self.assertEqual([path for path, _ in report.failures], [self.destination / 'beta'])
+        self.assertIn('cancel', report.failures[0][1].lower())
+        self.assertEqual(list(self.destination.iterdir()), [self.destination / 'alpha'])
+        self.assertFalse(other.parent.exists())
+        self.assertFalse(self.lock.exists())
+        self.assertEqual(list(self.destination.parent.iterdir()), [self.destination])
+
+    def test_target_appearing_during_copy_is_not_replaced_even_when_empty(self):
+        original_copytree = shutil.copytree
+
+        def create_conflict(source, destination, *args, **kwargs):
+            result = original_copytree(source, destination, *args, **kwargs)
+            if Path(source) == self.trees[0]:
+                self.skill.mkdir()
+            return result
+
+        with mock.patch.object(skills.shutil, 'copytree', create_conflict):
+            report = self.publish()
+        self.assertEqual(report.conflicts, [self.skill])
+        self.assertEqual(list(self.skill.iterdir()), [])
+        self.assert_clean()
+
+    def test_ancestor_indirection_is_rechecked_after_copy(self):
+        original_copytree = shutil.copytree
+        outside = self.root / 'outside'
+        outside.mkdir()
+        probe = self.root / 'probe-link'
+        self.make_link(probe, outside)
+        probe.unlink()
+
+        def redirect_root(source, destination, *args, **kwargs):
+            result = original_copytree(source, destination, *args, **kwargs)
+            if Path(source) == self.trees[0]:
+                self.destination.rmdir()
+                self.destination.symlink_to(outside, target_is_directory=True)
+            return result
+
+        with mock.patch.object(skills.shutil, 'copytree', redirect_root):
+            report = self.publish()
+        self.assertEqual([path for path, _ in report.failures], [self.skill])
+        self.assertEqual(list(outside.iterdir()), [])
+        self.assertTrue(self.destination.is_symlink())
+        self.assert_clean()
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows junction/reparse-point filesystem unavailable')
+    def test_windows_junctions_in_roots_and_skill_entries_are_unsafe(self):
+        self.destination.parent.mkdir(parents=True)
+        outside = self.root / 'outside'
+        outside.mkdir()
+        for junction in (self.destination, self.skill):
+            with self.subTest(junction=junction):
+                result = subprocess.run(['cmd', '/c', 'mklink', '/J', str(junction), str(outside)],
+                                        capture_output=True, check=False)
+                if result.returncode:
+                    self.skipTest(f'Junction creation unavailable: {result.stderr!r}')
+                try:
+                    report = self.publish()
+                    if junction == self.destination:
+                        self.assertEqual([path for path, _ in report.failures], [self.skill])
+                    else:
+                        self.assertEqual(report.conflicts, [self.skill])
+                    self.assertEqual(list(outside.iterdir()), [])
+                    self.assertEqual(report.installed, [])
+                finally:
+                    junction.rmdir()
+                self.destination.mkdir(exist_ok=True)
+
+    def test_empty_input_does_not_create_destination_or_lock(self):
+        self.assertEqual(skills.publish_skills([], [self.target]), skills.InstallReport())
+        self.assertEqual(skills.publish_skills(self.trees, []), skills.InstallReport())
+        self.assertFalse(self.destination.parent.exists())
 
 
 class _Response(io.BytesIO):

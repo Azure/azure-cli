@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Agent selection, bounded retrieval, and safe staging for optional Azure skills installation."""
+"""Agent selection, bounded retrieval, staging, and publication for optional Azure skills installation."""
 
 import io
 import json
@@ -12,11 +12,12 @@ import re
 import shutil
 import ssl
 import stat
+import tempfile
 import time
 import unicodedata
 import zipfile
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from http.client import HTTPException, HTTPResponse, HTTPSConnection
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -437,6 +438,154 @@ class AgentTarget:
     label: str
     destination: Path
     detected: bool
+
+
+@dataclass
+class InstallReport:
+    installed: list[Path] = field(default_factory=list)
+    already_present: list[Path] = field(default_factory=list)
+    conflicts: list[Path] = field(default_factory=list)
+    failures: list[tuple[Path, str]] = field(default_factory=list)
+
+
+def _is_indirection(info) -> bool:
+    return (stat.S_ISLNK(info.st_mode) or
+            bool(getattr(info, 'st_file_attributes', 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT))
+
+
+def _check_directory_path(path: Path) -> None:
+    # Walk lexically, before normalization: resolving a link would hide the unsafe ancestor.
+    for directory in (*reversed(path.parents), path):
+        try:
+            info = directory.lstat()
+        except FileNotFoundError:
+            continue
+        if _is_indirection(info):
+            raise CLIError(f'Azure skills destination uses a symlink or reparse point: {directory}. '
+                           'Choose a destination without filesystem indirection.')
+        if not stat.S_ISDIR(info.st_mode):
+            raise CLIError(f'Azure skills destination ancestor is not a directory: {directory}.')
+
+
+def _same_tree(source: Path, destination: Path) -> bool:
+    """Compare exact names, bytes, and Unix file executable bits without following tree links."""
+    try:
+        source_info, destination_info = source.lstat(), destination.lstat()
+    except FileNotFoundError:
+        return False
+    if _is_indirection(source_info) or _is_indirection(destination_info):
+        return False
+    if stat.S_ISDIR(source_info.st_mode) and stat.S_ISDIR(destination_info.st_mode):
+        names = sorted(path.name for path in source.iterdir())
+        if names != sorted(path.name for path in destination.iterdir()):
+            return False
+        return all(_same_tree(source / name, destination / name) for name in names)
+    if not (stat.S_ISREG(source_info.st_mode) and stat.S_ISREG(destination_info.st_mode)):
+        return False
+    if source_info.st_size != destination_info.st_size:
+        return False
+    if os.name == 'posix' and (source_info.st_mode & 0o111) != (destination_info.st_mode & 0o111):
+        return False
+    with source.open('rb') as left, destination.open('rb') as right:
+        while True:
+            chunk = left.read(65536)
+            if chunk != right.read(65536):
+                return False
+            if not chunk:
+                return True
+
+
+def _publish_one(source: Path, destination: Path) -> str:
+    """Publish a validated tree under a cooperative lock, never merge an existing entry.
+
+    Checks reject existing indirection, not hostile local writers racing filesystem operations.
+    The caller owns and retains the validated source returned by stage_bundle.
+    """
+    destination = Path.cwd() / destination
+    destination_root = destination.parent
+    _check_directory_path(destination_root)
+    destination_root.parent.mkdir(parents=True, exist_ok=True)
+    _check_directory_path(destination_root)
+    lock_path = destination_root.parent / '.az-azure-skills.lock'
+    try:
+        descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        raise CLIError(f'Azure skills installation lock already exists: {lock_path}. '
+                       'Verify no installation is running before manually addressing this lock; '
+                       'it will not be removed automatically.') from None
+    temporary = None
+    cancelled = False
+    try:
+        os.close(descriptor)
+        _check_directory_path(destination_root)
+        destination_root.mkdir(exist_ok=True)
+        try:
+            destination.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            return 'already_present' if _same_tree(source, destination) else 'conflict'
+
+        # A private sibling keeps incomplete content outside this skills root.
+        temporary = Path(tempfile.mkdtemp(prefix='.az-azure-skills-', dir=destination_root.parent))
+        prepared = temporary / source.name
+        shutil.copytree(source, prepared)
+        _check_directory_path(destination_root)
+        try:
+            destination.lstat()
+        except FileNotFoundError:
+            prepared.rename(destination)
+            return 'installed'
+        return 'conflict'
+    except KeyboardInterrupt:
+        cancelled = True
+        raise
+    finally:
+        try:
+            try:
+                if temporary is not None:
+                    shutil.rmtree(temporary)
+            finally:
+                # Only reached after this invocation acquired the exclusive lock.
+                lock_path.unlink()
+        except OSError as error:
+            if cancelled:
+                # Cleanup failure must not turn cancellation into a recoverable per-path error.
+                raise KeyboardInterrupt(f'Cleanup failed: {error}') from error
+            raise
+
+
+def publish_skills(skill_dirs: list[Path], targets: list[AgentTarget]) -> InstallReport:
+    """Record per-path first-install outcomes, not a coherent-bundle or update guarantee."""
+    report = InstallReport()
+    seen = set()
+    for target in targets:
+        for source in skill_dirs:
+            destination = Path.cwd() / target.destination / source.name
+            try:
+                _check_directory_path(destination.parent)
+                destination = Path(os.path.abspath(destination))
+                key = os.path.normcase(str(destination))
+                if key in seen:
+                    continue
+                seen.add(key)
+                # Keep the selected AgentTargets intact, including all labels for shared destinations.
+                result = _publish_one(source, destination)
+                if result == 'installed':
+                    report.installed.append(destination)
+                elif result == 'already_present':
+                    report.already_present.append(destination)
+                else:
+                    report.conflicts.append(destination)
+            except KeyboardInterrupt as error:
+                message = 'Azure skills publication cancelled; earlier installations remain.'
+                if str(error):
+                    message += f' {error}'
+                report.failures.append((destination, message))
+                return report
+            except (OSError, CLIError) as error:
+                report.failures.append((destination, str(error)))
+    return report
 
 
 def _config_directory(variable: str, default: Path) -> Path:
