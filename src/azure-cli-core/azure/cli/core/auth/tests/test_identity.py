@@ -45,6 +45,24 @@ with open(TEST_CERT) as f:
 
 class TestIdentity(unittest.TestCase):
 
+    @mock.patch("azure.cli.core.auth.identity.check_result", return_value={"username": "user1"})
+    @mock.patch("azure.cli.core.auth.util.read_response_templates", return_value=("success", "error"))
+    @mock.patch("azure.cli.core.auth.identity.wsl_browser_open")
+    def test_login_with_auth_code_uses_wsl_browser_open(self, wsl_browser_open_mock, _, check_result_mock):
+        identity = Identity.__new__(Identity)
+        identity._is_adfs = False
+        msal_app_mock = mock.MagicMock()
+        msal_app_mock.CONSOLE_WINDOW_HANDLE = "console"
+        msal_app_mock.acquire_token_interactive.return_value = {"access_token": "token"}
+
+        with mock.patch.object(Identity, "_msal_app", new_callable=mock.PropertyMock, return_value=msal_app_mock):
+            result = identity.login_with_auth_code(["scope"])
+
+        self.assertEqual(result, {"username": "user1"})
+        wsl_browser_open_mock.assert_called_once()
+        msal_app_mock.acquire_token_interactive.assert_called_once()
+        check_result_mock.assert_called_once_with({"access_token": "token"})
+
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
     @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
