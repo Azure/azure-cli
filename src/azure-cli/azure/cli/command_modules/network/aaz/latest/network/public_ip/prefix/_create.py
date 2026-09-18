@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2025-09-01"],
         ]
     }
 
@@ -122,6 +122,13 @@ class Create(AAZCommand):
         ip_tags_list.Element = AAZObjectArg()
 
         _element = cls._args_schema.ip_tags_list.Element
+        _element.first_party_service_tag_id = AAZResourceIdArg(
+            options=["first-party-service-tag-id"],
+            help="The resource ID of the first party service tag associated with the IP tag.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/firstPartyServiceTags/{}",
+            ),
+        )
         _element.ip_tag_type = AAZStrArg(
             options=["ip-tag-type"],
             help="The IP tag type. Example: FirstPartyUsage.",
@@ -143,27 +150,27 @@ class Create(AAZCommand):
         )
         return cls._args_schema
 
-    _args_sub_resource_create = None
+    _args_common_sub_resource_create = None
 
     @classmethod
-    def _build_args_sub_resource_create(cls, _schema):
-        if cls._args_sub_resource_create is not None:
-            _schema.id = cls._args_sub_resource_create.id
+    def _build_args_common_sub_resource_create(cls, _schema):
+        if cls._args_common_sub_resource_create is not None:
+            _schema.id = cls._args_common_sub_resource_create.id
             return
 
-        cls._args_sub_resource_create = AAZObjectArg()
+        cls._args_common_sub_resource_create = AAZObjectArg()
 
-        sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
+        common_sub_resource_create = cls._args_common_sub_resource_create
+        common_sub_resource_create.id = AAZStrArg(
             options=["id"],
             help="Resource ID.",
         )
 
-        _schema.id = cls._args_sub_resource_create.id
+        _schema.id = cls._args_common_sub_resource_create.id
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.PublicIPPrefixesCreateOrUpdate(ctx=self.ctx)()
+        yield self.PublicIpPrefixesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -178,7 +185,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PublicIPPrefixesCreateOrUpdate(AAZHttpOperation):
+    class PublicIpPrefixesCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -242,7 +249,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -296,6 +303,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.ipTags[]")
             if _elements is not None:
+                _elements.set_prop("firstPartyServiceTagId", AAZStrType, ".first_party_service_tag_id")
                 _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
                 _elements.set_prop("tag", AAZStrType, ".tag")
 
@@ -361,7 +369,7 @@ class Create(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -373,7 +381,7 @@ class Create(AAZCommand):
                 serialized_name="loadBalancerFrontendIpConfiguration",
                 flags={"read_only": True},
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -395,11 +403,18 @@ class Create(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.upgraded_to_v2 = AAZBoolType(
+                serialized_name="upgradedToV2",
+                flags={"read_only": True},
+            )
 
             ip_tags = cls._schema_on_200_201.properties.ip_tags
             ip_tags.Element = AAZObjectType()
 
             _element = cls._schema_on_200_201.properties.ip_tags.Element
+            _element.first_party_service_tag_id = AAZStrType(
+                serialized_name="firstPartyServiceTagId",
+            )
             _element.ip_tag_type = AAZStrType(
                 serialized_name="ipTagType",
             )
@@ -428,6 +443,7 @@ class Create(AAZCommand):
             properties.idle_timeout_in_minutes = AAZIntType(
                 serialized_name="idleTimeoutInMinutes",
             )
+            properties.nat64 = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -448,33 +464,37 @@ class Create(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.service_gateway = AAZObjectType(
+                serialized_name="serviceGateway",
+            )
+            _CreateHelper._build_schema_common_sub_resource_read(properties.service_gateway)
             properties.source_virtual_network = AAZObjectType(
                 serialized_name="sourceVirtualNetwork",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.source_virtual_network)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
 
             public_ip_addresses = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_addresses_v6 = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_addresses_v6
             public_ip_addresses_v6.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_addresses_v6.Element)
 
             public_ip_prefixes = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_prefixes.Element)
 
             public_ip_prefixes_v6 = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_prefixes_v6
             public_ip_prefixes_v6.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200_201.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _CreateHelper._build_schema_sub_resource_read(subnets.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200_201.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -508,27 +528,27 @@ class _CreateHelper:
     """Helper class for Create"""
 
     @classmethod
-    def _build_schema_sub_resource_create(cls, _builder):
+    def _build_schema_common_sub_resource_create(cls, _builder):
         if _builder is None:
             return
         _builder.set_prop("id", AAZStrType, ".id")
 
-    _schema_sub_resource_read = None
+    _schema_common_sub_resource_read = None
 
     @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
             flags={"read_only": True}
         )
 
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
 
-        _schema.id = cls._schema_sub_resource_read.id
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Create"]
