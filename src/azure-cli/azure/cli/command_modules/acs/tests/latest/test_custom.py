@@ -4,7 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import hashlib
+import io
 import shutil
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
@@ -25,9 +28,16 @@ from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
+    _download_aks_desktop_asset,
+    _extract_aks_desktop_archive,
+    _get_aks_desktop_platform,
+    _get_aks_desktop_release,
     _get_command_context,
     _get_latest_kubelogin_version,
+    _launch_aks_desktop_installer,
+    _select_aks_desktop_asset,
     _update_addons,
+    aks_install_desktop,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
     aks_agentpool_auto_scale_update,
@@ -64,8 +74,11 @@ from azure.mgmt.containerservice.models import (
 )
 from azure.cli.core.azclierror import (
     ClientRequestError,
+    FileOperationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
+    ResourceNotFoundError,
+    ValidationError,
 )
 
 
@@ -947,6 +960,301 @@ class AcsCustomCommandTest(unittest.TestCase):
 
                 with self.assertRaises(ClientRequestError):
                     _get_latest_kubelogin_version('azurecloud')
+
+    def test_aks_install_desktop_platform(self):
+        cases = [
+            ('Windows', 'AMD64', ('win', 'x64')),
+            ('Windows', 'arm64', ('win', 'arm64')),
+            ('Darwin', 'x86_64', ('mac', 'x64')),
+            ('Darwin', 'aarch64', ('mac', 'arm64')),
+            ('Linux', 'x86_64', ('linux', 'x64')),
+            ('Linux', 'armv7l', ('linux', 'armv7l')),
+        ]
+        for system, machine, expected in cases:
+            with self.subTest(system=system, machine=machine):
+                with mock.patch(
+                        'azure.cli.command_modules.acs.custom.platform.system',
+                        return_value=system), mock.patch(
+                            'azure.cli.command_modules.acs.custom.platform.machine',
+                            return_value=machine):
+                    self.assertEqual(_get_aks_desktop_platform(), expected)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.machine', return_value='mips64')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.system', return_value='Linux')
+    def test_aks_install_desktop_unsupported_architecture(self, _, __):
+        with self.assertRaises(ValidationError):
+            _get_aks_desktop_platform()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_specific_version(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        release, version = _get_aks_desktop_release('0.9.1')
+        self.assertEqual(version, '0.9.1')
+        self.assertEqual(release['tag_name'], 'v0.9.1')
+        mock_urlopen_read.assert_called_once_with(
+            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'ubuntu', 'ID_LIKE': 'debian'})
+    def test_aks_install_desktop_selects_native_linux_package(self, _, __):
+        release = {
+            'assets': [
+                {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
+                {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
+            ]
+        }
+        asset = _select_aks_desktop_asset(
+            release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop_0.9.1-1_amd64.deb')
+
+    def test_aks_install_desktop_linux_package_compatibility(self):
+        deb = 'aks-desktop_0.9.1-1_amd64.deb'
+        archive = 'aks-desktop-0.9.1-linux-x64.tar.gz'
+        release = {'assets': [{'name': deb}, {'name': archive}]}
+        cases = [
+            ({'ID': 'debian'}, '/usr/bin/xdg-open', deb),
+            ({'ID': 'linuxmint', 'ID_LIKE': 'ubuntu debian'}, '/usr/bin/xdg-open', deb),
+            ({'ID': 'fedora'}, '/usr/bin/xdg-open', archive),
+            ({'ID': 'rhel', 'ID_LIKE': 'fedora'}, '/usr/bin/xdg-open', archive),
+            ({'ID': 'arch'}, '/usr/bin/xdg-open', archive),
+            ({}, '/usr/bin/xdg-open', archive),
+            ({'ID': 'ubuntu'}, None, archive),
+        ]
+        for os_release, launcher, expected in cases:
+            with self.subTest(os_release=os_release, launcher=launcher), mock.patch(
+                    'azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                    return_value=os_release), mock.patch(
+                        'azure.cli.command_modules.acs.custom.shutil.which', return_value=launcher):
+                asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+                self.assertEqual(asset['name'], expected)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                side_effect=OSError('os-release unavailable'))
+    def test_aks_install_desktop_missing_os_release_uses_archive(self, _):
+        release = {'assets': [
+            {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
+            {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
+        ]}
+        asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'debian'})
+    def test_aks_install_desktop_missing_deb_uses_archive(self, _, __):
+        release = {'assets': [{'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'}]}
+        asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'fedora'})
+    def test_aks_install_desktop_rejects_incompatible_only_asset(self, _):
+        with self.assertRaises(ResourceNotFoundError):
+            _select_aks_desktop_asset(
+                {'assets': [{'name': 'aks-desktop_0.9.1-1_amd64.deb'}]},
+                '0.9.1', 'linux', 'x64')
+
+    def test_aks_install_desktop_missing_asset(self):
+        with self.assertRaises(ResourceNotFoundError):
+            _select_aks_desktop_asset(
+                {'assets': []}, '0.9.1', 'mac', 'arm64')
+
+    @mock.patch('urllib.request.build_opener')
+    def test_aks_install_desktop_verifies_download_digest(self, mock_build_opener):
+        content = b'AKS Desktop'
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.side_effect = [content, b'']
+        mock_build_opener.return_value.open.return_value = response
+        asset = {
+            'browser_download_url':
+                'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                'aks-desktop-0.9.1-win-x64.exe',
+            'digest': 'sha256:' + hashlib.sha256(content).hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            destination = os.path.join(temp_dir, 'installer.exe')
+            _download_aks_desktop_asset(asset, destination)
+            with open(destination, 'rb') as downloaded:
+                self.assertEqual(downloaded.read(), content)
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
+    def test_aks_install_desktop_archive_rejects_unsafe_members(self):
+        cases = [
+            [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
+             ('dir/foo/../../outside', tarfile.REGTYPE, '')],
+            [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
+             ('dir/link', tarfile.REGTYPE, '')],
+            [('../outside', tarfile.REGTYPE, '')],
+            [('aks-desktop/', tarfile.SYMTYPE, '../outside')],
+            [('pipe', tarfile.FIFOTYPE, '')],
+        ]
+        for members in cases:
+            with self.subTest(members=members), tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                outside = os.path.join(temp_dir, 'outside')
+                with open(outside, 'wb') as sentinel:
+                    sentinel.write(b'unchanged')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    for name, member_type, linkname in members:
+                        member = tarfile.TarInfo(name)
+                        member.type = member_type
+                        member.linkname = linkname
+                        if member.isfile():
+                            member.size = len(b'overwrite')
+                            archive.addfile(member, io.BytesIO(b'overwrite'))
+                        else:
+                            archive.addfile(member)
+
+                # Exercise pre-3.14 defaults even when the test runs on newer Python.
+                with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                       staticmethod(tarfile.fully_trusted_filter)):
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                with open(outside, 'rb') as sentinel:
+                    self.assertEqual(sentinel.read(), b'unchanged')
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'pipe')))
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'aks-desktop')))
+
+    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
+    def test_aks_install_desktop_archive_preserves_safe_links(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            with tarfile.open(archive_path, 'w:gz') as archive:
+                member = tarfile.TarInfo('app/aks-desktop')
+                member.mode = 0o755
+                member.size = len(b'executable')
+                archive.addfile(member, io.BytesIO(b'executable'))
+                for name, member_type, target in [
+                    ('app/symlink', tarfile.SYMTYPE, 'aks-desktop'),
+                    ('app/hardlink', tarfile.LNKTYPE, 'app/aks-desktop'),
+                ]:
+                    member = tarfile.TarInfo(name)
+                    member.type = member_type
+                    member.linkname = target
+                    member.mode = 0o755
+                    archive.addfile(member)
+            _extract_aks_desktop_archive(archive_path, destination)
+            for name in ('aks-desktop', 'symlink', 'hardlink'):
+                with open(os.path.join(destination, 'app', name), 'rb') as executable:
+                    self.assertEqual(executable.read(), b'executable')
+            if os.name != 'nt':
+                self.assertTrue(os.stat(os.path.join(destination, 'app', 'aks-desktop')).st_mode & 0o100)
+
+    @mock.patch.object(tarfile, 'data_filter', None, create=True)
+    def test_aks_install_desktop_archive_requires_safe_extractor(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            with tarfile.open(archive_path, 'w:gz') as archive:
+                archive.addfile(tarfile.TarInfo('aks-desktop'))
+            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                   staticmethod(lambda member, path: member), create=True):
+                with self.assertRaisesRegex(FileOperationError, 'Python'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.exists(destination))
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_aks_install_desktop_launches_without_shell(self, mock_run):
+        _launch_aks_desktop_installer(
+            'aks-desktop-0.9.1-win-x64.exe', 'win', '0.9.1')
+        mock_run.assert_called_once_with(
+            ['aks-desktop-0.9.1-win-x64.exe'], check=True)
+
+    def test_aks_install_desktop_retains_gui_installer(self):
+        cases = [
+            ('mac', 'arm64', 'aks-desktop-0.9.1-mac-arm64.dmg', 'open'),
+            ('linux', 'x64', 'aks-desktop_0.9.1-1_amd64.deb', 'xdg-open'),
+        ]
+        for system, arch, name, launcher in cases:
+            with self.subTest(system=system), tempfile.TemporaryDirectory() as config_dir:
+                paths = []
+
+                def download(asset, path):
+                    with open(path, 'wb') as output:
+                        output.write(b'installer')
+
+                def launch(args, check):
+                    self.assertEqual(args[0], launcher)
+                    self.assertTrue(check)
+                    self.assertTrue(os.path.isfile(args[1]))
+                    paths.append(args[1])
+
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=(system, arch)),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [{'name': name}]}, '0.9.1')),
+                    mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                               return_value={'ID': 'debian'}),
+                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open'),
+                    mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.run', side_effect=launch),
+                ):
+                    aks_install_desktop(None, version='0.9.1')
+                    aks_install_desktop(None, version='0.9.1')
+
+                # A dispatched GUI may read the package only after this command returns.
+                self.assertEqual(len(paths), 2)
+                self.assertNotEqual(paths[0], paths[1])
+                for path in paths:
+                    self.assertTrue(os.path.isfile(path))
+                    self.assertEqual(os.path.commonpath((config_dir, path)), config_dir)
+                    with open(path, 'rb') as installer:
+                        self.assertEqual(installer.read(), b'installer')
+
+    def test_aks_install_desktop_cleans_installer_after_failure(self):
+        for failure in ('download', 'launch'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as config_dir:
+                paths = []
+
+                def download(asset, path):
+                    paths.append(path)
+                    with open(path, 'wb') as output:
+                        output.write(b'partial installer')
+                    if failure == 'download':
+                        raise ClientRequestError('download failed')
+
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=('mac', 'arm64')),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [{'name': 'aks-desktop-0.9.1-mac-arm64.dmg'}]}, '0.9.1')),
+                    mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.run',
+                               side_effect=ClientRequestError('launch failed')),
+                ):
+                    with self.assertRaises(ClientRequestError):
+                        aks_install_desktop(None)
+                self.assertEqual(len(paths), 1)
+                self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform')
+    def test_aks_install_desktop_cleans_synchronous_installer(self, mock_platform, mock_release,
+                                                              mock_download, mock_launch):
+        cases = [
+            ('win', 'x64', 'aks-desktop-0.9.1-win-x64.exe'),
+            ('linux', 'arm64', 'aks-desktop-0.9.1-linux-arm64.tar.gz'),
+        ]
+        for system, arch, name in cases:
+            with self.subTest(system=system):
+                mock_download.reset_mock()
+                mock_launch.reset_mock()
+                mock_platform.return_value = (system, arch)
+                mock_release.return_value = ({'assets': [{'name': name}]}, '0.9.1')
+                aks_install_desktop(None)
+                mock_download.assert_called_once()
+                installer_path = mock_download.call_args[0][1]
+                mock_launch.assert_called_once_with(installer_path, system, '0.9.1')
+                self.assertFalse(os.path.exists(os.path.dirname(installer_path)))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)

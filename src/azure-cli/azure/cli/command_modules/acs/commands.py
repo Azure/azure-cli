@@ -134,6 +134,7 @@ def load_command_table(self, _):
                          'aks_update_credentials', supports_no_wait=True)
         g.custom_command('check-acr', 'aks_check_acr')
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
+        g.custom_command('install-desktop', 'aks_install_desktop', client_factory=None)
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
