@@ -108,7 +108,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @staticmethod
     def _is_transient_operation_conflict(ex):
         message = str(ex)
+        error_code = getattr(getattr(ex, "error", None), "code", None)
         return (
+            error_code == "AKSOperationPreempted" or
+            "(AKSOperationPreempted)" in message or
             "Another operation is in progress" in message or
             "Operation is not allowed because there's an in-progress" in message or
             "in-progress PutExtensionAddonHandler.PUT operation" in message or
@@ -138,6 +141,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             return None
         return f"aks show --resource-group {resource_group} --name {name}"
 
+    def _is_private_dns_role_assignment_pending(self, command, ex):
+        zone_id = getattr(self, "_private_dns_role_assignment_scope", None)
+        if not zone_id or not re.match(r"^aks\s+create\b", command.strip()):
+            return False
+        requested_zone = self._extract_cli_option(command, "--private-dns-zone")
+        message = str(ex).casefold()
+        return (
+            requested_zone is not None and requested_zone.casefold() == zone_id.casefold() and
+            "(resourcemissingpermissionerror)" in message and
+            f"resource {zone_id.casefold()}." in message and
+            "not allowed for action microsoft.network/privatednszones/read" in message
+        )
+
+    def _cmd_with_private_dns_role_assignment_retry(self, command, zone_id, checks=None):
+        # Only the caller that just granted this zone's role may retry propagation.
+        previous_scope = getattr(self, "_private_dns_role_assignment_scope", None)
+        self._private_dns_role_assignment_scope = zone_id
+        try:
+            return self.cmd(command, checks=checks)
+        finally:
+            self._private_dns_role_assignment_scope = previous_scope
+
     def _execute_with_transient_conflict_retry(self, command, expect_failure):
         from azure.cli.testsdk.base import execute
         import logging
@@ -158,16 +183,24 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 ):
                     show_command = self._build_show_command_for_already_existing_resource(command)
                     if show_command:
+                        recovery_command = getattr(self, "_retried_create_recovery_command", None)
+                        if recovery_command:
+                            # A postprocessing conflict can leave metrics disabled on an
+                            # otherwise Succeeded cluster. A GET alone cannot finish setup.
+                            return self._execute_with_transient_conflict_retry(recovery_command, False)
                         return execute(self.cli_ctx, show_command, expect_failure=False)
                 if (
                     expect_failure or
-                    not self._is_transient_operation_conflict(ex) or
+                    not (
+                        self._is_transient_operation_conflict(ex) or
+                        self._is_private_dns_role_assignment_pending(command, ex)
+                    ) or
                     attempt == max_retries - 1
                 ):
                     raise
                 delay = min(base_delay * (2 ** attempt), max_delay) + random.uniform(0, 1)
                 logging.warning(
-                    "AKS operation is still in progress; retrying command in %.1f seconds (%d/%d)",
+                    "AKS operation or dependency is not ready; retrying command in %.1f seconds (%d/%d)",
                     delay,
                     attempt + 1,
                     max_retries,
@@ -176,13 +209,18 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         raise AssertionError("unreachable")
 
-    def _cmd_with_retried_create_recovery(self, command, checks=None):
+    def _cmd_with_retried_create_recovery(self, command, checks=None, recovery_command=None):
         previous_value = getattr(self, "_allow_retried_create_recovery", False)
+        previous_command = getattr(self, "_retried_create_recovery_command", None)
         self._allow_retried_create_recovery = True
+        self._retried_create_recovery_command = (
+            self._apply_kwargs(recovery_command) if recovery_command else None
+        )
         try:
             return self.cmd(command, checks=checks)
         finally:
             self._allow_retried_create_recovery = previous_value
+            self._retried_create_recovery_command = previous_command
 
     def _refetch_settled_aks_result(self, resource_id, fallback_result):
         from azure.cli.testsdk.base import execute
@@ -370,33 +408,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         return sorted_supported_versions[0] if sorted_supported_versions else None
 
     def _create_container_insights_workspace(self, resource_group, location):
+        # These scenarios use MSI monitoring. The CLI provisions DCR/DCRA resources;
+        # the legacy OperationsManagement Containers solution is not required.
         workspace_name = self.create_random_name("cliaksworkspace", 24)
         workspace = self.cmd(
             "monitor log-analytics workspace create "
             f"--resource-group {resource_group} --name {workspace_name} --location {location}"
         ).get_output_in_json()
-        workspace_id = workspace["id"]
-        solution_name = f"Containers({workspace_name})"
-        solution_id = (
-            f"{workspace_id.rsplit('/providers/', 1)[0]}/providers/"
-            f"Microsoft.OperationsManagement/solutions/{solution_name}"
-        )
-        solution = {
-            "location": location,
-            "properties": {"workspaceResourceId": workspace_id},
-            "plan": {
-                "name": solution_name,
-                "publisher": "Microsoft",
-                "product": "OMSGallery/Containers",
-                "promotionCode": "",
-            },
-        }
-        self.kwargs["container_insights_solution"] = json.dumps(solution)
-        self.cmd(
-            f"resource create --id {solution_id} --api-version 2015-11-01-preview "
-            "--is-full-object --properties '{container_insights_solution}'"
-        )
-        return workspace_id
+        return workspace["id"]
 
     def _create_azure_monitor_workspace(self, resource_group, location):
         """Pre-create a dedicated Azure Monitor Workspace (AMW) for a single test.
@@ -421,6 +440,25 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'aks wait --resource-group={resource_group} --name={name} '
                 '--updated --interval 30 --timeout 1800',
                 checks=[self.is_empty()],
+            )
+
+    def _require_availability_zones(self, location, zones):
+        if not (self.is_live or self.in_recording):
+            return
+        skus = self.cmd(
+            f'vm list-skus --location {location} --resource-type virtualMachines --all -o json'
+        ).get_output_in_json()
+        location_info = [
+            info for sku in skus for info in (sku.get('locationInfo') or [])
+            if (info.get('location') or '').casefold() == location.casefold()
+        ]
+        if not location_info:
+            raise AssertionError(f"Could not determine availability zone capabilities for {location}")
+        supported = {zone for info in location_info for zone in (info.get('zones') or [])}
+        if not set(zones).issubset(supported):
+            self.skipTest(
+                f"Scenario requires zones {zones} in {location}; Compute advertises {sorted(supported)}. "
+                "The configured test location is not changed."
             )
 
     def _wait_for_cluster_property(self, query, expected, attempts=20, delay=30):
@@ -1235,7 +1273,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--node-count=1 --fqdn-subdomain={subdomain_name} ' \
                      '--load-balancer-sku=standard --enable-private-cluster --private-dns-zone={zone_id} ' \
                      '--enable-managed-identity --assign-identity {identity_resource_id} --ssh-key-value={ssh_key_value}'
-        self.cmd(create_cmd, checks=[
+        self._cmd_with_private_dns_role_assignment_retry(create_cmd, zone_id, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.exists('privateFqdn'),
             self.check('fqdnSubdomain', subdomain_name),
@@ -3046,6 +3084,7 @@ spec:
         preserve_default_location=True,
     )
     def test_aks_machine_cmds(self, resource_group, resource_group_location):
+        self._require_availability_zones(resource_group_location, ['1', '2', '3'])
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
@@ -3128,6 +3167,9 @@ spec:
                      '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview ' \
                      '--ssh-key-value={ssh_key_value} ' \
                      '--enable-azure-service-mesh --revision={revision} --output=json'
+        if self.is_live:
+            # Gateway configuration does not require a three-node cluster.
+            create_cmd += ' --node-count=1'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('serviceMeshProfile.mode', 'Istio'),
@@ -5523,16 +5565,14 @@ spec:
         ])
 
         # disable monitoring add-on
-        disable_addon_output = self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.omsagent.enabled', False),
-        ]).get_output_in_json()
-        assert bool(disable_addon_output["addonProfiles"]["omsagent"]["config"]) == False
+        self.cmd('aks disable-addons -a monitoring -g {resource_group} -n {name}')
+        self._wait_for_cluster_update()
+        self._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
 
-        # show again
-        show_output = self.cmd('aks show -g {resource_group} -n {name}', checks=[
+        # Disabled monitoring may retain workspace and MSI authentication metadata.
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
-        ]).get_output_in_json()
-        assert bool(show_output["addonProfiles"]["omsagent"]["config"]) == False
+        ])
 
         # enable monitoring add-on
         self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
@@ -6662,6 +6702,7 @@ spec:
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='uksouth', preserve_default_location=True)
     def test_aks_availability_zones_msi(self, resource_group, resource_group_location):
+        self._require_availability_zones(resource_group_location, ['1', '2', '3'])
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -7559,6 +7600,7 @@ spec:
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='uksouth', preserve_default_location=True)
     def test_aks_enable_utlra_ssd(self, resource_group, resource_group_location):
+        self._require_availability_zones(resource_group_location, ['1', '2', '3'])
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
@@ -8837,9 +8879,13 @@ spec:
                      '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
                      '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} ' \
                      '--enable-windows-recording-rules --output=json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
+        self._cmd_with_retried_create_recovery(
+            create_cmd,
+            checks=[self.check('provisioningState', 'Succeeded')],
+            recovery_command='aks update --resource-group={resource_group} --name={name} '
+                             '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} '
+                             '--enable-windows-recording-rules',
+        )
 
         # azuremonitor metrics will be set to false after initial creation command as its in the
         # postprocessing step that we do an update to enable it. Adding a wait for the second put request
@@ -8957,6 +9003,9 @@ spec:
             self._cmd_with_retried_create_recovery(
                 create_cmd,
                 checks=[self.check('provisioningState', 'Succeeded')],
+                recovery_command='aks update --resource-group={resource_group} --name={name} '
+                                 '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id} '
+                                 '--enable-control-plane-metrics',
             )
         except Exception as ex:  # pylint: disable=broad-except
             message = str(ex).casefold()
@@ -9016,6 +9065,8 @@ spec:
         self._cmd_with_retried_create_recovery(
             create_cmd,
             checks=[self.check('provisioningState', 'Succeeded')],
+            recovery_command='aks update --resource-group={resource_group} --name={name} '
+                             '--enable-azure-monitor-metrics --azure-monitor-workspace-resource-id={amw_id}',
         )
 
         # wait for AMW background setup to complete before issuing update
@@ -10690,7 +10741,7 @@ spec:
         preserve_default_location=True,
     )
     def test_aks_kubenet_to_cni_overlay_migration(self, resource_group, resource_group_location):
-        cluster_location = 'eastus' if self.is_live else resource_group_location
+        cluster_location = resource_group_location
         _, create_version = self._get_versions(cluster_location)
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -10698,14 +10749,14 @@ spec:
             'name': aks_name,
             'location': cluster_location,
             'k8s_version': create_version,
-            'node_vm_size': 'Standard_D2s_v3',
+            'node_vm_size_args': '' if self.is_live else '--node-vm-size Standard_D2s_v3',
             'ssh_key_value': self.generate_ssh_keys(),
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
-                     '--node-vm-size {node_vm_size} ' \
+                     '{node_vm_size_args} ' \
                      '--service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 --pod-cidr 100.112.0.0/12 ' \
                      '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
         self.cmd(create_cmd, checks=[
@@ -14957,6 +15008,7 @@ spec:
         self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
         # update: enable WireGuard transit encryption
+        self._wait_for_cluster_update()
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-acns --acns-transit-encryption-type WireGuard "
@@ -16205,6 +16257,7 @@ spec:
         self.cmd(create_cmd, checks=[self.check("provisioningState", "Succeeded")])
 
         # Add nodepool without localdns config
+        self._wait_for_cluster_update()
         add_cmd = (
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
             "--name={nodepool_name} --node-count 1 "
