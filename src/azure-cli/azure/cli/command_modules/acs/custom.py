@@ -2457,13 +2457,19 @@ def _select_aks_desktop_asset(release, version, system, arch):
         ('win', 'arm64'): ['aks-desktop-{}-win-arm64.exe'.format(version)],
         ('mac', 'x64'): ['aks-desktop-{}-mac-x64.dmg'.format(version)],
         ('mac', 'arm64'): ['aks-desktop-{}-mac-arm64.dmg'.format(version)],
-        ('linux', 'x64'): [
-            'aks-desktop_{}-1_amd64.deb'.format(version),
-            'aks-desktop-{}-linux-x64.tar.gz'.format(version),
-        ],
+        ('linux', 'x64'): ['aks-desktop-{}-linux-x64.tar.gz'.format(version)],
         ('linux', 'arm64'): ['aks-desktop-{}-linux-arm64.tar.gz'.format(version)],
         ('linux', 'armv7l'): ['aks-desktop-{}-linux-armv7l.tar.gz'.format(version)],
     }.get((system, arch), [])
+
+    if (system, arch) == ('linux', 'x64'):
+        try:
+            os_release = platform.freedesktop_os_release()
+        except OSError:
+            os_release = {}
+        distro_ids = {os_release.get('ID'), *os_release.get('ID_LIKE', '').split()}
+        if distro_ids.intersection(('debian', 'ubuntu')) and shutil.which('xdg-open'):
+            names.insert(0, 'aks-desktop_{}-1_amd64.deb'.format(version))
 
     assets = release.get('assets') or []
     for name in names:
@@ -2580,17 +2586,35 @@ def _launch_aks_desktop_installer(installer_path, system, version):
 
 
 def aks_install_desktop(cmd, version=None):
+    from azure.cli.core._environment import get_config_dir
+
     del cmd
     system, arch = _get_aks_desktop_platform()
     release, release_version = _get_aks_desktop_release(version)
     asset = _select_aks_desktop_asset(
         release, release_version, system, arch)
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        installer_path = os.path.join(tmp_dir, asset['name'])
+    # GUI launchers return before the installer has finished consuming its file.
+    gui_installer = system == 'mac' or asset['name'].endswith('.deb')
+    download_dir = None
+    if gui_installer:
+        download_dir = os.path.join(get_config_dir(), 'aks-desktop', 'installers')
+        os.makedirs(download_dir, mode=0o700, exist_ok=True)
+    installer_dir = tempfile.mkdtemp(prefix='aks-desktop-', dir=download_dir)
+    keep_installer = False
+    try:
+        installer_path = os.path.join(installer_dir, asset['name'])
         _download_aks_desktop_asset(asset, installer_path)
         _launch_aks_desktop_installer(
             installer_path, system, release_version)
+        if gui_installer:
+            keep_installer = True
+            logger.warning(
+                'AKS Desktop installer retained at "%s". Complete installation in the opened application, '
+                'then remove "%s" when it is no longer needed.', installer_path, installer_dir)
+    finally:
+        if not keep_installer:
+            shutil.rmtree(installer_dir)
 
 
 # determine the architecture for the binary based on platform.machine()
