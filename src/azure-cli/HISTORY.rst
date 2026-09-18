@@ -24,6 +24,24 @@ Release History
 * `az aks nodepool rollback`: Show an accurate warning when only the node OS upgrade channel is enabled (#33854)
 * Implement enable/disable flags for user-defined scheduler configuration (#33934)
 * `az aks update`: Fix Azure Container Storage configuration detection for lowercase and boolean extension settings (#33938)
+* `az aks create`, `az aks update`: Add `--enable-azure-monitor-logs` to onboard Container Insights through the Azure Monitor profile using managed identity authentication
+* `az aks update`: Add `--disable-azure-monitor-logs` to offboard Container Insights
+* `az aks create`, `az aks update`: Add `--syslog-port`, `--enable-prometheus-metrics-scraping` and `--disable-prometheus-metrics-scraping` to tune the Azure Monitor Container Insights configuration
+* `az aks create`, `az aks update`: Add `--enable-opentelemetry-metrics`, `--disable-opentelemetry-metrics`, `--opentelemetry-metrics-port-http` and `--opentelemetry-metrics-port-grpc` for the OpenTelemetry metrics receiver
+* `az aks create`, `az aks update`: Add `--enable-opentelemetry-logs-traces`, `--disable-opentelemetry-logs-traces`, `--opentelemetry-logs-traces-port-http` and `--opentelemetry-logs-traces-port-grpc` for the OpenTelemetry logs and traces receiver
+* `az aks create`, `az aks update`: Write container network logs to `azureMonitorProfile.containerInsights.containerNetworkLogs` instead of the monitoring addon configuration, and reject `--enable-container-network-logs` on clusters using legacy shared key authentication
+* `az aks create`, `az aks update`, `az aks enable-addons`: Deprecate `--enable-msi-auth-for-monitoring` in favor of `--enable-azure-monitor-logs`
+* `az aks create`, `az aks update`: Reject `--enable-azure-monitor-logs` on clusters using service principal authentication, since the Azure Monitor profile onboards with managed identity only
+* `az aks update`: Reject `--enable-azure-monitor-logs` when Azure Monitor logs is already enabled on the cluster, matching `az aks enable-addons -a monitoring`. Run `--disable-azure-monitor-logs` first to change the configuration
+* `az aks update`: `--disable-azure-monitor-logs` now removes the data collection rule association and resets the Container Insights settings (syslog port, Prometheus scraping and container network logs) back to their defaults, and asks for confirmation when OpenTelemetry logs and traces are enabled
+* `az aks update`: Fix `--enable-azure-monitor-logs` not creating the data collection rule and association unless the Log Analytics workspace changed, which left the agent running with no data collection rule attached so no logs were ingested
+* `az aks update`: Create the data collection rule and association before the cluster update when enabling with `--enable-azure-monitor-logs`, matching `az aks enable-addons -a monitoring`. Provisioning them afterwards meant the agent started before the association existed and then stayed idle for several minutes before restarting once the configuration arrived
+* `az aks update`: `--disable-azure-monitor-metrics` now also disables OpenTelemetry metrics, since they are collected through the managed Prometheus pipeline, and asks for confirmation first unless `--yes` is specified
+* `az aks update`: Fix the OpenTelemetry port flags (`--opentelemetry-metrics-port-http`, `--opentelemetry-metrics-port-grpc`, `--opentelemetry-logs-traces-port-http` and `--opentelemetry-logs-traces-port-grpc`) being silently ignored when supplied on their own to change a port on an already enabled receiver, and report an error instead of doing nothing when the matching receiver is not enabled or is being disabled in the same command
+* `az aks update`: Fix `--enable-syslog` updating only the cluster and never re-provisioning the data collection rule, which left the DCR without the syslog data source so no syslog was ingested
+* `az aks update`: Fix `--data-collection-settings` and `--ampls-resource-id` being silently ignored, as neither re-provisioned the data collection rule that carries them
+* `az aks update`: Collect every monitoring disable confirmation before any of them deletes collection resources. Combining `--disable-azure-monitor-metrics` with `--disable-azure-monitor-logs` used to delete the metrics collection resources before asking about logs, so declining that prompt aborted the command with metrics still enabled on the cluster but its data collection objects and recording rules already removed
+* `az aks create`, `az aks update`: Fix the `--data-collection-settings` size limit being applied to the file path instead of the settings it holds, which let an oversized file through to fail the data collection rule call with `Request Header Fields Too Large`
 
 **App Config**
 

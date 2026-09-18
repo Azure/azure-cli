@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import os
 import shutil
 import tempfile
@@ -15,14 +16,20 @@ from dateutil.parser import parse
 import yaml
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
+    CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+    CONST_CONTAINER_NETWORK_LOGS_ENABLED,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
     _create_or_update_dcr_with_table_readiness_retry,
+    _resolve_dcr_settings_from_existing,
     ensure_default_log_analytics_workspace_for_monitoring,
+    warn_on_legacy_monitoring_auth,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
@@ -34,6 +41,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_agentpool_get_rollback_versions,
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
+    aks_disable_addons,
     aks_enable_addons,
     aks_stop,
     aks_upgrade,
@@ -2022,6 +2030,745 @@ class DcrTableReadinessRetryTest(unittest.TestCase):
 
         self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
         self.mock_sleep.assert_not_called()
+
+
+class TestWarnOnLegacyMonitoringAuth(unittest.TestCase):
+    def _warn_mock(self):
+        return mock.patch("azure.cli.command_modules.acs.addonconfiguration.logger.warning")
+
+    def test_warns_for_explicit_false_with_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring")
+        warn.assert_called_once()
+        self.assertIn("legacy shared key authentication", warn.call_args[0][0])
+
+    def test_warns_when_monitoring_is_one_of_several_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring,virtual-node")
+        warn.assert_called_once()
+
+    def test_no_warning_when_msi_auth_is_true(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(True, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_when_msi_auth_is_not_specified(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(None, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_without_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "virtual-node")
+        warn.assert_not_called()
+
+    def test_no_warning_without_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, None)
+        warn.assert_not_called()
+
+    def test_silent_for_addon_names_that_merely_contain_monitoring(self):
+        # A substring check would misfire on these, so the list is matched token by token.
+        for addons in ("monitoring-preview", "notmonitoring"):
+            with self._warn_mock() as warn:
+                warn_on_legacy_monitoring_auth(False, addons)
+            warn.assert_not_called()
+
+    def test_tolerates_whitespace_and_casing_in_the_addon_list(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, " azure-policy , Monitoring ")
+        warn.assert_called_once()
+
+
+class TestMonitoringValidatorRegistration(unittest.TestCase):
+    """The monitoring cross-flag validators must stay wired to the commands.
+
+    These validators inspect the whole namespace, so the CLI runs them for every invocation as
+    long as each is attached to at least one argument of the command -- it does not matter which
+    one. Nothing else asserts that they are still attached, and detaching one would silently drop
+    every cross-flag check it performs, leaving combinations such as
+    --enable-prometheus-metrics-scraping without --enable-azure-monitor-logs, or duplicate
+    OpenTelemetry HTTP/gRPC ports, accepted and then ignored.
+    """
+
+    def _arguments(self, command_name):
+        import argparse
+
+        from azure.cli.command_modules.acs import ContainerServiceCommandsLoader
+        from azure.cli.core.mock import DummyCli
+
+        class _Invocation:
+            def __init__(self, command_string):
+                self.data = {"command_string": command_string}
+                self.parser = argparse.ArgumentParser()
+
+        cli_ctx = DummyCli()
+        cli_ctx.invocation = _Invocation(command_name)
+        loader = ContainerServiceCommandsLoader(cli_ctx)
+        loader.load_command_table(command_name.split())
+        loader.command_table[command_name].load_arguments()
+        loader.load_arguments(command_name)
+        return {
+            dest: arg.settings
+            for dest, arg in loader.argument_registry.arguments.get(command_name, {}).items()
+        }
+
+    def test_validator_is_attached_to_create_and_update(self):
+        for command_name, validator_name in (
+            ("aks create", "validate_container_insights_settings_for_create"),
+            ("aks update", "validate_container_insights_settings_for_update"),
+            ("aks create", "validate_azure_monitor_and_opentelemetry_for_create"),
+            ("aks update", "validate_azure_monitor_and_opentelemetry_for_update"),
+        ):
+            arguments = self._arguments(command_name)
+            attached = [
+                dest
+                for dest, settings in arguments.items()
+                if getattr(settings.get("validator"), "__name__", "") == validator_name
+            ]
+            self.assertTrue(
+                attached,
+                "{} has no argument carrying {}, so its cross-flag validation never "
+                "runs.".format(command_name, validator_name),
+            )
+
+    def test_container_insights_flags_are_registered_on_create_and_update(self):
+        # The validators read these off the namespace, so they can only reject bad combinations
+        # while they remain registered on the command.
+        for command_name in ("aks create", "aks update"):
+            arguments = self._arguments(command_name)
+            for dest in (
+                "enable_prometheus_metrics_scraping",
+                "disable_prometheus_metrics_scraping",
+                "syslog_port",
+                "opentelemetry_metrics_port_http",
+                "opentelemetry_metrics_port_grpc",
+                "opentelemetry_logs_traces_port_http",
+                "opentelemetry_logs_traces_port_grpc",
+            ):
+                self.assertIn(dest, arguments, command_name)
+
+
+class AKSDisableAddonsMonitoringTestCase(unittest.TestCase):
+    """`az aks disable-addons -a monitoring` must behave like --disable-azure-monitor-logs."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    def _instance(self, otlp_logs_traces=True):
+        app_monitoring = self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
+        if otlp_logs_traces:
+            app_monitoring.open_telemetry_logs_and_traces = (
+                self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces(
+                    enabled=True, http_port=4320, grpc_port=4319
+                )
+            )
+        return self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "test_workspace",
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                    },
+                )
+            },
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace",
+                    syslog_port=2832,
+                    disable_prometheus_metrics_scraping=True,
+                    container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                ),
+                app_monitoring=app_monitoring,
+            ),
+        )
+
+    def _run(self, instance, addons="monitoring", answer=True, yes=False):
+        """Drive aks_disable_addons, recording prompts and cleanups in the order they happen."""
+        order = []
+        # Recorded on self as well, so assertions still see it when the call raises.
+        self.last_order = order
+        client = mock.MagicMock()
+        client.get.return_value = instance
+
+        def ask(msg, default=None):
+            order.append("prompt")
+            self.assertIn("OpenTelemetry logs and traces", msg)
+            return answer
+
+        def cleanup(*args, **kwargs):
+            order.append("dcra_cleanup")
+
+        def put(no_wait, put_func, rg, name, mc, **kwargs):
+            order.append("put")
+            return mc
+
+        with mock.patch(
+            "azure.cli.command_modules.acs.custom.get_subscription_id",
+            return_value="test_sub_id",
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.prompt_y_n", side_effect=ask
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring",
+            side_effect=cleanup,
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.sdk_no_wait", side_effect=put
+        ):
+            result = aks_disable_addons(
+                self.cmd, client, "test_rg", "test_name", addons, yes=yes
+            )
+        return order, result
+
+    def _assert_container_insights_reset(self, instance):
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertFalse(container_insights.enabled)
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
+        )
+
+    def test_declining_the_prompt_aborts_before_any_cleanup(self):
+        instance = self._instance()
+        order, result = self._run(instance, answer=False)
+
+        # The prompt has to come first, and declining must leave the cluster completely untouched.
+        self.assertEqual(order, ["prompt"])
+        self.assertIsNone(result)
+        self.assertTrue(instance.azure_monitor_profile.container_insights.enabled)
+        self.assertEqual(instance.azure_monitor_profile.container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_accepting_the_prompt_resets_settings_and_disables_opentelemetry(self):
+        instance = self._instance()
+        order, _ = self._run(instance)
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+        open_telemetry = (
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        )
+        self.assertFalse(open_telemetry.enabled)
+        self.assertIsNone(open_telemetry.http_port)
+        self.assertIsNone(open_telemetry.grpc_port)
+
+    def test_yes_skips_the_prompt(self):
+        instance = self._instance()
+        order, _ = self._run(instance, yes=True)
+
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_settings_are_reset_even_without_opentelemetry(self):
+        instance = self._instance(otlp_logs_traces=False)
+        order, _ = self._run(instance)
+
+        # Nothing to warn about, but a later --enable-azure-monitor-logs must still start clean.
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_monitoring_is_recognised_alongside_other_addons(self):
+        instance = self._instance()
+        order, _ = self._run(
+            instance,
+            addons="kube-dashboard,monitoring",
+        )
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_disabling_another_addon_leaves_monitoring_untouched(self):
+        instance = self._instance()
+        order, _ = self._run(instance, addons="kube-dashboard")
+
+        self.assertEqual(order, ["put"])
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_unknown_addon_rejected_before_any_cleanup(self):
+        instance = self._instance()
+        with self.assertRaises(CLIError) as cm:
+            self._run(instance, addons="bogus-addon,monitoring")
+
+        self.assertIn("Invalid addon name: bogus-addon", str(cm.exception))
+        self._assert_nothing_happened(instance)
+
+    def test_not_installed_addon_rejected_before_any_cleanup(self):
+        # The reported case: azure-policy is not installed, so _update_addons raises -- but only
+        # after the monitoring DCRA has been deleted, and the raise then skips the cluster PUT.
+        # Monitoring would be left enabled with its association gone.
+        instance = self._instance()
+        with self.assertRaises(CLIError) as cm:
+            self._run(instance, addons="azure-policy,monitoring")
+
+        self.assertIn("is not installed", str(cm.exception))
+        self._assert_nothing_happened(instance)
+
+    def test_validation_runs_before_cleanup_regardless_of_addon_order(self):
+        instance = self._instance()
+        with self.assertRaises(CLIError):
+            self._run(instance, addons="monitoring,azure-policy")
+
+        self._assert_nothing_happened(instance)
+
+    def test_addon_names_with_surrounding_whitespace_are_rejected_before_cleanup(self):
+        """Whitespace must be parsed the same way everywhere, or cleanup outruns validation.
+
+        _update_addons splits on ',' without stripping, so ' monitoring' is not a known addon and
+        it raises. Anything here that stripped first would decide monitoring is being disabled,
+        delete the association, and only then hit that raise -- which skips the cluster PUT and
+        leaves monitoring enabled with nothing to collect into.
+        """
+        for addons in (" monitoring", "monitoring, kube-dashboard", "monitoring ,kube-dashboard"):
+            with self.subTest(addons=addons):
+                instance = self._instance()
+                with self.assertRaises(CLIError) as cm:
+                    self._run(instance, addons=addons)
+
+                self.assertIn("Invalid addon name", str(cm.exception))
+                self._assert_nothing_happened(instance)
+
+    def test_installed_addon_alongside_monitoring_proceeds(self):
+        instance = self._instance()
+        instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        order, _ = self._run(instance, addons="azure-policy,monitoring")
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_installed_addon_matched_case_insensitively(self):
+        # _update_addons normalises existing profile keys case-insensitively, so the pre-flight
+        # check must too, or a differently-cased profile key would be rejected as not installed.
+        instance = self._instance()
+        instance.addon_profiles["AzurePolicy"] = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        order, _ = self._run(instance, addons="azure-policy")
+
+        self.assertEqual(order, ["put"])
+
+    def _assert_nothing_happened(self, instance):
+        """No prompt, no DCRA cleanup, no PUT, and the cluster payload left fully intact."""
+        self.assertEqual(self.last_order, [])
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2832)
+        self.assertTrue(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_ENABLED
+        )
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+        self.assertTrue(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled)
+
+
+class TestResolveDcrSettingsFromExisting(unittest.TestCase):
+    """Settings the caller did not supply are carried over from the DCR that already exists."""
+
+    # The supported custom log configuration schema: interval, namespaceFilteringMode, namespaces,
+    # enableContainerLogV2 and streams.
+    CUSTOM_SETTINGS = {
+        "interval": "5m",
+        "namespaceFilteringMode": "Include",
+        "namespaces": ["kube-system"],
+        "enableContainerLogV2": True,
+        "streams": ["Microsoft-Perf", "Microsoft-ContainerLogV2"],
+    }
+
+    def _dcr(self, syslog=False, streams=None, settings=None):
+        data_sources = {
+            "extensions": [
+                {
+                    "name": "ContainerInsightsExtension",
+                    "extensionName": "ContainerInsights",
+                    "streams": streams or ["Microsoft-ContainerInsights-Group-Default"],
+                    "extensionSettings": (
+                        {"dataCollectionSettings": settings} if settings else {}
+                    ),
+                }
+            ]
+        }
+        if syslog:
+            data_sources["syslog"] = [{"streams": ["Microsoft-Syslog"]}]
+        return {"properties": {"dataSources": data_sources}}
+
+    def test_syslog_inherited_when_not_specified(self):
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), None, None, None
+        )
+        self.assertTrue(enable_syslog)
+
+    def test_syslog_absent_when_existing_dcr_has_none(self):
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=False), None, None, None
+        )
+        self.assertFalse(enable_syslog)
+
+    def test_explicit_syslog_wins_over_existing(self):
+        # Explicitly turning syslog off must not be overridden by the existing DCR having it.
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), False, None, None
+        )
+        self.assertFalse(enable_syslog)
+
+    def test_high_log_scale_mode_inherited_from_streams(self):
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2-HighScale"]), None, None, None
+        )
+        self.assertTrue(high_scale)
+
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2"]), None, None, None
+        )
+        self.assertFalse(high_scale)
+
+    def test_explicit_high_log_scale_mode_wins_over_existing(self):
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2-HighScale"]), None, None, False
+        )
+        self.assertFalse(high_scale)
+
+    def test_custom_settings_inherited_whole(self):
+        _, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(settings=self.CUSTOM_SETTINGS), None, None, None
+        )
+        self.assertEqual(settings, self.CUSTOM_SETTINGS)
+
+    def test_supplied_settings_file_suppresses_inheritance(self):
+        # An explicit --data-collection-settings replaces the stored settings outright.
+        _, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(settings=self.CUSTOM_SETTINGS), None, "/path/to/settings.json", None
+        )
+        self.assertIsNone(settings)
+
+    def test_reconfiguring_syslog_preserves_everything_else(self):
+        # The reported case: 'az aks update --enable-syslog' on a cluster using high log scale mode
+        # and custom settings must not rebuild the DCR without them.
+        enable_syslog, settings, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(
+                syslog=False,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            True,
+            None,
+            None,
+        )
+        self.assertTrue(enable_syslog)
+        self.assertTrue(high_scale)
+        self.assertEqual(settings, self.CUSTOM_SETTINGS)
+
+    def test_reconfiguring_settings_preserves_syslog(self):
+        # The converse: a standalone --data-collection-settings must not drop existing syslog.
+        enable_syslog, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), None, "/path/to/settings.json", None
+        )
+        self.assertTrue(enable_syslog)
+        self.assertIsNone(settings)
+
+    def test_missing_or_empty_dcr_is_safe(self):
+        for existing in (None, {}, {"properties": {}}, {"properties": {"dataSources": {}}}):
+            with self.subTest(existing=existing):
+                enable_syslog, settings, high_scale = _resolve_dcr_settings_from_existing(
+                    existing, None, None, None
+                )
+                self.assertFalse(enable_syslog)
+                self.assertIsNone(settings)
+                self.assertFalse(high_scale)
+
+    def test_non_container_insights_extension_ignored(self):
+        existing = {
+            "properties": {
+                "dataSources": {
+                    "extensions": [
+                        {
+                            "extensionName": "SomethingElse",
+                            "streams": ["Microsoft-ContainerLogV2-HighScale"],
+                            "extensionSettings": {
+                                "dataCollectionSettings": {"interval": "9m"}
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+        _, settings, high_scale = _resolve_dcr_settings_from_existing(existing, None, None, None)
+        self.assertIsNone(settings)
+        self.assertFalse(high_scale)
+
+
+class TestEnsureContainerInsightsDcrInheritance(unittest.TestCase):
+    """The DCR body that is actually written carries over settings the caller did not supply.
+
+    _resolve_dcr_settings_from_existing is unit tested above; these drive the real
+    ensure_container_insights_for_monitoring so that the merge staying wired into the DCR
+    rebuild is covered too.
+    """
+
+    WORKSPACE_ID = (
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg"
+        "/providers/Microsoft.OperationalInsights/workspaces/ws"
+    )
+    CUSTOM_SETTINGS = {
+        "interval": "5m",
+        "namespaceFilteringMode": "Include",
+        "namespaces": ["kube-system"],
+        "enableContainerLogV2": True,
+        "streams": ["Microsoft-Perf", "Microsoft-ContainerLogV2-HighScale"],
+    }
+
+    def _existing_dcr(self, syslog=False, streams=None, settings=None, tags=None):
+        extension = {
+            "name": "ContainerInsightsExtension",
+            "extensionName": "ContainerInsights",
+            "streams": streams or ["Microsoft-ContainerInsights-Group-Default"],
+            "extensionSettings": (
+                {"dataCollectionSettings": settings} if settings else {}
+            ),
+        }
+        data_sources = {"extensions": [extension]}
+        if syslog:
+            data_sources["syslog"] = [{"streams": ["Microsoft-Syslog"]}]
+        dcr = {"properties": {"dataSources": data_sources}}
+        if tags is not None:
+            dcr["tags"] = tags
+        return dcr
+
+    def _run(self, existing_dcr, **kwargs):
+        """Drive the real function and return the DCR body it wrote."""
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            ensure_container_insights_for_monitoring,
+        )
+        from azure.cli.command_modules.acs._consts import (
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+        )
+
+        cmd = mock.Mock()
+        cmd.cli_ctx.cloud.endpoints.resource_manager = "https://management.azure.com"
+        addon = mock.Mock(
+            enabled=True,
+            config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.WORKSPACE_ID},
+        )
+
+        def fake_send_raw_request(cli_ctx, method, url, **_):
+            resp = mock.Mock()
+            if "dataCollectionRules" in url:
+                if existing_dcr is None:
+                    raise CLIError("ResourceNotFound: no such DCR")
+                resp.text = json.dumps(existing_dcr)
+            elif "/locations?" in url:
+                resp.text = json.dumps(
+                    {"value": [{"displayName": "East US", "name": "eastus"}]}
+                )
+            else:
+                raise AssertionError("unexpected request to " + url)
+            return resp
+
+        resources = mock.Mock()
+        resources.get_by_id.return_value = mock.Mock(location="East US")
+
+        base = "azure.cli.command_modules.acs.addonconfiguration."
+        with mock.patch(base + "send_raw_request", side_effect=fake_send_raw_request), \
+                mock.patch(base + "get_resources_client", return_value=resources), \
+                mock.patch(
+                    base + "create_data_collection_endpoint", return_value="dce-id"
+                ) as mock_dce, \
+                mock.patch(
+                    base + "_create_or_update_dcr_with_table_readiness_retry"
+                ) as mock_put:
+            call_kwargs = {
+                "remove_monitoring": False,
+                "aad_route": True,
+                "create_dcr": True,
+                "create_dcra": False,
+                "enable_syslog": None,
+                "data_collection_settings": None,
+                "enable_high_log_scale_mode": None,
+                "preserve_existing_dcr_settings": True,
+            }
+            call_kwargs.update(kwargs)
+            ensure_container_insights_for_monitoring(
+                cmd, addon, "sub-id", "rg", "cluster", "eastus", **call_kwargs
+            )
+
+        self.assertEqual(mock_put.call_count, 1)
+        self.mock_dce = mock_dce
+        return mock_put.call_args[0][3]
+
+    @staticmethod
+    def _ci_extension(body):
+        extensions = body["properties"]["dataSources"]["extensions"]
+        return next(e for e in extensions if e["extensionName"] == "ContainerInsights")
+
+    def test_syslog_and_high_scale_and_settings_all_inherited(self):
+        body = self._run(
+            self._existing_dcr(
+                syslog=True,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            )
+        )
+
+        # syslog survives even though it was not supplied on the command line
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        # so do the custom data collection settings, with the high scale streams intact
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            self.CUSTOM_SETTINGS,
+        )
+        self.assertIn("Microsoft-ContainerLogV2-HighScale", extension["streams"])
+        # and high log scale mode still provisions its ingestion DCE
+        self.mock_dce.assert_called_once()
+        self.assertEqual(body["properties"]["dataCollectionEndpointId"], "dce-id")
+
+    def test_high_scale_streams_normalised_when_high_scale_turned_off(self):
+        body = self._run(
+            self._existing_dcr(
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            enable_high_log_scale_mode=False,
+        )
+
+        extension = self._ci_extension(body)
+        streams = extension["extensionSettings"]["dataCollectionSettings"]["streams"]
+        self.assertIn("Microsoft-ContainerLogV2", streams)
+        self.assertNotIn("Microsoft-ContainerLogV2-HighScale", streams)
+        self.assertNotIn("Microsoft-ContainerLogV2-HighScale", extension["streams"])
+        self.mock_dce.assert_not_called()
+        self.assertIsNone(body["properties"]["dataCollectionEndpointId"])
+
+    def test_explicit_flags_win_over_existing(self):
+        body = self._run(
+            self._existing_dcr(syslog=True, streams=["Microsoft-ContainerLogV2-HighScale"]),
+            enable_syslog=False,
+            enable_high_log_scale_mode=False,
+        )
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        self.assertNotIn(
+            "Microsoft-ContainerLogV2-HighScale", self._ci_extension(body)["streams"]
+        )
+
+    def test_enabling_syslog_keeps_existing_high_scale_and_settings(self):
+        body = self._run(
+            self._existing_dcr(
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            enable_syslog=True,
+        )
+
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            self.CUSTOM_SETTINGS,
+        )
+        self.assertEqual(body["properties"]["dataCollectionEndpointId"], "dce-id")
+
+    def test_supplied_settings_win_over_existing(self):
+        supplied = {"enableContainerLogV2": True, "streams": ["Microsoft-Perf"]}
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration._get_data_collection_settings",
+            return_value=dict(supplied),
+        ):
+            body = self._run(
+                self._existing_dcr(settings=self.CUSTOM_SETTINGS),
+                data_collection_settings="settings.json",
+                enable_high_log_scale_mode=False,
+            )
+
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"], supplied
+        )
+
+    def test_tags_are_preserved(self):
+        body = self._run(self._existing_dcr(tags={"team": "monitoring"}))
+
+        self.assertEqual(body["tags"], {"team": "monitoring"})
+
+    def test_fresh_cluster_uses_defaults(self):
+        body = self._run(None)
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            {"enableContainerLogV2": True},
+        )
+        self.assertEqual(extension["streams"], ["Microsoft-ContainerInsights-Group-Default"])
+        self.mock_dce.assert_not_called()
+        self.assertEqual(body["tags"], {})
+
+    def test_module_level_stream_list_is_not_mutated(self):
+        """High log scale mode rewrites the stream list in place, so it must rewrite a copy."""
+        from azure.cli.command_modules.acs import addonconfiguration
+
+        streams = ["Microsoft-ContainerLog", "Microsoft-ContainerLogV2", "Microsoft-Perf"]
+        with mock.patch.object(
+            addonconfiguration, "ContainerInsightsStreams", streams
+        ):
+            self._run(self._existing_dcr(streams=["Microsoft-ContainerLogV2-HighScale"]))
+            # the in-place rewrite to the high scale stream must not leak into the global
+            self.assertEqual(
+                streams,
+                ["Microsoft-ContainerLog", "Microsoft-ContainerLogV2", "Microsoft-Perf"],
+            )
+
+    def test_fresh_onboarding_ignores_leftover_dcr(self):
+        """Disabling monitoring leaves the DCR behind; re-enabling must not inherit from it."""
+        body = self._run(
+            self._existing_dcr(
+                syslog=True,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+                tags={"team": "monitoring"},
+            ),
+            preserve_existing_dcr_settings=False,
+        )
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            {"enableContainerLogV2": True},
+        )
+        self.assertEqual(extension["streams"], ["Microsoft-ContainerInsights-Group-Default"])
+        self.mock_dce.assert_not_called()
+        self.assertIsNone(body["properties"]["dataCollectionEndpointId"])
+        # customer-added tags are resource metadata, not collection settings, so they still survive
+        self.assertEqual(body["tags"], {"team": "monitoring"})
+
+    def test_fresh_onboarding_still_applies_supplied_settings(self):
+        body = self._run(
+            self._existing_dcr(streams=["Microsoft-ContainerLogV2-HighScale"]),
+            preserve_existing_dcr_settings=False,
+            enable_syslog=True,
+        )
+
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        self.assertNotIn(
+            "Microsoft-ContainerLogV2-HighScale", self._ci_extension(body)["streams"]
+        )
 
 
 if __name__ == "__main__":

@@ -145,6 +145,12 @@ from azure.cli.command_modules.acs._validators import (
     validate_bootstrap_container_registry_resource_id,
     validate_gateway_prefix_size,
     validate_artifact_streaming,
+    validate_azure_monitor_logs_and_enable_addons,
+    validate_azure_monitor_logs_enable_disable,
+    validate_container_insights_settings_for_create,
+    validate_container_insights_settings_for_update,
+    validate_azure_monitor_and_opentelemetry_for_create,
+    validate_azure_monitor_and_opentelemetry_for_update,
 )
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -523,11 +529,44 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
         c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_and_enable_addons,
+        )
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_create,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_create,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -878,6 +917,45 @@ def load_arguments(self, _):
         )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('disable_azure_monitor_app_monitoring', action='store_true')
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_enable_disable,
+        )
+        c.argument('disable_azure_monitor_logs', action='store_true')
+        c.argument('workspace_resource_id')
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_update,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_update,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
@@ -987,6 +1065,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks enable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -1001,7 +1080,14 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
