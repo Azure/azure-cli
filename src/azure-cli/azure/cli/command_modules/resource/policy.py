@@ -161,13 +161,13 @@ class Common:
         ctx = self.ctx
         if has_value(ctx.args.scope):
             scope_parts = ctx.args.scope._data.split('/')
-            if scope_parts[1] == 'providers' and len(scope_parts) > 4:
+            if len(scope_parts) > 4 and scope_parts[1] == 'providers':
                 ctx.args.management_group = scope_parts[4]
                 ctx.args.resource_group = None
-            elif scope_parts[1] == 'subscriptions':
+            elif len(scope_parts) > 2 and scope_parts[1] == 'subscriptions':
                 # store subscription from scope for later use
                 self.subscription_from_scope = scope_parts[2]
-                if len(scope_parts) > 3:
+                if len(scope_parts) > 4 and scope_parts[3].lower() == 'resourcegroups':
                     ctx.args.resource_group = scope_parts[4]
                 else:
                     ctx.args.resource_group = None
