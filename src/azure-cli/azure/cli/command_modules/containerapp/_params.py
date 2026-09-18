@@ -463,6 +463,7 @@ def load_arguments(self, _):
         c.argument('user_assigned', options_list=['--mi-user-assigned', c.deprecate(target='--user-assigned', redirect='--mi-user-assigned', hide=True)], nargs='+', help='Space-separated user identities to be assigned.')
         c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.', default=1)
         c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.', default=1)
+        c.argument('env_vars', help='A list of environment variable(s) for the container. Space-separated values in \'key=value\' format. Empty string to clear existing values. Prefix value with \'secretref:\' to reference a secret. Note: this parameter is ignored unless --image is also specified.')
 
     with self.argument_context('containerapp job', arg_group='Scale') as c:
         c.argument('min_executions', type=int, help="Minimum number of job executions to run per polling interval.")
