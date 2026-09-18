@@ -2060,6 +2060,18 @@ class TestWarnOnLegacyMonitoringAuth(unittest.TestCase):
             warn_on_legacy_monitoring_auth(False, None)
         warn.assert_not_called()
 
+    def test_silent_for_addon_names_that_merely_contain_monitoring(self):
+        # A substring check would misfire on these, so the list is matched token by token.
+        for addons in ("monitoring-preview", "notmonitoring"):
+            with self._warn_mock() as warn:
+                warn_on_legacy_monitoring_auth(False, addons)
+            warn.assert_not_called()
+
+    def test_tolerates_whitespace_and_casing_in_the_addon_list(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, " azure-policy , Monitoring ")
+        warn.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,7 @@
 # pylint: disable=line-too-long
 
 import copy
+import json
 import os
 import re
 import time
@@ -143,6 +144,11 @@ from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from knack.util import CLIError
 
 logger = get_logger(__name__)
+
+# Maximum size, in characters of the serialized JSON, of the --data-collection-settings payload.
+# The settings are embedded in the data collection rule request, which the service rejects with
+# "Request Header Fields Too Large" beyond roughly this size.
+CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS = 10000
 
 # type variables
 ContainerServiceClient = TypeVar("ContainerServiceClient")
@@ -290,14 +296,46 @@ def _get_addon_config_value(config, key):
 def _is_container_network_logs_enabled_on_mc(mc, addon_consts):
     """Whether container network logs are on, via the AMP profile or the legacy addon config key."""
     container_insights = _get_container_insights_profile(mc)
-    if container_insights and safe_lower(container_insights.container_network_logs) == \
-            CONST_CONTAINER_NETWORK_LOGS_ENABLED.lower():
-        return True
+    amp_value = container_insights.container_network_logs if container_insights else None
+    if amp_value:
+        return safe_lower(amp_value) == CONST_CONTAINER_NETWORK_LOGS_ENABLED.lower()
     addon_profile = _get_monitoring_addon_profile(mc, addon_consts)
     if addon_profile is None:
         return False
     value = _get_addon_config_value(addon_profile.config, CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS)
     return safe_lower(value) == "true"
+
+
+def _is_azure_monitor_metrics_enabled(mc):
+    """Whether managed Prometheus (Azure Monitor metrics) is enabled on the cluster."""
+    return bool(
+        mc and
+        mc.azure_monitor_profile and
+        mc.azure_monitor_profile.metrics and
+        mc.azure_monitor_profile.metrics.enabled
+    )
+
+
+def _is_opentelemetry_metrics_enabled(mc):
+    """Whether the OpenTelemetry metrics receiver is enabled on the cluster."""
+    return bool(
+        mc and
+        mc.azure_monitor_profile and
+        mc.azure_monitor_profile.app_monitoring and
+        mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics and
+        mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics.enabled
+    )
+
+
+def _is_opentelemetry_logs_traces_enabled(mc):
+    """Whether the OpenTelemetry logs and traces receiver is enabled on the cluster."""
+    return bool(
+        mc and
+        mc.azure_monitor_profile and
+        mc.azure_monitor_profile.app_monitoring and
+        mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces and
+        mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+    )
 
 
 def _is_monitoring_aad_auth(cluster, addon_consts):
@@ -3699,6 +3737,19 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "{} is not valid file, or not accessable.".format(
                         data_collection_settings_file_path
                     )
+                )
+            # The settings are serialized into the data collection rule request, so the size that
+            # matters is that of the parsed contents, not of the path they were read from. Checking
+            # the path length instead would never trigger, letting an oversized file through to
+            # fail the DCR call with an opaque "Request Header Fields Too Large". Raise here rather
+            # than dropping the settings, which would silently fall back to the default collection
+            # settings and change what the cluster ingests without telling the caller.
+            serialized_length = len(json.dumps(get_file_json(data_collection_settings_file_path)))
+            if serialized_length > CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS:
+                raise InvalidArgumentValueError(
+                    f"--data-collection-settings is too large: {serialized_length} characters once "
+                    f"serialized, the limit is {CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS}. Reduce "
+                    "the number of namespaces or streams in the file and retry."
                 )
         return data_collection_settings_file_path
 
@@ -10843,14 +10894,34 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(enabled=False)
             )
 
+        # Read the OTLP host port flags before dispatching so their validation runs even when the
+        # receiver is being disabled in the same command, which would otherwise accept a port and
+        # silently drop it. Each getter returns None immediately when its own flag was not
+        # supplied, so this is a no-op for every other update.
+        metrics_port_http = self.context.get_opentelemetry_metrics_port_http()
+        metrics_port_grpc = self.context.get_opentelemetry_metrics_port_grpc()
+        logs_traces_port_http = self.context.get_opentelemetry_logs_traces_port_http()
+        logs_traces_port_grpc = self.context.get_opentelemetry_logs_traces_port_grpc()
+
+        # Exactly one of these three applies per signal: the enable path builds a fresh receiver
+        # configuration and consumes the ports itself, the disable path clears the configuration,
+        # and only when neither flag is given can a port flag stand on its own against a receiver
+        # that is already enabled.
         if self.context.get_enable_opentelemetry_metrics():
             self._setup_opentelemetry_metrics(mc)
-        if self.context.get_disable_opentelemetry_metrics():
+        elif self.context.get_disable_opentelemetry_metrics():
             self._disable_opentelemetry_metrics(mc)
+        else:
+            self._update_opentelemetry_metrics_ports(mc, metrics_port_http, metrics_port_grpc)
+
         if self.context.get_enable_opentelemetry_logs_traces():
             self._setup_opentelemetry_logs_traces(mc)
-        if self.context.get_disable_opentelemetry_logs_traces():
+        elif self.context.get_disable_opentelemetry_logs_traces():
             self._disable_opentelemetry_logs_traces(mc)
+        else:
+            self._update_opentelemetry_logs_traces_ports(
+                mc, logs_traces_port_http, logs_traces_port_grpc
+            )
         return mc
 
     def _ensure_azure_monitor_profile(self, mc: ManagedCluster) -> None:
@@ -10930,6 +11001,44 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             # Clear the ports when disabling OpenTelemetry logs and traces
             mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.http_port = None
             mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.grpc_port = None
+
+    def _update_opentelemetry_metrics_ports(
+        self, mc: ManagedCluster, port_http: Union[int, None], port_grpc: Union[int, None]
+    ) -> None:
+        """Apply a port-only update to an already enabled OTLP metrics receiver.
+
+        Supports changing a host port without re-specifying --enable-opentelemetry-metrics. The
+        ports have already been validated by their getters, which permit this only when the
+        receiver is already enabled and raise an actionable error otherwise, so reaching here with
+        a port means the receiver configuration exists. The existing configuration is mutated in
+        place rather than rebuilt (as the enable path does) so that the current enabled state and
+        the sibling port that was not supplied are both preserved.
+        """
+        if port_http is None and port_grpc is None:
+            return
+
+        otlp_metrics_config = mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics
+        if port_http is not None:
+            otlp_metrics_config.http_port = port_http
+        if port_grpc is not None:
+            otlp_metrics_config.grpc_port = port_grpc
+
+    def _update_opentelemetry_logs_traces_ports(
+        self, mc: ManagedCluster, port_http: Union[int, None], port_grpc: Union[int, None]
+    ) -> None:
+        """Apply a port-only update to an already enabled OTLP logs and traces receiver.
+
+        See _update_opentelemetry_metrics_ports for why the existing configuration is mutated in
+        place instead of being rebuilt.
+        """
+        if port_http is None and port_grpc is None:
+            return
+
+        otlp_logs_config = mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        if port_http is not None:
+            otlp_logs_config.http_port = port_http
+        if port_grpc is not None:
+            otlp_logs_config.grpc_port = port_grpc
 
     def _setup_azure_monitor_logs(self, mc: ManagedCluster) -> None:
         """Set up Azure Monitor logs on the Azure Monitor profile."""
@@ -11030,10 +11139,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             return
 
         data_collection_settings = self.context.get_data_collection_settings()
-        # Oversized settings are dropped rather than sent, to avoid the DCR call failing with
-        # "Request Header Fields Too Large".
-        if data_collection_settings and len(str(data_collection_settings)) > 10000:
-            data_collection_settings = None
 
         self.context.external_functions.ensure_container_insights_for_monitoring(
             self.cmd,
@@ -11055,6 +11160,73 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
 
+    def _confirm_disable_azure_monitor_metrics(self, mc: ManagedCluster) -> None:
+        """Take the confirmation for a metrics disable that also turns OpenTelemetry metrics off.
+
+        Returns without prompting once _confirm_monitoring_disables has already collected it, so
+        the question is asked exactly once per command no matter which path reaches here.
+        """
+        if not self.context.get_disable_azure_monitor_metrics():
+            return
+        # Mirror the handler's own guards so no question is asked for a disable that would not
+        # actually turn anything off.
+        if not _is_azure_monitor_metrics_enabled(mc) or not _is_opentelemetry_metrics_enabled(mc):
+            return
+        if self.context.get_yes() or self._monitoring_disables_confirmed():
+            return
+
+        msg = (
+            "OpenTelemetry metrics are enabled on this cluster and are collected by Azure "
+            "Monitor metrics. Disabling Azure Monitor metrics will also disable OpenTelemetry "
+            "metrics. Do you want to continue?"
+        )
+        if not prompt_y_n(msg, default="n"):
+            raise DecoratorEarlyExitException()
+
+    def _confirm_disable_azure_monitor_logs(self, mc: ManagedCluster) -> None:
+        """Take the confirmation for a logs disable that also turns OpenTelemetry logs/traces off.
+
+        See _confirm_disable_azure_monitor_metrics for why this can be a no-op.
+        """
+        if not self.context.get_disable_azure_monitor_logs():
+            return
+        addon_consts = self.context.get_addon_consts()
+        if not _is_monitoring_enabled_on_mc(mc, addon_consts):
+            return
+        if not _is_opentelemetry_logs_traces_enabled(mc):
+            return
+        if self.context.get_yes() or self._monitoring_disables_confirmed():
+            return
+
+        msg = (
+            "OpenTelemetry logs and traces are enabled on this cluster and are collected by "
+            "Azure Monitor logs. Disabling Azure Monitor logs will also disable OpenTelemetry "
+            "logs and traces. Do you want to continue?"
+        )
+        if not prompt_y_n(msg, default="n"):
+            raise DecoratorEarlyExitException()
+
+    def _monitoring_disables_confirmed(self) -> bool:
+        return self.context.get_intermediate("monitoring_disables_confirmed", default_value=False)
+
+    def confirm_monitoring_disables(self, mc: ManagedCluster) -> None:
+        """Collect every monitoring disable confirmation before any cleanup runs.
+
+        --disable-azure-monitor-metrics and --disable-azure-monitor-logs each delete collection
+        resources in Azure before the cluster PUT happens. Prompting from inside those handlers
+        means the metrics artifacts are already gone by the time the logs question is asked, so
+        declining it aborts the command with the cluster still reporting metrics as enabled while
+        its data collection objects and recording rules no longer exist. Asking everything up
+        front keeps the command all or nothing.
+
+        :return: None
+        """
+        self._ensure_mc(mc)
+
+        self._confirm_disable_azure_monitor_metrics(mc)
+        self._confirm_disable_azure_monitor_logs(mc)
+        self.context.set_intermediate("monitoring_disables_confirmed", True, overwrite_exists=True)
+
     def _disable_azure_monitor_logs(self, mc: ManagedCluster) -> None:
         """Disable Azure Monitor logs on the Azure Monitor profile."""
         addon_consts = self.context.get_addon_consts()
@@ -11066,22 +11238,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             return
 
         # OpenTelemetry logs and traces are collected by the Container Insights agent, so disabling
-        # Azure Monitor logs necessarily turns them off too. Confirm before doing that.
-        opentelemetry_logs_enabled = (
-            mc.azure_monitor_profile and
-            mc.azure_monitor_profile.app_monitoring and
-            mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces and
-            mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
-        )
-
-        if opentelemetry_logs_enabled and not self.context.get_yes():
-            msg = (
-                "OpenTelemetry logs and traces are enabled on this cluster and are collected by "
-                "Azure Monitor logs. Disabling Azure Monitor logs will also disable OpenTelemetry "
-                "logs and traces. Do you want to continue?"
-            )
-            if not prompt_y_n(msg, default="n"):
-                raise DecoratorEarlyExitException()
+        # Azure Monitor logs necessarily turns them off too. The confirmation is normally taken up
+        # front by confirm_monitoring_disables, before any cleanup has run; this call only prompts
+        # when the handler is driven directly.
+        opentelemetry_logs_enabled = _is_opentelemetry_logs_traces_enabled(mc)
+        self._confirm_disable_azure_monitor_logs(mc)
 
         # Perform DCR/DCRA cleanup BEFORE disabling, the same way aks_disable_addons does. Only
         # managed identity clusters have a DCR/DCRA to clean up, so decide from local state first
@@ -11144,22 +11305,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             return
 
         # OpenTelemetry metrics are ingested through the managed Prometheus pipeline that Azure
-        # Monitor metrics sets up, so disabling the parent necessarily turns them off too. Confirm
-        # before doing that, mirroring the --disable-azure-monitor-logs behaviour.
-        opentelemetry_metrics_enabled = (
-            mc.azure_monitor_profile.app_monitoring and
-            mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics and
-            mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics.enabled
-        )
-
-        if opentelemetry_metrics_enabled and not self.context.get_yes():
-            msg = (
-                "OpenTelemetry metrics are enabled on this cluster and are collected by Azure "
-                "Monitor metrics. Disabling Azure Monitor metrics will also disable OpenTelemetry "
-                "metrics. Do you want to continue?"
-            )
-            if not prompt_y_n(msg, default="n"):
-                raise DecoratorEarlyExitException()
+        # Monitor metrics sets up, so disabling the parent necessarily turns them off too. The
+        # confirmation is normally taken up front by confirm_monitoring_disables, before any
+        # cleanup has run; this call only prompts when the handler is driven directly.
+        opentelemetry_metrics_enabled = _is_opentelemetry_metrics_enabled(mc)
+        self._confirm_disable_azure_monitor_metrics(mc)
 
         mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
 
@@ -11187,12 +11337,31 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """Update the AMP containerInsights tuning settings for the ManagedCluster object.
 
         These flags are independent of --enable-azure-monitor-logs, so they also apply to a cluster
-        where Azure Monitor logs is already enabled. When neither flag is given nothing is touched,
-        which keeps the rest of the monitoring configuration intact.
+        where Azure Monitor logs is already enabled. When none of the flags are given nothing is
+        touched, which keeps the rest of the monitoring configuration intact.
 
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        # These flags require DCR reprovisioning. Skip it when enabling logs (the DCR is created
+        # inline) or disabling logs (the DCR is removed). Read them before the cluster PUT so
+        # invalid data collection settings fail before postprocessing.
+        enable_syslog = self.context.get_enable_syslog()
+        data_collection_settings = self.context.get_data_collection_settings()
+        ampls_resource_id = self.context.get_ampls_resource_id()
+        if (
+            (
+                enable_syslog is not None or
+                data_collection_settings is not None or
+                ampls_resource_id is not None
+            ) and
+            not self.context.raw_param.get("enable_azure_monitor_logs") and
+            not self.context.raw_param.get("disable_azure_monitor_logs")
+        ):
+            self.context.set_intermediate(
+                "monitoring_addon_postprocessing_required", True, overwrite_exists=True
+            )
 
         syslog_port = self.context.get_syslog_port()
         disable_prometheus_scraping = self.context.get_disable_prometheus_metrics_scraping()
@@ -11861,6 +12030,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_workload_auto_scaler_profile(mc)
         # update kubernetes support plan
         mc = self.update_k8s_support_plan(mc)
+        # collect every monitoring disable confirmation before any of them deletes collection
+        # resources, so a declined prompt cannot leave a signal enabled without its resources
+        self.confirm_monitoring_disables(mc)
         # update azure monitor metrics profile
         mc = self.update_azure_monitor_profile(mc)
         # update azure monitor logs (container insights) enablement

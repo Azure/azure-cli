@@ -37,6 +37,11 @@ Release History
 * `az aks update`: Fix `--enable-azure-monitor-logs` not creating the data collection rule and association unless the Log Analytics workspace changed, which left the agent running with no data collection rule attached so no logs were ingested
 * `az aks update`: Create the data collection rule and association before the cluster update when enabling with `--enable-azure-monitor-logs`, matching `az aks enable-addons -a monitoring`. Provisioning them afterwards meant the agent started before the association existed and then stayed idle for several minutes before restarting once the configuration arrived
 * `az aks update`: `--disable-azure-monitor-metrics` now also disables OpenTelemetry metrics, since they are collected through the managed Prometheus pipeline, and asks for confirmation first unless `--yes` is specified
+* `az aks update`: Fix the OpenTelemetry port flags (`--opentelemetry-metrics-port-http`, `--opentelemetry-metrics-port-grpc`, `--opentelemetry-logs-traces-port-http` and `--opentelemetry-logs-traces-port-grpc`) being silently ignored when supplied on their own to change a port on an already enabled receiver, and report an error instead of doing nothing when the matching receiver is not enabled or is being disabled in the same command
+* `az aks update`: Fix `--enable-syslog` updating only the cluster and never re-provisioning the data collection rule, which left the DCR without the syslog data source so no syslog was ingested
+* `az aks update`: Fix `--data-collection-settings` and `--ampls-resource-id` being silently ignored, as neither re-provisioned the data collection rule that carries them
+* `az aks update`: Collect every monitoring disable confirmation before any of them deletes collection resources. Combining `--disable-azure-monitor-metrics` with `--disable-azure-monitor-logs` used to delete the metrics collection resources before asking about logs, so declining that prompt aborted the command with metrics still enabled on the cluster but its data collection objects and recording rules already removed
+* `az aks create`, `az aks update`: Fix the `--data-collection-settings` size limit being applied to the file path instead of the settings it holds, which let an oversized file through to fail the data collection rule call with `Request Header Fields Too Large`
 
 **App Config**
 

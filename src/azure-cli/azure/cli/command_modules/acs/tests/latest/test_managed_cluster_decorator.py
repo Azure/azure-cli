@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+import json
 import os
 import tempfile
 import unittest
@@ -40,6 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_CONTAINER_NETWORK_LOGS_ENABLED,
     CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+    CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS,
     CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
     CONST_LOAD_BALANCER_SKU_STANDARD,
     CONST_LOAD_BALANCER_SKU_BASIC,
@@ -69,6 +71,8 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
+    CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS,
+    _is_container_network_logs_enabled_on_mc,
     AKSManagedClusterContext,
     AKSManagedClusterCreateDecorator,
     AKSManagedClusterModels,
@@ -18328,8 +18332,172 @@ class AKSAzureMonitorLogsUpdateTestCase(unittest.TestCase):
         dec_mc = dec.update_azure_monitor_logs_settings(mc)
         self.assertIsNone(dec_mc.azure_monitor_profile)
 
+    def _mc_with_container_insights(self):
+        return self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                ),
+            ),
+        )
 
-class AKSOpenTelemetryCreateTestCase(unittest.TestCase):
+    def _postprocessing_required(self, dec):
+        return dec.context.get_intermediate(
+            "monitoring_addon_postprocessing_required", default_value=False
+        )
+
+    def test_enable_syslog_requests_dcr_reprovisioning(self):
+        # The syslog data source and the Microsoft-Syslog stream live in the DCR, so writing the
+        # cluster alone would leave syslog uncollected.
+        dec = self._update_dec({"enable_syslog": True, "syslog_port": 2833})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertEqual(dec_mc.azure_monitor_profile.container_insights.syslog_port, 2833)
+        self.assertTrue(self._postprocessing_required(dec))
+
+    def test_disable_syslog_requests_dcr_reprovisioning(self):
+        # Turning syslog off also changes the DCR shape, so it has to be re-provisioned to drop
+        # the syslog data source.
+        dec = self._update_dec({"enable_syslog": False, "syslog_port": 2833})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertTrue(self._postprocessing_required(dec))
+
+    def test_syslog_port_alone_does_not_request_dcr_reprovisioning(self):
+        # The port never reaches the DCR, so there is nothing to re-provision for it.
+        dec = self._update_dec({"syslog_port": 2833})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertFalse(self._postprocessing_required(dec))
+
+    def test_prometheus_scraping_alone_does_not_request_dcr_reprovisioning(self):
+        dec = self._update_dec({"disable_prometheus_metrics_scraping": True})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertFalse(self._postprocessing_required(dec))
+
+    def test_enable_syslog_with_enable_azure_monitor_logs_skips_dcr_reprovisioning(self):
+        # The onboarding path already provisions the DCR inline before the cluster PUT, so asking
+        # for postprocessing as well would repeat the same work afterwards.
+        dec = self._update_dec(
+            {"enable_azure_monitor_logs": True, "enable_syslog": True, "syslog_port": 2833}
+        )
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertFalse(self._postprocessing_required(dec))
+
+    def test_enable_syslog_with_disable_azure_monitor_logs_skips_dcr_reprovisioning(self):
+        # Offboarding tears the DCR down, so it must not be recreated by the syslog flag.
+        dec = self._update_dec({"disable_azure_monitor_logs": True, "enable_syslog": True})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertFalse(self._postprocessing_required(dec))
+
+    def _settings_file(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as settings_file:
+            settings_file.write('{"interval": "1m"}')
+            settings_path = settings_file.name
+        self.addCleanup(os.unlink, settings_path)
+        return settings_path
+
+    def test_data_collection_settings_requests_dcr_reprovisioning(self):
+        # dataCollectionSettings only exists inside the DCR, so an update that does not
+        # re-provision the rule would leave the previous collection settings in place.
+        dec = self._update_dec({"data_collection_settings": self._settings_file()})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertTrue(self._postprocessing_required(dec))
+
+    def test_ampls_resource_id_requests_dcr_reprovisioning(self):
+        # The private link scope association is made while provisioning the DCR, so changing it
+        # requires the rule to be provisioned again.
+        dec = self._update_dec(
+            {
+                "ampls_resource_id": (
+                    "/subscriptions/1234-5678/resourceGroups/test_rg_name/providers/"
+                    "microsoft.insights/privatelinkscopes/test_ampls"
+                )
+            }
+        )
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertTrue(self._postprocessing_required(dec))
+
+    def test_data_collection_settings_with_disable_azure_monitor_logs_skips_dcr_reprovisioning(self):
+        dec = self._update_dec(
+            {
+                "disable_azure_monitor_logs": True,
+                "data_collection_settings": self._settings_file(),
+            }
+        )
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+        dec.update_azure_monitor_logs_settings(mc)
+
+        self.assertFalse(self._postprocessing_required(dec))
+
+    def test_unreadable_data_collection_settings_fails_before_cluster_put(self):
+        # Validating here keeps a bad path from being discovered only after the cluster has
+        # already been updated.
+        dec = self._update_dec({"data_collection_settings": "/tmp/does_not_exist_dcs.json"})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+
+        with self.assertRaises(InvalidArgumentValueError):
+            dec.update_azure_monitor_logs_settings(mc)
+
+    def _settings_file_of_serialized_size(self, target_chars):
+        # Build a settings file whose JSON payload is comfortably larger than the limit.
+        payload = {"namespaces": ["ns-{:05d}-padding-padding".format(i) for i in range(target_chars // 25)]}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as settings_file:
+            json.dump(payload, settings_file)
+            settings_path = settings_file.name
+        self.addCleanup(os.unlink, settings_path)
+        return settings_path
+
+    def test_oversized_data_collection_settings_is_rejected(self):
+        # The settings are embedded in the data collection rule request, which the service
+        # rejects with an opaque "Request Header Fields Too Large" once they grow too big.
+        # Fail here, with the actual size, instead of letting that happen after the cluster PUT.
+        settings_path = self._settings_file_of_serialized_size(
+            CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS * 2
+        )
+        dec = self._update_dec({"data_collection_settings": settings_path})
+        mc = self._mc_with_container_insights()
+        dec.context.attach_mc(mc)
+
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            dec.update_azure_monitor_logs_settings(mc)
+        self.assertIn(str(CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS), str(cm.exception))
+
+    def test_data_collection_settings_limit_measures_contents_not_path(self):
+        # Measuring the path length instead of the parsed settings would never reach the limit,
+        # so an oversized file would sail through while a small one could be dropped.
+        settings_path = self._settings_file()
+        self.assertLess(len(settings_path), CONST_DATA_COLLECTION_SETTINGS_MAX_CHARS)
+        dec = self._update_dec({"data_collection_settings": settings_path})
+
+        self.assertEqual(dec.context.get_data_collection_settings(), settings_path)
+
+
+
     def setUp(self):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
@@ -18469,6 +18637,243 @@ class AKSOpenTelemetryCreateTestCase(unittest.TestCase):
         self.assertEqual(app_monitoring.open_telemetry_metrics.grpc_port, 4317)
         self.assertTrue(app_monitoring.open_telemetry_logs_and_traces.enabled)
         self.assertEqual(app_monitoring.open_telemetry_logs_and_traces.grpc_port, 4319)
+
+
+class ContainerNetworkLogsEnabledOnMcTestCase(unittest.TestCase):
+    """The Azure Monitor profile is the source of truth for container network logs."""
+
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+        self.addon_consts = {
+            "CONST_MONITORING_ADDON_NAME": CONST_MONITORING_ADDON_NAME,
+            "CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS": CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS,
+        }
+
+    def _mc(self, amp_value, legacy_value):
+        mc = self.models.ManagedCluster(location="test_location")
+        if amp_value is not None:
+            mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    container_network_logs=amp_value,
+                )
+            )
+        if legacy_value is not None:
+            mc.addon_profiles = {
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS: legacy_value},
+                )
+            }
+        return mc
+
+    def test_disabled_profile_wins_over_stale_legacy_config(self):
+        # The legacy addon config key mirrors the profile server side, so it still reports the
+        # previous value while an update is in flight. Reading it here would reject a command
+        # that disables container network logs and high log scale mode together.
+        mc = self._mc(CONST_CONTAINER_NETWORK_LOGS_DISABLED, "true")
+
+        self.assertFalse(_is_container_network_logs_enabled_on_mc(mc, self.addon_consts))
+
+    def test_enabled_profile_wins_over_stale_legacy_config(self):
+        mc = self._mc(CONST_CONTAINER_NETWORK_LOGS_ENABLED, "false")
+
+        self.assertTrue(_is_container_network_logs_enabled_on_mc(mc, self.addon_consts))
+
+    def test_legacy_config_is_used_when_the_profile_says_nothing(self):
+        # Clusters onboarded through the omsagent addon have no value on the profile.
+        self.assertTrue(_is_container_network_logs_enabled_on_mc(self._mc(None, "true"), self.addon_consts))
+        self.assertFalse(_is_container_network_logs_enabled_on_mc(self._mc(None, "false"), self.addon_consts))
+
+    def test_disabled_when_neither_source_reports_anything(self):
+        self.assertFalse(
+            _is_container_network_logs_enabled_on_mc(self.models.ManagedCluster(location="l"), self.addon_consts)
+        )
+
+
+class AKSMonitoringDisableConfirmationTestCase(unittest.TestCase):
+    """Both monitoring disables must be confirmed before either deletes collection resources."""
+
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    def _dec_and_mc(self, raw_param, otlp_metrics=False, otlp_logs_traces=False):
+        params = {"name": "test_name", "resource_group_name": "test_rg_name"}
+        params.update(raw_param)
+
+        class _Client:
+            def get(self, rg, name):
+                return self.cluster
+
+        client = _Client()
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd, client, params, ResourceType.MGMT_CONTAINERSERVICE
+        )
+        app_monitoring = self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
+        if otlp_metrics:
+            app_monitoring.open_telemetry_metrics = (
+                self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryMetrics(
+                    enabled=True, http_port=4318, grpc_port=4317
+                )
+            )
+        if otlp_logs_traces:
+            app_monitoring.open_telemetry_logs_and_traces = (
+                self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces(
+                    enabled=True, http_port=4320, grpc_port=4319
+                )
+            )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "test_workspace",
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                    },
+                )
+            },
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True),
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True, log_analytics_workspace_resource_id="test_workspace"
+                ),
+                app_monitoring=app_monitoring,
+            ),
+        )
+        dec.context.attach_mc(mc)
+        dec.context.set_intermediate("subscription_id", "test_sub_id")
+        client.cluster = mc
+        return dec, mc
+
+    def _run(self, dec, mc, answers):
+        """Drive the disable path, recording prompts and cleanups in the order they happen."""
+        order = []
+        remaining = list(answers)
+
+        def ask(msg, default=None):
+            order.append("prompt_logs" if "logs and traces" in msg else "prompt_metrics")
+            return remaining.pop(0)
+
+        prefix = "azure.cli.command_modules.acs.managed_cluster_decorator."
+        with patch(
+            prefix + "ensure_azure_monitor_profile_prerequisites",
+            side_effect=lambda *a, **k: order.append("cleanup_metrics"),
+        ), patch(
+            prefix + "ensure_container_insights_for_monitoring",
+            side_effect=lambda *a, **k: order.append("cleanup_logs"),
+        ), patch(
+            prefix + "prompt_y_n", side_effect=ask
+        ):
+            try:
+                dec.confirm_monitoring_disables(mc)
+                mc = dec.update_azure_monitor_profile(mc)
+                mc = dec.update_azure_monitor_logs(mc)
+                order.append("cluster_put")
+            except DecoratorEarlyExitException:
+                order.append("early_exit")
+        return order
+
+    def test_declining_logs_does_not_delete_metrics_resources(self):
+        # The reported bug: metrics cleanup used to run before the logs question was asked, so
+        # declining it left the cluster with metrics enabled but no collection resources.
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True},
+            otlp_metrics=True,
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [True, False])
+
+        self.assertEqual(order, ["prompt_metrics", "prompt_logs", "early_exit"])
+        self.assertNotIn("cleanup_metrics", order)
+        self.assertNotIn("cleanup_logs", order)
+
+    def test_declining_logs_without_opentelemetry_metrics_still_deletes_nothing(self):
+        # Only the logs prompt is raised here, which is the exact combination reported: managed
+        # metrics plus OpenTelemetry logs and traces, with no OpenTelemetry metrics.
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True},
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [False])
+
+        self.assertEqual(order, ["prompt_logs", "early_exit"])
+        self.assertTrue(mc.azure_monitor_profile.metrics.enabled)
+
+    def test_accepting_both_confirms_before_any_cleanup(self):
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True},
+            otlp_metrics=True,
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [True, True])
+
+        self.assertEqual(
+            order,
+            [
+                "prompt_metrics",
+                "prompt_logs",
+                "cleanup_metrics",
+                "cleanup_logs",
+                "cluster_put",
+            ],
+        )
+
+    def test_each_confirmation_is_asked_only_once(self):
+        # The handlers still prompt when driven directly, so the up front pass must stop them
+        # asking the same question a second time.
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True},
+            otlp_metrics=True,
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [True, True])
+
+        self.assertEqual(order.count("prompt_metrics"), 1)
+        self.assertEqual(order.count("prompt_logs"), 1)
+
+    def test_declining_metrics_stops_before_logs_cleanup(self):
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True},
+            otlp_metrics=True,
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [False])
+
+        self.assertEqual(order, ["prompt_metrics", "early_exit"])
+
+    def test_yes_skips_both_confirmations(self):
+        dec, mc = self._dec_and_mc(
+            {
+                "disable_azure_monitor_metrics": True,
+                "disable_azure_monitor_logs": True,
+                "yes": True,
+            },
+            otlp_metrics=True,
+            otlp_logs_traces=True,
+        )
+        order = self._run(dec, mc, [])
+
+        self.assertEqual(order, ["cleanup_metrics", "cleanup_logs", "cluster_put"])
+
+    def test_no_confirmation_without_opentelemetry(self):
+        dec, mc = self._dec_and_mc(
+            {"disable_azure_monitor_metrics": True, "disable_azure_monitor_logs": True}
+        )
+        order = self._run(dec, mc, [])
+
+        self.assertEqual(order, ["cleanup_metrics", "cleanup_logs", "cluster_put"])
+
+    def test_no_confirmation_when_nothing_is_being_disabled(self):
+        dec, mc = self._dec_and_mc({}, otlp_metrics=True, otlp_logs_traces=True)
+        order = self._run(dec, mc, [])
+
+        self.assertNotIn("prompt_metrics", order)
+        self.assertNotIn("prompt_logs", order)
 
 
 class AKSOpenTelemetryUpdateTestCase(unittest.TestCase):
@@ -18706,6 +19111,122 @@ class AKSOpenTelemetryUpdateTestCase(unittest.TestCase):
         self.assertEqual(otlp.http_port, 4318)
         # Leftover DCR/DCRA cleanup is still driven by the flag, not by cluster state.
         prereq_mock.assert_called_once()
+
+    def _mc_with_otlp_logs_traces(self):
+        mc = self._mc_with_monitoring()
+        otel_logs_cls = (
+            self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces
+        )
+        mc.azure_monitor_profile.app_monitoring = (
+            self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                open_telemetry_logs_and_traces=otel_logs_cls(
+                    enabled=True, http_port=4320, grpc_port=4319
+                ),
+            )
+        )
+        return mc
+
+    def test_opentelemetry_logs_traces_port_only_update_applies(self):
+        # A port may be changed on an already onboarded cluster without re-specifying
+        # --enable-opentelemetry-logs-traces.
+        dec = self._update_dec({"opentelemetry_logs_traces_port_http": 2331})
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        self.assertEqual(otlp.http_port, 2331)
+        # The receiver stays enabled and the port that was not supplied is preserved.
+        self.assertTrue(otlp.enabled)
+        self.assertEqual(otlp.grpc_port, 4319)
+
+    def test_opentelemetry_metrics_port_only_update_applies(self):
+        dec = self._update_dec({"opentelemetry_metrics_port_grpc": 2332})
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics
+        self.assertEqual(otlp.grpc_port, 2332)
+        self.assertTrue(otlp.enabled)
+        self.assertEqual(otlp.http_port, 4318)
+
+    def test_opentelemetry_both_ports_only_update_applies(self):
+        dec = self._update_dec(
+            {
+                "opentelemetry_logs_traces_port_http": 2331,
+                "opentelemetry_logs_traces_port_grpc": 2333,
+            }
+        )
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        self.assertTrue(otlp.enabled)
+        self.assertEqual(otlp.http_port, 2331)
+        self.assertEqual(otlp.grpc_port, 2333)
+
+    def test_opentelemetry_logs_traces_port_only_on_disabled_cluster_errors(self):
+        # Without the receiver already enabled the port has nothing to apply to, so the update
+        # must fail loudly rather than silently doing nothing.
+        dec = self._update_dec({"opentelemetry_logs_traces_port_http": 2331})
+        mc = self._mc_with_monitoring()
+        dec.context.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec.update_azure_monitor_profile(mc)
+
+    def test_opentelemetry_metrics_port_only_on_disabled_cluster_errors(self):
+        dec = self._update_dec({"opentelemetry_metrics_port_grpc": 2332})
+        mc = self._mc_with_monitoring()
+        dec.context.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec.update_azure_monitor_profile(mc)
+
+    def test_update_without_opentelemetry_params_leaves_ports_untouched(self):
+        # The port-only branch runs on every update, so an unrelated update must be a no-op.
+        dec = self._update_dec({})
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        self.assertTrue(otlp.enabled)
+        self.assertEqual(otlp.http_port, 4320)
+        self.assertEqual(otlp.grpc_port, 4319)
+
+    def test_opentelemetry_metrics_port_with_disable_errors(self):
+        # Disabling the receiver and setting one of its ports in the same command is
+        # contradictory, so it must be rejected instead of silently dropping the port.
+        dec = self._update_dec(
+            {"disable_opentelemetry_metrics": True, "opentelemetry_metrics_port_http": 2331}
+        )
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec.update_azure_monitor_profile(mc)
+
+    def test_opentelemetry_logs_traces_port_with_disable_errors(self):
+        dec = self._update_dec(
+            {
+                "disable_opentelemetry_logs_traces": True,
+                "opentelemetry_logs_traces_port_grpc": 2333,
+            }
+        )
+        mc = self._mc_with_otlp_logs_traces()
+        dec.context.attach_mc(mc)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec.update_azure_monitor_profile(mc)
+
+    def test_disable_opentelemetry_metrics_without_port_still_disables(self):
+        # The eager port reads must not disturb a plain disable.
+        dec = self._update_dec({"disable_opentelemetry_metrics": True})
+        mc = self._mc_with_otlp_metrics()
+        dec.context.attach_mc(mc)
+        dec_mc = dec.update_azure_monitor_profile(mc)
+
+        otlp = dec_mc.azure_monitor_profile.app_monitoring.open_telemetry_metrics
+        self.assertFalse(otlp.enabled)
 
 
 if __name__ == "__main__":
