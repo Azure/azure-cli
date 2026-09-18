@@ -12,7 +12,7 @@ import re
 import ssl
 import time
 from dataclasses import dataclass
-from http.client import HTTPException
+from http.client import HTTPException, HTTPResponse, HTTPSConnection
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urljoin, urlsplit
@@ -31,12 +31,59 @@ API_ROOT = 'https://api.github.com/repos/microsoft/azure-skills'
 ARCHIVE_ROOT = 'https://codeload.github.com/microsoft/azure-skills/zip/'
 METADATA_LIMIT = 1024 * 1024
 ARCHIVE_LIMIT = 64 * 1024 * 1024
+_SOCKET_TIMEOUT = 30
+_RESPONSE_TIMEOUT = 120
 
 
 @dataclass(frozen=True)
 class Release:
     tag: str
     commit: str
+
+
+class _DeadlineReader(io.RawIOBase):
+    def __init__(self, sock, raw):
+        self._socket = sock
+        self._raw = raw
+        self._deadline = time.monotonic() + _RESPONSE_TIMEOUT
+
+    def readable(self):
+        return True
+
+    def readinto(self, buffer):
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            raise CLIError('Azure skills response exceeded the read deadline.')
+        # Buffered body reads and chunk framing can each perform many receives.
+        self._socket.settimeout(min(_SOCKET_TIMEOUT, remaining))
+        try:
+            return self._raw.readinto(buffer)
+        except TimeoutError:
+            if time.monotonic() >= self._deadline:
+                raise CLIError('Azure skills response exceeded the read deadline.') from None
+            raise
+
+    def close(self):
+        try:
+            self._raw.close()
+        finally:
+            super().close()
+
+
+class _DeadlineHTTPResponse(HTTPResponse):
+    def __init__(self, sock, *args, **kwargs):
+        super().__init__(sock, *args, **kwargs)
+        # Install below buffering before headers are read; error bodies share this deadline.
+        self.fp = io.BufferedReader(_DeadlineReader(sock, self.fp.detach()))
+
+
+class _DeadlineHTTPSConnection(HTTPSConnection):
+    response_class = _DeadlineHTTPResponse
+
+
+class _DeadlineHTTPSHandler(HTTPSHandler):
+    def do_open(self, http_class, req, **http_conn_args):
+        return super().do_open(_DeadlineHTTPSConnection, req, **http_conn_args)
 
 
 class _MetadataRedirectHandler(HTTPRedirectHandler):
@@ -84,7 +131,7 @@ class _ArchiveRedirectHandler(HTTPRedirectHandler):
 
 
 def _copy_bounded(source, destination, limit: int) -> int:
-    deadline = time.monotonic() + 120
+    deadline = time.monotonic() + _RESPONSE_TIMEOUT
     written = 0
     while True:
         if time.monotonic() > deadline:
@@ -159,8 +206,8 @@ def _api_json(path: str, gh_token: str | None) -> dict:
         if gh_token:
             headers['Authorization'] = 'Bearer ' + gh_token
         request = Request(API_ROOT + path, headers=headers)
-        opener = build_opener(_MetadataRedirectHandler(), HTTPSHandler(context=ssl.create_default_context()))
-        with opener.open(request, timeout=30) as response:
+        opener = build_opener(_MetadataRedirectHandler(), _DeadlineHTTPSHandler(context=ssl.create_default_context()))
+        with opener.open(request, timeout=_SOCKET_TIMEOUT) as response:
             body = io.BytesIO()
             _copy_response(response, body, METADATA_LIMIT)
         try:
@@ -207,9 +254,9 @@ def download_archive(release: Release, destination: Path) -> None:
     incomplete = False
     try:
         # A separate opener and Request ensure metadata credentials cannot carry over.
-        opener = build_opener(_ArchiveRedirectHandler(), HTTPSHandler(context=ssl.create_default_context()))
+        opener = build_opener(_ArchiveRedirectHandler(), _DeadlineHTTPSHandler(context=ssl.create_default_context()))
         request = Request(ARCHIVE_ROOT + release.commit)
-        with opener.open(request, timeout=30) as response:
+        with opener.open(request, timeout=_SOCKET_TIMEOUT) as response:
             with destination.open('wb') as archive:
                 incomplete = True
                 _copy_response(response, archive, ARCHIVE_LIMIT)

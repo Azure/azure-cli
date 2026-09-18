@@ -6,11 +6,15 @@
 import importlib
 import io
 import os
+import socket
 import ssl
 import tempfile
+import threading
+import time
 import unittest
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from email.message import Message
+from http.client import HTTPSConnection
 from pathlib import Path
 from unittest import mock
 from urllib.error import HTTPError, URLError
@@ -475,6 +479,152 @@ class ReleaseDownloadTests(unittest.TestCase):
             self.assertNotIn('secret-token', str(raised.exception))
             self.assertTrue(response.closed)
             self.assertFalse(destination.exists())
+
+
+class ResponseDeadlineTests(unittest.TestCase):
+    @contextmanager
+    def _local_response(self, prefix, chunks, interval=0.02, socket_timeout=0.1, deadline=0.2):
+        """Keep real urllib/HTTPResponse/socket I/O; replace only TLS connection setup."""
+        client, server = socket.socketpair()
+        stop = threading.Event()
+        requests = []
+        sent = []
+
+        def serve():
+            try:
+                with server:
+                    server.settimeout(2)
+                    with server.makefile('rb') as stream:
+                        request = b''
+                        while not request.endswith(b'\r\n\r\n'):
+                            line = stream.readline()
+                            if not line:
+                                return
+                            request += line
+                        requests.append(request)
+                        server.sendall(prefix)
+                        for chunk in chunks:
+                            if stop.wait(interval):
+                                return
+                            server.sendall(chunk)
+                            sent.append(chunk)
+            except (BrokenPipeError, ConnectionResetError):
+                # The deadline deliberately closes the client before the peer finishes.
+                pass
+
+        def connect(connection):
+            client.settimeout(connection.timeout)
+            connection.sock = client
+
+        worker = threading.Thread(target=serve)
+        worker.start()
+        try:
+            with mock.patch.object(HTTPSConnection, 'connect', autospec=True, side_effect=connect), \
+                    mock.patch.object(skills, '_RESPONSE_TIMEOUT', deadline), \
+                    mock.patch.object(skills, '_SOCKET_TIMEOUT', socket_timeout), \
+                    mock.patch.dict('os.environ', {}, clear=True):
+                yield client, requests, sent
+        finally:
+            stop.set()
+            client.close()
+            worker.join(timeout=3)
+            self.assertFalse(worker.is_alive(), 'Local HTTP peer did not stop')
+
+    def _assert_trickle_stops(self, framing, chunks, operation='metadata', status=200,
+                             interval=0.02, socket_timeout=0.1):
+        prefix = f'HTTP/1.1 {status} Test\r\nConnection: close\r\n'.encode() + framing
+        with self._local_response(prefix, chunks, interval, socket_timeout) as (client, requests, sent), \
+                tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / 'archive.zip'
+            failure = None
+            started = time.monotonic()
+            try:
+                if operation == 'metadata':
+                    skills._api_json('/releases/latest', 'secret-token')
+                else:
+                    skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+            except CLIError as error:
+                failure = str(error)
+            elapsed = time.monotonic() - started
+            # The peer needs >1 second to finish. Allow scheduling headroom, not the full body wait.
+            self.assertLess(elapsed, 0.6, f'Response deadline did not interrupt transport I/O: {elapsed:.3f}s')
+            self.assertIsNotNone(failure, 'The slow response unexpectedly completed')
+            if status == 403:
+                self.assertIn('HTTP 403', failure)
+                self.assertIn('access', failure)
+                self.assertNotIn('rate limit', failure)
+            else:
+                self.assertIn('read deadline', failure)
+            self.assertNotIn('secret-token', failure)
+            self.assertFalse(destination.exists(), 'Incomplete archive was retained')
+            self.assertEqual(client.fileno(), -1, 'HTTP response retained its socket')
+            self.assertLess(len(sent), len(chunks), 'Waited for the whole response before timing out')
+            self.assertEqual(len(requests), 1)
+            if operation == 'metadata':
+                self.assertIn(b'Authorization: Bearer secret-token\r\n', requests[0])
+            else:
+                self.assertNotIn(b'Authorization:', requests[0])
+
+    def test_fixed_length_metadata_trickle_cannot_extend_response_deadline(self):
+        self._assert_trickle_stops(b'Content-Length: 60\r\n\r\n', [b'x'] * 60)
+
+    def test_fixed_length_archive_trickle_is_interrupted_and_removed(self):
+        # Complete one copy chunk first, so cleanup must remove already-written bytes.
+        self._assert_trickle_stops(b'Content-Length: 65596\r\n\r\n' + b'x' * 65536,
+                                  [b'x'] * 60, operation='archive')
+
+    def test_chunked_archive_trickle_is_interrupted_and_removed(self):
+        self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n10000\r\n' +
+                                  b'x' * 65536 + b'\r\n3c\r\n',
+                                  [b'x'] * 60 + [b'\r\n0\r\n\r\n'], operation='archive')
+
+    def test_chunk_size_line_trickle_is_bounded_before_payload(self):
+        self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n',
+                                  [b'0'] * 60 + [b'1\r\nx\r\n0\r\n\r\n'])
+
+    def test_chunk_trailer_trickle_is_bounded(self):
+        self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\nX-Trailer: ',
+                                  [b'x'] * 60 + [b'\r\n\r\n'])
+
+    def test_error_diagnostic_trickle_is_bounded_and_redacted(self):
+        body = b'{"message":"secret-token ' + b'x' * 40 + b'"}'
+        for framing, chunks in (
+                (f'Content-Length: {len(body)}\r\n\r\n'.encode(), [bytes([byte]) for byte in body]),
+                (b'Transfer-Encoding: chunked\r\n\r\n' + f'{len(body):x}\r\n'.encode(),
+                 [bytes([byte]) for byte in body] + [b'\r\n0\r\n\r\n'])):
+            with self.subTest(framing=framing):
+                self._assert_trickle_stops(framing, chunks, status=403)
+
+    def test_blocked_receive_uses_remaining_deadline_not_socket_timeout(self):
+        self._assert_trickle_stops(b'Content-Length: 1\r\n\r\n', [b'x'],
+                                  interval=1.2, socket_timeout=1)
+
+    def test_socket_inactivity_timeout_still_applies_before_deadline(self):
+        prefix = b'HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\n'
+        with self._local_response(prefix, [b'x'], interval=1.2, deadline=1) as (client, _, _):
+            started = time.monotonic()
+            with self.assertRaisesRegex(CLIError, 'network, TLS') as raised:
+                skills._api_json('/releases/latest', 'secret-token')
+            self.assertLess(time.monotonic() - started, 0.6)
+            self.assertNotIn('secret-token', str(raised.exception))
+            self.assertEqual(client.fileno(), -1)
+
+    def test_fast_real_http_responses_complete_and_close(self):
+        for framing, body in ((b'Content-Length: 2\r\n\r\n', b'{}'),
+                              (b'Transfer-Encoding: chunked\r\n\r\n', b'2\r\n{}\r\n0\r\n\r\n')):
+            with self.subTest(framing=framing):
+                prefix = b'HTTP/1.1 200 OK\r\nConnection: close\r\n' + framing
+                with self._local_response(prefix, [body]) as (client, _, _):
+                    self.assertEqual(skills._api_json('/releases/latest', None), {})
+                    self.assertEqual(client.fileno(), -1)
+
+    def test_generic_bounded_copy_still_accepts_local_files(self):
+        with tempfile.TemporaryFile() as source:
+            source.write(b'x' * 65537)
+            source.seek(0)
+            destination = io.BytesIO()
+            self.assertEqual(skills._copy_bounded(source, destination, 65537), 65537)
+            self.assertEqual(destination.getvalue(), b'x' * 65537)
 
 
 class AgentSelectionTests(unittest.TestCase):
