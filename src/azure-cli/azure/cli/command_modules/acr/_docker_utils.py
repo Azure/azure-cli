@@ -19,7 +19,7 @@ from knack.prompting import prompt, prompt_pass, NoTTYException
 from knack.log import get_logger
 
 from azure.cli.core.util import should_disable_connection_verify
-from azure.cli.core.cloud import CloudSuffixNotSetException
+from azure.cli.core.cloud import CloudSuffixNotSetException, CloudNameEnum
 from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import AzureResponseError
@@ -34,6 +34,17 @@ from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
 logger = get_logger(__name__)
 
+# Known standard Azure cloud names whose ACR instances share the common
+# ``https://containerregistry.azure.net`` audience.  Custom / private clouds
+# (e.g. Azure Local) are NOT in this set and require per-registry audience
+# derived from the login server.
+_STANDARD_CLOUD_NAMES = frozenset({
+    CloudNameEnum.AzureCloud,
+    CloudNameEnum.AzureChinaCloud,
+    CloudNameEnum.AzureUSGovernment,
+    CloudNameEnum.AzureGermanCloud,
+    CloudNameEnum.AzureBleuCloud,
+})
 
 EMPTY_GUID = '00000000-0000-0000-0000-000000000000'
 ALLOWED_HTTP_METHOD = ['get', 'patch', 'put', 'delete', 'post']
@@ -126,17 +137,23 @@ def _handle_challenge_phase(login_server,
     return token_params
 
 
-def _resolve_acr_scope(cli_ctx):
+def _resolve_acr_scope(cli_ctx, login_server=None):
     """Determine the AAD resource (audience) to request a token for, for the ACR /oauth2/exchange endpoint.
 
     Resolution order:
       1. ``az config set acr.audience_resource=<value>`` — operator override. If the value
          starts with ``https://`` it is used verbatim, otherwise it is treated as a short
          name and expanded to ``https://<value>.azure.net``.
-      2. The default public ACR audience ``https://containerregistry.azure.net``.
+      2. For private/local clouds (cloud name not in the set of known standard Azure cloud names),
+         the resource is derived from ``login_server``: ``https://<login_server>``.
+         Standard Azure clouds (AzureCloud, AzureChinaCloud, AzureUSGovernment, etc.) always
+         fall through to the default audience.
+      3. The default public ACR audience ``https://containerregistry.azure.net``.
 
-    This lets disconnected environments (e.g. Azure Local Disconnected Operations) pin
-    the audience their local IDP knows about, instead of relying on runtime fallback.
+    Private/disconnected environments (e.g. Azure Local) automatically use the registry's
+    own URL as the audience, because their local IDPs do not recognise the public
+    ``containerregistry.azure.net`` application.  Operators may still override via
+    ``az config set acr.audience_resource=<value>`` for any remaining edge cases.
     """
     configured = None
     try:
@@ -145,6 +162,16 @@ def _resolve_acr_scope(cli_ctx):
         configured = None
     if configured:
         return configured if configured.startswith('https://') else "https://{}.azure.net".format(configured)
+
+    # For private / local clouds the per-registry URL is the correct audience.
+    if login_server:
+        try:
+            cloud_name = cli_ctx.cloud.name
+        except AttributeError:
+            cloud_name = None
+        if cloud_name and cloud_name not in _STANDARD_CLOUD_NAMES:
+            return "https://{}".format(login_server)
+
     return "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 
 
@@ -163,7 +190,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
 
-    scope = _resolve_acr_scope(cli_ctx)
+    scope = _resolve_acr_scope(cli_ctx, login_server=login_server)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
     creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
