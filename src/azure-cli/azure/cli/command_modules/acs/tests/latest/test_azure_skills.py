@@ -8,10 +8,13 @@ import io
 import os
 import socket
 import ssl
+import stat
+import struct
 import tempfile
 import threading
 import time
 import unittest
+import zipfile
 from contextlib import ExitStack, contextmanager
 from email.message import Message
 from http.client import HTTPSConnection
@@ -28,6 +31,331 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
+
+
+_SKILL = '---\nname: demo\ndescription: Test skill\n---\nInstructions\n'
+_LICENSE = b'MIT License\nTest fixture copyright\n'
+_PAYLOAD = 'bundle/.github/plugins/azure-skills/skills/'
+
+
+def make_bundle(path, files=None, extra=(), license_content=_LICENSE, compression=zipfile.ZIP_DEFLATED):
+    if files is None:
+        files = {
+            'demo/SKILL.md': _SKILL,
+            'demo/references/guide.md': b'Reference content\n',
+            'demo/child/SKILL.md': '---\nname: child\ndescription: Nested skill\n---\n',
+        }
+    with zipfile.ZipFile(path, 'w', compression) as archive:
+        if license_content is not None:
+            archive.writestr('bundle/LICENSE', license_content)
+        for relative, content in files.items():
+            archive.writestr(_PAYLOAD + relative, content)
+        archive.writestr('bundle/.github/plugins/azure-skills/.mcp.json', '{}')
+        archive.writestr('bundle/.github/plugins/azure-skills/hooks/hooks.json', '{}')
+        for member, content in extra:
+            archive.writestr(member, content)
+
+
+class ArchiveTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.archive = self.root / 'bundle.zip'
+        self.staging = self.root / 'staged'
+
+    def assert_rejected(self, message=None):
+        with self.assertRaisesRegex(CLIError, message or '.'):
+            skills.stage_bundle(self.archive, self.staging)
+        self.assertFalse(self.staging.exists())
+        self.assertTrue(self.archive.is_file(), 'Keep caller-owned archive for diagnostics')
+        self.assertEqual(sorted(path.name for path in self.root.iterdir()), ['bundle.zip'])
+
+    def test_preserves_nested_resources_and_license_not_plugin_config(self):
+        make_bundle(self.archive)
+        trees = skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual(trees, [self.staging / 'demo'])
+        self.assertEqual((trees[0] / 'references/guide.md').read_bytes(), b'Reference content\n')
+        self.assertEqual((trees[0] / 'SKILL.md').read_bytes(), _SKILL.encode())
+        self.assertEqual((trees[0] / 'child/SKILL.md').read_bytes(),
+                         b'---\nname: child\ndescription: Nested skill\n---\n')
+        self.assertEqual((trees[0] / 'LICENSE.azure-skills').read_bytes(), _LICENSE)
+        self.assertEqual(sorted(path.relative_to(self.staging).as_posix() for path in self.staging.rglob('*')
+                                if path.is_file()),
+                         ['demo/LICENSE.azure-skills', 'demo/SKILL.md', 'demo/child/SKILL.md',
+                          'demo/references/guide.md'])
+
+    def test_returns_sorted_top_level_trees_without_renaming(self):
+        make_bundle(self.archive, {'zebra/SKILL.md': _SKILL, 'Alpha/SKILL.md': _SKILL})
+        trees = skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual(trees, [self.staging / 'Alpha', self.staging / 'zebra'])
+        for tree in trees:
+            self.assertEqual((tree / 'LICENSE.azure-skills').read_bytes(), _LICENSE)
+
+    def test_preserves_binary_resources_and_explicit_empty_directories(self):
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/data.bin': bytes(range(256)),
+                                   'demo/empty/': b''},
+                    extra=[('bundle/', b''), (_PAYLOAD, b''), (_PAYLOAD + 'demo/', b'')])
+        skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual((self.staging / 'demo/data.bin').read_bytes(), bytes(range(256)))
+        self.assertTrue((self.staging / 'demo/empty').is_dir())
+
+    def test_rejects_unsafe_raw_paths_even_outside_payload_before_writes(self):
+        paths = ['../escape', '/absolute', '//server/share', 'C:/drive', 'C:relative',
+                 'bundle/back\\slash', 'bundle/alternate:stream', 'bundle//empty',
+                 'bundle/./dot', 'bundle/../escape', 'bundle/trailing.', 'bundle/trailing ',
+                 'bundle/CON', 'bundle/con.txt', 'bundle/PRN', 'bundle/AUX.md', 'bundle/nul',
+                 'bundle/COM1.log', 'bundle/lpt9.txt', 'bundle/COM¹', 'bundle/con .txt',
+                 'bundle/bad?', 'bundle/bad*', 'bundle/bad|', 'bundle/bad<', 'bundle/bad>',
+                 'bundle/bad"', 'bundle/control\x01', 'bundle/dir//', _PAYLOAD + 'demo/../../escape']
+        for path in paths:
+            with self.subTest(path=path):
+                make_bundle(self.archive, extra=[(path, b'unsafe')])
+                with mock.patch.object(Path, 'mkdir', side_effect=AssertionError('Validation must precede writes')):
+                    self.assert_rejected()
+
+    def test_rejects_trailing_backslash_even_when_zipfile_recognizes_it_as_directory(self):
+        make_bundle(self.archive, extra=[('bundle/backslash\\', b'')])
+        # ZipInfo also recognizes the native separator as a directory suffix on Windows.
+        with mock.patch.object(zipfile.ZipInfo, 'is_dir', lambda member: member.filename.endswith(('/', '\\'))):
+            self.assert_rejected()
+
+    def test_rejects_nul_in_original_zip_name(self):
+        make_bundle(self.archive, extra=[('bundle/nulXname', b'unsafe')])
+        self.archive.write_bytes(self.archive.read_bytes().replace(b'nulXname', b'nul\x00name'))
+        self.assert_rejected()
+
+    def test_rejects_multiple_roots_or_file_root(self):
+        for extra in ([('other/readme', b'outside')], [('bundle', b'file')]):
+            with self.subTest(extra=extra):
+                make_bundle(self.archive, extra=extra)
+                self.assert_rejected()
+
+    def test_rejects_duplicate_members(self):
+        with self.assertWarns(UserWarning):
+            make_bundle(self.archive, extra=[(_PAYLOAD + 'demo/SKILL.md', _SKILL)])
+        self.assert_rejected()
+
+    def test_rejects_case_and_unicode_collisions_including_implicit_ancestors(self):
+        for first, second in [('Guide.md', 'guide.md'), ('café.txt', 'cafe\u0301.txt'),
+                              ('Straße.txt', 'STRASSE.txt'), ('Docs/one', 'docs/two'),
+                              ('café/one', 'cafe\u0301/two'),
+                              ('a\u0345\u0300.txt', 'a\u0300\u0345.txt')]:
+            with self.subTest(first=first, second=second):
+                make_bundle(self.archive, extra=[(_PAYLOAD + 'demo/' + first, b'one'),
+                                                (_PAYLOAD + 'demo/' + second, b'two')])
+                self.assert_rejected()
+
+    def test_rejects_file_directory_collisions_in_either_order(self):
+        for first, second in [('resource', 'resource/child'), ('resource/child', 'resource'),
+                              ('resource', 'resource/'), ('resource/', 'resource')]:
+            with self.subTest(first=first, second=second):
+                make_bundle(self.archive, extra=[(_PAYLOAD + 'demo/' + first, b''),
+                                                (_PAYLOAD + 'demo/' + second, b'')])
+                self.assert_rejected()
+
+    def test_rejects_symlinks_special_files_and_inconsistent_directory_modes(self):
+        for mode, suffix in [(stat.S_IFLNK, ''), (stat.S_IFIFO, ''), (stat.S_IFSOCK, ''),
+                             (stat.S_IFBLK, ''), (stat.S_IFCHR, ''),
+                             (stat.S_IFDIR, ''), (stat.S_IFREG, '/')]:
+            with self.subTest(mode=mode, suffix=suffix):
+                member = zipfile.ZipInfo('bundle/special' + suffix)
+                member.create_system = 3
+                member.external_attr = (mode | 0o777) << 16
+                make_bundle(self.archive, extra=[(member, b'')])
+                self.assert_rejected()
+
+    def test_rejects_directories_with_advertised_content(self):
+        make_bundle(self.archive, extra=[('bundle/directory/', b'not empty')])
+        self.assert_rejected()
+
+    def test_rejects_encrypted_entries_including_excluded_files(self):
+        for name in ('bundle/LICENSE', 'bundle/.github/plugins/azure-skills/hooks/hooks.json'):
+            for flag in (1, 64):
+                with self.subTest(name=name, flag=flag):
+                    make_bundle(self.archive)
+                    data = bytearray(self.archive.read_bytes())
+                    central = data.index(b'PK\x01\x02')
+                    offset = data.index(name.encode(), central) - 46
+                    flags = struct.unpack_from('<H', data, offset + 8)[0]
+                    struct.pack_into('<H', data, offset + 8, flags | flag)
+                    self.archive.write_bytes(data)
+                    self.assert_rejected('encrypt')
+
+    def test_rejects_entry_depth_and_advertised_size_budgets_before_writes(self):
+        cases = [('ENTRY_LIMIT', 5), ('PATH_DEPTH_LIMIT', 7), ('EXPANDED_LIMIT', 10),
+                 ('FILE_LIMIT', 10), ('ARCHIVE_LIMIT', 10)]
+        for constant, limit in cases:
+            with self.subTest(constant=constant):
+                make_bundle(self.archive)
+                with mock.patch.object(skills, constant, limit, create=True), \
+                        mock.patch.object(Path, 'mkdir', side_effect=AssertionError('Validate budgets first')):
+                    self.assert_rejected('limit')
+
+    def test_advertised_aggregate_budget_includes_excluded_files(self):
+        make_bundle(self.archive, extra=[('bundle/not-installed', b'x' * 1000)])
+        with mock.patch.object(skills, 'EXPANDED_LIMIT', 500, create=True):
+            self.assert_rejected('limit')
+
+    def test_accepts_exact_entry_depth_file_and_advertised_total_limits(self):
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL}, license_content=b'MIT')
+        # Four entries, maximum seven path components, 63 advertised expanded bytes.
+        with mock.patch.object(skills, 'ENTRY_LIMIT', 4, create=True), \
+                mock.patch.object(skills, 'PATH_DEPTH_LIMIT', 7, create=True), \
+                mock.patch.object(skills, 'FILE_LIMIT', 56, create=True), \
+                mock.patch.object(skills, 'EXPANDED_LIMIT', 63, create=True):
+            self.assertEqual(skills.stage_bundle(self.archive, self.staging), [self.staging / 'demo'])
+
+    def test_actual_file_budget_is_enforced_while_streaming(self):
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/resource': b'x'})
+        original_open = zipfile.ZipFile.open
+
+        def open_member(archive, member, *args, **kwargs):
+            if isinstance(member, zipfile.ZipInfo) and member.filename.endswith('/resource'):
+                return io.BytesIO(b'x' * 101)
+            return original_open(archive, member, *args, **kwargs)
+
+        with mock.patch.object(skills, 'FILE_LIMIT', 100, create=True), \
+                mock.patch.object(zipfile.ZipFile, 'open', open_member):
+            self.assert_rejected('size limit')
+
+    def test_actual_aggregate_budget_is_shared_across_streamed_members(self):
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/one': b'x', 'demo/two': b'y'})
+        original_open = zipfile.ZipFile.open
+
+        def open_member(archive, member, *args, **kwargs):
+            if isinstance(member, zipfile.ZipInfo) and member.filename.rsplit('/', 1)[-1] in ('one', 'two'):
+                return io.BytesIO(b'x' * 100)
+            return original_open(archive, member, *args, **kwargs)
+
+        with mock.patch.object(skills, 'EXPANDED_LIMIT', 200, create=True), \
+                mock.patch.object(zipfile.ZipFile, 'open', open_member):
+            self.assert_rejected('size limit')
+
+    def test_license_copies_cannot_multiply_beyond_aggregate_budget(self):
+        make_bundle(self.archive, {'one/SKILL.md': _SKILL, 'two/SKILL.md': _SKILL},
+                    license_content=b'MIT notice' + b'x' * 90)
+        with mock.patch.object(skills, 'EXPANDED_LIMIT', 300, create=True):
+            self.assert_rejected('size limit')
+
+    def test_rejects_crc_failure_and_truncation_with_cleanup(self):
+        for corruption in ('crc', 'truncated', 'not-zip'):
+            with self.subTest(corruption=corruption):
+                make_bundle(self.archive, compression=zipfile.ZIP_STORED)
+                data = self.archive.read_bytes()
+                if corruption == 'crc':
+                    data = data.replace(b'Reference content', b'Reference corrupt')
+                elif corruption == 'truncated':
+                    data = data[:-30]
+                else:
+                    data = b'not a zip archive'
+                self.archive.write_bytes(data)
+                self.assert_rejected()
+
+    def test_requires_payload_and_immediate_skill_file_in_every_top_level_tree(self):
+        for files in ({}, {'SKILL.md': _SKILL}, {'demo/readme': 'missing'},
+                      {'demo/nested/SKILL.md': _SKILL}, {'demo/SKILL.md/': b''},
+                      {'demo/SKILL.md': _SKILL, 'empty/': b''},
+                      {'demo/SKILL.md': _SKILL, 'other/resource': 'missing'}):
+            with self.subTest(files=files):
+                make_bundle(self.archive, files)
+                self.assert_rejected('skill|SKILL')
+
+    def test_rejects_invalid_frontmatter_in_top_level_and_nested_skills(self):
+        invalid = [b'\xff', 'No frontmatter', '---\nname: demo\ndescription: text\n',
+                   '---\nname: [broken\ndescription: text\n---\n', '---\n- list\n---\n',
+                   '---\n---\n', '---\nname: demo\n---\n', '---\ndescription: text\n---\n',
+                   '---\nname: 42\ndescription: text\n---\n', '---\nname: demo\ndescription: []\n---\n',
+                   '---\nname: " "\ndescription: text\n---\n', '---\nname: demo\ndescription: " "\n---\n',
+                   '---\nname: !!python/object:unsafe {}\ndescription: text\n---\n']
+        for relative in ('demo/SKILL.md', 'demo/child/SKILL.md'):
+            for content in invalid:
+                with self.subTest(relative=relative, content=content):
+                    make_bundle(self.archive, {'demo/SKILL.md': _SKILL, relative: content})
+                    self.assert_rejected('frontmatter|SKILL')
+
+    def test_accepts_optional_metadata_long_descriptions_and_crlf_without_rewriting(self):
+        content = ('---\r\nname: upstream-name\r\ndescription: ' + 'x' * 1100 +
+                   '\r\nmetadata:\r\n  arbitrary: [1, 2]\r\n---\r\nInstructions\r\n').encode()
+        make_bundle(self.archive, {'demo/SKILL.md': content})
+        skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual((self.staging / 'demo/SKILL.md').read_bytes(), content)
+
+    def test_accepts_block_scalar_description_containing_indented_delimiter(self):
+        content = b'---\nname: demo\ndescription: |\n  ---\n  Valid description\n---\nInstructions\n'
+        make_bundle(self.archive, {'demo/SKILL.md': content})
+        skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual((self.staging / 'demo/SKILL.md').read_bytes(), content)
+
+    def test_requires_nonempty_root_license(self):
+        for license_content in (None, b''):
+            with self.subTest(license_content=license_content):
+                make_bundle(self.archive, license_content=license_content)
+                self.assert_rejected('LICENSE|license')
+
+    def test_preserves_identical_existing_license_notice(self):
+        make_bundle(self.archive, {'demo/SKILL.md': _SKILL, 'demo/LICENSE.azure-skills': _LICENSE})
+        skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual((self.staging / 'demo/LICENSE.azure-skills').read_bytes(), _LICENSE)
+
+    def test_rejects_differing_or_platform_colliding_license_notice(self):
+        for relative, content in [('demo/LICENSE.azure-skills', b'different'),
+                                  ('demo/license.AZURE-skills', _LICENSE),
+                                  ('demo/LICENSE.azure-skills/', b'')]:
+            with self.subTest(relative=relative):
+                make_bundle(self.archive, {'demo/SKILL.md': _SKILL, relative: content})
+                self.assert_rejected('license|LICENSE')
+
+    @unittest.skipUnless(os.name == 'posix', 'Unix executable permissions')
+    def test_preserves_executable_bits_but_never_privileged_bits(self):
+        member = zipfile.ZipInfo(_PAYLOAD + 'demo/run.sh')
+        member.create_system = 3
+        member.external_attr = (stat.S_IFREG | 0o7755) << 16
+        make_bundle(self.archive, extra=[(member, b'#!/bin/sh\nexit 0\n')])
+        skills.stage_bundle(self.archive, self.staging)
+        mode = (self.staging / 'demo/run.sh').stat().st_mode
+        self.assertEqual(mode & 0o111, 0o111)
+        self.assertEqual(mode & 0o7000, 0)
+
+    def test_existing_staging_directory_or_file_is_not_touched(self):
+        make_bundle(self.archive)
+        for is_directory in (False, True):
+            with self.subTest(is_directory=is_directory):
+                if is_directory:
+                    self.staging.mkdir()
+                    sentinel = self.staging / 'keep'
+                else:
+                    sentinel = self.staging
+                sentinel.write_bytes(b'untouched')
+                with self.assertRaises(CLIError):
+                    skills.stage_bundle(self.archive, self.staging)
+                self.assertEqual(sentinel.read_bytes(), b'untouched')
+                sentinel.unlink()
+                if is_directory:
+                    self.staging.rmdir()
+
+    @unittest.skipUnless(os.name == 'posix', 'Symlink staging boundary')
+    def test_existing_staging_symlink_is_not_followed_or_removed(self):
+        make_bundle(self.archive)
+        target = self.root / 'target'
+        target.mkdir()
+        self.staging.symlink_to(target, target_is_directory=True)
+        with self.assertRaises(CLIError):
+            skills.stage_bundle(self.archive, self.staging)
+        self.assertTrue(self.staging.is_symlink())
+        self.assertEqual(list(target.iterdir()), [])
+
+    def test_filesystem_failure_removes_only_owned_staging(self):
+        make_bundle(self.archive)
+        original_open = Path.open
+
+        def fail_resource(path, *args, **kwargs):
+            if path.name == 'guide.md':
+                raise PermissionError('simulated extraction failure')
+            return original_open(path, *args, **kwargs)
+
+        with mock.patch.object(Path, 'open', fail_resource):
+            self.assert_rejected()
 
 
 class _Response(io.BytesIO):

@@ -3,14 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""User-level agent selection and bounded retrieval for optional Azure skills installation."""
+"""Agent selection, bounded retrieval, and safe staging for optional Azure skills installation."""
 
 import io
 import json
 import os
 import re
+import shutil
 import ssl
+import stat
 import time
+import unicodedata
+import zipfile
+import zlib
 from dataclasses import dataclass
 from http.client import HTTPException, HTTPResponse, HTTPSConnection
 from pathlib import Path
@@ -18,6 +23,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urljoin, urlsplit
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
+import yaml
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -31,6 +37,12 @@ API_ROOT = 'https://api.github.com/repos/microsoft/azure-skills'
 ARCHIVE_ROOT = 'https://codeload.github.com/microsoft/azure-skills/zip/'
 METADATA_LIMIT = 1024 * 1024
 ARCHIVE_LIMIT = 64 * 1024 * 1024
+EXPANDED_LIMIT = 256 * 1024 * 1024
+FILE_LIMIT = 16 * 1024 * 1024
+ENTRY_LIMIT = 10000
+PATH_DEPTH_LIMIT = 32
+_SKILLS_PATH = ('.github', 'plugins', 'azure-skills', 'skills')
+_LICENSE_NOTICE = 'LICENSE.azure-skills'
 _SOCKET_TIMEOUT = 30
 _RESPONSE_TIMEOUT = 120
 
@@ -269,6 +281,149 @@ def download_archive(release: Release, destination: Path) -> None:
     finally:
         if incomplete:
             destination.unlink(missing_ok=True)
+
+
+def _path_key(parts):
+    # Normalize before folding too: folding can turn combining marks into letters.
+    return tuple(unicodedata.normalize('NFD', unicodedata.normalize('NFD', part).casefold()) for part in parts)
+
+
+def _validated_members(bundle):
+    members = bundle.infolist()
+    if not members or len(members) > ENTRY_LIMIT:
+        raise CLIError('Azure skills archive is empty or exceeded the entry limit.')
+    paths = {}
+    explicit = set()
+    roots = set()
+    total = 0
+    validated = []
+    for member in members:
+        # orig_filename retains NULs that ZipInfo.filename silently truncates.
+        raw = member.orig_filename
+        is_directory = member.is_dir()
+        parts = tuple(raw.removesuffix('/').split('/'))
+        if len(parts) > PATH_DEPTH_LIMIT:
+            raise CLIError('Azure skills archive exceeded the path depth limit.')
+        for part in parts:
+            basename = part.split('.')[0].rstrip(' ').upper()
+            if (not part or part in ('.', '..') or part.endswith((' ', '.')) or
+                    any(ord(char) < 32 or char in '\\:<>"|?*' for char in part) or
+                    basename in ('CON', 'PRN', 'AUX', 'NUL', 'CLOCK$', 'CONIN$', 'CONOUT$') or
+                    re.fullmatch(r'(COM|LPT)[1-9¹²³]', basename)):
+                raise CLIError('Azure skills archive contains an unsafe path.')
+        mode = stat.S_IFMT(member.external_attr >> 16)
+        allowed_modes = (0, stat.S_IFDIR) if is_directory else (0, stat.S_IFREG)
+        if mode not in allowed_modes or (is_directory and member.file_size):
+            raise CLIError('Azure skills archive contains a link, special file, or invalid directory.')
+        if member.flag_bits & (1 | 64):
+            raise CLIError('Azure skills archive contains an encrypted entry.')
+        if member.file_size < 0 or member.compress_size < 0:
+            raise CLIError('Azure skills archive contains invalid size metadata.')
+        total += member.file_size
+        if total > EXPANDED_LIMIT:
+            raise CLIError('Azure skills archive exceeded the expanded size limit.')
+        key = _path_key(parts)
+        if key in explicit:
+            raise CLIError('Azure skills archive contains duplicate or platform-colliding paths.')
+        explicit.add(key)
+        # Record implicit ancestors too: ZIPs need not contain directory entries.
+        for depth in range(1, len(parts) + 1):
+            prefix = key[:depth]
+            value = (parts[:depth], is_directory or depth < len(parts))
+            if prefix in paths and paths[prefix] != value:
+                raise CLIError('Azure skills archive contains file/directory or platform-colliding paths.')
+            paths[prefix] = value
+        roots.add(parts[0])
+        if len(roots) > 1 or (len(parts) == 1 and not is_directory):
+            raise CLIError('Azure skills archive must contain one repository root directory.')
+        validated.append((member, parts))
+    return validated
+
+
+def _validate_skill_frontmatter(path):
+    try:
+        lines = path.read_text(encoding='utf-8-sig').splitlines()
+        if not lines or lines[0].rstrip() != '---':
+            raise ValueError('Missing frontmatter')
+        end = next(index for index in range(1, len(lines)) if lines[index].rstrip() == '---')
+        metadata = yaml.safe_load('\n'.join(lines[1:end]))
+        if not isinstance(metadata, dict) or any(
+                not isinstance(metadata.get(field), str) or not metadata[field].strip()
+                for field in ('name', 'description')):
+            raise ValueError('Missing name or description')
+    except (UnicodeError, ValueError, StopIteration, RecursionError, yaml.YAMLError):
+        raise CLIError(f'Invalid SKILL.md frontmatter in {path}. Expected nonempty name and description strings.') from None
+
+
+def stage_bundle(archive: Path, staging: Path) -> list[Path]:
+    """Validate a repository ZIP and stage complete skill trees in a new private directory."""
+    owned = False
+    complete = False
+    try:
+        if archive.stat().st_size > ARCHIVE_LIMIT:
+            raise CLIError('Azure skills archive exceeded the size limit.')
+        with zipfile.ZipFile(archive) as bundle:
+            members = _validated_members(bundle)
+            root = members[0][1][0]
+            prefix = (root,) + _SKILLS_PATH
+            payload = [(member, parts[len(prefix):]) for member, parts in members
+                       if parts[:len(prefix)] == prefix and len(parts) > len(prefix)]
+            license_member = next((member for member, parts in members
+                                   if parts == (root, 'LICENSE') and not member.is_dir()), None)
+            if license_member is None or not license_member.file_size:
+                raise CLIError('Azure skills archive is missing its repository LICENSE notice.')
+            names = sorted({parts[0] for _, parts in payload})
+            files = {parts for member, parts in payload if not member.is_dir()}
+            if (not names or any(len(parts) < 2 for parts in files) or
+                    any((name, 'SKILL.md') not in files for name in names)):
+                raise CLIError('Azure skills payload requires an immediate SKILL.md in every top-level skill directory.')
+            if any(member.file_size > FILE_LIMIT for member, _ in payload) or license_member.file_size > FILE_LIMIT:
+                raise CLIError('Azure skills archive exceeded the per-file size limit.')
+            for member, parts in payload:
+                if len(parts) >= 2 and _path_key((parts[1],)) == _path_key((_LICENSE_NOTICE,)):
+                    if parts[1] != _LICENSE_NOTICE or len(parts) != 2 or member.is_dir():
+                        raise CLIError('Azure skills payload collides with the LICENSE.azure-skills notice.')
+
+            # mkdir must fail for existing directories, files, and symlinks; never clean those up.
+            staging.mkdir(mode=0o700)
+            owned = True
+            license_buffer = io.BytesIO()
+            with bundle.open(license_member) as source:
+                _copy_bounded(source, license_buffer, min(FILE_LIMIT, EXPANDED_LIMIT))
+            license_content = license_buffer.getvalue()
+            total = 0
+            for member, parts in payload:
+                destination = staging.joinpath(*parts)
+                if member.is_dir():
+                    destination.mkdir(parents=True, exist_ok=True)
+                    continue
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                with bundle.open(member) as source, destination.open('xb') as output:
+                    total += _copy_bounded(source, output, min(FILE_LIMIT, EXPANDED_LIMIT - total))
+                if destination.name == 'SKILL.md':
+                    _validate_skill_frontmatter(destination)
+                if os.name == 'posix':
+                    # Retain executable resources, not setuid/setgid/sticky or archive write permissions.
+                    destination.chmod((destination.stat().st_mode & 0o666) | ((member.external_attr >> 16) & 0o111))
+
+            trees = [staging / name for name in names]
+            for tree in trees:
+                notice = tree / _LICENSE_NOTICE
+                if notice.exists():
+                    if notice.read_bytes() != license_content:
+                        raise CLIError('Azure skills payload has differing LICENSE.azure-skills content.')
+                else:
+                    # Count every added notice: a large license must not multiply without a bound.
+                    with notice.open('xb') as output:
+                        total += _copy_bounded(io.BytesIO(license_content), output,
+                                               min(FILE_LIMIT, EXPANDED_LIMIT - total))
+        complete = True
+        return trees
+    except (OSError, ValueError, EOFError, RuntimeError, zipfile.BadZipFile, zlib.error) as error:
+        raise CLIError(f'Could not stage the Azure skills archive: {error}') from None
+    finally:
+        if owned and not complete:
+            shutil.rmtree(staging)
 
 
 @dataclass(frozen=True)
