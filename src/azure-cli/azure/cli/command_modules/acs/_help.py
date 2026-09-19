@@ -1480,6 +1480,23 @@ examples:
 helps["aks install-cli"] = """
 type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
+long-summary: |
+    After both binaries succeed, optionally install Microsoft Azure skills for Claude Code, Codex, GitHub Copilot, and Pi. This installs complete user-level skill directories and resources, not MCP configuration, hooks, or agent applications. Some workflows require separately configured tools.
+
+    When --install-azure-skills is omitted, interactive terminals receive a default-No offer and a numbered agent selector, followed by a default-No destination confirmation. Detection only supplies defaults; selections replace those defaults and control destinations, not agent enable/disable configuration. The offer is skipped in noninteractive sessions, when core.disable_confirm_prompt is set, and under sudo. Explicit true requires --skills-agents, never prompts, and is rejected under sudo. Install skills unprivileged; use user-writable binary locations if rerunning this command.
+
+    Codex installs to the shared ~/.agents/skills directory, which can also make skills visible to Pi and GitHub Copilot even if they are not selected. Other destinations use the current user's agent configuration directories, respecting CLAUDE_CONFIG_DIR and PI_CODING_AGENT_DIR overrides.
+
+    This is first-install-only, not an updater. Identical content is skipped; conflicting directories and symlinks are never overwritten. Each attempt resolves the latest release again, so reruns can conflict or leave a mixed-version bundle. For replacement, preserve user modifications and move only reviewed Azure skill directories to backups outside all agent discovery paths. Review other Azure skill directories too for a coherent replacement; do not remove unrelated skills or the whole skills root. Shared-directory changes affect other agents. Keep backups until the installation is checked.
+
+    Rerunning also reruns binary installation and resolves the then-current release. Optional skill failures warn without undoing binaries; explicit skill failures return a nonzero status and retain any completed installations.
+examples:
+  - name: Install kubectl and kubelogin, then offer Azure skills in an interactive terminal.
+    text: az aks install-cli
+  - name: Install only the binaries, without offering Azure skills.
+    text: az aks install-cli --install-azure-skills false
+  - name: Install the binaries and user-level Azure skills for selected agents without prompts.
+    text: az aks install-cli --install-azure-skills true --skills-agents claude-code pi
 """
 
 helps["aks list"] = """

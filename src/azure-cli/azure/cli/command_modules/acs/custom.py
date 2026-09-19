@@ -2377,12 +2377,15 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 # install kubectl & kubelogin
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
-                    kubelogin_base_src_url=None, gh_token=None):
+                    kubelogin_base_src_url=None, gh_token=None, install_azure_skills=None, skills_agents=None):
+    from ._azure_skills import maybe_install_azure_skills, validate_skills_options
+    validate_skills_options(install_azure_skills, skills_agents)
     arch = get_arch_for_cli_binary()
     k8s_install_kubectl(cmd, client_version,
                         install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
                           kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
+    maybe_install_azure_skills(cmd, install_azure_skills, skills_agents, gh_token)
 
 
 # determine the architecture for the binary based on platform.machine()

@@ -7,6 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from contextlib import ExitStack
 from unittest import mock
 from urllib.error import HTTPError, URLError
 import datetime
@@ -38,6 +39,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_stop,
     aks_upgrade,
     is_monitoring_addon_enabled,
+    k8s_install_cli,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -67,6 +69,69 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
+
+
+class InstallCliSkillsTest(unittest.TestCase):
+    def setUp(self):
+        from azure.cli.command_modules.acs import _azure_skills
+        self.skills = _azure_skills
+        patches = ExitStack()
+        self.addCleanup(patches.close)
+        self.cmd = mock.Mock()
+        self.calls = mock.Mock()
+        for name in ('get_arch_for_cli_binary', 'k8s_install_kubectl', 'k8s_install_kubelogin'):
+            patched = patches.enter_context(mock.patch('azure.cli.command_modules.acs.custom.' + name))
+            self.calls.attach_mock(patched, name)
+        self.calls.get_arch_for_cli_binary.return_value = 'arm64'
+        self.optional = patches.enter_context(mock.patch.object(self.skills, 'maybe_install_azure_skills', create=True))
+        self.calls.attach_mock(self.optional, 'skills')
+        patches.enter_context(mock.patch.object(self.skills, '_is_sudo', return_value=False))
+
+    def test_k8s_install_cli_validates_before_arch_and_binaries_then_installs_skills(self):
+        with mock.patch.object(self.skills, 'validate_skills_options',
+                               wraps=self.skills.validate_skills_options) as preflight:
+            self.calls.attach_mock(preflight, 'validate')
+            # Keep every existing positional parameter in its original position.
+            k8s_install_cli(self.cmd, '1.2.3', '/tmp/kubectl', 'https://kubectl',
+                            '4.5.6', '/tmp/kubelogin', 'https://kubelogin', 'secret', True, ['pi'])
+        self.assertEqual(self.calls.mock_calls, [
+            mock.call.validate(True, ['pi']),
+            mock.call.get_arch_for_cli_binary(),
+            mock.call.k8s_install_kubectl(self.cmd, '1.2.3', '/tmp/kubectl', 'https://kubectl', arch='arm64'),
+            mock.call.k8s_install_kubelogin(self.cmd, '4.5.6', '/tmp/kubelogin', 'https://kubelogin',
+                                            arch='arm64', gh_token='secret'),
+            mock.call.skills(self.cmd, True, ['pi'], 'secret'),
+        ])
+
+    def test_k8s_install_cli_default_binary_arguments_unchanged(self):
+        k8s_install_cli(self.cmd)
+        self.assertEqual(self.calls.mock_calls, [
+            mock.call.get_arch_for_cli_binary(),
+            mock.call.k8s_install_kubectl(self.cmd, 'latest', None, None, arch='arm64'),
+            mock.call.k8s_install_kubelogin(self.cmd, 'latest', None, None, arch='arm64', gh_token=None),
+            mock.call.skills(self.cmd, None, None, None),
+        ])
+
+    def test_k8s_install_cli_invalid_options_prevent_arch_and_binary_work(self):
+        for mode, agents in ((True, None), (True, []), (True, ['unknown']),
+                             (None, ['pi']), (False, ['pi'])):
+            with self.subTest(mode=mode, agents=agents), self.assertRaises(CLIError):
+                k8s_install_cli(self.cmd, install_azure_skills=mode, skills_agents=agents)
+            self.assertEqual(self.calls.mock_calls, [])
+        with mock.patch.object(self.skills, '_is_sudo', return_value=True), self.assertRaisesRegex(CLIError, 'sudo'):
+            k8s_install_cli(self.cmd, install_azure_skills=True, skills_agents=['pi'])
+        self.assertEqual(self.calls.mock_calls, [])
+
+    def test_k8s_install_cli_binary_failure_prevents_skills(self):
+        for name in ('k8s_install_kubectl', 'k8s_install_kubelogin'):
+            with self.subTest(name=name):
+                self.calls.reset_mock(side_effect=True)
+                getattr(self.calls, name).side_effect = CLIError('binary failed')
+                with self.assertRaisesRegex(CLIError, 'binary failed'):
+                    k8s_install_cli(self.cmd)
+                self.optional.assert_not_called()
+                if name == 'k8s_install_kubectl':
+                    self.calls.k8s_install_kubelogin.assert_not_called()
 
 
 class AcsCustomCommandTest(unittest.TestCase):
