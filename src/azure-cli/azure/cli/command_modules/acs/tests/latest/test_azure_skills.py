@@ -6,6 +6,7 @@
 import errno
 import importlib
 import io
+import logging
 import os
 import shutil
 import socket
@@ -144,9 +145,9 @@ class FlowTests(unittest.TestCase):
 
     def test_enter_keeps_detected_agents_and_codex_discloses_shared_visibility(self):
         self.input.side_effect = ['y', '', 'y']
-        with self.assertLogs(skills.logger, level='WARNING') as logs:
+        with self.assertLogs(skills.logger, level='WARNING'):
             skills.maybe_install_azure_skills(self.cmd)
-        text = '\n'.join(logs.output)
+        text = self.output.getvalue()
         for label in ('Claude Code', 'Codex', 'Pi', 'GitHub Copilot', 'MCP', 'hooks', 'user-level'):
             self.assertIn(label, text)
         self.assertIn('even when', text)
@@ -388,6 +389,104 @@ class FlowTests(unittest.TestCase):
                     self.assertEqual((self.root / 'claude/skills/demo/SKILL.md').read_text(), _SKILL)
                     self.assertFalse((self.root / 'pi/skills/demo').exists())
                     self.assertFalse(any(path.parent.exists() for path in self.archives))
+
+
+class ConsoleConsentTests(unittest.TestCase):
+    @contextmanager
+    def console(self, mode, answers=''):
+        from knack.cli import CLI
+        from knack.log import CliLogLevel, cli_logger_names
+
+        with ExitStack() as patches:
+            home = Path(patches.enter_context(tempfile.TemporaryDirectory()))
+            config = home / '.azure'
+            config.mkdir()
+            (config / 'config').write_text(
+                f'[core]\nonly_show_errors = {mode == "config"}\n', encoding='utf-8')
+            patches.enter_context(mock.patch.dict(os.environ, {
+                'HOME': str(home), 'USERPROFILE': str(home), 'AZURE_CONFIG_DIR': str(config),
+                'CLAUDE_CONFIG_DIR': str(home / 'custom-claude'),
+                'PI_CODING_AGENT_DIR': str(home / 'custom-pi'),
+            }, clear=True))
+            output = io.StringIO()
+            patches.enter_context(mock.patch('sys.stdout', output))
+            patches.enter_context(mock.patch('sys.stderr', output))
+            stdin = io.StringIO(answers)
+            patches.enter_context(mock.patch('sys.stdin', stdin))
+            patches.enter_context(mock.patch.object(stdin, 'isatty', return_value=True))
+            # Exercise Knack's actual console filtering without retaining global logging changes.
+            loggers = [logging.getLogger(name) for name in ['', *cli_logger_names]] + [skills.logger]
+            for logger in loggers:
+                for attribute, value in (('handlers', []), ('level', logging.NOTSET),
+                                         ('propagate', True), ('disabled', False)):
+                    patches.enter_context(mock.patch.object(logger, attribute, value))
+            cli = CLI(cli_name='az', config_dir=str(config), config_env_var_prefix='AZURE')
+            cli.logging.configure(['--only-show-errors'] if mode == 'flag' else [])
+            if mode != 'default':
+                self.assertEqual(cli.logging.log_level, CliLogLevel.ERROR)
+                skills.logger.warning('Ordinary warnings must remain suppressed')
+                self.assertEqual(output.getvalue(), '')
+            resolve = patches.enter_context(mock.patch.object(
+                skills, 'resolve_release', side_effect=CLIError('offline test boundary')))
+            download = patches.enter_context(mock.patch.object(skills, 'download_archive'))
+            publish = patches.enter_context(mock.patch.object(skills, 'publish_skills'))
+            before = sorted(home.rglob('*'))
+            yield mock.Mock(cli_ctx=cli), output, home, resolve
+            download.assert_not_called()
+            publish.assert_not_called()
+            self.assertEqual(sorted(home.rglob('*')), before)
+
+    def test_interactive_consent_survives_only_show_errors_before_final_confirmation(self):
+        for mode in ('flag', 'config'):
+            with self.subTest(mode=mode), self.console(mode, 'y\n1,2,4\nn\n') as (cmd, output, home, resolve):
+                skills.maybe_install_azure_skills(cmd)
+                text = output.getvalue()
+                confirmation = 'Install Azure skills at these destinations? (y/N): '
+                self.assertIn(confirmation, text)
+                before_confirmation = text.split(confirmation)[0]
+                for destination in (home / 'custom-claude/skills', home / '.agents/skills',
+                                    home / 'custom-pi/skills'):
+                    self.assertIn(str(destination), before_confirmation)
+                for disclosure in ('user-level Azure skills only', 'no MCP configuration, hooks, or agent applications',
+                                   'tools configured separately', 'shared ~/.agents/skills',
+                                   'Pi and GitHub Copilot even when they are not selected',
+                                   'Selection controls destinations, not agent enable/disable configuration'):
+                    self.assertIn(disclosure, before_confirmation)
+                self.assertNotIn(str(home / '.copilot/skills'), text)
+                resolve.assert_not_called()
+
+    def test_explicit_selection_keeps_suppressible_logging_without_prompts(self):
+        for mode in ('default', 'flag', 'config'):
+            with self.subTest(mode=mode), self.console(mode) as (cmd, output, home, resolve):
+                with self.assertRaisesRegex(CLIError, 'offline test boundary'):
+                    skills.maybe_install_azure_skills(cmd, True, ['codex'])
+                resolve.assert_called_once_with(None)
+                text = output.getvalue()
+                self.assertNotIn('(y/N)', text)
+                self.assertNotIn('Select agents:', text)
+                if mode == 'default':
+                    for disclosure in (str(home / '.agents/skills'), 'no MCP configuration, hooks',
+                                       'even when they are not selected', 'offline test boundary'):
+                        self.assertIn(disclosure, text)
+                else:
+                    self.assertEqual(text, '')
+
+    def test_skipped_offers_do_not_emit_consent_disclosures(self):
+        for mode in ('flag', 'config'):
+            for reason in ('false', 'no-tty', 'disabled', 'declined', 'none'):
+                with self.subTest(mode=mode, reason=reason), \
+                        self.console(mode, 'y\nnone\n' if reason == 'none' else 'n\n') as (cmd, output, home, resolve):
+                    if reason == 'disabled':
+                        cmd.cli_ctx.config.set_value('core', 'disable_confirm_prompt', 'true')
+                    with mock.patch.object(sys.stdin, 'isatty', return_value=reason != 'no-tty'):
+                        skills.maybe_install_azure_skills(cmd, False if reason == 'false' else None)
+                    text = output.getvalue()
+                    for disclosure in ('user-level Azure skills only', 'no MCP', 'shared ~/.agents/skills',
+                                       'Install Azure skills at these destinations?', str(home / '.agents/skills')):
+                        self.assertNotIn(disclosure, text)
+                    if reason in ('false', 'no-tty', 'disabled'):
+                        self.assertEqual(text, '')
+                    resolve.assert_not_called()
 
 
 class CliArgumentTests(unittest.TestCase):

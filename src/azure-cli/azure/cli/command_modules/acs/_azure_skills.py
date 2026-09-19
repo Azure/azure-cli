@@ -685,15 +685,17 @@ def _choose_skill_targets() -> list[AgentTarget]:
             logger.warning('%s', error)
 
 
-def _show_skill_targets(targets: list[AgentTarget]) -> None:
-    logger.warning('Install user-level Azure skills only; no MCP configuration, hooks, or agent applications. '
-                   'Some workflows require tools configured separately.')
+def _show_skill_targets(targets: list[AgentTarget], *, interactive: bool) -> None:
+    # Consent details must remain visible with --only-show-errors, just like the prompts.
+    show = print if interactive else logger.warning
+    show('Install user-level Azure skills only; no MCP configuration, hooks, or agent applications. '
+         'Some workflows require tools configured separately.')
     for target in targets:
-        logger.warning('  %s: %s', target.label, target.destination)
+        show(f'  {target.label}: {target.destination}')
     if any(target.identifier == 'codex' for target in targets):
-        logger.warning('Codex uses the shared ~/.agents/skills directory. Skills can also be visible to '
-                       'Pi and GitHub Copilot even when they are not selected. '
-                       'Selection controls destinations, not agent enable/disable configuration.')
+        show('Codex uses the shared ~/.agents/skills directory. Skills can also be visible to '
+             'Pi and GitHub Copilot even when they are not selected. '
+             'Selection controls destinations, not agent enable/disable configuration.')
 
 
 def _report_skills(report: InstallReport) -> None:
@@ -748,7 +750,7 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
                    if explicit else _choose_skill_targets())
         if not targets:
             return
-        _show_skill_targets(targets)
+        _show_skill_targets(targets, interactive=not explicit)
         if not explicit and not _confirm_skills('Install Azure skills at these destinations?'):
             return
         try:
