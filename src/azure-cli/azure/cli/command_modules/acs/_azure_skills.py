@@ -12,6 +12,7 @@ import re
 import shutil
 import ssl
 import stat
+import sys
 import tempfile
 import time
 import unicodedata
@@ -25,6 +26,8 @@ from urllib.parse import quote, urljoin, urlsplit
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 import yaml
+from knack.log import get_logger
+from knack.prompting import NoTTYException, prompt, prompt_y_n
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -32,6 +35,8 @@ from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
 )
 
+
+logger = get_logger(__name__)
 
 AGENT_IDS = ('claude-code', 'codex', 'github-copilot', 'pi')
 API_ROOT = 'https://api.github.com/repos/microsoft/azure-skills'
@@ -646,3 +651,136 @@ def validate_skills_options(install_azure_skills: bool | None, skills_agents: li
         raise CLIError(
             'Install Azure skills as an unprivileged user, not under sudo. '
             'Rerun with user-writable binary installation locations.')
+
+
+def _confirm_skills(message: str) -> bool:
+    try:
+        return prompt_y_n(message, default='n')
+    except (NoTTYException, EOFError, KeyboardInterrupt):
+        logger.warning('Azure skills offer cancelled; kubectl and kubelogin remain installed.')
+        return False
+
+
+def _choose_skill_targets() -> list[AgentTarget]:
+    if not _confirm_skills('Install Microsoft Azure skills for your coding agents?'):
+        return []
+    targets = discover_agents()
+    defaults = [target.identifier for target in targets if target.detected]
+    numbers = ','.join(str(index + 1) for index, target in enumerate(targets) if target.detected)
+    print('Select agents:')
+    for index, target in enumerate(targets, 1):
+        status = 'detected, selected' if target.detected else 'not detected'
+        print(f'  {index}. {target.label}: {status}')
+    while True:
+        try:
+            value = prompt(f'Enter agent numbers, comma-separated. Enter keeps [{numbers}]; "none" skips: ')
+        except (NoTTYException, EOFError, KeyboardInterrupt):
+            logger.warning('Azure skills selection cancelled; kubectl and kubelogin remain installed.')
+            return []
+        try:
+            selected = parse_agent_selection(value, defaults)
+            return [target for target in targets if target.identifier in selected]
+        except CLIError as error:
+            logger.warning('%s', error)
+
+
+def _show_skill_targets(targets: list[AgentTarget]) -> None:
+    logger.warning('Install user-level Azure skills only; no MCP configuration, hooks, or agent applications. '
+                   'Some workflows require tools configured separately.')
+    for target in targets:
+        logger.warning('  %s: %s', target.label, target.destination)
+    if any(target.identifier == 'codex' for target in targets):
+        logger.warning('Codex uses the shared ~/.agents/skills directory. Skills can also be visible to '
+                       'Pi and GitHub Copilot even when they are not selected. '
+                       'Selection controls destinations, not agent enable/disable configuration.')
+
+
+def _report_skills(report: InstallReport) -> None:
+    for label, paths in (('Installed', report.installed), ('Already present', report.already_present),
+                         ('Skipped/conflicting', report.conflicts)):
+        logger.warning('%s (%d):%s', label, len(paths), ''.join(f'\n  {path}' for path in paths))
+    logger.warning('Failed (%d):%s', len(report.failures),
+                   ''.join(f'\n  {path}: {reason}' for path, reason in report.failures))
+
+
+def _skills_recovery(targets: list[AgentTarget], manual: bool) -> str:
+    guidance = ''
+    if manual:
+        guidance = (
+            'Review the reported paths and preserve user modifications; do not assume this command owns them. '
+            'If replacement is wanted, move only reviewed Azure skill directories to backups outside all agent '
+            'skill discovery paths. For a coherent replacement of a partial or mixed-version bundle, review and '
+            'back up its other Azure skill directories too, not just conflicts. Do not remove the entire skills '
+            'root or unrelated skills; shared-directory changes affect other agents. Keep backups until the new '
+            'installation has been checked. ')
+    agents = ' '.join(target.identifier for target in targets) or '<selected agents>'
+    return (guidance + 'Address the reported cause before a retry. A network-only failure can be retried directly. '
+            f'Retry with az aks install-cli --install-azure-skills true --skills-agents {agents}. '
+            'This also reruns binary installation and resolves the then-current release; the release may have changed. '
+            'Retries do not guarantee a coherent bundle, and this first-install-only command '
+            'does not update existing skills.')
+
+
+def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
+                              skills_agents: list[str] | None = None, gh_token: str | None = None) -> None:
+    """Offer skills only after binary success; the command handler owns argument preflight."""
+    if install_azure_skills is False:
+        return
+    explicit = install_azure_skills is True
+    if not explicit:
+        if not sys.stdin.isatty() or cmd.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False):
+            return
+        if _is_sudo():
+            logger.warning('Skipping Azure skills under sudo. Install as an unprivileged user; '
+                           'rerun with user-writable binary installation locations.')
+            return
+
+    targets = []
+    source = 'Azure skills source was not resolved.'
+    report = None
+    failure = None
+    publishing = False
+    try:
+        # Registry membership deduplicates IDs, but lexical destinations must reach publish_skills
+        # unchanged so it can validate ancestors before normalizing and deduplicating paths.
+        targets = ([target for target in discover_agents() if target.identifier in skills_agents]
+                   if explicit else _choose_skill_targets())
+        if not targets:
+            return
+        _show_skill_targets(targets)
+        if not explicit and not _confirm_skills('Install Azure skills at these destinations?'):
+            return
+        try:
+            with tempfile.TemporaryDirectory(prefix='az-azure-skills-') as temporary:
+                root = Path(temporary)
+                release = resolve_release(gh_token)
+                source = (f'Azure skills source for this attempt: microsoft/azure-skills, '
+                          f'{release.tag}, commit {release.commit}.')
+                logger.warning('%s', source)
+                archive = root / 'azure-skills.zip'
+                download_archive(release, archive)
+                trees = stage_bundle(archive, root / 'staged')
+                publishing = True
+                report = publish_skills(trees, targets)
+        except KeyboardInterrupt:
+            failure = ('Azure skills installation cancelled; earlier installations remain.' if publishing else
+                       'Azure skills installation cancelled; no skills were published.')
+    except (CLIError, OSError) as error:
+        failure = f'Azure skills installation failed: {error}'
+
+    if report is not None:
+        _report_skills(report)
+        if report.conflicts or report.failures:
+            reasons = [f'Conflict: {path}' for path in report.conflicts]
+            reasons.extend(f'{path}: {reason}' for path, reason in report.failures)
+            if failure:
+                reasons.append(failure)
+            failure = 'Azure skills installation is incomplete. ' + '; '.join(reasons)
+    if failure:
+        message = (f'{failure} kubectl and kubelogin remain installed. {source} '
+                   + _skills_recovery(targets, publishing))
+        logger.warning('%s', message)
+        if explicit:
+            raise CLIError(message)
+        return
+    logger.warning('Azure skills installation complete. kubectl and kubelogin remain installed. %s', source)

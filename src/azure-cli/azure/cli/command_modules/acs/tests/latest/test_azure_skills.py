@@ -13,6 +13,7 @@ import ssl
 import stat
 import struct
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -27,6 +28,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import HTTPSHandler, Request
 from urllib.response import addinfourl
 
+from knack.prompting import NoTTYException
 from knack.util import CLIError
 from azure.cli.command_modules.acs import _azure_skills as skills
 from azure.cli.core.azclierror import (
@@ -57,6 +59,378 @@ def make_bundle(path, files=None, extra=(), license_content=_LICENSE, compressio
         archive.writestr('bundle/.github/plugins/azure-skills/hooks/hooks.json', '{}')
         for member, content in extra:
             archive.writestr(member, content)
+
+
+class FlowTests(unittest.TestCase):
+    def setUp(self):
+        self.patches = ExitStack()
+        self.addCleanup(self.patches.close)
+        self.root = Path(self.patches.enter_context(tempfile.TemporaryDirectory()))
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx.config.getboolean.return_value = False
+        self.targets = [
+            skills.AgentTarget('claude-code', 'Claude Code', self.root / 'claude/skills', True),
+            skills.AgentTarget('codex', 'Codex', self.root / 'shared/skills', True),
+            skills.AgentTarget('github-copilot', 'GitHub Copilot', self.root / 'copilot/skills', False),
+            skills.AgentTarget('pi', 'Pi', self.root / 'pi/skills', True),
+        ]
+        self.discover = self.patches.enter_context(mock.patch.object(
+            skills, 'discover_agents', return_value=self.targets))
+        self.sudo = self.patches.enter_context(mock.patch.object(skills, '_is_sudo', return_value=False))
+        self.tty = self.patches.enter_context(mock.patch.object(sys.stdin, 'isatty', return_value=True))
+        self.input = self.patches.enter_context(mock.patch('knack.prompting._input', side_effect=['y', '4', 'y']))
+        self.output = self.patches.enter_context(mock.patch('sys.stdout', new_callable=io.StringIO))
+        self.release = skills.Release('v1.2.3', 'a' * 40)
+        self.resolve = self.patches.enter_context(mock.patch.object(skills, 'resolve_release',
+                                                                  return_value=self.release))
+        self.archives = []
+
+        def download(release, destination):
+            self.archives.append(destination)
+            make_bundle(destination)
+
+        self.download = self.patches.enter_context(mock.patch.object(skills, 'download_archive', side_effect=download))
+        self.publish = self.patches.enter_context(mock.patch.object(skills, 'publish_skills', wraps=skills.publish_skills))
+
+    def assert_no_skill_work(self):
+        self.discover.assert_not_called()
+        self.resolve.assert_not_called()
+        self.input.assert_not_called()
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_noninteractive_default_does_no_skill_work(self):
+        self.tty.return_value = False
+        skills.maybe_install_azure_skills(self.cmd)
+        self.assert_no_skill_work()
+
+    def test_false_does_no_skill_work(self):
+        skills.maybe_install_azure_skills(self.cmd, False)
+        self.assert_no_skill_work()
+        self.tty.assert_not_called()
+        self.cmd.cli_ctx.config.getboolean.assert_not_called()
+
+    def test_disabled_confirmations_are_not_consent(self):
+        self.cmd.cli_ctx.config.getboolean.return_value = True
+        skills.maybe_install_azure_skills(self.cmd)
+        self.assert_no_skill_work()
+        self.cmd.cli_ctx.config.getboolean.assert_called_once_with('core', 'disable_confirm_prompt', fallback=False)
+
+    def test_sudo_skips_with_unprivileged_binary_location_guidance(self):
+        self.sudo.return_value = True
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd)
+        self.assert_no_skill_work()
+        self.assertIn('unprivileged', '\n'.join(logs.output))
+        self.assertIn('user-writable binary', '\n'.join(logs.output))
+
+    def test_first_enter_defaults_to_no_before_discovery(self):
+        self.input.side_effect = ['']
+        skills.maybe_install_azure_skills(self.cmd)
+        self.discover.assert_not_called()
+        self.resolve.assert_not_called()
+        self.assertIn('(y/N)', self.input.call_args.args[0])
+
+    def test_invalid_input_reprompts_then_replaces_detected_defaults(self):
+        self.input.side_effect = ['y', '1,9', '3,3', 'y']
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd)
+        self.assertEqual(self.input.call_count, 4)
+        self.assertIn('1-4', '\n'.join(logs.output))
+        self.assertIn('1,2,4', self.input.call_args_list[1].args[0])
+        self.assertIn('1. Claude Code', self.output.getvalue())
+        self.assertIn('not detected', self.output.getvalue())
+        self.assertEqual(list(self.root.glob('*/skills/demo')), [self.root / 'copilot/skills/demo'])
+        self.assertFalse(self.archives[0].parent.exists())
+
+    def test_enter_keeps_detected_agents_and_codex_discloses_shared_visibility(self):
+        self.input.side_effect = ['y', '', 'y']
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd)
+        text = '\n'.join(logs.output)
+        for label in ('Claude Code', 'Codex', 'Pi', 'GitHub Copilot', 'MCP', 'hooks', 'user-level'):
+            self.assertIn(label, text)
+        self.assertIn('even when', text)
+        self.assertEqual(len(list(self.root.glob('*/skills/demo'))), 3)
+        self.assertFalse((self.root / 'copilot').exists())
+
+    def test_no_detected_agents_and_empty_input_skips(self):
+        self.discover.return_value = [skills.AgentTarget(t.identifier, t.label, t.destination, False)
+                                      for t in self.targets]
+        self.input.side_effect = ['y', '']
+        skills.maybe_install_azure_skills(self.cmd)
+        self.resolve.assert_not_called()
+        self.assertEqual(self.input.call_count, 2)
+
+    def test_none_skips_detected_defaults(self):
+        self.input.side_effect = ['y', 'none']
+        skills.maybe_install_azure_skills(self.cmd)
+        self.resolve.assert_not_called()
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_final_enter_defaults_to_no_without_retrieval_or_writes(self):
+        self.input.side_effect = ['y', '4', '']
+        skills.maybe_install_azure_skills(self.cmd)
+        self.resolve.assert_not_called()
+        self.assertIn('(y/N)', self.input.call_args.args[0])
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_prompt_cancellation_at_each_stage_keeps_binary_success(self):
+        for error in (NoTTYException, EOFError, KeyboardInterrupt):
+            for answers in ([], ['y'], ['y', '4']):
+                with self.subTest(error=error, answers=answers):
+                    self.input.side_effect = answers + [error()]
+                    with self.assertLogs(skills.logger, level='WARNING') as logs:
+                        skills.maybe_install_azure_skills(self.cmd)
+                    self.assertIn('cancelled', '\n'.join(logs.output))
+                    self.assertIn('kubectl and kubelogin', '\n'.join(logs.output))
+                    self.resolve.assert_not_called()
+                    self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_explicit_selection_ignores_detection_and_prompt_suppression_without_revalidation(self):
+        self.cmd.cli_ctx.config.getboolean.return_value = True
+        with mock.patch.object(skills, 'validate_skills_options', side_effect=AssertionError('preflight repeated')):
+            skills.maybe_install_azure_skills(self.cmd, True, ['github-copilot', 'github-copilot'])
+        self.input.assert_not_called()
+        self.assertEqual(list(self.root.glob('*/skills/demo')), [self.root / 'copilot/skills/demo'])
+        self.assertEqual(len(self.publish.call_args.args[1]), 1)
+
+    def test_source_and_token_propagation_and_source_before_publication(self):
+        def publish(trees, targets):
+            self.assertTrue(any('microsoft/azure-skills' in line and self.release.commit in line
+                                for line in logs.output))
+            return skills.InstallReport(installed=[targets[0].destination / trees[0].name])
+
+        self.publish.side_effect = publish
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd, True, ['pi'], 'secret-token')
+        self.resolve.assert_called_once_with('secret-token')
+        self.download.assert_called_once_with(self.release, self.archives[0])
+        text = '\n'.join(logs.output)
+        self.assertNotIn('secret-token', text)
+        self.assertGreaterEqual(text.count(self.release.commit), 2)
+        self.assertIn(self.release.tag, text)
+
+    def test_duplicate_destinations_are_published_once(self):
+        self.discover.return_value = [skills.AgentTarget(t.identifier, t.label, self.root / 'skills', t.detected)
+                                      for t in self.targets]
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd, True, ['pi', 'claude-code', 'pi'])
+        text = '\n'.join(logs.output)
+        self.assertIn('Claude Code', text)
+        self.assertIn('Pi', text)
+        self.assertIn('Installed (1)', text)
+        self.assertIn('Already present (0)', text)
+        self.assertEqual((self.root / 'skills/demo/SKILL.md').read_text(), _SKILL)
+
+    @unittest.skipUnless(os.name == 'posix', 'Symlink safety with lexical parent traversal')
+    def test_wrapper_preserves_unsafe_lexical_path_even_when_normalized_destination_duplicates(self):
+        (self.root / 'outside').mkdir()
+        (self.root / 'link').symlink_to(self.root / 'outside', target_is_directory=True)
+        self.discover.return_value = [
+            skills.AgentTarget('claude-code', 'Claude Code', self.root / 'skills', True),
+            skills.AgentTarget('pi', 'Pi', self.root / 'link/../skills', True),
+        ]
+        with self.assertRaisesRegex(CLIError, 'symlink|reparse'):
+            skills.maybe_install_azure_skills(self.cmd, True, ['claude-code', 'pi'])
+        self.assertTrue((self.root / 'skills/demo/SKILL.md').exists())
+        self.assertEqual(self.publish.call_args.args[1][1].destination, self.root / 'link/../skills')
+
+    def test_known_errors_optional_warn_explicit_raise_with_source_and_retry_guidance(self):
+        for explicit in (False, True):
+            for phase in ('resolve', 'download', 'stage'):
+                with self.subTest(explicit=explicit, phase=phase), ExitStack() as patches:
+                    self.input.side_effect = ['y', '4', 'y']
+                    operation = {'resolve': 'resolve_release', 'download': 'download_archive',
+                                 'stage': 'stage_bundle'}[phase]
+                    patches.enter_context(mock.patch.object(skills, operation, side_effect=CLIError('test failure')))
+                    with self.assertLogs(skills.logger, level='WARNING') as logs:
+                        if explicit:
+                            with self.assertRaisesRegex(CLIError, 'kubectl and kubelogin') as error:
+                                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                            text = str(error.exception)
+                        else:
+                            skills.maybe_install_azure_skills(self.cmd)
+                            text = '\n'.join(logs.output)
+                    for expected in ('test failure', 'retry', 'release may have changed', 'binary installation'):
+                        self.assertIn(expected, text)
+                    if phase != 'resolve':
+                        self.assertIn(self.release.tag, text)
+                        self.assertIn(self.release.commit, text)
+                    self.assertFalse(any(path.parent.exists() for path in self.archives))
+                    self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_discovery_failure_does_not_suggest_an_empty_agent_list(self):
+        self.discover.side_effect = OSError('cannot inspect agent directories')
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            skills.maybe_install_azure_skills(self.cmd)
+        text = '\n'.join(logs.output)
+        self.assertIn('cannot inspect agent directories', text)
+        self.assertIn('--skills-agents <selected agents>', text)
+        self.resolve.assert_not_called()
+
+    def test_temporary_filesystem_error_is_contextual_not_programming_error(self):
+        with mock.patch.object(skills.tempfile, 'TemporaryDirectory', side_effect=PermissionError('denied')):
+            with self.assertRaisesRegex(CLIError, 'permissions|denied'):
+                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        with mock.patch.object(skills, 'resolve_release', side_effect=TypeError('bug')):
+            with self.assertRaisesRegex(TypeError, 'bug'):
+                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+
+    def test_all_outcomes_and_manual_recovery_explicit_raises_optional_warns(self):
+        installed = self.root / 'pi/skills/installed'
+        present = self.root / 'pi/skills/present'
+        conflict = self.root / 'pi/skills/conflict'
+        failed = self.root / 'pi/skills/failed'
+        self.publish.side_effect = lambda *args: skills.InstallReport(
+            installed=[installed], already_present=[present], conflicts=[conflict],
+            failures=[(failed, 'Permission denied')])
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit):
+                self.input.side_effect = ['y', '4', 'y']
+                with self.assertLogs(skills.logger, level='WARNING') as logs:
+                    if explicit:
+                        with self.assertRaisesRegex(CLIError, 'incomplete'):
+                            skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                    else:
+                        skills.maybe_install_azure_skills(self.cmd)
+                text = '\n'.join(logs.output)
+                for expected in ('Installed (1)', 'Already present (1)', 'Skipped/conflicting (1)', 'Failed (1)',
+                                 str(installed), str(present), str(conflict), str(failed), 'Permission denied',
+                                 'user modifications', 'outside all agent skill discovery paths',
+                                 'other Azure skill directories', 'unrelated skills', 'shared',
+                                 '--install-azure-skills true --skills-agents pi', 'binary installation',
+                                 'release may have changed', 'backups', self.release.tag, self.release.commit):
+                    self.assertIn(expected, text)
+                self.assertNotIn('installation complete', text)
+
+    def test_release_advance_keeps_existing_content_and_reports_conflict_path_in_explicit_error(self):
+        with self.assertLogs(skills.logger, level='WARNING'):
+            skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        destination = self.root / 'pi/skills/demo'
+        self.resolve.return_value = skills.Release('v2.0.0', 'b' * 40)
+        self.download.side_effect = lambda release, path: make_bundle(
+            path, {'demo/SKILL.md': _SKILL + 'Changed upstream instructions\n'})
+        with self.assertLogs(skills.logger, level='WARNING') as logs:
+            with self.assertRaises(CLIError) as error:
+                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        self.assertEqual((destination / 'SKILL.md').read_text(), _SKILL)
+        self.assertIn(str(destination), str(error.exception))
+        self.assertIn('v2.0.0', str(error.exception))
+        self.assertIn('b' * 40, str(error.exception))
+        self.assertNotIn('a' * 40, '\n'.join(logs.output))
+        self.assertIn('mixed-version', str(error.exception))
+        self.assertIn('release may have changed', str(error.exception))
+
+    def test_cleanup_error_does_not_hide_partial_publication_or_cancellation(self):
+        real_temporary = tempfile.TemporaryDirectory
+
+        @contextmanager
+        def cleanup_error(**kwargs):
+            with real_temporary(**kwargs) as directory:
+                yield directory
+            raise PermissionError('temporary cleanup denied')
+
+        self.publish.side_effect = lambda *args: skills.InstallReport(
+            installed=[self.root / 'pi/skills/first'],
+            failures=[(self.root / 'pi/skills/second', 'publication cancelled; earlier installations remain')])
+        with mock.patch.object(skills.tempfile, 'TemporaryDirectory', cleanup_error):
+            with self.assertLogs(skills.logger, level='WARNING') as logs, self.assertRaises(CLIError) as error:
+                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        self.assertIn('cancelled', str(error.exception))
+        self.assertIn('temporary cleanup denied', str(error.exception))
+        self.assertIn(str(self.root / 'pi/skills/first'), '\n'.join(logs.output))
+        self.assertFalse(any(path.parent.exists() for path in self.archives))
+
+    def test_retrieval_interrupt_cleans_up_and_has_mode_specific_status(self):
+        def interrupted(release, destination):
+            self.archives.append(destination)
+            destination.write_bytes(b'partial')
+            raise KeyboardInterrupt()
+
+        self.download.side_effect = interrupted
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit):
+                self.input.side_effect = ['y', '4', 'y']
+                with self.assertLogs(skills.logger, level='WARNING') as logs:
+                    if explicit:
+                        with self.assertRaisesRegex(CLIError, 'cancelled') as error:
+                            skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                        self.assertIn(self.release.commit, str(error.exception))
+                    else:
+                        skills.maybe_install_azure_skills(self.cmd)
+                text = '\n'.join(logs.output)
+                self.assertIn('no skills were published', text)
+                self.assertIn('kubectl and kubelogin', text)
+                self.publish.assert_not_called()
+                self.assertFalse(any(path.parent.exists() for path in self.archives))
+
+    def test_publication_interrupt_keeps_completed_files_reports_partial_and_cleans_temporary_state(self):
+        original_publish_one = skills._publish_one
+
+        def interrupt_second(source, destination):
+            if destination.parent == self.root / 'pi/skills':
+                raise KeyboardInterrupt()
+            return original_publish_one(source, destination)
+
+        with mock.patch.object(skills, '_publish_one', side_effect=interrupt_second):
+            for explicit in (False, True):
+                with self.subTest(explicit=explicit):
+                    self.input.side_effect = ['y', '1,4', 'y']
+                    with self.assertLogs(skills.logger, level='WARNING') as logs:
+                        if explicit:
+                            with self.assertRaisesRegex(CLIError, 'cancelled'):
+                                skills.maybe_install_azure_skills(self.cmd, True, ['claude-code', 'pi'])
+                        else:
+                            skills.maybe_install_azure_skills(self.cmd)
+                    text = '\n'.join(logs.output)
+                    self.assertIn('earlier installations remain', text)
+                    self.assertNotIn('installation complete', text)
+                    self.assertEqual((self.root / 'claude/skills/demo/SKILL.md').read_text(), _SKILL)
+                    self.assertFalse((self.root / 'pi/skills/demo').exists())
+                    self.assertFalse(any(path.parent.exists() for path in self.archives))
+
+
+class CliArgumentTests(unittest.TestCase):
+    def invoke(self, arguments):
+        from azure.cli.core import get_default_cli
+        with tempfile.TemporaryDirectory() as config, \
+                mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config}), \
+                mock.patch('azure.cli.command_modules.acs.custom.k8s_install_cli',
+                           autospec=True, return_value=None) as handler:
+            try:
+                result = get_default_cli().invoke(['aks', 'install-cli'] + arguments)
+            except SystemExit as error:
+                result = error.code
+            return result, handler
+
+    def test_three_state_flag_and_agent_list(self):
+        cases = [(['--install-azure-skills', '--skills-agents', 'pi', 'codex'], True),
+                 (['--install-azure-skills', 'true', '--skills-agents', 'pi', 'codex'], True),
+                 (['--install-azure-skills', 'false'], False), ([], None)]
+        for arguments, expected in cases:
+            with self.subTest(arguments=arguments):
+                result, handler = self.invoke(arguments)
+                self.assertEqual(result, 0)
+                self.assertIs(handler.call_args.kwargs['install_azure_skills'], expected)
+                self.assertEqual(handler.call_args.kwargs['skills_agents'], ['pi', 'codex'] if expected else None)
+
+    def test_invalid_agent_is_rejected_by_parser(self):
+        with mock.patch('sys.stderr', new_callable=io.StringIO) as output:
+            result, handler = self.invoke(['--install-azure-skills', '--skills-agents', 'unknown'])
+        self.assertEqual(result, 2)
+        self.assertIn("'unknown' is not a valid value for '--skills-agents'", output.getvalue())
+        handler.assert_not_called()
+
+    def test_source_overlay_help_explains_optional_scope_and_retry_limitations(self):
+        with tempfile.TemporaryDirectory() as config:
+            result = subprocess.run([sys.executable, '-B', '-m', 'azure.cli', 'aks', 'install-cli', '--help'],
+                                    env=dict(os.environ, AZURE_CONFIG_DIR=config),
+                                    text=True, capture_output=True, check=True)
+        help_text = ' '.join(result.stdout.split())
+        for expected in ('--install-azure-skills', '--skills-agents', 'Azure skills release', 'kubelogin',
+                         'MCP', 'hooks', 'user-level', 'sudo', 'noninteractive', 'Codex', 'Pi', 'Copilot',
+                         'first-install-only', 'binary installation', 'latest release'):
+            self.assertIn(expected, help_text)
 
 
 class ArchiveTests(unittest.TestCase):
