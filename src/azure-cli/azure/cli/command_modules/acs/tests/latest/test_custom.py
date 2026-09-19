@@ -99,7 +99,7 @@ class InstallCliSkillsTest(unittest.TestCase):
             mock.call.get_arch_for_cli_binary(),
             mock.call.k8s_install_kubectl(self.cmd, '1.2.3', '/tmp/kubectl', 'https://kubectl', arch='arm64'),
             mock.call.k8s_install_kubelogin(self.cmd, '4.5.6', '/tmp/kubelogin', 'https://kubelogin',
-                                          arch='arm64', gh_token='secret'),
+                                            arch='arm64', gh_token='secret'),
             mock.call.skills(self.cmd, True, ['pi'], 'secret'),
         ])
 

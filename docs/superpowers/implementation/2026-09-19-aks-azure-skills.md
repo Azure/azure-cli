@@ -1,7 +1,8 @@
 # AKS Azure skills implementation notes
 
 Implementation branch: `feature/aks-azure-skills`.
-Reviewed source revision: `25c78cddd71919b316bda7df8a9fbcc845800178`.
+Initial independently reviewed source revision: `25c78cddd71919b316bda7df8a9fbcc845800178`.
+Pre-PR CodeRabbit-reviewed behavior revision: `120e0e3cec08103dff5290efe28561eab56c47a4`.
 Base: `ebade7308a`; implementation began after plan commit `83dfbd2168`.
 
 [Design](../specs/2026-09-18-aks-azure-skills-design.md) ·
@@ -152,6 +153,44 @@ Not run: native Windows/macOS execution, Python 3.10 runtime, full Azure CLI/azd
 ACS suites and azdev style/linter, or actual agent/MCP workflows. Native runners and
 azdev tooling were unavailable; no global dependencies were installed. These remain
 verification limits, not implied passing gates.
+
+## Pre-PR review and conformance follow-up
+
+CodeRabbit CLI 0.7.6 reviewed the complete committed branch against `ebade7308a`.
+Its first pass reported the same continuation-indentation issue twice. Confirmed
+E128 violations were corrected in the helper and its tests. A second full pass,
+with the repository's command/error guidelines supplied as additional context,
+reported only one remaining E128 issue in the orchestration test; that was also
+corrected. The whitespace-only fixes preserve the parsed AST.
+
+```bash
+coderabbit review --agent --committed --base-commit ebade7308a
+coderabbit review --agent --committed --base-commit ebade7308a \
+  --config doc/command_guidelines.md doc/error_handling_guidelines.md
+```
+
+Preparing the PR also exposed mandatory contribution conventions not captured by
+the earlier reviews. New error constructions now use concrete Azure CLI error types,
+and wrapping preserves their categories and the previous exit status. In particular,
+a missing GitHub artifact still returns exit 1, not the Azure resource-not-found exit 3.
+Interactive menus and consent disclosures now use native Knack prompt messages,
+without direct `print` calls; quiet-mode consent remains visible. Installation,
+first-install recovery, credential, and archive policies are unchanged. These
+conformance corrections supersede generic-error/direct-output examples in the
+historical implementation plan.
+
+Fresh post-conformance verification ran the same three unit modules above:
+**402 tests run, 400 passed, 2 known skips**. Ruff, diff checks, and targeted
+`pycodestyle --select E128` checks passed across all six changed Python files.
+Pycodestyle ran in an isolated environment cached inside the worktree; no project
+or global Python dependency was added. Existing warnings remain unchanged.
+
+The real `v1.2.49` temporary-destination smoke was rerun successfully after these
+changes: **28 installed, then 28 identical no-ops**, with all **926 original payload
+files** byte-matched and legal notices retained. Temporary state was removed.
+The seven PTY results recorded above belong to the initially reviewed revision;
+current committed real-console tests verify the native-prompt and quiet-mode
+conformance changes. Native-platform/azdev limitations remain as stated above.
 
 ## Reviewer focus
 
