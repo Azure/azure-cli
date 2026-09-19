@@ -725,7 +725,7 @@ def _skills_recovery(targets: list[AgentTarget], manual: bool) -> str:
 
 
 def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
-                              skills_agents: list[str] | None = None, gh_token: str | None = None) -> None:
+                               skills_agents: list[str] | None = None, gh_token: str | None = None) -> None:
     """Offer skills only after binary success; the command handler owns argument preflight."""
     if install_azure_skills is False:
         return

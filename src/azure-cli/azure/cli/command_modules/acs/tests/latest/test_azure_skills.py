@@ -83,7 +83,7 @@ class FlowTests(unittest.TestCase):
         self.output = self.patches.enter_context(mock.patch('sys.stdout', new_callable=io.StringIO))
         self.release = skills.Release('v1.2.3', 'a' * 40)
         self.resolve = self.patches.enter_context(mock.patch.object(skills, 'resolve_release',
-                                                                  return_value=self.release))
+                                                                    return_value=self.release))
         self.archives = []
 
         def download(release, destination):
@@ -633,7 +633,7 @@ class ArchiveTests(unittest.TestCase):
                               ('a\u0345\u0300.txt', 'a\u0300\u0345.txt')]:
             with self.subTest(first=first, second=second):
                 make_bundle(self.archive, extra=[(_PAYLOAD + 'demo/' + first, b'one'),
-                                                (_PAYLOAD + 'demo/' + second, b'two')])
+                                                 (_PAYLOAD + 'demo/' + second, b'two')])
                 self.assert_rejected()
 
     def test_rejects_file_directory_collisions_in_either_order(self):
@@ -641,7 +641,7 @@ class ArchiveTests(unittest.TestCase):
                               ('resource', 'resource/'), ('resource/', 'resource')]:
             with self.subTest(first=first, second=second):
                 make_bundle(self.archive, extra=[(_PAYLOAD + 'demo/' + first, b''),
-                                                (_PAYLOAD + 'demo/' + second, b'')])
+                                                 (_PAYLOAD + 'demo/' + second, b'')])
                 self.assert_rejected()
 
     def test_rejects_symlinks_special_files_and_inconsistent_directory_modes(self):
@@ -1075,7 +1075,7 @@ class PublicationTests(unittest.TestCase):
         (home / 'child').mkdir(parents=True)
         (home / 'config').mkdir()
         with mock.patch.dict('os.environ', {'CLAUDE_CONFIG_DIR': 'home/child/../config',
-                                          'PI_CODING_AGENT_DIR': 'home/config'}, clear=True), \
+                                            'PI_CODING_AGENT_DIR': 'home/config'}, clear=True), \
                 mock.patch.object(Path, 'home', return_value=home), \
                 mock.patch('os.getcwd', return_value=str(self.root)):
             targets = [target for target in skills.discover_agents() if target.identifier in ('claude-code', 'pi')]
@@ -1381,7 +1381,7 @@ class PublicationTests(unittest.TestCase):
 
         with mock.patch.object(skills.shutil, 'copytree', interrupt_beta):
             report = skills.publish_skills(self.trees, [self.target,
-                                                     skills.AgentTarget('codex', 'Codex', other, True)])
+                                                        skills.AgentTarget('codex', 'Codex', other, True)])
         self.assertEqual(report.installed, [self.destination / 'alpha'])
         self.assertEqual([path for path, _ in report.failures], [self.destination / 'beta'])
         self.assertIn('cancel', report.failures[0][1].lower())
@@ -1626,7 +1626,7 @@ class ReleaseDownloadTests(unittest.TestCase):
             with self.subTest(code=code):
                 body = _Response(headers={'Location': 'https://attacker.invalid/steal'})
                 response = addinfourl(body, body.headers,
-                                     'https://api.github.com/repos/microsoft/azure-skills/releases/latest', code)
+                                      'https://api.github.com/repos/microsoft/azure-skills/releases/latest', code)
                 response.msg = 'Found'
                 send.reset_mock()
                 send.return_value = response
@@ -1639,7 +1639,7 @@ class ReleaseDownloadTests(unittest.TestCase):
     def test_archive_opener_rejects_redirect_before_second_request_and_closes_response(self, send):
         body = _Response(headers={'Location': 'https://attacker.invalid/steal'})
         response = addinfourl(body, body.headers,
-                             'https://codeload.github.com/microsoft/azure-skills/zip/' + 'a' * 40, 302)
+                              'https://codeload.github.com/microsoft/azure-skills/zip/' + 'a' * 40, 302)
         response.msg = 'Found'
         send.return_value = response
         with tempfile.TemporaryDirectory() as directory:
@@ -1957,7 +1957,7 @@ class ResponseDeadlineTests(unittest.TestCase):
             self.assertFalse(worker.is_alive(), 'Local HTTP peer did not stop')
 
     def _assert_trickle_stops(self, framing, chunks, operation='metadata', status=200,
-                             interval=0.02, socket_timeout=0.1):
+                              interval=0.02, socket_timeout=0.1):
         prefix = f'HTTP/1.1 {status} Test\r\nConnection: close\r\n'.encode() + framing
         with self._local_response(prefix, chunks, interval, socket_timeout) as (client, requests, sent), \
                 tempfile.TemporaryDirectory() as directory:
@@ -1997,20 +1997,20 @@ class ResponseDeadlineTests(unittest.TestCase):
     def test_fixed_length_archive_trickle_is_interrupted_and_removed(self):
         # Complete one copy chunk first, so cleanup must remove already-written bytes.
         self._assert_trickle_stops(b'Content-Length: 65596\r\n\r\n' + b'x' * 65536,
-                                  [b'x'] * 60, operation='archive')
+                                   [b'x'] * 60, operation='archive')
 
     def test_chunked_archive_trickle_is_interrupted_and_removed(self):
         self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n10000\r\n' +
-                                  b'x' * 65536 + b'\r\n3c\r\n',
-                                  [b'x'] * 60 + [b'\r\n0\r\n\r\n'], operation='archive')
+                                   b'x' * 65536 + b'\r\n3c\r\n',
+                                   [b'x'] * 60 + [b'\r\n0\r\n\r\n'], operation='archive')
 
     def test_chunk_size_line_trickle_is_bounded_before_payload(self):
         self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n',
-                                  [b'0'] * 60 + [b'1\r\nx\r\n0\r\n\r\n'])
+                                   [b'0'] * 60 + [b'1\r\nx\r\n0\r\n\r\n'])
 
     def test_chunk_trailer_trickle_is_bounded(self):
         self._assert_trickle_stops(b'Transfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\nX-Trailer: ',
-                                  [b'x'] * 60 + [b'\r\n\r\n'])
+                                   [b'x'] * 60 + [b'\r\n\r\n'])
 
     def test_error_diagnostic_trickle_is_bounded_and_redacted(self):
         body = b'{"message":"secret-token ' + b'x' * 40 + b'"}'
@@ -2023,7 +2023,7 @@ class ResponseDeadlineTests(unittest.TestCase):
 
     def test_blocked_receive_uses_remaining_deadline_not_socket_timeout(self):
         self._assert_trickle_stops(b'Content-Length: 1\r\n\r\n', [b'x'],
-                                  interval=1.2, socket_timeout=1)
+                                   interval=1.2, socket_timeout=1)
 
     def test_socket_inactivity_timeout_still_applies_before_deadline(self):
         prefix = b'HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\n'
@@ -2196,8 +2196,8 @@ class AgentDiscoveryTests(unittest.TestCase):
         defaults = {self.home / '.claude', self.home / '.codex', self.home / '.pi/agent'}
         self.isdir.side_effect = lambda path: Path(path) in defaults
         with mock.patch.dict('os.environ', {'CLAUDE_CONFIG_DIR': str(self.home / 'missing-claude'),
-                                          'CODEX_HOME': str(self.home / 'missing-codex'),
-                                          'PI_CODING_AGENT_DIR': str(self.home / 'missing-pi')}):
+                                            'CODEX_HOME': str(self.home / 'missing-codex'),
+                                            'PI_CODING_AGENT_DIR': str(self.home / 'missing-pi')}):
             targets = skills.discover_agents()
         self.assertEqual([target.detected for target in targets], [False] * 4)
         self.assertEqual(targets[0].destination, self.home / 'missing-claude/skills')
