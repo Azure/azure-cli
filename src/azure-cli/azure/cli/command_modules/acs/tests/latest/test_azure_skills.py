@@ -34,8 +34,18 @@ from knack.util import CLIError
 from azure.cli.command_modules.acs import _azure_skills as skills
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
+    AzureConnectionError,
+    AzureInternalError,
+    AzureResponseError,
+    BadRequestError,
+    ClientRequestError,
+    FileOperationError,
+    ForbiddenError,
     InvalidArgumentValueError,
+    ManualInterrupt,
     RequiredArgumentMissingError,
+    UnauthorizedError,
+    ValidationError,
 )
 
 
@@ -80,8 +90,8 @@ class FlowTests(unittest.TestCase):
         self.sudo = self.patches.enter_context(mock.patch.object(skills, '_is_sudo', return_value=False))
         self.tty = self.patches.enter_context(mock.patch.object(sys.stdin, 'isatty', return_value=True))
         self.input = self.patches.enter_context(mock.patch('knack.prompting._input', side_effect=['y', '4', 'y']))
-        self.output = self.patches.enter_context(mock.patch('sys.stdout', new_callable=io.StringIO))
         self.release = skills.Release('v1.2.3', 'a' * 40)
+        self.real_resolve = skills.resolve_release
         self.resolve = self.patches.enter_context(mock.patch.object(skills, 'resolve_release',
                                                                     return_value=self.release))
         self.archives = []
@@ -138,8 +148,8 @@ class FlowTests(unittest.TestCase):
         self.assertEqual(self.input.call_count, 4)
         self.assertIn('1-4', '\n'.join(logs.output))
         self.assertIn('1,2,4', self.input.call_args_list[1].args[0])
-        self.assertIn('1. Claude Code', self.output.getvalue())
-        self.assertIn('not detected', self.output.getvalue())
+        self.assertIn('1. Claude Code', self.input.call_args_list[1].args[0])
+        self.assertIn('not detected', self.input.call_args_list[1].args[0])
         self.assertEqual(list(self.root.glob('*/skills/demo')), [self.root / 'copilot/skills/demo'])
         self.assertFalse(self.archives[0].parent.exists())
 
@@ -147,7 +157,7 @@ class FlowTests(unittest.TestCase):
         self.input.side_effect = ['y', '', 'y']
         with self.assertLogs(skills.logger, level='WARNING'):
             skills.maybe_install_azure_skills(self.cmd)
-        text = self.output.getvalue()
+        text = '\n'.join(call.args[0] for call in self.input.call_args_list)
         for label in ('Claude Code', 'Codex', 'Pi', 'GitHub Copilot', 'MCP', 'hooks', 'user-level'):
             self.assertIn(label, text)
         self.assertIn('even when', text)
@@ -243,11 +253,14 @@ class FlowTests(unittest.TestCase):
                     self.input.side_effect = ['y', '4', 'y']
                     operation = {'resolve': 'resolve_release', 'download': 'download_archive',
                                  'stage': 'stage_bundle'}[phase]
-                    patches.enter_context(mock.patch.object(skills, operation, side_effect=CLIError('test failure')))
+                    error_type = {'resolve': AzureResponseError, 'download': AzureConnectionError,
+                                  'stage': ValidationError}[phase]
+                    patches.enter_context(mock.patch.object(skills, operation, side_effect=error_type('test failure')))
                     with self.assertLogs(skills.logger, level='WARNING') as logs:
                         if explicit:
                             with self.assertRaisesRegex(CLIError, 'kubectl and kubelogin') as error:
                                 skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                            self.assertIsInstance(error.exception, error_type)
                             text = str(error.exception)
                         else:
                             skills.maybe_install_azure_skills(self.cmd)
@@ -259,6 +272,65 @@ class FlowTests(unittest.TestCase):
                         self.assertIn(self.release.commit, text)
                     self.assertFalse(any(path.parent.exists() for path in self.archives))
                     self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_missing_github_release_preserves_optional_success_and_explicit_exit_code_one(self):
+        from azure.cli.core import azclierror
+        from azure.cli.core.util import handle_exception
+
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit), \
+                    mock.patch.object(skills, 'resolve_release', wraps=self.real_resolve), \
+                    mock.patch.object(skills, 'build_opener') as build:
+                self.input.side_effect = ['y', '4', 'y']
+                response = _Response(b'secret-token')
+                build.return_value.open.side_effect = HTTPError(
+                    'https://api.github.com', 404, 'secret-token', {}, response)
+                with self.assertLogs(skills.logger, level='WARNING') as logs:
+                    if explicit:
+                        with self.assertRaises(CLIError) as raised:
+                            skills.maybe_install_azure_skills(self.cmd, True, ['pi'], 'secret-token')
+                        with mock.patch.object(azclierror, 'telemetry'), \
+                                self.assertLogs(azclierror.logger, level='ERROR'), \
+                                self.assertLogs('az_command_data_logger', level='ERROR'):
+                            self.assertEqual(handle_exception(raised.exception), 1)
+                        self.assertIsInstance(raised.exception, AzureResponseError)
+                    else:
+                        self.assertIsNone(skills.maybe_install_azure_skills(self.cmd))
+                self.assertIn('HTTP 404', '\n'.join(logs.output))
+                self.assertNotIn('secret-token', '\n'.join(logs.output))
+                self.assertTrue(response.closed)
+                self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_wrapper_retains_error_categories_from_real_operation_boundaries(self):
+        cases = [('network', AzureConnectionError), ('response', AzureResponseError),
+                 ('request', ClientRequestError), ('archive', ValidationError),
+                 ('file', FileOperationError), ('interrupt', ManualInterrupt)]
+        for phase, expected in cases:
+            with self.subTest(phase=phase), ExitStack() as patches:
+                if phase in ('network', 'response', 'request'):
+                    patches.enter_context(mock.patch.object(skills, 'resolve_release', wraps=self.real_resolve))
+                    opener = patches.enter_context(mock.patch.object(skills, 'build_opener'))
+                    if phase == 'network':
+                        opener.return_value.open.side_effect = URLError('secret-token')
+                    elif phase == 'request':
+                        opener.return_value.open.side_effect = ValueError('secret-token')
+                    else:
+                        opener.return_value.open.return_value = _Response(b'not JSON: secret-token')
+                elif phase == 'archive':
+                    self.download.side_effect = lambda release, path: path.write_bytes(b'not ZIP')
+                elif phase == 'file':
+                    patches.enter_context(mock.patch.object(skills.tempfile, 'TemporaryDirectory',
+                                                            side_effect=PermissionError('denied')))
+                else:
+                    self.download.side_effect = KeyboardInterrupt()
+                with self.assertLogs(skills.logger, level='WARNING') as logs, self.assertRaises(CLIError) as raised:
+                    skills.maybe_install_azure_skills(self.cmd, True, ['pi'], 'secret-token')
+                self.assertIsInstance(raised.exception, expected)
+                self.assertIn('kubectl and kubelogin remain installed', str(raised.exception))
+                self.assertNotIn('secret-token', str(raised.exception))
+                self.assertNotIn('secret-token', '\n'.join(logs.output))
+                self.assertEqual(list(self.root.iterdir()), [])
+                self.assertFalse(any(path.parent.exists() for path in self.archives))
 
     def test_discovery_failure_does_not_suggest_an_empty_agent_list(self):
         self.discover.side_effect = OSError('cannot inspect agent directories')
@@ -284,7 +356,7 @@ class FlowTests(unittest.TestCase):
         failed = self.root / 'pi/skills/failed'
         self.publish.side_effect = lambda *args: skills.InstallReport(
             installed=[installed], already_present=[present], conflicts=[conflict],
-            failures=[(failed, 'Permission denied')])
+            failures=[(failed, FileOperationError('Permission denied'))])
         for explicit in (False, True):
             with self.subTest(explicit=explicit):
                 self.input.side_effect = ['y', '4', 'y']
@@ -319,6 +391,7 @@ class FlowTests(unittest.TestCase):
         self.assertIn('v2.0.0', str(error.exception))
         self.assertIn('b' * 40, str(error.exception))
         self.assertNotIn('a' * 40, '\n'.join(logs.output))
+        self.assertIsInstance(error.exception, FileOperationError)
         self.assertIn('mixed-version', str(error.exception))
         self.assertIn('release may have changed', str(error.exception))
 
@@ -333,10 +406,12 @@ class FlowTests(unittest.TestCase):
 
         self.publish.side_effect = lambda *args: skills.InstallReport(
             installed=[self.root / 'pi/skills/first'],
-            failures=[(self.root / 'pi/skills/second', 'publication cancelled; earlier installations remain')])
+            failures=[(self.root / 'pi/skills/second',
+                       ManualInterrupt('publication cancelled; earlier installations remain'))])
         with mock.patch.object(skills.tempfile, 'TemporaryDirectory', cleanup_error):
             with self.assertLogs(skills.logger, level='WARNING') as logs, self.assertRaises(CLIError) as error:
                 skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        self.assertIsInstance(error.exception, ManualInterrupt)
         self.assertIn('cancelled', str(error.exception))
         self.assertIn('temporary cleanup denied', str(error.exception))
         self.assertIn(str(self.root / 'pi/skills/first'), '\n'.join(logs.output))
@@ -356,6 +431,7 @@ class FlowTests(unittest.TestCase):
                     if explicit:
                         with self.assertRaisesRegex(CLIError, 'cancelled') as error:
                             skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                        self.assertIsInstance(error.exception, ManualInterrupt)
                         self.assertIn(self.release.commit, str(error.exception))
                     else:
                         skills.maybe_install_azure_skills(self.cmd)
@@ -379,8 +455,9 @@ class FlowTests(unittest.TestCase):
                     self.input.side_effect = ['y', '1,4', 'y']
                     with self.assertLogs(skills.logger, level='WARNING') as logs:
                         if explicit:
-                            with self.assertRaisesRegex(CLIError, 'cancelled'):
+                            with self.assertRaisesRegex(CLIError, 'cancelled') as raised:
                                 skills.maybe_install_azure_skills(self.cmd, True, ['claude-code', 'pi'])
+                            self.assertIsInstance(raised.exception, ManualInterrupt)
                         else:
                             skills.maybe_install_azure_skills(self.cmd)
                     text = '\n'.join(logs.output)
@@ -427,7 +504,7 @@ class ConsoleConsentTests(unittest.TestCase):
                 skills.logger.warning('Ordinary warnings must remain suppressed')
                 self.assertEqual(output.getvalue(), '')
             resolve = patches.enter_context(mock.patch.object(
-                skills, 'resolve_release', side_effect=CLIError('offline test boundary')))
+                skills, 'resolve_release', side_effect=AzureConnectionError('offline test boundary')))
             download = patches.enter_context(mock.patch.object(skills, 'download_archive'))
             publish = patches.enter_context(mock.patch.object(skills, 'publish_skills'))
             before = sorted(home.rglob('*'))
@@ -437,9 +514,21 @@ class ConsoleConsentTests(unittest.TestCase):
             self.assertEqual(sorted(home.rglob('*')), before)
 
     def test_interactive_consent_survives_only_show_errors_before_final_confirmation(self):
-        for mode in ('flag', 'config'):
-            with self.subTest(mode=mode), self.console(mode, 'y\n1,2,4\nn\n') as (cmd, output, home, resolve):
+        from knack import prompting
+
+        for mode in ('default', 'flag', 'config'):
+            with self.subTest(mode=mode), self.console(mode, 'y\n1,2,4\n\n') as (cmd, output, home, resolve), \
+                    mock.patch.object(prompting, '_input', wraps=prompting._input) as native_input:
                 skills.maybe_install_azure_skills(cmd)
+                self.assertEqual(native_input.call_count, 3)
+                selection_prompt = native_input.call_args_list[1].args[0]
+                consent_prompt = native_input.call_args_list[2].args[0]
+                for choice in ('Select agents:', '1. Claude Code', '2. Codex', '3. GitHub Copilot', '4. Pi',
+                               'not detected', 'Enter agent numbers, comma-separated.'):
+                    self.assertIn(choice, selection_prompt)
+                self.assertIn('user-level Azure skills only', consent_prompt)
+                self.assertIn('shared ~/.agents/skills', consent_prompt)
+                self.assertIn(str(home / '.agents/skills'), consent_prompt)
                 text = output.getvalue()
                 confirmation = 'Install Azure skills at these destinations? (y/N): '
                 self.assertIn(confirmation, text)
@@ -540,9 +629,10 @@ class ArchiveTests(unittest.TestCase):
         self.archive = self.root / 'bundle.zip'
         self.staging = self.root / 'staged'
 
-    def assert_rejected(self, message=None):
-        with self.assertRaisesRegex(CLIError, message or '.'):
+    def assert_rejected(self, message=None, error_type=ValidationError):
+        with self.assertRaisesRegex(CLIError, message or '.') as raised:
             skills.stage_bundle(self.archive, self.staging)
+        self.assertIsInstance(raised.exception, error_type)
         self.assertFalse(self.staging.exists())
         self.assertTrue(self.archive.is_file(), 'Keep caller-owned archive for diagnostics')
         self.assertEqual(sorted(path.name for path in self.root.iterdir()), ['bundle.zip'])
@@ -840,12 +930,13 @@ class ArchiveTests(unittest.TestCase):
                 else:
                     sentinel = self.staging
                 sentinel.write_bytes(b'untouched')
-                with self.assertRaises(CLIError):
+                with self.assertRaises(CLIError) as raised:
                     skills.stage_bundle(self.archive, self.staging)
                 self.assertEqual(sentinel.read_bytes(), b'untouched')
                 sentinel.unlink()
                 if is_directory:
                     self.staging.rmdir()
+                self.assertIsInstance(raised.exception, FileOperationError)
 
     @unittest.skipUnless(os.name == 'posix', 'Symlink staging boundary')
     def test_existing_staging_symlink_is_not_followed_or_removed(self):
@@ -868,7 +959,7 @@ class ArchiveTests(unittest.TestCase):
             return original_open(path, *args, **kwargs)
 
         with mock.patch.object(Path, 'open', fail_resource):
-            self.assert_rejected()
+            self.assert_rejected(error_type=FileOperationError)
 
 
 class PublicationTests(unittest.TestCase):
@@ -926,7 +1017,7 @@ class PublicationTests(unittest.TestCase):
     def test_report_defaults_are_independent_between_lists_and_invocations(self):
         first, second = skills.InstallReport(), skills.InstallReport()
         first.installed.append(self.skill)
-        first.failures.append((self.skill, 'failure'))
+        first.failures.append((self.skill, FileOperationError('failure')))
         self.assertEqual(first.already_present, [])
         self.assertEqual(first.conflicts, [])
         self.assertEqual(second.installed, [])
@@ -1021,7 +1112,8 @@ class PublicationTests(unittest.TestCase):
                 target = skills.AgentTarget('pi', 'Pi', destination, True)
                 report = skills.publish_skills(self.trees, [target])
                 self.assertEqual([path for path, _ in report.failures], [destination / 'demo'])
-                self.assertRegex(report.failures[0][1], 'symlink|reparse')
+                self.assertRegex(str(report.failures[0][1]), 'symlink|reparse')
+                self.assertIsInstance(report.failures[0][1], FileOperationError)
                 self.assertEqual(report.installed, [])
                 self.assertTrue(link.is_symlink())
                 if not dangling:
@@ -1065,7 +1157,8 @@ class PublicationTests(unittest.TestCase):
                     self.assertEqual(list((outside / 'child').iterdir()), [])
                     self.assertEqual(target.destination, configured / 'skills')
                     self.assertEqual([path for path, _ in report.failures], [configured / 'skills/demo'])
-                    self.assertRegex(report.failures[0][1], 'symlink|reparse')
+                    self.assertRegex(str(report.failures[0][1]), 'symlink|reparse')
+                    self.assertIsInstance(report.failures[0][1], FileOperationError)
                     self.assertEqual(report.installed, [])
                     self.assertEqual(report.already_present, [])
                     self.assertEqual(report.conflicts, [])
@@ -1164,8 +1257,9 @@ class PublicationTests(unittest.TestCase):
         report = self.publish()
         self.assertEqual(report.installed, [])
         self.assertEqual([path for path, _ in report.failures], [self.skill])
-        self.assertRegex(report.failures[0][1], 'no installation is running')
-        self.assertIn('manually', report.failures[0][1])
+        self.assertIsInstance(report.failures[0][1], FileOperationError)
+        self.assertRegex(str(report.failures[0][1]), 'no installation is running')
+        self.assertIn('manually', str(report.failures[0][1]))
         self.assertEqual(self.lock.read_bytes(), b'existing lock')
         self.assertFalse(self.destination.exists())
         self.assertEqual(list(self.destination.parent.iterdir()), [self.lock])
@@ -1191,7 +1285,8 @@ class PublicationTests(unittest.TestCase):
         finally:
             self.destination.parent.chmod(0o700)
         self.assertEqual([path for path, _ in report.failures], [self.skill])
-        self.assertRegex(report.failures[0][1].lower(), 'permission|denied')
+        self.assertIsInstance(report.failures[0][1], FileOperationError)
+        self.assertRegex(str(report.failures[0][1]).lower(), 'permission|denied')
         self.assertEqual(keep.read_bytes(), b'keep')
         self.assertFalse(self.lock.exists())
         self.assertFalse(self.destination.exists())
@@ -1257,7 +1352,8 @@ class PublicationTests(unittest.TestCase):
         with mock.patch.object(skills.shutil, 'copyfile', fail_copy):
             report = self.publish()
         self.assertEqual([path for path, _ in report.failures], [self.skill])
-        self.assertIn('injected disk failure', report.failures[0][1])
+        self.assertIsInstance(report.failures[0][1], FileOperationError)
+        self.assertIn('injected disk failure', str(report.failures[0][1]))
         self.assertFalse(self.skill.exists())
         self.assertFalse(self.lock.exists())
         self.assertEqual((unrelated / 'keep').read_bytes(), b'keep')
@@ -1361,8 +1457,9 @@ class PublicationTests(unittest.TestCase):
             report = self.publish()
         self.assertEqual(report.installed, [self.destination / 'alpha'])
         self.assertEqual([path for path, _ in report.failures], [self.destination / 'beta'])
-        self.assertIn('cancel', report.failures[0][1].lower())
-        self.assertIn('injected cleanup failure', report.failures[0][1])
+        self.assertIsInstance(report.failures[0][1], ManualInterrupt)
+        self.assertIn('cancel', str(report.failures[0][1]).lower())
+        self.assertIn('injected cleanup failure', str(report.failures[0][1]))
         self.assertFalse(self.lock.exists())
         self.assertEqual(list(self.destination.iterdir()), [self.destination / 'alpha'])
 
@@ -1384,7 +1481,8 @@ class PublicationTests(unittest.TestCase):
                                                         skills.AgentTarget('codex', 'Codex', other, True)])
         self.assertEqual(report.installed, [self.destination / 'alpha'])
         self.assertEqual([path for path, _ in report.failures], [self.destination / 'beta'])
-        self.assertIn('cancel', report.failures[0][1].lower())
+        self.assertIsInstance(report.failures[0][1], ManualInterrupt)
+        self.assertIn('cancel', str(report.failures[0][1]).lower())
         self.assertEqual(list(self.destination.iterdir()), [self.destination / 'alpha'])
         self.assertFalse(other.parent.exists())
         self.assertFalse(self.lock.exists())
@@ -1484,6 +1582,47 @@ class _SizedResponse(_Response):
 
 
 class ReleaseDownloadTests(unittest.TestCase):
+    @mock.patch.object(skills, 'build_opener')
+    def test_archive_local_write_failures_are_file_errors_not_connection_errors(self, build):
+        for phase in ('open', 'write', 'close'):
+            with self.subTest(phase=phase), tempfile.TemporaryDirectory() as directory, ExitStack() as patches:
+                destination = Path(directory) / 'archive.zip'
+                response = _Response(b'archive')
+                build.return_value.open.return_value = response
+                if phase == 'open':
+                    destination.mkdir()
+                else:
+                    real_open = Path.open
+
+                    @contextmanager
+                    def failing_output(path, *args, **kwargs):
+                        with real_open(path, *args, **kwargs) as output:
+                            if phase == 'write':
+                                writer = mock.Mock(wraps=output)
+                                writer.write.side_effect = OSError('secret-token')
+                                yield writer
+                            else:
+                                yield output
+                        if phase == 'close':
+                            raise OSError('secret-token')
+
+                    patches.enter_context(mock.patch.object(Path, 'open', failing_output))
+                with self.assertRaises(CLIError) as raised:
+                    skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+                self.assertIsInstance(raised.exception, FileOperationError)
+                self.assertNotIn('secret-token', str(raised.exception))
+                self.assertTrue(response.closed)
+                if phase != 'open':
+                    self.assertFalse(destination.exists())
+
+    @mock.patch.object(skills, 'build_opener')
+    def test_request_construction_failure_is_sanitized_client_request_error(self, build):
+        build.return_value.open.side_effect = ValueError('secret-token')
+        with self.assertRaises(CLIError) as raised:
+            skills._api_json('/releases/latest', 'secret-token')
+        self.assertIsInstance(raised.exception, ClientRequestError)
+        self.assertNotIn('secret-token', str(raised.exception))
+
     @mock.patch.object(skills, '_api_json', create=True)
     def test_annotated_tag_is_peeled_to_commit(self, api):
         commit = 'a' * 40
@@ -1700,6 +1839,7 @@ class ReleaseDownloadTests(unittest.TestCase):
                 build.return_value.open.return_value = response
                 with self.assertRaisesRegex(CLIError, 'metadata') as raised:
                     skills._api_json('/releases/latest', 'secret-token')
+                self.assertIsInstance(raised.exception, AzureResponseError)
                 self.assertNotIn('secret-token', str(raised.exception))
                 self.assertTrue(response.closed)
 
@@ -1733,6 +1873,7 @@ class ReleaseDownloadTests(unittest.TestCase):
                 build.return_value.open.return_value = response
                 with self.assertRaises(CLIError) as raised:
                     skills._api_json('/releases/latest', 'secret-token')
+                self.assertIsInstance(raised.exception, AzureResponseError)
                 self.assertNotIn('secret-token', str(raised.exception))
                 self.assertTrue(response.closed)
 
@@ -1812,11 +1953,13 @@ class ReleaseDownloadTests(unittest.TestCase):
                 build.return_value.open.side_effect = error
                 with self.assertRaisesRegex(CLIError, 'metadata') as raised:
                     skills._api_json('/releases/latest', 'secret-token')
+                self.assertIsInstance(raised.exception, AzureConnectionError)
                 self.assertNotIn('secret-token', str(raised.exception))
                 with tempfile.TemporaryDirectory() as directory:
                     destination = Path(directory) / 'archive.zip'
                     with self.assertRaisesRegex(CLIError, 'archive') as raised:
                         skills.download_archive(skills.Release('v1', 'a' * 40), destination)
+                    self.assertIsInstance(raised.exception, AzureConnectionError)
                     self.assertNotIn('secret-token', str(raised.exception))
                     self.assertFalse(destination.exists())
 
@@ -1835,6 +1978,7 @@ class ReleaseDownloadTests(unittest.TestCase):
             (403, {'X-RateLimit-Remaining': '5'}, b'Forbidden',
              None, ('access',), ('rate limit',)),
             (401, {}, b'secret-token', 'secret-token', ('access', 'token'), ('rate limit',)),
+            (400, {}, b'secret-token', None, ('retry',), ('rate limit',)),
             (404, {}, b'secret-token', None, ('retry',), ('rate limit',)),
             (500, {}, b'secret-token', None, ('retry',), ('rate limit',)),
         ]
@@ -1846,6 +1990,9 @@ class ReleaseDownloadTests(unittest.TestCase):
                 build.return_value.open.reset_mock()
                 with self.assertRaises(CLIError) as raised:
                     skills._api_json('/releases/latest', token)
+                expected = {400: BadRequestError, 401: UnauthorizedError, 403: ForbiddenError,
+                            500: AzureInternalError}.get(code, AzureResponseError)
+                self.assertIsInstance(raised.exception, expected)
                 message = str(raised.exception)
                 self.assertIn('metadata', message)
                 self.assertIn(str(code), message)
@@ -2079,8 +2226,9 @@ class AgentSelectionTests(unittest.TestCase):
 
     def test_invalid_selection(self):
         for text in ('0', '5', '-1', '1,,4', 'claude', '1.5', '1,', ',1', 'none,1'):
-            with self.subTest(text=text), self.assertRaises(CLIError):
+            with self.subTest(text=text), self.assertRaises(CLIError) as raised:
                 skills.parse_agent_selection(text, [])
+            self.assertIsInstance(raised.exception, InvalidArgumentValueError)
 
     @mock.patch.dict('os.environ', {}, clear=True)
     def test_explicit_install_requires_targets(self):
@@ -2132,8 +2280,9 @@ class SkillsPreflightTests(unittest.TestCase):
     def test_explicit_install_under_sudo_is_rejected(self):
         for variable in ('SUDO_UID', 'SUDO_USER'):
             with self.subTest(variable=variable), mock.patch.dict('os.environ', {variable: '1000'}):
-                with self.assertRaisesRegex(CLIError, 'unprivileged'):
+                with self.assertRaisesRegex(CLIError, 'unprivileged') as raised:
                     skills.validate_skills_options(True, ['pi'])
+                self.assertIsInstance(raised.exception, ArgumentUsageError)
 
     @mock.patch('os.name', 'posix')
     def test_sudo_recognizes_either_marker_including_empty_values(self):

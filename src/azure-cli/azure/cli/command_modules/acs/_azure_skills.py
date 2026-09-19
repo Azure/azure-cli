@@ -31,8 +31,19 @@ from knack.prompting import NoTTYException, prompt, prompt_y_n
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
+    AzCLIError,
+    AzureConnectionError,
+    AzureInternalError,
+    AzureResponseError,
+    BadRequestError,
+    ClientRequestError,
+    FileOperationError,
+    ForbiddenError,
     InvalidArgumentValueError,
+    ManualInterrupt,
     RequiredArgumentMissingError,
+    UnauthorizedError,
+    ValidationError,
 )
 
 
@@ -71,14 +82,14 @@ class _DeadlineReader(io.RawIOBase):
     def readinto(self, buffer):
         remaining = self._deadline - time.monotonic()
         if remaining <= 0:
-            raise CLIError('Azure skills response exceeded the read deadline.')
+            raise AzureConnectionError('Azure skills response exceeded the read deadline.')
         # Buffered body reads and chunk framing can each perform many receives.
         self._socket.settimeout(min(_SOCKET_TIMEOUT, remaining))
         try:
             return self._raw.readinto(buffer)
         except TimeoutError:
             if time.monotonic() >= self._deadline:
-                raise CLIError('Azure skills response exceeded the read deadline.') from None
+                raise AzureConnectionError('Azure skills response exceeded the read deadline.') from None
             raise
 
     def close(self):
@@ -106,7 +117,7 @@ class _DeadlineHTTPSHandler(HTTPSHandler):
 
 class _MetadataRedirectHandler(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        raise CLIError('Unexpected redirect while resolving Azure skills metadata.')
+        raise AzureResponseError('Unexpected redirect while resolving Azure skills metadata.')
 
     def http_error_302(self, req, fp, code, msg, headers):
         # urllib otherwise retains the response when redirect_request raises.
@@ -127,18 +138,18 @@ class _ArchiveRedirectHandler(HTTPRedirectHandler):
         except ValueError:
             allowed = False
         if not allowed:
-            raise CLIError('Unexpected redirect while downloading the Azure skills archive.')
+            raise AzureResponseError('Unexpected redirect while downloading the Azure skills archive.')
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
     def http_error_302(self, req, fp, code, msg, headers):
         try:
             location = headers.get('Location') or headers.get('URI')
             if not location:
-                raise CLIError('Missing redirect location while downloading the Azure skills archive.')
+                raise AzureResponseError('Missing redirect location while downloading the Azure skills archive.')
             new = self.redirect_request(req, fp, code, msg, headers, urljoin(req.full_url, location))
             count = getattr(req, '_azure_skills_redirects', 0)
             if count >= self.max_redirections:
-                raise CLIError('Too many redirects while downloading the Azure skills archive.')
+                raise AzureResponseError('Too many redirects while downloading the Azure skills archive.')
             new._azure_skills_redirects = count + 1  # pylint: disable=protected-access
         finally:
             # Do not use urllib's unbounded drain of a redirect response body.
@@ -148,32 +159,35 @@ class _ArchiveRedirectHandler(HTTPRedirectHandler):
     http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
 
 
-def _copy_bounded(source, destination, limit: int) -> int:
+def _copy_bounded(source, destination, limit: int, *, error_type=ValidationError) -> int:
     deadline = time.monotonic() + _RESPONSE_TIMEOUT
     written = 0
     while True:
         if time.monotonic() > deadline:
-            raise CLIError('Azure skills response exceeded the read deadline.')
+            raise error_type('Azure skills response exceeded the read deadline.')
         chunk = source.read(min(65536, limit - written + 1))
         if not chunk:
             return written
         written += len(chunk)
         if written > limit:
-            raise CLIError('Azure skills content exceeded the size limit.')
-        destination.write(chunk)
+            raise error_type('Azure skills content exceeded the size limit.')
+        try:
+            destination.write(chunk)
+        except OSError as error:
+            raise FileOperationError(f'Could not write Azure skills content: {error}') from None
 
 
 def _copy_response(response, destination, limit: int) -> None:
     length = response.headers.get('Content-Length')
     if length is not None:
         if not re.fullmatch(r'[0-9]{1,20}', length):
-            raise CLIError('Azure skills response has an invalid content length.')
+            raise AzureResponseError('Azure skills response has an invalid content length.')
         length = int(length)
         if length > limit:
-            raise CLIError('Azure skills content exceeded the size limit.')
-    written = _copy_bounded(response, destination, limit)
+            raise AzureResponseError('Azure skills content exceeded the size limit.')
+    written = _copy_bounded(response, destination, limit, error_type=AzureResponseError)
     if length is not None and written != length:
-        raise CLIError('Azure skills response did not match its advertised content length.')
+        raise AzureResponseError('Azure skills response did not match its advertised content length.')
 
 
 def _numeric_header(headers, name: str) -> int | None:
@@ -184,7 +198,7 @@ def _numeric_header(headers, name: str) -> int | None:
     return None
 
 
-def _http_error(error: HTTPError, operation: str, authenticated: bool) -> CLIError:
+def _http_error(error: HTTPError, operation: str, authenticated: bool) -> AzCLIError:
     with error:
         headers = error.headers or {}
         retry = _numeric_header(headers, 'Retry-After')
@@ -215,7 +229,12 @@ def _http_error(error: HTTPError, operation: str, authenticated: bool) -> CLIErr
                         'Check access to microsoft/azure-skills and any network access restrictions.')
         else:
             message += 'Check GitHub availability and repository access, then retry.'
-        return CLIError(message)
+        # Missing GitHub artifacts are response failures, not Azure resource-not-found exits (3).
+        error_type = {400: BadRequestError, 401: UnauthorizedError,
+                      403: ForbiddenError}.get(error.code, AzureResponseError)
+        if 500 <= error.code < 600:
+            error_type = AzureInternalError
+        return error_type(message)
 
 
 def _api_json(path: str, gh_token: str | None) -> dict:
@@ -231,16 +250,17 @@ def _api_json(path: str, gh_token: str | None) -> dict:
         try:
             payload = json.loads(body.getvalue())
         except (ValueError, RecursionError):
-            raise CLIError('GitHub returned invalid Azure skills metadata JSON.') from None
+            raise AzureResponseError('GitHub returned invalid Azure skills metadata JSON.') from None
         if not isinstance(payload, dict):
-            raise CLIError('GitHub returned invalid Azure skills metadata fields.')
+            raise AzureResponseError('GitHub returned invalid Azure skills metadata fields.')
         return payload
     except HTTPError as error:
         raise _http_error(error, 'metadata lookup', bool(gh_token)) from None
-    except (URLError, OSError, HTTPException, ValueError):
+    except (URLError, OSError, HTTPException, ValueError) as error:
         # Network exceptions can contain URLs, request headers, or the token.
-        raise CLIError('Azure skills metadata lookup failed. Check the network, TLS, '
-                       'and proxy settings, then retry.') from None
+        error_type = AzureConnectionError if isinstance(error, (OSError, HTTPException)) else ClientRequestError
+        raise error_type('Azure skills metadata lookup failed. Check the network, TLS, '
+                         'and proxy settings, then retry.') from None
 
 
 def resolve_release(gh_token: str | None = None) -> Release:
@@ -250,7 +270,7 @@ def resolve_release(gh_token: str | None = None) -> Release:
             any(ord(char) < 32 for char in tag) or
             release.get('draft') is not False or
             release.get('prerelease') is not False):
-        raise CLIError('GitHub returned an invalid stable Azure skills release.')
+        raise AzureResponseError('GitHub returned an invalid stable Azure skills release.')
     obj = _api_json('/git/ref/tags/' + quote(tag, safe=''), gh_token).get('object')
     for depth in range(6):
         if not isinstance(obj, dict):
@@ -263,27 +283,36 @@ def resolve_release(gh_token: str | None = None) -> Release:
         if obj.get('type') != 'tag' or depth == 5:
             break
         obj = _api_json('/git/tags/' + sha, gh_token).get('object')
-    raise CLIError('Could not resolve the Azure skills release tag to a commit.')
+    raise AzureResponseError('Could not resolve the Azure skills release tag to a commit.')
 
 
 def download_archive(release: Release, destination: Path) -> None:
     if not isinstance(release.commit, str) or not re.fullmatch(r'[0-9a-fA-F]{40}', release.commit):
-        raise CLIError('Invalid Azure skills archive commit.')
+        raise ValidationError('Invalid Azure skills archive commit.')
+    failure_message = ('Azure skills archive download failed. Check the network, TLS, proxy, '
+                       'and destination permissions, then retry.')
     incomplete = False
     try:
         # A separate opener and Request ensure metadata credentials cannot carry over.
         opener = build_opener(_ArchiveRedirectHandler(), _DeadlineHTTPSHandler(context=ssl.create_default_context()))
         request = Request(ARCHIVE_ROOT + release.commit)
         with opener.open(request, timeout=_SOCKET_TIMEOUT) as response:
-            with destination.open('wb') as archive:
-                incomplete = True
-                _copy_response(response, archive, ARCHIVE_LIMIT)
+            try:
+                with destination.open('wb') as archive:
+                    incomplete = True
+                    try:
+                        _copy_response(response, archive, ARCHIVE_LIMIT)
+                    except (URLError, OSError, HTTPException):
+                        # Writes are already typed by _copy_bounded; these failures are reads.
+                        raise AzureConnectionError(failure_message) from None
+            except (OSError, FileOperationError):
+                raise FileOperationError(failure_message) from None
         incomplete = False
     except HTTPError as error:
         raise _http_error(error, 'archive download', False) from None
-    except (URLError, OSError, HTTPException, ValueError):
-        raise CLIError('Azure skills archive download failed. Check the network, TLS, proxy, '
-                       'and destination permissions, then retry.') from None
+    except (URLError, OSError, HTTPException, ValueError) as error:
+        error_type = AzureConnectionError if isinstance(error, (OSError, HTTPException)) else ClientRequestError
+        raise error_type(failure_message) from None
     finally:
         if incomplete:
             destination.unlink(missing_ok=True)
@@ -297,7 +326,7 @@ def _path_key(parts):
 def _validated_members(bundle):
     members = bundle.infolist()
     if not members or len(members) > ENTRY_LIMIT:
-        raise CLIError('Azure skills archive is empty or exceeded the entry limit.')
+        raise ValidationError('Azure skills archive is empty or exceeded the entry limit.')
     paths = {}
     explicit = set()
     roots = set()
@@ -309,39 +338,39 @@ def _validated_members(bundle):
         is_directory = member.is_dir()
         parts = tuple(raw.removesuffix('/').split('/'))
         if len(parts) > PATH_DEPTH_LIMIT:
-            raise CLIError('Azure skills archive exceeded the path depth limit.')
+            raise ValidationError('Azure skills archive exceeded the path depth limit.')
         for part in parts:
             basename = part.split('.')[0].rstrip(' ').upper()
             if (not part or part in ('.', '..') or part.endswith((' ', '.')) or
                     any(ord(char) < 32 or char in '\\:<>"|?*' for char in part) or
                     basename in ('CON', 'PRN', 'AUX', 'NUL', 'CLOCK$', 'CONIN$', 'CONOUT$') or
                     re.fullmatch(r'(COM|LPT)[1-9¹²³]', basename)):
-                raise CLIError('Azure skills archive contains an unsafe path.')
+                raise ValidationError('Azure skills archive contains an unsafe path.')
         mode = stat.S_IFMT(member.external_attr >> 16)
         allowed_modes = (0, stat.S_IFDIR) if is_directory else (0, stat.S_IFREG)
         if mode not in allowed_modes or (is_directory and member.file_size):
-            raise CLIError('Azure skills archive contains a link, special file, or invalid directory.')
+            raise ValidationError('Azure skills archive contains a link, special file, or invalid directory.')
         if member.flag_bits & (1 | 64):
-            raise CLIError('Azure skills archive contains an encrypted entry.')
+            raise ValidationError('Azure skills archive contains an encrypted entry.')
         if member.file_size < 0 or member.compress_size < 0:
-            raise CLIError('Azure skills archive contains invalid size metadata.')
+            raise ValidationError('Azure skills archive contains invalid size metadata.')
         total += member.file_size
         if total > EXPANDED_LIMIT:
-            raise CLIError('Azure skills archive exceeded the expanded size limit.')
+            raise ValidationError('Azure skills archive exceeded the expanded size limit.')
         key = _path_key(parts)
         if key in explicit:
-            raise CLIError('Azure skills archive contains duplicate or platform-colliding paths.')
+            raise ValidationError('Azure skills archive contains duplicate or platform-colliding paths.')
         explicit.add(key)
         # Record implicit ancestors too: ZIPs need not contain directory entries.
         for depth in range(1, len(parts) + 1):
             prefix = key[:depth]
             value = (parts[:depth], is_directory or depth < len(parts))
             if prefix in paths and paths[prefix] != value:
-                raise CLIError('Azure skills archive contains file/directory or platform-colliding paths.')
+                raise ValidationError('Azure skills archive contains file/directory or platform-colliding paths.')
             paths[prefix] = value
         roots.add(parts[0])
         if len(roots) > 1 or (len(parts) == 1 and not is_directory):
-            raise CLIError('Azure skills archive must contain one repository root directory.')
+            raise ValidationError('Azure skills archive must contain one repository root directory.')
         validated.append((member, parts))
     return validated
 
@@ -358,7 +387,7 @@ def _validate_skill_frontmatter(path):
                 for field in ('name', 'description')):
             raise ValueError('Missing name or description')
     except (UnicodeError, ValueError, StopIteration, RecursionError, yaml.YAMLError):
-        raise CLIError(f'Invalid SKILL.md frontmatter in {path}. Expected nonempty name and description strings.') from None
+        raise ValidationError(f'Invalid SKILL.md frontmatter in {path}. Expected nonempty name and description strings.') from None
 
 
 def stage_bundle(archive: Path, staging: Path) -> list[Path]:
@@ -367,7 +396,7 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
     complete = False
     try:
         if archive.stat().st_size > ARCHIVE_LIMIT:
-            raise CLIError('Azure skills archive exceeded the size limit.')
+            raise ValidationError('Azure skills archive exceeded the size limit.')
         with zipfile.ZipFile(archive) as bundle:
             members = _validated_members(bundle)
             root = members[0][1][0]
@@ -377,18 +406,18 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
             license_member = next((member for member, parts in members
                                    if parts == (root, 'LICENSE') and not member.is_dir()), None)
             if license_member is None or not license_member.file_size:
-                raise CLIError('Azure skills archive is missing its repository LICENSE notice.')
+                raise ValidationError('Azure skills archive is missing its repository LICENSE notice.')
             names = sorted({parts[0] for _, parts in payload})
             files = {parts for member, parts in payload if not member.is_dir()}
             if (not names or any(len(parts) < 2 for parts in files) or
                     any((name, 'SKILL.md') not in files for name in names)):
-                raise CLIError('Azure skills payload requires an immediate SKILL.md in every top-level skill directory.')
+                raise ValidationError('Azure skills payload requires an immediate SKILL.md in every top-level skill directory.')
             if any(member.file_size > FILE_LIMIT for member, _ in payload) or license_member.file_size > FILE_LIMIT:
-                raise CLIError('Azure skills archive exceeded the per-file size limit.')
+                raise ValidationError('Azure skills archive exceeded the per-file size limit.')
             for member, parts in payload:
                 if len(parts) >= 2 and _path_key((parts[1],)) == _path_key((_LICENSE_NOTICE,)):
                     if parts[1] != _LICENSE_NOTICE or len(parts) != 2 or member.is_dir():
-                        raise CLIError('Azure skills payload collides with the LICENSE.azure-skills notice.')
+                        raise ValidationError('Azure skills payload collides with the LICENSE.azure-skills notice.')
 
             # mkdir must fail for existing directories, files, and symlinks; never clean those up.
             staging.mkdir(mode=0o700)
@@ -397,7 +426,7 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
             with bundle.open(license_member) as source:
                 written = _copy_bounded(source, license_buffer, min(FILE_LIMIT, EXPANDED_LIMIT))
             if written != license_member.file_size:
-                raise CLIError('Azure skills archive LICENSE did not match its advertised size.')
+                raise ValidationError('Azure skills archive LICENSE did not match its advertised size.')
             license_content = license_buffer.getvalue()
             total = 0
             for member, parts in payload:
@@ -409,7 +438,7 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                 with bundle.open(member) as source, destination.open('xb') as output:
                     written = _copy_bounded(source, output, min(FILE_LIMIT, EXPANDED_LIMIT - total))
                 if written != member.file_size:
-                    raise CLIError(f'Azure skills archive member {member.filename} did not match its advertised size.')
+                    raise ValidationError(f'Azure skills archive member {member.filename} did not match its advertised size.')
                 total += written
                 # Nested SKILL.md files can be supporting guides, not standalone entry points.
                 if len(parts) == 2 and parts[1] == 'SKILL.md':
@@ -423,7 +452,7 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                 notice = tree / _LICENSE_NOTICE
                 if notice.exists():
                     if notice.read_bytes() != license_content:
-                        raise CLIError('Azure skills payload has differing LICENSE.azure-skills content.')
+                        raise ValidationError('Azure skills payload has differing LICENSE.azure-skills content.')
                 else:
                     # Count every added notice: a large license must not multiply without a bound.
                     with notice.open('xb') as output:
@@ -431,8 +460,10 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                                                min(FILE_LIMIT, EXPANDED_LIMIT - total))
         complete = True
         return trees
-    except (OSError, ValueError, EOFError, RuntimeError, zipfile.BadZipFile, zlib.error) as error:
-        raise CLIError(f'Could not stage the Azure skills archive: {error}') from None
+    except (OSError, FileOperationError) as error:
+        raise FileOperationError(f'Could not stage the Azure skills archive: {error}') from None
+    except (ValueError, EOFError, RuntimeError, zipfile.BadZipFile, zlib.error) as error:
+        raise ValidationError(f'Could not stage the Azure skills archive: {error}') from None
     finally:
         if owned and not complete:
             shutil.rmtree(staging)
@@ -451,7 +482,7 @@ class InstallReport:
     installed: list[Path] = field(default_factory=list)
     already_present: list[Path] = field(default_factory=list)
     conflicts: list[Path] = field(default_factory=list)
-    failures: list[tuple[Path, str]] = field(default_factory=list)
+    failures: list[tuple[Path, AzCLIError]] = field(default_factory=list)
 
 
 def _is_indirection(info) -> bool:
@@ -467,10 +498,10 @@ def _check_directory_path(path: Path) -> None:
         except FileNotFoundError:
             continue
         if _is_indirection(info):
-            raise CLIError(f'Azure skills destination uses a symlink or reparse point: {directory}. '
-                           'Choose a destination without filesystem indirection.')
+            raise FileOperationError(f'Azure skills destination uses a symlink or reparse point: {directory}. '
+                                     'Choose a destination without filesystem indirection.')
         if not stat.S_ISDIR(info.st_mode):
-            raise CLIError(f'Azure skills destination ancestor is not a directory: {directory}.')
+            raise FileOperationError(f'Azure skills destination ancestor is not a directory: {directory}.')
 
 
 def _same_tree(source: Path, destination: Path) -> bool:
@@ -516,9 +547,9 @@ def _publish_one(source: Path, destination: Path) -> str:
     try:
         descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError:
-        raise CLIError(f'Azure skills installation lock already exists: {lock_path}. '
-                       'Verify no installation is running before manually addressing this lock; '
-                       'it will not be removed automatically.') from None
+        raise FileOperationError(f'Azure skills installation lock already exists: {lock_path}. '
+                                 'Verify no installation is running before manually addressing this lock; '
+                                 'it will not be removed automatically.') from None
     temporary = None
     cancelled = False
     try:
@@ -587,10 +618,11 @@ def publish_skills(skill_dirs: list[Path], targets: list[AgentTarget]) -> Instal
                 message = 'Azure skills publication cancelled; earlier installations remain.'
                 if str(error):
                     message += f' {error}'
-                report.failures.append((destination, message))
+                report.failures.append((destination, ManualInterrupt(message)))
                 return report
-            except (OSError, CLIError) as error:
-                report.failures.append((destination, str(error)))
+            except (OSError, AzCLIError) as error:
+                report.failures.append((destination, FileOperationError(str(error)) if isinstance(error, OSError)
+                                        else error))
     return report
 
 
@@ -626,7 +658,7 @@ def parse_agent_selection(value: str, defaults: list[str]) -> list[str]:
         return []
     parts = [part.strip() for part in text.split(',')]
     if any(part not in ('1', '2', '3', '4') for part in parts):
-        raise CLIError('Enter agent numbers 1-4 separated by commas, or "none".')
+        raise InvalidArgumentValueError('Enter agent numbers 1-4 separated by commas, or "none".')
     selected = {int(part) - 1 for part in parts}
     return [identifier for index, identifier in enumerate(AGENT_IDS)
             if index in selected]
@@ -649,7 +681,7 @@ def validate_skills_options(install_azure_skills: bool | None, skills_agents: li
         raise InvalidArgumentValueError(
             f'Unknown --skills-agents: {", ".join(unknown)}. Choose from: {", ".join(AGENT_IDS)}.')
     if _is_sudo():
-        raise CLIError(
+        raise ArgumentUsageError(
             'Install Azure skills as an unprivileged user, not under sudo. '
             'Rerun with user-writable binary installation locations.')
 
@@ -668,13 +700,14 @@ def _choose_skill_targets() -> list[AgentTarget]:
     targets = discover_agents()
     defaults = [target.identifier for target in targets if target.detected]
     numbers = ','.join(str(index + 1) for index, target in enumerate(targets) if target.detected)
-    print('Select agents:')
+    choices = ['Select agents:']
     for index, target in enumerate(targets, 1):
         status = 'detected, selected' if target.detected else 'not detected'
-        print(f'  {index}. {target.label}: {status}')
+        choices.append(f'  {index}. {target.label}: {status}')
+    choices.append(f'Enter agent numbers, comma-separated. Enter keeps [{numbers}]; "none" skips: ')
     while True:
         try:
-            value = prompt(f'Enter agent numbers, comma-separated. Enter keeps [{numbers}]; "none" skips: ')
+            value = prompt('\n'.join(choices))
         except (NoTTYException, EOFError, KeyboardInterrupt):
             logger.warning('Azure skills selection cancelled; kubectl and kubelogin remain installed.')
             return []
@@ -685,17 +718,21 @@ def _choose_skill_targets() -> list[AgentTarget]:
             logger.warning('%s', error)
 
 
-def _show_skill_targets(targets: list[AgentTarget], *, interactive: bool) -> None:
-    # Consent details must remain visible with --only-show-errors, just like the prompts.
-    show = print if interactive else logger.warning
-    show('Install user-level Azure skills only; no MCP configuration, hooks, or agent applications. '
-         'Some workflows require tools configured separately.')
+def _show_skill_targets(targets: list[AgentTarget], *, interactive: bool) -> bool:
+    messages = ['Install user-level Azure skills only; no MCP configuration, hooks, or agent applications. '
+                'Some workflows require tools configured separately.']
     for target in targets:
-        show(f'  {target.label}: {target.destination}')
+        messages.append(f'  {target.label}: {target.destination}')
     if any(target.identifier == 'codex' for target in targets):
-        show('Codex uses the shared ~/.agents/skills directory. Skills can also be visible to '
-             'Pi and GitHub Copilot even when they are not selected. '
-             'Selection controls destinations, not agent enable/disable configuration.')
+        messages.append('Codex uses the shared ~/.agents/skills directory. Skills can also be visible to '
+                        'Pi and GitHub Copilot even when they are not selected. '
+                        'Selection controls destinations, not agent enable/disable configuration.')
+    if interactive:
+        # Knack's prompt channel keeps consent visible even with --only-show-errors.
+        return _confirm_skills('\n'.join(messages + ['Install Azure skills at these destinations?']))
+    for message in messages:
+        logger.warning('%s', message)
+    return True
 
 
 def _report_skills(report: InstallReport) -> None:
@@ -742,6 +779,7 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
     source = 'Azure skills source was not resolved.'
     report = None
     failure = None
+    failure_type = FileOperationError
     publishing = False
     try:
         # Registry membership deduplicates IDs, but lexical destinations must reach publish_skills
@@ -750,8 +788,7 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
                    if explicit else _choose_skill_targets())
         if not targets:
             return
-        _show_skill_targets(targets, interactive=not explicit)
-        if not explicit and not _confirm_skills('Install Azure skills at these destinations?'):
+        if not _show_skill_targets(targets, interactive=not explicit):
             return
         try:
             with tempfile.TemporaryDirectory(prefix='az-azure-skills-') as temporary:
@@ -766,14 +803,21 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
                 publishing = True
                 report = publish_skills(trees, targets)
         except KeyboardInterrupt:
+            failure_type = ManualInterrupt
             failure = ('Azure skills installation cancelled; earlier installations remain.' if publishing else
                        'Azure skills installation cancelled; no skills were published.')
-    except (CLIError, OSError) as error:
+    except (AzCLIError, OSError) as error:
+        if isinstance(error, AzCLIError):
+            failure_type = type(error)
         failure = f'Azure skills installation failed: {error}'
 
     if report is not None:
         _report_skills(report)
         if report.conflicts or report.failures:
+            if any(isinstance(error, ManualInterrupt) for _, error in report.failures):
+                failure_type = ManualInterrupt
+            elif report.failures and failure is None:
+                failure_type = type(report.failures[0][1])
             reasons = [f'Conflict: {path}' for path in report.conflicts]
             reasons.extend(f'{path}: {reason}' for path, reason in report.failures)
             if failure:
@@ -784,6 +828,6 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
                    + _skills_recovery(targets, publishing))
         logger.warning('%s', message)
         if explicit:
-            raise CLIError(message)
+            raise failure_type(message)
         return
     logger.warning('Azure skills installation complete. kubectl and kubelogin remain installed. %s', source)
