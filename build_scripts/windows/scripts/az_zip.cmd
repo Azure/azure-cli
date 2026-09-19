@@ -4,6 +4,7 @@
 ::
 
 @IF EXIST "%~dp0\..\python.exe" (
+  SET PYTHONPATH=%~dp0\..;%PYTHONPATH%
   SET AZ_INSTALLER=ZIP
   "%~dp0\..\python.exe" -IBm azure.cli %*
 ) ELSE (
