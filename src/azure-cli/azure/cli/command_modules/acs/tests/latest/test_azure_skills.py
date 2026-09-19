@@ -556,6 +556,62 @@ class PublicationTests(unittest.TestCase):
         self.assertFalse((self.root / 'skills').exists())
         self.assertEqual(list(outside.iterdir()), [])
 
+    def test_discovered_symlink_parent_traversal_is_rejected_before_any_destination_write(self):
+        for identifier, variable in [('pi', 'PI_CODING_AGENT_DIR'), ('claude-code', 'CLAUDE_CONFIG_DIR')]:
+            for relative in (False, True):
+                with self.subTest(identifier=identifier, relative=relative):
+                    home = self.root / f'{identifier}-{relative}/home'
+                    outside = home.parent / 'outside'
+                    home.mkdir(parents=True)
+                    (outside / 'child').mkdir(parents=True)
+                    self.make_link(home / 'link', outside / 'child')
+                    configured = home / 'link/../agent'
+                    override = configured.relative_to(self.root) if relative else configured
+                    with mock.patch.dict('os.environ', {variable: str(override)}, clear=True), \
+                            mock.patch.object(Path, 'home', return_value=home), \
+                            mock.patch('os.getcwd', return_value=str(self.root)):
+                        target = next(target for target in skills.discover_agents() if target.identifier == identifier)
+                        report = skills.publish_skills(self.trees, [target])
+                    self.assertFalse((home / 'agent').exists(), 'Do not write the prematurely normalized destination')
+                    self.assertFalse((outside / 'agent').exists(), 'Do not write through the configured symlink')
+                    self.assertEqual(list(home.iterdir()), [home / 'link'])
+                    self.assertEqual(list(outside.iterdir()), [outside / 'child'])
+                    self.assertEqual(list((outside / 'child').iterdir()), [])
+                    self.assertEqual(target.destination, configured / 'skills')
+                    self.assertEqual([path for path, _ in report.failures], [configured / 'skills/demo'])
+                    self.assertRegex(report.failures[0][1], 'symlink|reparse')
+                    self.assertEqual(report.installed, [])
+                    self.assertEqual(report.already_present, [])
+                    self.assertEqual(report.conflicts, [])
+
+    def test_discovered_safe_relative_parent_traversal_is_normalized_and_deduplicated_at_publication(self):
+        home = self.root / 'home'
+        (home / 'child').mkdir(parents=True)
+        (home / 'config').mkdir()
+        with mock.patch.dict('os.environ', {'CLAUDE_CONFIG_DIR': 'home/child/../config',
+                                          'PI_CODING_AGENT_DIR': 'home/config'}, clear=True), \
+                mock.patch.object(Path, 'home', return_value=home), \
+                mock.patch('os.getcwd', return_value=str(self.root)):
+            targets = [target for target in skills.discover_agents() if target.identifier in ('claude-code', 'pi')]
+            self.assertEqual(targets[0].destination, home / 'child/../config/skills')
+            self.assertTrue(all(target.destination.is_absolute() and target.detected for target in targets))
+            report = skills.publish_skills(self.trees, targets)
+            repeated = skills.publish_skills(self.trees, targets)
+        destination = home / 'config/skills/demo'
+        self.assertEqual(report.installed, [destination])
+        self.assertEqual(report.already_present, [])
+        self.assertEqual(report.conflicts, [])
+        self.assertEqual(report.failures, [])
+        self.assertEqual(repeated.already_present, [destination])
+        self.assertEqual(repeated.installed, [])
+        self.assertEqual(repeated.failures, [])
+        self.assertEqual((destination / 'LICENSE.azure-skills').read_bytes(), _LICENSE)
+        self.assertEqual((destination / 'references/guide.md').read_bytes(), b'Reference content\n')
+        self.assertEqual(list((home / 'child').iterdir()), [])
+        self.assertEqual(list((home / 'config').iterdir()), [home / 'config/skills'])
+        self.assertEqual([target.label for target in targets], ['Claude Code', 'Pi'])
+        self.assertEqual(targets[0].destination, home / 'child/../config/skills')
+
     def test_symlinked_skill_entries_including_dangling_are_conflicts(self):
         self.destination.mkdir(parents=True)
         for target in (self.trees[0], self.root / 'missing'):
@@ -1672,7 +1728,7 @@ class AgentDiscoveryTests(unittest.TestCase):
                 self.assertEqual(targets[0].destination, self.home / '.claude/skills')
                 self.assertEqual(targets[3].destination, self.home / '.pi/agent/skills')
 
-    def test_overrides_expand_home_and_normalize_relative_paths(self):
+    def test_overrides_expand_home_and_preserve_lexical_relative_paths(self):
         self.isdir.side_effect = lambda path: Path(path) == Path.cwd() / 'codex-config'
         with mock.patch.dict('os.environ', {
                 'HOME': str(self.home), 'USERPROFILE': str(self.home),
@@ -1682,7 +1738,8 @@ class AgentDiscoveryTests(unittest.TestCase):
         self.assertEqual(targets[0].destination, self.home / 'claude-config/skills')
         self.assertEqual(targets[1].destination, self.home / '.agents/skills')
         self.assertTrue(targets[1].detected)
-        self.assertEqual(targets[3].destination, Path.cwd() / 'pi-config/skills')
+        self.assertEqual(targets[3].destination, Path.cwd() / 'other/../pi-config/skills')
+        self.assertTrue(all(target.destination.is_absolute() for target in targets))
 
     @unittest.skipUnless(os.name == 'posix', 'Unix system Codex configuration')
     def test_system_codex_is_detected_even_with_nonexistent_override(self):

@@ -591,7 +591,8 @@ def publish_skills(skill_dirs: list[Path], targets: list[AgentTarget]) -> Instal
 def _config_directory(variable: str, default: Path) -> Path:
     value = os.environ.get(variable)
     if value and value.strip():
-        return Path(os.path.abspath(os.path.expanduser(value)))
+        # Preserve '..' until publication can inspect every lexical ancestor for indirection.
+        return Path(os.path.expanduser(value)).absolute()
     return default
 
 
