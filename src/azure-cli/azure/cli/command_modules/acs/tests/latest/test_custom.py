@@ -3,9 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import os
 import shutil
+import stat
+import subprocess
+import sys
 import tempfile
+import textwrap
 import unittest
 from unittest import mock
 from urllib.error import HTTPError, URLError
@@ -35,6 +40,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
     aks_enable_addons,
+    aks_get_credentials,
     aks_stop,
     aks_upgrade,
     is_monitoring_addon_enabled,
@@ -67,6 +73,241 @@ from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
 )
+
+
+class AksGetCredentialsTest(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.directory = directory.name
+        self.addCleanup(os.chdir, os.getcwd())
+        os.chdir(self.directory)
+        environment = dict(os.environ, HOME=self.directory, USERPROFILE=self.directory)
+        environment.pop('KUBECONFIG', None)
+        patcher = mock.patch.dict(os.environ, environment, clear=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx.cloud.profile = 'latest'
+        self.client = mock.Mock()
+        self.kubeconfig = yaml.safe_dump({
+            'apiVersion': 'v1',
+            'kind': 'Config',
+            'clusters': [{'name': 'test-cluster', 'cluster': {'server': 'https://test-cluster'}}],
+            'contexts': [{'name': 'test-cluster', 'context': {
+                'cluster': 'test-cluster', 'user': 'clusterUser_rg_test-cluster'}}],
+            'current-context': 'test-cluster',
+            'users': [{'name': 'clusterUser_rg_test-cluster', 'user': {'exec': {
+                'apiVersion': 'client.authentication.k8s.io/v1beta1',
+                'command': 'kubelogin', 'args': ['get-token', '--login', 'devicecode']}}}],
+        })
+        self._set_credentials(self.kubeconfig)
+        self.unrelated_config = self.kubeconfig.replace('test-cluster', 'other-cluster')
+        self.default_file = os.path.join(self.directory, '.kube', 'config')
+        self.other_file = os.path.join(self.directory, 'other.config')
+        self._write_config(self.default_file, self.unrelated_config)
+        self._write_config(self.other_file, self.unrelated_config)
+
+    def _set_credentials(self, kubeconfig):
+        result = mock.Mock(kubeconfigs=[mock.Mock(value=kubeconfig.encode('utf-8'))])
+        self.client.list_cluster_user_credentials.return_value = result
+        self.client.list_cluster_admin_credentials.return_value = result
+
+    @staticmethod
+    def _write_config(path, content):
+        os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as stream:
+            stream.write(content)
+        os.chmod(path, 0o600)
+
+    @staticmethod
+    def _read_config(path):
+        with open(path, encoding='utf-8') as stream:
+            return yaml.safe_load(stream)
+
+    def _get_credentials(self, path, **kwargs):
+        aks_get_credentials(self.cmd, self.client, 'rg', 'test-cluster', path=path, **kwargs)
+
+    def _conversion_cases(self):
+        # The CLI default is passed explicitly: the handler's default is evaluated at import time.
+        return [
+            ('cluster.config', None, 'cluster.config'),
+            (os.path.join('.', 'dot.config'), None, os.path.join('.', 'dot.config')),
+            (os.path.join('nested', 'cluster.config'), None, os.path.join('nested', 'cluster.config')),
+            (os.path.join(self.directory, 'absolute.config'), None,
+             os.path.join(self.directory, 'absolute.config')),
+            (os.path.join('directory with spaces', 'cluster config'), None,
+             os.path.join('directory with spaces', 'cluster config')),
+            ('explicit.config', self.other_file, 'explicit.config'),
+            (self.default_file, None, self.default_file),
+            (self.default_file, os.pathsep.join(['env.config', self.other_file]), 'env.config'),
+            (self.default_file, os.pathsep + self.other_file, self.default_file),
+        ]
+
+    def _assert_merged(self, path, login):
+        config = self._read_config(path)
+        self.assertEqual(config['current-context'], 'test-cluster')
+        user = next(user for user in config['users'] if user['name'] == 'clusterUser_rg_test-cluster')
+        self.assertEqual(user['user']['exec']['args'], ['get-token', '--login', login])
+        for unrelated in (self.default_file, self.other_file):
+            if unrelated != path:
+                with open(unrelated, encoding='utf-8') as stream:
+                    self.assertEqual(stream.read(), self.unrelated_config)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which', return_value='/bin/kubelogin')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_get_credentials_conversion_paths(self, run, which):
+        for path, kubeconfig_env, target in self._conversion_cases():
+            environment = {'KUBECONFIG': kubeconfig_env} if kubeconfig_env is not None else {}
+            with self.subTest(path=path, kubeconfig=kubeconfig_env), mock.patch.dict(os.environ, environment):
+                self._write_config(self.default_file, self.unrelated_config)
+                self._get_credentials(path, overwrite_existing=True)
+                run.assert_called_once_with(
+                    ['kubelogin', 'convert-kubeconfig', '-l', 'azurecli', '--kubeconfig', target], check=True)
+                self._assert_merged(target, 'devicecode')
+                run.reset_mock()
+        which.assert_called_with('kubelogin')
+        self.client.list_cluster_user_credentials.assert_called_with(
+            'rg', 'test-cluster', server_fqdn=None, format=None)
+        self.client.list_cluster_admin_credentials.assert_not_called()
+
+    def _install_kubelogin(self, exit_code=0):
+        """Use a real subprocess, with only the converter's CLI/file boundary implemented."""
+        bin_directory = os.path.join(self.directory, 'bin')
+        os.makedirs(bin_directory, exist_ok=True)
+        executable = os.path.join(bin_directory, 'kubelogin')
+        script = textwrap.dedent('''\
+            import argparse
+            from pathlib import Path
+
+            parser = argparse.ArgumentParser()
+            parser.add_argument('command', choices=['convert-kubeconfig'])
+            parser.add_argument('-l', choices=['azurecli'], required=True)
+            parser.add_argument('--kubeconfig', required=True)
+            args = parser.parse_args()
+            path = Path(args.kubeconfig)
+            content = path.read_text(encoding='utf-8')
+            path.write_text(content.replace('- devicecode', '- azurecli'), encoding='utf-8')
+        ''')
+        if exit_code:
+            script = 'raise SystemExit({})\n'.format(exit_code)
+        with open(executable, 'w', encoding='utf-8') as stream:
+            stream.write('#!{}\n{}'.format(sys.executable, script))
+        os.chmod(executable, 0o700)
+        os.environ['PATH'] = bin_directory + os.pathsep + os.environ.get('PATH', '')
+
+    @unittest.skipIf(os.name == 'nt', 'Executable fixture requires POSIX shebang support')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_credentials_converts_selected_kubeconfig(self, logger):
+        self._install_kubelogin()
+        for path, kubeconfig_env, target in self._conversion_cases():
+            environment = {'KUBECONFIG': kubeconfig_env} if kubeconfig_env is not None else {}
+            with self.subTest(path=path, kubeconfig=kubeconfig_env), mock.patch.dict(os.environ, environment):
+                self._write_config(self.default_file, self.unrelated_config)
+                self._get_credentials(path, overwrite_existing=True)
+                self._assert_merged(target, 'azurecli')
+                self.assertEqual(stat.S_IMODE(os.stat(target).st_mode), 0o600)
+                logger.warning.assert_any_call('Converted kubeconfig to use Azure CLI authentication.')
+                logger.warning.assert_any_call('Merged "test-cluster" as current context in {}'.format(target))
+                logger.reset_mock()
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_credentials_stdout_skips_conversion(self, logger, run, which):
+        with mock.patch.dict(os.environ, {'KUBECONFIG': self.other_file}), \
+                mock.patch('sys.stdout', new_callable=io.StringIO) as stdout:
+            self._get_credentials('-')
+        self.assertEqual(stdout.getvalue(), self.kubeconfig + '\n')
+        self.assertFalse(os.path.exists('-'))
+        for path in (self.default_file, self.other_file):
+            with open(path, encoding='utf-8') as stream:
+                self.assertEqual(stream.read(), self.unrelated_config)
+        which.assert_not_called()
+        run.assert_not_called()
+        logger.warning.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_get_credentials_without_devicecode_skips_conversion(self, run, which):
+        token_config = yaml.safe_load(self.kubeconfig)
+        token_config['users'][0]['user'] = {'token': 'test-token'}
+        for kubeconfig in (self.kubeconfig.replace('devicecode', 'azurecli'),
+                           self.kubeconfig.replace('kubelogin', 'other-command'), yaml.safe_dump(token_config)):
+            with self.subTest(kubeconfig=kubeconfig):
+                self._set_credentials(kubeconfig)
+                self._get_credentials('non-devicecode.config', overwrite_existing=True)
+                self.assertEqual(self._read_config('non-devicecode.config'), yaml.safe_load(kubeconfig))
+                which.assert_not_called()
+                run.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which', return_value=None)
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_credentials_missing_kubelogin_warns(self, logger, run, which):
+        self._get_credentials('cluster.config')
+        self._assert_merged('cluster.config', 'devicecode')
+        which.assert_called_once_with('kubelogin')
+        run.assert_not_called()
+        self.assertIn('Please install kubelogin', logger.warning.call_args[0][0])
+        logger.warning.assert_any_call('Merged "test-cluster" as current context in cluster.config')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which', return_value='/bin/kubelogin')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_credentials_conversion_failure_warns(self, logger, run, _which):
+        for error, warning in (
+                (subprocess.CalledProcessError(17, 'kubelogin'), 'Failed to convert kubeconfig with kubelogin: %s'),
+                (FileNotFoundError(2, 'not found', 'kubelogin'), 'Error running kubelogin: %s')):
+            with self.subTest(error=error):
+                run.side_effect = error
+                self._get_credentials('cluster.config', overwrite_existing=True)
+                self._assert_merged('cluster.config', 'devicecode')
+                logger.warning.assert_any_call(warning, str(error))
+                logger.warning.assert_any_call('Merged "test-cluster" as current context in cluster.config')
+
+    @unittest.skipIf(os.name == 'nt', 'Executable fixture requires POSIX shebang support')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_credentials_nonzero_kubelogin_exit(self, logger):
+        self._install_kubelogin(exit_code=17)
+        self._get_credentials('cluster.config')
+        self._assert_merged('cluster.config', 'devicecode')
+        self.assertEqual(logger.warning.call_args[0][0], 'Failed to convert kubeconfig with kubelogin: %s')
+        self.assertIn('17', logger.warning.call_args[0][1])
+
+    @mock.patch('azure.cli.command_modules.acs.custom.which', return_value='/bin/kubelogin')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_get_credentials_preserves_overwrite_context_and_admin(self, _run, _which):
+        for admin in (False, True):
+            with self.subTest(admin=admin):
+                kubeconfig = self.kubeconfig.replace('clusterUser', 'clusterAdmin') if admin else self.kubeconfig
+                self._set_credentials(kubeconfig)
+                self._write_config('cluster.config', kubeconfig.replace('devicecode', 'azurecli'))
+                self._get_credentials('cluster.config', admin=admin, overwrite_existing=True,
+                                      context_name='custom-context', public_fqdn=True)
+                config = self._read_config('cluster.config')
+                self.assertEqual(config['current-context'], 'custom-context-admin' if admin else 'custom-context')
+                self.assertEqual(config['users'][0]['user']['exec']['args'][-1], 'devicecode')
+                self.assertIn('custom-context', [cluster['name'] for cluster in config['clusters']])
+                if admin:
+                    self.client.list_cluster_admin_credentials.assert_called_once_with(
+                        'rg', 'test-cluster', server_fqdn='public')
+                else:
+                    self.client.list_cluster_user_credentials.assert_called_once_with(
+                        'rg', 'test-cluster', server_fqdn='public', format=None)
+
+    @unittest.skipIf(os.name == 'nt', 'Symlink test not applicable on Windows')
+    @mock.patch('azure.cli.command_modules.acs.custom.which')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_get_credentials_rejects_symlink_before_conversion(self, run, which):
+        os.symlink(self.default_file, 'linked.config')
+        with self.assertRaisesRegex(CLIError, 'symbolic link'):
+            self._get_credentials('linked.config')
+        with open(self.default_file, encoding='utf-8') as stream:
+            self.assertEqual(stream.read(), self.unrelated_config)
+        which.assert_not_called()
+        run.assert_not_called()
 
 
 class AcsCustomCommandTest(unittest.TestCase):
