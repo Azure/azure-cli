@@ -86,7 +86,6 @@ Release History
 * `az network public-ip create/update`: Add `--ddos-custom-policy` to attach a DDoS custom policy (#33812)
 * `az network application-gateway waf-policy managed-rule rule-set update`: Allow updating rule group without rule IDs (#33871)
 * `az network private-endpoint-connection`: Add provider `Microsoft.HardwareSecurityModules/paymentHsmClusters` (#33889)
-* `az network application-gateway ssl-profile add/update`: Expose `--auth-configuration` to support mTLS `verify-client-auth-mode=Passthrough|Strict`
 
 **Packaging**
 
