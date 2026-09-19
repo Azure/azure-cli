@@ -1006,6 +1006,24 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 # region application-gateway ssl-profile
 class SSLProfileAdd(_SSLProfileAdd):
+    AZ_HELP = {
+        **_SSLProfileAdd.AZ_HELP,
+        "examples": [
+            {
+                "name": "Add an SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile",
+            },
+            {
+                "name": "Add an SSL profile in Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1024,7 +1042,6 @@ class SSLProfileAdd(_SSLProfileAdd):
                          "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
             ),
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
@@ -1044,6 +1061,24 @@ class SSLProfileAdd(_SSLProfileAdd):
 
 
 class SSLProfileUpdate(_SSLProfileUpdate):
+    AZ_HELP = {
+        **_SSLProfileUpdate.AZ_HELP,
+        "examples": [
+            {
+                "name": "Update SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile --client-auth-configuration False",
+            },
+            {
+                "name": "Update an SSL profile to Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1065,7 +1100,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
             ),
             nullable=True,
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
