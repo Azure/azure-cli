@@ -462,6 +462,20 @@ class ArchiveTests(unittest.TestCase):
                          ['demo/LICENSE.azure-skills', 'demo/SKILL.md', 'demo/child/SKILL.md',
                           'demo/references/guide.md'])
 
+    def test_preserves_nested_onboarding_guides_without_frontmatter_byte_for_byte(self):
+        guide = b'# Deploy\r\n\r\nChild supporting guide; not directly user-routable.\r\n'
+        make_bundle(self.archive, {
+            'azure-app-onboard/SKILL.md': _SKILL,
+            'azure-app-onboard/deploy/SKILL.md': guide,
+            'azure-app-onboard/prepare/steps/SKILL.md': guide,
+        })
+        trees = skills.stage_bundle(self.archive, self.staging)
+        self.assertEqual(trees, [self.staging / 'azure-app-onboard'])
+        self.assertEqual((trees[0] / 'deploy/SKILL.md').read_bytes(), guide)
+        self.assertEqual((trees[0] / 'prepare/steps/SKILL.md').read_bytes(), guide)
+        self.assertEqual((trees[0] / 'SKILL.md').read_bytes(), _SKILL.encode())
+        self.assertEqual((trees[0] / 'LICENSE.azure-skills').read_bytes(), _LICENSE)
+
     def test_returns_sorted_top_level_trees_without_renaming(self):
         make_bundle(self.archive, {'zebra/SKILL.md': _SKILL, 'Alpha/SKILL.md': _SKILL})
         trees = skills.stage_bundle(self.archive, self.staging)
@@ -662,18 +676,17 @@ class ArchiveTests(unittest.TestCase):
                 make_bundle(self.archive, files)
                 self.assert_rejected('skill|SKILL')
 
-    def test_rejects_invalid_frontmatter_in_top_level_and_nested_skills(self):
+    def test_rejects_invalid_frontmatter_in_top_level_skills(self):
         invalid = [b'\xff', 'No frontmatter', '---\nname: demo\ndescription: text\n',
                    '---\nname: [broken\ndescription: text\n---\n', '---\n- list\n---\n',
                    '---\n---\n', '---\nname: demo\n---\n', '---\ndescription: text\n---\n',
                    '---\nname: 42\ndescription: text\n---\n', '---\nname: demo\ndescription: []\n---\n',
                    '---\nname: " "\ndescription: text\n---\n', '---\nname: demo\ndescription: " "\n---\n',
                    '---\nname: !!python/object:unsafe {}\ndescription: text\n---\n']
-        for relative in ('demo/SKILL.md', 'demo/child/SKILL.md'):
-            for content in invalid:
-                with self.subTest(relative=relative, content=content):
-                    make_bundle(self.archive, {'demo/SKILL.md': _SKILL, relative: content})
-                    self.assert_rejected('frontmatter|SKILL')
+        for content in invalid:
+            with self.subTest(content=content):
+                make_bundle(self.archive, {'demo/SKILL.md': content})
+                self.assert_rejected('frontmatter|SKILL')
 
     def test_accepts_optional_metadata_long_descriptions_and_crlf_without_rewriting(self):
         content = ('---\r\nname: upstream-name\r\ndescription: ' + 'x' * 1100 +

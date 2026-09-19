@@ -411,7 +411,8 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                 if written != member.file_size:
                     raise CLIError(f'Azure skills archive member {member.filename} did not match its advertised size.')
                 total += written
-                if destination.name == 'SKILL.md':
+                # Nested SKILL.md files can be supporting guides, not standalone entry points.
+                if len(parts) == 2 and parts[1] == 'SKILL.md':
                     _validate_skill_frontmatter(destination)
                 if os.name == 'posix':
                     # Retain executable resources, not setuid/setgid/sticky or archive write permissions.
