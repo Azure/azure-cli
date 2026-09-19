@@ -10,6 +10,8 @@
 
 **Spec:** [2026-09-18-aks-azure-skills-design.md](../specs/2026-09-18-aks-azure-skills-design.md), incorporating the accepted independent-review findings in commit `b57a3515d6`.
 
+**Execution status:** All five tasks are implemented and reviewed. The task checklists below are the original execution briefs; completed behavior, review corrections, exact verification, and unavailable platform/tooling gates are recorded in the [implementation notes](../implementation/2026-09-19-aks-azure-skills.md). The path-validation, HTTP-deadline, and nested-document guidance below has been corrected to match those evidence-backed rulings.
+
 ## Global Constraints
 
 The complete spec applies to every task. In particular:
@@ -149,7 +151,7 @@ def parse_agent_selection(value, defaults):
             if index in selected]
 ```
 
-Resolve home at call time. Use `CLAUDE_CONFIG_DIR` and `PI_CODING_AGENT_DIR` for both discovery and their destinations; use `CODEX_HOME` for detection only. Codex's destination remains `~/.agents/skills`. Copilot uses `~/.copilot/skills`. Expand a leading user-home marker in overrides and normalize relative paths against the current directory; do not inspect project skills. Do not create directories during discovery. Preflight is side-effect-free and does not call discovery.
+Resolve home at call time. Use `CLAUDE_CONFIG_DIR` and `PI_CODING_AGENT_DIR` for both discovery and their destinations; use `CODEX_HOME` for detection only. Codex's destination remains `~/.agents/skills`. Copilot uses `~/.copilot/skills`. Expand a leading user-home marker in overrides and make relative paths absolute without collapsing `..`; preserve lexical ancestors for publication's safety inspection, then normalize for deduplication. Do not inspect project skills. Do not create directories during discovery. Preflight is side-effect-free and does not call discovery.
 
 - [ ] **Step 4: Run the new tests green, including explicit false, unknown IDs, and sudo cases.**
 - [ ] **Step 5: Commit only the helper and its tests.**
@@ -263,6 +265,8 @@ def _copy_bounded(source, destination, limit):
         destination.write(chunk)
 ```
 
+The generic copy-loop clock check alone cannot bound a buffered HTTP read from a slow-trickle peer. Enforce the remaining response deadline at each underlying socket read through a response/transport adapter, including headers, chunk framing, and diagnostic bodies; retain the generic copy helper for local ZIP streams. Protect this with real-socket slow-trickle regressions.
+
 Use a separate token-free opener for archives. Permit archive redirects only to HTTPS on `codeload.github.com` and reject other origins; the archive request must never carry Authorization. Stream using 64 KiB chunks with size/deadline checks; check both advertised and actual sizes. Close responses on every path and remove incomplete archive files on failure. Use `ssl.create_default_context()` and a finite socket timeout; do not disable certificate checks.
 
 Map HTTP errors to safe messages naming the operation, HTTP status, and guidance. A 429 is rate limiting; a 403 needs rate-limit headers or an explicit rate-limit indication in a bounded response body before calling it a rate limit. Distinguish anonymous limits, authenticated limits, and access failures. Never print the supplied token, raw request headers, or unfiltered server error bodies; parse reset/retry metadata as bounded numeric values. No unversioned fallback or unbounded retry.
@@ -344,7 +348,7 @@ Add parameterized/subTest cases for absolute paths, backslashes, drive prefixes/
 
 Validate every member's raw path and advertised metadata before creating the staged trees. Require one archive root; split raw names before using `PurePosixPath`, because path normalization must not erase forbidden `.` or `..` components. Compare normalized/casefolded paths and ancestor types to reject platform collisions. Permit ordinary directories and regular files only (ZIP entries with no Unix file-type bits may be treated as regular files); reject link/special-file modes.
 
-Select exactly `<root>/.github/plugins/azure-skills/skills/` and the repository-root `LICENSE`. Require a nonempty payload with an immediate `SKILL.md` in each top-level skill directory. Each `SKILL.md`, including nested ones, must have parseable YAML frontmatter with nonempty string `name` and `description`; use `yaml.safe_load`, catch decoding/YAML failures, and do not tighten unrelated optional metadata or description-length rules. Preserve nested paths and bytes; do not rename skills or rewrite their instructions.
+Select exactly `<root>/.github/plugins/azure-skills/skills/` and the repository-root `LICENSE`. Require a nonempty payload with an immediate `SKILL.md` in each top-level skill directory. Each top-level skill entry point must have parseable YAML frontmatter with nonempty string `name` and `description`; use `yaml.safe_load`, catch decoding/YAML failures, and do not tighten unrelated optional metadata or description-length rules. Nested files named `SKILL.md` can be supporting guides rather than standalone skills and must not be rejected for lacking frontmatter. Preserve all nested paths and bytes; do not rename skills or rewrite their instructions.
 
 Use the validated path components to join beneath staging and stream each selected member through the per-file/aggregate budgets. Reuse Task 2's `_copy_bounded` implementation; its required behavior is repeated here for clarity, not as a second definition:
 

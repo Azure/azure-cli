@@ -246,6 +246,6 @@ using mocked prompts/network and temporary homes; do not touch real agent homes.
 - Pi locations and override: installed Pi `docs/skills.md` and
   `docs/environment-variables.md`.
 
-This document defines the proposed v1 behavior. Source implementation and
-repository test execution have not started; written-spec approval precedes the
-implementation plan.
+This document defines the approved v1 behavior. Implementation and focused
+verification are complete; see the [implementation notes](../implementation/2026-09-19-aks-azure-skills.md)
+for review corrections, exact results, and remaining platform/tooling limits.
