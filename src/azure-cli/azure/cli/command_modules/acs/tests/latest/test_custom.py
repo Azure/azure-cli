@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import unittest
 from unittest import mock
+from urllib.error import HTTPError, URLError
 import datetime
 from dateutil.parser import parse
 
@@ -20,10 +21,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
+    _create_or_update_dcr_with_table_readiness_retry,
     ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
+    _get_latest_kubelogin_version,
     _update_addons,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
@@ -846,6 +849,104 @@ class AcsCustomCommandTest(unittest.TestCase):
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_latest_version_fallback(self, logger_mock, mock_url_retrieve, mock_urlopen_read):
+        """Test that the version file is used to install kubelogin when the GitHub API is rate limited."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            b'v0.0.30',
+        ]
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+
+            k8s_install_kubelogin(
+                mock.MagicMock(), client_version='latest', install_location=test_location,
+                arch="amd64", gh_token='ghp_test_token_123')
+
+            fallback_call = mock_urlopen_read.call_args_list[1]
+            self.assertEqual(
+                fallback_call[0][0],
+                'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt')
+            self.assertIsNone(fallback_call.kwargs.get('gh_token'))
+            mock_url_retrieve.assert_called_with(
+                MockUrlretrieveUrlValidator('https://github.com/Azure/kubelogin/releases/download', 'v0.0.30'),
+                mock.ANY)
+            self.assertTrue(
+                any('rate limit was exceeded' in str(call) for call in logger_mock.warning.call_args_list))
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_fallback_only_on_rate_limit(self, logger_mock, mock_urlopen_read):
+        """Test that the version file is only used for a rate limit, other failures are surfaced as they are."""
+        api_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+        cases = [
+            (HTTPError(api_url, 429, 'too many requests', None, None), True),
+            (HTTPError(api_url, 500, 'internal server error', None, None), False),
+            (URLError('[Errno -2] Name or service not known'), False),
+        ]
+        for error, expect_fallback in cases:
+            with self.subTest(error=error):
+                mock_urlopen_read.reset_mock()
+                mock_urlopen_read.side_effect = [error, b'v0.0.30']
+
+                if expect_fallback:
+                    self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+                    self.assertEqual(mock_urlopen_read.call_count, 2)
+                else:
+                    with self.assertRaises(type(error)) as cm:
+                        _get_latest_kubelogin_version('azurecloud')
+                    self.assertIs(cm.exception, error)
+                    mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_fallback_without_tag_prefix(self, logger_mock, mock_urlopen_read):
+        """Test that a bare version is normalized to the release tag used to build the download url."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            b'0.0.30\n',
+        ]
+
+        self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_all_sources_fail(self, logger_mock, mock_urlopen_read):
+        """Test that both failures are reported when the GitHub API and the version file are unavailable."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            HTTPError('https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt',
+                      500, 'internal server error', None, None),
+        ]
+
+        with self.assertRaises(ClientRequestError) as cm:
+            _get_latest_kubelogin_version('azurecloud')
+        self.assertIn('403', str(cm.exception))
+        self.assertIn('500', str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_unexpected_fallback_content(self, logger_mock, mock_urlopen_read):
+        """Test that content which is not exactly a version is rejected, not used to build the download url."""
+        for content in (b'<html>not found</html>', b'v0.0.30/../../evil', b'\xff\xfe\x00binary'):
+            with self.subTest(content=content):
+                mock_urlopen_read.reset_mock()
+                mock_urlopen_read.side_effect = [
+                    HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest',
+                              403, 'rate limited', None, None),
+                    content,
+                ]
+
+                with self.assertRaises(ClientRequestError):
+                    _get_latest_kubelogin_version('azurecloud')
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
@@ -1847,6 +1948,80 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         self.assertNotIn("nodeOSUpgradeChannel", warning)
         self.assertNotIn("The orchestrator version rollback will proceed", warning)
         mock_sdk_no_wait.assert_called_once()
+
+
+class DcrTableReadinessRetryTest(unittest.TestCase):
+    def setUp(self):
+        patcher = mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.time.sleep",
+            return_value=None,
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_sleep = patcher.start()
+        self.resources = mock.Mock()
+
+    def test_succeeds_without_retry(self):
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, self.resources.begin_create_or_update_by_id.return_value)
+        self.resources.begin_create_or_update_by_id.assert_called_once_with(
+            "dcr-id", "2022-06-01", {"properties": {}}
+        )
+        self.mock_sleep.assert_not_called()
+
+    def test_retries_invalid_output_table_with_delay(self):
+        expected = mock.Mock()
+        self.resources.begin_create_or_update_by_id.side_effect = [
+            CLIError("invalidoutputtable: output table is not ready"),
+            CLIError("INVALIDOUTPUTTABLE: output table is not ready"),
+            expected,
+        ]
+
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, expected)
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.assertEqual(self.mock_sleep.call_count, 2)
+
+    def test_raises_after_readiness_retry_limit(self):
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "InvalidOutputTable: output table is not ready"
+        )
+
+        with self.assertRaisesRegex(CLIError, "InvalidOutputTable"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(
+            self.resources.begin_create_or_update_by_id.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES + 1,
+        )
+        self.assertEqual(
+            self.mock_sleep.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+    def test_other_errors_keep_three_attempt_limit(self):
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "unrelated failure"
+        )
+
+        with self.assertRaisesRegex(CLIError, "unrelated failure"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.mock_sleep.assert_not_called()
 
 
 if __name__ == "__main__":

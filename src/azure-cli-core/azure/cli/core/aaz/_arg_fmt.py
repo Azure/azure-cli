@@ -767,7 +767,9 @@ class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
             # `next_link` is a URL that the next page request is sent to with an Azure access token.
             # Validate it shares the same origin as a trusted endpoint of the active cloud to prevent
             # the token from being sent to an attacker-controlled host such as
-            # `https://management.azure.com.attacker`.
+            # `https://management.azure.com.attacker`. URLs that are not normalized, such as
+            # `https://management.azure.com//attacker.example/leak`, are rejected as well, since they
+            # may be resolved to a different host by a downstream parser, proxy or server.
             if next_link is not None:
                 from azure.cli.core.util import is_trusted_cloud_endpoint
                 if not is_trusted_cloud_endpoint(next_link, ctx.cli_ctx):

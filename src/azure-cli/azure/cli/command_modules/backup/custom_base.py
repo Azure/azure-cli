@@ -14,6 +14,7 @@ from azure.cli.command_modules.backup._client_factory import protection_policies
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError
 from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
+from azure.mgmt.recoveryservicesbackup.models import ProtectedItemConfigureSourceScanRequest
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 # pylint: disable=import-error
 
@@ -43,11 +44,13 @@ def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, 
 
     # Item-level validation (state, workload specifics)
     from azure.mgmt.recoveryservicesbackup.models import ProtectionState
-    if item.properties.protection_state not in [ProtectionState.PROTECTED,
-                                                ProtectionState.PROTECTION_STOPPED]:
+    protection_state = custom_help.get_model_property(
+        item.properties, 'protection_state', 'protectionState')
+    if protection_state not in [ProtectionState.protected,
+                                ProtectionState.protection_stopped]:
         raise ValidationError(f"Reconfiguration only supported for items in states: Protected or "
                               f"ProtectionStopped. Current state: "
-                              f"{item.properties.protection_state}")
+                              f"{protection_state}")
 
     # Dispatch by backup management type
     dispatch_type = backup_management_type.lower()
@@ -71,10 +74,27 @@ def show_container(cmd, client, name, resource_group_name, vault_name, backup_ma
                                  use_secondary_region)
 
 
+def show_container_with_hybrid_properties(
+        cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
+        status="Registered", use_secondary_region=None):
+    container = show_container(
+        cmd, client, name, resource_group_name, vault_name, backup_management_type, status,
+        use_secondary_region)
+    return custom_help.serialize_hybrid_model(container)
+
+
 def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered",
                     use_secondary_region=None):
     return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status,
                                   use_secondary_region)
+
+
+def list_containers_with_hybrid_properties(
+        client, resource_group_name, vault_name, backup_management_type, status="Registered",
+        use_secondary_region=None):
+    containers = list_containers(
+        client, resource_group_name, vault_name, backup_management_type, status, use_secondary_region)
+    return custom_help.serialize_hybrid_model(containers)
 
 
 def show_policy(client, resource_group_name, vault_name, name):
@@ -106,10 +126,49 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
                             backup_management_type, workload_type, use_secondary_region)
 
 
+def show_item_with_hybrid_properties(cmd, client, resource_group_name, vault_name, container_name, name,
+                                     backup_management_type=None, workload_type=None, use_secondary_region=None):
+    item = show_item(cmd, client, resource_group_name, vault_name, container_name, name,
+                     backup_management_type, workload_type, use_secondary_region)
+    return custom_help.serialize_hybrid_model(item)
+
+
+def set_item_source_scan_configuration(cmd, client, resource_group_name, vault_name, container_name, name,
+                                       state, backup_management_type, workload_type):
+    from azure.core.exceptions import HttpResponseError
+
+    item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name, name,
+                     backup_management_type, workload_type)
+    custom_help.validate_item(item)
+    if isinstance(item, list):
+        raise ValidationError("Multiple items found. Please use native container and item names.")
+    if item.properties.backup_management_type.lower() != "azureiaasvm":
+        raise InvalidArgumentValueError("Source Scan configuration is supported only for Azure VM backup items.")
+
+    container_uri = custom_help.get_protection_container_uri_from_id(item.id)
+    item_uri = custom_help.get_protected_item_uri_from_id(item.id)
+    action = "Enable" if state == "Enabled" else "Disable"
+    request = ProtectedItemConfigureSourceScanRequest(source_scan_action=action)
+    try:
+        return client.begin_execute(
+            resource_group_name, vault_name, fabric_name, container_uri, item_uri, request)
+    except HttpResponseError as ex:
+        if ex.error and ex.error.code == "UserErrorSourceScanStatusAlreadyInRequestedState":
+            return None
+        raise
+
+
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
                backup_management_type=None, use_secondary_region=None):
     return common.list_items(cmd, client, resource_group_name, vault_name, workload_type,
                              container_name, backup_management_type, use_secondary_region)
+
+
+def list_items_with_hybrid_properties(cmd, client, resource_group_name, vault_name, workload_type=None,
+                                      container_name=None, backup_management_type=None, use_secondary_region=None):
+    items = list_items(cmd, client, resource_group_name, vault_name, workload_type, container_name,
+                       backup_management_type, use_secondary_region)
+    return custom_help.serialize_hybrid_model(items)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
@@ -117,6 +176,15 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
     return common.show_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
                                       item_name, name, workload_type, backup_management_type, use_secondary_region)
+
+
+def show_recovery_point_with_hybrid_properties(cmd, client, resource_group_name, vault_name, container_name,
+                                               item_name, name, workload_type=None, backup_management_type=None,
+                                               use_secondary_region=None):
+    recovery_point = show_recovery_point(
+        cmd, client, resource_group_name, vault_name, container_name, item_name, name,
+        workload_type, backup_management_type, use_secondary_region)
+    return custom_help.serialize_hybrid_model(recovery_point)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
@@ -153,6 +221,18 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
                                                  tier=tier, recommended_for_archive=recommended_for_archive)
 
     return None
+
+
+def list_recovery_points_with_hybrid_properties(
+        cmd, client, resource_group_name, vault_name, container_name, item_name,
+        backup_management_type=None, workload_type=None, start_date=None, end_date=None,
+        use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
+        recommended_for_archive=None):
+    recovery_points = list_recovery_points(
+        cmd, client, resource_group_name, vault_name, container_name, item_name,
+        backup_management_type, workload_type, start_date, end_date, use_secondary_region,
+        is_ready_for_move, target_tier, tier, recommended_for_archive)
+    return custom_help.serialize_hybrid_model(recovery_points)
 
 
 def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
@@ -312,8 +392,9 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 
 def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type=None):
-    return common.list_associated_items_for_policy(client, resource_group_name, vault_name, name,
-                                                   backup_management_type)
+    items = common.list_associated_items_for_policy(
+        client, resource_group_name, vault_name, name, backup_management_type)
+    return custom_help.serialize_hybrid_model(items)
 
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
@@ -343,10 +424,29 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                                             backup_management_type, container_uri, protectable_item_type, server_name)
 
 
+def list_protectable_items_with_hybrid_properties(
+        cmd, client, resource_group_name, vault_name, workload_type,
+        backup_management_type="AzureWorkload", container_name=None, protectable_item_type=None,
+        server_name=None):
+    items = list_protectable_items(
+        cmd, client, resource_group_name, vault_name, workload_type,
+        backup_management_type, container_name, protectable_item_type, server_name)
+    return custom_help.serialize_hybrid_model(items)
+
+
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
                           workload_type):
     items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type)
     return custom_wl.show_protectable_item(items, name, server_name, protectable_item_type)
+
+
+def show_protectable_item_with_hybrid_properties(
+        cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
+        workload_type):
+    item = show_protectable_item(
+        cmd, client, resource_group_name, vault_name, name, server_name,
+        protectable_item_type, workload_type)
+    return custom_help.serialize_hybrid_model(item)
 
 
 def show_protectable_instance(cmd, client, resource_group_name, vault_name, server_name, protectable_item_type,
@@ -372,7 +472,8 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
     container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
                                backup_management_type)
     container_name = container.name
-    container_friendly_name = container.properties.friendly_name
+    container_friendly_name = custom_help.get_model_property(
+        container.properties, 'friendly_name', 'friendlyName')
 
     if container_type.lower() == "azurestorage":
         return custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name)
@@ -496,12 +597,13 @@ def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, poli
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None, target_resource_group_name=None, tenant_id=None):
+                           target_folder=None, target_resource_group_name=None, tenant_id=None,
+                           use_secondary_region=None):
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     backup_management_type, workload_type, use_secondary_region)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
@@ -511,7 +613,8 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
-                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id)
+                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id,
+                                             use_secondary_region=use_secondary_region)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
@@ -630,10 +733,13 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
+    if item.properties.backup_management_type.lower() == "azurestorage":
+        return custom_afs.undelete_protection(cmd, client, resource_group_name, vault_name, item)
+
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.undelete_protection(cmd, client, resource_group_name, vault_name, item)
 
-    return None
+    raise ValidationError("Undelete is not supported for this backup management type.")
 
 
 def list_protectable_items_in_subscription(cmd, client, resource_group_name, vault_name, workload_type,
@@ -677,7 +783,7 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
 
     filter_string = custom_help.get_filter_string(filter_dict)
 
-    paged_containers = client.list(vault_name, resource_group_name, filter_string)
+    paged_containers = client.list(vault_name, resource_group_name, filter=filter_string)
     containers = custom_help.get_list_from_paged_response(paged_containers)
 
     if container_name and custom_help.is_native_name(container_name):

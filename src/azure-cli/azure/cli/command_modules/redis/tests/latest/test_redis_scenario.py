@@ -327,10 +327,10 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method SAS')
         if self.is_live:
             time.sleep(5 * 60)
-        self.cmd('az redis import-method -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
+        self.cmd('az redis import-method -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS -y')
         if self.is_live:
             time.sleep(5 * 60)
-        self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS')
+        self.cmd('az redis import -n {name} -g {rg} --files "{filesasURL}" --preferred-data-archive-auth-method SAS -y')
         if self.is_live:
             time.sleep(5 * 60)
         '''     
@@ -348,7 +348,7 @@ class RedisCacheTests(ScenarioTest):
             self.kwargs['filesasURL'] = self.kwargs['filesasURL'].split('?')[0]
         self.cmd('az redis export -n {name} -g {rg} --prefix {prefix} --container \'{containersasURL}\' --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
         # TODO: un comment after July DP release
-        # self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId}')
+        # self.cmd('az redis import -n {name} -g {rg} --files {filesasURL} --preferred-data-archive-auth-method ManagedIdentity --storage-subscription-id {storageSubscriptionId} -y')
 
         self.cmd('az redis delete -n {name} -g {rg} -y')
 

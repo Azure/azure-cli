@@ -26,13 +26,9 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     UserAssignedManagedIdentityDetails, UserAssignedIdentityProperties, \
     AzureVmWorkloadSAPAseDatabaseProtectedItem, MoveRPAcrossTiersRequest
 
-from azure.cli.core.util import CLIError
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
-try:
-    from azure.mgmt.recoveryservicesbackup.models import CrossRegionRestoreRequest
-except ImportError:
-    def CrossRegionRestoreRequest(*_args, **_kwargs):
-        raise CLIError('This operation is not supported by the installed Recovery Services Backup SDK.')
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type, validate_wl_restore, validate_log_point_in_time
 from azure.cli.command_modules.backup._client_factory import protectable_containers_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
@@ -77,7 +73,8 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
 
     # 2. Unregister container if last item
     _maybe_unregister_wl_container(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
-                                   item.properties.container_name, workload_type)
+                                   cust_help.get_model_property(
+                                       item.properties, 'container_name', 'containerName'), workload_type)
 
     # 3. Register workload container in destination vault.
     _register_wl_container_in_new_vault(cmd, item, new_vault_rg, new_vault_name, workload_type)
@@ -86,8 +83,10 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
     new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg,
                                                           new_vault_name, new_policy_name,
                                                           protectable_item_type="SQLDatabase",
-                                                          protectable_item_name=item.properties.friendly_name,
-                                                          server_name=item.properties.server_name,
+                                                          protectable_item_name=cust_help.get_model_property(
+                                                              item.properties, 'friendly_name', 'friendlyName'),
+                                                          server_name=cust_help.get_model_property(
+                                                              item.properties, 'server_name', 'serverName'),
                                                           workload_type=workload_type)
     return new_item
 
@@ -95,7 +94,8 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
 def _register_wl_container_in_new_vault(cmd, item, resource_group_name, vault_name, workload_type):
     # For workload items, container_name is something like: IaasVMContainer;iaasvmcontainerv2;rg;vmname or similar.
     # We'll need the underlying resource id if present on item.properties.source_resource_id.
-    resource_id = getattr(item.properties, 'source_resource_id', None)
+    resource_id = cust_help.get_model_property(
+        item.properties, 'source_resource_id', 'sourceResourceId')
     if resource_id is None:
         raise CLIError('Cannot derive source resource id from workload item for reconfiguration.')
 
@@ -114,7 +114,11 @@ def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault
     items = common.list_items(cmd, items_client, resource_group_name, vault_name,
                               workload_type=workload_type, container_name=container_name,
                               container_type="AzureWorkload")
-    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    remaining = [
+        pi for pi in items
+        if cust_help.get_model_property(
+            pi.properties, 'protection_state', 'protectionState').lower() == 'protected'
+    ]
     if remaining:
         raise ValidationError('Cannot unregister container as other items are still protected.')
 
@@ -182,7 +186,7 @@ def list_wl_policies(client, resource_group_name, vault_name, workload_type, bac
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
 
-    policies = client.list(vault_name, resource_group_name, filter_string)
+    policies = client.list(vault_name, resource_group_name, filter=filter_string)
     return cust_help.get_list_from_paged_response(policies)
 
 
@@ -190,7 +194,7 @@ def list_protectable_containers(cmd, resource_group_name, vault_name, container_
     filter_string = cust_help.get_filter_string({
         'backupManagementType': container_type})
     client = protectable_containers_cf(cmd.cli_ctx)
-    paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter_string)
+    paged_containers = client.list(vault_name, resource_group_name, fabric_name, filter=filter_string)
     return cust_help.get_list_from_paged_response(paged_containers)
 
 
@@ -246,7 +250,8 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
 
     for container in containers:
         if container.name == container_name:
-            source_resource_id = container.properties.source_resource_id
+            source_resource_id = cust_help.get_model_property(
+                container.properties, 'source_resource_id', 'sourceResourceId')
             break
 
     if not source_resource_id:
@@ -313,8 +318,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             param.properties.resource_guard_operation_requests = [cust_help.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
     # Update policy
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
+    result = cust_help.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, param,
+                                      cls=cust_help.get_pipeline_response, polling=False))
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -329,7 +336,7 @@ def initialize_protectable_items(client, resource_group_name, vault_name, contai
         'backupManagementType': 'AzureWorkload',
         'workloadType': workload_type})
 
-    return client.inquire(vault_name, resource_group_name, fabric_name, container_name, filter_string)
+    return client.inquire(vault_name, resource_group_name, fabric_name, container_name, filter=filter_string)
 
 
 def create_policy(client, resource_group_name, vault_name, policy_name, policy, workload_type):
@@ -381,15 +388,29 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
     if cust_help.is_native_name(name):
         filtered_items = [item for item in items if item.name.lower() == name.lower()]
     else:
-        filtered_items = [item for item in items if item.properties.friendly_name.lower() == name.lower()]
+        filtered_items = [
+            item for item in items
+            if cust_help.get_model_property(
+                item.properties, 'friendly_name', 'friendlyName').lower() == name.lower()
+        ]
 
     # Server Name filter
-    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
-                      item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [
+        item for item in filtered_items
+        if cust_help.get_model_property(item.properties, 'server_name', 'serverName') is not None and
+        cust_help.get_model_property(item.properties, 'server_name', 'serverName').lower() ==
+        server_name.lower()
+    ]
 
     # Protectable Item Type filter
-    filtered_items = [item for item in filtered_items if item.properties.protectable_item_type is not None and
-                      item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    filtered_items = [
+        item for item in filtered_items
+        if cust_help.get_model_property(
+            item.properties, 'protectable_item_type', 'protectableItemType') is not None and
+        cust_help.get_model_property(
+            item.properties, 'protectable_item_type', 'protectableItemType').lower() ==
+        protectable_item_type.lower()
+    ]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
@@ -410,11 +431,21 @@ def show_protectable_instance(items, server_name, protectable_item_type, instanc
 
     protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Protectable Item Type filter
-    filtered_items = [item for item in items if item.properties.protectable_item_type is not None and
-                      item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+    filtered_items = [
+        item for item in items
+        if cust_help.get_model_property(
+            item.properties, 'protectable_item_type', 'protectableItemType') is not None and
+        cust_help.get_model_property(
+            item.properties, 'protectable_item_type', 'protectableItemType').lower() ==
+        protectable_item_type.lower()
+    ]
     # Server Name filter
-    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
-                      item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [
+        item for item in filtered_items
+        if cust_help.get_model_property(item.properties, 'server_name', 'serverName') is not None and
+        cust_help.get_model_property(item.properties, 'server_name', 'serverName').lower() ==
+        server_name.lower()
+    ]
     # Instance Name filter, if it is passed
     if instance_name:
         filtered_items = [item for item in items if item.name.lower() == instance_name.lower()]
@@ -435,17 +466,27 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
         'workloadType': workload_type})
 
     # Items list
-    items = client.list(vault_name, resource_group_name, filter_string)
+    items = client.list(vault_name, resource_group_name, filter=filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
 
     if protectable_item_type is not None:
         # Protectable Item Type filter
-        paged_items = [item for item in paged_items if item.properties.protectable_item_type is not None and
-                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
+        paged_items = [
+            item for item in paged_items
+            if cust_help.get_model_property(
+                item.properties, 'protectable_item_type', 'protectableItemType') is not None and
+            cust_help.get_model_property(
+                item.properties, 'protectable_item_type', 'protectableItemType').lower() ==
+            protectable_item_type.lower()
+        ]
     if server_name is not None:
         # Server Name filter
-        paged_items = [item for item in paged_items if hasattr(item.properties, 'server_name') and
-                       item.properties.server_name.lower() == server_name.lower()]
+        paged_items = [
+            item for item in paged_items
+            if cust_help.get_model_property(item.properties, 'server_name', 'serverName') is not None and
+            cust_help.get_model_property(item.properties, 'server_name', 'serverName').lower() ==
+            server_name.lower()
+        ]
     if container_uri:
         # Container URI filter
         paged_items = [item for item in paged_items if
@@ -488,13 +529,17 @@ def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, 
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
+    recovery_points = client.list(
+        vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = cust_help.get_list_from_paged_response(recovery_points)
     common.fetch_tier(paged_recovery_points)
     if use_secondary_region:
-        paged_recovery_points = [item for item in paged_recovery_points if item.properties.recovery_point_tier_details
-                                 is None or (item.properties.recovery_point_tier_details is not None and
-                                             item.tier_type != 'VaultArchive')]
+        paged_recovery_points = [
+            item for item in paged_recovery_points
+            if cust_help.get_model_property(
+                item.properties, 'recovery_point_tier_details', 'recoveryPointTierDetails') is None or
+            item.tier_type != 'VaultArchive'
+        ]
     recovery_point_list = common.check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move)
     recovery_point_list = common.filter_rp_based_on_tier(recovery_point_list, tier)
     return recovery_point_list
@@ -545,8 +590,10 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger enable protection and wait for completion
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_name, item_name, param, cls=cust_help.get_pipeline_response)
+    result = cust_help.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_name, item_name, param,
+                                      cls=cust_help.get_pipeline_response, polling=False))
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -612,15 +659,15 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
 
     properties = _get_protected_item_instance(backup_item_type)
     if retain_recovery_points_as_per_policy:
-        properties.protection_state = ProtectionState.BACKUPS_SUSPENDED
+        properties.protection_state = ProtectionState.backups_suspended
     else:
-        properties.protection_state = ProtectionState.PROTECTION_STOPPED
+        properties.protection_state = ProtectionState.protection_stopped
     properties.policy_id = ''
     param = ProtectedItemResource(properties=properties)
 
     # ResourceGuard scenario: if we are stopping backup and there is MUA setup for the scenario,
     # we want to set the appropriate parameters.
-    if param.properties.protection_state == ProtectionState.PROTECTION_STOPPED:
+    if param.properties.protection_state == ProtectionState.protection_stopped:
         if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name,
                                                 vault_name, "RecoveryServicesStopProtection"):
             # Cross Tenant scenario
@@ -631,8 +678,10 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item,
                 cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesStopProtection")]
 
     # Trigger disable protection and wait for completion
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
+    result = cust_help.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, param,
+                                      cls=cust_help.get_pipeline_response, polling=False))
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -653,8 +702,10 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     properties.is_rehydrate = True
     param = ProtectedItemResource(properties=properties)
 
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
-                                     container_uri, item_uri, param, cls=cust_help.get_pipeline_response)
+    result = cust_help.get_initial_pipeline_response(
+        client.begin_create_or_update(vault_name, resource_group_name, fabric_name,
+                                      container_uri, item_uri, param,
+                                      cls=cust_help.get_pipeline_response, polling=False))
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -701,7 +752,8 @@ def disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, prot
         'itemName': protectable_item_name,
         'parentName': container_name})
 
-    protection_intents = backup_protection_intent_cf(cmd.cli_ctx).list(vault_name, resource_group_name, filter_string)
+    protection_intents = backup_protection_intent_cf(cmd.cli_ctx).list(
+        vault_name, resource_group_name, filter=filter_string)
     paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
 
     if len(paged_protection_intents) != 1:
@@ -720,9 +772,11 @@ def list_workload_items(cmd, vault_name, resource_group_name, target_subscriptio
         'backupManagementType': container_type,
         'workloadItemType': workload_type})
 
-    workload_items_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
-                                                    subscription_id=target_subscription).backup_workload_items
-    items = workload_items_client.list(vault_name, resource_group_name, fabric_name, container_name, filter_string)
+    workload_items_client = get_mgmt_service_client(
+        cmd.cli_ctx, RecoveryServicesBackupClient,
+        subscription_id=target_subscription).backup_workload_items
+    items = workload_items_client.list(
+        vault_name, resource_group_name, fabric_name, container_name, filter=filter_string)
     return cust_help.get_list_from_paged_response(items)
 
 
@@ -791,7 +845,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
                                                     subscription_id=target_subscription).backup_protection_containers
         target_container = common.show_container(cmd, containers_client, target_container_name, target_resource_group,
                                                  target_vault_name, 'AzureWorkload')
-        setattr(trigger_restore_properties, 'target_virtual_machine_id', target_container.properties.source_resource_id)
+        setattr(trigger_restore_properties, 'target_virtual_machine_id', cust_help.get_model_property(
+            target_container.properties, 'source_resource_id', 'sourceResourceId'))
 
     if restore_mode == 'AlternateLocation':
         if recovery_mode != "FileRecovery":
@@ -963,16 +1018,33 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if 'sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore':
         items = list_workload_items(cmd, target_vault_name, target_resource_group, target_subscription,
                                     target_container.name)
+        target_friendly_name = cust_help.get_model_property(
+            target_item.properties, 'friendly_name', 'friendlyName')
+        target_server_name = cust_help.get_model_property(
+            target_item.properties, 'server_name', 'serverName')
         for titem in items:
-            if titem.properties.friendly_name == target_item.properties.friendly_name:
-                if titem.properties.server_name == target_item.properties.server_name:
-                    for path in recovery_point.properties.extended_info.data_directory_paths:
-                        target_path = cust_help.get_target_path(path.type, path.path, path.logical_name,
-                                                                titem.properties.data_directory_paths)
-                        alternate_directory_paths.append((path.type, path.path, path.logical_name, target_path))
+            if cust_help.get_model_property(
+                    titem.properties, 'friendly_name', 'friendlyName') == target_friendly_name:
+                if cust_help.get_model_property(
+                        titem.properties, 'server_name', 'serverName') == target_server_name:
+                    extended_info = cust_help.get_model_property(
+                        recovery_point.properties, 'extended_info', 'extendedInfo')
+                    data_directory_paths = cust_help.get_model_property(
+                        extended_info, 'data_directory_paths', 'dataDirectoryPaths')
+                    target_data_directory_paths = cust_help.get_model_property(
+                        titem.properties, 'data_directory_paths', 'dataDirectoryPaths')
+                    for path in data_directory_paths:
+                        path_type = cust_help.get_model_property(path, 'type', 'type')
+                        source_path = cust_help.get_model_property(path, 'path', 'path')
+                        logical_name = cust_help.get_model_property(path, 'logical_name', 'logicalName')
+                        target_path = cust_help.get_target_path(
+                            path_type, source_path, logical_name, target_data_directory_paths)
+                        alternate_directory_paths.append(
+                            (path_type, source_path, logical_name, target_path))
     db_name = None
     if restore_mode == 'AlternateWorkloadRestore':
-        friendly_name = target_item.properties.friendly_name
+        friendly_name = cust_help.get_model_property(
+            target_item.properties, 'friendly_name', 'friendlyName')
         db_name = friendly_name + '/' + target_item_name
 
     container_id = None
@@ -1000,7 +1072,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'log_point_in_time': log_point_in_time,
         'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPASE' if 'sapase' in item_type.lower() else 'SAPHana',
         'workload_type': item_type,
-        'source_resource_id': item.properties.source_resource_id,
+        'source_resource_id': cust_help.get_model_property(
+            item.properties, 'source_resource_id', 'sourceResourceId'),
         'database_name': db_name,
         'container_id': container_id,
         'recovery_mode': recovery_mode,
@@ -1023,26 +1096,30 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
     for item in paged_items:
         item_id = item.id
         protectable_item_type = item.properties.protectable_item_type
-        protectable_item_name = item.properties.friendly_name
+        protectable_item_name = cust_help.get_model_property(
+            item.properties, 'friendly_name', 'friendlyName')
         container_name = cust_help.get_protection_container_uri_from_id(item_id)
 
         # fetch AutoProtectionPolicy for SQLInstance and SQLAG
         if protectable_item_type and protectable_item_type.lower() in ['sqlinstance', 'sqlavailabilitygroupcontainer']:
-            setattr(item.properties, "auto_protection_policy", None)
+            cust_help.set_model_property(
+                item.properties, "auto_protection_policy", "autoProtectionPolicy", None)
             filter_string = cust_help.get_filter_string({
                 'backupManagementType': "AzureWorkload",
                 'itemType': protectable_item_type,
                 'itemName': protectable_item_name,
                 'parentName': container_name})
-            protection_intents = protection_intent_client.list(vault_name, resource_group_name, filter_string)
+            protection_intents = protection_intent_client.list(vault_name, resource_group_name, filter=filter_string)
             paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
 
             if paged_protection_intents:
-                item.properties.auto_protection_policy = paged_protection_intents[0].properties.policy_id
+                cust_help.set_model_property(
+                    item.properties, "auto_protection_policy", "autoProtectionPolicy",
+                    paged_protection_intents[0].properties.policy_id)
 
         # fetch NodesList for SQLAG
         if protectable_item_type and protectable_item_type.lower() == 'sqlavailabilitygroupcontainer':
-            setattr(item.properties, "nodes_list", None)
+            cust_help.set_model_property(item.properties, "nodes_list", "nodesList", None)
             container = None
             try:
                 container = protection_containers_client.get(vault_name, resource_group_name, fabric_name,
@@ -1050,7 +1127,8 @@ def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_grou
             except:  # pylint: disable=bare-except
                 continue
             if container and container.properties.extended_info:
-                item.properties.nodes_list = container.properties.extended_info.nodes_list
+                cust_help.set_model_property(
+                    item.properties, "nodes_list", "nodesList", container.properties.extended_info.nodes_list)
 
 
 def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region):
@@ -1065,7 +1143,8 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
         client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
+    recovery_points = client.list(
+        vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = cust_help.get_none_one_or_many(cust_help.get_list_from_paged_response(recovery_points))
     _check_none_and_many(paged_recovery_points, "Log time range")
     return paged_recovery_points.properties.time_ranges

@@ -47,9 +47,40 @@ class FlexibleServerRestoreMgmtScenarioTest(ScenarioTest):
                                   .format(resource_group, target_server_ssdv2, server_name, storage_type)).get_output_in_json()
         self.assertEqual(restore_migration_result['storage']['type'], storage_type)
 
+        # Restore with a different compute size, inheriting the compute tier of the source server
+        target_server_sku = self.create_random_name(SERVER_NAME_PREFIX + 'sku-', SERVER_NAME_MAX_LENGTH)
+        sku_name = 'Standard_D8ds_v5'
+        restore_sku_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {} --sku-name {}'
+                                      .format(resource_group, target_server_sku, server_name, sku_name)).get_output_in_json()
+        self.assertEqual(restore_sku_result['sku']['name'], sku_name)
+        self.assertEqual(restore_sku_result['sku']['tier'], 'GeneralPurpose')
+
+        # Restore with a different compute tier and compute size
+        target_server_tier = self.create_random_name(SERVER_NAME_PREFIX + 'tier-', SERVER_NAME_MAX_LENGTH)
+        tier = 'MemoryOptimized'
+        tier_sku_name = 'Standard_E2ds_v5'
+        restore_tier_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {} --tier {} --sku-name {}'
+                                       .format(resource_group, target_server_tier, server_name, tier, tier_sku_name)).get_output_in_json()
+        self.assertEqual(restore_tier_result['sku']['tier'], tier)
+        self.assertEqual(restore_tier_result['sku']['name'], tier_sku_name)
+
+        # Restoring below the compute tier of the source server is not allowed
+        self.cmd('postgres flexible-server restore -g {} --name {} --source-server {} --tier {}'
+                 .format(resource_group,
+                         self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                         server_name,
+                         'Burstable'),
+                 expect_failure=True)
+
         # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
                  resource_group, target_server_default), checks=NoneCheck())
 
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
                  resource_group, target_server_ssdv2), checks=NoneCheck())
+
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
+                 resource_group, target_server_sku), checks=NoneCheck())
+
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
+                 resource_group, target_server_tier), checks=NoneCheck())

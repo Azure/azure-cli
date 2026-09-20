@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -32,7 +32,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
     def test_azconfig_kv(self, resource_group, location):
         # Lowercase store-name prefix so the HTTP-lowercased '<name>.azconfig.io' host matches the
         # name registered with the recording name-replacer, keeping cassettes scrubbed for playback.
-        config_store_prefix = get_resource_name_prefix('kvtest')
+        config_store_prefix = 'kvtest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -311,13 +311,44 @@ class AppConfigKVScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
             self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --endpoint {endpoint} --auth-mode login --key {key} --label {label} --dry-run -y')
 
+        # Description property: set with --description, verify it is returned, preserved on edit, and overwritten
+        self.kwargs.update({
+            'key': "DescKey",
+            'value': "Red",
+            'description': "The theme color"
+        })
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --description "{description}" -y',
+                 checks=[self.check('key', "DescKey"),
+                         self.check('value', "Red"),
+                         self.check('description', "The theme color")])
+
+        # Description is returned by show
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
+                 checks=[self.check('description', "The theme color")])
+
+        # Description is selectable via --fields
+        partial_kv = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --fields description').get_output_in_json()
+        self.assertEqual(partial_kv[0]['description'], "The theme color")
+        self.assertNotIn('value', partial_kv[0])
+
+        # Updating another property without --description preserves the existing description
+        self.kwargs.update({'value': "Green"})
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
+                 checks=[self.check('value', "Green"),
+                         self.check('description', "The theme color")])
+
+        # Explicitly updating the description overwrites it
+        self.kwargs.update({'description': "The updated theme color"})
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --description "{description}" -y',
+                 checks=[self.check('description', "The updated theme color")])
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
-        config_store_prefix = get_resource_name_prefix('kvtest')
+        config_store_prefix = 'kvtest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -377,7 +408,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)
         # name registered with the recording name-replacer, leaving the live host unscrubbed in the
         # cassette and breaking playback. A lowercase name keeps recording and playback hosts aligned.
-        config_store_prefix = get_resource_name_prefix('kvrevisiontest')
+        config_store_prefix = 'kvrevisiontest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -522,3 +553,5 @@ class AppConfigKVScenarioTest(ScenarioTest):
         # Get all key-value revisions for key with all tags
         revisions = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3
+
+

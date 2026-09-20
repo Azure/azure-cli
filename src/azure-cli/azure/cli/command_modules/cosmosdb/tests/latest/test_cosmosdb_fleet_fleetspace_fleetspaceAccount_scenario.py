@@ -79,7 +79,7 @@ class CosmosdbFleetScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb fleet list -g {rg}')
         
         # Create Storage Account for Fleet Analytics
-        self.cmd('az storage account create -g {rg} -n {storage} --sku Standard_LRS --location westus2')
+        self.cmd('az storage account create -g {rg} -n {storage} --sku Standard_LRS --location westus2 --allow-shared-key-access false')
 
         # Feature being updated with a different contract. Will be enabled in the future.
         '''
@@ -95,7 +95,7 @@ class CosmosdbFleetScenarioTest(ScenarioTest):
         self.cmd('az cosmosdb fleetspace list -g {rg} --fleet-name {fleet}')
 
         # Create Cosmos DB account dynamically
-        self.cmd('az cosmosdb create -g {rg} -n {acct} --locations regionName=westus2 failoverPriority=0 isZoneRedundant=False')
+        self.cmd('az cosmosdb create -g {rg} -n {acct} --disable-local-auth true --locations regionName=westus2 failoverPriority=0 isZoneRedundant=False')
 
         # Fleetspace Account
         self.cmd('az cosmosdb fleetspace account create -g {rg} --fleet-name {fleet} --fleetspace-name {fsp} --fleetspace-account-name {fspacct} --body @{fspacctbody}')

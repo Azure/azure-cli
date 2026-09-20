@@ -25,6 +25,8 @@ SOURCE_NOT_FOUND = "Source cannot be found. " \
 LOGIN_SERVER_NOT_VALID = "Login server of the registry is not valid " \
                          "because it is not a fully qualified domain name."
 CREDENTIALS_INVALID = "Authentication failed. Please provide password."
+REGIONAL_ENDPOINT_IMPORT_WARNING = "ACR imports do not support regional endpoint selection. " \
+                                   "This import will use the source registry's home region."
 
 
 def acr_import(cmd,  # pylint: disable=too-many-locals
@@ -134,6 +136,8 @@ def _regional_endpoint_uri_to_login_server(uri, login_server_suffix):
         prefix = uri_lower[:-len(geo_suffix)]  # "<registry>.<region>"
         prefix_parts = prefix.split('.')
         if len(prefix_parts) == 2 and prefix_parts[0] and prefix_parts[1]:
+            # The converted login server resolves the ACR resource but no longer identifies a replica.
+            logger.warning(REGIONAL_ENDPOINT_IMPORT_WARNING)
             return f"{prefix_parts[0]}{login_server_suffix}"
 
     # If not a regional endpoint format, return as-is
@@ -146,8 +150,10 @@ def _get_azure_registry(cmd, source_registry):
 
     # Try to get the pre-defined login server suffix.
     login_server_suffix = get_login_server_suffix(cmd.cli_ctx)
+    # DNS hostnames are case-insensitive, so normalize both values before matching the suffix.
+    regional_suffix = f".geo{login_server_suffix}".lower() if login_server_suffix else None
     # Convert regional endpoint to standard format if applicable
-    if login_server_suffix and source_registry.endswith(f".geo{login_server_suffix}"):
+    if regional_suffix and source_registry.lower().endswith(regional_suffix):
         lookup_uri = _regional_endpoint_uri_to_login_server(source_registry, login_server_suffix)
 
     # Search by login server (lookup_uri) and registry name (source_registry) to handle both URI and name inputs

@@ -27,13 +27,19 @@ class FlexibleServerDatabaseMgmtScenarioTest(ScenarioTest):
 
         database_name = self.create_random_name('database', 20)
 
-        self.cmd('postgres flexible-server db create -g {} -s {} -n {}'.format(resource_group, server, database_name),
-                 checks=[JMESPathCheck('name', database_name)])
+        self.cmd('postgres flexible-server db create -g {} -s {} -n {} --charset UTF8 --collation C'.format(
+            resource_group, server, database_name),
+            checks=[
+                JMESPathCheck('name', database_name),
+                JMESPathCheck('charset', 'UTF8'),
+                JMESPathCheck('collation', 'C')])
 
         self.cmd('postgres flexible-server db show -g {} -s {} -n {}'.format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', resource_group)])
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('charset', 'UTF8'),
+                     JMESPathCheck('collation', 'C')])
 
         self.cmd('postgres flexible-server db list -g {} -s {} '.format(resource_group, server),
                  checks=[JMESPathCheck('type(@)', 'array')])

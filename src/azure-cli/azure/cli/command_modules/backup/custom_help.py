@@ -15,15 +15,11 @@ from knack.prompting import prompt_y_n
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
+from azure.mgmt.recoveryservicesbackup import models as backup_models
 from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
+
 from azure.cli.core.util import CLIError
-
-try:
-    from azure.mgmt.recoveryservicesbackup.models import CrrJobRequest
-except ImportError:
-    def CrrJobRequest(*_args, **_kwargs):
-        raise CLIError('This operation is not supported by the installed Recovery Services Backup SDK.')
-
 from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
@@ -106,7 +102,7 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
         filter_dict['friendlyName'] = container_name
     filter_string = get_filter_string(filter_dict)
 
-    paged_containers = client.list(vault_name, resource_group_name, filter_string)
+    paged_containers = client.list(vault_name, resource_group_name, filter=filter_string)
     containers = get_list_from_paged_response(paged_containers)
 
     if container_name and is_native_name(container_name):
@@ -369,9 +365,9 @@ def replace_min_value_in_subtask(response):
     # For a task in progress: replace min_value in start and end times with null.
     tasks_list = response.properties.extended_info.tasks_list
     for task in tasks_list:
-        if task.start_time == datetime.min:
+        if getattr(task, 'start_time', None) == datetime.min:
             task.start_time = None
-        if task.end_time == datetime.min:
+        if getattr(task, 'end_time', None) == datetime.min:
             task.end_time = None
     return response
 
@@ -405,14 +401,39 @@ def get_pipeline_response(pipeline_response, _0, _1):
     return pipeline_response
 
 
+def get_initial_pipeline_response(poller):
+    return poller.polling_method()._initial_response  # pylint: disable=protected-access
+
+
+def get_model_property(model, attribute_name, wire_name):
+    value = getattr(model, attribute_name, None)
+    if value is None and hasattr(model, 'get'):
+        value = model.get(wire_name)
+    return value
+
+
+def set_model_property(model, attribute_name, wire_name, value):
+    setattr(model, attribute_name, value)
+    if hasattr(model, '__setitem__'):
+        model[wire_name] = value
+
+
+def serialize_hybrid_model(value):
+    if isinstance(value, list):
+        return [serialize_hybrid_model(item) for item in value]
+    if hasattr(value, 'items'):
+        return {key: serialize_hybrid_model(item) for key, item in value.items()}
+    return value
+
+
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
     for filepath in data_directory_paths:
-        if filepath.type == resource_type:
+        if get_model_property(filepath, 'type', 'type') == resource_type:
             data_directory_path = filepath
     # Extracts the file extension type if it exists otherwise returns empty string
     file_type = '.' + path.split('\\')[-1].split('.')[1] if len(path.split('\\')[-1].split('.')) > 1 else ""
     file_name = logical_name + '_' + str(int(time.time())) + file_type
-    return data_directory_path.path + file_name
+    return get_model_property(data_directory_path, 'path', 'path') + file_name
 
 
 # Tracking Utilities
@@ -421,7 +442,7 @@ def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
-    if operation_status.status != OperationStatusValues.SUCCEEDED.value:
+    if operation_status.status != OperationStatusValues.succeeded.value:
         raise CLIError('Provisioning access to the recovery point failed with status: {}.'.format(
             operation_status.status))
 
@@ -444,7 +465,7 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
-    while operation_status.status == OperationStatusValues.IN_PROGRESS.value:
+    while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
@@ -466,7 +487,7 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
     operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
-    while operation_status.status == OperationStatusValues.IN_PROGRESS.value:
+    while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
         operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
@@ -515,7 +536,7 @@ def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, contain
 
 
 def job_in_progress(job_status):
-    return job_status in ['InProgress', 'Cancelling']
+    return job_status in ["InProgress", "Cancelling"]
 
 # List Utilities
 
@@ -620,7 +641,11 @@ def get_object_from_json(client, json_or_file, class_name):
     json_obj = get_or_read_json(json_or_file)
 
     # Deserialize json to object
-    param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
+    dependencies = getattr(client._deserialize, 'dependencies', {})  # pylint: disable=protected-access
+    if class_name in dependencies:
+        param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
+    else:
+        param = getattr(backup_models, class_name)(json_obj)
     if param is None:
         raise ValidationError(
             """
@@ -683,11 +708,19 @@ def set_container_subscription_id(item):
     if item is None or not hasattr(item, 'properties'):
         return item
     properties = item.properties
-    backup_management_type = getattr(properties, 'backup_management_type', None)
-    source_resource_id = getattr(properties, 'source_resource_id', None)
+    backup_management_type = get_model_property(properties, 'backup_management_type', 'backupManagementType')
+    source_resource_id = get_model_property(properties, 'source_resource_id', 'sourceResourceId')
     if (backup_management_type is not None and backup_management_type.lower() == 'azureiaasvm' and
             source_resource_id):
-        properties.container_subscription_id = get_subscription_from_id(source_resource_id)
+        properties['containerSubscriptionId'] = get_subscription_from_id(source_resource_id)
+    return item
+
+
+def set_container_resource_group(item):
+    if item is None or not getattr(item, 'id', None) or not hasattr(item, 'properties'):
+        return item
+    resource_group = get_resource_group_from_id(item.id)
+    item.properties['resourceGroup'] = resource_group
     return item
 
 
@@ -697,12 +730,13 @@ def set_job_container_subscription_id(job):
     # contains the "VM Subscription ID" for Cross Subscription Backup jobs.
     if job is None or not hasattr(job, 'properties'):
         return job
-    extended_info = getattr(job.properties, 'extended_info', None)
+    extended_info = get_model_property(job.properties, 'extended_info', 'extendedInfo')
     if extended_info is None:
         return job
-    property_bag = getattr(extended_info, 'property_bag', None)
+    property_bag = get_model_property(extended_info, 'property_bag', 'propertyBag')
     if property_bag and 'VM Subscription ID' in property_bag:
-        job.properties.container_subscription_id = property_bag['VM Subscription ID']
+        set_model_property(job.properties, 'container_subscription_id', 'containerSubscriptionId',
+                           property_bag['VM Subscription ID'])
     return job
 
 

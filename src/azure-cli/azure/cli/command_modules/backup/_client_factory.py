@@ -27,10 +27,17 @@ def _backup_client_factory(cli_ctx, **_):
 
 
 def _backup_passive_client_factory(cli_ctx, **_):
-    from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
+    from azure.mgmt.recoveryservicesbackup.passivestamp import RecoveryServicesBackupPassiveClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
+    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupPassiveClient)
+
+
+def _storage_client_factory(cli_ctx, **_):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
 
 
 # External Deps Client Factories
@@ -40,6 +47,10 @@ def resources_cf(cli_ctx, *_):
 
 def resource_groups_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resource_groups
+
+
+def file_shares_cf(cli_ctx, *_):
+    return _storage_client_factory(cli_ctx).file_shares
 
 
 # Internal Deps Client Factories
@@ -115,6 +126,10 @@ def backup_protectable_items_cf(cli_ctx, *_):
 
 def backup_protected_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protected_items
+
+
+def configure_source_scan_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).configure_source_scan
 
 
 def backup_protected_items_crr_cf(cli_ctx, *_):

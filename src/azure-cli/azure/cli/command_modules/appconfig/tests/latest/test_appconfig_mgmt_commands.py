@@ -11,7 +11,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer
 from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -27,7 +27,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_mgmt(self, resource_group, location):
-        mgmt_prefix = get_resource_name_prefix('MgmtTest')
+        mgmt_prefix = 'MgmtTest'
 
         # Create store with developer sku
         developer_config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
@@ -124,7 +124,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', premium_sku)])
 
-        keyvault_prefix = get_resource_name_prefix('cmk-test-keyvault')
+        keyvault_prefix = 'cmk-test-keyvault'
         keyvault_name = self.create_random_name(prefix=keyvault_prefix, length=24)
         encryption_key = 'key'
         system_assigned_identity_id = store['identity']['principalId']
@@ -207,8 +207,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
         # create store in premium tier with replica
-        premium_store_prefix = get_resource_name_prefix('MgmtTestPremiumSku')
-        replica_prefix = get_resource_name_prefix('MgmtTestReplica')
+        premium_store_prefix = 'MgmtTestPremiumSku'
+        replica_prefix = 'MgmtTestReplica'
         config_store_name = self.create_random_name(prefix=premium_store_prefix, length=24)
         replica_name = self.create_random_name(prefix=replica_prefix, length=24)
         tag_key = "key"
@@ -312,7 +312,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
-        test_del_prefix = get_resource_name_prefix('MgmtTestdel')
+        test_del_prefix = 'MgmtTestdel'
         config_store_name = self.create_random_name(prefix=test_del_prefix, length=24)
 
         self.kwargs.update({
@@ -354,7 +354,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_appinsights(self, resource_group, location):
         """Test linking Application Insights to App Configuration store."""
-        appinsights_prefix = get_resource_name_prefix('AppInsightsTest')
+        appinsights_prefix = 'AppInsightsTest'
         config_store_name = self.create_random_name(prefix=appinsights_prefix, length=24)
 
         location = 'eastus'
@@ -370,7 +370,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         # Use a fake Application Insights resource ID because the application-insights extension
         # cannot be installed in recording/playback mode — the extension index response exceeds
-        app_insights_prefix = get_resource_name_prefix('appinsights')
+        app_insights_prefix = 'appinsights'
         app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
         app_insights_resource_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(resource_group, app_insights_name)
         self.kwargs.update({
@@ -403,7 +403,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
-        disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
+        disable_local_auth_prefix = 'DisableLocalAuth'
         config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=24)
 
         location = 'eastus'
@@ -449,7 +449,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     def test_azconfig_public_network_access(self, resource_group, location):
         """Test public network access via the deprecated --enable-public-network flag and the
         new --public-network-access parameter (Enabled, Disabled, SecuredByPerimeter)."""
-        pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
+        pub_network_prefix = 'PubNetworkTrue'
         config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
         location = 'eastus'
@@ -472,7 +472,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
 
-        pub_network_null_prefix = get_resource_name_prefix('PubNetworkNull')
+        pub_network_null_prefix = 'PubNetworkNull'
         config_store_name = self.create_random_name(prefix=pub_network_null_prefix, length=24)
 
         self.kwargs.update({
@@ -497,7 +497,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('publicNetworkAccess', 'Enabled')])
 
         # Test the new --public-network-access parameter with Enabled, Disabled and SecuredByPerimeter values.
-        new_param_prefix = get_resource_name_prefix('PubNetAccess')
+        new_param_prefix = 'PubNetAccess'
 
         # Test create with --public-network-access Enabled
         enabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
@@ -544,7 +544,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_appconfig_kv_revision_retention_period(self, resource_group, location):
         """Test kv_revision_retention_period for different SKUs and validation scenarios."""
-        mgmt_prefix = get_resource_name_prefix('RevisionRetention')
+        mgmt_prefix = 'RevisionRetention'
         
         # Test store names
         standard_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
@@ -604,7 +604,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_azconfig_azure_front_door_profile(self, resource_group, location):
         """Test Azure Front Door profile linking/unlinking for App Configuration store."""
-        mgmt_prefix = get_resource_name_prefix('AFDTest')
+        mgmt_prefix = 'AFDTest'
 
         # Create store with Front Door profile
         config_store_name = self.create_random_name(prefix=mgmt_prefix, length=24)
