@@ -9186,6 +9186,87 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig delete -g {rg} -r {gallery}')
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_policy_', location='westus')
+    def test_gallery_soft_delete_policy_and_recycle_bin(self, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': self.create_random_name('sig_', 10),
+            'image_name': self.create_random_name('img_', 10),
+            'version': '1.1.1',
+            'loc': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery} --location {loc} --soft-delete true '
+                 '--soft-delete-retention-period 30 --soft-delete-grace-period 7', checks=[
+            self.check('location', '{loc}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 30),
+            self.check('softDeletePolicy.gracePeriodInDays', 7),
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery} --soft-delete-retention-period 31 '
+                 '--soft-delete-grace-period 8', checks=[
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 31),
+            self.check('softDeletePolicy.gracePeriodInDays', 8),
+        ])
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --os-type linux --os-state Specialized '
+                 '--publisher publisher1 --offer offer1 --sku sku1 --hyper-v-generation v1')
+
+        vm_id = self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} --image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--size Standard_D2s_v3 --admin-username clitest1 --generate-ssh-key '
+            '--public-ip-address "" --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs['vm_id'] = vm_id
+
+        version = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} '
+            '--gallery-image-definition {image_name} --gallery-image-version {version} '
+            '--virtual-machine {vm_id}', checks=[
+                self.check('location', '{loc}'),
+                self.check('name', '{version}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('storageProfile.source.virtualMachineId', '{vm_id}'),
+            ]).get_output_in_json()
+        self.kwargs['version_id'] = version['id']
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].resourceArmId', '{version_id}'),
+            self.check('[0].softDeletedArtifactType', 'Images'),
+            self.exists('[0].softDeletedTime'),
+            self.exists('[0].consumptionEndTime'),
+            self.exists('[0].hardDeletionTargetTime'),
+        ])
+
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}', checks=[
+            self.check('name', '{version}'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version} '
+                 '--bypass-soft-delete')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 0),
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
     def test_replication_mode(self, resource_group):
         self.kwargs.update({
