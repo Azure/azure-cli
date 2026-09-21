@@ -82,7 +82,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.publisher_contact = AAZStrArg(
-            options=["--publisher-contact"],
+            options=["--publisher-email", "--publisher-contact"],
             arg_group="CommunityGalleryInfo",
             help="Community gallery publisher support email. The email address of the publisher. Visible to all users.",
             nullable=True,
