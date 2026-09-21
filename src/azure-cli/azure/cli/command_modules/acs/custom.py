@@ -2532,19 +2532,100 @@ def _download_aks_desktop_asset(asset, destination):
             'The downloaded AKS Desktop artifact did not match its published SHA-256 digest.')
 
 
+def _extract_aks_desktop_archive_compat(archive, destination):
+    # Python 3.10.0-3.10.11 and 3.11.0-3.11.3 have no tar extraction filters.
+    root = os.path.realpath(destination)
+
+    def contained_path(path):
+        resolved = os.path.realpath(os.path.join(root, path))
+        if os.path.commonpath([root, resolved]) != root:
+            raise tarfile.ExtractError('Archive path escapes the extraction directory: {}'.format(path))
+        return resolved
+
+    def extract_member(member, expected_target=None):
+        name = member.name.lstrip('/' + os.sep)
+        if os.path.isabs(name):
+            raise tarfile.ExtractError('Absolute archive path: {}'.format(member.name))
+        resolved = contained_path(name)
+        if member.isdir():
+            # Ignore archive directory modes so subsequent members remain accessible.
+            os.makedirs(resolved, mode=0o755, exist_ok=True)
+            return None
+        if not (member.isreg() or member.issym() or member.islnk()):
+            raise tarfile.ExtractError('Unsupported archive member: {}'.format(member.name))
+        if resolved == root:
+            raise tarfile.ExtractError('An archive file or link cannot replace the extraction directory')
+
+        # Resolve parents, but retain the leaf so replacing a link unlinks the link itself.
+        parent = contained_path(os.path.dirname(name))
+        target = os.path.join(parent, os.path.basename(name))
+        if expected_target is not None and (target != expected_target or os.path.lexists(target)):
+            raise tarfile.ExtractError('Ambiguous destination for deferred archive hardlink: {}'.format(member.name))
+        link_target = None
+        if member.issym() or member.islnk():
+            if os.path.isabs(member.linkname):
+                raise tarfile.ExtractError('Absolute archive link: {}'.format(member.linkname))
+            linkname = os.path.normpath(member.linkname)
+            link_target = contained_path(os.path.join(parent, linkname) if member.issym() else linkname)
+            if member.islnk():
+                try:
+                    target_mode = os.stat(link_target).st_mode
+                except FileNotFoundError:
+                    # Preserve the canonical destination before later members can rebind its parents.
+                    return target
+                if not stat.S_ISREG(target_mode):
+                    raise tarfile.ExtractError('Archive hardlink target is not a regular file: {}'.format(linkname))
+
+        os.makedirs(parent, mode=0o755, exist_ok=True)
+        if member.islnk() and target == link_target:
+            pass  # A hardlink to the same existing regular file needs no replacement.
+        else:
+            if os.path.lexists(target):
+                os.unlink(target)
+            if member.issym():
+                os.symlink(linkname, target)
+                return None
+            if member.islnk():
+                os.link(link_target, target)
+            else:
+                # Never ask tarfile to follow a link or recursively extract its target.
+                with archive.extractfile(member) as source, open(target, 'wb') as output:
+                    shutil.copyfileobj(source, output)
+
+        # Match data_filter: no ownership, special bits, or group/other writes.
+        mode = member.mode & 0o755
+        if not mode & 0o100:
+            mode &= ~0o111
+        os.chmod(target, mode | 0o600)
+        return None
+
+    pending = []
+    for member in archive:
+        deferred_target = extract_member(member)
+        if deferred_target is not None:
+            pending.append((member, deferred_target))
+    # Resolve forward hardlinks without tarfile's unvalidated link-target extraction.
+    while pending:
+        unresolved = [(member, target) for member, target in pending
+                      if extract_member(member, target) is not None]
+        if len(unresolved) == len(pending):
+            raise tarfile.ExtractError('Unresolved or cyclic archive hardlink: {}'.format(unresolved[0][0].name))
+        pending = unresolved
+
+
 def _extract_aks_desktop_archive(archive_path, destination):
-    if getattr(tarfile, 'data_filter', None) is None:
-        raise FileOperationError(
-            'Safe AKS Desktop archive extraction requires an updated Python with tarfile.data_filter support.')
-    os.makedirs(destination, exist_ok=True)
     try:
+        os.makedirs(destination, exist_ok=True)
         with tarfile.open(archive_path, 'r:gz') as archive:
             for member in archive.getmembers():
                 # Older data filters resolve these names differently from extraction (CPython gh-149486).
-                if member.issym() and member.name.endswith(('/', '\\')):
+                if (member.issym() or member.islnk()) and member.name.endswith(('/', '\\')):
                     raise FileOperationError('The AKS Desktop archive contains an unsafe link name.')
             # Check each member against the filesystem state left by earlier members.
-            archive.extractall(destination, filter='data')
+            if getattr(tarfile, 'data_filter', None) is not None:
+                archive.extractall(destination, filter='data')
+            else:
+                _extract_aks_desktop_archive_compat(archive, destination)
     except (OSError, tarfile.TarError) as ex:
         raise FileOperationError(
             'Failed to extract the AKS Desktop archive ({}).'.format(ex))

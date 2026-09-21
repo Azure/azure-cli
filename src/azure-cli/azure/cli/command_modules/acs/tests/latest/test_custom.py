@@ -13,6 +13,7 @@ import unittest
 from unittest import mock
 from urllib.error import HTTPError, URLError
 import datetime
+from contextlib import contextmanager
 from dateutil.parser import parse
 
 import yaml
@@ -1078,8 +1079,39 @@ class AcsCustomCommandTest(unittest.TestCase):
             with open(destination, 'rb') as downloaded:
                 self.assertEqual(downloaded.read(), content)
 
+    @contextmanager
+    def _aks_desktop_archive_extractor(self, fallback):
+        if fallback:
+            # Match the old API: accepting filter= must fail, and an unfiltered call is never safe.
+            def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
+                raise AssertionError('The compatibility extractor must not call extractall')
+
+            with mock.patch.object(tarfile, 'data_filter', None, create=True), \
+                    mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall):
+                yield
+        else:
+            if not hasattr(tarfile, 'data_filter'):
+                self.skipTest('Native tar extraction filters unavailable')
+            # Exercise pre-3.14 defaults even on newer Python.
+            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                   staticmethod(lambda member, path: member), create=True):
+                yield
+
+    @staticmethod
+    def _write_aks_desktop_archive(archive_path, members):
+        with tarfile.open(archive_path, 'w:gz') as archive:
+            for name, member_type, linkname in members:
+                member = tarfile.TarInfo(name)
+                member.type = member_type
+                member.linkname = linkname
+                member.mode = 0o755
+                if member.isfile():
+                    member.size = len(b'executable')
+                    archive.addfile(member, io.BytesIO(b'executable'))
+                else:
+                    archive.addfile(member)
+
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
-    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
     def test_aks_install_desktop_archive_rejects_unsafe_members(self):
         cases = [
             [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
@@ -1088,74 +1120,292 @@ class AcsCustomCommandTest(unittest.TestCase):
              ('dir/link', tarfile.REGTYPE, '')],
             [('../outside', tarfile.REGTYPE, '')],
             [('aks-desktop/', tarfile.SYMTYPE, '../outside')],
+            [('aks-desktop\\', tarfile.SYMTYPE, '../outside')],
+            [('aks-desktop/', tarfile.LNKTYPE, 'missing')],
+            [('aks-desktop\\', tarfile.LNKTYPE, 'missing')],
             [('pipe', tarfile.FIFOTYPE, '')],
+            [('device', tarfile.CHRTYPE, '')],
+            [('device', tarfile.BLKTYPE, '')],
+            [('unknown', b'Z', '')],
+            [('aks-desktop', tarfile.SYMTYPE, '/etc/passwd')],
+            [('aks-desktop', tarfile.LNKTYPE, '/etc/passwd')],
         ]
-        for members in cases:
-            with self.subTest(members=members), tempfile.TemporaryDirectory() as temp_dir:
-                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
-                destination = os.path.join(temp_dir, 'install')
-                outside = os.path.join(temp_dir, 'outside')
-                with open(outside, 'wb') as sentinel:
-                    sentinel.write(b'unchanged')
-                with tarfile.open(archive_path, 'w:gz') as archive:
-                    for name, member_type, linkname in members:
-                        member = tarfile.TarInfo(name)
-                        member.type = member_type
-                        member.linkname = linkname
-                        if member.isfile():
-                            member.size = len(b'overwrite')
-                            archive.addfile(member, io.BytesIO(b'overwrite'))
-                        else:
-                            archive.addfile(member)
-
-                # Exercise pre-3.14 defaults even when the test runs on newer Python.
-                with mock.patch.object(tarfile.TarFile, 'extraction_filter',
-                                       staticmethod(tarfile.fully_trusted_filter)):
+        for fallback in (False, True):
+            for members in cases:
+                with self.subTest(fallback=fallback, members=members), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    outside = os.path.join(temp_dir, 'outside')
+                    with open(outside, 'wb') as sentinel:
+                        sentinel.write(b'unchanged')
+                    self._write_aks_desktop_archive(archive_path, members)
                     with self.assertRaises(FileOperationError):
                         _extract_aks_desktop_archive(archive_path, destination)
-                with open(outside, 'rb') as sentinel:
-                    self.assertEqual(sentinel.read(), b'unchanged')
-                self.assertFalse(os.path.lexists(os.path.join(destination, 'pipe')))
-                self.assertFalse(os.path.lexists(os.path.join(destination, 'aks-desktop')))
+                    with open(outside, 'rb') as sentinel:
+                        self.assertEqual(sentinel.read(), b'unchanged')
+                    for name in ('pipe', 'device', 'unknown', 'aks-desktop'):
+                        self.assertFalse(os.path.lexists(os.path.join(destination, name)))
 
-    @unittest.skipUnless(hasattr(tarfile, 'data_filter'), 'Requires tar extraction filters')
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_existing_escaping_symlinks(self):
+        cases = [
+            [('link/aks-desktop', tarfile.REGTYPE, '')],
+            [('link', tarfile.REGTYPE, '')],
+            [('link/dir', tarfile.DIRTYPE, '')],
+            [('link', tarfile.SYMTYPE, 'safe')],
+            [('hardlink', tarfile.LNKTYPE, 'link/aks-desktop')],
+        ]
+        for fallback in (False, True):
+            for members in cases:
+                with self.subTest(fallback=fallback, members=members), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    outside = os.path.join(temp_dir, 'outside')
+                    os.mkdir(destination)
+                    os.mkdir(outside)
+                    sentinel_path = os.path.join(outside, 'aks-desktop')
+                    with open(sentinel_path, 'wb') as sentinel:
+                        sentinel.write(b'unchanged')
+                    os.symlink(outside, os.path.join(destination, 'link'))
+                    self._write_aks_desktop_archive(archive_path, members)
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                    with open(sentinel_path, 'rb') as sentinel:
+                        self.assertEqual(sentinel.read(), b'unchanged')
+                    self.assertEqual(os.listdir(outside), ['aks-desktop'])
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
     def test_aks_install_desktop_archive_preserves_safe_links(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
-            destination = os.path.join(temp_dir, 'install')
-            with tarfile.open(archive_path, 'w:gz') as archive:
-                member = tarfile.TarInfo('app/aks-desktop')
-                member.mode = 0o755
-                member.size = len(b'executable')
-                archive.addfile(member, io.BytesIO(b'executable'))
-                for name, member_type, target in [
-                    ('app/symlink', tarfile.SYMTYPE, 'aks-desktop'),
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('app/aks-desktop', tarfile.REGTYPE, ''),
+                    ('app/subdir/symlink', tarfile.SYMTYPE, '../aks-desktop'),
                     ('app/hardlink', tarfile.LNKTYPE, 'app/aks-desktop'),
-                ]:
-                    member = tarfile.TarInfo(name)
-                    member.type = member_type
-                    member.linkname = target
-                    member.mode = 0o755
-                    archive.addfile(member)
-            _extract_aks_desktop_archive(archive_path, destination)
-            for name in ('aks-desktop', 'symlink', 'hardlink'):
-                with open(os.path.join(destination, 'app', name), 'rb') as executable:
-                    self.assertEqual(executable.read(), b'executable')
-            if os.name != 'nt':
-                self.assertTrue(os.stat(os.path.join(destination, 'app', 'aks-desktop')).st_mode & 0o100)
+                    ('alias', tarfile.SYMTYPE, 'app'),
+                    ('alias/resource', tarfile.REGTYPE, ''),
+                ])
+                _extract_aks_desktop_archive(archive_path, destination)
+                for name in ('aks-desktop', 'subdir/symlink', 'hardlink', 'resource'):
+                    with open(os.path.join(destination, 'app', name), 'rb') as executable:
+                        self.assertEqual(executable.read(), b'executable')
+                executable_path = os.path.join(destination, 'app', 'aks-desktop')
+                self.assertTrue(os.stat(executable_path).st_mode & 0o100)
+                self.assertEqual(os.readlink(os.path.join(destination, 'app', 'subdir', 'symlink')),
+                                 '../aks-desktop')
+                self.assertTrue(os.path.samefile(executable_path, os.path.join(destination, 'app', 'hardlink')))
+                self.assertFalse(os.path.islink(os.path.join(destination, 'app', 'hardlink')))
 
-    @mock.patch.object(tarfile, 'data_filter', None, create=True)
-    def test_aks_install_desktop_archive_requires_safe_extractor(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
+    def test_aks_install_desktop_archive_supports_legacy_python(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
             archive_path = os.path.join(temp_dir, 'installer.tar.gz')
             destination = os.path.join(temp_dir, 'install')
-            with tarfile.open(archive_path, 'w:gz') as archive:
-                archive.addfile(tarfile.TarInfo('aks-desktop'))
-            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
-                                   staticmethod(lambda member, path: member), create=True):
-                with self.assertRaisesRegex(FileOperationError, 'Python'):
+            self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+            _extract_aks_desktop_archive(archive_path, destination)
+            with open(os.path.join(destination, 'aks-desktop'), 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_resolves_forward_hardlinks(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('app/first', tarfile.LNKTYPE, 'app/second'),
+                ('app/second', tarfile.LNKTYPE, 'app/aks-desktop'),
+                ('app/aks-desktop', tarfile.REGTYPE, ''),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            for name in ('first', 'second'):
+                link = os.path.join(destination, 'app', name)
+                self.assertFalse(os.path.islink(link))
+                self.assertTrue(os.path.samefile(link, os.path.join(destination, 'app', 'aks-desktop')))
+                with open(link, 'rb') as executable:
+                    self.assertEqual(executable.read(), b'executable')
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_deferred_hardlink_collisions(self):
+        for link_name, later_name in [('a', 'a'), ('alias/a', 'dir/a')]:
+            with self.subTest(link_name=link_name), self._aks_desktop_archive_extractor(True), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    alias = tarfile.TarInfo('alias')
+                    alias.type = tarfile.SYMTYPE
+                    alias.linkname = 'dir'
+                    archive.addfile(alias)
+                    link = tarfile.TarInfo(link_name)
+                    link.type = tarfile.LNKTYPE
+                    link.linkname = 'b'
+                    link.mode = 0o755
+                    archive.addfile(link)
+                    for name, content, mode in [(later_name, b'later-a', 0o600), ('b', b'b-content', 0o755)]:
+                        member = tarfile.TarInfo(name)
+                        member.size = len(content)
+                        member.mode = mode
+                        archive.addfile(member, io.BytesIO(content))
+                with self.assertRaisesRegex(FileOperationError, 'Ambiguous.*deferred.*hardlink'):
                     _extract_aks_desktop_archive(archive_path, destination)
-            self.assertFalse(os.path.exists(destination))
+                for name, content, mode in [(later_name, b'later-a', 0o600), ('b', b'b-content', 0o755)]:
+                    path = os.path.join(destination, name)
+                    with open(path, 'rb') as extracted:
+                        self.assertEqual(extracted.read(), content)
+                    self.assertEqual(os.stat(path).st_mode & 0o777, mode)
+                self.assertFalse(os.path.samefile(os.path.join(destination, later_name),
+                                                  os.path.join(destination, 'b')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_deferred_hardlink_parent_rebinding(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('alias', tarfile.SYMTYPE, 'first'),
+                ('alias/a', tarfile.LNKTYPE, 'b'),
+                ('alias', tarfile.SYMTYPE, 'second'),
+                ('b', tarfile.REGTYPE, ''),
+            ])
+            with self.assertRaisesRegex(FileOperationError, 'Ambiguous.*deferred.*hardlink'):
+                _extract_aks_desktop_archive(archive_path, destination)
+            self.assertEqual(os.readlink(os.path.join(destination, 'alias')), 'second')
+            self.assertFalse(os.path.lexists(os.path.join(destination, 'first')))
+            self.assertFalse(os.path.lexists(os.path.join(destination, 'second')))
+            with open(os.path.join(destination, 'b'), 'rb') as extracted:
+                self.assertEqual(extracted.read(), b'executable')
+
+    def test_aks_install_desktop_archive_rejects_unresolved_hardlinks(self):
+        cases = [
+            [('first', tarfile.LNKTYPE, 'second'), ('second', tarfile.LNKTYPE, 'first')],
+            [('first', tarfile.LNKTYPE, 'missing')],
+            [('dir', tarfile.DIRTYPE, ''), ('first', tarfile.LNKTYPE, 'dir')],
+        ]
+        for members in cases:
+            with self.subTest(members=members), self._aks_desktop_archive_extractor(True), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, members)
+                with self.assertRaisesRegex(FileOperationError, 'hardlink'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'first')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_root_replacement(self):
+        for member_type in (tarfile.SYMTYPE, tarfile.LNKTYPE):
+            for name in ('.', 'app/..', 'alias'):
+                with self.subTest(member_type=member_type, name=name), \
+                        self._aks_desktop_archive_extractor(True), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    os.mkdir(destination)
+                    os.symlink('.', os.path.join(destination, 'alias'))
+                    self._write_aks_desktop_archive(archive_path, [
+                        ('aks-desktop', tarfile.REGTYPE, ''),
+                        (name, member_type, 'aks-desktop'),
+                    ])
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                    self.assertTrue(os.path.isdir(destination))
+                    self.assertFalse(os.path.islink(destination))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_normalizes_safe_symlink_targets(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('app/aks-desktop', tarfile.REGTYPE, ''),
+                ('app/link', tarfile.SYMTYPE, 'unused/../aks-desktop'),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            link = os.path.join(destination, 'app', 'link')
+            self.assertEqual(os.readlink(link), 'aks-desktop')
+            with open(link, 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    def test_aks_install_desktop_archive_does_not_create_outside_parents(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('../outside/../install/app/aks-desktop', tarfile.REGTYPE, ''),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.lexists(os.path.join(temp_dir, 'outside')))
+            with open(os.path.join(destination, 'app', 'aks-desktop'), 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_failure_does_not_launch(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('aks-desktop', tarfile.REGTYPE, ''),
+                    ('../outside', tarfile.REGTYPE, ''),
+                ])
+                with mock.patch('os.path.expanduser', return_value=temp_dir):
+                    with self.assertRaises(FileOperationError):
+                        _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                mock_popen.assert_not_called()
+
+    @unittest.skipIf(os.name == 'nt', 'Requires POSIX permissions')
+    def test_aks_install_desktop_archive_sanitizes_permissions(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    directory = tarfile.TarInfo('app')
+                    directory.type = tarfile.DIRTYPE
+                    directory.mode = 0
+                    archive.addfile(directory)
+                    for name, mode in [('executable', 0o7777), ('data', 0o7033)]:
+                        member = tarfile.TarInfo('app/' + name)
+                        member.mode = mode
+                        member.uid = member.gid = 12345
+                        member.uname = member.gname = 'untrusted'
+                        archive.addfile(member)
+                _extract_aks_desktop_archive(archive_path, destination)
+                self.assertEqual(os.stat(os.path.join(destination, 'app')).st_mode & 0o700, 0o700)
+                for name, mode in [('executable', 0o755), ('data', 0o600)]:
+                    info = os.stat(os.path.join(destination, 'app', name))
+                    self.assertEqual(info.st_mode & 0o7777, mode)
+                    self.assertEqual(info.st_uid, os.getuid())
+                    self.assertEqual(info.st_gid, os.getgid())
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_replaces_link_leaf_without_following(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('old', tarfile.REGTYPE, ''),
+                    ('new', tarfile.REGTYPE, ''),
+                    ('alias', tarfile.SYMTYPE, 'old'),
+                    ('alias', tarfile.SYMTYPE, 'new'),
+                    ('hardlink', tarfile.SYMTYPE, 'old'),
+                    ('hardlink', tarfile.LNKTYPE, 'new'),
+                ])
+                _extract_aks_desktop_archive(archive_path, destination)
+                self.assertEqual(os.readlink(os.path.join(destination, 'alias')), 'new')
+                self.assertFalse(os.path.islink(os.path.join(destination, 'old')))
+                self.assertFalse(os.path.islink(os.path.join(destination, 'hardlink')))
+                self.assertTrue(os.path.samefile(os.path.join(destination, 'hardlink'),
+                                                 os.path.join(destination, 'new')))
 
     @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
     def test_aks_install_desktop_launches_without_shell(self, mock_run):
