@@ -2417,9 +2417,13 @@ def _get_aks_desktop_platform():
     return system_names[system], arch
 
 
-def _get_aks_desktop_release(version=None):
+def _get_aks_desktop_release(version=None, gh_token=None):
+    # urllib includes invalid header values in errors, which would expose the token.
+    if gh_token and ('\r' in gh_token or '\n' in gh_token):
+        raise InvalidArgumentValueError('The --gh-token value must not contain carriage returns or line feeds.')
+
     requested_version = None
-    if version:
+    if version is not None:
         version = version[1:] if version.startswith('v') else version
         if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', version):
             raise InvalidArgumentValueError(
@@ -2432,11 +2436,22 @@ def _get_aks_desktop_release(version=None):
 
     logger.warning('Getting AKS Desktop release metadata from "%s".', release_url)
     try:
-        release = json.loads(_urlopen_read(release_url))
+        release = json.loads(_urlopen_read(release_url, gh_token=gh_token))
     except (OSError, ValueError) as ex:
+        status = getattr(ex, 'code', None)
+        headers = getattr(ex, 'headers', None) or {}
+        if status == 429 or (status == 403 and (
+                headers.get('X-RateLimit-Remaining') == '0' or headers.get('Retry-After') is not None)):
+            recommendation = (
+                "Please wait for the GitHub API rate limit to reset and check your token's quota."
+                if gh_token else
+                'Please rerun with --gh-token or wait for the GitHub API rate limit to reset.')
+            raise ClientRequestError(
+                'GitHub API rate limit exceeded while getting AKS Desktop release metadata from "{}" ({}).'
+                .format(release_url, ex), recommendation=recommendation)
         raise ClientRequestError(
             'Failed to get AKS Desktop release metadata from "{}" ({}).'.format(release_url, ex),
-            recommendation='Please retry later, or specify a version with --version.')
+            recommendation='Please check the error and retry later.')
 
     tag = release.get('tag_name', '')
     if not re.fullmatch(r'v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', tag):
@@ -2507,7 +2522,7 @@ def _download_aks_desktop_asset(asset, destination):
             return super().redirect_request(req, fp, code, msg, headers, newurl)
 
     digest = asset.get('digest', '')
-    if not re.fullmatch(r'sha256:[0-9a-fA-F]{64}', digest):
+    if not isinstance(digest, str) or not re.fullmatch(r'sha256:[0-9a-fA-F]{64}', digest):
         raise ClientRequestError(
             'The AKS Desktop release artifact does not include a valid SHA-256 digest.')
 
@@ -2662,12 +2677,12 @@ def _launch_aks_desktop_installer(installer_path, system, version):
             'The AKS Desktop installer exited with code {}.'.format(ex.returncode))
 
 
-def aks_install_desktop(cmd, version=None):
+def aks_install_desktop(cmd, version=None, gh_token=None):
     from azure.cli.core._environment import get_config_dir
 
     del cmd
     system, arch = _get_aks_desktop_platform()
-    release, release_version = _get_aks_desktop_release(version)
+    release, release_version = _get_aks_desktop_release(version, gh_token=gh_token)
     asset = _select_aks_desktop_asset(
         release, release_version, system, arch)
 

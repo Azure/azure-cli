@@ -993,7 +993,144 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(version, '0.9.1')
         self.assertEqual(release['tag_name'], 'v0.9.1')
         mock_urlopen_read.assert_called_once_with(
-            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1')
+            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1', gh_token=None)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_authentication(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        for version, endpoint in ((None, 'latest'), ('0.9.1', 'tags/v0.9.1'), ('v0.9.1', 'tags/v0.9.1')):
+            for token in (None, 'fake-gh-token'):
+                with self.subTest(version=version, token=token):
+                    mock_urlopen_read.reset_mock()
+                    release, release_version = _get_aks_desktop_release(version, gh_token=token)
+                    self.assertEqual(release['tag_name'], 'v0.9.1')
+                    self.assertEqual(release_version, '0.9.1')
+                    mock_urlopen_read.assert_called_once_with(
+                        'https://api.github.com/repos/Azure/aks-desktop/releases/' + endpoint, gh_token=token)
+
+    @mock.patch('http.client.HTTPSConnection.connect', side_effect=AssertionError('Network connection blocked'))
+    def test_aks_install_desktop_rejects_newlines_in_token(self, mock_connect):
+        secret = 'fake-sensitive-token'
+        for version in (None, '0.9.1'):
+            for newline in ('\r', '\n', '\r\n'):
+                with self.subTest(version=version, newline=repr(newline)):
+                    # Keep the real urllib header validation: it can echo malformed credentials.
+                    with self.assertRaises(InvalidArgumentValueError) as cm:
+                        _get_aks_desktop_release(version, gh_token=secret + newline)
+                    self.assertIn('--gh-token', str(cm.exception))
+                    self.assertNotIn(secret, str(cm.exception))
+                    self.assertNotIn(secret, ' '.join(cm.exception.recommendations))
+                    mock_connect.assert_not_called()
+
+    @mock.patch('http.client.HTTPSConnection.connect', side_effect=AssertionError('Network connection blocked'))
+    def test_aks_install_desktop_valid_token_reaches_transport(self, mock_connect):
+        for token in (None, 'fake-sensitive-token'):
+            with self.subTest(token=token):
+                mock_connect.reset_mock()
+                with self.assertRaisesRegex(AssertionError, 'Network connection blocked'):
+                    _get_aks_desktop_release(gh_token=token)
+                mock_connect.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_rejects_empty_version(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        for version in ('', ' ', '\t', 'v'):
+            with self.subTest(version=version):
+                mock_urlopen_read.reset_mock()
+                with self.assertRaises(InvalidArgumentValueError):
+                    _get_aks_desktop_release(version)
+                mock_urlopen_read.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_rate_limit(self, mock_urlopen_read):
+        url = 'https://api.github.com/repos/Azure/aks-desktop/releases/latest'
+        for status, headers in ((429, None), (403, {'X-RateLimit-Remaining': '0'}),
+                                (403, {'Retry-After': '60'})):
+            for token in (None, 'fake-gh-token'):
+                with self.subTest(status=status, headers=headers, token=token):
+                    mock_urlopen_read.reset_mock()
+                    error = HTTPError(url, status, 'Forbidden', headers, None)
+                    self.addCleanup(error.close)
+                    mock_urlopen_read.side_effect = error
+                    kwargs = {'gh_token': token} if token else {}
+                    with self.assertRaises(ClientRequestError) as cm:
+                        _get_aks_desktop_release(**kwargs)
+                    message = str(cm.exception)
+                    recommendation = ' '.join(cm.exception.recommendations)
+                    self.assertIn('rate limit', message.lower())
+                    self.assertIn(str(status), message)
+                    self.assertIn(url, message)
+                    self.assertIn('wait', recommendation.lower())
+                    if token:
+                        self.assertIn('quota', recommendation.lower())
+                        self.assertNotIn('--gh-token', recommendation)
+                    else:
+                        self.assertIn('--gh-token', recommendation)
+                        self.assertIn('reset', recommendation.lower())
+                    self.assertNotIn('--version', recommendation)
+                    self.assertNotIn('fake-gh-token', message + recommendation)
+                    mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_errors(self, mock_urlopen_read):
+        url = 'https://api.github.com/repos/Azure/aks-desktop/releases/latest'
+        cases = [
+            (HTTPError(url, 403, 'Forbidden', None, None), '403'),
+            (HTTPError(url, 403, 'Forbidden', {'X-RateLimit-Remaining': '10'}, None), '403'),
+            (HTTPError(url, 401, 'Unauthorized', None, None), '401'),
+            (HTTPError(url, 404, 'Not Found', None, None), '404'),
+            (URLError('network unavailable'), 'network unavailable'),
+            (b'not JSON', 'Expecting value'),
+        ]
+        for response, context in cases:
+            with self.subTest(context=context, response=response):
+                mock_urlopen_read.reset_mock()
+                if isinstance(response, HTTPError):
+                    self.addCleanup(response.close)
+                mock_urlopen_read.side_effect = response if isinstance(response, Exception) else None
+                mock_urlopen_read.return_value = response
+                with self.assertRaises(ClientRequestError) as cm:
+                    _get_aks_desktop_release()
+                message = str(cm.exception)
+                recommendation = ' '.join(cm.exception.recommendations)
+                self.assertIn('release metadata', message)
+                self.assertIn(url, message)
+                self.assertIn(context, message)
+                self.assertNotIn('rate limit', message.lower())
+                self.assertNotIn('--version', recommendation)
+                mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('urllib.request.build_opener')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform', return_value=('win', 'x64'))
+    def test_aks_install_desktop_token_only_reaches_metadata(
+            self, _, mock_urlopen_read, mock_build_opener, mock_launch):
+        mock_urlopen_read.return_value = (
+            b'{"tag_name": "v0.9.1", "assets": [{"name": "aks-desktop-0.9.1-win-x64.exe",'
+            b'"browser_download_url": "https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+            b'aks-desktop-0.9.1-win-x64.exe", "digest": "sha256:' +
+            hashlib.sha256(b'installer').hexdigest().encode() + b'"}]}')
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.side_effect = [b'installer', b'']
+        mock_build_opener.return_value.open.return_value = response
+
+        def launch(path, system, version):
+            with open(path, 'rb') as installer:
+                self.assertEqual(installer.read(), b'installer')
+
+        mock_launch.side_effect = launch
+        aks_install_desktop(None, version='0.9.1', gh_token='fake-gh-token')
+        mock_urlopen_read.assert_called_once_with(
+            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1', gh_token='fake-gh-token')
+        mock_build_opener.return_value.open.assert_called_once()
+        request = mock_build_opener.return_value.open.call_args[0][0]
+        self.assertEqual(request.full_url,
+                         'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                         'aks-desktop-0.9.1-win-x64.exe')
+        self.assertIsNone(request.get_header('Authorization'))
+        self.assertNotIn('fake-gh-token', str(request.header_items()))
+        mock_launch.assert_called_once()
 
     @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
@@ -1078,6 +1215,51 @@ class AcsCustomCommandTest(unittest.TestCase):
             _download_aks_desktop_asset(asset, destination)
             with open(destination, 'rb') as downloaded:
                 self.assertEqual(downloaded.read(), content)
+
+    @mock.patch('urllib.request.build_opener')
+    def test_aks_install_desktop_rejects_invalid_digest(self, mock_build_opener):
+        cases = [{}, *({'digest': digest} for digest in (
+            None, 123, [], {}, '', 'sha256:', 'sha256:' + 'a' * 63,
+            'sha256:' + 'a' * 65, 'sha256:' + 'g' * 64, 'sha512:' + 'a' * 64))]
+        for metadata in cases:
+            with self.subTest(metadata=metadata), tempfile.TemporaryDirectory() as temp_dir:
+                asset = {
+                    'browser_download_url':
+                        'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/installer.exe',
+                    **metadata,
+                }
+                destination = os.path.join(temp_dir, 'installer.exe')
+                with self.assertRaisesRegex(ClientRequestError, 'valid SHA-256 digest'):
+                    _download_aks_desktop_asset(asset, destination)
+                mock_build_opener.assert_not_called()
+                self.assertFalse(os.path.exists(destination))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('urllib.request.build_opener')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform', return_value=('win', 'x64'))
+    def test_aks_install_desktop_digest_failure_prevents_launch(
+            self, _, mock_release, mock_build_opener, mock_launch):
+        for digest, error in ((None, 'valid SHA-256 digest'), ('sha256:' + '0' * 64, 'did not match')):
+            with self.subTest(digest=digest):
+                mock_build_opener.reset_mock()
+                response = mock.MagicMock()
+                response.__enter__.return_value.read.side_effect = [b'installer', b'']
+                mock_build_opener.return_value.open.return_value = response
+                mock_release.return_value = ({'assets': [{
+                    'name': 'aks-desktop-0.9.1-win-x64.exe',
+                    'browser_download_url':
+                        'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                        'aks-desktop-0.9.1-win-x64.exe',
+                    'digest': digest,
+                }]}, '0.9.1')
+                with self.assertRaisesRegex(ClientRequestError, error):
+                    aks_install_desktop(None)
+                mock_launch.assert_not_called()
+                if digest is None:
+                    mock_build_opener.assert_not_called()
+                else:
+                    mock_build_opener.return_value.open.assert_called_once()
 
     @contextmanager
     def _aks_desktop_archive_extractor(self, fallback):
@@ -1490,6 +1672,16 @@ class AcsCustomCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform')
     def test_aks_install_desktop_cleans_synchronous_installer(self, mock_platform, mock_release,
                                                               mock_download, mock_launch):
+        def download(asset, path):
+            with open(path, 'wb') as output:
+                output.write(b'installer')
+
+        def launch(path, system, version):
+            with open(path, 'rb') as installer:
+                self.assertEqual(installer.read(), b'installer')
+
+        mock_download.side_effect = download
+        mock_launch.side_effect = launch
         cases = [
             ('win', 'x64', 'aks-desktop-0.9.1-win-x64.exe'),
             ('linux', 'arm64', 'aks-desktop-0.9.1-linux-arm64.tar.gz'),
@@ -1504,6 +1696,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 mock_download.assert_called_once()
                 installer_path = mock_download.call_args[0][1]
                 mock_launch.assert_called_once_with(installer_path, system, '0.9.1')
+                self.assertFalse(os.path.exists(installer_path))
                 self.assertFalse(os.path.exists(os.path.dirname(installer_path)))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')

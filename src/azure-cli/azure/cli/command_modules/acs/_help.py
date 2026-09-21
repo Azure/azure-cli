@@ -1490,6 +1490,9 @@ long-summary: >
   GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
   directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open;
   other Linux systems use the portable archive when available.
+  If GitHub API requests are rate-limited, rerun with --gh-token or wait for the rate limit to reset.
+  The token is used only to retrieve release metadata, not to download the installer. If requests with a token
+  are rate-limited, wait for the rate limit to reset and check the token's quota.
 examples:
   - name: Install the latest stable version of AKS Desktop
     text: az aks install-desktop
