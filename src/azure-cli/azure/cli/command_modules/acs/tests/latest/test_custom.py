@@ -1579,15 +1579,28 @@ class AcsCustomCommandTest(unittest.TestCase):
                     ('new', tarfile.REGTYPE, ''),
                     ('alias', tarfile.SYMTYPE, 'old'),
                     ('alias', tarfile.SYMTYPE, 'new'),
-                    ('hardlink', tarfile.SYMTYPE, 'old'),
-                    ('hardlink', tarfile.LNKTYPE, 'new'),
                 ])
                 _extract_aks_desktop_archive(archive_path, destination)
                 self.assertEqual(os.readlink(os.path.join(destination, 'alias')), 'new')
                 self.assertFalse(os.path.islink(os.path.join(destination, 'old')))
-                self.assertFalse(os.path.islink(os.path.join(destination, 'hardlink')))
-                self.assertTrue(os.path.samefile(os.path.join(destination, 'hardlink'),
-                                                 os.path.join(destination, 'new')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_compat_replaces_hardlink_leaf_without_following(self):
+        # Native tarfile behavior for hardlinks replacing symlinks varies across Python versions.
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('old', tarfile.REGTYPE, ''),
+                ('new', tarfile.REGTYPE, ''),
+                ('hardlink', tarfile.SYMTYPE, 'old'),
+                ('hardlink', tarfile.LNKTYPE, 'new'),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.islink(os.path.join(destination, 'old')))
+            self.assertFalse(os.path.islink(os.path.join(destination, 'hardlink')))
+            self.assertTrue(os.path.samefile(os.path.join(destination, 'hardlink'),
+                                             os.path.join(destination, 'new')))
 
     @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
     def test_aks_install_desktop_launches_without_shell(self, mock_run):
