@@ -57,6 +57,7 @@ class ListSoftDeleted(AAZCommand):
             options=["--artifact-type"],
             help="The type of the artifact to be listed, such as gallery image version.",
             required=True,
+            default="Images",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$",
             ),
