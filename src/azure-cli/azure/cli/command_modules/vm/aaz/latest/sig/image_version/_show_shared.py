@@ -22,9 +22,9 @@ class ShowShared(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/sharedgalleries/{}/images/{}/versions/{}", "2022-01-03"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/sharedgalleries/{}/images/{}/versions/{}", "2026-03-03"],
         ]
     }
 
@@ -141,7 +141,7 @@ class ShowShared(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-03",
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }
@@ -193,11 +193,22 @@ class ShowShared(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
+            properties.artifact_tags = AAZDictType(
+                serialized_name="artifactTags",
+            )
+            properties.consumption_end_time = AAZStrType(
+                serialized_name="consumptionEndTime",
+                flags={"read_only": True},
+            )
             properties.end_of_life_date = AAZStrType(
                 serialized_name="endOfLifeDate",
             )
             properties.exclude_from_latest = AAZBoolType(
                 serialized_name="excludeFromLatest",
+            )
+            properties.image_state = AAZStrType(
+                serialized_name="imageState",
+                flags={"read_only": True},
             )
             properties.published_date = AAZStrType(
                 serialized_name="publishedDate",
@@ -205,6 +216,9 @@ class ShowShared(AAZCommand):
             properties.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
             )
+
+            artifact_tags = cls._schema_on_200.properties.artifact_tags
+            artifact_tags.Element = AAZStrType()
 
             storage_profile = cls._schema_on_200.properties.storage_profile
             storage_profile.data_disk_images = AAZListType(
