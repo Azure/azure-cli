@@ -635,7 +635,11 @@ def _config_directory(variable: str, default: Path) -> Path:
 
 
 def discover_agents() -> list[AgentTarget]:
-    home = Path.home()
+    try:
+        home = Path.home()
+    except RuntimeError as error:
+        raise FileOperationError(
+            f'Could not resolve the user home directory for Azure skills: {error}') from None
     claude = _config_directory('CLAUDE_CONFIG_DIR', home / '.claude')
     codex = _config_directory('CODEX_HOME', home / '.codex')
     copilot = home / '.copilot'

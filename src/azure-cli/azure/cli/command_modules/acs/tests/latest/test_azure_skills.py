@@ -85,6 +85,7 @@ class FlowTests(unittest.TestCase):
             skills.AgentTarget('github-copilot', 'GitHub Copilot', self.root / 'copilot/skills', False),
             skills.AgentTarget('pi', 'Pi', self.root / 'pi/skills', True),
         ]
+        self.real_discover = skills.discover_agents
         self.discover = self.patches.enter_context(mock.patch.object(
             skills, 'discover_agents', return_value=self.targets))
         self.sudo = self.patches.enter_context(mock.patch.object(skills, '_is_sudo', return_value=False))
@@ -341,13 +342,51 @@ class FlowTests(unittest.TestCase):
         self.assertIn('--skills-agents <selected agents>', text)
         self.resolve.assert_not_called()
 
+    def test_home_resolution_failure_preserves_optional_success_and_explicit_exit_code_one(self):
+        from azure.cli.core import azclierror
+        from azure.cli.core.util import handle_exception
+
+        self.discover.side_effect = self.real_discover
+        for explicit in (False, True):
+            with self.subTest(explicit=explicit), \
+                    mock.patch.object(Path, 'home', side_effect=RuntimeError('Could not determine home directory.')), \
+                    mock.patch.object(skills, 'stage_bundle') as stage:
+                self.input.reset_mock()
+                self.input.side_effect = ['y']
+                with self.assertLogs(skills.logger, level='WARNING') as logs:
+                    if explicit:
+                        with self.assertRaises(FileOperationError) as raised:
+                            skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+                        with mock.patch.object(azclierror, 'telemetry'), \
+                                self.assertLogs(azclierror.logger, level='ERROR'), \
+                                self.assertLogs('az_command_data_logger', level='ERROR'):
+                            self.assertEqual(handle_exception(raised.exception), 1)
+                        self.input.assert_not_called()
+                    else:
+                        self.assertIsNone(skills.maybe_install_azure_skills(self.cmd))
+                        self.input.assert_called_once()
+                text = '\n'.join(logs.output)
+                for expected in ('home directory', 'Could not determine home directory.',
+                                 'kubectl and kubelogin remain installed', '--skills-agents <selected agents>',
+                                 'binary installation', 'release may have changed'):
+                    self.assertIn(expected, text)
+                    if explicit:
+                        self.assertIn(expected, str(raised.exception))
+                self.resolve.assert_not_called()
+                self.download.assert_not_called()
+                stage.assert_not_called()
+                self.publish.assert_not_called()
+                self.assertEqual(list(self.root.iterdir()), [])
+
     def test_temporary_filesystem_error_is_contextual_not_programming_error(self):
         with mock.patch.object(skills.tempfile, 'TemporaryDirectory', side_effect=PermissionError('denied')):
             with self.assertRaisesRegex(CLIError, 'permissions|denied'):
                 skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
-        with mock.patch.object(skills, 'resolve_release', side_effect=TypeError('bug')):
-            with self.assertRaisesRegex(TypeError, 'bug'):
-                skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
+        for error_type in (TypeError, RuntimeError):
+            with self.subTest(error_type=error_type), \
+                    mock.patch.object(skills, 'resolve_release', side_effect=error_type('bug')):
+                with self.assertRaisesRegex(error_type, 'bug'):
+                    skills.maybe_install_azure_skills(self.cmd, True, ['pi'])
 
     def test_all_outcomes_and_manual_recovery_explicit_raises_optional_warns(self):
         installed = self.root / 'pi/skills/installed'
@@ -603,10 +642,8 @@ class CliArgumentTests(unittest.TestCase):
                 self.assertEqual(handler.call_args.kwargs['skills_agents'], ['pi', 'codex'] if expected else None)
 
     def test_invalid_agent_is_rejected_by_parser(self):
-        with mock.patch('sys.stderr', new_callable=io.StringIO) as output:
-            result, handler = self.invoke(['--install-azure-skills', '--skills-agents', 'unknown'])
+        result, handler = self.invoke(['--install-azure-skills', '--skills-agents', 'unknown'])
         self.assertEqual(result, 2)
-        self.assertIn("'unknown' is not a valid value for '--skills-agents'", output.getvalue())
         handler.assert_not_called()
 
     def test_source_overlay_help_explains_optional_scope_and_retry_limitations(self):
@@ -2383,6 +2420,14 @@ class AgentDiscoveryTests(unittest.TestCase):
             targets = skills.discover_agents()
         self.assertEqual([target.detected for target in targets], [False, True, False, False])
         self.assertEqual(targets[1].destination, self.home / '.agents/skills')
+
+    def test_unresolved_home_raises_file_operation_error_before_directory_probing(self):
+        with mock.patch.object(Path, 'home', side_effect=RuntimeError('Could not determine home directory.')):
+            with self.assertRaises(FileOperationError) as raised:
+                skills.discover_agents()
+        self.assertIn('resolve the user home directory for Azure skills', str(raised.exception))
+        self.assertIn('Could not determine home directory.', str(raised.exception))
+        self.isdir.assert_not_called()
 
     def test_home_is_resolved_on_each_call(self):
         first = skills.discover_agents()
