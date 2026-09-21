@@ -266,8 +266,8 @@ def _api_json(path: str, gh_token: str | None) -> dict:
 def resolve_release(gh_token: str | None = None) -> Release:
     release = _api_json('/releases/latest', gh_token)
     tag = release.get('tag_name')
-    if (not isinstance(tag, str) or not tag or len(tag) > 255 or
-            any(ord(char) < 32 for char in tag) or
+    valid_tag = isinstance(tag, str) and bool(tag) and len(tag) <= 255
+    if (not valid_tag or any(ord(char) < 32 for char in tag) or
             release.get('draft') is not False or
             release.get('prerelease') is not False):
         raise AzureResponseError('GitHub returned an invalid stable Azure skills release.')
@@ -341,10 +341,10 @@ def _validated_members(bundle):
             raise ValidationError('Azure skills archive exceeded the path depth limit.')
         for part in parts:
             basename = part.split('.')[0].rstrip(' ').upper()
+            reserved_name = (basename in ('CON', 'PRN', 'AUX', 'NUL', 'CLOCK$', 'CONIN$', 'CONOUT$') or
+                             re.fullmatch(r'(COM|LPT)[1-9¹²³]', basename))
             if (not part or part in ('.', '..') or part.endswith((' ', '.')) or
-                    any(ord(char) < 32 or char in '\\:<>"|?*' for char in part) or
-                    basename in ('CON', 'PRN', 'AUX', 'NUL', 'CLOCK$', 'CONIN$', 'CONOUT$') or
-                    re.fullmatch(r'(COM|LPT)[1-9¹²³]', basename)):
+                    any(ord(char) < 32 or char in '\\:<>"|?*' for char in part) or reserved_name):
                 raise ValidationError('Azure skills archive contains an unsafe path.')
         mode = stat.S_IFMT(member.external_attr >> 16)
         allowed_modes = (0, stat.S_IFDIR) if is_directory else (0, stat.S_IFREG)
@@ -387,7 +387,8 @@ def _validate_skill_frontmatter(path):
                 for field in ('name', 'description')):
             raise ValueError('Missing name or description')
     except (UnicodeError, ValueError, StopIteration, RecursionError, yaml.YAMLError):
-        raise ValidationError(f'Invalid SKILL.md frontmatter in {path}. Expected nonempty name and description strings.') from None
+        raise ValidationError(f'Invalid SKILL.md frontmatter in {path}. '
+                              'Expected nonempty name and description strings.') from None
 
 
 def stage_bundle(archive: Path, staging: Path) -> list[Path]:
@@ -411,13 +412,14 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
             files = {parts for member, parts in payload if not member.is_dir()}
             if (not names or any(len(parts) < 2 for parts in files) or
                     any((name, 'SKILL.md') not in files for name in names)):
-                raise ValidationError('Azure skills payload requires an immediate SKILL.md in every top-level skill directory.')
+                raise ValidationError('Azure skills payload requires an immediate SKILL.md '
+                                      'in every top-level skill directory.')
             if any(member.file_size > FILE_LIMIT for member, _ in payload) or license_member.file_size > FILE_LIMIT:
                 raise ValidationError('Azure skills archive exceeded the per-file size limit.')
             for member, parts in payload:
-                if len(parts) >= 2 and _path_key((parts[1],)) == _path_key((_LICENSE_NOTICE,)):
-                    if parts[1] != _LICENSE_NOTICE or len(parts) != 2 or member.is_dir():
-                        raise ValidationError('Azure skills payload collides with the LICENSE.azure-skills notice.')
+                if (len(parts) >= 2 and _path_key((parts[1],)) == _path_key((_LICENSE_NOTICE,)) and
+                        (parts[1] != _LICENSE_NOTICE or len(parts) != 2 or member.is_dir())):
+                    raise ValidationError('Azure skills payload collides with the LICENSE.azure-skills notice.')
 
             # mkdir must fail for existing directories, files, and symlinks; never clean those up.
             staging.mkdir(mode=0o700)
@@ -438,7 +440,8 @@ def stage_bundle(archive: Path, staging: Path) -> list[Path]:
                 with bundle.open(member) as source, destination.open('xb') as output:
                     written = _copy_bounded(source, output, min(FILE_LIMIT, EXPANDED_LIMIT - total))
                 if written != member.file_size:
-                    raise ValidationError(f'Azure skills archive member {member.filename} did not match its advertised size.')
+                    raise ValidationError(f'Azure skills archive member {member.filename} '
+                                          'did not match its advertised size.')
                 total += written
                 # Nested SKILL.md files can be supporting guides, not standalone entry points.
                 if len(parts) == 2 and parts[1] == 'SKILL.md':
@@ -514,14 +517,11 @@ def _same_tree(source: Path, destination: Path) -> bool:
         return False
     if stat.S_ISDIR(source_info.st_mode) and stat.S_ISDIR(destination_info.st_mode):
         names = sorted(path.name for path in source.iterdir())
-        if names != sorted(path.name for path in destination.iterdir()):
-            return False
-        return all(_same_tree(source / name, destination / name) for name in names)
-    if not (stat.S_ISREG(source_info.st_mode) and stat.S_ISREG(destination_info.st_mode)):
-        return False
-    if source_info.st_size != destination_info.st_size:
-        return False
-    if os.name == 'posix' and (source_info.st_mode & 0o111) != (destination_info.st_mode & 0o111):
+        return (names == sorted(path.name for path in destination.iterdir()) and
+                all(_same_tree(source / name, destination / name) for name in names))
+    if (not (stat.S_ISREG(source_info.st_mode) and stat.S_ISREG(destination_info.st_mode)) or
+            source_info.st_size != destination_info.st_size or
+            (os.name == 'posix' and (source_info.st_mode & 0o111) != (destination_info.st_mode & 0o111))):
         return False
     with source.open('rb') as left, destination.open('rb') as right:
         while True:
@@ -828,8 +828,8 @@ def maybe_install_azure_skills(cmd, install_azure_skills: bool | None = None,
                 reasons.append(failure)
             failure = 'Azure skills installation is incomplete. ' + '; '.join(reasons)
     if failure:
-        message = (f'{failure} kubectl and kubelogin remain installed. {source} '
-                   + _skills_recovery(targets, publishing))
+        message = (f'{failure} kubectl and kubelogin remain installed. {source} ' +
+                   _skills_recovery(targets, publishing))
         logger.warning('%s', message)
         if explicit:
             raise failure_type(message)
