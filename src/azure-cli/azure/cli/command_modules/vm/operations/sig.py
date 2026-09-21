@@ -7,7 +7,7 @@ import json
 from knack.log import get_logger
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
-from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz import AAZResourceLocationArg, has_value
 from ..aaz.latest.sig import Create as _SigCreate, Update as _SigUpdate, Show as _SigShow
 from ..aaz.latest.sig.identity import Remove as _SigIdentityRemove
 from .._vm_utils import IdentityType
@@ -28,6 +28,17 @@ class SigCreate(_SigCreate):
 
 
 class SigUpdate(_SigUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.location = AAZResourceLocationArg(
+            arg_group="Gallery",
+            help="Resource location",
+            nullable=True,
+        )
+        return args_schema
+
     def pre_operations(self):
         args = self.ctx.args
 
@@ -37,6 +48,12 @@ class SigUpdate(_SigUpdate):
                 raise RequiredArgumentMissingError('If you want to share to the community, '
                                                    'you need to fill in all the following parameters:'
                                                    ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+
+        if has_value(args.location):
+            instance.location = args.location
 
 
 class SigShow(_SigShow):
