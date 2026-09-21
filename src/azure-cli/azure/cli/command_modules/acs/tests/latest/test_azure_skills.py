@@ -662,11 +662,13 @@ class CliArgumentTests(unittest.TestCase):
 @unittest.skipUnless(sys.platform.startswith('linux'), 'Exercises Linux binary installation and agent paths')
 class AzureSkillsScenarioTest(ScenarioTest):
     def __init__(self, method_name):
+        from knack.config import CLIConfig
+
         # Suppress import-time metadata I/O without caching the fixture's configuration root.
         environment = dict(os.environ)
         environment.pop('ARM_CLOUD_METADATA_URL', None)
         with mock.patch.object(os, 'environ', environment):
-            from azure.cli.core import _config, cloud
+            from azure.cli.core import _config, cloud, extension
 
         # DummyCli is constructed before setUp; never let it use the user's configuration.
         with ExitStack() as cleanup:
@@ -675,7 +677,8 @@ class AzureSkillsScenarioTest(ScenarioTest):
             config.mkdir()
             (config / 'config').write_text('[core]\ncollect_telemetry = no\n', encoding='utf-8')
             environment = dict(environment, HOME=str(self.home), USERPROFILE=str(self.home),
-                               AZURE_CONFIG_DIR=str(config), AZURE_CORE_COLLECT_TELEMETRY='no',
+                               AZURE_CONFIG_DIR=str(config), AZURE_CLOUD_NAME='AzureCloud',
+                               AZURE_CORE_COLLECT_TELEMETRY='no',
                                CLAUDE_CONFIG_DIR=str(self.home / 'claude'), CODEX_HOME=str(self.home / 'codex'),
                                PI_CODING_AGENT_DIR=str(self.home / 'pi'))
             environment.pop('SUDO_UID', None)
@@ -684,12 +687,16 @@ class AzureSkillsScenarioTest(ScenarioTest):
                     mock.patch.object(Path, 'home', return_value=self.home), \
                     mock.patch.object(_config, 'GLOBAL_CONFIG_DIR', str(config)), \
                     mock.patch.object(cloud, 'GLOBAL_CONFIG_DIR', str(config)), \
-                    mock.patch.object(cloud, 'CLOUD_CONFIG_FILE', str(config / 'clouds.config')):
+                    mock.patch.object(cloud, 'CLOUD_CONFIG_FILE', str(config / 'clouds.config')), \
+                    mock.patch.multiple(extension, GLOBAL_CONFIG_DIR=str(config),
+                                        az_config=CLIConfig(config_dir=str(config), config_env_var_prefix='AZURE'),
+                                        EXTENSIONS_DIR=str(config / 'cliextensions'),
+                                        EXTENSIONS_SYS_DIR=str(config / 'syscliextensions'), DEV_EXTENSION_SOURCES=[]):
                 super().__init__(method_name, random_config_dir=False)
             self.addCleanup(cleanup.pop_all().close)
 
     def setUp(self):
-        from azure.cli.core import _config, cloud
+        from azure.cli.core import _config, cloud, extension
 
         self.patches = ExitStack()
         self.addCleanup(self.patches.close)
@@ -700,16 +707,27 @@ class AzureSkillsScenarioTest(ScenarioTest):
         self.patches.enter_context(mock.patch.object(_config, 'GLOBAL_CONFIG_DIR', str(config)))
         self.patches.enter_context(mock.patch.object(cloud, 'GLOBAL_CONFIG_DIR', str(config)))
         self.patches.enter_context(mock.patch.object(cloud, 'CLOUD_CONFIG_FILE', str(config / 'clouds.config')))
+        # Command discovery must not scan or load caller-installed user, system, or dev extensions.
+        self.patches.enter_context(mock.patch.multiple(
+            extension, GLOBAL_CONFIG_DIR=str(config), az_config=self.cli_ctx.config,
+            EXTENSIONS_DIR=str(config / 'cliextensions'), EXTENSIONS_SYS_DIR=str(config / 'syscliextensions'),
+            DEV_EXTENSION_SOURCES=[]))
         super().setUp()
 
     def test_aks_install_cli_azure_skills(self):
         from azure.cli.command_modules.acs import custom
-        from azure.cli.core import _config, cloud
+        from azure.cli.core import _config, cloud, extension
 
         self.assertEqual(_config.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
         self.assertEqual(cloud.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
         self.assertEqual(cloud.CLOUD_CONFIG_FILE, str(self.home / '.azure/clouds.config'))
         self.assertNotIn('ARM_CLOUD_METADATA_URL', os.environ)
+        self.assertEqual(self.cli_ctx.cloud.name, 'AzureCloud')
+        self.assertEqual(extension.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
+        self.assertEqual(extension.az_config.config_dir, str(self.home / '.azure'))
+        self.assertEqual(extension.EXTENSIONS_DIR, str(self.home / '.azure/cliextensions'))
+        self.assertEqual(extension.EXTENSIONS_SYS_DIR, str(self.home / '.azure/syscliextensions'))
+        self.assertEqual(extension.DEV_EXTENSION_SOURCES, [])
         kubectl = self.home / 'bin/kubectl'
         kubelogin = self.home / 'bin/kubelogin'
         pi = self.home / 'pi'
