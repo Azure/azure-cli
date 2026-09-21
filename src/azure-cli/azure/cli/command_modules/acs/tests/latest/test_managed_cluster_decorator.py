@@ -10117,6 +10117,24 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.check_raw_parameters()
 
+    def test_check_raw_parameters_explicit_false_three_state_flags(self):
+        # three-state flags explicitly set to false are a real update request,
+        # they must not be mistaken for "no argument specified"
+        for param in ("enable_syslog", "enable_high_log_scale_mode"):
+            with self.subTest(param=param):
+                dec = AKSManagedClusterUpdateDecorator(
+                    self.cmd,
+                    self.client,
+                    {param: False},
+                    ResourceType.MGMT_CONTAINERSERVICE,
+                )
+                with patch(
+                    "azure.cli.command_modules.acs.managed_cluster_decorator.prompt_y_n",
+                    return_value=False,
+                ) as prompt:
+                    dec.check_raw_parameters()
+                prompt.assert_not_called()
+
     def test_ensure_mc(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,

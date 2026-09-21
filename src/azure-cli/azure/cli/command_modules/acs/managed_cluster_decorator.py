@@ -9408,7 +9408,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_load_balancer_outbound_ports() is None and
             self.context.get_nat_gateway_managed_outbound_ip_count() is None and
             self.context.get_nat_gateway_idle_timeout() is None and
-            self.context.raw_param.get("enable_high_log_scale_mode") is None
+            self.context.raw_param.get("enable_high_log_scale_mode") is None and
+            self.context.raw_param.get("enable_syslog") is None
         )
 
         if not is_changed and is_default:

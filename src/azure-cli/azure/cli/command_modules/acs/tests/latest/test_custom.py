@@ -28,6 +28,7 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs.addonconfiguration import (
     _create_or_update_dcr_with_table_readiness_retry,
     _resolve_dcr_settings_from_existing,
+    add_monitoring_role_assignment,
     ensure_default_log_analytics_workspace_for_monitoring,
     warn_on_legacy_monitoring_auth,
 )
@@ -2769,6 +2770,104 @@ class TestEnsureContainerInsightsDcrInheritance(unittest.TestCase):
         self.assertNotIn(
             "Microsoft-ContainerLogV2-HighScale", self._ci_extension(body)["streams"]
         )
+
+
+class TestAddMonitoringRoleAssignment(unittest.TestCase):
+    """Cover add_monitoring_role_assignment, whose body was previously only ever mocked.
+
+    The 'Monitoring Metrics Publisher' grant is only needed when the monitoring addon
+    authenticates with a service principal or the addon's own MSI. When it authenticates
+    with AAD/managed identity (useAADAuth) no role assignment is required at all.
+    """
+
+    ROLE = "Monitoring Metrics Publisher"
+    CLUSTER_ID = "/subscriptions/1234/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/c"
+
+    def _cluster(self, client_id="msi", addon_identity=None, use_aad_auth="true", config=True):
+        addon = mock.MagicMock()
+        addon.identity = addon_identity
+        if config:
+            addon.config = {CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/ws"}
+            if use_aad_auth is not None:
+                addon.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = use_aad_auth
+        else:
+            addon.config = None
+        result = mock.MagicMock()
+        result.addon_profiles = {CONST_MONITORING_ADDON_NAME: addon}
+        result.service_principal_profile.client_id = client_id
+        return result
+
+    def _run(self, result):
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.add_role_assignment",
+            return_value=True,
+        ) as add_role, mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.logger"
+        ) as log:
+            add_monitoring_role_assignment(result, self.CLUSTER_ID, mock.MagicMock())
+        self.warnings = " ".join(str(c) for c in log.warning.call_args_list)
+        return add_role
+
+    def assertNoMissingIdentityWarning(self):
+        # the user-visible symptom of the bug: a spurious warning on a correctly
+        # configured AAD-auth cluster
+        self.assertNotIn("Could not find service principal", self.warnings)
+
+    def test_msi_auth_cluster_skips_role_assignment(self):
+        # An MSI cluster onboarded through the Azure Monitor profile reports useAADAuth=true
+        # and carries the literal "msi" sentinel as its service principal client id.
+        add_role = self._run(self._cluster(client_id="msi", addon_identity=None))
+        add_role.assert_not_called()
+        self.assertNoMissingIdentityWarning()
+
+    def test_msi_auth_skips_role_assignment_even_when_addon_identity_present(self):
+        # Clusters migrated from legacy auth can retain the addon identity. useAADAuth still
+        # wins, so no unnecessary RBAC grant may be issued against it.
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(self._cluster(client_id="msi", addon_identity=addon_identity))
+        add_role.assert_not_called()
+        self.assertNoMissingIdentityWarning()
+
+    def test_use_aad_auth_false_is_not_treated_as_enabled(self):
+        # The config value is the *string* "false"; a bare truthiness check would wrongly
+        # treat it as AAD auth and skip a role assignment that is genuinely required.
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(
+            self._cluster(client_id="msi", addon_identity=addon_identity, use_aad_auth="false")
+        )
+        add_role.assert_called_once()
+        self.assertEqual(add_role.call_args[0][1], self.ROLE)
+        self.assertEqual(add_role.call_args[0][2], "addon-msi-object-id")
+        self.assertFalse(add_role.call_args[0][3])  # is_service_principal
+
+    def test_use_aad_auth_is_case_insensitive(self):
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(
+            self._cluster(client_id="msi", addon_identity=addon_identity, use_aad_auth="True")
+        )
+        add_role.assert_not_called()
+
+    def test_service_principal_cluster_gets_role_assignment(self):
+        add_role = self._run(self._cluster(client_id="sp-client-id", use_aad_auth="false"))
+        add_role.assert_called_once()
+        self.assertEqual(add_role.call_args[0][2], "sp-client-id")
+        self.assertTrue(add_role.call_args[0][3])  # is_service_principal
+
+    def test_missing_addon_profiles_does_not_raise(self):
+        # A cluster onboarded purely through the Azure Monitor profile may come back with no
+        # addon profiles at all; indexing into None used to raise TypeError.
+        result = mock.MagicMock()
+        result.addon_profiles = None
+        result.service_principal_profile.client_id = "msi"
+        add_role = self._run(result)
+        add_role.assert_not_called()
+
+    def test_missing_addon_config_does_not_raise(self):
+        add_role = self._run(self._cluster(client_id="msi", config=False))
+        add_role.assert_not_called()
 
 
 if __name__ == "__main__":

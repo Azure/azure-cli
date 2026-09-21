@@ -16,10 +16,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_SUBNET_ID,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_VIRTUAL_NODE_ADDON_NAME,
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
+from azure.cli.command_modules.acs._helpers import safe_lower
 from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
@@ -1017,16 +1019,15 @@ def validate_data_collection_settings(dataCollectionSettings):
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     service_principal_msi_id = None
     is_useAADAuth = False
+    addon_profiles = getattr(result, "addon_profiles", None) or {}
+    monitoring_addon = addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+    monitoring_config = getattr(monitoring_addon, "config", None)
     # Check if monitoring addon enabled with useAADAuth = True, if it does, ignore role assignment
     # Check if service principal exists, if it does, assign permissions to service principal
     # Else, provide permissions to MSI
-    if (
-        (hasattr(result, "addon_profiles")) and
-        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], "config") and
-        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].config, "useAADAuth") and
-        result.addon_profiles[CONST_MONITORING_ADDON_NAME].config.useAADAuth
-    ):
+    if monitoring_config and safe_lower(
+        monitoring_config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+    ) == "true":
         is_useAADAuth = True
     elif (
         hasattr(result, "service_principal_profile") and
@@ -1036,25 +1037,11 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         logger.info("valid service principal exists, using it")
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
-    elif (
-        (hasattr(result, "addon_profiles")) and
-        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-        (
-            hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME], "identity"
-            )
-        ) and
-        (
-            hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity,
-                "object_id",
-            )
-        )
+    elif hasattr(monitoring_addon, "identity") and hasattr(
+        monitoring_addon.identity, "object_id"
     ):
         logger.info("omsagent MSI exists, using it")
-        service_principal_msi_id = result.addon_profiles[
-            CONST_MONITORING_ADDON_NAME
-        ].identity.object_id
+        service_principal_msi_id = monitoring_addon.identity.object_id
         is_service_principal = False
 
     if is_useAADAuth:
@@ -1074,7 +1061,7 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
             )
     else:
         logger.warning(
-            "Could not find service principal or user assigned MSI for role"
+            "Could not find service principal or user assigned MSI for role "
             "assignment"
         )
 
