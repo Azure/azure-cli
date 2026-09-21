@@ -47,6 +47,7 @@ from azure.cli.core.azclierror import (
     UnauthorizedError,
     ValidationError,
 )
+from azure.cli.testsdk import ScenarioTest
 
 
 _SKILL = '---\nname: demo\ndescription: Test skill\n---\nInstructions\n'
@@ -656,6 +657,109 @@ class CliArgumentTests(unittest.TestCase):
                          'MCP', 'hooks', 'user-level', 'sudo', 'noninteractive', 'Codex', 'Pi', 'Copilot',
                          'first-install-only', 'binary installation', 'latest release'):
             self.assertIn(expected, help_text)
+
+
+@unittest.skipUnless(sys.platform.startswith('linux'), 'Exercises Linux binary installation and agent paths')
+class AzureSkillsScenarioTest(ScenarioTest):
+    def __init__(self, method_name):
+        # DummyCli is constructed before setUp; never let it use the user's configuration.
+        with ExitStack() as cleanup:
+            self.home = Path(cleanup.enter_context(tempfile.TemporaryDirectory(prefix='azure-skills-scenario-')))
+            config = self.home / '.azure'
+            config.mkdir()
+            (config / 'config').write_text('[core]\ncollect_telemetry = no\n', encoding='utf-8')
+            environment = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+                               AZURE_CONFIG_DIR=str(config), AZURE_CORE_COLLECT_TELEMETRY='no',
+                               CLAUDE_CONFIG_DIR=str(self.home / 'claude'), CODEX_HOME=str(self.home / 'codex'),
+                               PI_CODING_AGENT_DIR=str(self.home / 'pi'))
+            environment.pop('SUDO_UID', None)
+            environment.pop('SUDO_USER', None)
+            with mock.patch.object(os, 'environ', environment), \
+                    mock.patch.object(Path, 'home', return_value=self.home), \
+                    mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', str(config)):
+                super().__init__(method_name, random_config_dir=False)
+            self.addCleanup(cleanup.pop_all().close)
+
+    def setUp(self):
+        self.patches = ExitStack()
+        self.addCleanup(self.patches.close)
+        # ReplayableTest replaces os.environ in tearDown; restore the incoming object after SDK cleanup.
+        self.patches.enter_context(mock.patch.object(os, 'environ', self.original_env.copy()))
+        self.patches.enter_context(mock.patch.object(Path, 'home', return_value=self.home))
+        super().setUp()
+
+    def test_aks_install_cli_azure_skills(self):
+        from azure.cli.command_modules.acs import custom
+
+        kubectl = self.home / 'bin/kubectl'
+        kubelogin = self.home / 'bin/kubelogin'
+        pi = self.home / 'pi'
+        kubectl_bytes = b'fixture kubectl\n'
+        kubelogin_bytes = b'fixture kubelogin\n'
+        kubectl_url = 'https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl'
+        kubelogin_url = 'https://github.com/Azure/kubelogin/releases/download/v0.1.0/kubelogin.zip'
+        binary_downloads = []
+        archives = []
+        release = skills.Release('v1.2.3', 'a' * 40)
+
+        def retrieve(url, filename):
+            binary_downloads.append((url, Path(filename)))
+            if url == kubectl_url:
+                Path(filename).write_bytes(kubectl_bytes)
+            elif url == kubelogin_url:
+                with zipfile.ZipFile(filename, 'w') as archive:
+                    archive.writestr('bin/linux_amd64/kubelogin', kubelogin_bytes)
+            else:
+                self.fail(f'Unexpected binary download: {url}')
+
+        def download(resolved_release, destination):
+            self.assertEqual(resolved_release, release)
+            archives.append(destination)
+            make_bundle(destination)
+
+        expected = {
+            'skills/demo/SKILL.md': _SKILL.encode(),
+            'skills/demo/references/guide.md': b'Reference content\n',
+            'skills/demo/child/SKILL.md': b'---\nname: child\ndescription: Nested skill\n---\n',
+            'skills/demo/LICENSE.azure-skills': _LICENSE,
+        }
+        command = (
+            'aks install-cli --client-version 1.30.0 --kubelogin-version 0.1.0 '
+            f'--install-location "{kubectl}" --kubelogin-install-location "{kubelogin}" '
+            '--install-azure-skills true --skills-agents pi'
+        )
+        skill_file = pi / 'skills/demo/SKILL.md'
+        historical_time = 946684800
+        with mock.patch.object(custom, 'get_arch_for_cli_binary', return_value='amd64'), \
+                mock.patch.object(custom, '_urlretrieve', side_effect=retrieve), \
+                mock.patch.object(custom, '_urlopen_read', side_effect=AssertionError('Unexpected version request')), \
+                mock.patch.object(skills, 'resolve_release', return_value=release) as resolve, \
+                mock.patch.object(skills, 'download_archive', side_effect=download), \
+                mock.patch.object(socket, 'getaddrinfo', side_effect=AssertionError('Unexpected DNS lookup')), \
+                mock.patch.object(socket.socket, 'connect', side_effect=AssertionError('Unexpected network connection')):
+            for attempt in range(2):
+                result = self.cmd(command, checks=[self.is_empty()])
+                self.assertEqual(result.exit_code, 0)
+                self.assertEqual(kubectl.read_bytes(), kubectl_bytes)
+                self.assertEqual(kubelogin.read_bytes(), kubelogin_bytes)
+                for binary in (kubectl, kubelogin):
+                    self.assertEqual(binary.stat().st_mode & 0o111, 0o111)
+                self.assertEqual({path.relative_to(pi).as_posix(): path.read_bytes()
+                                  for path in pi.rglob('*') if path.is_file()}, expected)
+                for other in ('claude', 'codex', '.claude', '.codex', '.agents', '.copilot', '.pi'):
+                    self.assertFalse((self.home / other).exists(), other)
+                self.assertEqual(sorted(path.name for path in pi.iterdir()), ['skills'])
+                self.assertFalse(list(self.home.rglob('.az-azure-skills*')))
+                self.assertFalse(any(path.parent.exists() for path in archives))
+                self.assertFalse(any(path.parent.exists() for url, path in binary_downloads if url == kubelogin_url))
+                self.assertFalse(self.cassette.dirty)
+                if attempt == 0:
+                    os.utime(skill_file, (historical_time, historical_time))
+                else:
+                    self.assertEqual(skill_file.stat().st_mtime_ns, historical_time * 10 ** 9)
+            self.assertEqual(resolve.call_args_list, [mock.call(None), mock.call(None)])
+        self.assertEqual([url for url, _ in binary_downloads], [kubectl_url, kubelogin_url] * 2)
+        self.assertEqual(len(archives), 2)
 
 
 class ArchiveTests(unittest.TestCase):
