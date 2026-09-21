@@ -668,7 +668,7 @@ class AzureSkillsScenarioTest(ScenarioTest):
         environment = dict(os.environ)
         environment.pop('ARM_CLOUD_METADATA_URL', None)
         with mock.patch.object(os, 'environ', environment):
-            from azure.cli.core import _config, cloud, extension
+            from azure.cli.core import _config, cloud, extension, util
 
         # DummyCli is constructed before setUp; never let it use the user's configuration.
         with ExitStack() as cleanup:
@@ -691,8 +691,17 @@ class AzureSkillsScenarioTest(ScenarioTest):
                     mock.patch.multiple(extension, GLOBAL_CONFIG_DIR=str(config),
                                         az_config=CLIConfig(config_dir=str(config), config_env_var_prefix='AZURE'),
                                         EXTENSIONS_DIR=str(config / 'cliextensions'),
-                                        EXTENSIONS_SYS_DIR=str(config / 'syscliextensions'), DEV_EXTENSION_SOURCES=[]):
+                                        EXTENSIONS_SYS_DIR=str(config / 'syscliextensions'),
+                                        DEV_EXTENSION_SOURCES=[]), \
+                    mock.patch.object(util, 'check_connectivity', return_value=False), \
+                    mock.patch.object(socket, 'getaddrinfo',
+                                      side_effect=AssertionError('Unexpected DNS lookup')) as dns, \
+                    mock.patch.object(socket.socket, 'connect',
+                                      side_effect=AssertionError('Unexpected network connection')) as connect:
                 super().__init__(method_name, random_config_dir=False)
+                # CLI startup catches version-check errors, so a swallowed network attempt must still fail.
+                dns.assert_not_called()
+                connect.assert_not_called()
             self.addCleanup(cleanup.pop_all().close)
 
     def setUp(self):
@@ -772,8 +781,9 @@ class AzureSkillsScenarioTest(ScenarioTest):
                 mock.patch.object(custom, '_urlopen_read', side_effect=AssertionError('Unexpected version request')), \
                 mock.patch.object(skills, 'resolve_release', return_value=release) as resolve, \
                 mock.patch.object(skills, 'download_archive', side_effect=download), \
-                mock.patch.object(socket, 'getaddrinfo', side_effect=AssertionError('Unexpected DNS lookup')), \
-                mock.patch.object(socket.socket, 'connect', side_effect=AssertionError('Unexpected network connection')):
+                mock.patch.object(socket, 'getaddrinfo', side_effect=AssertionError('Unexpected DNS lookup')) as dns, \
+                mock.patch.object(socket.socket, 'connect',
+                                  side_effect=AssertionError('Unexpected network connection')) as connect:
             for attempt in range(2):
                 result = self.cmd(command, checks=[self.is_empty()])
                 self.assertEqual(result.exit_code, 0)
@@ -795,6 +805,8 @@ class AzureSkillsScenarioTest(ScenarioTest):
                 else:
                     self.assertEqual(skill_file.stat().st_mtime_ns, historical_time * 10 ** 9)
             self.assertEqual(resolve.call_args_list, [mock.call(None), mock.call(None)])
+            dns.assert_not_called()
+            connect.assert_not_called()
         self.assertEqual([url for url, _ in binary_downloads], [kubectl_url, kubelogin_url] * 2)
         self.assertEqual(len(archives), 2)
 
