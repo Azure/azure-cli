@@ -662,6 +662,9 @@ class CliArgumentTests(unittest.TestCase):
 @unittest.skipUnless(sys.platform.startswith('linux'), 'Exercises Linux binary installation and agent paths')
 class AzureSkillsScenarioTest(ScenarioTest):
     def __init__(self, method_name):
+        # Import before overriding paths so a first import cannot retain the fixture's configuration root.
+        from azure.cli.core import _config, cloud
+
         # DummyCli is constructed before setUp; never let it use the user's configuration.
         with ExitStack() as cleanup:
             self.home = Path(cleanup.enter_context(tempfile.TemporaryDirectory(prefix='azure-skills-scenario-')))
@@ -676,21 +679,33 @@ class AzureSkillsScenarioTest(ScenarioTest):
             environment.pop('SUDO_USER', None)
             with mock.patch.object(os, 'environ', environment), \
                     mock.patch.object(Path, 'home', return_value=self.home), \
-                    mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', str(config)):
+                    mock.patch.object(_config, 'GLOBAL_CONFIG_DIR', str(config)), \
+                    mock.patch.object(cloud, 'GLOBAL_CONFIG_DIR', str(config)), \
+                    mock.patch.object(cloud, 'CLOUD_CONFIG_FILE', str(config / 'clouds.config')):
                 super().__init__(method_name, random_config_dir=False)
             self.addCleanup(cleanup.pop_all().close)
 
     def setUp(self):
+        from azure.cli.core import _config, cloud
+
         self.patches = ExitStack()
         self.addCleanup(self.patches.close)
         # ReplayableTest replaces os.environ in tearDown; restore the incoming object after SDK cleanup.
         self.patches.enter_context(mock.patch.object(os, 'environ', self.original_env.copy()))
         self.patches.enter_context(mock.patch.object(Path, 'home', return_value=self.home))
+        config = self.home / '.azure'
+        self.patches.enter_context(mock.patch.object(_config, 'GLOBAL_CONFIG_DIR', str(config)))
+        self.patches.enter_context(mock.patch.object(cloud, 'GLOBAL_CONFIG_DIR', str(config)))
+        self.patches.enter_context(mock.patch.object(cloud, 'CLOUD_CONFIG_FILE', str(config / 'clouds.config')))
         super().setUp()
 
     def test_aks_install_cli_azure_skills(self):
         from azure.cli.command_modules.acs import custom
+        from azure.cli.core import _config, cloud
 
+        self.assertEqual(_config.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
+        self.assertEqual(cloud.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
+        self.assertEqual(cloud.CLOUD_CONFIG_FILE, str(self.home / '.azure/clouds.config'))
         kubectl = self.home / 'bin/kubectl'
         kubelogin = self.home / 'bin/kubelogin'
         pi = self.home / 'pi'
