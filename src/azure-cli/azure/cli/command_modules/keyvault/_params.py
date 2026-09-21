@@ -630,7 +630,10 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault ekm-connection create', arg_group='EKM Connection') as c:
         c.argument('host', options_list=['--host'], required=True,
-                   help='EKM proxy host (FQDN or FQDN:port). If port is omitted, 443 is assumed.')
+                   help='EKM proxy host (FQDN or FQDN:port), or the private endpoint name in PrivateEndpoint mode. '
+                        'For Public mode, port 443 is assumed if omitted.')
+        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']),
+                   help='Connectivity mode for the EKM proxy. The service defaults to Public when omitted.')
         c.extra('path_prefix', options_list=['--path-prefix'],
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
@@ -643,7 +646,10 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault ekm-connection update', arg_group='EKM Connection') as c:
         c.argument('host', options_list=['--host'], required=False,
-                   help='EKM proxy host (FQDN or FQDN:port). If port is omitted, 443 is assumed.')
+                   help='EKM proxy host (FQDN or FQDN:port), or the private endpoint name in PrivateEndpoint mode. '
+                        'Required when changing connectivity mode.')
+        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']),
+                   help='Connectivity mode for the EKM proxy. Preserves the existing mode when omitted.')
         c.extra('path_prefix', options_list=['--path-prefix'],
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
@@ -660,6 +666,28 @@ def load_arguments(self, _):
         c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
                 help='Full URI of the HSM.')
         c.ignore('vault_base_url')
+
+    for scope in ['create', 'delete', 'show', 'list', 'wait', 'operation show']:
+        with self.argument_context('keyvault ekm-connection private-endpoint {}'.format(scope),
+                                   arg_group='HSM Id') as c:
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
+                    help='Full URI of the HSM.')
+            c.ignore('vault_base_url')
+
+    with self.argument_context('keyvault ekm-connection private-endpoint') as c:
+        c.argument('private_endpoint_name', options_list=['--name', '-n'],
+                   help='EKM private endpoint name. Use 1-24 letters, digits or hyphens, '
+                        'starting and ending with a letter or digit.')
+
+    with self.argument_context('keyvault ekm-connection private-endpoint create') as c:
+        c.argument('private_link_service_id', options_list=['--private-link-service'],
+                   help='Alias of the Private Link Service that fronts the EKM proxy.')
+        c.argument('request_message', help='Message for the Private Link Service owner when approving the connection.')
+
+    with self.argument_context('keyvault ekm-connection private-endpoint operation show') as c:
+        c.argument('job_id', help='Job ID returned by a private endpoint create or delete operation.')
     # endregion
 
     # region keyvault backup/restore

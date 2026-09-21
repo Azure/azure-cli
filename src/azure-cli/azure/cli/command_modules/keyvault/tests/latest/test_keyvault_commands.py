@@ -286,6 +286,305 @@ class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
                 validate_ekm_connection_create(None, ns)
 
 
+class KeyVaultEkmPrivateEndpointUnitTest(unittest.TestCase):
+    def test_keyvault_ekm_private_endpoint_create_polling(self):
+        from azure.cli.command_modules.keyvault.custom import create_ekm_private_endpoint
+        from azure.mgmt.core.polling.arm_polling import ARMPolling
+
+        for no_wait in [False, True]:
+            with self.subTest(no_wait=no_wait):
+                client = mock.Mock()
+                poller = client.begin_create_ekm_private_endpoint.return_value
+                result = create_ekm_private_endpoint(client, 'pe-one', 'service-alias', 'Approve this', no_wait)
+                client.begin_create_ekm_private_endpoint.assert_called_once_with(
+                    name='pe-one', private_link_service_id='service-alias',
+                    request_message='Approve this', polling=False if no_wait else mock.ANY)
+                self.assertIs(result, None if no_wait else poller)
+                poller.result.assert_not_called()
+                if not no_wait:
+                    self.assertIsInstance(client.begin_create_ekm_private_endpoint.call_args.kwargs['polling'], ARMPolling)
+
+    def test_keyvault_ekm_private_endpoint_delete_polling(self):
+        from azure.cli.command_modules.keyvault.custom import delete_ekm_private_endpoint
+
+        for no_wait in [False, True]:
+            with self.subTest(no_wait=no_wait):
+                client = mock.Mock()
+                poller = client.begin_delete_ekm_private_endpoint.return_value
+                result = delete_ekm_private_endpoint(client, 'pe-one', no_wait)
+                client.begin_delete_ekm_private_endpoint.assert_called_once_with(
+                    name='pe-one', polling=False if no_wait else mock.ANY)
+                self.assertIs(result, None if no_wait else poller)
+                client.delete_ekm_connection.assert_not_called()
+
+    def test_keyvault_ekm_private_endpoint_reads(self):
+        from azure.cli.command_modules.keyvault.custom import (
+            get_ekm_private_endpoint, list_ekm_private_endpoints, get_ekm_private_endpoint_operation)
+
+        client = mock.Mock()
+        self.assertIs(get_ekm_private_endpoint(client, 'pe-one'), client.get_ekm_private_endpoint.return_value)
+        client.get_ekm_private_endpoint.assert_called_once_with(name='pe-one')
+        endpoint = argparse.Namespace(name='pe-one', provisioning_state='Succeeded')
+        client.list_ekm_private_endpoints.return_value = iter([endpoint])
+        self.assertEqual(list_ekm_private_endpoints(client), [endpoint])
+        client.list_ekm_private_endpoints.return_value = iter([])
+        self.assertEqual(list_ekm_private_endpoints(client), [])
+        result = get_ekm_private_endpoint_operation(client, 'operation-id')
+        self.assertIs(result, client.get_ekm_private_endpoint_operation_status.return_value)
+        client.get_ekm_private_endpoint_operation_status.assert_called_once_with(job_id='operation-id')
+
+    def test_keyvault_ekm_private_host_validation(self):
+        from azure.cli.command_modules.keyvault._validators import _normalize_ekm_connection_host
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        self.assertEqual(_normalize_ekm_connection_host('proxy.example.com'), 'proxy.example.com:443')
+        self.assertEqual(_normalize_ekm_connection_host('proxy.example.com:8443', 'Public'),
+                         'proxy.example.com:8443')
+        for name in ['a', 'pe-one', 'a' * 24]:
+            self.assertEqual(_normalize_ekm_connection_host(name, 'PrivateEndpoint'), name)
+        for name in ['', 'a' * 25, '-pe', 'pe-', 'pe.one', 'pe_one', 'pe:443', 'pe/one', 'pe\n']:
+            with self.subTest(name=name), self.assertRaises(InvalidArgumentValueError):
+                _normalize_ekm_connection_host(name, 'PrivateEndpoint')
+        with self.assertRaises(InvalidArgumentValueError):
+            _normalize_ekm_connection_host('pe-one', 'Unknown')
+
+    def test_keyvault_ekm_private_create_validation(self):
+        from azure.cli.command_modules.keyvault._validators import validate_ekm_connection_create
+
+        namespace = argparse.Namespace(
+            hsm_name=None, identifier='https://example.managedhsm.azure.net',
+            host='pe-one', connectivity_mode='PrivateEndpoint', path_prefix='/api/v1',
+            server_ca_certificates=[os.path.join(CERTS_DIR, 'cert_0.cer')])
+        with mock.patch('azure.cli.command_modules.keyvault._validators.set_vault_base_url'):
+            validate_ekm_connection_create(None, namespace)
+        self.assertEqual(namespace.host, 'pe-one')
+        self.assertIsInstance(namespace.server_ca_certificates[0], bytes)
+
+    def test_keyvault_ekm_update_preserves_existing_mode(self):
+        from azure.cli.command_modules.keyvault._validators import validate_ekm_connection_update
+        from azure.cli.command_modules.keyvault.custom import update_ekm_connection
+
+        for mode, expected_host in [('PrivateEndpoint', 'pe-two'), ('Public', 'pe-two:443'),
+                                    (None, 'pe-two:443')]:
+            with self.subTest(mode=mode):
+                existing = argparse.Namespace(host='pe-one', connectivity_mode=mode,
+                                              path_prefix='/api/v1', server_ca_certificates=[b'cert'],
+                                              server_subject_common_name='proxy')
+                client = mock.Mock()
+                client.get_ekm_connection.return_value = existing
+                namespace = argparse.Namespace(hsm_name=None, identifier='https://example.managedhsm.azure.net',
+                                               host='pe-two', connectivity_mode=None)
+                with mock.patch('azure.cli.command_modules.keyvault._validators.set_vault_base_url'):
+                    validate_ekm_connection_update(None, namespace)
+                self.assertEqual(namespace.host, 'pe-two')
+                update_ekm_connection(client, host=namespace.host)
+                self.assertEqual(existing.host, expected_host)
+                self.assertEqual(existing.connectivity_mode, mode)
+                self.assertEqual(existing.path_prefix, '/api/v1')
+                self.assertEqual(existing.server_ca_certificates, [b'cert'])
+                client.update_ekm_connection.assert_called_once_with(existing)
+
+    def test_keyvault_ekm_mode_switch_requires_host(self):
+        from azure.cli.command_modules.keyvault.custom import update_ekm_connection
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+
+        for previous, target in [('Public', 'PrivateEndpoint'), ('PrivateEndpoint', 'Public')]:
+            client = mock.Mock()
+            client.get_ekm_connection.return_value = argparse.Namespace(host='pe-one', connectivity_mode=previous)
+            with self.subTest(previous=previous), self.assertRaises(RequiredArgumentMissingError):
+                update_ekm_connection(client, connectivity_mode=target)
+            client.update_ekm_connection.assert_not_called()
+
+    def test_keyvault_ekm_mode_switch_with_host(self):
+        from azure.cli.command_modules.keyvault.custom import update_ekm_connection
+
+        client = mock.Mock()
+        existing = argparse.Namespace(host='proxy.example.com:443', connectivity_mode='Public')
+        client.get_ekm_connection.return_value = existing
+        update_ekm_connection(client, host='pe-one', connectivity_mode='PrivateEndpoint')
+        self.assertEqual((existing.host, existing.connectivity_mode), ('pe-one', 'PrivateEndpoint'))
+        update_ekm_connection(client, host='proxy.example.com', connectivity_mode='Public')
+        self.assertEqual((existing.host, existing.connectivity_mode), ('proxy.example.com:443', 'Public'))
+
+    def test_keyvault_ekm_private_update_rejects_host_port(self):
+        from azure.cli.command_modules.keyvault.custom import update_ekm_connection
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        client = mock.Mock()
+        client.get_ekm_connection.return_value = argparse.Namespace(host='pe-one', connectivity_mode='PrivateEndpoint')
+        with self.assertRaises(InvalidArgumentValueError):
+            update_ekm_connection(client, host='pe-two:443')
+        client.update_ekm_connection.assert_not_called()
+
+
+class KeyVaultEkmPrivateEndpointCommandTest(unittest.TestCase):
+    def setUp(self):
+        from pathlib import Path
+        from azure.core.credentials import AccessToken
+
+        self.directory = tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[7])
+        self.addCleanup(self.directory.cleanup)
+        environment = mock.patch.dict(os.environ, {
+            'AZURE_CONFIG_DIR': self.directory.name,
+            'AZURE_CORE_COLLECT_TELEMETRY': 'no',
+            'AZURE_EXTENSION_USE_DYNAMIC_INSTALL': 'no',
+            'AZURE_CORE_NO_COLOR': 'true'
+        })
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.host = 'https://ekm-unit.managedhsm.azure.net'
+        self.operation_id = '11111111-1111-1111-1111-111111111111'
+        self.requests = []
+        self.endpoint = {
+            'name': 'pe-one', 'location': 'centraluseuap', 'provisioningState': 'Succeeded',
+            'properties': {'privateLinkServiceId': 'service-alias'},
+            'privateLinkServiceConnectionState': {'status': 'Approved'}
+        }
+        self.connection = {'host': 'proxy.example.com:443', 'path_prefix': '/api/v1',
+                   'server_ca_certificates': ['Y2VydA=='], 'connectivity_mode': 'Public'}
+        self.operation = {'jobId': self.operation_id, 'privateEndpointName': 'pe-one',
+                          'operationType': 'Create', 'status': 'Succeeded'}
+        self.deleted = False
+        credential = mock.Mock(spec=['get_token'])
+        credential.get_token.return_value = AccessToken('unit-test-token', int(time.time()) + 3600)
+        for patcher in [
+            mock.patch('azure.cli.command_modules.keyvault._client_factory._prepare_data_plane_azure_keyvault_client',
+                       return_value=(self.host, credential, '2026-07-01-preview')),
+            mock.patch('azure.cli.command_modules.keyvault._client_factory.prepare_client_kwargs_track2',
+                       side_effect=lambda *args, **kwargs: {'http_logging_policy': None, 'polling_interval': 0}),
+            mock.patch('requests.sessions.Session.send', side_effect=self._respond)
+        ]:
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def _respond(self, request, **kwargs):
+        from io import BytesIO
+        from urllib.parse import urlsplit, parse_qs
+        from requests import Response
+        from urllib3.response import HTTPResponse
+
+        address = urlsplit(request.url)
+        self.assertEqual(address.hostname, 'ekm-unit.managedhsm.azure.net')
+        self.assertEqual(parse_qs(address.query).get('api-version'), ['2026-07-01-preview'])
+        body = json.loads(request.body) if request.body else None
+        if request.headers.get('Authorization'):
+            self.requests.append((request.method, address.path, body))
+        response = Response()
+        response.request = request
+        response.url = request.url
+        response.headers['Content-Type'] = 'application/json'
+        response.status_code = 200
+        if not request.headers.get('Authorization'):
+            response.status_code = 401
+            response.headers['WWW-Authenticate'] = (
+                'Bearer authorization="https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000", '
+                'resource="https://managedhsm.azure.net"')
+            payload = {'error': {'code': 'Unauthorized', 'message': 'Authentication required.'}}
+        elif address.path == '/ekm/privateendpoint' and request.method == 'GET':
+            payload = {'value': [] if self.deleted else [self.endpoint]}
+        elif address.path == '/ekm/privateendpoint/operations/' + self.operation_id:
+            self.assertEqual(request.method, 'GET')
+            payload = self.operation
+        elif address.path == '/ekm/privateendpoint/pe-one':
+            if request.method in ['POST', 'DELETE']:
+                self.operation['operationType'] = 'Create' if request.method == 'POST' else 'Delete'
+                self.deleted = request.method == 'DELETE'
+                payload = dict(self.operation, status='Running')
+                response.status_code = 202
+                response.headers['Azure-AsyncOperation'] = (
+                    self.host + '/ekm/privateendpoint/operations/' + self.operation_id + '?api-version=2026-07-01-preview')
+                response.headers['Retry-After'] = '0'
+            elif request.method == 'GET' and not self.deleted:
+                payload = self.endpoint
+            else:
+                self.assertEqual(request.method, 'GET')
+                response.status_code = 404
+                payload = {'error': {'code': 'NotFound', 'message': 'Endpoint not found.'}}
+        elif address.path in ['/ekm', '/ekm/create']:
+            if request.method in ['POST', 'PATCH']:
+                self.connection.update(body)
+            else:
+                self.assertEqual(request.method, 'GET')
+            payload = self.connection
+        else:
+            self.fail('Unexpected SDK request: {} {}'.format(request.method, address.path))
+        response._content = json.dumps(payload).encode('utf-8')
+        response._content_consumed = True
+        response.raw = HTTPResponse(body=BytesIO(response._content), status=response.status_code,
+                                    headers=dict(response.headers), preload_content=False)
+        return response
+
+    def _invoke(self, arguments, expected_code=0):
+        from contextlib import redirect_stdout, redirect_stderr
+        from io import StringIO
+        from azure.cli.core import get_default_cli
+
+        output, errors = StringIO(), StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            cli = get_default_cli()
+            cli.out_file = output
+            cli.config.set_value('core', 'collect_telemetry', 'no')
+            try:
+                code = cli.invoke(['keyvault', 'ekm-connection'] + arguments +
+                                  ['--id', self.host, '--output', 'json', '--only-show-errors'])
+            except SystemExit as result:
+                code = result.code
+        self.assertEqual(code, expected_code, errors.getvalue() + repr([
+            (method, path) for method, path, _ in self.requests]))
+        return json.loads(output.getvalue()) if output.getvalue().strip() else None
+
+    def test_keyvault_ekm_private_endpoint_cli_lifecycle(self):
+        created = self._invoke(['private-endpoint', 'create', '--name', 'pe-one',
+                                '--private-link-service', 'service-alias', '--request-message', 'Please approve'])
+        self.assertEqual(created['status'], 'Succeeded')
+        self.assertEqual(self.requests[0], ('POST', '/ekm/privateendpoint/pe-one',
+                                          {'privateLinkServiceId': 'service-alias', 'requestMessage': 'Please approve'}))
+        endpoint = self._invoke(['private-endpoint', 'show', '--name', 'pe-one'])
+        self.assertEqual(endpoint['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(self._invoke(['private-endpoint', 'list'])[0]['name'], 'pe-one')
+        self._invoke(['private-endpoint', 'wait', '--name', 'pe-one', '--created', '--timeout', '1'])
+        self._invoke(['private-endpoint', 'wait', '--name', 'pe-one', '--timeout', '1',
+                      '--custom', "privateLinkServiceConnectionState.status=='Approved'"])
+        operation = self._invoke(['private-endpoint', 'operation', 'show', '--job-id', self.operation_id])
+        self.assertEqual(operation['jobId'], self.operation_id)
+        deleted = self._invoke(['private-endpoint', 'delete', '--name', 'pe-one', '--yes'])
+        self.assertEqual(deleted['status'], 'Succeeded')
+        self._invoke(['private-endpoint', 'wait', '--name', 'pe-one', '--deleted', '--timeout', '1'])
+        self.assertEqual(self._invoke(['private-endpoint', 'list']), [])
+
+    def test_keyvault_ekm_private_endpoint_cli_no_wait(self):
+        created = self._invoke(['private-endpoint', 'create', '--name', 'pe-one',
+                                '--private-link-service', 'service-alias', '--no-wait'])
+        self.assertIsNone(created)
+        self.assertEqual(len(self.requests), 1)
+        deleted = self._invoke(['private-endpoint', 'delete', '--name', 'pe-one', '--yes', '--no-wait'])
+        self.assertIsNone(deleted)
+        self.assertEqual([request[0] for request in self.requests], ['POST', 'DELETE'])
+
+    def test_keyvault_ekm_connection_cli_private_mode(self):
+        created = self._invoke(['create', '--host', 'pe-one', '--connectivity-mode', 'PrivateEndpoint',
+                                '--path-prefix', '/api/v1', '--server-ca-certificate',
+                                os.path.join(CERTS_DIR, 'cert_0.cer')])
+        self.assertEqual((created['host'], created['connectivityMode']), ('pe-one', 'PrivateEndpoint'))
+        updated = self._invoke(['update', '--host', 'pe-two'])
+        self.assertEqual((updated['host'], updated['connectivityMode']), ('pe-two', 'PrivateEndpoint'))
+        updated = self._invoke(['update', '--path-prefix', '/api/v2'])
+        self.assertEqual((updated['host'], updated['connectivityMode']), ('pe-two', 'PrivateEndpoint'))
+        updated = self._invoke(['update', '--connectivity-mode', 'Public', '--host', 'proxy.example.com'])
+        self.assertEqual((updated['host'], updated['connectivityMode']), ('proxy.example.com:443', 'Public'))
+
+    def test_keyvault_ekm_connection_cli_public_mode(self):
+        created = self._invoke(['create', '--host', 'proxy.example.com', '--server-ca-certificate',
+                                os.path.join(CERTS_DIR, 'cert_0.cer')])
+        self.assertEqual(created['host'], 'proxy.example.com:443')
+        self.assertNotIn('connectivity_mode', self.requests[0][2])
+
+    def test_keyvault_ekm_private_endpoint_cli_failure(self):
+        self.operation.update(status='Failed', error={'code': 'ProvisioningFailed', 'message': 'Cannot provision.'})
+        self._invoke(['private-endpoint', 'create', '--name', 'pe-one',
+                      '--private-link-service', 'service-alias'], expected_code=1)
+
+
 class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
     def test_get_ekm_certificate_serializes_der_bytes(self):
         from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes

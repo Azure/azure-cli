@@ -1254,23 +1254,32 @@ def delete_ekm_connection(client):
     return client.delete_ekm_connection()
 
 
-def create_ekm_connection(client, host, path_prefix=None, server_ca_certificates=None, server_subject_common_name=None):
+def create_ekm_connection(client, host, path_prefix=None, server_ca_certificates=None, server_subject_common_name=None,
+                          connectivity_mode=None):
     from azure.keyvault.administration import KeyVaultEkmConnection
 
     ekm_connection = KeyVaultEkmConnection(
         host=host,
         path_prefix=path_prefix,
         server_ca_certificates=server_ca_certificates,
-        server_subject_common_name=server_subject_common_name
+        server_subject_common_name=server_subject_common_name,
+        connectivity_mode=connectivity_mode
     )
     return client.create_ekm_connection(ekm_connection)
 
 
 def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certificates=None,
-                          server_subject_common_name=None):
+                          server_subject_common_name=None, connectivity_mode=None):
+    from azure.cli.command_modules.keyvault._validators import _normalize_ekm_connection_host
+
     existing = client.get_ekm_connection()
+    existing_mode = getattr(existing, 'connectivity_mode', None) or 'Public'
+    if connectivity_mode is not None and connectivity_mode != existing_mode and host is None:
+        raise RequiredArgumentMissingError('--host is required when changing --connectivity-mode.')
     if host is not None:
-        existing.host = host
+        existing.host = _normalize_ekm_connection_host(host, connectivity_mode or existing_mode)
+    if connectivity_mode is not None:
+        existing.connectivity_mode = connectivity_mode
     if path_prefix is not None:
         existing.path_prefix = path_prefix
     if server_ca_certificates is not None:
@@ -1278,6 +1287,37 @@ def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certifi
     if server_subject_common_name is not None:
         existing.server_subject_common_name = server_subject_common_name
     return client.update_ekm_connection(existing)
+
+
+def create_ekm_private_endpoint(client, private_endpoint_name, private_link_service_id, request_message=None,
+                                no_wait=False):
+    from azure.mgmt.core.polling.arm_polling import ARMPolling
+
+    polling = False if no_wait else ARMPolling(lro_options={'final-state-via': 'azure-async-operation'})
+    poller = client.begin_create_ekm_private_endpoint(
+        name=private_endpoint_name, private_link_service_id=private_link_service_id,
+        request_message=request_message, polling=polling)
+    return None if no_wait else poller
+
+
+def delete_ekm_private_endpoint(client, private_endpoint_name, no_wait=False):
+    from azure.mgmt.core.polling.arm_polling import ARMPolling
+
+    polling = False if no_wait else ARMPolling(lro_options={'final-state-via': 'azure-async-operation'})
+    poller = client.begin_delete_ekm_private_endpoint(name=private_endpoint_name, polling=polling)
+    return None if no_wait else poller
+
+
+def get_ekm_private_endpoint(client, private_endpoint_name):
+    return client.get_ekm_private_endpoint(name=private_endpoint_name)
+
+
+def list_ekm_private_endpoints(client):
+    return list(client.list_ekm_private_endpoints())
+
+
+def get_ekm_private_endpoint_operation(client, job_id):
+    return client.get_ekm_private_endpoint_operation_status(job_id=job_id)
 # endregion
 
 
