@@ -1713,7 +1713,7 @@ short-summary: Update a connected registry for an Azure Container Registry.
 long-summary: |
     Only one-way migration from SyncToken to ManagedIdentity authentication is supported.
     The service validates migration eligibility, including the required Offline state.
-    Run `az acr connected-registry deactivate` before invoking the migration.
+    Ensure the connected registry is Offline/Inactive before invoking the migration; run `az acr connected-registry deactivate` first only if it is currently Online/Active.
 examples:
   - name: Update the connected registry client Tokens.
     text: |
