@@ -565,7 +565,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.')
         c.argument('repositories', options_list=['--repository'], nargs='+', help='Specify the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...')
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.')
-        c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.')
+        c.argument('cleanup', help='Delete the sync token and scope map resources for SyncToken authentication. No effect for ManagedIdentity authentication; the managed identity and role assignments are not deleted.')
         c.argument('no_children', help='Used to remove all children from the list.', action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicate whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 

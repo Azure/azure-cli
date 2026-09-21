@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Unit tests for managed-identity connected registry creation, permissions, update, and settings."""
+"""Unit tests for managed-identity connected registry creation, deletion, permissions, update, and settings."""
 
 import unittest
 from unittest import mock
@@ -25,6 +25,7 @@ from azure.cli.command_modules.acr.connected_registry import (
     _build_user_assigned_identity,
     _get_current_auth_type,
     acr_connected_registry_create,
+    acr_connected_registry_delete,
     acr_connected_registry_get_settings,
     acr_connected_registry_permissions_show,
     acr_connected_registry_permissions_update,
@@ -318,6 +319,130 @@ class TestConnectedRegistryCreatePayload(unittest.TestCase):
 
 
 UPDATE_MODULE = 'azure.cli.command_modules.acr.connected_registry'
+
+
+class TestConnectedRegistryDelete(unittest.TestCase):
+
+    def test_mi_delete_skips_token_cleanup(self):
+        token_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/'
+            'registries/{}/tokens/old-sync'.format(TEST_SUB, TEST_RG, TEST_REGISTRY))
+        for cleanup in (False, True):
+            for auth_type in (AUTH_TYPE_MANAGED_IDENTITY, models.AuthType.MANAGED_IDENTITY):
+                for previous_token in (None, token_id):
+                    with self.subTest(cleanup=cleanup, auth_type=auth_type, token_id=previous_token):
+                        cr = _fake_cr(auth_type=auth_type, has_identity=True, token_id=previous_token)
+                        cmd = _make_cmd()
+                        client = mock.MagicMock()
+                        client.get.return_value = cr
+                        client.begin_delete.return_value.result.return_value = mock.sentinel.deleted
+                        with mock.patch(UPDATE_MODULE + '.validate_managed_registry',
+                                        return_value=(None, TEST_RG)), \
+                             mock.patch(UPDATE_MODULE + '.user_confirmation') as confirm, \
+                             mock.patch(UPDATE_MODULE + '.get_token_from_id') as token_lookup, \
+                             mock.patch(UPDATE_MODULE + '.get_scope_map_from_id') as scope_lookup, \
+                             mock.patch(UPDATE_MODULE + '.cf_acr_tokens') as tokens, \
+                             mock.patch(UPDATE_MODULE + '.cf_acr_scope_maps') as scope_maps, \
+                             mock.patch('azure.cli.command_modules.acr.token.acr_token_delete') as delete_token, \
+                             mock.patch('azure.cli.command_modules.acr.scope_map.acr_scope_map_delete') as delete_scope, \
+                             mock.patch(UPDATE_MODULE + '._get_family_tree') as family_tree, \
+                             mock.patch(UPDATE_MODULE + '._update_ancestor_permissions') as update_permissions, \
+                             mock.patch(UPDATE_MODULE + '.logger.warning') as warning:
+                            result = acr_connected_registry_delete(
+                                cmd, client, TEST_CR, TEST_REGISTRY, cleanup=cleanup, resource_group_name=TEST_RG)
+                        self.assertIs(result, mock.sentinel.deleted)
+                        client.get.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
+                        client.begin_delete.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
+                        client.begin_delete.return_value.result.assert_called_once_with()
+                        self.assertEqual(client.mock_calls, [
+                            mock.call.get(TEST_RG, TEST_REGISTRY, TEST_CR),
+                            mock.call.begin_delete(TEST_RG, TEST_REGISTRY, TEST_CR),
+                            mock.call.begin_delete().result(),
+                        ])
+                        confirm.assert_called_once_with(
+                            "Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
+                                TEST_CR, TEST_REGISTRY, '' if cleanup else ' without cleanup flag enabled'), False)
+                        token_lookup.assert_not_called()
+                        scope_lookup.assert_not_called()
+                        tokens.assert_not_called()
+                        scope_maps.assert_not_called()
+                        delete_token.assert_not_called()
+                        delete_scope.assert_not_called()
+                        family_tree.assert_not_called()
+                        update_permissions.assert_not_called()
+                        warning.assert_not_called()
+
+    def test_sync_token_delete_preserves_cleanup_and_warning(self):
+        token_id = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/'
+            'registries/{}/tokens/sync'.format(TEST_SUB, TEST_RG, TEST_REGISTRY))
+        for cleanup in (False, True):
+            for auth_type in (AUTH_TYPE_SYNC_TOKEN, models.AuthType.SYNC_TOKEN, None):
+                with self.subTest(cleanup=cleanup, auth_type=auth_type):
+                    cr = _fake_cr(auth_type=auth_type, token_id=token_id)
+                    cr.parent.id = '/connectedRegistries/parent'
+                    cmd = _make_cmd()
+                    client = mock.MagicMock()
+                    client.get.return_value = cr
+                    client.begin_delete.return_value.result.return_value = mock.sentinel.deleted
+                    client.list.return_value = [mock.sentinel.parent]
+                    token = mock.MagicMock()
+                    token.name = 'sync'
+                    token.scope_map_id = token_id.replace('/tokens/sync', '/scopeMaps/sync-scope')
+                    with mock.patch(UPDATE_MODULE + '.validate_managed_registry',
+                                    return_value=(None, TEST_RG)), \
+                         mock.patch(UPDATE_MODULE + '.user_confirmation') as confirm, \
+                         mock.patch(UPDATE_MODULE + '.get_token_from_id', return_value=token) as token_lookup, \
+                         mock.patch(UPDATE_MODULE + '.cf_acr_tokens') as tokens, \
+                         mock.patch(UPDATE_MODULE + '.cf_acr_scope_maps') as scope_maps, \
+                         mock.patch('azure.cli.command_modules.acr.token.acr_token_delete') as delete_token, \
+                         mock.patch('azure.cli.command_modules.acr.scope_map.acr_scope_map_delete') as delete_scope, \
+                         mock.patch(UPDATE_MODULE + '._get_family_tree',
+                                    return_value=(mock.sentinel.family_tree, None)) as family_tree, \
+                         mock.patch(UPDATE_MODULE + '._update_ancestor_permissions') as update_permissions, \
+                         mock.patch(UPDATE_MODULE + '.logger.warning') as warning:
+                        result = acr_connected_registry_delete(
+                            cmd, client, TEST_CR, TEST_REGISTRY, cleanup=cleanup, yes=True, resource_group_name=TEST_RG)
+                    self.assertIs(result, mock.sentinel.deleted)
+                    client.get.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
+                    client.begin_delete.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
+                    client.begin_delete.return_value.result.assert_called_once_with()
+                    confirm.assert_called_once_with(
+                        "Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
+                            TEST_CR, TEST_REGISTRY, '' if cleanup else ' without cleanup flag enabled'), True)
+                    token_lookup.assert_called_once_with(cmd, token_id)
+                    if cleanup:
+                        tokens.assert_called_once_with(cmd.cli_ctx)
+                        scope_maps.assert_called_once_with(cmd.cli_ctx)
+                        delete_token.assert_called_once_with(
+                            cmd, tokens.return_value, TEST_REGISTRY, 'sync', True, TEST_RG)
+                        delete_token.return_value.result.assert_called_once_with()
+                        delete_scope.assert_called_once_with(
+                            cmd, scope_maps.return_value, TEST_REGISTRY, 'sync-scope', True, TEST_RG)
+                        delete_scope.return_value.result.assert_called_once_with()
+                        client.list.assert_called_once_with(TEST_RG, TEST_REGISTRY)
+                        family_tree.assert_called_once_with([mock.sentinel.parent], None)
+                        update_permissions.assert_called_once_with(
+                            cmd, mock.sentinel.family_tree, TEST_RG, TEST_REGISTRY,
+                            cr.parent.id, TEST_CR, remove_access=True)
+                        warning.assert_not_called()
+                    else:
+                        tokens.assert_not_called()
+                        scope_maps.assert_not_called()
+                        delete_token.assert_not_called()
+                        delete_scope.assert_not_called()
+                        client.list.assert_not_called()
+                        family_tree.assert_not_called()
+                        update_permissions.assert_not_called()
+                        warning.assert_called_once_with(
+                            "Connected registry successfully deleted. Please cleanup your sync tokens and scope maps. "
+                            "Run the following commands for cleanup: \n\t"
+                            "az acr token delete -n sync -r {registry} --yes\n\t"
+                            "az acr scope-map delete -n sync-scope -r {registry} --yes\n"
+                            "Run the following command on all ascendency to remove the deleted registry gateway access: "
+                            "\n\taz acr scope-map update -n <scope-map-name> -r {registry} --remove-gateway "
+                            "{connected_registry} config/read config/write message/read message/write".format(
+                                registry=TEST_REGISTRY, connected_registry=TEST_CR))
 
 
 # ---------------------------------------------------------------------------
