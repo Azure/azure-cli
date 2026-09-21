@@ -234,3 +234,70 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_connectedregistry_managed_identity(self):
+        # Managed-identity auth mode for connected registries. Recorded scenario is
+        # intentionally minimal (create + show + get-settings + delete) so the cassette
+        # does not depend on the SyncToken->ManagedIdentity migration.
+        # Client-side validation, the migration state machine, and MI-mode delete cleanup
+        # are covered by mock-based unit tests in test_acr_connected_registry_mi_unit.py.
+        # Note: This test does NOT import from azure.mgmt.containerregistry so the
+        # recording remains valid across future SDK model-namespace changes.
+
+        self.kwargs.update({
+        'registry_name': self.create_random_name('clireg', 20),
+        'cr_mi_name': 'crmiscen',
+        'rg_loc': 'eastus',
+        'sku': 'Premium',
+        'identity_name': self.create_random_name('cr-mi-id', 20),
+        })
+
+        # Registry + data endpoint + abac (required for connected-registry).
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} '
+                 '--role-assignment-mode rbac-abac',
+                checks=[self.check('name', '{registry_name}'),
+                        self.check('sku.name', '{sku}'),
+                        self.check('provisioningState', 'Succeeded'),
+                        self.check('roleAssignmentMode', 'AbacRepositoryPermissions')])
+        self.cmd('acr update -n {registry_name} -g {rg} --data-endpoint-enabled true',
+                checks=[self.check('dataEndpointEnabled', True),
+                        self.check('roleAssignmentMode', 'AbacRepositoryPermissions')])
+
+        # User-assigned identity.
+        result = self.cmd('identity create --name {identity_name} -g {rg}').get_output_in_json()
+        self.kwargs['identity_id'] = result['id']
+        self.kwargs['identity_client_id'] = result['clientId']
+
+        # --- Create with ManagedIdentity ---
+        self.cmd('acr connected-registry create -n {cr_mi_name} -r {registry_name} -g {rg} '
+                '-m ReadOnly --auth-type ManagedIdentity --identity {identity_id}',
+                checks=[self.check('name', '{cr_mi_name}'),
+                        self.check('mode', 'ReadOnly'),
+                        self.check('provisioningState', 'Succeeded'),
+                        self.check('parent.syncProperties.authType', 'ManagedIdentity'),
+                        self.check('identity.type', 'userAssigned')])
+
+        # --- Show reflects MI ---
+        self.cmd('acr connected-registry show -n {cr_mi_name} -r {registry_name} -g {rg}',
+                checks=[self.check('parent.syncProperties.authType', 'ManagedIdentity'),
+                        self.check('identity.type', 'userAssigned')])
+
+        # --- get-settings returns MI-flavored connection string ---
+        settings = self.cmd('acr connected-registry get-settings -n {cr_mi_name} -r {registry_name} '
+                        '-g {rg} --parent-protocol https').get_output_in_json()
+        connection_string = settings['ACR_REGISTRY_CONNECTION_STRING']
+        self.assertIn(
+            'ManagedIdentityClientId={};'.format(self.kwargs['identity_client_id']),
+            connection_string)
+        self.assertNotIn('SyncTokenName=', connection_string)
+        self.assertNotIn('SyncTokenPassword=', connection_string)
+        self.assertNotIn('SYNC_TOKEN_USER', settings)
+        self.assertNotIn('SYNC_TOKEN_PASSWORD', settings)
+
+        # --- MI-mode delete (no sync token / scope map cleanup path) ---
+        self.cmd('acr connected-registry delete -n {cr_mi_name} -r {registry_name} -g {rg} -y')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+        # Shared RG: clean up the user-assigned identity too.
+        self.cmd('identity delete --name {identity_name} -g {rg}')
