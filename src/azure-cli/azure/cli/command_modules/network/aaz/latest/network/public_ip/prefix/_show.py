@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes/{}", "2025-09-01"],
         ]
     }
 
@@ -61,7 +61,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.PublicIPPrefixesGet(ctx=self.ctx)()
+        self.PublicIpPrefixesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -76,7 +76,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PublicIPPrefixesGet(AAZHttpOperation):
+    class PublicIpPrefixesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -127,7 +127,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -189,7 +189,7 @@ class Show(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -201,7 +201,7 @@ class Show(AAZCommand):
                 serialized_name="loadBalancerFrontendIpConfiguration",
                 flags={"read_only": True},
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -223,11 +223,18 @@ class Show(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.upgraded_to_v2 = AAZBoolType(
+                serialized_name="upgradedToV2",
+                flags={"read_only": True},
+            )
 
             ip_tags = cls._schema_on_200.properties.ip_tags
             ip_tags.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.ip_tags.Element
+            _element.first_party_service_tag_id = AAZStrType(
+                serialized_name="firstPartyServiceTagId",
+            )
             _element.ip_tag_type = AAZStrType(
                 serialized_name="ipTagType",
             )
@@ -256,6 +263,7 @@ class Show(AAZCommand):
             properties.idle_timeout_in_minutes = AAZIntType(
                 serialized_name="idleTimeoutInMinutes",
             )
+            properties.nat64 = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -276,33 +284,37 @@ class Show(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.service_gateway = AAZObjectType(
+                serialized_name="serviceGateway",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.service_gateway)
             properties.source_virtual_network = AAZObjectType(
                 serialized_name="sourceVirtualNetwork",
             )
-            _ShowHelper._build_schema_sub_resource_read(properties.source_virtual_network)
+            _ShowHelper._build_schema_common_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
 
             public_ip_addresses = cls._schema_on_200.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_addresses_v6 = cls._schema_on_200.properties.nat_gateway.properties.public_ip_addresses_v6
             public_ip_addresses_v6.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_addresses_v6.Element)
 
             public_ip_prefixes = cls._schema_on_200.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_prefixes.Element)
 
             public_ip_prefixes_v6 = cls._schema_on_200.properties.nat_gateway.properties.public_ip_prefixes_v6
             public_ip_prefixes_v6.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(subnets.Element)
+            _ShowHelper._build_schema_common_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -335,22 +347,22 @@ class Show(AAZCommand):
 class _ShowHelper:
     """Helper class for Show"""
 
-    _schema_sub_resource_read = None
+    _schema_common_sub_resource_read = None
 
     @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
             flags={"read_only": True}
         )
 
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
 
-        _schema.id = cls._schema_sub_resource_read.id
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Show"]
