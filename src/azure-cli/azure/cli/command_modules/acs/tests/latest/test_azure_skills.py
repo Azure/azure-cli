@@ -662,8 +662,11 @@ class CliArgumentTests(unittest.TestCase):
 @unittest.skipUnless(sys.platform.startswith('linux'), 'Exercises Linux binary installation and agent paths')
 class AzureSkillsScenarioTest(ScenarioTest):
     def __init__(self, method_name):
-        # Import before overriding paths so a first import cannot retain the fixture's configuration root.
-        from azure.cli.core import _config, cloud
+        # Suppress import-time metadata I/O without caching the fixture's configuration root.
+        environment = dict(os.environ)
+        environment.pop('ARM_CLOUD_METADATA_URL', None)
+        with mock.patch.object(os, 'environ', environment):
+            from azure.cli.core import _config, cloud
 
         # DummyCli is constructed before setUp; never let it use the user's configuration.
         with ExitStack() as cleanup:
@@ -671,7 +674,7 @@ class AzureSkillsScenarioTest(ScenarioTest):
             config = self.home / '.azure'
             config.mkdir()
             (config / 'config').write_text('[core]\ncollect_telemetry = no\n', encoding='utf-8')
-            environment = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+            environment = dict(environment, HOME=str(self.home), USERPROFILE=str(self.home),
                                AZURE_CONFIG_DIR=str(config), AZURE_CORE_COLLECT_TELEMETRY='no',
                                CLAUDE_CONFIG_DIR=str(self.home / 'claude'), CODEX_HOME=str(self.home / 'codex'),
                                PI_CODING_AGENT_DIR=str(self.home / 'pi'))
@@ -706,6 +709,7 @@ class AzureSkillsScenarioTest(ScenarioTest):
         self.assertEqual(_config.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
         self.assertEqual(cloud.GLOBAL_CONFIG_DIR, str(self.home / '.azure'))
         self.assertEqual(cloud.CLOUD_CONFIG_FILE, str(self.home / '.azure/clouds.config'))
+        self.assertNotIn('ARM_CLOUD_METADATA_URL', os.environ)
         kubectl = self.home / 'bin/kubectl'
         kubelogin = self.home / 'bin/kubelogin'
         pi = self.home / 'pi'
