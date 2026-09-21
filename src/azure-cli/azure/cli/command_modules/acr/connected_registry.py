@@ -622,7 +622,6 @@ def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
             raise CLIError(
                 "Connected registry '{}' is in ManagedIdentity mode but no user-assigned identity is "
                 "attached.".format(connected_registry_name))
-        
         # exactly one user-assigned identity is expected.
         msi_resource_id, msi = next(iter(user_assigned.items()))
         client_id = getattr(msi, 'client_id', None)
