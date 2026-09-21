@@ -66,6 +66,34 @@ class Update(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "CommunityGalleryInfo"
+
+        _args_schema = cls._args_schema
+        _args_schema.eula = AAZStrArg(
+            options=["--eula"],
+            arg_group="CommunityGalleryInfo",
+            help="End-user license agreement for community gallery image.",
+            nullable=True,
+        )
+        _args_schema.public_name_prefix = AAZStrArg(
+            options=["--public-name-prefix"],
+            arg_group="CommunityGalleryInfo",
+            help="The prefix of the gallery name that will be displayed publicly. Visible to all users.",
+            nullable=True,
+        )
+        _args_schema.publisher_contact = AAZStrArg(
+            options=["--publisher-contact"],
+            arg_group="CommunityGalleryInfo",
+            help="Community gallery publisher support email. The email address of the publisher. Visible to all users.",
+            nullable=True,
+        )
+        _args_schema.publisher_uri = AAZStrArg(
+            options=["--publisher-uri"],
+            arg_group="CommunityGalleryInfo",
+            help="The link to the publisher website. Visible to all users.",
+            nullable=True,
+        )
+
         # define Arg Group "Gallery"
 
         _args_schema = cls._args_schema
@@ -92,46 +120,16 @@ class Update(AAZCommand):
             help="The description of this Shared Image Gallery resource. This property is updatable.",
             nullable=True,
         )
-        _args_schema.sharing_profile = AAZObjectArg(
-            options=["--sharing-profile"],
-            arg_group="Properties",
-            help="Profile for gallery sharing to subscription or tenant",
-            nullable=True,
-        )
 
-        sharing_profile = cls._args_schema.sharing_profile
-        sharing_profile.community_gallery_info = AAZObjectArg(
-            options=["community-gallery-info"],
-            help="Information of community gallery if current gallery is shared to community.",
-            nullable=True,
-        )
-        sharing_profile.permissions = AAZStrArg(
-            options=["permissions"],
+        # define Arg Group "SharingProfile"
+
+        _args_schema = cls._args_schema
+        _args_schema.permissions = AAZStrArg(
+            options=["--permissions"],
+            arg_group="SharingProfile",
             help="This property allows you to specify the permission of sharing gallery. Possible values are: **Private,** **Groups,** **Community.**",
             nullable=True,
             enum={"Community": "Community", "Groups": "Groups", "Private": "Private"},
-        )
-
-        community_gallery_info = cls._args_schema.sharing_profile.community_gallery_info
-        community_gallery_info.eula = AAZStrArg(
-            options=["eula"],
-            help="End-user license agreement for community gallery image.",
-            nullable=True,
-        )
-        community_gallery_info.public_name_prefix = AAZStrArg(
-            options=["public-name-prefix"],
-            help="The prefix of the gallery name that will be displayed publicly. Visible to all users.",
-            nullable=True,
-        )
-        community_gallery_info.publisher_contact = AAZStrArg(
-            options=["publisher-contact"],
-            help="Community gallery publisher support email. The email address of the publisher. Visible to all users.",
-            nullable=True,
-        )
-        community_gallery_info.publisher_uri = AAZStrArg(
-            options=["publisher-uri"],
-            help="The link to the publisher website. Visible to all users.",
-            nullable=True,
         )
 
         # define Arg Group "SoftDeletePolicy"
@@ -399,12 +397,12 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("description", AAZStrType, ".description")
-                properties.set_prop("sharingProfile", AAZObjectType, ".sharing_profile")
+                properties.set_prop("sharingProfile", AAZObjectType)
                 properties.set_prop("softDeletePolicy", AAZObjectType)
 
             sharing_profile = _builder.get(".properties.sharingProfile")
             if sharing_profile is not None:
-                sharing_profile.set_prop("communityGalleryInfo", AAZObjectType, ".community_gallery_info")
+                sharing_profile.set_prop("communityGalleryInfo", AAZObjectType)
                 sharing_profile.set_prop("permissions", AAZStrType, ".permissions")
 
             community_gallery_info = _builder.get(".properties.sharingProfile.communityGalleryInfo")
