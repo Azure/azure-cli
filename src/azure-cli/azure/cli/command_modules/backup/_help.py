@@ -32,6 +32,10 @@ short-summary: Register a Resource to the given Recovery Services Vault.
 examples:
   - name: This command allows Azure Backup to convert the 'Resource' to a 'Backup Container' which is then registered to the given Recovery services vault. The Azure Backup service can then discover workloads of the given workload type within this container to be protected later.
     text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload
+  - name: Register a storage account for Azure Files backup using the vault's system-assigned managed identity.
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --workload-type AzureFileShare --backup-management-type AzureStorage --access-type IdentityBased --mi-system-assigned
+  - name: Re-register a storage account with a user-assigned managed identity without prompting.
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --workload-type AzureFileShare --backup-management-type AzureStorage --access-type IdentityBased --mi-user-assigned MyIdentityResourceId --yes
 """
 
 helps['backup container re-register'] = """
@@ -306,6 +310,8 @@ short-summary: Start protecting a previously unprotected Azure File share within
 examples:
   - name: Start protecting a previously unprotected Azure File share within an Azure Storage account as per the specified policy to a Recovery services vault. Provide the Azure File share name and the parent storage account name.
     text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare
+  - name: Protect an Azure file share using a user-assigned managed identity.
+    text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare --access-type IdentityBased --mi-user-assigned MyIdentityResourceId
 """
 
 helps['backup protection undelete'] = """
@@ -469,6 +475,10 @@ short-summary: Restore backed up Azure file shares to the same file-share or ano
 examples:
   - name: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation
+  - name: Restore an Azure file share to an alternate location using the vault's system-assigned managed identity.
+    text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --mi-system-assigned
+  - name: Restore an Azure file share across both region and subscription.
+    text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MySecondaryRegionContainer --item-name MySecondaryRegionItem --rp-name MySecondaryRegionRecoveryPoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-subscription-id MyTargetSubscription --target-resource-group-name MyTargetResourceGroup --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --use-secondary-region
 """
 
 helps['backup restore restore-azurefiles'] = """
@@ -477,6 +487,8 @@ short-summary: Restore backed up Azure files within a file-share to the same fil
 examples:
   - name: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path Filepath1 Filepath2
+  - name: Restore selected Azure files using a user-assigned managed identity.
+    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --source-file-type File --source-file-path Filepath1 --mi-user-assigned MyIdentityResourceId
 """
 
 helps['backup restore restore-azurewl'] = """
