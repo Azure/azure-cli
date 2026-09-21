@@ -54,7 +54,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
-            options=["-n", "--name", "--gallery-name"],
+            options=["-r", "--gallery-name"],
             help="The name of the Shared Image Gallery.",
             required=True,
             id_part="name",
