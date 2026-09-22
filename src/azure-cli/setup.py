@@ -75,7 +75,7 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices==15.0.0b6',  # 15.0.0b6 version supports compute operations which is in PrPr, pls don't remove it without consulting our team
+    'azure-mgmt-cognitiveservices==15.0.0b6',  # beta pin: preview-only features (managed-compute-deployment, compute, adapter-deployment, agent, ...) live only in preview SDKs; consult our team before changing
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==15.1.0b3',
