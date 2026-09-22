@@ -106,6 +106,7 @@ class SigShow(_SigShow):
             }
             return parameters
 
+
 class SigIdentityRemove(_SigIdentityRemove):
     def _execute_operations(self):
         self.pre_operations()
