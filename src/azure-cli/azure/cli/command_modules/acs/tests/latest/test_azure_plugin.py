@@ -620,6 +620,7 @@ class AzurePluginNativeTest(unittest.TestCase):
                 ('timeout', payload, stderr_secret, 'time.sleep(30)', ClientRequestError, 'timed out after'),
                 ('warning', payload, stderr_secret, 'sys.exit(0)', ValidationError, 'warning')):
             calls = []
+            owned = []
             script = (f'import sys, time; print({stdout!r}, flush=True); '
                       f'print({stderr!r}, file=sys.stderr, flush=True); {ending}')
 
@@ -629,13 +630,26 @@ class AzurePluginNativeTest(unittest.TestCase):
                     return NativeProcessFixture({tuple(argv): []})(argv)
                 if argv == ['copilot', 'mcp', 'list', '--json']:
                     process = real_popen([sys.executable, '-c', script], **kwargs)
+                    owned.append(process)
+                    # Register bound methods before wrapping communicate, even if an assertion fails.
+                    self.addCleanup(process.communicate, timeout=5)
+                    self.addCleanup(process.kill)
                     communicate = process.communicate
                     process.communicate = lambda timeout: communicate(timeout=0.2 if case == 'timeout' else timeout)
                     return process
                 raise AssertionError('Unexpected native command: ' + repr(argv))
 
+            def taskkill(argv, **kwargs):
+                self.assertEqual(sys.platform, 'win32')
+                self.assertEqual(len(owned), 1)
+                self.assertEqual(argv, [os.path.join(os.environ['SystemRoot'], 'System32', 'taskkill.exe'),
+                                        '/PID', str(owned[0].pid), '/T', '/F'])
+                return subprocess.CompletedProcess(argv, 0)
+
             with self.subTest(case=case):
-                with mock.patch.object(plugin.subprocess, 'Popen', side_effect=popen), self.assertRaises(error) as caught:
+                with mock.patch.object(plugin.subprocess, 'Popen', side_effect=popen), \
+                        mock.patch.object(plugin.subprocess, 'run', side_effect=taskkill), \
+                        self.assertRaises(error) as caught:
                     plugin.install_plugin('github-copilot')
                 message = str(caught.exception)
                 for safe_context in ('GitHub Copilot CLI', 'MCP inventory', context, 'native'):
@@ -646,6 +660,13 @@ class AzurePluginNativeTest(unittest.TestCase):
                     self.assertNotIn(secret, rendered)
                 self.assertEqual(calls, [('copilot', 'plugin', 'list', '--json'),
                                          ('copilot', 'mcp', 'list', '--json')])
+
+    def test_mcp_inventory_failures_with_windows_cleanup_do_not_disclose_credentials(self):
+        # Exercise the same real-child fixture without requiring a Windows host.
+        with mock.patch.object(plugin.sys, 'platform', 'win32'), \
+                mock.patch.object(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0, create=True), \
+                mock.patch.dict(os.environ, {'SystemRoot': 'C:\\Windows'}):
+            self.test_mcp_inventory_failures_do_not_disclose_credentials()
 
     def test_plugin_and_marketplace_failures_do_not_disclose_credentials(self):
         secret = 'synthetic-private-git-credential'
