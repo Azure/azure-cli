@@ -22,10 +22,15 @@ for a due single follow-up. Stop after either write.
 For sufficient reports, call the repository-owned `infer_target_for_repo`
 custom skill with `repo_full_name="Azure/azure-cli"`, the sanitized text, and
 an empty `pr_files` list. It resolves only against the configured live module
-and extension roots. Verify the returned target against current repository
-structure.
+and extension roots, so `unknown` does not by itself reject a repository-level
+issue. Verify a resolved target against current repository structure. When no
+module or extension is resolved, use the issue evidence to continue only if it
+unambiguously targets handwritten repository-level code such as packaging,
+bootstrap, or shared CLI infrastructure; otherwise request the missing target
+details and stop.
 
-- A core module remains in `Azure/azure-cli`. Build the exact
+- A core module or an unambiguous repository-level target remains in
+  `Azure/azure-cli`. Build the exact
   `[Component] Fix #N: \`az ...\`: Summary` title with `pr_title_for`, include
   `pr_format_guidance`, post the evidence-based bug analysis, then start the
   configured Copilot fork task.
