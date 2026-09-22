@@ -65,8 +65,11 @@ class MoveIpConfigurations(AAZCommand):
         )
         _element.source_ip_configuration.id = AAZResourceIdArg(
             options=["id"],
-            help="ARM resource ID of the source IP configuration.",
+            help="ARM resource ID of the secondary source IP configuration.",
             required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkInterfaces/{}/ipConfigurations/{}",
+            ),
         )
         _element.target_ip_configuration = AAZObjectArg(
             options=["target-ip-configuration"],
@@ -75,8 +78,11 @@ class MoveIpConfigurations(AAZCommand):
         )
         _element.target_ip_configuration.id = AAZResourceIdArg(
             options=["id"],
-            help="ARM resource ID of the target IP configuration.",
+            help="ARM resource ID of the new target IP configuration. The target must not already exist.",
             required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkInterfaces/{}/ipConfigurations/{}",
+            ),
         )
         return cls._args_schema
 

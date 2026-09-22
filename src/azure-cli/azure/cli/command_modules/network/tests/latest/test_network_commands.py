@@ -5496,8 +5496,11 @@ class NetworkVNetScenarioTest(ScenarioTest):
             'source_nic': self.create_random_name('srcnic', 12),
             'target_nic': self.create_random_name('dstnic', 12),
             'source_config': 'source-secondary',
+            'source_config_2': 'source-tertiary',
             'target_config': 'target-secondary',
+            'target_config_2': 'target-tertiary',
             'source_ip': '10.0.0.10',
+            'source_ip_2': '10.0.0.11',
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes 10.0.0.0/16')
@@ -5511,25 +5514,42 @@ class NetworkVNetScenarioTest(ScenarioTest):
             'network nic show -g {rg} -n {target_nic}'
         ).get_output_in_json()['id']
         self.kwargs['target_id'] = '{}/ipConfigurations/{}'.format(target_nic_id, self.kwargs['target_config'])
+        self.kwargs['target_id_2'] = '{}/ipConfigurations/{}'.format(
+            target_nic_id, self.kwargs['target_config_2']
+        )
         self.kwargs['source_id'] = self.cmd(
             'network nic ip-config create -g {rg} --nic-name {source_nic} -n {source_config} '
             '--private-ip-address {source_ip}',
             checks=self.check('privateIPAddress', '{source_ip}')
         ).get_output_in_json()['id']
+        self.kwargs['source_id_2'] = self.cmd(
+            'network nic ip-config create -g {rg} --nic-name {source_nic} -n {source_config_2} '
+            '--private-ip-address {source_ip_2}',
+            checks=self.check('privateIPAddress', '{source_ip_2}')
+        ).get_output_in_json()['id']
 
         self.cmd(
             'network vnet move-ip-configurations -g {rg} -n {vnet} '
             '--move-items "[0].source-ip-configuration.id={source_id}" '
-            '"[0].target-ip-configuration.id={target_id}"'
+            '"[0].target-ip-configuration.id={target_id}" '
+            '"[1].source-ip-configuration.id={source_id_2}" '
+            '"[1].target-ip-configuration.id={target_id_2}"'
         )
 
         self.cmd(
             'network nic ip-config list -g {rg} --nic-name {source_nic}',
-            checks=self.check("[?name == '{source_config}'] | length(@)", 0)
+            checks=[
+                self.check("[?name == '{source_config}'] | length(@)", 0),
+                self.check("[?name == '{source_config_2}'] | length(@)", 0),
+            ]
         )
         self.cmd(
             'network nic ip-config show -g {rg} --nic-name {target_nic} -n {target_config}',
             checks=self.check('privateIPAddress', '{source_ip}')
+        )
+        self.cmd(
+            'network nic ip-config show -g {rg} --nic-name {target_nic} -n {target_config_2}',
+            checks=self.check('privateIPAddress', '{source_ip_2}')
         )
 
     @AllowLargeResponse()
