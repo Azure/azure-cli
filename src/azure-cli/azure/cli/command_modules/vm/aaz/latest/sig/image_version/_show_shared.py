@@ -49,18 +49,27 @@ class ShowShared(AAZCommand):
             help="The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.",
             required=True,
             id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_image_version_name = AAZStrArg(
             options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
             help="The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: `<MajorVersion>.<MinorVersion>.<Patch>`",
             required=True,
             id_part="child_name_3",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_unique_name = AAZStrArg(
             options=["--gallery-unique-name"],
             help="The unique name of the Shared Gallery.",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.location = AAZResourceLocationArg(
             required=True,

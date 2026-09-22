@@ -52,11 +52,17 @@ class ListShared(AAZCommand):
             options=["-i", "--gallery-image-definition"],
             help="The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_unique_name = AAZStrArg(
             options=["--gallery-unique-name"],
             help="The unique name of the Shared Gallery.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.location = AAZResourceLocationArg(
             required=True,

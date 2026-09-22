@@ -50,12 +50,18 @@ class Delete(AAZCommand):
             help="The name of the gallery image definition in which the Image Version resides.",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_image_version_name = AAZStrArg(
             options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
             help="The name of the gallery image version to be deleted.",
             required=True,
             id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
@@ -63,7 +69,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

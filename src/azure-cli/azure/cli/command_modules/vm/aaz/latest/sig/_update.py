@@ -59,7 +59,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -264,7 +264,173 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_gallery_read(cls._schema_on_200)
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.identity = AAZIdentityObjectType()
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.description = AAZStrType()
+            properties.identifier = AAZObjectType()
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.sharing_profile = AAZObjectType(
+                serialized_name="sharingProfile",
+            )
+            properties.sharing_status = AAZObjectType(
+                serialized_name="sharingStatus",
+                flags={"read_only": True},
+            )
+            properties.soft_delete_policy = AAZObjectType(
+                serialized_name="softDeletePolicy",
+            )
+
+            identifier = cls._schema_on_200.properties.identifier
+            identifier.unique_name = AAZStrType(
+                serialized_name="uniqueName",
+                flags={"read_only": True},
+            )
+
+            sharing_profile = cls._schema_on_200.properties.sharing_profile
+            sharing_profile.community_gallery_info = AAZObjectType(
+                serialized_name="communityGalleryInfo",
+            )
+            sharing_profile.groups = AAZListType(
+                flags={"read_only": True},
+            )
+            sharing_profile.permissions = AAZStrType()
+
+            community_gallery_info = cls._schema_on_200.properties.sharing_profile.community_gallery_info
+            community_gallery_info.community_gallery_enabled = AAZBoolType(
+                serialized_name="communityGalleryEnabled",
+                flags={"read_only": True},
+            )
+            community_gallery_info.eula = AAZStrType()
+            community_gallery_info.public_name_prefix = AAZStrType(
+                serialized_name="publicNamePrefix",
+            )
+            community_gallery_info.public_names = AAZListType(
+                serialized_name="publicNames",
+                flags={"read_only": True},
+            )
+            community_gallery_info.publisher_contact = AAZStrType(
+                serialized_name="publisherContact",
+            )
+            community_gallery_info.publisher_uri = AAZStrType(
+                serialized_name="publisherUri",
+            )
+
+            public_names = cls._schema_on_200.properties.sharing_profile.community_gallery_info.public_names
+            public_names.Element = AAZStrType()
+
+            groups = cls._schema_on_200.properties.sharing_profile.groups
+            groups.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.sharing_profile.groups.Element
+            _element.ids = AAZListType()
+            _element.type = AAZStrType()
+
+            ids = cls._schema_on_200.properties.sharing_profile.groups.Element.ids
+            ids.Element = AAZStrType()
+
+            sharing_status = cls._schema_on_200.properties.sharing_status
+            sharing_status.aggregated_state = AAZStrType(
+                serialized_name="aggregatedState",
+                flags={"read_only": True},
+            )
+            sharing_status.summary = AAZListType()
+
+            summary = cls._schema_on_200.properties.sharing_status.summary
+            summary.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.sharing_status.summary.Element
+            _element.details = AAZStrType()
+            _element.region = AAZStrType()
+            _element.state = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            soft_delete_policy = cls._schema_on_200.properties.soft_delete_policy
+            soft_delete_policy.grace_period_in_days = AAZIntType(
+                serialized_name="gracePeriodInDays",
+            )
+            soft_delete_policy.is_soft_delete_enabled = AAZBoolType(
+                serialized_name="isSoftDeleteEnabled",
+            )
+            soft_delete_policy.retention_period_in_days = AAZIntType(
+                serialized_name="retentionPeriodInDays",
+            )
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 

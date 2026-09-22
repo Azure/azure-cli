@@ -62,7 +62,7 @@ class Create(AAZCommand):
             help="The name of the Shared Image Gallery.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

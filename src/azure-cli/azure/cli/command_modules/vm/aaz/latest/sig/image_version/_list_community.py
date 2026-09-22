@@ -49,6 +49,9 @@ class ListCommunity(AAZCommand):
             options=["-i", "--gallery-image-definition"],
             help="The name of the community gallery image definition from which the image versions are to be listed.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.location = AAZResourceLocationArg(
             required=True,
@@ -57,6 +60,9 @@ class ListCommunity(AAZCommand):
             options=["--public-gallery-name"],
             help="The public name of the community gallery.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         return cls._args_schema
 
