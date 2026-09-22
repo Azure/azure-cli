@@ -491,8 +491,9 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
                                            resource_id, backup_management_type)
 
 
-def register_container(cmd, client, vault_name, resource_group_name, backup_management_type,
-                       workload_type=None, resource_id=None, storage_account=None, access_type=None,
+def register_container(cmd, client, vault_name, resource_group_name, workload_type,
+                       resource_id=None, backup_management_type="AzureWorkload",
+                       storage_account=None, access_type=None,
                        mi_system_assigned=None, mi_user_assigned=None, yes=False):
     if backup_management_type.lower() == "azurestorage":
         if workload_type is None or workload_type.lower() not in ["azurefiles", "azurefileshare"]:

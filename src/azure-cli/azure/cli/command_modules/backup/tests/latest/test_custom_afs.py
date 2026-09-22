@@ -25,8 +25,19 @@ class AfsManagedIdentityTest(unittest.TestCase):
         for arguments in afs_arguments:
             with self.subTest(arguments=arguments), self.assertRaises(ArgumentUsageError):
                 custom_base.register_container(
-                    Mock(), Mock(), "vault", "rg", "AzureWorkload",
-                    workload_type="MSSQL", resource_id="resource-id", **arguments)
+                    Mock(), Mock(), "vault", "rg", "MSSQL",
+                    resource_id="resource-id", **arguments)
+
+    @patch("azure.cli.command_modules.backup.custom_base.register_wl_container")
+    def test_register_container_preserves_azure_workload_default(self, register_wl_container):
+        cmd = Mock()
+        client = Mock()
+
+        custom_base.register_container(
+            cmd, client, "vault", "rg", "MSSQL", resource_id="resource-id")
+
+        register_wl_container.assert_called_once_with(
+            cmd, client, "vault", "rg", "MSSQL", "resource-id", "AzureWorkload")
 
     def test_validate_identity_parameters(self):
         custom_afs._validate_afs_identity_parameters(None, None, None)
