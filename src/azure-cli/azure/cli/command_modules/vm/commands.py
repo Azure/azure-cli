@@ -329,6 +329,9 @@ def load_command_table(self, _):
 
     with self.command_group('vmss extension image') as g:
         g.custom_command('list', 'list_vm_extension_images')
+        from .operations.vmss_extension_image import VMSSExtensionImageListVersions, VMSSExtensionImageShow
+        self.command_table['vmss extension image list-versions'] = VMSSExtensionImageListVersions(loader=self)
+        self.command_table['vmss extension image show'] = VMSSExtensionImageShow(loader=self)
 
     with self.command_group('vmss run-command') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')

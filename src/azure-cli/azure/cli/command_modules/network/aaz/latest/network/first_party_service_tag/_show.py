@@ -12,16 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vmss extension image list-versions",
+    "network first-party-service-tag show",
+    is_preview=True,
 )
-class ListVersions(AAZCommand):
-    """List virtual machine extension image versions.
+class Show(AAZCommand):
+    """Get the specified first party service tag.
+
+    :example: Get first party service tag
+        az network first-party-service-tag show --resource-group rg1 --first-party-service-tag-name myServiceTag
     """
 
     _aaz_info = {
-        "version": "2022-08-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/firstpartyservicetags/{}", "2025-09-01"],
         ]
     }
 
@@ -41,39 +45,24 @@ class ListVersions(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
+        _args_schema.first_party_service_tag_name = AAZStrArg(
+            options=["-n", "--name", "--first-party-service-tag-name"],
+            help="The name of the first party service tag.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$",
+                max_length=80,
+            ),
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["-p", "--publisher", "--publisher-name"],
-            help="Image publisher name.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-            id_part="child_name_1",
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name", "--type"],
-            help="Name of the extension.",
-            required=True,
-            id_part="child_name_3",
-        )
-        _args_schema.filter = AAZStrArg(
-            options=["--filter"],
-            help="The filter to apply on the operation. Default value is None.",
-        )
-        _args_schema.orderby = AAZStrArg(
-            options=["--orderby"],
-            help="The $orderby odata query option.",
-        )
-        _args_schema.top = AAZIntArg(
-            options=["--top"],
-            help="The $top odata query option.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineExtensionImagesListVersions(ctx=self.ctx)()
+        self.FirstPartyServiceTagsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -88,7 +77,7 @@ class ListVersions(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineExtensionImagesListVersions(AAZHttpOperation):
+    class FirstPartyServiceTagsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -102,7 +91,7 @@ class ListVersions(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types/{type}/versions",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/firstPartyServiceTags/{firstPartyServiceTagName}",
                 **self.url_parameters
             )
 
@@ -118,19 +107,15 @@ class ListVersions(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "location", self.ctx.args.location,
+                    "firstPartyServiceTagName", self.ctx.args.first_party_service_tag_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "type", self.ctx.args.name,
                     required=True,
                 ),
             }
@@ -140,16 +125,7 @@ class ListVersions(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                ),
-                **self.serialize_query_param(
-                    "$orderby", self.ctx.args.orderby,
-                ),
-                **self.serialize_query_param(
-                    "$top", self.ctx.args.top,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2022-08-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -179,57 +155,50 @@ class ListVersions(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.Element
-            _element.id = AAZStrType(
+            _schema_on_200.etag = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
-                flags={"required": True},
+            _schema_on_200.id = AAZStrType(
+                flags={"read_only": True},
             )
-            _element.name = AAZStrType(
-                flags={"required": True, "read_only": True},
+            _schema_on_200.location = AAZStrType()
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
+            _schema_on_200.properties = AAZObjectType()
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.Element.properties
-            properties.compute_role = AAZStrType(
-                serialized_name="computeRole",
+            properties = cls._schema_on_200.properties
+            properties.failed_reason = AAZStrType(
+                serialized_name="failedReason",
+                flags={"read_only": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.value = AAZStrType(
                 flags={"required": True},
-            )
-            properties.handler_schema = AAZStrType(
-                serialized_name="handlerSchema",
-                flags={"required": True},
-            )
-            properties.operating_system = AAZStrType(
-                serialized_name="operatingSystem",
-                flags={"required": True},
-            )
-            properties.supports_multiple_extensions = AAZBoolType(
-                serialized_name="supportsMultipleExtensions",
-            )
-            properties.vm_scale_set_enabled = AAZBoolType(
-                serialized_name="vmScaleSetEnabled",
             )
 
-            tags = cls._schema_on_200.Element.tags
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListVersionsHelper:
-    """Helper class for ListVersions"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["ListVersions"]
+__all__ = ["Show"]

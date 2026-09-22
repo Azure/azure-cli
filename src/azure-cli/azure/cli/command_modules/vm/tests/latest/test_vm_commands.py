@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # AZURE CLI VM TEST DEFINITIONS
+from datetime import datetime, timedelta, timezone
 import json
 import os
 import platform
@@ -2027,6 +2028,51 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_processor_mode_', location='westus')
+    def test_vm_processor_mode(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10),
+            'vmss': self.create_random_name('vmss-', 12),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest',
+            'size': 'Standard_D2als_v7'
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image {image} --size {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --public-ip-address "" --nsg-rule NONE',
+            checks=[
+                self.check('hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --processor-mode Opportunistic', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image {image} --vm-sku {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --instance-count 0 --lb-sku Standard',
+            checks=[
+                self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --processor-mode Opportunistic', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):
 
@@ -2563,6 +2609,62 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
             self.check('location', '{loc}'),
             self.check("contains(id, '/Providers/Microsoft.Compute/Locations/{loc}/Publishers/{pub}/ArtifactTypes/VMExtension/Types/{ext}/Versions/{ver}')", True)
         ])
+
+    @live_only()
+    # Add live_only: Extension that is ready for testing isn’t accessible. The currently written using publicly
+    # available version of the extension, which has not yet been updated on the RP side.
+    # Required to re-record when it is ready.
+    def test_vm_vmss_extension_image(self):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'pub': 'Microsoft.Compute',
+            'ext': 'CustomScriptExtension'
+        })
+
+        command_results = {}
+        for command_group in ('vm', 'vmss'):
+            versions_without_expand = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_without_expand)
+
+            versions_with_metadata = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_with_metadata)
+            self.assertEqual(
+                [version['name'] for version in versions_without_expand],
+                [version['name'] for version in versions_with_metadata]
+            )
+            self.assertTrue(all(
+                field in version
+                for version in versions_with_metadata
+                for field in ('releaseCategory', 'urgencyLevel', 'runProfile')
+            ))
+
+            self.kwargs['ver'] = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties '
+                '--query "[?releaseCategory==\'SecurityFix\' && urgencyLevel==\'Emergency\'].name | [0]" '
+                '--output tsv'.format(command_group)
+            ).output.strip()
+            self.assertTrue(self.kwargs['ver'])
+            image = self.cmd(
+                '{} extension image show --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --version {{ver}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertEqual(image['name'], self.kwargs['ver'])
+            for field in ('releaseNotes', 'releaseCategory', 'urgencyLevel', 'runProfile'):
+                self.assertIn(field, image)
+
+            feature_tags = image['extensionFeatureMetadata']['extensionFeatureTags']
+            self.assertTrue(feature_tags)
+            self.assertTrue(all('key' in tag and 'value' in tag for tag in feature_tags))
+            command_results[command_group] = (versions_without_expand, versions_with_metadata, image)
+
+        self.assertEqual(command_results['vm'], command_results['vmss'])
 
 
 class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
@@ -10315,6 +10417,51 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
 class VMPriorityEvictionBillingTest(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_spot_plus_', location='eastus2')
+    def test_vm_vmss_create_with_spot_plus_priority(self, resource_group):
+        self.kwargs.update({
+            'location': 'eastus2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss_uniform': self.create_random_name('vmssu', 10),
+            'vmss_flexible': self.create_random_name('vmssf', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Ubuntu2204 --size Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('priority', 'SpotPlus'),
+            self.check('evictionPolicy', 'Deallocate'),
+            self.check('billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_uniform} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Delete --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Uniform --lb ""')
+
+        self.cmd('vmss show -g {rg} -n {vmss_uniform}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Delete'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_flexible} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Flexible')
+
+        self.cmd('vmss show -g {rg} -n {vmss_flexible}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Deallocate'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
     def test_vm_priority_eviction_billing(self, resource_group):
         self.kwargs.update({
@@ -13317,8 +13464,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
-    def test_capacity_reservation_operations(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='southafricanorth')
+    def test_capacity_reservation_operations(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -13381,6 +13528,57 @@ class CapacityReservationScenarioTest(ScenarioTest):
         if self.is_live:
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
+    @live_only()  # Future Capacity Reservation is a private preview that requires subscription access.
+    @ResourceGroupPreparer(name_prefix='cli_test_future_capacity_reservation_', location='westus')
+    def test_future_capacity_reservation(self, resource_group):
+        start = datetime.now(timezone.utc) + timedelta(days=90)
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_future_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_future_reservation_', 40),
+            'sku': 'Standard_DS1_v2',
+            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --zones 1',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('zones', ['1'])
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1 --zone 1 --schedule-profile-start {start} '
+                 '--minimum-commitment-days 30',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--instance-view',
+                 checks=[
+                     self.exists('instanceView.reservationStateInfo.reservationState')
+                 ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} '
+                 '--query "[?name==\'{reservation_name}\']"',
+                 checks=[
+                     self.check('[0].name', '{reservation_name}'),
+                     self.check('[0].scheduleProfile.start', '{start}'),
+                     self.check('[0].scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('[0].scheduleProfile.modifiableUntil')
+                 ])
 
     # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
     # Provide private package for service team to test it out.

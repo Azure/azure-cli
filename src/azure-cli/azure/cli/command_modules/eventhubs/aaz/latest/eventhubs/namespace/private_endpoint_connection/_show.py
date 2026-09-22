@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get a description for the specified Private Endpoint Connection name.
+
+    :example: NameSpacePrivateEndPointConnectionGet
+        az eventhubs namespace private-endpoint-connection show --resource-group SDK-EventHub-4794 --namespace-name sdk-Namespace-5828 --private-endpoint-connection-name privateEndpointConnectionName
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/privateendpointconnections/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -132,7 +135,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

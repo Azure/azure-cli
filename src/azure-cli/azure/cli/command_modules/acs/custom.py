@@ -882,7 +882,11 @@ def aks_create(
     load_balancer_idle_timeout=None,
     load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_managed_outbound_ipv6_count=None,
     nat_gateway_idle_timeout=None,
+    nat_gateway_sku=None,
+    nat_gateway_outbound_ip_ids=None,
+    nat_gateway_outbound_ip_prefix_ids=None,
     outbound_type=None,
     network_plugin=None,
     network_plugin_mode=None,
@@ -1113,7 +1117,11 @@ def aks_update(
     load_balancer_backend_pool_type=None,
     load_balancer_sku=None,
     nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_managed_outbound_ipv6_count=None,
     nat_gateway_idle_timeout=None,
+    nat_gateway_sku=None,
+    nat_gateway_outbound_ip_ids=None,
+    nat_gateway_outbound_ip_prefix_ids=None,
     outbound_type=None,
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
@@ -2573,6 +2581,43 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
                        install_dir, cli)
 
 
+# get the latest version of kubelogin
+def _get_latest_kubelogin_version(cloud_name, gh_token=None):
+    if cloud_name.lower() == 'azurechinacloud':
+        latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
+        logger.warning(
+            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+
+    latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+    fallback_url = 'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt'
+    logger.warning(
+        'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+    try:
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+    except URLError as ex:
+        # the GitHub api answers with 403 or 429 when the rate limit is exceeded
+        if getattr(ex, 'code', None) not in (403, 429):
+            raise
+        logger.warning(
+            'The GitHub api rate limit was exceeded (%s), getting the latest version of kubelogin from "%s"',
+            ex, fallback_url)
+        try:
+            latest_version = _urlopen_read(fallback_url).decode('UTF-8', errors='replace').strip()
+        except OSError as fallback_ex:
+            raise ClientRequestError(
+                'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}).'.format(
+                    latest_release_url, ex, fallback_url, fallback_ex),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
+        if not re.fullmatch(r'v?\d+\.\d+\.\d+', latest_version):
+            raise ClientRequestError(
+                'Unexpected version "{}" returned by "{}".'.format(latest_version[:50], fallback_url),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
+        return latest_version if latest_version.startswith('v') else 'v' + latest_version
+
+
 # install kubelogin
 def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None, gh_token=None):
     """
@@ -2587,13 +2632,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
-        if cloud_name.lower() == 'azurechinacloud':
-            latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        logger.warning(
-            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
-        client_version = json.loads(latest_release)['tag_name'].strip()
+        client_version = _get_latest_kubelogin_version(cloud_name, gh_token=gh_token)
     else:
         client_version = "v%s" % client_version
 
@@ -3039,6 +3078,7 @@ def aks_agentpool_add(
     gpu_instance_profile=None,
     allowed_host_ports=None,
     asg_ids=None,
+    enable_managed_dranet=False,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
     workload_runtime=None,
@@ -3104,6 +3144,7 @@ def aks_agentpool_update(
     aks_custom_headers=None,
     allowed_host_ports=None,
     asg_ids=None,
+    enable_managed_dranet=False,
     os_sku=None,
     enable_fips_image=False,
     disable_fips_image=False,

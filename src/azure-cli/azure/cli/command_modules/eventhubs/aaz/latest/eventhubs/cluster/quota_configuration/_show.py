@@ -12,16 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vmss extension image show",
+    "eventhubs cluster quota-configuration show",
 )
 class Show(AAZCommand):
-    """Get a virtual machine extension image.
+    """Get all Event Hubs Cluster settings - a collection of key/value pairs which represent the quotas and settings imposed on the cluster.
+
+    :example: ClustersQuotasConfigurationGet
+        az eventhubs cluster quota-configuration show --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {
-        "version": "2022-08-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}/quotaconfiguration/default", "2026-07-01-preview"],
         ]
     }
 
@@ -41,33 +44,24 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
+        _args_schema.cluster_name = AAZStrArg(
+            options=["--cluster-name"],
+            help="The name of the Event Hubs Cluster.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=6,
+            ),
         )
-        _args_schema.publisher_name = AAZStrArg(
-            options=["-p", "--publisher", "--publisher-name"],
-            help="Image publisher name.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-            id_part="child_name_1",
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name", "--type"],
-            help="Name of the extension.",
-            required=True,
-            id_part="child_name_3",
-        )
-        _args_schema.version = AAZStrArg(
-            options=["--version"],
-            help="Extension version",
-            required=True,
-            id_part="child_name_4",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineExtensionImagesGet(ctx=self.ctx)()
+        self.ConfigurationGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -82,7 +76,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineExtensionImagesGet(AAZHttpOperation):
+    class ConfigurationGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -96,7 +90,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types/{type}/versions/{version}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/clusters/{clusterName}/quotaConfiguration/default",
                 **self.url_parameters
             )
 
@@ -106,29 +100,21 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "location", self.ctx.args.location,
+                    "clusterName", self.ctx.args.cluster_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publisherName", self.ctx.args.publisher_name,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "type", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "version", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -138,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -171,45 +157,10 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.location = AAZStrType(
-                flags={"required": True},
-            )
-            _schema_on_200.name = AAZStrType(
-                flags={"required": True, "read_only": True},
-            )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
+            _schema_on_200.settings = AAZDictType()
 
-            properties = cls._schema_on_200.properties
-            properties.compute_role = AAZStrType(
-                serialized_name="computeRole",
-                flags={"required": True},
-            )
-            properties.handler_schema = AAZStrType(
-                serialized_name="handlerSchema",
-                flags={"required": True},
-            )
-            properties.operating_system = AAZStrType(
-                serialized_name="operatingSystem",
-                flags={"required": True},
-            )
-            properties.supports_multiple_extensions = AAZBoolType(
-                serialized_name="supportsMultipleExtensions",
-            )
-            properties.vm_scale_set_enabled = AAZBoolType(
-                serialized_name="vmScaleSetEnabled",
-            )
-
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
+            settings = cls._schema_on_200.settings
+            settings.Element = AAZStrType()
 
             return cls._schema_on_200
 

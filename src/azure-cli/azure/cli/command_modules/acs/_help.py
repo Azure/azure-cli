@@ -186,6 +186,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Omit to default to StandardV2 where the region supports it, otherwise Standard. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -867,6 +871,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Migrate an existing Standard (V1) cluster to StandardV2 by passing StandardV2. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth. Downgrade from StandardV2 to Standard is not supported.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -2065,6 +2073,9 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2240,6 +2251,9 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
     short-summary: The os-sku of the agent node pool.
