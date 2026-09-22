@@ -32,6 +32,9 @@ class SigUpdate(_SigUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
+        args_schema.description._registered = False
+        args_schema.tags._registered = False
+
         args_schema.location = AAZResourceLocationArg(
             arg_group="Gallery",
             help="Resource location",
