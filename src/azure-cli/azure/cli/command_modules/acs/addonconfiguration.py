@@ -389,6 +389,23 @@ def get_existing_container_insights_extension_dcr(cmd, dcr_url):
     return {}
 
 
+def get_existing_data_collection_endpoint(cmd, dce_resource_id):
+    """Fetch the data collection endpoint that already exists, or {} if there is none."""
+    dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{dce_resource_id}?api-version=2022-06-01"
+    _MAX_RETRY_TIMES = 3
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resp = send_raw_request(cmd.cli_ctx, "GET", dce_url)
+            return json.loads(resp.text)
+        except CLIError as e:
+            if "ResourceNotFound" in str(e):
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise e
+    return {}
+
+
 def _resolve_dcr_settings_from_existing(
     existing_dcr, enable_syslog, data_collection_settings, enable_high_log_scale_mode
 ):
@@ -960,18 +977,30 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
         f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
         f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
     )
+    public_network_access = "Disabled" if is_ampls else "Enabled"
+    if not is_ampls:
+        # This is a create_or_update, and an endpoint that is already private has to stay private.
+        # --ampls-resource-id is only supplied on the command that links the scope, so any later
+        # reconfiguration of an onboarded cluster ('az aks update --enable-syslog', for example)
+        # arrives here with is_ampls False and would otherwise reopen public network access on an
+        # existing private ingestion endpoint. The network configuration is only changed when the
+        # caller explicitly asks for it.
+        existing_dce = get_existing_data_collection_endpoint(cmd, dce_resource_id)
+        existing_network_acls = (existing_dce.get("properties") or {}).get("networkAcls") or {}
+        existing_public_network_access = existing_network_acls.get("publicNetworkAccess")
+        if existing_public_network_access:
+            public_network_access = existing_public_network_access
+
     # create the DCE
     dce_creation_body_common = {
         "location": region,
         "kind": "Linux",
         "properties": {
             "networkAcls": {
-                "publicNetworkAccess": "Enabled"
+                "publicNetworkAccess": public_network_access
             }
         }
     }
-    if is_ampls:
-        dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
     dce_creation_body_ = json.dumps(dce_creation_body_common)
     resources = get_resources_client(cmd.cli_ctx, subscription)
     for _ in range(3):

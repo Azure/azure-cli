@@ -10300,6 +10300,75 @@ spec:
                 self.check('properties.provisioningState', f'Succeeded')
                 ])
 
+        if use_ampls:
+            # Regression coverage for the two private-networking fixes.
+            #
+            # 1. 'aks update --ampls-resource-id <scope>' has to work on a cluster that is already
+            #    private, without --enable-private-cluster being repeated. The private state is now
+            #    read from the cluster itself, so this no longer trips the AMPLS guard.
+            # 2. A later reconfiguration that does not mention AMPLS at all (--enable-syslog here)
+            #    must leave the ingestion and configuration endpoints private. The DCE write used to
+            #    rebuild the body with publicNetworkAccess=Enabled whenever --ampls-resource-id was
+            #    absent, which silently reopened public access on a private ingestion endpoint.
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # 1. re-link the scope without re-declaring the cluster as private
+            self.cmd(
+                f'aks update -g={resource_group} -n={aks_name} --ampls-resource-id {ampls_resource_id} --yes',
+                checks=[
+                    self.check('addonProfiles.omsagent.enabled', True),
+                    self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
+                ])
+
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # the association must still resolve to the same configuration endpoint
+            dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01',
+                checks=[self.check('properties.dataCollectionEndpointId', f'{config_dce_resource_id}')])
+
+            # 2. a syslog-only update, with no AMPLS argument in sight
+            self.cmd(
+                f'aks update -g={resource_group} -n={aks_name} --enable-syslog --yes',
+                checks=[self.check('addonProfiles.omsagent.enabled', True)])
+
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # the configuration endpoint must still be private
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{config_dce_resource_id}?api-version=2022-06-01',
+                checks=[
+                    self.check('properties.networkAcls.publicNetworkAccess', f'Disabled'),
+                    self.check('properties.provisioningState', f'Succeeded')
+                ])
+
+            # the syslog change must actually have landed, otherwise the endpoint checks above
+            # would pass simply because the update was a no-op and rewrote nothing
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01',
+                checks=[self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')])
+
+            if highlogscale_mode_enabled:
+                # the DCR must still point at the same ingestion endpoint, and it must still be private
+                self.cmd(
+                    f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01',
+                    checks=[
+                        self.check('properties.dataCollectionEndpointId', f'{ingestion_dce_resource_id}')
+                    ])
+                self.cmd(
+                    f'rest --method get --url https://management.azure.com{ingestion_dce_resource_id}?api-version=2022-06-01',
+                    checks=[
+                        self.check('properties.networkAcls.publicNetworkAccess', f'Disabled'),
+                        self.check('properties.provisioningState', f'Succeeded')
+                    ])
+
         # wait for any in-progress cluster operation to finish before disabling
         self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
         if self.is_live or self.in_recording:

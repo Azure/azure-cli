@@ -327,6 +327,22 @@ def _is_opentelemetry_metrics_enabled(mc):
     )
 
 
+def _is_private_cluster_on_mc(mc):
+    """Whether the cluster is private according to its own state.
+
+    The AMPLS provisioning guard needs to know whether the cluster is private, but
+    get_enable_private_cluster() only falls back to the ManagedCluster in create mode; in update
+    mode it returns the command line flag, which is None unless --enable-private-cluster was
+    passed again. Callers combine this with that getter so that 'az aks update
+    --ampls-resource-id <id>' works on a cluster that is already private.
+    """
+    return bool(
+        mc and
+        mc.api_server_access_profile and
+        mc.api_server_access_profile.enable_private_cluster
+    )
+
+
 def _is_opentelemetry_logs_traces_enabled(mc):
     """Whether the OpenTelemetry logs and traces receiver is enabled on the cluster."""
     return bool(
@@ -11164,7 +11180,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             create_dcra=True,
             enable_syslog=self.context.get_enable_syslog(),
             data_collection_settings=data_collection_settings,
-            is_private_cluster=self.context.get_enable_private_cluster(),
+            is_private_cluster=(
+                self.context.get_enable_private_cluster() or _is_private_cluster_on_mc(mc)
+            ),
             ampls_resource_id=self.context.get_ampls_resource_id(),
             enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
         )
@@ -12204,7 +12222,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         create_dcra=enable_msi_auth_for_monitoring,
                         enable_syslog=self.context.get_enable_syslog(),
                         data_collection_settings=self.context.get_data_collection_settings(),
-                        is_private_cluster=self.context.get_enable_private_cluster(),
+                        is_private_cluster=(
+                            self.context.get_enable_private_cluster() or
+                            _is_private_cluster_on_mc(cluster)
+                        ),
                         ampls_resource_id=self.context.get_ampls_resource_id(),
                         enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
                         # This is the reconfigure path: the cluster is already onboarded and only
