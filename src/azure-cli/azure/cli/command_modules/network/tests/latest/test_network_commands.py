@@ -562,6 +562,101 @@ class NetworkPublicIpWithSku(ScenarioTest):
         ])
 
 
+class NetworkFirstPartyServiceTagScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_first_party_service_tag', location='eastus2')
+    def test_network_first_party_service_tag(self, resource_group):
+        self.kwargs.update({
+            'service_tag': self.create_random_name('fpst-', 16),
+            'service_tag2': self.create_random_name('fpst-', 16),
+            'public_ip': self.create_random_name('pip-', 16),
+            'public_ip_prefix': self.create_random_name('pipprefix-', 24),
+        })
+
+        self.cmd(
+            'network first-party-service-tag create -g {rg} -n {service_tag} '
+            '--value /NrpBIServiceTag --tags environment=test --no-wait'
+        )
+        self.cmd('network first-party-service-tag wait -g {rg} -n {service_tag} --created')
+        service_tag = self.cmd(
+            'network first-party-service-tag show -g {rg} -n {service_tag}',
+            checks=[
+                self.check('name', '{service_tag}'),
+                self.exists('resourceGuid'),
+                self.check('properties.value', '/NrpBIServiceTag'),
+                self.check('tags.environment', 'test'),
+            ]
+        ).get_output_in_json()
+        self.kwargs['service_tag_id'] = service_tag['id']
+
+        self.cmd(
+            'network first-party-service-tag list -g {rg}',
+            checks=self.check("length([?name == '{service_tag}'])", 1)
+        )
+
+        self.cmd(
+            'network first-party-service-tag create -g {rg} -n {service_tag2} '
+            '--value /NrpBIServiceTag'
+        )
+        self.cmd('network first-party-service-tag delete -g {rg} -n {service_tag2} --yes')
+        self.cmd(
+            'network first-party-service-tag list -g {rg}',
+            checks=self.check("length([?name == '{service_tag2}'])", 0)
+        )
+
+        self.cmd(
+            'network first-party-service-tag update -g {rg} -n {service_tag} '
+            '--tags environment=updated'
+        )
+        self.cmd(
+            'network first-party-service-tag show -g {rg} -n {service_tag}',
+            checks=self.check('tags.environment', 'updated')
+        )
+        self.cmd(
+            'network public-ip create -g {rg} -n {public_ip} --sku Standard '
+            '--ip-tags FirstPartyUsage=/NrpBIServiceTag --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('publicIp.ipTags[0].ipTagType', 'FirstPartyUsage'),
+                self.check('publicIp.ipTags[0].tag', '/NrpBIServiceTag'),
+                self.check('publicIp.ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip update -g {rg} -n {public_ip} '
+            '--ip-tags FirstPartyUsage=/NrpBIServiceTag --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].tag', '/NrpBIServiceTag'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip show -g {rg} -n {public_ip}',
+            checks=self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}')
+        )
+
+        self.cmd(
+            'network public-ip prefix create -g {rg} -n {public_ip_prefix} --length 31 '
+            '--ip-tags FirstPartyUsage=/NrpBIServiceTag --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].ipTagType', 'FirstPartyUsage'),
+                self.check('ipTags[0].tag', '/NrpBIServiceTag'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip prefix update -g {rg} -n {public_ip_prefix} '
+            '--ip-tags FirstPartyUsage=/NrpBIServiceTag --first-party-service-tag-id {service_tag_id}',
+            checks=[
+                self.check('ipTags[0].tag', '/NrpBIServiceTag'),
+                self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}'),
+            ]
+        )
+        self.cmd(
+            'network public-ip prefix show -g {rg} -n {public_ip_prefix}',
+            checks=self.check('ipTags[0].firstPartyServiceTagId', '{service_tag_id}')
+        )
+
+
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
     def test_network_custom_ip_prefix_crud(self):
@@ -1052,13 +1147,14 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
             'ip': 'ip1',
             'name': 'name',
             'name1': 'name1',
+            'name2': 'name2',
         })
 
         # create an ag with ssl profile
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
             "network application-gateway create -n {gw} -g {rg} --public-ip-address {ip} --sku Standard_v2 --priority 1001 "
-            "--ssl-profile name={name} min-protocol-version=TLSv1_0 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
+            "--ssl-profile name={name} min-protocol-version=TLSv1_2 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom client-auth-configuration=True",
             checks=[
                 self.check("length(applicationGateway.sslProfiles)", 1),
                 self.check("applicationGateway.sslProfiles[0].properties.clientAuthConfiguration.verifyClientCertIssuerDN", True),
@@ -1067,15 +1163,18 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         )
         # set client cert revocation option
         self.cmd(
-            "network application-gateway update -n {gw} -g {rg} --ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP",
+            "network application-gateway update -n {gw} -g {rg} "
+            "--ssl-profiles [0].client-auth-configuration.verify-client-revocation=OCSP "
+            "--set sslPolicy.policyType=Predefined sslPolicy.policyName=AppGwSslPolicy20170401S",
             checks=[
+                self.check("sslPolicy.policyName", "AppGwSslPolicy20170401S"),
                 self.check("sslProfiles[0].clientAuthConfiguration.verifyClientCertIssuerDN", True),
                 self.check("sslProfiles[0].clientAuthConfiguration.verifyClientRevocation", "OCSP"),
             ]
         )
 
         self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '
-                 '--client-auth-configuration True --min-protocol-version TLSv1_0 '
+                 '--client-auth-configuration True --min-protocol-version TLSv1_2 '
                  '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
                  checks=[self.check('length(sslProfiles)', 2)])
 
@@ -1088,6 +1187,31 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Passthrough '
+                 '--policy-type Custom --min-protocol-version TLSv1_2 '
+                 '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+                 checks=[
+                     self.check('length(sslProfiles)', 3),
+                     self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Passthrough'),
+                 ])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name2}',
+                 checks=[self.check('clientAuthConfiguration.verifyClientAuthMode', 'Passthrough')])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Strict',
+                 checks=[self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Strict')])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name2}',
+                 checks=[self.check('clientAuthConfiguration.verifyClientAuthMode', 'Strict')])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name2} '
+                 '--auth-configuration verify-client-auth-mode=Passthrough',
+                 checks=[self.check('sslProfiles[2].clientAuthConfiguration.verifyClientAuthMode', 'Passthrough')])
+
+        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name2}')
 
         self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ')
 
