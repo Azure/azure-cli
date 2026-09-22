@@ -7,7 +7,7 @@ import json
 from knack.log import get_logger
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
-from azure.cli.core.aaz import AAZResourceLocationArg, has_value
+from azure.cli.core.aaz import AAZResourceLocationArg, has_value, AAZStrArg
 from ..aaz.latest.sig import Create as _SigCreate, Update as _SigUpdate, Show as _SigShow
 from ..aaz.latest.sig.identity import Remove as _SigIdentityRemove
 from .._vm_utils import IdentityType
@@ -62,13 +62,22 @@ class SigShow(_SigShow):
         from azure.cli.core.aaz import AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
-        args_schema.expand._registered = False
-
         args_schema.sharing_groups = AAZBoolArg(
             options=['--sharing-groups'],
             help='The expand query option to query shared gallery groups.',
         )
+        args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand query option to apply on the operation.",
+            enum={"SharingProfile/Groups": "SharingProfile/Groups"},
+        )
+        args_schema.select = AAZStrArg(
+            options=["--select"],
+            help="The select expression to apply on the operation.",
+            enum={"Permissions": "Permissions"},
+        )
 
+        args_schema.expand._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -77,6 +86,22 @@ class SigShow(_SigShow):
         if args.sharing_groups:
             args.expand = 'sharingProfile/Groups'
 
+    class GalleriesGet(_SigShow.GalleriesGet):
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
+                **self.serialize_query_param(
+                    "$select", self.ctx.args.select,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2026-03-03",
+                    required=True,
+                ),
+            }
+            return parameters
 
 class SigIdentityRemove(_SigIdentityRemove):
     def _execute_operations(self):
