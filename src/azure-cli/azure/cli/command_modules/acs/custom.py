@@ -1947,14 +1947,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         _print_or_merge_credentials(
             path, kubeconfig, overwrite_existing, context_name)
 
-        # Check if kubeconfig requires kubelogin with devicecode and convert it
-        if uses_kubelogin_devicecode(kubeconfig):
+        # Check if file output requires kubelogin with devicecode and convert it
+        if path != "-" and uses_kubelogin_devicecode(kubeconfig):
             if which("kubelogin"):
                 try:
-                    # Run kubelogin convert-kubeconfig -l azurecli
+                    # Convert the same path used for merging, relative to the caller's directory.
                     subprocess.run(
-                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
-                        cwd=os.path.dirname(path),
+                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli", "--kubeconfig", path],
                         check=True,
                     )
                     logger.warning("Converted kubeconfig to use Azure CLI authentication.")
