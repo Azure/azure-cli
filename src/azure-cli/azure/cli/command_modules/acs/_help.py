@@ -1479,7 +1479,45 @@ examples:
 
 helps["aks install-cli"] = """
 type: command
-short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
+short-summary: Download and install kubectl and kubelogin. Optionally set up the full Azure plugin for supported AI CLI hosts.
+long-summary: |
+  Installs kubectl first, then kubelogin. Azure plugin setup runs only after both succeed.
+  With --install-azure-plugin omitted, noninteractive sessions, core.disable_confirm_prompt=true and sudo
+  perform no plugin setup or host/runtime probes. Other sessions offer default-No setup, a numbered host
+  selection with PATH-detected defaults, and final default-No consent. Detection is not consent.
+  Use --install-azure-plugin false for binaries only. Explicit true requires --plugin-hosts and authorizes
+  full-plugin setup without prompts, including in automation. Explicit plugin setup under sudo is rejected;
+  run as the intended host user with writable --install-location and --kubelogin-install-location paths.
+
+  Only Claude Code, GitHub Copilot CLI and Codex CLI are supported, not Pi or VS Code. This installs the full
+  base Azure plugin (upstream skills, MCP configuration and hooks), not individual skills or the separate
+  deeper AKS plugin. Installation uses native user/global scope, not repository configuration. Hosts and
+  Node.js 22+ with node and npx on PATH must already be available for new installations; Azure CLI does not
+  install prerequisites. The stock MCP runtime uses @azure/mcp@latest, which is not pinned by the plugin
+  version and may change its runtime requirements. Azure authentication, MCP activation, hook trust and
+  sovereign-cloud setup may still be needed after installation. No Azure login or resource operations run.
+
+  Azure plugins reported by native inventory, including disabled installations and applicable non-user
+  scopes, are skipped without reinstalling or enabling them. Inventory can omit hidden/stale registrations
+  or disable preferences. When valid inventory reports absence, consent authorizes the host's normal native
+  install-and-enable behavior, including changes to that hidden state. Invalid or unsupported inventory
+  fails safely; Azure CLI does not reconstruct native configuration. A marketplace may have been added
+  before an existing plugin becomes visible and plugin installation is skipped.
+
+  Hosts own permissions, trust, marketplace sources/pins and future updates. An existing marketplace
+  registration is used as configured, without repointing it or bypassing host policy; the recommended
+  marketplace is added only if absent. There is no custom updater, forced update or per-task plugin reinstall.
+  --gh-token is used only for kubelogin downloads, not passed to plugin hosts.
+  Selected hosts are attempted independently, so partial success is possible. Optional interactive failures
+  warn without failing the binary installation. Explicit setup failures return nonzero; kubectl and kubelogin
+  remain installed. No automatic retry or rollback occurs. Recover with the host's native plugin commands.
+examples:
+  - name: Install binaries only, without any Azure plugin offer or setup
+    text: az aks install-cli --install-azure-plugin false
+  - name: Install binaries and explicitly authorize full Azure plugin setup for Codex CLI
+    text: az aks install-cli --install-azure-plugin true --plugin-hosts codex
+  - name: Install binaries and authorize full Azure plugin setup for Claude Code and GitHub Copilot CLI
+    text: az aks install-cli --install-azure-plugin --plugin-hosts claude-code github-copilot
 """
 
 helps["aks install-desktop"] = """

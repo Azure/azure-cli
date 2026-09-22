@@ -7,6 +7,7 @@ import os.path
 import platform
 
 from argcomplete.completers import FilesCompleter
+from azure.cli.command_modules.acs._azure_plugin import HOST_IDS
 from azure.cli.command_modules.acs._completers import (
     get_k8s_upgrades_completion_list, get_k8s_versions_completion_list)
 from azure.cli.command_modules.acs._consts import (
@@ -1024,6 +1025,17 @@ def load_arguments(self, _):
         c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin. Note: the path should contain the binary filename.')
         c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
         c.argument('gh_token', help='GitHub authentication token used when downloading kubelogin binaries from GitHub releases. Supplying a token helps avoid GitHub API rate limits.')
+
+    with self.argument_context('aks install-cli', arg_group='Azure Plugin') as c:
+        c.argument('install_azure_plugin', arg_type=get_three_state_flag(),
+                   help='Consent to full Azure plugin setup in native user/global scope after both binaries install. '
+                   'Requires --plugin-hosts when true; false skips setup. If omitted, only interactive sessions '
+                   'offer default-No setup, unless confirmation prompts are disabled or running under sudo. '
+                   'Valid native inventory absence authorizes normal install-and-enable, including hidden/stale '
+                   'disable preferences. See command help for runtime, MCP, hooks and authentication requirements.')
+        c.argument('plugin_hosts', arg_type=get_enum_type(HOST_IDS), nargs='+',
+                   help='Host CLIs for full Azure plugin setup. Requires --install-azure-plugin true. '
+                   'Host CLIs must already be installed. Supported hosts only; not Pi or VS Code.')
 
     with self.argument_context('aks install-desktop') as c:
         c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')

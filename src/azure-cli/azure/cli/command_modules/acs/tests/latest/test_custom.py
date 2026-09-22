@@ -6,8 +6,10 @@
 import os
 import hashlib
 import io
+import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -50,6 +52,7 @@ from azure.cli.command_modules.acs.custom import (
     aks_stop,
     aks_upgrade,
     is_monitoring_addon_enabled,
+    k8s_install_cli,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -82,6 +85,172 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
 )
+
+
+class AcsInstallCliPluginTest(unittest.TestCase):
+    def setUp(self):
+        self.cmd = mock.Mock()
+        self.calls = mock.Mock()
+        for name, kwargs in (
+                ('get_arch_for_cli_binary', {'return_value': 'arm64'}),
+                ('k8s_install_kubectl', {}), ('k8s_install_kubelogin', {}),
+                ('maybe_install_azure_plugin', {'create': True})):
+            patcher = mock.patch('azure.cli.command_modules.acs.custom.' + name, **kwargs)
+            self.calls.attach_mock(patcher.start(), name)
+            self.addCleanup(patcher.stop)
+        patcher = mock.patch.dict(os.environ, {}, clear=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_default_binary_arguments_and_plugin_stage_order_are_preserved(self):
+        k8s_install_cli(self.cmd)
+        self.assertEqual(self.calls.mock_calls, [
+            mock.call.get_arch_for_cli_binary(),
+            mock.call.k8s_install_kubectl(self.cmd, 'latest', None, None, arch='arm64'),
+            mock.call.k8s_install_kubelogin(self.cmd, 'latest', None, None, arch='arm64', gh_token=None),
+            mock.call.maybe_install_azure_plugin(self.cmd, None, None),
+        ])
+
+    def test_explicit_hosts_normalize_without_changing_binary_arguments_or_forwarding_token(self):
+        k8s_install_cli(self.cmd, '1.2.3', '/kubectl', 'https://kubectl.example',
+                        '4.5.6', '/kubelogin', 'https://kubelogin.example', 'binary-only-token',
+                        True, ['codex', 'claude-code', 'codex'])
+        self.assertEqual(self.calls.mock_calls, [
+            mock.call.get_arch_for_cli_binary(),
+            mock.call.k8s_install_kubectl(self.cmd, '1.2.3', '/kubectl', 'https://kubectl.example', arch='arm64'),
+            mock.call.k8s_install_kubelogin(self.cmd, '4.5.6', '/kubelogin', 'https://kubelogin.example',
+                                          arch='arm64', gh_token='binary-only-token'),
+            mock.call.maybe_install_azure_plugin(self.cmd, True, ['claude-code', 'codex']),
+        ])
+
+    def test_false_is_forwarded_after_both_binaries(self):
+        k8s_install_cli(self.cmd, install_azure_plugin=False)
+        self.assertEqual(self.calls.mock_calls[-1], mock.call.maybe_install_azure_plugin(self.cmd, False, None))
+        self.assertEqual(len(self.calls.mock_calls), 4)
+
+    def test_invalid_plugin_options_are_rejected_before_binary_side_effects(self):
+        for enabled, hosts in ((True, None), (True, []), (True, ['pi']), (False, ['codex']), (None, ['codex'])):
+            with self.subTest(enabled=enabled, hosts=hosts), self.assertRaises(InvalidArgumentValueError):
+                k8s_install_cli(self.cmd, install_azure_plugin=enabled, plugin_hosts=hosts)
+            self.assertEqual(self.calls.mock_calls, [])
+        with mock.patch.dict(os.environ, {'SUDO_USER': 'user'}), self.assertRaises(InvalidArgumentValueError):
+            k8s_install_cli(self.cmd, install_azure_plugin=True, plugin_hosts=['codex'])
+        self.assertEqual(self.calls.mock_calls, [])
+
+    def test_either_binary_failure_prevents_plugin_stage(self):
+        for binary in ('k8s_install_kubectl', 'k8s_install_kubelogin'):
+            with self.subTest(binary=binary):
+                self.calls.reset_mock(side_effect=True)
+                getattr(self.calls, binary).side_effect = ClientRequestError('binary failed')
+                with self.assertRaisesRegex(ClientRequestError, 'binary failed'):
+                    k8s_install_cli(self.cmd, install_azure_plugin=True, plugin_hosts=['codex'])
+                self.calls.maybe_install_azure_plugin.assert_not_called()
+                if binary == 'k8s_install_kubectl':
+                    self.calls.k8s_install_kubelogin.assert_not_called()
+
+
+# A new interpreter keeps import-time cloud/extension paths and CLI global state
+# isolated even when this file is run outside the repository's test environment.
+_PLUGIN_PARSER_SCRIPT = r'''
+import io
+import json
+import os
+import sys
+from contextlib import ExitStack, redirect_stdout, redirect_stderr
+from unittest import mock
+
+blocked = []
+def forbidden(*args, **kwargs):
+    blocked.append(repr(args))
+    raise AssertionError('Parser fixture attempted external I/O: ' + repr(args))
+
+with ExitStack() as stack:
+    for target in ('socket.getaddrinfo', 'socket.socket.connect', 'socket.socket.connect_ex',
+                   'subprocess.Popen', 'os.system', 'requests.sessions.Session.request'):
+        stack.enter_context(mock.patch(target, side_effect=forbidden))
+    # Patch before construction: handle_version_update may query freshness even
+    # when ordinary CLI version-check configuration is disabled.
+    stack.enter_context(mock.patch('uuid.getnode', return_value=0x123456789ABC))
+    stack.enter_context(mock.patch('azure.cli.core.util.check_connectivity', return_value=False))
+    from azure.cli.core import get_default_cli
+    from azure.cli.core import cloud, extension
+    from azure.cli.command_modules.acs import custom, _azure_plugin
+    assert cloud.CLOUD_CONFIG_FILE.startswith(os.environ['AZURE_CONFIG_DIR'])
+    assert extension.EXTENSIONS_DIR == os.environ['AZURE_EXTENSION_DIR']
+    cli = get_default_cli()
+    assert cli.cloud.name == 'AzureCloud'
+    assert cli.config.config_dir == os.environ['AZURE_CONFIG_DIR']
+    cli.config.set_value('core', 'collect_telemetry', 'no')
+    cli.config.set_value('core', 'check_version', 'no')
+    mode, arguments = json.loads(sys.argv[1])
+    if mode == 'parser':
+        handler = stack.enter_context(mock.patch.object(custom, 'k8s_install_cli', autospec=True))
+        handler.return_value = None
+    else:
+        stack.enter_context(mock.patch.object(custom, 'k8s_install_kubectl'))
+        stack.enter_context(mock.patch.object(custom, 'k8s_install_kubelogin'))
+        handler = stack.enter_context(mock.patch.object(_azure_plugin, 'install_plugin', return_value=True))
+    output, errors = io.StringIO(), io.StringIO()
+    with redirect_stdout(output), redirect_stderr(errors):
+        try:
+            code = cli.invoke(['aks', 'install-cli', *arguments])
+        except SystemExit as ex:
+            code = ex.code
+    assert not blocked, blocked
+    calls = [{key: value for key, value in call.kwargs.items() if key != 'cmd'}
+             for call in handler.call_args_list]
+    hosts = [call.args[0] for call in handler.call_args_list] if mode != 'parser' else []
+    print(json.dumps({'code': code, 'calls': calls, 'hosts': hosts, 'stderr': errors.getvalue()}))
+'''
+
+
+class AcsInstallCliPluginParserTest(unittest.TestCase):
+    def invoke_isolated(self, arguments, mode='parser'):
+        with tempfile.TemporaryDirectory() as root:
+            environment = {key: value for key, value in os.environ.items()
+                           if not key.startswith(('AZURE_', 'ARM_', 'SUDO_', 'XDG_', 'CLAUDE_', 'COPILOT_', 'CODEX_'))}
+            for key in ('HOME', 'USERPROFILE', 'AZURE_CONFIG_DIR', 'AZURE_EXTENSION_DIR', 'AZURE_EXTENSION_SYS_DIR',
+                        'XDG_CONFIG_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME', 'CLAUDE_CONFIG_DIR', 'COPILOT_HOME',
+                        'COPILOT_CACHE_HOME', 'CODEX_HOME'):
+                environment[key] = os.path.join(root, key.lower())
+                os.makedirs(environment[key])
+            environment.update(AZURE_CORE_COLLECT_TELEMETRY='no', AZURE_CORE_CHECK_VERSION='no',
+                               PYTHONDONTWRITEBYTECODE='1', PYTHONNOUSERSITE='1',
+                               PYTHONPATH=os.pathsep.join(path for path in sys.path if path))
+            result = subprocess.run([sys.executable, '-B', '-c', _PLUGIN_PARSER_SCRIPT, json.dumps([mode, arguments])],
+                                    cwd=root, env=environment, stdin=subprocess.DEVNULL, capture_output=True,
+                                    text=True, timeout=90, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return json.loads(result.stdout)
+
+    def test_real_parser_registers_three_states_and_all_host_choices(self):
+        for arguments, enabled, hosts in (
+                ([], None, None), (['--install-azure-plugin', 'false'], False, None),
+                (['--install-azure-plugin', '--plugin-hosts', 'claude-code', 'github-copilot', 'codex'],
+                 True, ['claude-code', 'github-copilot', 'codex']),
+                (['--install-azure-plugin', 'true', '--plugin-hosts', 'codex'], True, ['codex'])):
+            with self.subTest(arguments=arguments):
+                result = self.invoke_isolated(arguments)
+                self.assertEqual(result['code'], 0, result['stderr'])
+                self.assertEqual(len(result['calls']), 1)
+                self.assertEqual(result['calls'][0]['install_azure_plugin'], enabled)
+                self.assertEqual(result['calls'][0]['plugin_hosts'], hosts)
+
+    def test_real_parser_rejects_unknown_or_empty_hosts_before_handler(self):
+        for hosts in (['pi'], ['vscode'], ['aks'], []):
+            with self.subTest(hosts=hosts):
+                result = self.invoke_isolated(['--install-azure-plugin', '--plugin-hosts', *hosts])
+                self.assertEqual(result['code'], 2)
+                self.assertEqual(result['calls'], [])
+
+    def test_explicit_disclosure_is_visible_with_only_show_errors(self):
+        result = self.invoke_isolated(['--install-azure-plugin', '--plugin-hosts', 'codex', '--only-show-errors'],
+                                      mode='flow')
+        self.assertEqual(result['code'], 0, result['stderr'])
+        self.assertEqual(result['hosts'], ['codex'])
+        for disclosure in ('full Azure plugin', 'user/global', 'MCP', 'hooks', '@azure/mcp@latest',
+                           'hidden/stale', 'enablement', 'authentication', 'trust'):
+            self.assertIn(disclosure, result['stderr'])
 
 
 class AcsCustomCommandTest(unittest.TestCase):
