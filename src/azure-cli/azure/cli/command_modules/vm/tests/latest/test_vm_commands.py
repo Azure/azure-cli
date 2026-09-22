@@ -8260,8 +8260,8 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
+    @ResourceGroupPreparer(location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -8278,7 +8278,7 @@ class VMGalleryImage(ScenarioTest):
             'des1': self.create_random_name(prefix='des1-', length=20),
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --location {location}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1',
@@ -8287,14 +8287,14 @@ class VMGalleryImage(ScenarioTest):
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
         self.kwargs['image_id'] = res['id']
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
                  '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
 
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
-        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('image create -g {rg} -n {captured} --location {location} --source {vm}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
                  checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
 
@@ -8310,7 +8310,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
                      self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
                      self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
-                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
+                     self.check('publishingProfile.targetRegions[1].name', 'West US'),
                      self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
                      self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
                  ])
@@ -8323,7 +8323,7 @@ class VMGalleryImage(ScenarioTest):
             'kid': kid
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --location {location} --key-url {kid} --source-vault {vault}')
         des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
         des1_sp_id = des1_show_output['identity']['principalId']
         des1_id = des1_show_output['id']
@@ -8343,14 +8343,14 @@ class VMGalleryImage(ScenarioTest):
 
         # Test --target-region-encryption
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}'),
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 '
+        self.cmd('vm create -g {rg} -n {vm2} --location {location} --image {image_id} --admin-username clitest1 '
                  '--generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3',
                  checks=self.check('powerState', 'VM running'))
 
@@ -8779,7 +8779,7 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
             ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -8803,7 +8803,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey ')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVMEncryptionType', 'EncryptedWithPmk'),
         ])
