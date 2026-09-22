@@ -7,8 +7,12 @@ import copy
 import io
 import json
 import os
+from pathlib import Path
+import signal
 import subprocess
 import sys
+import tempfile
+import time
 import traceback
 import unittest
 from unittest import mock
@@ -71,12 +75,14 @@ class NativeProcessFixture:
         response = self.responses[tuple(argv)]
         if callable(response):
             response = response()
-        if isinstance(response, Exception):
+        if isinstance(response, BaseException):
             raise response
-        if isinstance(response, subprocess.CompletedProcess):
-            return response
-        stdout = response if isinstance(response, str) else json.dumps(response)
-        return subprocess.CompletedProcess(argv, 0, stdout, '')
+        if not isinstance(response, subprocess.CompletedProcess):
+            stdout = response if isinstance(response, str) else json.dumps(response)
+            response = subprocess.CompletedProcess(argv, 0, stdout, '')
+        process = mock.Mock(returncode=response.returncode)
+        process.communicate.return_value = (response.stdout, response.stderr)
+        return process
 
 
 class AzurePluginOptionsTest(unittest.TestCase):
@@ -99,7 +105,7 @@ class AzurePluginOptionsTest(unittest.TestCase):
         cases = [(True, None), (True, []), (True, ['']), (True, ['pi']), (True, ['codex', 'other']),
                  (None, ['codex']), (False, ['codex']), (None, []), (False, [])]
         with mock.patch.object(plugin.shutil, 'which') as which, \
-                mock.patch.object(plugin.subprocess, 'run') as run:
+                mock.patch.object(plugin.subprocess, 'Popen') as run:
             for enabled, hosts in cases:
                 with self.subTest(enabled=enabled, hosts=hosts), self.assertRaises(InvalidArgumentValueError):
                     plugin.validate_plugin_options(enabled, hosts)
@@ -130,7 +136,7 @@ class AzurePluginConsentTest(unittest.TestCase):
             mock.patch('knack.prompting._input', side_effect=self.answer),
             mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: name if name == 'codex' else None),
             mock.patch.object(plugin, 'install_plugin', side_effect=self.install),
-            mock.patch.object(plugin.subprocess, 'run', side_effect=AssertionError('Unexpected native process')),
+            mock.patch.object(plugin.subprocess, 'Popen', side_effect=AssertionError('Unexpected native process')),
         )
         self.mocks = [patcher.start() for patcher in patches]
         for patcher in patches:
@@ -301,6 +307,61 @@ class AzurePluginConsentTest(unittest.TestCase):
         self.assertIn('MCP inventory', str(caught.exception))
         self.assertIn('exit 7', str(caught.exception))
 
+    def test_all_inventory_errors_stay_redacted_through_flow_aggregation(self):
+        secret = 'synthetic-private-market-credential'
+        self.mocks[5].side_effect = REAL_INSTALL_PLUGIN
+        self.mocks[4].side_effect = lambda name: name
+        command = ('codex', 'plugin', 'list', '--available', '--json')
+        market = ('codex', 'plugin', 'marketplace', 'list', '--json')
+        for failing in (command, market):
+            self.mocks[6].side_effect = NativeProcessFixture({
+                command: {'installed': [], 'available': []},
+                failing: subprocess.CompletedProcess([], 7, secret, secret),
+            })
+            with self.subTest(failing=failing), self.assertRaises(ClientRequestError) as caught:
+                plugin.maybe_install_azure_plugin(self.cmd, True, ['codex'])
+            self.assertNotIn(secret, ''.join(traceback.format_exception(caught.exception)) + self.stderr.getvalue())
+            self.assertIn('exit 7', str(caught.exception))
+
+    def test_cancellation_reports_partial_native_state_even_when_logging_is_quiet(self):
+        self.mocks[5].side_effect = REAL_INSTALL_PLUGIN
+        self.mocks[4].side_effect = lambda name: name
+        process = NativeProcessFixture({
+            ('claude', 'plugin', 'list', '--json'): [],
+            ('claude', 'plugin', 'marketplace', 'list', '--json'): [],
+            ('node', '--version'): 'v22.0.0',
+            ('claude', 'plugin', 'marketplace', 'add', 'anthropics/claude-plugins-official', '--scope', 'user'): '',
+            ('claude', 'plugin', 'install', 'azure@claude-plugins-official', '--scope', 'user'):
+                subprocess.CompletedProcess([], 1, '', 'native install refused'),
+            ('copilot', 'plugin', 'list', '--json'): KeyboardInterrupt(),
+        })
+        for explicit in (True, False):
+            self.mocks[6].side_effect = process
+            self.stderr.truncate(0)
+            self.stderr.seek(0)
+            process.calls.clear()
+            with self.subTest(explicit=explicit), mock.patch.object(plugin.logger, 'disabled', True):
+                with self.assertRaises(KeyboardInterrupt):
+                    if explicit:
+                        plugin.maybe_install_azure_plugin(self.cmd, True, list(plugin.HOST_IDS))
+                    else:
+                        self.run_optional(['y', '1 2 3', 'y'])
+            message = self.stderr.getvalue()
+            for part in ('Claude Code', 'native install refused', 'GitHub Copilot CLI: interrupted',
+                         'native state is uncertain', 'kubectl and kubelogin remain installed',
+                         'native plugin commands', 'No automatic retry or rollback'):
+                self.assertIn(part, message)
+            self.assertEqual(process.calls[-1], ('copilot', 'plugin', 'list', '--json'))
+            self.assertFalse(any(call[0] == 'codex' for call in process.calls))
+
+    def test_cancellation_reports_prior_success_without_continuing(self):
+        self.mocks[5].side_effect = [True, KeyboardInterrupt(), True]
+        with self.assertRaises(KeyboardInterrupt):
+            plugin.maybe_install_azure_plugin(self.cmd, True, list(plugin.HOST_IDS))
+        self.assertEqual(self.mocks[5].call_args_list, [mock.call('claude-code'), mock.call('github-copilot')])
+        self.assertIn('Claude Code: installed', self.stderr.getvalue())
+        self.assertIn('GitHub Copilot CLI: interrupted', self.stderr.getvalue())
+
     def test_explicit_sudo_is_rejected_before_any_execution(self):
         with mock.patch.dict(os.environ, {'SUDO_UID': '123'}), self.assertRaises(InvalidArgumentValueError):
             plugin.maybe_install_azure_plugin(self.cmd, True, ['codex'])
@@ -316,7 +377,7 @@ class AzurePluginNativeTest(unittest.TestCase):
 
     def install(self, host, responses):
         self.process = NativeProcessFixture(responses)
-        with mock.patch.object(plugin.subprocess, 'run', side_effect=self.process):
+        with mock.patch.object(plugin.subprocess, 'Popen', side_effect=self.process):
             return plugin.install_plugin(host)
 
     def fresh_responses(self, host, markets):
@@ -552,7 +613,7 @@ class AzurePluginNativeTest(unittest.TestCase):
         inventory = copy.deepcopy(COPILOT_MCP)
         inventory['mcpServers']['azure']['args'] = ['--token', stdout_secret]
         payload = json.dumps(inventory)
-        real_run = subprocess.run
+        real_popen = subprocess.Popen
         for case, stdout, stderr, ending, error, context in (
                 ('invalid JSON', payload[:-1], '', 'sys.exit(0)', ValidationError, 'Invalid native JSON'),
                 ('nonzero', payload, stderr_secret, 'sys.exit(7)', ClientRequestError, 'exit 7'),
@@ -562,17 +623,19 @@ class AzurePluginNativeTest(unittest.TestCase):
             script = (f'import sys, time; print({stdout!r}, flush=True); '
                       f'print({stderr!r}, file=sys.stderr, flush=True); {ending}')
 
-            def run(argv, **kwargs):
+            def popen(argv, **kwargs):
                 calls.append(tuple(argv))
                 if argv == ['copilot', 'plugin', 'list', '--json']:
-                    return subprocess.CompletedProcess(argv, 0, '[]', '')
+                    return NativeProcessFixture({tuple(argv): []})(argv)
                 if argv == ['copilot', 'mcp', 'list', '--json']:
-                    kwargs['timeout'] = 0.2 if case == 'timeout' else 5
-                    return real_run([sys.executable, '-c', script], **kwargs)
+                    process = real_popen([sys.executable, '-c', script], **kwargs)
+                    communicate = process.communicate
+                    process.communicate = lambda timeout: communicate(timeout=0.2 if case == 'timeout' else timeout)
+                    return process
                 raise AssertionError('Unexpected native command: ' + repr(argv))
 
             with self.subTest(case=case):
-                with mock.patch.object(plugin.subprocess, 'run', side_effect=run), self.assertRaises(error) as caught:
+                with mock.patch.object(plugin.subprocess, 'Popen', side_effect=popen), self.assertRaises(error) as caught:
                     plugin.install_plugin('github-copilot')
                 message = str(caught.exception)
                 for safe_context in ('GitHub Copilot CLI', 'MCP inventory', context, 'native'):
@@ -584,10 +647,58 @@ class AzurePluginNativeTest(unittest.TestCase):
                 self.assertEqual(calls, [('copilot', 'plugin', 'list', '--json'),
                                          ('copilot', 'mcp', 'list', '--json')])
 
+    def test_plugin_and_marketplace_failures_do_not_disclose_credentials(self):
+        secret = 'synthetic-private-git-credential'
+        payload = '{"source":{"url":"https://user:' + secret + '@example.test/repo.git"}}'
+        for host, executable, args in (
+                ('claude-code', 'claude', ['plugin', 'list', '--json']),
+                ('github-copilot', 'copilot', ['plugin', 'list', '--json']),
+                ('codex', 'codex', ['plugin', 'list', '--available', '--json'])):
+            for command in ((executable, *args), (executable, 'plugin', 'marketplace', 'list', '--json')):
+                for response, error, context in (
+                        (payload[:-1], ValidationError, 'Invalid native JSON'),
+                        (subprocess.CompletedProcess([], 0, payload, secret), ValidationError, 'warning'),
+                        (subprocess.CompletedProcess([], 7, payload, secret), ClientRequestError, 'exit 7'),
+                        (subprocess.TimeoutExpired(command, 300, output=payload, stderr=secret),
+                         ClientRequestError, 'timed out'),
+                        (OSError(secret), ClientRequestError, 'suppressed')):
+                    responses = self.fresh_responses(host, [])
+                    responses[command] = response
+                    with self.subTest(host=host, command=command, context=context), self.assertRaises(error) as caught:
+                        self.install(host, responses)
+                    self.assertNotIn(secret, ''.join(traceback.format_exception(caught.exception)))
+                    self.assertIn(context, str(caught.exception))
+                    self.assertEqual(self.mutations(), [])
+
+    def test_duplicate_json_members_fail_before_native_mutations(self):
+        cases = (
+            ('github-copilot', ('copilot', 'mcp', 'list', '--json'),
+             '{"mcpServers":{"azure":{"source":"user","enabled":true}},"mcpServers":{}}'),
+            ('codex', ('codex', 'plugin', 'list', '--available', '--json'),
+             '{"installed":[{"name":"azure"}],"installed":[],"available":[]}'),
+            ('codex', ('codex', 'plugin', 'marketplace', 'list', '--json'),
+             '{"marketplaces":[{"name":"azure-skills"}],"marketplaces":[]}'),
+            ('claude-code', ('claude', 'plugin', 'list', '--json'),
+             '[{"id":"azure@private","id":"other@private","scope":"user","enabled":false}]'),
+            ('github-copilot', ('copilot', 'mcp', 'list', '--json'),
+             '{"mcpServers":{"other":{"source":"user","enabled":true,'
+             '"private-key-sentinel":"secret-value-sentinel","private-key-sentinel":"last"}}}'),
+        )
+        for host, command, raw in cases:
+            responses = self.fresh_responses(host, [])
+            responses[command] = raw
+            with self.subTest(host=host, command=command):
+                with self.assertRaisesRegex(ValidationError, 'duplicate') as caught:
+                    self.install(host, responses)
+                rendered = ''.join(traceback.format_exception(caught.exception))
+                self.assertNotIn('private-key-sentinel', rendered)
+                self.assertNotIn('secret-value-sentinel', rendered)
+                self.assertEqual(self.mutations(), [])
+
     def test_inventory_warning_never_becomes_absence(self):
         command = ('copilot', 'plugin', 'list', '--json')
         response = subprocess.CompletedProcess(command, 0, '[]', 'Configuration could not be loaded')
-        with self.assertRaisesRegex(ValidationError, 'Configuration could not be loaded'):
+        with self.assertRaisesRegex(ValidationError, 'Native inventory warning'):
             self.install('github-copilot', {command: response})
         self.assertEqual(self.mutations(), [])
 
@@ -598,7 +709,7 @@ class AzurePluginNativeTest(unittest.TestCase):
             for command in commands:
                 broken = dict(responses)
                 broken[command] = subprocess.CompletedProcess(command, 2, '', 'unsupported flag or policy refusal')
-                context = 'exit 2' if command[1] == 'mcp' else 'policy refusal'
+                context = 'exit 2' if 'list' in command else 'policy refusal'
                 with self.subTest(host=host, command=command), self.assertRaisesRegex(ClientRequestError, context):
                     self.install(host, broken)
                 self.assertEqual(self.process.calls[-1], command)
@@ -704,25 +815,154 @@ class AzurePluginProcessTest(unittest.TestCase):
         for part in ('Codex CLI', 'plugin inventory', 'timed out', 'waiting', 'native'):
             self.assertIn(part, message)
 
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Real process-group regression uses Linux')
+    def test_timeout_and_cancellation_stop_owned_descendant_before_it_can_write(self):
+        import psutil
+
+        communicate = subprocess.Popen.communicate
+        for cancelled in (False, True):
+            for sensitive in (False, True):
+                with self.subTest(cancelled=cancelled, sensitive=sensitive), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    ready, gate, marker = (root / name for name in ('ready', 'gate', 'marker'))
+                    child = (
+                        'import os, pathlib, time; '
+                        f'root = pathlib.Path({directory!r}); '
+                        '(root / "pid").write_text(str(os.getpid())); (root / "pid").rename(root / "ready"); '
+                        '\nwhile not (root / "gate").exists(): time.sleep(0.01)\n'
+                        'time.sleep(0.8); (root / "marker").write_text("continued")'
+                    )
+                    parent = (
+                        'import subprocess, sys, time; '
+                        f'subprocess.Popen([sys.executable, "-c", {child!r}]); '
+                        'print("partial-output-sentinel", flush=True); time.sleep(10)'
+                    )
+                    owned = []
+
+                    def after_ready(process, *args, **kwargs):
+                        if not owned:
+                            owned.append(psutil.Process(process.pid))
+                            deadline = time.monotonic() + 5
+                            while not ready.exists() and time.monotonic() < deadline:
+                                time.sleep(0.01)
+                            self.assertTrue(ready.exists(), 'Descendant did not start')
+                            owned.append(psutil.Process(int(ready.read_text())))
+                            gate.touch()
+                            if cancelled:
+                                raise KeyboardInterrupt()
+                        return communicate(process, *args, **kwargs)
+
+                    try:
+                        error = KeyboardInterrupt if cancelled else ClientRequestError
+                        with mock.patch.object(subprocess.Popen, 'communicate', after_ready):
+                            started = time.monotonic()
+                            with self.assertRaises(error) as caught:
+                                plugin._run('codex', [sys.executable, '-c', parent], 'plugin inventory',
+                                            timeout=0.2, sensitive=sensitive)
+                            self.assertLess(time.monotonic() - started, 3, 'Cleanup exceeded bounded deadline')
+                        time.sleep(1)
+                        self.assertFalse(marker.exists(), 'Owned descendant continued after timeout/cancellation')
+                        self.assertTrue(all(not proc.is_running() or proc.status() == psutil.STATUS_ZOMBIE
+                                            for proc in owned))
+                        if not cancelled:
+                            message = ''.join(traceback.format_exception(caught.exception))
+                            self.assertIn('timed out', message)
+                            if sensitive:
+                                self.assertNotIn('partial-output-sentinel', message)
+                            else:
+                                self.assertIn('partial-output-sentinel', message)
+                    finally:
+                        # Clean up even on the unfixed runner, without killing an unrelated group.
+                        for process in reversed(owned):
+                            try:
+                                process.kill()
+                            except psutil.NoSuchProcess:
+                                pass
+                        psutil.wait_procs(owned, timeout=1)
+
+    def test_windows_timeout_and_cancellation_use_bounded_owned_tree_termination(self):
+        for failure in (subprocess.TimeoutExpired(['codex'], 0.2), KeyboardInterrupt()):
+            process = mock.Mock(pid=321)
+            process.communicate.side_effect = [failure, ('windows partial output', '')]
+            with self.subTest(failure=type(failure).__name__), \
+                    mock.patch.object(plugin.sys, 'platform', 'win32'), \
+                    mock.patch.dict(os.environ, {'SystemRoot': 'C:\\Windows'}), \
+                    mock.patch.object(subprocess, 'CREATE_NEW_PROCESS_GROUP', 512, create=True), \
+                    mock.patch.object(subprocess, 'Popen', return_value=process) as popen, \
+                    mock.patch.object(subprocess, 'run', return_value=subprocess.CompletedProcess([], 0)) as taskkill:
+                error = KeyboardInterrupt if isinstance(failure, KeyboardInterrupt) else ClientRequestError
+                with self.assertRaises(error) as caught:
+                    plugin._run('codex', ['codex', 'plugin', 'add', 'azure@azure-skills'], 'plugin install', timeout=0.2)
+                if not isinstance(failure, KeyboardInterrupt):
+                    self.assertIn('windows partial output', str(caught.exception))
+                self.assertEqual(popen.call_args.kwargs['creationflags'], 512)
+                self.assertFalse(popen.call_args.kwargs.get('shell', False))
+                self.assertEqual(taskkill.call_args.args[0], [
+                    os.path.join('C:\\Windows', 'System32', 'taskkill.exe'), '/PID', '321', '/T', '/F'])
+                self.assertEqual(taskkill.call_args.kwargs['stdin'], subprocess.DEVNULL)
+                self.assertGreater(taskkill.call_args.kwargs['timeout'], 0)
+                self.assertLessEqual(taskkill.call_args.kwargs['timeout'], 5)
+                self.assertTrue(all(call.kwargs['timeout'] <= 5 for call in process.communicate.call_args_list))
+
+    def test_posix_cancellation_uses_only_the_owned_group_including_on_macos(self):
+        for platform in ('linux', 'darwin'):
+            process = mock.Mock(pid=321)
+            process.communicate.side_effect = [KeyboardInterrupt(), ('', '')]
+            with self.subTest(platform=platform), mock.patch.object(plugin.sys, 'platform', platform), \
+                    mock.patch.object(subprocess, 'Popen', return_value=process) as popen, \
+                    mock.patch.object(os, 'killpg', create=True) as killpg, \
+                    mock.patch.object(signal, 'SIGKILL', 9, create=True):
+                with self.assertRaises(KeyboardInterrupt):
+                    plugin._run('codex', ['codex'], 'plugin install')
+                self.assertTrue(popen.call_args.kwargs['start_new_session'])
+                killpg.assert_called_once_with(321, signal.SIGKILL)
+                process.stdout.close.assert_called_once()
+                process.stderr.close.assert_called_once()
+
+    def test_unconfirmed_windows_cleanup_is_bounded_redacted_and_preserves_failure(self):
+        for failure in (subprocess.TimeoutExpired(['codex'], 0.2), KeyboardInterrupt()):
+            process = mock.Mock(pid=321)
+            process.communicate.side_effect = [failure, subprocess.TimeoutExpired(['codex'], 5)]
+            process.wait.side_effect = subprocess.TimeoutExpired(['codex'], 5)
+            output = io.StringIO()
+            with self.subTest(failure=type(failure).__name__), \
+                    mock.patch.object(plugin.sys, 'platform', 'win32'), \
+                    mock.patch.object(subprocess, 'CREATE_NEW_PROCESS_GROUP', 512, create=True), \
+                    mock.patch.object(subprocess, 'Popen', return_value=process), \
+                    mock.patch.object(subprocess, 'run', side_effect=OSError('private-cleanup-sentinel')), \
+                    mock.patch.dict(os.environ, {'SystemRoot': 'C:\\Windows'}), mock.patch('sys.stderr', output):
+                error = KeyboardInterrupt if isinstance(failure, KeyboardInterrupt) else ClientRequestError
+                with self.assertRaises(error) as caught:
+                    plugin._run('codex', ['codex'], 'plugin inventory', timeout=0.2, sensitive=True)
+                self.assertIn('cleanup could not be confirmed', output.getvalue())
+                self.assertNotIn('private-cleanup-sentinel', output.getvalue() +
+                                 ''.join(traceback.format_exception(caught.exception)))
+                process.kill.assert_called_once()
+                process.wait.assert_called_once_with(timeout=5)
+                process.stdout.close.assert_not_called()
+                process.stderr.close.assert_not_called()
+
     def test_oserror_is_concrete_cli_error(self):
-        with mock.patch.object(plugin.subprocess, 'run', side_effect=OSError('executable permission denied')):
+        with mock.patch.object(plugin.subprocess, 'Popen', side_effect=OSError('executable permission denied')):
             with self.assertRaisesRegex(ClientRequestError, 'Claude Code.*plugin inventory.*permission denied'):
                 plugin._run('claude-code', ['claude', 'plugin', 'list', '--json'], 'plugin inventory')
 
     def test_runner_has_no_shell_and_finite_default_timeout(self):
-        with mock.patch.object(plugin.subprocess, 'run', wraps=subprocess.run) as run:
+        communicate = subprocess.Popen.communicate
+        with mock.patch.object(subprocess.Popen, 'communicate', autospec=True, side_effect=communicate) as exchange, \
+                mock.patch.object(plugin.subprocess, 'Popen', wraps=subprocess.Popen) as popen:
             plugin._run('codex', [sys.executable, '-c', 'print("ok")'], 'test inventory')
-        kwargs = run.call_args.kwargs
+        kwargs = popen.call_args.kwargs
         self.assertFalse(kwargs.get('shell', False))
         self.assertEqual(kwargs['stdin'], subprocess.DEVNULL)
-        self.assertGreater(kwargs['timeout'], 0)
-        self.assertLessEqual(kwargs['timeout'], 300)
+        self.assertGreater(exchange.call_args.kwargs['timeout'], 0)
+        self.assertLessEqual(exchange.call_args.kwargs['timeout'], 300)
 
 
 class AzurePluginDiscoveryTest(unittest.TestCase):
     def test_discovery_only_checks_executable_presence(self):
         with mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: '/bin/' + name if name == 'codex' else None), \
-                mock.patch('subprocess.run', side_effect=AssertionError('Discovery must not execute a host')):
+                mock.patch('subprocess.Popen', side_effect=AssertionError('Discovery must not execute a host')):
             self.assertEqual(plugin.discover_hosts(), ['codex'])
 
     def test_discovery_uses_stable_host_order(self):
