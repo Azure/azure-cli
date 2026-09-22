@@ -2420,7 +2420,7 @@ def _get_aks_desktop_platform():
 def _get_aks_desktop_release(version=None, gh_token=None):
     # urllib includes invalid header values in errors, which would expose the token.
     if gh_token and ('\r' in gh_token or '\n' in gh_token):
-        raise InvalidArgumentValueError('The --gh-token value must not contain carriage returns or line feeds.')
+        raise InvalidArgumentValueError('The GitHub token must not contain carriage returns or line feeds.')
 
     requested_version = None
     if version is not None:
@@ -2445,7 +2445,7 @@ def _get_aks_desktop_release(version=None, gh_token=None):
             recommendation = (
                 "Please wait for the GitHub API rate limit to reset and check your token's quota."
                 if gh_token else
-                'Please rerun with --gh-token or wait for the GitHub API rate limit to reset.')
+                'Please set the GH_TOKEN environment variable or wait for the GitHub API rate limit to reset.')
             raise ClientRequestError(
                 'GitHub API rate limit exceeded while getting AKS Desktop release metadata from "{}" ({}).'
                 .format(release_url, ex), recommendation=recommendation)
@@ -2466,7 +2466,7 @@ def _get_aks_desktop_release(version=None, gh_token=None):
     return release, release_version
 
 
-def _select_aks_desktop_asset(release, version, system, arch):
+def _select_aks_desktop_asset(release, version, system, arch, prefer_deb=True):
     names = {
         ('win', 'x64'): ['aks-desktop-{}-win-x64.exe'.format(version)],
         ('win', 'arm64'): ['aks-desktop-{}-win-arm64.exe'.format(version)],
@@ -2477,7 +2477,8 @@ def _select_aks_desktop_asset(release, version, system, arch):
         ('linux', 'armv7l'): ['aks-desktop-{}-linux-armv7l.tar.gz'.format(version)],
     }.get((system, arch), [])
 
-    if (system, arch) == ('linux', 'x64'):
+    if (prefer_deb and (system, arch) == ('linux', 'x64') and
+            (os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY'))):
         try:
             os_release = platform.freedesktop_os_release()
         except OSError:
@@ -2646,6 +2647,65 @@ def _extract_aks_desktop_archive(archive_path, destination):
             'Failed to extract the AKS Desktop archive ({}).'.format(ex))
 
 
+def _install_aks_desktop_archive(installer_path, version):
+    install_root = os.path.join(os.path.expanduser('~'), '.local', 'share', 'aks-desktop')
+    install_dir = os.path.join(install_root, version)
+    staging_dir = None
+    backup_dir = None
+    backup_path = None
+    published = False
+    try:
+        os.makedirs(install_root, exist_ok=True)
+        if os.path.lexists(install_dir) and (os.path.islink(install_dir) or not os.path.isdir(install_dir)):
+            raise FileOperationError(
+                'The AKS Desktop installation path "{}" is not a regular directory.'.format(install_dir))
+        staging_dir = tempfile.mkdtemp(prefix='.{}-staging-'.format(version), dir=install_root)
+        _extract_aks_desktop_archive(installer_path, staging_dir)
+        executable = next(
+            (os.path.join(root, name)
+             for root, _, files in os.walk(staging_dir)
+             for name in files if name == 'aks-desktop' and os.path.isfile(os.path.join(root, name))),
+            None)
+        if not executable:
+            raise FileOperationError(
+                'The AKS Desktop archive does not contain the expected executable.')
+        os.chmod(executable, os.stat(executable).st_mode | stat.S_IXUSR)
+        executable_path = os.path.join(install_dir, os.path.relpath(executable, staging_dir))
+
+        try:
+            if os.path.exists(install_dir):
+                backup_dir = tempfile.mkdtemp(prefix='.{}-backup-'.format(version), dir=install_root)
+                backup_path = os.path.join(backup_dir, version)
+                os.replace(install_dir, backup_path)
+            # Replacing a nonempty directory requires a backup rename first. Publication is atomic,
+            # but the version path is briefly absent between these renames (not an atomic exchange).
+            os.replace(staging_dir, install_dir)
+            published = True
+        except BaseException as ex:  # Restore the old installation even when interrupted.
+            if backup_path and os.path.exists(backup_path):
+                try:
+                    os.replace(backup_path, install_dir)
+                except BaseException as rollback_error:  # pylint: disable=broad-exception-caught
+                    raise FileOperationError(
+                        'Failed to publish AKS Desktop ({}), and rollback failed ({}). '
+                        'Recover the previous installation from "{}" to "{}".'
+                        .format(ex, rollback_error, backup_path, install_dir)) from rollback_error
+            raise
+        logger.warning('AKS Desktop was installed at "%s".', install_dir)
+        return executable_path
+    except OSError as ex:
+        raise FileOperationError('Failed to install the AKS Desktop archive ({}).'.format(ex)) from ex
+    finally:
+        if backup_dir:
+            if published or not os.listdir(backup_dir):
+                shutil.rmtree(backup_dir)
+            else:
+                # Never delete the only good installation, including on interruption during rollback.
+                logger.warning('The previous AKS Desktop installation is retained at "%s".', backup_path)
+        if staging_dir and os.path.exists(staging_dir):
+            shutil.rmtree(staging_dir)
+
+
 def _launch_aks_desktop_installer(installer_path, system, version):
     try:
         if system == 'win':
@@ -2655,20 +2715,8 @@ def _launch_aks_desktop_installer(installer_path, system, version):
         elif installer_path.endswith('.deb'):
             subprocess.run(['xdg-open', installer_path], check=True)
         else:
-            install_dir = os.path.join(
-                os.path.expanduser('~'), '.local', 'share', 'aks-desktop', version)
-            _extract_aks_desktop_archive(installer_path, install_dir)
-            executable = next(
-                (os.path.join(root, name)
-                 for root, _, files in os.walk(install_dir)
-                 for name in files if name == 'aks-desktop'),
-                None)
-            if not executable:
-                raise FileOperationError(
-                    'The AKS Desktop archive does not contain the expected executable.')
-            os.chmod(executable, os.stat(executable).st_mode | stat.S_IXUSR)
+            executable = _install_aks_desktop_archive(installer_path, version)
             subprocess.Popen([executable])
-            logger.warning('AKS Desktop was installed at "%s".', install_dir)
     except FileNotFoundError as ex:
         raise FileOperationError(
             "The required installer launcher '{}' was not found.".format(ex.filename))
@@ -2681,32 +2729,48 @@ def aks_install_desktop(cmd, version=None, gh_token=None):
     from azure.cli.core._environment import get_config_dir
 
     del cmd
+    if gh_token is None:
+        gh_token = os.environ.get('GH_TOKEN')
     system, arch = _get_aks_desktop_platform()
     release, release_version = _get_aks_desktop_release(version, gh_token=gh_token)
     asset = _select_aks_desktop_asset(
         release, release_version, system, arch)
 
-    # GUI launchers return before the installer has finished consuming its file.
-    gui_installer = system == 'mac' or asset['name'].endswith('.deb')
-    download_dir = None
-    if gui_installer:
-        download_dir = os.path.join(get_config_dir(), 'aks-desktop', 'installers')
-        os.makedirs(download_dir, mode=0o700, exist_ok=True)
-    installer_dir = tempfile.mkdtemp(prefix='aks-desktop-', dir=download_dir)
-    keep_installer = False
-    try:
-        installer_path = os.path.join(installer_dir, asset['name'])
-        _download_aks_desktop_asset(asset, installer_path)
-        _launch_aks_desktop_installer(
-            installer_path, system, release_version)
+    while True:
+        # GUI launchers return before the installer has finished consuming its file.
+        gui_installer = system == 'mac' or asset['name'].endswith('.deb')
+        download_dir = None
         if gui_installer:
-            keep_installer = True
-            logger.warning(
-                'AKS Desktop installer retained at "%s". Complete installation in the opened application, '
-                'then remove "%s" when it is no longer needed.', installer_path, installer_dir)
-    finally:
-        if not keep_installer:
-            shutil.rmtree(installer_dir)
+            download_dir = os.path.join(get_config_dir(), 'aks-desktop', 'installers')
+            os.makedirs(download_dir, mode=0o700, exist_ok=True)
+        installer_dir = tempfile.mkdtemp(prefix='aks-desktop-', dir=download_dir)
+        keep_installer = False
+        try:
+            installer_path = os.path.join(installer_dir, asset['name'])
+            _download_aks_desktop_asset(asset, installer_path)
+            try:
+                _launch_aks_desktop_installer(installer_path, system, release_version)
+            except (ClientRequestError, FileOperationError, OSError) as ex:
+                if not (system == 'linux' and asset['name'].endswith('.deb')):
+                    raise
+                try:
+                    asset = _select_aks_desktop_asset(
+                        release, release_version, system, arch, prefer_deb=False)
+                except ResourceNotFoundError as missing_archive:
+                    raise ClientRequestError(
+                        '{} No portable archive is available as a fallback ({}).'.format(ex, missing_archive)) from ex
+                logger.warning('The Debian installer could not be opened (%s). Using the portable archive.', ex)
+                # The finally block removes the failed DEB before the single archive retry.
+                continue
+            if gui_installer:
+                keep_installer = True
+                logger.warning(
+                    'AKS Desktop installer retained at "%s". Complete installation in the opened application, '
+                    'then remove "%s" when it is no longer needed.', installer_path, installer_dir)
+            return
+        finally:
+            if not keep_installer:
+                shutil.rmtree(installer_dir)
 
 
 # determine the architecture for the binary based on platform.machine()

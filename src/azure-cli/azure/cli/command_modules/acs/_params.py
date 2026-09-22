@@ -1028,6 +1028,8 @@ def load_arguments(self, _):
     with self.argument_context('aks install-desktop') as c:
         c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')
         c.argument('gh_token', help='GitHub authentication token used to retrieve AKS Desktop release metadata. '
+                   'Prefer the GH_TOKEN environment variable to avoid exposing credentials in shell history, '
+                   'process listings, or debug logs. This option overrides GH_TOKEN. '
                    'Supplying a token helps avoid GitHub API rate limits.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:

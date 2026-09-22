@@ -1488,9 +1488,12 @@ short-summary: Download and install AKS Desktop for the current platform.
 long-summary: >
   On macOS and Linux systems using Debian packages, complete installation in the opened application.
   GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
-  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open;
-  other Linux systems use the portable archive when available.
-  If GitHub API requests are rate-limited, rerun with --gh-token or wait for the rate limit to reset.
+  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open
+  and a graphical session. Other Linux systems, or systems where the Debian installer cannot be opened,
+  use the portable archive when available.
+  If GitHub API requests are rate-limited, set the GH_TOKEN environment variable or wait for the rate limit to reset.
+  Prefer GH_TOKEN over --gh-token, which can expose credentials in shell history, process listings, and debug logs.
+  An explicit --gh-token value overrides GH_TOKEN.
   The token is used only to retrieve release metadata, not to download the installer. If requests with a token
   are rate-limited, wait for the rate limit to reset and check the token's quota.
 examples:

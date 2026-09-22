@@ -41,8 +41,13 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
             'AZURE_CONFIG_DIR': self.cli_ctx.config.config_dir,
             'AZURE_EXTENSION_DIR': str(self.home / 'extensions'),
             'AZURE_CORE_COLLECT_TELEMETRY': '0',
+            'GH_TOKEN': '',
         }))
         super().setUp()
+        # Extension roots are cached at import time, before the environment patch.
+        self._patch(mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', str(self.home / 'extensions')))
+        self._patch(mock.patch('azure.cli.core.extension.EXTENSIONS_SYS_DIR', str(self.home / 'system-extensions')))
+        self._patch(mock.patch('azure.cli.core.extension.DEV_EXTENSION_SOURCES', []))
 
         # Any missed transport stub must fail, including DNS or swallowed requests.
         for target in ('socket.getaddrinfo', 'socket.socket.connect', 'socket.socket.connect_ex'):
@@ -52,6 +57,10 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self._patch(mock.patch('platform.system', return_value='Linux'))
         self._patch(mock.patch('platform.machine', return_value='aarch64'))
         self.popen = self._patch(mock.patch('subprocess.Popen'))
+        # A cold runtime may probe network interfaces during CLI initialization.
+        # Include those calls so launch assertions cannot depend on probe caches.
+        self.popen(('/usr/sbin/ip', 'link'))
+        self.popen(('/usr/sbin/ifconfig',))
         self.run = self._patch(mock.patch('subprocess.run', side_effect=AssertionError('Unexpected installer launch')))
         self.addCleanup(self.run.assert_not_called)
 
@@ -91,6 +100,11 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self.installer_path = installer_dirs[0] / self.asset['name']
         return io.BytesIO(self.archive_bytes)
 
+    def _desktop_launch_calls(self):
+        return [call for call in self.popen.call_args_list
+                if call.args and isinstance(call.args[0], (list, tuple)) and call.args[0]
+                and os.path.basename(call.args[0][0]) == 'aks-desktop']
+
     def _assert_archive_installed(self, endpoint, token=None):
         self.metadata.assert_called_once()
         request = self.metadata.call_args.args[0]
@@ -101,15 +115,36 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self.assertEqual(executable.read_bytes(), b'fixture')
         if os.name != 'nt':
             self.assertEqual(stat.S_IMODE(executable.stat().st_mode), 0o755)
-        self.popen.assert_called_once_with([str(executable)])
+        self.assertEqual(self._desktop_launch_calls(), [mock.call([str(executable)])])
         self.assertIsNotNone(self.installer_path)
         self.assertFalse(self.installer_path.exists())
         self.assertFalse(self.installer_path.parent.exists())
         self.assertEqual(list(self.downloads.iterdir()), [])
 
     def test_install_desktop_specific_version(self):
-        self.cmd('aks install-desktop --version 0.9.1 --gh-token fake-test-token')
+        with mock.patch.dict(os.environ, {'GH_TOKEN': 'unused-environment-token'}):
+            self.cmd('aks install-desktop --version 0.9.1 --gh-token fake-test-token')
         self._assert_archive_installed('tags/v0.9.1', token='fake-test-token')
+
+    def test_install_desktop_environment_token_is_not_in_debug_logs(self):
+        token = 'test-environment-token-not-in-argv'
+        with mock.patch.dict(os.environ, {'GH_TOKEN': token}):
+            with self.assertLogs(level='DEBUG') as root_logs, self.assertLogs('cli', level='DEBUG') as logs:
+                self.cmd('aks install-desktop --version 0.9.1 --debug')
+        self._assert_archive_installed('tags/v0.9.1', token=token)
+        output = '\n'.join(root_logs.output + logs.output)
+        self.assertIn('Command arguments:', output)
+        self.assertNotIn(token, output)
+
+    def test_install_desktop_rejects_malformed_environment_token(self):
+        token = 'malformed-environment-token'
+        with mock.patch.dict(os.environ, {'GH_TOKEN': token + '\n'}):
+            with self.assertRaises(InvalidArgumentValueError) as error:
+                self.cmd('aks install-desktop')
+        self.assertNotIn(token, str(error.exception))
+        self.metadata.assert_not_called()
+        self.opener.open.assert_not_called()
+        self.assertEqual(self._desktop_launch_calls(), [])
 
     def test_install_desktop_latest(self):
         self.cmd('aks install-desktop')
@@ -128,7 +163,7 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
                 self.assertIn("version '{}' is invalid".format(version), str(error.exception))
                 self.metadata.assert_not_called()
                 self.opener.open.assert_not_called()
-                self.popen.assert_not_called()
+                self.assertEqual(self._desktop_launch_calls(), [])
                 self.assertFalse((self.home / '.local').exists())
                 self.assertEqual(list(self.downloads.iterdir()), [])
 
@@ -137,7 +172,7 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(ClientRequestError, 'did not match.*SHA-256'):
             self.cmd('aks install-desktop --version 0.9.1')
         self.opener.open.assert_called_once()
-        self.popen.assert_not_called()
+        self.assertEqual(self._desktop_launch_calls(), [])
         self.assertFalse((self.home / '.local').exists())
         self.assertIsNotNone(self.installer_path)
         self.assertFalse(self.installer_path.exists())
