@@ -48,6 +48,34 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_troubleshoot_config_output(result):
+    """Flatten the troubleshoot config payload into a per-setting table.
+
+    Reads Settings out of the nested ``configCheck`` field (the verbatim SCM
+    body). Falls back gracefully for non-dict / empty payloads (e.g. --report
+    was passed and the command returned ``None``).
+    """
+    from collections import OrderedDict
+    if not isinstance(result, dict):
+        return []
+    config_check = result.get('configCheck') or {}
+    settings = config_check.get('Settings') or config_check.get('settings') or []
+    if not isinstance(settings, list):
+        return []
+    written_at = config_check.get('WrittenAt') or config_check.get('writtenAt')
+    if isinstance(written_at, str):
+        written_at = written_at.strip()
+    details_header = (
+        'Details (Last Updated: {})'.format(written_at)
+        if written_at else 'Details'
+    )
+    return [OrderedDict([
+        ('Setting', s.get('Setting') or s.get('setting') or ''),
+        ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
+        (details_header, s.get('Details') or s.get('details') or ''),
+    ]) for s in settings if isinstance(s, dict)]
+
+
 def transform_troubleshoot_status_output(result):
     """Flatten the nested `instances` payload into one row per worker for `-o table`.
     Column layout: InstanceId / State / Details / (LastError /
@@ -127,7 +155,6 @@ def transform_troubleshoot_status_output(result):
                 .format(name=app, rg=rg))
 
         atexit.register(_print_hint)
-
     return rows
 
 
@@ -349,6 +376,8 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_startup_log')
 
     with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('config', 'troubleshoot_config',
+                         table_transformer=transform_troubleshoot_config_output)
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
 

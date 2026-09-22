@@ -2507,6 +2507,44 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface a recent runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The site runtime status error reported by App Service for the worker
+    represented by the configuration-check snapshot.
+    Use `--instance` with a worker machine name to retrieve that worker's
+    configuration checks. The instance ID returned by those checks is used
+    to select the matching runtime error. If the configuration snapshot is
+    unavailable, the machine name is resolved through ARM so an error from
+    another worker is not returned.
+    Runtime errors are surfaced only when they occurred within the last
+    15 minutes. Older errors are omitted from both structured output and
+    the `--report` view.
+    For a 24-hour lookback of runtime status and startup attempts, run
+    `az webapp troubleshoot status`.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show a recent runtime error, if any (JSON by default)
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+  - name: Run checks and show a recent runtime error for a specific worker instance
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['webapp troubleshoot'] = """
 type: group
 short-summary: Diagnose common Linux web app problems.
