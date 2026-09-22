@@ -119,7 +119,7 @@ class AcsInstallCliPluginTest(unittest.TestCase):
             mock.call.get_arch_for_cli_binary(),
             mock.call.k8s_install_kubectl(self.cmd, '1.2.3', '/kubectl', 'https://kubectl.example', arch='arm64'),
             mock.call.k8s_install_kubelogin(self.cmd, '4.5.6', '/kubelogin', 'https://kubelogin.example',
-                                          arch='arm64', gh_token='binary-only-token'),
+                                            arch='arm64', gh_token='binary-only-token'),
             mock.call.maybe_install_azure_plugin(self.cmd, True, ['claude-code', 'codex']),
         ])
 

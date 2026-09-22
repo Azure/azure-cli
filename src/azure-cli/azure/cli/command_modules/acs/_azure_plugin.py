@@ -9,6 +9,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 
@@ -77,6 +78,11 @@ def _install_selected_hosts(hosts, *, explicit):
     for host in hosts:
         try:
             installed = install_plugin(host)
+        except KeyboardInterrupt:
+            outcomes.append(f'{HOST_LABELS[host]}: interrupted; native state is uncertain.')
+            # Cancellation must disclose partial state even with --only-show-errors.
+            print(_setup_summary(outcomes), file=sys.stderr)
+            raise
         except (ClientRequestError, ResourceNotFoundError, ValidationError) as ex:
             failures.append(ex)
             outcomes.append(f'{HOST_LABELS[host]}: failed. {ex}')
@@ -87,14 +93,18 @@ def _install_selected_hosts(hosts, *, explicit):
             outcomes.append(outcome)
             print(outcome, file=sys.stderr)
     if failures:
-        summary = '\n'.join(outcomes)
-        message = ('Azure plugin setup did not complete for all selected hosts. '
-                   f'kubectl and kubelogin remain installed.\n{summary}\n'
-                   "Inspect and recover using each host's native plugin commands. "
-                   'No automatic retry or rollback was attempted.')
+        message = _setup_summary(outcomes)
         if explicit:
             raise type(failures[0])(message) from None
         logger.warning(message)
+
+
+def _setup_summary(outcomes):
+    summary = '\n'.join(outcomes)
+    return ('Azure plugin setup did not complete for all selected hosts. '
+            f'kubectl and kubelogin remain installed.\n{summary}\n'
+            "Inspect and recover using each host's native plugin commands. "
+            'No automatic retry or rollback was attempted.')
 
 
 def _select_hosts():
@@ -228,8 +238,7 @@ def _azure_registered(host_id, inventory):
 
 
 def _check_copilot_mcp(executable):
-    # MCP command arguments and environment values can contain credentials.
-    inventory = _inventory('github-copilot', [executable, 'mcp', 'list', '--json'], 'MCP inventory', sensitive=True)
+    inventory = _inventory('github-copilot', [executable, 'mcp', 'list', '--json'], 'MCP inventory')
     servers = inventory.get('mcpServers') if isinstance(inventory, dict) else None
     if not isinstance(servers, dict) or any(
             not isinstance(row, dict) or not _text(row.get('source')) or not isinstance(row.get('enabled'), bool)
@@ -241,17 +250,28 @@ def _check_copilot_mcp(executable):
                                        'Resolve this collision manually before installing.'))
 
 
-def _inventory(host_id, argv, operation, *, sensitive=False):
-    result = _run(host_id, argv, operation, sensitive=sensitive)
+def _inventory(host_id, argv, operation):
+    # All inventories can carry credentials: Git URLs as well as MCP args/env.
+    result = _run(host_id, argv, operation, sensitive=True)
     # A warning may mean the host skipped unreadable configuration, not an empty inventory.
     if result.stderr.strip():
-        detail = f'Native inventory warning: {_diagnostic(result.stderr, sensitive=sensitive)}'
+        detail = f'Native inventory warning: {_diagnostic(result.stderr, sensitive=True)}'
         raise ValidationError(_failure(host_id, operation, detail))
     try:
-        return json.loads(result.stdout)
-    except (ValueError, RecursionError) as ex:
-        detail = f'Invalid native JSON: {_diagnostic(result.stdout, sensitive=sensitive)}'
-        raise ValidationError(_failure(host_id, operation, detail)) from (None if sensitive else ex)
+        return json.loads(result.stdout, object_pairs_hook=_unique_object)
+    except (ValueError, RecursionError):
+        detail = 'Invalid native JSON (malformed, too deeply nested or duplicate object members).'
+        raise ValidationError(_failure(host_id, operation, detail)) from None
+
+
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            # Do not put potentially sensitive keys or values in exception chains.
+            raise ValueError('duplicate object member')
+        result[key] = value
+    return result
 
 
 def _diagnostic(value, *, sensitive=False):
@@ -269,10 +289,61 @@ def _failure(host_id, operation, detail):
             'no automatic retry or rollback was attempted.')
 
 
+def _stop_process_tree(process):
+    # Own a POSIX session, or target only the Windows launcher's descendant tree.
+    # This is not containment for a host that deliberately detaches its children.
+    uncertain = False
+    output = None
+    try:
+        if sys.platform == 'win32':
+            taskkill = os.path.join(os.environ['SystemRoot'], 'System32', 'taskkill.exe')
+            result = subprocess.run([taskkill, '/PID', str(process.pid), '/T', '/F'],
+                                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                    timeout=5, check=False)
+            uncertain = result.returncode != 0
+        else:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+    except (OSError, subprocess.TimeoutExpired, KeyError):
+        uncertain = True
+    try:
+        process.kill()
+        output = process.communicate(timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        uncertain = True
+        try:
+            process.wait(timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    if uncertain:
+        print('Native process-tree cleanup could not be confirmed; native state is uncertain. '
+              "Inspect the host's running processes and recover using its native plugin commands.", file=sys.stderr)
+    return output
+
+
 def _run(host_id, argv, operation, timeout=300, *, sensitive=False):
     try:
-        result = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True,
-                                encoding='utf-8', errors='replace', timeout=timeout, check=False)
+        windows = sys.platform == 'win32'
+        process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   encoding='utf-8', errors='replace', start_new_session=not windows,
+                                   creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if windows else 0)
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except (subprocess.TimeoutExpired, KeyboardInterrupt) as ex:
+            output = _stop_process_tree(process)
+            if isinstance(ex, subprocess.TimeoutExpired) and output is not None:
+                # Windows reader threads only return partial output after EOF.
+                ex.stdout, ex.stderr = output
+            raise
+        finally:
+            # POSIX has no pipe-reader threads. On Windows communicate owns and
+            # closes its pipes; closing them here after failed cleanup can block.
+            if not windows:
+                process.stdout.close()
+                process.stderr.close()
+        result = subprocess.CompletedProcess(argv, process.returncode, stdout, stderr)
     except subprocess.TimeoutExpired as ex:
         detail = (f'timed out after {timeout}s. {_diagnostic(ex.stdout, sensitive=sensitive)} '
                   f'{_diagnostic(ex.stderr, sensitive=sensitive)}')

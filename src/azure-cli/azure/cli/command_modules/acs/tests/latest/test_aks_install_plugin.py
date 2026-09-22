@@ -156,8 +156,14 @@ def _run_cli_scenario(mode):
             assert blocked == ['socket.getaddrinfo', 'subprocess.Popen', 'open', 'socket.connect'], blocked
             # Failure during the actual constructor must propagate, while the
             # parent still removes all disposable config and executable files.
-            connectivity.side_effect = RuntimeError('injected startup failure after four blocked probes')
-            DummyCli()
+            failure = RuntimeError('injected active-cloud constructor failure')
+            with mock.patch.object(cloud, 'get_active_cloud', side_effect=failure):
+                try:
+                    DummyCli()
+                except RuntimeError as ex:
+                    assert ex is failure, 'Unexpected constructor failure'
+                    print('Caught intended constructor failure after four blocked probes')
+                    sys.exit(23)
             raise AssertionError('Startup failure was not propagated')
 
         cli = DummyCli()
@@ -279,8 +285,9 @@ class AKSInstallPluginScenarioTest(unittest.TestCase):
 
     def test_install_plugin_fixture_guards_and_constructor_failure_cleanup(self):
         result = self.invoke_isolated('guards')
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn('injected startup failure after four blocked probes', result.stderr)
+        self.assertEqual(result.returncode, 23, result.stdout + result.stderr)
+        self.assertIn('Caught intended constructor failure after four blocked probes', result.stdout)
+        self.assertNotIn('Startup failure was not propagated', result.stderr)
 
 
 if __name__ == '__main__':
