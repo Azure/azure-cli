@@ -2698,7 +2698,14 @@ def _install_aks_desktop_archive(installer_path, version):
     finally:
         if backup_dir:
             if published or not os.listdir(backup_dir):
-                shutil.rmtree(backup_dir)
+                try:
+                    shutil.rmtree(backup_dir)
+                except OSError as ex:
+                    if not published:
+                        raise
+                    logger.warning(
+                        'AKS Desktop was installed, but the previous installation backup at "%s" '
+                        'could not be removed (%s). Remove it manually when no longer needed.', backup_dir, ex)
             else:
                 # Never delete the only good installation, including on interruption during rollback.
                 logger.warning('The previous AKS Desktop installation is retained at "%s".', backup_path)

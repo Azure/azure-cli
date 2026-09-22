@@ -1205,23 +1205,28 @@ class AcsCustomCommandTest(unittest.TestCase):
                 asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
                 self.assertEqual(asset['name'], expected)
 
+    @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                 side_effect=OSError('os-release unavailable'))
-    def test_aks_install_desktop_missing_os_release_uses_archive(self, _):
+    def test_aks_install_desktop_missing_os_release_uses_archive(self, mock_os_release):
         release = {'assets': [
             {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
             {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
         ]}
         asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
         self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+        mock_os_release.assert_called_once_with()
 
+    @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
     @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                 return_value={'ID': 'debian'})
-    def test_aks_install_desktop_missing_deb_uses_archive(self, _, __):
+    def test_aks_install_desktop_missing_deb_uses_archive(self, mock_os_release, mock_which):
         release = {'assets': [{'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'}]}
         asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
         self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+        mock_os_release.assert_called_once_with()
+        mock_which.assert_called_once_with('xdg-open')
 
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                 return_value={'ID': 'fedora'})
@@ -1675,6 +1680,42 @@ class AcsCustomCommandTest(unittest.TestCase):
                     self.assertEqual(installed.read(), b'new executable')
                 self.assertEqual(mock_popen.call_args_list, [mock.call([executable]), mock.call([executable])])
                 mock_popen.reset_mock()
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_backup_cleanup_failure_still_launches(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                mock_popen.reset_mock()
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                install_dir = os.path.join(install_root, '0.9.1')
+                os.makedirs(os.path.join(install_dir, 'resources'))
+                with open(os.path.join(install_dir, 'resources', 'old'), 'wb') as output:
+                    output.write(b'old resources')
+                self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                real_rmtree = shutil.rmtree
+                backups = []
+
+                def remove_tree(path, *args, **kwargs):
+                    if os.path.basename(path).startswith('.0.9.1-backup-'):
+                        backups.append(path)
+                        raise PermissionError('backup cleanup denied')
+                    return real_rmtree(path, *args, **kwargs)
+
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.command_modules.acs.custom.shutil.rmtree', side_effect=remove_tree), \
+                        mock.patch('azure.cli.command_modules.acs.custom.logger.warning') as warning:
+                    _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                executable = os.path.join(install_dir, 'aks-desktop')
+                mock_popen.assert_called_once_with([executable])
+                with open(executable, 'rb') as installed:
+                    self.assertEqual(installed.read(), b'executable')
+                self.assertEqual(len(backups), 1)
+                self.assertTrue(os.path.isdir(backups[0]))
+                self.assertEqual(sorted(os.listdir(install_root)), [os.path.basename(backups[0]), '0.9.1'])
+                self.assertIn(backups[0], str(warning.call_args_list))
+                self.assertIn('backup cleanup denied', str(warning.call_args_list))
 
     @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
     def test_aks_install_desktop_archive_interrupted_publication_preserves_old(self, mock_popen):
