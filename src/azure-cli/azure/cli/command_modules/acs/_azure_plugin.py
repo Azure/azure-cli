@@ -116,7 +116,8 @@ def _azure_registered(host_id, inventory):
 
 
 def _check_copilot_mcp(executable):
-    inventory = _inventory('github-copilot', [executable, 'mcp', 'list', '--json'], 'MCP inventory')
+    # MCP command arguments and environment values can contain credentials.
+    inventory = _inventory('github-copilot', [executable, 'mcp', 'list', '--json'], 'MCP inventory', sensitive=True)
     servers = inventory.get('mcpServers') if isinstance(inventory, dict) else None
     if not isinstance(servers, dict) or any(
             not isinstance(row, dict) or not _text(row.get('source')) or not isinstance(row.get('enabled'), bool)
@@ -128,19 +129,22 @@ def _check_copilot_mcp(executable):
                                        'Resolve this collision manually before installing.'))
 
 
-def _inventory(host_id, argv, operation):
-    result = _run(host_id, argv, operation)
+def _inventory(host_id, argv, operation, *, sensitive=False):
+    result = _run(host_id, argv, operation, sensitive=sensitive)
     # A warning may mean the host skipped unreadable configuration, not an empty inventory.
     if result.stderr.strip():
-        raise ValidationError(_failure(host_id, operation, _diagnostic(result.stderr)))
+        detail = f'Native inventory warning: {_diagnostic(result.stderr, sensitive=sensitive)}'
+        raise ValidationError(_failure(host_id, operation, detail))
     try:
         return json.loads(result.stdout)
     except (ValueError, RecursionError) as ex:
-        raise ValidationError(_failure(host_id, operation,
-                                       f'Invalid native JSON: {_diagnostic(result.stdout)}')) from ex
+        detail = f'Invalid native JSON: {_diagnostic(result.stdout, sensitive=sensitive)}'
+        raise ValidationError(_failure(host_id, operation, detail)) from (None if sensitive else ex)
 
 
-def _diagnostic(value):
+def _diagnostic(value, *, sensitive=False):
+    if sensitive:
+        return '[sensitive inventory output suppressed]'
     if isinstance(value, bytes):
         value = value.decode('utf-8', errors='replace')
     value = (value or '').strip()
@@ -153,16 +157,19 @@ def _failure(host_id, operation, detail):
             'no automatic retry or rollback was attempted.')
 
 
-def _run(host_id, argv, operation, timeout=300):
+def _run(host_id, argv, operation, timeout=300, *, sensitive=False):
     try:
         result = subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True,
                                 encoding='utf-8', errors='replace', timeout=timeout, check=False)
     except subprocess.TimeoutExpired as ex:
-        detail = f'timed out after {timeout}s. {_diagnostic(ex.stdout)} {_diagnostic(ex.stderr)}'
-        raise ClientRequestError(_failure(host_id, operation, detail)) from ex
+        detail = (f'timed out after {timeout}s. {_diagnostic(ex.stdout, sensitive=sensitive)} '
+                  f'{_diagnostic(ex.stderr, sensitive=sensitive)}')
+        raise ClientRequestError(_failure(host_id, operation, detail)) from (None if sensitive else ex)
     except OSError as ex:
-        raise ClientRequestError(_failure(host_id, operation, _diagnostic(str(ex)))) from ex
+        detail = _diagnostic(str(ex), sensitive=sensitive)
+        raise ClientRequestError(_failure(host_id, operation, detail)) from (None if sensitive else ex)
     if result.returncode:
-        detail = f'exit {result.returncode}. {_diagnostic(result.stdout)} {_diagnostic(result.stderr)}'
+        detail = (f'exit {result.returncode}. {_diagnostic(result.stdout, sensitive=sensitive)} '
+                  f'{_diagnostic(result.stderr, sensitive=sensitive)}')
         raise ClientRequestError(_failure(host_id, operation, detail))
     return result

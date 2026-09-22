@@ -7,6 +7,7 @@ import copy
 import json
 import subprocess
 import sys
+import traceback
 import unittest
 from unittest import mock
 
@@ -310,6 +311,44 @@ class AzurePluginNativeTest(unittest.TestCase):
                 self.install('github-copilot', responses)
             self.assertEqual(self.mutations(), [])
 
+    def test_mcp_inventory_failures_do_not_disclose_credentials(self):
+        stdout_secret = 'synthetic-mcp-stdout-credential'
+        stderr_secret = 'synthetic-mcp-stderr-credential'
+        inventory = copy.deepcopy(COPILOT_MCP)
+        inventory['mcpServers']['azure']['args'] = ['--token', stdout_secret]
+        payload = json.dumps(inventory)
+        real_run = subprocess.run
+        for case, stdout, stderr, ending, error, context in (
+                ('invalid JSON', payload[:-1], '', 'sys.exit(0)', ValidationError, 'Invalid native JSON'),
+                ('nonzero', payload, stderr_secret, 'sys.exit(7)', ClientRequestError, 'exit 7'),
+                ('timeout', payload, stderr_secret, 'time.sleep(30)', ClientRequestError, 'timed out after'),
+                ('warning', payload, stderr_secret, 'sys.exit(0)', ValidationError, 'warning')):
+            calls = []
+            script = (f'import sys, time; print({stdout!r}, flush=True); '
+                      f'print({stderr!r}, file=sys.stderr, flush=True); {ending}')
+
+            def run(argv, **kwargs):
+                calls.append(tuple(argv))
+                if argv == ['copilot', 'plugin', 'list', '--json']:
+                    return subprocess.CompletedProcess(argv, 0, '[]', '')
+                if argv == ['copilot', 'mcp', 'list', '--json']:
+                    kwargs['timeout'] = 0.2 if case == 'timeout' else 5
+                    return real_run([sys.executable, '-c', script], **kwargs)
+                raise AssertionError('Unexpected native command: ' + repr(argv))
+
+            with self.subTest(case=case):
+                with mock.patch.object(plugin.subprocess, 'run', side_effect=run), self.assertRaises(error) as caught:
+                    plugin.install_plugin('github-copilot')
+                message = str(caught.exception)
+                for safe_context in ('GitHub Copilot CLI', 'MCP inventory', context, 'native'):
+                    self.assertIn(safe_context, message)
+                rendered = ''.join(traceback.format_exception(caught.exception))
+                for secret in (stdout_secret, stderr_secret):
+                    self.assertNotIn(secret, message)
+                    self.assertNotIn(secret, rendered)
+                self.assertEqual(calls, [('copilot', 'plugin', 'list', '--json'),
+                                         ('copilot', 'mcp', 'list', '--json')])
+
     def test_inventory_warning_never_becomes_absence(self):
         command = ('copilot', 'plugin', 'list', '--json')
         response = subprocess.CompletedProcess(command, 0, '[]', 'Configuration could not be loaded')
@@ -324,7 +363,8 @@ class AzurePluginNativeTest(unittest.TestCase):
             for command in commands:
                 broken = dict(responses)
                 broken[command] = subprocess.CompletedProcess(command, 2, '', 'unsupported flag or policy refusal')
-                with self.subTest(host=host, command=command), self.assertRaisesRegex(ClientRequestError, 'policy refusal'):
+                context = 'exit 2' if command[1] == 'mcp' else 'policy refusal'
+                with self.subTest(host=host, command=command), self.assertRaisesRegex(ClientRequestError, context):
                     self.install(host, broken)
                 self.assertEqual(self.process.calls[-1], command)
                 self.assertEqual(self.process.calls.count(command), 1)
