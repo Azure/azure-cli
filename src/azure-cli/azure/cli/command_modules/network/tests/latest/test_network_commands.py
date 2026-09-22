@@ -63,17 +63,17 @@ class NetworkApplicationSecurityGroupScenario(ScenarioTest):
         self.cmd('network asg create -g {rg} -n {asg}')
         self.cmd(
             'network asg address-prefix-set create -g {rg} --asg-name {asg} -n {prefix_set} '
-            '--address-prefixes 10.0.0.0/24 10.1.0.0/24',
+            '--address-prefixes 10.0.0.0/24 2001:db8::/32',
             checks=[
                 self.check('name', '{prefix_set}'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('addressPrefixes', ['10.0.0.0/24', '10.1.0.0/24']),
+                self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32']),
             ]
         )
         self.cmd(
             'network asg address-prefix-set show -g {rg} --application-security-group-name {asg} '
             '--address-prefix-set-name {prefix_set}',
-            checks=self.check('addressPrefixes[0]', '10.0.0.0/24')
+            checks=self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32'])
         )
         self.cmd(
             'network asg address-prefix-set list -g {rg} --asg-name {asg}',

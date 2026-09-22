@@ -54,6 +54,9 @@ class Show(AAZCommand):
             options=["-n", "--name", "--address-prefix-set-name"],
             help="Name of the address prefix set.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]([a-zA-Z0-9_.-]{0,78}[a-zA-Z0-9_])?$",
+            ),
             id_part="child_name_1",
         )
         return cls._args_schema

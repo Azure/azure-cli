@@ -55,12 +55,18 @@ class Create(AAZCommand):
             options=["-n", "--name", "--address-prefix-set-name"],
             help="Name of the address prefix set.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]([a-zA-Z0-9_.-]{0,78}[a-zA-Z0-9_])?$",
+            ),
             id_part="child_name_1",
         )
         _args_schema.address_prefixes = AAZListArg(
             options=["--address-prefixes"],
             help="Space-separated list of IPv4 or IPv6 address prefixes in CIDR notation.",
             required=True,
+            fmt=AAZListArgFormat(
+                min_length=1,
+            ),
         )
         _args_schema.address_prefixes.Element = AAZStrArg()
         return cls._args_schema
