@@ -528,18 +528,18 @@ def check_if_new_storagepool_creation_required(
 def generate_vm_sku_cache_for_region(cli_ctx, location=None):
     result = _get_vm_sku_details(cli_ctx, location)
     for vm_data in result:
-        sku_name = vm_data.name.lower()
-        capabilities = vm_data.capabilities
+        sku_name = vm_data['name'].lower()
+        capabilities = vm_data['capabilities']
         cpu_value = -1
         nvme_enabled = False
         for entry in capabilities:
-            if entry.name == 'vCPUs' and cpu_value == -1:
-                cpu_value = int(entry.value)
+            if entry['name'] == 'vCPUs' and cpu_value == -1:
+                cpu_value = int(entry['value'])
 
-            if entry.name == 'vCPUsAvailable':
-                cpu_value = int(entry.value)
+            if entry['name'] == 'vCPUsAvailable':
+                cpu_value = int(entry['value'])
 
-            if entry.name == 'NvmeDiskSizeInMiB':
+            if entry['name'] == 'NvmeDiskSizeInMiB':
                 nvme_enabled = True
 
             vm_sku_details_cache[sku_name] = (cpu_value, nvme_enabled)
@@ -652,9 +652,9 @@ def _get_vm_sku_details(cli_ctx, location=None):
                 return True
         return False
 
-    from azure.cli.command_modules.acs._client_factory import get_compute_client
-    result = get_compute_client(cli_ctx).resource_skus.list()
-    result = [x for x in result if x.resource_type.lower() == 'virtualmachines']
+    from azure.cli.command_modules.vm.aaz.latest.vm import ListSkus
+    result = ListSkus(cli_ctx=cli_ctx)(command_args={})
+    result = [x for x in result if x['resourceType'].lower() == 'virtualmachines']
     if location:
-        result = [r for r in result if _is_vm_in_required_location(location, r.locations)]
+        result = [r for r in result if _is_vm_in_required_location(location, r['locations'])]
     return result
