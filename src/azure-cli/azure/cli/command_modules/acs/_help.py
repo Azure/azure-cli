@@ -1482,6 +1482,27 @@ type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
+helps["aks install-desktop"] = """
+type: command
+short-summary: Download and install AKS Desktop for the current platform.
+long-summary: >
+  On macOS and Linux systems using Debian packages, complete installation in the opened application.
+  GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
+  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open
+  and a graphical session. Other Linux systems, or systems where the Debian installer cannot be opened,
+  use the portable archive when available.
+  If GitHub API requests are rate-limited, set the GH_TOKEN environment variable or wait for the rate limit to reset.
+  Prefer GH_TOKEN over --gh-token, which can expose credentials in shell history, process listings, and debug logs.
+  An explicit --gh-token value overrides GH_TOKEN.
+  The token is used only to retrieve release metadata, not to download the installer. If requests with a token
+  are rate-limited, wait for the rate limit to reset and check the token's quota.
+examples:
+  - name: Install the latest stable version of AKS Desktop
+    text: az aks install-desktop
+  - name: Install a specific version of AKS Desktop
+    text: az aks install-desktop --version 0.9.1
+"""
+
 helps["aks list"] = """
 type: command
 short-summary: List managed Kubernetes clusters.

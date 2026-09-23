@@ -53,6 +53,46 @@ class NetworkApplicationSecurityGroupScenario(ScenarioTest):
         count3 = len(self.cmd('network asg list').get_output_in_json())
         self.assertTrue(count3 == count1)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_asg_prefix_set', location='eastus2euap')
+    def test_network_asg_address_prefix_set(self, resource_group):
+        self.kwargs.update({
+            'asg': self.create_random_name('asg', 12),
+            'prefix_set': self.create_random_name('prefixset', 16),
+        })
+
+        self.cmd('network asg create -g {rg} -n {asg}')
+        self.cmd(
+            'network asg address-prefix-set create -g {rg} --asg-name {asg} -n {prefix_set} '
+            '--address-prefixes 10.0.0.0/24 2001:db8::/32',
+            checks=[
+                self.check('name', '{prefix_set}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32']),
+            ]
+        )
+        self.cmd(
+            'network asg address-prefix-set show -g {rg} --application-security-group-name {asg} '
+            '--address-prefix-set-name {prefix_set}',
+            checks=self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32'])
+        )
+        self.cmd(
+            'network asg address-prefix-set list -g {rg} --asg-name {asg}',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].name', '{prefix_set}'),
+            ]
+        )
+        self.cmd(
+            'network asg address-prefix-set update -g {rg} --asg-name {asg} -n {prefix_set} '
+            '--address-prefixes 10.2.0.0/24',
+            checks=self.check('addressPrefixes', ['10.2.0.0/24'])
+        )
+        self.cmd('network asg address-prefix-set delete -g {rg} --asg-name {asg} -n {prefix_set}')
+        self.cmd(
+            'network asg address-prefix-set list -g {rg} --asg-name {asg}',
+            checks=self.check('length(@)', 0)
+        )
+
 
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
@@ -5695,6 +5735,70 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_move_ip_configurations', location='eastus2euap')
+    def test_network_vnet_move_ip_configurations(self, resource_group):
+        self.kwargs.update({
+            'vnet': self.create_random_name('vnet', 12),
+            'subnet': self.create_random_name('subnet', 12),
+            'source_nic': self.create_random_name('srcnic', 12),
+            'target_nic': self.create_random_name('dstnic', 12),
+            'source_config': 'source-secondary',
+            'source_config_2': 'source-tertiary',
+            'target_config': 'target-secondary',
+            'target_config_2': 'target-tertiary',
+            'source_ip': '10.0.0.10',
+            'source_ip_2': '10.0.0.11',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefixes 10.0.0.0/16')
+        self.cmd(
+            'network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} '
+            '--address-prefixes 10.0.0.0/24 --default-outbound false'
+        )
+        self.cmd('network nic create -g {rg} -n {source_nic} --vnet-name {vnet} --subnet {subnet}')
+        self.cmd('network nic create -g {rg} -n {target_nic} --vnet-name {vnet} --subnet {subnet}')
+        target_nic_id = self.cmd(
+            'network nic show -g {rg} -n {target_nic}'
+        ).get_output_in_json()['id']
+        self.kwargs['target_id'] = '{}/ipConfigurations/{}'.format(target_nic_id, self.kwargs['target_config'])
+        self.kwargs['target_id_2'] = '{}/ipConfigurations/{}'.format(
+            target_nic_id, self.kwargs['target_config_2']
+        )
+        self.kwargs['source_id'] = self.cmd(
+            'network nic ip-config create -g {rg} --nic-name {source_nic} -n {source_config} '
+            '--private-ip-address {source_ip}',
+            checks=self.check('privateIPAddress', '{source_ip}')
+        ).get_output_in_json()['id']
+        self.kwargs['source_id_2'] = self.cmd(
+            'network nic ip-config create -g {rg} --nic-name {source_nic} -n {source_config_2} '
+            '--private-ip-address {source_ip_2}',
+            checks=self.check('privateIPAddress', '{source_ip_2}')
+        ).get_output_in_json()['id']
+
+        self.cmd(
+            'network vnet move-ip-configurations -g {rg} -n {vnet} '
+            '--move-items "[0].source-ip-configuration.id={source_id}" '
+            '"[0].target-ip-configuration.id={target_id}" '
+            '"[1].source-ip-configuration.id={source_id_2}" '
+            '"[1].target-ip-configuration.id={target_id_2}"'
+        )
+
+        self.cmd(
+            'network nic ip-config list -g {rg} --nic-name {source_nic}',
+            checks=[
+                self.check("[?name == '{source_config}'] | length(@)", 0),
+                self.check("[?name == '{source_config_2}'] | length(@)", 0),
+            ]
+        )
+        self.cmd(
+            'network nic ip-config show -g {rg} --nic-name {target_nic} -n {target_config}',
+            checks=self.check('privateIPAddress', '{source_ip}')
+        )
+        self.cmd(
+            'network nic ip-config show -g {rg} --nic-name {target_nic} -n {target_config_2}',
+            checks=self.check('privateIPAddress', '{source_ip_2}')
+        )
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet(self, resource_group):
@@ -10264,6 +10368,95 @@ class NetworkPrivateEndpointScenarioTest(ScenarioTest):
         # Basic list checks
         self.cmd('network private-endpoint list -g {rg}', checks=[
             self.check('length(@)', 3)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_billing_sku', location='eastus2')
+    @StorageAccountPreparer(name_prefix='sapebsku', kind='StorageV2')
+    def test_network_private_endpoint_billing_sku(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'location': 'eastus2',
+
+            'vnet': 'vnetbsku',
+            'subnet_pe': 'subnetpe',
+            'subnet_pe_prefix': '10.0.1.0/24',
+            'vnet_prefix': '10.0.0.0/16',
+
+            'pe_conn': 'cn',
+            'pe_fixed': 'pefixed',
+            'pe_paygo': 'pepaygo',
+            'nic_fixed': 'nicfixed',
+            'nic_paygo': 'nicpaygo',
+        })
+
+        # VNet + Private Endpoint subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} -l {location} '
+            '--address-prefixes {vnet_prefix} '
+            '--subnet-name {subnet_pe} --subnet-prefixes {subnet_pe_prefix}'
+        )
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--disable-private-endpoint-network-policies'
+        )
+
+        # Storage PLR
+        pr = self.cmd(
+            'storage account private-link-resource list --account-name {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd(
+            'storage account show -n {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+
+        # Create with billing sku Fixed
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_fixed} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_fixed} '
+            '--billing-sku Fixed',
+            checks=[
+                self.check('name', '{pe_fixed}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'Fixed'),
+            ]
+        )
+
+        # Create with billing sku PayAsYouGo
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_paygo} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_paygo} '
+            '--billing-sku PayAsYouGo',
+            checks=[
+                self.check('name', '{pe_paygo}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'PayAsYouGo'),
+            ]
+        )
+
+        # Update billing sku PayAsYouGo -> Fixed
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_paygo} '
+            '--billing-sku Fixed',
+            checks=[
+                self.check('name', '{pe_paygo}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('billingSku', 'Fixed'),
+            ]
+        )
+
+        self.cmd('network private-endpoint show -g {rg} -n {pe_fixed}', checks=[
+            self.check('billingSku', 'Fixed'),
         ])
 
 
