@@ -53,6 +53,46 @@ class NetworkApplicationSecurityGroupScenario(ScenarioTest):
         count3 = len(self.cmd('network asg list').get_output_in_json())
         self.assertTrue(count3 == count1)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_asg_prefix_set', location='eastus2euap')
+    def test_network_asg_address_prefix_set(self, resource_group):
+        self.kwargs.update({
+            'asg': self.create_random_name('asg', 12),
+            'prefix_set': self.create_random_name('prefixset', 16),
+        })
+
+        self.cmd('network asg create -g {rg} -n {asg}')
+        self.cmd(
+            'network asg address-prefix-set create -g {rg} --asg-name {asg} -n {prefix_set} '
+            '--address-prefixes 10.0.0.0/24 2001:db8::/32',
+            checks=[
+                self.check('name', '{prefix_set}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32']),
+            ]
+        )
+        self.cmd(
+            'network asg address-prefix-set show -g {rg} --application-security-group-name {asg} '
+            '--address-prefix-set-name {prefix_set}',
+            checks=self.check('addressPrefixes', ['10.0.0.0/24', '2001:db8::/32'])
+        )
+        self.cmd(
+            'network asg address-prefix-set list -g {rg} --asg-name {asg}',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].name', '{prefix_set}'),
+            ]
+        )
+        self.cmd(
+            'network asg address-prefix-set update -g {rg} --asg-name {asg} -n {prefix_set} '
+            '--address-prefixes 10.2.0.0/24',
+            checks=self.check('addressPrefixes', ['10.2.0.0/24'])
+        )
+        self.cmd('network asg address-prefix-set delete -g {rg} --asg-name {asg} -n {prefix_set}')
+        self.cmd(
+            'network asg address-prefix-set list -g {rg} --asg-name {asg}',
+            checks=self.check('length(@)', 0)
+        )
+
 
 class NetworkLoadBalancerWithSku(ScenarioTest):
 
