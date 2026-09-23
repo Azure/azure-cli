@@ -22,9 +22,9 @@ class ListPeeringPassphrase(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-05-01",
+        "version": "2026-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/listpeeringpassphrases", "2026-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/listpeeringpassphrases", "2026-07-01"],
         ]
     }
 
@@ -153,7 +153,7 @@ class ListPeeringPassphrase(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-05-01",
+                    "api-version", "2026-07-01",
                     required=True,
                 ),
             }
@@ -192,7 +192,7 @@ class ListPeeringPassphrase(AAZCommand):
             )
             _schema_on_200.cluster_peering_passphrase = AAZStrType(
                 serialized_name="clusterPeeringPassphrase",
-                flags={"required": True},
+                flags={"secret": True},
             )
             _schema_on_200.critical_warning = AAZStrType(
                 serialized_name="criticalWarning",
