@@ -49,6 +49,9 @@ class Delete(AAZCommand):
             help="The name of the SSH public key.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         return cls._args_schema
 

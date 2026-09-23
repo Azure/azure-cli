@@ -48,6 +48,9 @@ class Create(AAZCommand):
             options=["-n", "--name", "--ssh-public-key-name"],
             help="The name of the SSH public key.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
 
         # define Arg Group "Parameters"

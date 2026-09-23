@@ -11,17 +11,17 @@
 from azure.cli.core.aaz import *
 
 
-class Show(AAZCommand):
-    """Get information about a SSH public key.
+class GenerateKeyPair(AAZCommand):
+    """Generate an SSH public/private key pair for an SSH public key resource.
 
-    :example: Get a ssh public key.
-        az sshkey show --resource-group myResourceGroup --ssh-public-key-name mySshPublicKeyName
+    :example: Generate an RSA SSH key pair.
+        az sshkey generate-key-pair --resource-group myResourceGroup --ssh-public-key-name mySshPublicKeyName --encryption-type RSA
     """
 
     _aaz_info = {
         "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/sshpublickeys/{}", "2025-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/sshpublickeys/{}/generatekeypair", "2025-04-01"],
         ]
     }
 
@@ -45,7 +45,7 @@ class Show(AAZCommand):
             required=True,
         )
         _args_schema.ssh_public_key_name = AAZStrArg(
-            options=["-n", "--name", "--ssh-public-key-name"],
+            options=["--ssh-public-key-name"],
             help="The name of the SSH public key.",
             required=True,
             id_part="name",
@@ -53,11 +53,21 @@ class Show(AAZCommand):
                 pattern="",
             ),
         )
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.encryption_type = AAZStrArg(
+            options=["--encryption-type"],
+            arg_group="Parameters",
+            help="The encryption type of the SSH keys to be generated. See SshEncryptionTypes for possible set of values. If not provided, will default to RSA",
+            enum={"Ed25519": "Ed25519", "RSA": "RSA"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.SshPublicKeysGet(ctx=self.ctx)()
+        self.SshPublicKeysGenerateKeyPair(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +82,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class SshPublicKeysGet(AAZHttpOperation):
+    class SshPublicKeysGenerateKeyPair(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,13 +96,13 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/sshPublicKeys/{sshPublicKeyName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/sshPublicKeys/{sshPublicKeyName}/generateKeyPair",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
@@ -130,10 +140,24 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"client_flatten": True}}
+            )
+            _builder.set_prop("encryptionType", AAZStrType, ".encryption_type")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -154,59 +178,22 @@ class Show(AAZCommand):
 
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
+            _schema_on_200.private_key = AAZStrType(
+                serialized_name="privateKey",
+                flags={"required": True},
             )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _schema_on_200.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.public_key = AAZStrType(
+            _schema_on_200.public_key = AAZStrType(
                 serialized_name="publicKey",
+                flags={"required": True},
             )
-
-            system_data = cls._schema_on_200.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _GenerateKeyPairHelper:
+    """Helper class for GenerateKeyPair"""
 
 
-__all__ = ["Show"]
+__all__ = ["GenerateKeyPair"]
