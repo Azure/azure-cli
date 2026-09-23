@@ -126,7 +126,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
-        c.argument('key_encryption_key', help="Key vault key uri. To enable automated rotation, provide a version-less key uri. For manual rotation, provide a versioned key uri.")
+        c.argument('key_encryption_key', help="Azure Key Vault or Managed HSM key URI. To enable automated rotation, provide a versionless key URI. For manual rotation, provide a versioned key URI.")
 
     with self.argument_context('acr create') as c:
         c.argument('allow_metadata_search', arg_type=get_three_state_flag(), is_preview=True, help="Enable or disable the metadata-search feature for the registry. If not specified, this is set to disabled by default.")
@@ -555,7 +555,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('identities', nargs='+', help="Space-separated identities. Use '[system]' to refer to the system assigned identity")
 
     with self.argument_context('acr encryption') as c:
-        c.argument('key_encryption_key', help="Key vault key uri. To enable automated rotation, provide a version-less key uri. For manual rotation, provide a versioned key uri.")
+        c.argument('key_encryption_key', help="Azure Key Vault or Managed HSM key URI. To enable automated rotation, provide a versionless key URI. For manual rotation, provide a versioned key URI.")
         c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
 
     with self.argument_context('acr connected-registry') as c:

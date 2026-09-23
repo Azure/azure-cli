@@ -191,6 +191,9 @@ examples:
   - name: Create a managed container registry with writable cache repositories enabled.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Premium --writable-cache-repos enabled
+  - name: Create a Premium registry encrypted with a customer-managed key in Managed HSM.
+    text: >
+        az acr create --name myregistry --resource-group MyResourceGroup --sku Premium --identity myidentity --key-encryption-key https://myhsm.managedhsm.azure.net/keys/mykey
 """
 
 helps['acr credential'] = """
@@ -1856,14 +1859,21 @@ short-summary: list the private link resources supported for a registry
 # region encryption
 helps['acr encryption'] = """
 type: group
-short-summary: Manage container registry encryption
+short-summary: Manage customer-managed encryption for a container registry.
 long-summary: For more information, see http://aka.ms/acr/cmk
 """
 
 helps['acr encryption rotate-key'] = """
 type: command
-short-summary: Rotate (update) the container registry's encryption key
-long-summary: For more information, see http://aka.ms/acr/cmk
+short-summary: Rotate the customer-managed encryption key for a container registry.
+long-summary: The registry must already have customer-managed key encryption enabled. The managed identity must have permission to use the new Azure Key Vault or Managed HSM key. For more information, see http://aka.ms/acr/cmk
+examples:
+  - name: Rotate to a versionless Managed HSM key to enable automatic key rotation.
+    text: >
+        az acr encryption rotate-key --name myregistry --resource-group MyResourceGroup --identity myidentity --key-encryption-key https://myhsm.managedhsm.azure.net/keys/mykey
+  - name: Rotate manually to a specific Azure Key Vault key version.
+    text: >
+        az acr encryption rotate-key --name myregistry --resource-group MyResourceGroup --identity myidentity --key-encryption-key https://myvault.vault.azure.net/keys/mykey/00000000000000000000000000000000
 """
 
 helps['acr encryption show'] = """
