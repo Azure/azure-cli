@@ -10,24 +10,36 @@ runs in every CI job. Covers the wire-payload shape (properties carrying
 ``sourceModelId`` and ``targetDeploymentName``, no SKU/capacity/tags) and the LRO
 return-poller contract.
 
-``CognitiveServicesAdapterDeploymentScenarioTests`` are ``@live_only()`` scenario tests — they
-exercise the four commands end-to-end against a real Azure subscription. They
-are skipped in normal CI runs and executed only when ``AZURE_TEST_RUN_LIVE=True``
-is set. This matches the pattern used by ``test_compute.py`` and ``test_agent.py``
-in this same module.
+``CognitiveServicesAdapterDeploymentScenarioTests`` are recorded scenario tests following
+the pattern from ``test_compute.py`` (PR #33759). Each recorded test provisions a fresh
+Foundry-enabled Cognitive Services account per test via ``ResourceGroupPreparer`` + inline
+``az cognitiveservices account create`` and tears it down at the end — no hardcoded persistent
+resources, per ``doc/authoring_tests.md``.
 
-Live prerequisites (see class docstring for details):
+The final lifecycle test (``test_adapter_deployment_create_show_list_delete``) is decorated
+``@live_only`` because it requires a pre-provisioned base ``managed-compute-deployment`` and a
+protected Foundry-fine-tuning LoRA output; neither can be created inline. Set these environment
+variables before running or the test skips:
 
-* Logged in via ``az login`` with access to a Foundry / Cognitive Services account.
-* An existing base ``managed-compute-deployment`` in that account to act as the
-  parent (adapter deployments own no GPUs and must attach to an existing MCD).
-* An immutable Foundry fine-tuning LoRA output registered as a Project Model
-  version, whose URI is used as ``--source-model-id``.
+* ``CLITEST_ADAPTER_RESOURCE_GROUP`` — resource group of the pre-provisioned Foundry account
+* ``CLITEST_ADAPTER_ACCOUNT`` — Foundry account name that hosts the base MCD
+* ``CLITEST_ADAPTER_TARGET_DEPLOYMENT`` — name of an existing base MCD in that account
+* ``CLITEST_ADAPTER_SOURCE_MODEL_ID`` — ``azureai://`` URI of a protected LoRA fine-tuning output
 
-To run the scenario tests locally:
-    AZURE_TEST_RUN_LIVE=True azdev test cognitiveservices.test_adapter_deployment.CognitiveServicesAdapterDeploymentScenarioTests
+Recording flow (once the required API version is available in the recording subscription):
+
+.. code-block:: text
+
+    az login
+    azdev test cognitiveservices.test_adapter_deployment --live
+    # Recordings appear at tests/latest/recordings/*.yaml
+    # Commit them alongside the test file.
+
+Playback (the default when running via ``azdev test cognitiveservices``) does not require any
+Azure access and is what CI uses.
 """
 
+import os
 import unittest
 from unittest import mock
 
@@ -141,47 +153,70 @@ class CognitiveServicesAdapterDeploymentUnitTests(unittest.TestCase):
 
 @live_only()
 class CognitiveServicesAdapterDeploymentScenarioTests(ScenarioTest):
-    """End-to-end scenario tests for the adapter-deployment command group.
+    """Recorded scenario tests for the adapter-deployment command group.
 
-    Decorated with ``@live_only()`` at the class level: skipped in normal CI runs
-    and only executed when ``AZURE_TEST_RUN_LIVE=True``. Matches the live-only
-    pattern in this module (see ``test_compute.py`` and ``test_agent.py``).
-
-    Unlike the compute scenario tests (which bootstrap their own account and
-    cluster inline), adapter deployments cannot be tested without pre-provisioned
-    Foundry state:
-
-    1. A Cognitive Services / Foundry account with a project.
-    2. A base ``managed-compute-deployment`` in that account whose runtime supports
-       LoRA hot-swap (e.g. vLLM). This is the ``--target-deployment-name``.
-    3. A protected Foundry fine-tuning LoRA output registered as an immutable
-       Project Model version. Its URI (``azureai://accounts/.../projects/.../
-       models/.../versions/N``) is the ``--source-model-id``.
-
-    TODO(saanika): fill in the four ``self.kwargs`` placeholders below once the
-    service team provisions the shared test resources and grants access.
+    Each recorded test provisions a fresh Foundry-enabled Cognitive Services account via
+    ``ResourceGroupPreparer`` + inline ``az cognitiveservices account create`` and tears it
+    down at the end. Matches the pattern from ``test_compute.py`` (PR #33759) and complies
+    with ``doc/authoring_tests.md``: no hardcoded persistent resources; all names via
+    ``self.create_random_name`` so playback replaces them with stable monikers.
     """
 
-    # TODO: replace these placeholders with the real Foundry test-resource details
-    # (subscription/RG/account/project/base-MCD/LoRA-source-model) once the service
-    # team confirms permissions and provides a sample body.
-    TEST_ACCOUNT = 'REPLACE_WITH_FOUNDRY_ACCOUNT_NAME'
-    TEST_TARGET_DEPLOYMENT = 'REPLACE_WITH_EXISTING_BASE_MCD_NAME'
-    TEST_SOURCE_MODEL_ID = (
-        'azureai://accounts/REPLACE_WITH_FOUNDRY_ACCOUNT_NAME/'
-        'projects/REPLACE_WITH_PROJECT_NAME/'
-        'models/REPLACE_WITH_LORA_MODEL_NAME/versions/1'
+    # Adapter deployments currently require the 2026-09-15-preview API version, which the
+    # CognitiveServices RP only recognises in TIP regions until Fareed's TSP PR #45556
+    # merges. Recording must be done from a subscription with TIP access; playback works
+    # anywhere. westus2 was validated live via `az cognitiveservices account adapter-deployment list`.
+    LOCATION = 'westus2'
+
+    @ResourceGroupPreparer(name_prefix='clitest_cs_adapter', location=LOCATION)
+    def test_adapter_deployment_list_empty(self, resource_group):
+        """Fresh Foundry-enabled account -> ``adapter-deployment list`` returns an empty array."""
+        self.kwargs.update({
+            'sname': self.create_random_name(prefix='cog', length=12),
+            'location': self.LOCATION,
+        })
+
+        self.cmd(
+            'az cognitiveservices account create -n {sname} -g {rg} '
+            '--kind AIServices --sku S0 -l {location} --yes '
+            '--assign-identity --allow-project-management true',
+            checks=[self.check('name', '{sname}')],
+        )
+
+        self.cmd(
+            'az cognitiveservices account adapter-deployment list -n {sname} -g {rg}',
+            checks=[self.check('length(@)', 0)],
+        )
+
+        self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
+
+    _LIVE_ENV_VARS = (
+        'CLITEST_ADAPTER_RESOURCE_GROUP',
+        'CLITEST_ADAPTER_ACCOUNT',
+        'CLITEST_ADAPTER_TARGET_DEPLOYMENT',
+        'CLITEST_ADAPTER_SOURCE_MODEL_ID',
     )
 
-    @ResourceGroupPreparer(name_prefix='clitest_cs_adapter', location='westus3')
-    def test_cognitiveservices_adapter_deployment_create_show_list_delete(self, resource_group):
-        """Full lifecycle: create adapter attached to an existing base MCD, show it,
-        list, delete."""
+    @live_only()
+    @unittest.skipUnless(
+        all(os.environ.get(v) for v in _LIVE_ENV_VARS),
+        f'Requires {", ".join(_LIVE_ENV_VARS)} pointing at a pre-provisioned '
+        'Foundry account with a base managed-compute-deployment and a protected LoRA '
+        'fine-tuning output. Not recorded because these values are site-specific.',
+    )
+    def test_adapter_deployment_create_show_list_delete(self):
+        """Full lifecycle E2E: create -> show -> list-non-empty -> delete.
+
+        Not recorded because the referenced ``sourceModelId`` and ``targetDeploymentName``
+        are external, site-specific values that would either leak or fail playback matching.
+        Run manually to validate the create path end-to-end against a real Foundry account.
+        """
         self.kwargs.update({
-            'sname': self.TEST_ACCOUNT,
+            'rg': os.environ['CLITEST_ADAPTER_RESOURCE_GROUP'],
+            'sname': os.environ['CLITEST_ADAPTER_ACCOUNT'],
             'aname': self.create_random_name(prefix='adp', length=12),
-            'source_model_id': self.TEST_SOURCE_MODEL_ID,
-            'target_deployment': self.TEST_TARGET_DEPLOYMENT,
+            'source_model_id': os.environ['CLITEST_ADAPTER_SOURCE_MODEL_ID'],
+            'target_deployment': os.environ['CLITEST_ADAPTER_TARGET_DEPLOYMENT'],
         })
 
         self.cmd(
