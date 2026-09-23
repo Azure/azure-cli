@@ -529,7 +529,7 @@ def generate_vm_sku_cache_for_region(cli_ctx, location=None):
     result = _get_vm_sku_details(cli_ctx, location)
     for vm_data in result:
         sku_name = vm_data['name'].lower()
-        capabilities = vm_data['capabilities']
+        capabilities = vm_data.get('capabilities', [])
         cpu_value = -1
         nvme_enabled = False
         for entry in capabilities:
