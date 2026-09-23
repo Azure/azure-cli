@@ -364,11 +364,9 @@ def acr_connected_registry_delete(cmd,
                                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    extraMsg = ""
-    if not cleanup:
-        extraMsg = " without cleanup flag enabled"
-    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
-        connected_registry_name, registry_name, extraMsg), yes)
+
+    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
+        connected_registry_name, registry_name), yes)
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
