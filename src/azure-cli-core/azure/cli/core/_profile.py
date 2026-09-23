@@ -154,29 +154,33 @@ class Profile:
               show_progress=False,
               claims_challenge=None,
               skip_subscription_discovery=False,
-              subscription=None):
+              subscription=None,
+              redirect_port=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
         if not scopes:
             scopes = self._arm_scope
 
-        identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant)
+        identity = _create_identity_instance(
+            self.cli_ctx, self._authority, tenant_id=tenant,
+            enable_broker_on_windows=False if redirect_port is not None else None)
 
         user_identity = None
         if interactive:
-            if not use_device_code and not can_launch_browser():
+            if not use_device_code and redirect_port is None and not can_launch_browser():
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
-            if not use_device_code and is_github_codespaces():
+            if not use_device_code and redirect_port is None and is_github_codespaces():
                 logger.info('GitHub Codespaces is detected. Fall back to device code.')
                 use_device_code = True
 
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
+                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge,
+                                                              redirect_port=redirect_port)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes)
@@ -964,7 +968,7 @@ def _transform_subscription_for_multiapi(s, s_dict):
             s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
 
-def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None):
+def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None, enable_broker_on_windows=None):
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
     from .util import should_encrypt_token_cache
@@ -974,7 +978,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
 
     # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
-    enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
+    if enable_broker_on_windows is None:
+        enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
     from .telemetry import set_broker_info
     set_broker_info(enable_broker_on_windows)
 
