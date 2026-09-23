@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sshkey show",
+)
 class Show(AAZCommand):
     """Get information about a SSH public key.
 

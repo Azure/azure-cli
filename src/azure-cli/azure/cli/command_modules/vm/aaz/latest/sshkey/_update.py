@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sshkey update",
+)
 class Update(AAZCommand):
     """Update a SSH public key resource.
 
