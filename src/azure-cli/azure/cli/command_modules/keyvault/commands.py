@@ -154,7 +154,8 @@ def load_command_table(self, _):
     with self.command_group('keyvault ekm-connection certificate', command_type=data_ekm_custom, is_preview=True) as g:
         g.keyvault_custom('show', 'get_ekm_certificate', validator=validate_ekm_connection_base)
 
-    with self.command_group('keyvault ekm-connection private-endpoint', command_type=data_ekm_custom) as g:
+    with self.command_group('keyvault ekm-connection private-endpoint', command_type=data_ekm_custom,
+                            is_preview=True) as g:
         g.keyvault_custom('create', 'create_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
                           supports_no_wait=True)
         g.keyvault_custom('delete', 'delete_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
@@ -164,7 +165,8 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
                               custom_command_type=data_ekm_custom)
 
-    with self.command_group('keyvault ekm-connection private-endpoint operation', command_type=data_ekm_custom) as g:
+    with self.command_group('keyvault ekm-connection private-endpoint operation', command_type=data_ekm_custom,
+                            is_preview=True) as g:
         g.keyvault_custom('show', 'get_ekm_private_endpoint_operation', validator=validate_ekm_connection_base)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:

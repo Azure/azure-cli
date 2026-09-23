@@ -632,7 +632,7 @@ def load_arguments(self, _):
         c.argument('host', options_list=['--host'], required=True,
                    help='EKM proxy host (FQDN or FQDN:port), or the private endpoint name in PrivateEndpoint mode. '
                         'For Public mode, port 443 is assumed if omitted.')
-        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']),
+        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']), is_preview=True,
                    help='Connectivity mode for the EKM proxy. The service defaults to Public when omitted.')
         c.extra('path_prefix', options_list=['--path-prefix'],
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
@@ -648,7 +648,7 @@ def load_arguments(self, _):
         c.argument('host', options_list=['--host'], required=False,
                    help='EKM proxy host (FQDN or FQDN:port), or the private endpoint name in PrivateEndpoint mode. '
                         'Required when changing connectivity mode.')
-        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']),
+        c.argument('connectivity_mode', arg_type=get_enum_type(['Public', 'PrivateEndpoint']), is_preview=True,
                    help='Connectivity mode for the EKM proxy. Preserves the existing mode when omitted.')
         c.extra('path_prefix', options_list=['--path-prefix'],
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
