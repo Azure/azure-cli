@@ -11,7 +11,7 @@ from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueEr
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
-from azure.mgmt.containerregistry.models import ManagedServiceIdentityType
+from azure.mgmt.containerregistry.models import ConnectionState, ManagedServiceIdentityType
 from ._client_factory import cf_acr_tokens, cf_acr_scope_maps, cf_acr_registries
 from ._constants import ConnectedRegistryAuthType
 from ._utils import (
@@ -46,6 +46,7 @@ GATEWAY = "gateway/"
 AUTH_TYPE_SYNC_TOKEN = ConnectedRegistryAuthType.SYNC_TOKEN.value
 AUTH_TYPE_MANAGED_IDENTITY = ConnectedRegistryAuthType.MANAGED_IDENTITY.value
 MSI_TYPE_USER_ASSIGNED = ManagedServiceIdentityType.USER_ASSIGNED.value
+CONNECTION_STATE_OFFLINE = ConnectionState.OFFLINE.value
 
 
 def _get_current_auth_type(connected_registry):
@@ -123,6 +124,16 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     subscription_id = get_subscription_id(cmd.cli_ctx)
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
+    if not registry.data_endpoint_enabled:
+        user_confirmation("Dedicated data endpoints must be enabled to use connected-registry. Enabling might " +
+                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
+                              registry_name), yes)
+        acr_update_custom(cmd, registry, data_endpoint_enabled=True)
+        registry_client = cf_acr_registries(cmd.cli_ctx)
+        LongRunningOperation(cmd.cli_ctx)(
+            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        )
+
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None
     mode = mode.lower()
@@ -146,18 +157,6 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
                            "please visit https://aka.ms/acr/connected-registry.")
-
-    if not registry.data_endpoint_enabled:
-        user_confirmation("Dedicated data endpoints must be enabled to use connected-registry. Enabling might " +
-                          "impact your firewall rules. Are you sure you want to enable it for '{}' registry?".format(
-                              registry_name), yes)
-        acr_update_custom(cmd, registry, data_endpoint_enabled=True)
-        registry_client = cf_acr_registries(cmd.cli_ctx)
-        LongRunningOperation(cmd.cli_ctx)(
-            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
-        )
-
-    if parent_name:
         _update_ancestor_permissions(cmd, family_tree, resource_group_name, registry_name, parent.id,
                                      connected_registry_name, repositories, mode, False)
 
@@ -256,6 +255,20 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
             raise ArgumentUsageError(
                 "argument error: a non-empty --identity <user-assigned-managed-identity-resource-id> is required "
                 "when migrating to --auth-type ManagedIdentity."
+            )
+        if _get_current_auth_type(current_connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
+            raise ArgumentUsageError(
+                "Connected registry is already using 'ManagedIdentity' authentication. "
+                "Same-mode credential rotation is not supported."
+            )
+        current_state = getattr(current_connected_registry, 'connection_state', None)
+        current_state = getattr(current_state, 'value', current_state)
+        if current_state != CONNECTION_STATE_OFFLINE:
+            raise ArgumentUsageError(
+                "Connected registry must be in '{}' state to migrate authentication mode. "
+                "Current state is '{}'. Deactivate it first with "
+                "'az acr connected-registry deactivate' and wait until it is Offline.".format(
+                    CONNECTION_STATE_OFFLINE, current_state)
             )
         identity_update = _build_user_assigned_identity(cmd, identity)
         sync_auth_type_update = AUTH_TYPE_MANAGED_IDENTITY
@@ -361,6 +374,10 @@ def acr_connected_registry_delete(cmd,
             cmd, client, connected_registry_name, registry_name, resource_group_name)
         result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
         if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
+            if cleanup:
+                logger.warning(
+                    "'--cleanup' has no effect for connected registry '%s' using ManagedIdentity authentication. "
+                    "The managed identity and role assignments are retained.", connected_registry_name)
             return result
         sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
         sync_token_name = sync_token.name
@@ -636,7 +653,7 @@ def acr_connected_registry_get_settings(cmd,  # pylint: disable=too-many-locals
             parent_gateway_endpoint,
             parent_endpoint_protocol,
             auth_connection_fragment="ManagedIdentityClientId={};".format(client_id),
-            auth_env={},
+            auth_env={"ACR_MANAGED_IDENTITY_RESOURCE_ID": msi_resource_id},
         )
 
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]

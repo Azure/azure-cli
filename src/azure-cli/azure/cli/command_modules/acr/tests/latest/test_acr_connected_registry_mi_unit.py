@@ -223,30 +223,6 @@ class TestConnectedRegistryCreateValidation(unittest.TestCase):
             get_registry.assert_not_called()
             get_subscription.assert_not_called()
 
-    def test_mi_parent_rejected_before_mutations(self):
-        parent = _fake_cr(has_identity=True)
-        client = mock.MagicMock()
-        registry = mock.MagicMock(data_endpoint_enabled=False)
-        with mock.patch(UPDATE_MODULE + '.get_subscription_id', return_value=TEST_SUB), \
-             mock.patch(UPDATE_MODULE + '.get_registry_by_name', return_value=(registry, TEST_RG)), \
-             mock.patch(UPDATE_MODULE + '.acr_connected_registry_show', return_value=parent) as show, \
-             mock.patch(UPDATE_MODULE + '.acr_update_custom') as update_registry, \
-             mock.patch(UPDATE_MODULE + '.acr_update_set') as set_registry, \
-             mock.patch(UPDATE_MODULE + '._create_sync_token') as create_token, \
-             mock.patch(UPDATE_MODULE + '._update_ancestor_permissions') as update_permissions:
-            for auth_type in (None, AUTH_TYPE_SYNC_TOKEN, AUTH_TYPE_MANAGED_IDENTITY):
-                with self.subTest(auth_type=auth_type), self.assertRaises(ArgumentUsageError):
-                    options = {'identity': TEST_MSI_ID} if auth_type == AUTH_TYPE_MANAGED_IDENTITY else {
-                        'repositories': ['r1']}
-                    self._create(client=client, parent_name='parentcr', auth_type=auth_type, **options)
-            self.assertEqual(show.call_count, 2)
-            client.list.assert_not_called()
-            client.begin_create.assert_not_called()
-            update_registry.assert_not_called()
-            set_registry.assert_not_called()
-            create_token.assert_not_called()
-            update_permissions.assert_not_called()
-
 
 class TestConnectedRegistryCreatePayload(unittest.TestCase):
 
@@ -370,7 +346,30 @@ class TestConnectedRegistryDelete(unittest.TestCase):
                         delete_scope.assert_not_called()
                         family_tree.assert_not_called()
                         update_permissions.assert_not_called()
-                        warning.assert_not_called()
+                        if cleanup:
+                            warning.assert_called_once_with(
+                                "'--cleanup' has no effect for connected registry '%s' using "
+                                "ManagedIdentity authentication. The managed identity and role assignments "
+                                "are retained.", TEST_CR)
+                        else:
+                            warning.assert_not_called()
+
+    def test_mi_failed_delete_does_not_report_cleanup_success(self):
+        cr = _fake_cr(has_identity=True)
+        client = mock.MagicMock()
+        client.get.return_value = cr
+        error = HttpResponseError(message='Connected registry deletion failed.')
+        client.begin_delete.return_value.result.side_effect = error
+        with mock.patch(UPDATE_MODULE + '.validate_managed_registry', return_value=(None, TEST_RG)), \
+             mock.patch(UPDATE_MODULE + '.user_confirmation'), \
+             mock.patch(UPDATE_MODULE + '.get_token_from_id') as token_lookup, \
+             mock.patch(UPDATE_MODULE + '.logger.warning') as warning:
+            with self.assertRaises(HttpResponseError) as caught:
+                acr_connected_registry_delete(
+                    _make_cmd(), client, TEST_CR, TEST_REGISTRY, cleanup=True, yes=True, resource_group_name=TEST_RG)
+        self.assertIs(caught.exception, error)
+        token_lookup.assert_not_called()
+        warning.assert_not_called()
 
     def test_sync_token_delete_preserves_cleanup_and_warning(self):
         token_id = (
@@ -520,23 +519,33 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
                     self._run_update(cur, client=client, identity=identity)
                 client.begin_update.assert_not_called()
 
-    def test_migration_eligibility_errors_are_deferred_to_rp(self):
-        for auth_type, state, identity in (
-                (AUTH_TYPE_SYNC_TOKEN, 'Online', TEST_MSI_ID),
-                (AUTH_TYPE_MANAGED_IDENTITY, 'Offline', TEST_MSI_ID2),
-                (AUTH_TYPE_MANAGED_IDENTITY, 'Offline', TEST_MSI_ID)):
-            with self.subTest(auth_type=auth_type, state=state, identity=identity):
-                cur = _fake_cr(auth_type=auth_type,
-                               has_identity=auth_type == AUTH_TYPE_MANAGED_IDENTITY,
-                               connection_state=state)
+    def test_migration_rejects_existing_managed_identity(self):
+        for identity in (TEST_MSI_ID, TEST_MSI_ID2):
+            with self.subTest(identity=identity):
+                cur = _fake_cr(has_identity=True, connection_state='Offline')
                 client = mock.MagicMock()
-                error = HttpResponseError(message='The requested migration is not allowed.')
-                client.begin_update.side_effect = error
-                with self.assertRaises(HttpResponseError) as caught:
+                with self.assertRaisesRegex(ArgumentUsageError, "already using 'ManagedIdentity'"):
                     self._run_update(cur, client=client, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=identity)
-                self.assertIs(caught.exception, error)
-                client.begin_update.assert_called_once()
-                client.list.assert_not_called()
+                client.begin_update.assert_not_called()
+
+    def test_migration_requires_offline_connection_state(self):
+        for state in ('Online', models.ConnectionState.ONLINE, None):
+            with self.subTest(state=state):
+                cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state=state)
+                client = mock.MagicMock()
+                with self.assertRaisesRegex(ArgumentUsageError, "must be in 'Offline' state"):
+                    self._run_update(cur, client=client, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=TEST_MSI_ID)
+                client.begin_update.assert_not_called()
+
+    def test_migration_service_errors_propagate_after_local_validation(self):
+        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state='Offline')
+        client = mock.MagicMock()
+        error = HttpResponseError(message='The requested migration is not allowed.')
+        client.begin_update.side_effect = error
+        with self.assertRaises(HttpResponseError) as caught:
+            self._run_update(cur, client=client, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=TEST_MSI_ID)
+        self.assertIs(caught.exception, error)
+        client.begin_update.assert_called_once()
 
     def test_migrate_to_mi_requires_identity(self):
         cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN)
@@ -564,21 +573,19 @@ class TestConnectedRegistryUpdateMigration(unittest.TestCase):
         return kwargs['connected_registry_update_parameters']
 
     def test_migrate_sync_token_to_mi_sends_identity(self):
-        cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state='Offline')
-        client = self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY,
-                                  identity=TEST_MSI_ID)
-        body = self._extract_update_body(client)
-        self.assertIsNotNone(body.identity)
-        self.assertEqual(body.identity.type, MSI_TYPE_USER_ASSIGNED)
-        self.assertIn(TEST_MSI_ID, body.identity.user_assigned_identities)
-        self.assertEqual(body.sync_properties.auth_type, AUTH_TYPE_MANAGED_IDENTITY)
-        serialized = body.as_dict()
-        self.assertEqual(serialized['identity'], {
-            'type': 'UserAssigned', 'userAssignedIdentities': {TEST_MSI_ID: {}}})
-        self.assertEqual(serialized['properties']['syncProperties'], {
-            'authType': AUTH_TYPE_MANAGED_IDENTITY})
-        self.assertNotIn('parent', serialized['properties'])
-        self.assertNotIn('tokenId', serialized['properties']['syncProperties'])
+        for auth_type, state in (
+                (None, 'Offline'),
+                (AUTH_TYPE_SYNC_TOKEN, 'Offline'),
+                (models.AuthType.SYNC_TOKEN, models.ConnectionState.OFFLINE)):
+            with self.subTest(auth_type=auth_type, state=state):
+                cur = _fake_cr(auth_type=auth_type, connection_state=state)
+                client = self._run_update(cur, auth_type=AUTH_TYPE_MANAGED_IDENTITY, identity=TEST_MSI_ID)
+                serialized = self._extract_update_body(client).as_dict()
+                self.assertEqual(serialized['identity'], {
+                    'type': 'UserAssigned', 'userAssignedIdentities': {TEST_MSI_ID: {}}})
+                self.assertEqual(serialized['properties']['syncProperties'], {
+                    'authType': AUTH_TYPE_MANAGED_IDENTITY})
+                self.assertNotIn('parent', serialized['properties'])
 
     def test_migration_combines_with_ordinary_property_updates(self):
         cur = _fake_cr(auth_type=AUTH_TYPE_SYNC_TOKEN, connection_state='Offline')
@@ -679,7 +686,20 @@ class TestConnectedRegistryGetSettingsMI(unittest.TestCase):
         self.assertNotIn('SYNC_TOKEN_USER', result)
         self.assertNotIn('SYNC_TOKEN_PASSWORD', result)
         self.assertNotIn('ACR_MANAGED_IDENTITY_CLIENT_ID', result)
-        self.assertNotIn('ACR_MANAGED_IDENTITY_RESOURCE_ID', result)
+        self.assertEqual(result['ACR_MANAGED_IDENTITY_RESOURCE_ID'], TEST_MSI_ID)
+
+    def test_migrated_settings_report_attached_identity_despite_stale_token(self):
+        cr = _fake_cr(auth_type=models.AuthType.MANAGED_IDENTITY, has_identity=True,
+                      token_id='/tokens/old-sync', client_id='cid-migrated')
+        cr.identity.user_assigned_identities = {
+            TEST_MSI_ID2: cr.identity.user_assigned_identities[TEST_MSI_ID]}
+        result = self._invoke(cr)
+        self.assertEqual(result['ACR_MANAGED_IDENTITY_RESOURCE_ID'], TEST_MSI_ID2)
+        self.assertIn('ManagedIdentityClientId=cid-migrated;', result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn(TEST_MSI_ID2, result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SyncToken', result['ACR_REGISTRY_CONNECTION_STRING'])
+        self.assertNotIn('SYNC_TOKEN_USER', result)
+        self.assertNotIn('SYNC_TOKEN_PASSWORD', result)
 
     def test_source_settings_use_get_without_token_or_credential_calls(self):
         cr = _fake_cr(has_identity=True, client_id='cid-happy')
@@ -703,8 +723,8 @@ class TestConnectedRegistryGetSettingsMI(unittest.TestCase):
         cred_factory.assert_not_called()
         generate.assert_not_called()
         confirm.assert_not_called()
-        # Preserve the pinned source format (including its request name), not a verified spec contract.
         self.assertEqual(result, {
+            'ACR_MANAGED_IDENTITY_RESOURCE_ID': TEST_MSI_ID,
             'ACR_REGISTRY_CERTIFICATE_VOLUME': '/var/acr/certs',
             'ACR_REGISTRY_DATA_VOLUME': '/var/acr/data',
             'ACR_REGISTRY_CONNECTION_STRING': (

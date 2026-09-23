@@ -295,6 +295,8 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         self.assertNotIn('SyncTokenPassword=', connection_string)
         self.assertNotIn('SYNC_TOKEN_USER', settings)
         self.assertNotIn('SYNC_TOKEN_PASSWORD', settings)
+        self.assertEqual(settings['ACR_MANAGED_IDENTITY_RESOURCE_ID'].lower(),
+                         self.kwargs['identity_id'].lower())
 
         # --- MI-mode delete (no sync token / scope map cleanup path) ---
         self.cmd('acr connected-registry delete -n {cr_mi_name} -r {registry_name} -g {rg} -y')
@@ -380,6 +382,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         self.assertNotIn('SyncTokenPassword=', connection_string)
         self.assertNotIn('SYNC_TOKEN_USER', settings)
         self.assertNotIn('SYNC_TOKEN_PASSWORD', settings)
+        self.assertEqual(settings['ACR_MANAGED_IDENTITY_RESOURCE_ID'].lower(), identity['id'].lower())
 
         self.cmd('acr connected-registry delete -n {cr_name} -r {registry_name} -g {rg} --cleanup -y')
         self.cmd('identity show -n {identity_name} -g {rg}',
