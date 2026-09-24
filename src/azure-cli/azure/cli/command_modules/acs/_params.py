@@ -1028,14 +1028,13 @@ def load_arguments(self, _):
 
     with self.argument_context('aks install-cli', arg_group='Azure Plugin') as c:
         c.argument('install_azure_plugin', arg_type=get_three_state_flag(),
-                   help='Consent to full Azure plugin setup in native user/global scope after both binaries install. '
-                   'Requires --plugin-hosts when true; false skips setup. If omitted, only interactive sessions '
-                   'offer default-No setup, unless confirmation prompts are disabled or running under sudo. '
-                   'Valid native inventory absence authorizes normal install-and-enable, including hidden/stale '
-                   'disable preferences. See command help for runtime, MCP, hooks and authentication requirements.')
+                   help='Install Azure plugin skills, MCP configuration and hooks in native user/global scope. '
+                   'True requires --plugin-hosts and authorizes setup without prompts after both binaries install. '
+                   'Omission only allows an opt-in hint; false suppresses it. See command help for prerequisites '
+                   'and native enablement behavior.')
         c.argument('plugin_hosts', arg_type=get_enum_type(HOST_IDS), nargs='+',
-                   help='Host CLIs for full Azure plugin setup. Requires --install-azure-plugin true. '
-                   'Host CLIs must already be installed. Supported hosts only; not Pi or VS Code.')
+                   help='Installed host CLIs to configure. Requires --install-azure-plugin true; '
+                   'new plugins also require Node.js 22+ with npx on PATH.')
 
     with self.argument_context('aks install-desktop') as c:
         c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')
