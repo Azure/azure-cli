@@ -448,7 +448,7 @@ def show_protectable_instance(items, server_name, protectable_item_type, instanc
     ]
     # Instance Name filter, if it is passed
     if instance_name:
-        filtered_items = [item for item in items if item.name.lower() == instance_name.lower()]
+        filtered_items = [item for item in filtered_items if item.name.lower() == instance_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
