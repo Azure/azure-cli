@@ -85,7 +85,7 @@ def _run_cli_scenario(mode):
     root = Path.cwd()
     blocked = []
     writable = [root / 'azure_config_dir', root / 'installed', root / 'tmpdir']
-    executables = [str(root / 'bin' / name) for name in ('codex', 'node')]
+    executables = [] if mode.startswith('optional') else [str(root / 'bin' / name) for name in ('codex', 'node')]
 
     def forbidden(event, args):
         blocked.append(event)
@@ -196,8 +196,23 @@ def _run_cli_scenario(mode):
             'aks', 'install-cli', '--client-version', '1.2.3', '--kubelogin-version', '4.5.6',
             '--install-location', str(root / 'installed/kubectl'),
             '--kubelogin-install-location', str(root / 'installed/kubelogin'),
-            '--install-azure-plugin', '--plugin-hosts', 'codex',
         ]
+        if mode.startswith('optional'):
+            assert sys.stdin.isatty(), 'Regression requires inherited TTY stdin'
+            if mode == 'optional-quiet':
+                arguments.append('--only-show-errors')
+            assert cli.invoke(arguments) == 0
+            assert not (root / 'native.jsonl').exists(), 'Optional stage executed a host/runtime'
+            assert downloads == list(payloads), downloads
+            for name, payload in (('kubectl', b'fixture kubectl\n'), ('kubelogin', b'fixture kubelogin\n')):
+                assert (root / 'installed' / name).read_bytes() == payload
+            for directory in _ENV_DIRS:
+                if directory != 'AZURE_CONFIG_DIR':
+                    assert list((root / directory.lower()).iterdir()) == [], directory
+            assert not blocked, blocked
+            print('Omitted plugin setup returned without input or native I/O')
+            return
+        arguments.extend(['--install-azure-plugin', '--plugin-hosts', 'codex'])
         assert cli.invoke(arguments) == 0
         state_path = root / 'codex_home/state.json'
         state = json.loads(state_path.read_text())
@@ -244,7 +259,10 @@ def _run_cli_scenario(mode):
 @unittest.skipUnless(sys.platform.startswith('linux'), 'Owned executable and fd guards use Linux')
 class AKSInstallPluginScenarioTest(unittest.TestCase):
     def invoke_isolated(self, mode='scenario'):
-        with tempfile.TemporaryDirectory() as sandbox:
+        from contextlib import ExitStack
+        import pty
+
+        with tempfile.TemporaryDirectory() as sandbox, ExitStack() as stack:
             root = Path(sandbox)
             # Allowlist, rather than inheriting tokens, sudo, ARM metadata, host
             # homes, extension dev sources or the user's executable search path.
@@ -266,9 +284,22 @@ class AKSInstallPluginScenarioTest(unittest.TestCase):
                 executable = root / 'bin' / name
                 executable.write_text('#!' + sys.executable + '\n' + _HOST_SCRIPT)
                 executable.chmod(0o755)
-            result = subprocess.run([sys.executable, '-B', str(Path(__file__).resolve()), mode],
-                                    cwd=root, env=environment, stdin=subprocess.DEVNULL,
-                                    capture_output=True, text=True, timeout=90, check=False)
+            command = [sys.executable, '-B', str(Path(__file__).resolve()), mode]
+            stdin = subprocess.DEVNULL
+            if mode.startswith('optional'):
+                master, stdin = pty.openpty()
+                stack.callback(os.close, master)
+                stack.callback(os.close, stdin)
+                # A noninteractive shell can still pass a TTY to az. Keep its
+                # master open without ever sending input; do not mock prompting.
+                command = ['/bin/bash', '--noprofile', '--norc', '-c',
+                           'case "$-" in *i*) exit 99;; esac; exec "$@"', 'fixture', *command]
+            try:
+                result = subprocess.run(command, cwd=root, env=environment, stdin=stdin,
+                                        capture_output=True, text=True,
+                                        timeout=30 if mode.startswith('optional') else 90, check=False)
+            except subprocess.TimeoutExpired as ex:
+                self.fail('CLI did not exit without input: ' + repr((ex.stdout, ex.stderr)))
         self.assertFalse(root.exists(), 'Fixture cleanup left host/config files behind')
         return result
 
@@ -282,6 +313,19 @@ class AKSInstallPluginScenarioTest(unittest.TestCase):
             result = self.invoke_isolated()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('Fresh install and disabled-existing rerun verified; no forbidden I/O', result.stdout)
+
+    def test_install_plugin_omitted_in_noninteractive_shell_with_inherited_tty_never_waits(self):
+        for mode in ('optional', 'optional-quiet'):
+            with self.subTest(mode=mode):
+                result = self.invoke_isolated(mode)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(result.stdout, 'Omitted plugin setup returned without input or native I/O\n')
+                if mode == 'optional':
+                    self.assertEqual(result.stderr.count('--install-azure-plugin'), 1)
+                    self.assertEqual(result.stderr.count('--plugin-hosts'), 1)
+                else:
+                    self.assertEqual(result.stderr, '')
+                self.assertNotIn('(y/N)', result.stderr)
 
     def test_install_plugin_fixture_guards_and_constructor_failure_cleanup(self):
         result = self.invoke_isolated('guards')

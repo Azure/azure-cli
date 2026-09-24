@@ -17,8 +17,6 @@ import traceback
 import unittest
 from unittest import mock
 
-from knack.prompting import NoTTYException
-
 from azure.cli.command_modules.acs import _azure_plugin as plugin
 from azure.cli.core.azclierror import (
     ClientRequestError, InvalidArgumentValueError, ResourceNotFoundError, ValidationError,
@@ -125,42 +123,34 @@ class AzurePluginConsentTest(unittest.TestCase):
     def setUp(self):
         self.cmd = mock.Mock()
         self.cmd.cli_ctx.config.getboolean.return_value = False
-        self.prompts = []
-        self.answers = iter([])
         self.stderr = io.StringIO()
+        self.stdout = io.StringIO()
         self.installed = []
         patches = (
             mock.patch.dict(os.environ, {}, clear=True),
             mock.patch('sys.stdin.isatty', return_value=True),
             mock.patch('sys.stderr', self.stderr),
-            mock.patch('knack.prompting._input', side_effect=self.answer),
+            mock.patch('knack.prompting._input', side_effect=AssertionError('Unexpected prompt')),
             mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: name if name == 'codex' else None),
             mock.patch.object(plugin, 'install_plugin', side_effect=self.install),
             mock.patch.object(plugin.subprocess, 'Popen', side_effect=AssertionError('Unexpected native process')),
+            mock.patch('sys.stdout', self.stdout),
+            mock.patch('sys.stdin.read', side_effect=AssertionError('Unexpected stdin read')),
+            mock.patch('sys.stdin.readline', side_effect=AssertionError('Unexpected stdin read')),
+            mock.patch('builtins.input', side_effect=AssertionError('Unexpected input')),
         )
         self.mocks = [patcher.start() for patcher in patches]
         for patcher in patches:
             self.addCleanup(patcher.stop)
-
-    def answer(self, message):
-        self.prompts.append(message)
-        result = next(self.answers)
-        if isinstance(result, BaseException):
-            raise result
-        return result
 
     def install(self, host):
         self.installed.append(host)
         self.assertIn('MCP', self.stderr.getvalue())
         return True
 
-    def run_optional(self, answers):
-        self.answers = iter(answers)
-        plugin.maybe_install_azure_plugin(self.cmd)
-
-    def test_false_no_tty_disabled_confirmation_and_sudo_do_no_discovery_or_execution(self):
+    def test_false_no_tty_disabled_confirmation_and_sudo_do_not_hint_or_probe(self):
         for condition in ('false', 'no-tty', 'disabled', 'sudo-user', 'sudo-uid'):
-            with self.subTest(condition=condition), mock.patch.object(plugin, 'discover_hosts') as discover:
+            with self.subTest(condition=condition), self.assertNoLogs('cli.' + plugin.__name__, level='WARNING'):
                 self.mocks[1].return_value = condition != 'no-tty'
                 self.cmd.cli_ctx.config.getboolean.return_value = condition == 'disabled'
                 environment = {'SUDO_USER': 'user'} if condition == 'sudo-user' else {}
@@ -168,27 +158,23 @@ class AzurePluginConsentTest(unittest.TestCase):
                     environment = {'SUDO_UID': '0'}
                 with mock.patch.dict(os.environ, environment, clear=True):
                     plugin.maybe_install_azure_plugin(self.cmd, False if condition == 'false' else None)
-                discover.assert_not_called()
                 self.assertEqual(self.installed, [])
-                self.assertEqual(self.prompts, [])
+                self.assertEqual(self.stderr.getvalue(), '')
+                self.assertEqual(self.stdout.getvalue(), '')
                 self.mocks[4].assert_not_called()
                 self.mocks[6].assert_not_called()
 
-    def test_initial_offer_defaults_to_no_without_even_discovering(self):
-        self.run_optional([''])
+    def test_omitted_tty_only_hints_once_without_reading_stdin_or_probing(self):
+        with self.assertLogs('cli.' + plugin.__name__, level='WARNING') as logs:
+            plugin.maybe_install_azure_plugin(self.cmd)
+        self.assertEqual(len(logs.records), 1)
+        self.assertIn('--install-azure-plugin', logs.output[0])
+        self.assertIn('--plugin-hosts', logs.output[0])
         self.assertEqual(self.installed, [])
-        self.assertEqual(len(self.prompts), 1)
-        self.assertIn('(y/N)', self.prompts[0])
+        self.assertEqual(self.stderr.getvalue(), '')
+        self.assertEqual(self.stdout.getvalue(), '')
         self.mocks[4].assert_not_called()
-
-    def test_detected_defaults_require_final_default_no_consent(self):
-        self.run_optional(['y', '', ''])
-        self.assertEqual(self.installed, [])
-        self.assertEqual(len(self.prompts), 3)
-        self.assertIn('(y/N)', self.prompts[-1])
-        self.assertIn('Codex CLI', self.prompts[-1])
-        self.assertIn('3', self.prompts[1])
-        self.assert_disclosure()
+        self.mocks[6].assert_not_called()
 
     def assert_disclosure(self):
         text = self.stderr.getvalue()
@@ -197,51 +183,58 @@ class AzurePluginConsentTest(unittest.TestCase):
                            'disabled', 'authentication', 'trust', 'sovereign', 'updates'):
             self.assertIn(disclosure, text)
 
-    def test_detected_host_installs_only_after_final_consent(self):
-        def install(host):
-            self.assertEqual(len(self.prompts), 3)
-            self.assert_disclosure()
-            return self.install(host)
-        self.mocks[5].side_effect = install
-        self.run_optional(['y', '', 'y'])
-        self.assertEqual(self.installed, ['codex'])
+    def test_new_install_prints_only_selected_host_lifecycle_commands(self):
+        commands = {
+            'claude-code': ('claude plugin update azure@claude-plugins-official --scope user',
+                            'claude plugin uninstall azure@claude-plugins-official --scope user'),
+            'github-copilot': ('copilot plugin update azure@azure-skills',
+                               'copilot plugin uninstall azure@azure-skills'),
+            'codex': ('codex plugin marketplace upgrade azure-skills', 'codex plugin remove azure@azure-skills'),
+        }
+        for host, expected in commands.items():
+            with self.subTest(host=host):
+                self.stderr.truncate(0)
+                self.stderr.seek(0)
+                plugin.maybe_install_azure_plugin(self.cmd, True, [host])
+                message = self.stderr.getvalue()
+                for command in expected:
+                    self.assertIn(command, [line.rsplit(': ', 1)[-1] for line in message.splitlines()])
+                    self.assertEqual(message.count(command), 1)
+                    self.assertLess(message.index('installed;'), message.index(command))
+                for other, excluded in commands.items():
+                    if other != host:
+                        for command in excluded:
+                            self.assertNotIn(command, message)
+                if host == 'codex':
+                    self.assertIn('marketplace-wide', message)
+                    self.assertIn('other installed plugins', message)
+                    self.assertNotIn('codex plugin update', message)
+                    self.assertNotIn('codex plugin add', message)
+                self.assertEqual(self.stdout.getvalue(), '')
+                self.mocks[6].assert_not_called()
 
-    def test_numbered_selection_replaces_defaults_and_deduplicates(self):
-        self.run_optional(['y', '2 1 2', 'y'])
-        self.assertEqual(self.installed, ['claude-code', 'github-copilot'])
-        self.assertNotIn('Codex CLI', self.prompts[-1])
-
-    def test_all_hosts_can_be_deselected_without_final_prompt(self):
-        self.run_optional(['y', '0'])
-        self.assertEqual(self.installed, [])
-        self.assertEqual(len(self.prompts), 2)
-
-    def test_no_detected_hosts_blank_selection_does_not_consent(self):
-        self.mocks[4].side_effect = lambda name: None
-        self.run_optional(['y', ''])
-        self.assertEqual(self.installed, [])
-        self.assertEqual(len(self.prompts), 2)
-
-    def test_invalid_selection_reprompts_without_installing(self):
-        self.run_optional(['y', '4', '0 1', '-1', 'codex', '1,2', '2', 'y'])
-        self.assertEqual(self.installed, ['github-copilot'])
-        self.assertEqual(len(self.prompts), 8)
-
-    def test_cancellation_eof_or_lost_tty_at_each_prompt_is_optional_noop(self):
-        for error in (KeyboardInterrupt, EOFError, NoTTYException):
-            for answers in ([error()], ['y', error()], ['y', '', error()]):
-                with self.subTest(error=error, stage=len(answers)):
-                    self.run_optional(answers)
-                    self.assertEqual(self.installed, [])
+    def test_existing_private_source_gets_no_hardcoded_lifecycle_target(self):
+        self.mocks[5].side_effect = REAL_INSTALL_PLUGIN
+        self.mocks[4].side_effect = lambda name: name
+        process = NativeProcessFixture({
+            ('claude', 'plugin', 'list', '--json'): [CLAUDE_PLUGIN],
+            ('copilot', 'plugin', 'list', '--json'): [COPILOT_PLUGIN],
+            ('codex', 'plugin', 'list', '--available', '--json'): {'installed': [CODEX_PLUGIN], 'available': []},
+        })
+        self.mocks[6].side_effect = process
+        plugin.maybe_install_azure_plugin(self.cmd, True, list(plugin.HOST_IDS))
+        message = self.stderr.getvalue()
+        self.assertEqual(message.count('Azure already reported; plugin install skipped'), 3)
+        self.assertNotIn('azure@', message)
+        self.assertNotIn('marketplace upgrade', message)
+        self.assertEqual(len(process.calls), 3)
 
     def test_explicit_hosts_need_no_tty_prompts_or_detection_even_with_confirm_disabled(self):
         self.mocks[1].return_value = False
         self.cmd.cli_ctx.config.getboolean.return_value = True
-        with mock.patch.object(plugin, 'discover_hosts') as discover:
-            plugin.maybe_install_azure_plugin(self.cmd, True, ['codex', 'claude-code', 'codex'])
+        plugin.maybe_install_azure_plugin(self.cmd, True, ['codex', 'claude-code', 'codex'])
         self.assertEqual(self.installed, ['claude-code', 'codex'])
-        self.assertEqual(self.prompts, [])
-        discover.assert_not_called()
+        self.mocks[4].assert_not_called()
         self.assert_disclosure()
 
     def test_expected_failures_continue_hosts_and_preserve_explicit_error_category(self):
@@ -265,15 +258,11 @@ class AzurePluginConsentTest(unittest.TestCase):
                          'GitHub Copilot CLI', 'installed'):
                 self.assertIn(part, message)
             self.assertEqual(calls, ['claude-code', 'github-copilot', 'codex'])
-
-    def test_optional_failure_warns_without_failing_and_remaining_host_still_installs(self):
-        self.mocks[5].side_effect = [ValidationError('bad inventory'), True]
-        with self.assertLogs('cli.' + plugin.__name__, level='WARNING') as logs:
-            self.run_optional(['y', '1 3', 'y'])
-        message = '\n'.join(logs.output)
-        for part in ('Claude Code', 'bad inventory', 'Codex CLI', 'installed', 'remain installed', 'native'):
-            self.assertIn(part, message)
-        self.assertEqual(self.mocks[5].call_args_list, [mock.call('claude-code'), mock.call('codex')])
+            output = self.stderr.getvalue()
+            self.assertIn('copilot plugin update azure@azure-skills', output)
+            self.assertIn('copilot plugin uninstall azure@azure-skills', output)
+            self.assertNotIn('claude plugin', output)
+            self.assertNotIn('codex plugin', output)
 
     def test_report_distinguishes_install_from_skip_without_claiming_zero_marketplace_changes(self):
         self.mocks[5].side_effect = [True, False]
@@ -283,11 +272,12 @@ class AzurePluginConsentTest(unittest.TestCase):
         self.assertIn('Codex CLI: Azure already reported; plugin install skipped', message)
         self.assertIn('marketplace may have been added', message)
         self.assertNotIn('all integrations are ready', message)
+        self.assertIn('claude plugin update azure@claude-plugins-official --scope user', message)
+        self.assertIn('claude plugin uninstall azure@claude-plugins-official --scope user', message)
+        self.assertNotIn('codex plugin', message)
 
-    def test_programming_errors_are_not_swallowed_on_optional_or_explicit_paths(self):
+    def test_programming_errors_are_not_swallowed(self):
         self.mocks[5].side_effect = TypeError('programming error')
-        with self.assertRaisesRegex(TypeError, 'programming error'):
-            self.run_optional(['y', '1', 'y'])
         with self.assertRaisesRegex(TypeError, 'programming error'):
             plugin.maybe_install_azure_plugin(self.cmd, True, ['codex'])
 
@@ -335,24 +325,18 @@ class AzurePluginConsentTest(unittest.TestCase):
                 subprocess.CompletedProcess([], 1, '', 'native install refused'),
             ('copilot', 'plugin', 'list', '--json'): KeyboardInterrupt(),
         })
-        for explicit in (True, False):
-            self.mocks[6].side_effect = process
-            self.stderr.truncate(0)
-            self.stderr.seek(0)
-            process.calls.clear()
-            with self.subTest(explicit=explicit), mock.patch.object(plugin.logger, 'disabled', True):
-                with self.assertRaises(KeyboardInterrupt):
-                    if explicit:
-                        plugin.maybe_install_azure_plugin(self.cmd, True, list(plugin.HOST_IDS))
-                    else:
-                        self.run_optional(['y', '1 2 3', 'y'])
-            message = self.stderr.getvalue()
-            for part in ('Claude Code', 'native install refused', 'GitHub Copilot CLI: interrupted',
-                         'native state is uncertain', 'kubectl and kubelogin remain installed',
-                         'native plugin commands', 'No automatic retry or rollback'):
-                self.assertIn(part, message)
-            self.assertEqual(process.calls[-1], ('copilot', 'plugin', 'list', '--json'))
-            self.assertFalse(any(call[0] == 'codex' for call in process.calls))
+        self.mocks[6].side_effect = process
+        with mock.patch.object(plugin.logger, 'disabled', True), self.assertRaises(KeyboardInterrupt):
+            plugin.maybe_install_azure_plugin(self.cmd, True, list(plugin.HOST_IDS))
+        message = self.stderr.getvalue()
+        for part in ('Claude Code', 'native install refused', 'GitHub Copilot CLI: interrupted',
+                     'native state is uncertain', 'kubectl and kubelogin remain installed',
+                     'native plugin commands', 'No automatic retry or rollback'):
+            self.assertIn(part, message)
+        self.assertEqual(process.calls[-1], ('copilot', 'plugin', 'list', '--json'))
+        self.assertFalse(any(call[0] == 'codex' for call in process.calls))
+        self.assertNotIn('azure@', message)
+        self.assertNotIn('marketplace upgrade', message)
 
     def test_cancellation_reports_prior_success_without_continuing(self):
         self.mocks[5].side_effect = [True, KeyboardInterrupt(), True]
@@ -361,12 +345,16 @@ class AzurePluginConsentTest(unittest.TestCase):
         self.assertEqual(self.mocks[5].call_args_list, [mock.call('claude-code'), mock.call('github-copilot')])
         self.assertIn('Claude Code: installed', self.stderr.getvalue())
         self.assertIn('GitHub Copilot CLI: interrupted', self.stderr.getvalue())
+        self.assertIn('claude plugin update azure@claude-plugins-official --scope user', self.stderr.getvalue())
+        self.assertIn('claude plugin uninstall azure@claude-plugins-official --scope user', self.stderr.getvalue())
+        self.assertNotIn('copilot plugin', self.stderr.getvalue())
+        self.assertNotIn('codex plugin', self.stderr.getvalue())
 
     def test_explicit_sudo_is_rejected_before_any_execution(self):
         with mock.patch.dict(os.environ, {'SUDO_UID': '123'}), self.assertRaises(InvalidArgumentValueError):
             plugin.maybe_install_azure_plugin(self.cmd, True, ['codex'])
         self.assertEqual(self.installed, [])
-        self.assertEqual(self.prompts, [])
+        self.mocks[4].assert_not_called()
 
 
 class AzurePluginNativeTest(unittest.TestCase):
@@ -978,14 +966,3 @@ class AzurePluginProcessTest(unittest.TestCase):
         self.assertEqual(kwargs['stdin'], subprocess.DEVNULL)
         self.assertGreater(exchange.call_args.kwargs['timeout'], 0)
         self.assertLessEqual(exchange.call_args.kwargs['timeout'], 300)
-
-
-class AzurePluginDiscoveryTest(unittest.TestCase):
-    def test_discovery_only_checks_executable_presence(self):
-        with mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: '/bin/' + name if name == 'codex' else None), \
-                mock.patch('subprocess.Popen', side_effect=AssertionError('Discovery must not execute a host')):
-            self.assertEqual(plugin.discover_hosts(), ['codex'])
-
-    def test_discovery_uses_stable_host_order(self):
-        with mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: '/bin/' + name):
-            self.assertEqual(plugin.discover_hosts(), ['claude-code', 'github-copilot', 'codex'])

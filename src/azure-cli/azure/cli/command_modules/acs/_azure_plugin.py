@@ -14,7 +14,6 @@ import subprocess
 import sys
 
 from knack.log import get_logger
-from knack.prompting import NoTTYException, prompt, prompt_y_n
 
 from azure.cli.core.azclierror import (
     ClientRequestError, InvalidArgumentValueError, ResourceNotFoundError, ValidationError,
@@ -25,6 +24,15 @@ logger = get_logger(__name__)
 HOST_IDS = ('claude-code', 'github-copilot', 'codex')
 HOST_LABELS = {'claude-code': 'Claude Code', 'github-copilot': 'GitHub Copilot CLI', 'codex': 'Codex CLI'}
 _EXECUTABLES = {'claude-code': 'claude', 'github-copilot': 'copilot', 'codex': 'codex'}
+_LIFECYCLE_GUIDANCE = {
+    'claude-code': 'Update: claude plugin update azure@claude-plugins-official --scope user\n'
+                   'Remove: claude plugin uninstall azure@claude-plugins-official --scope user',
+    'github-copilot': 'Update: copilot plugin update azure@azure-skills\n'
+                      'Remove: copilot plugin uninstall azure@azure-skills',
+    'codex': 'Update (marketplace-wide; affects other installed plugins from azure-skills): '
+             'codex plugin marketplace upgrade azure-skills\n'
+             'Remove: codex plugin remove azure@azure-skills',
+}
 
 
 def validate_plugin_options(install_azure_plugin=None, plugin_hosts=None):
@@ -47,7 +55,7 @@ def _under_sudo():
 
 
 def maybe_install_azure_plugin(cmd, install_azure_plugin=None, plugin_hosts=None):
-    """Offer optional setup after both binaries succeed; explicit flags are consent."""
+    """Hint after both binaries succeed; only explicit flags authorize setup."""
     hosts = validate_plugin_options(install_azure_plugin, plugin_hosts)
     if install_azure_plugin is False:
         return
@@ -55,24 +63,13 @@ def maybe_install_azure_plugin(cmd, install_azure_plugin=None, plugin_hosts=None
         if (_under_sudo() or not sys.stdin.isatty() or
                 cmd.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False)):
             return
-        try:
-            if not prompt_y_n('Set up the full Azure plugin for an AI CLI host?', default='n'):
-                return
-            hosts = _select_hosts()
-            if not hosts:
-                return
-            _disclose_setup()
-            labels = ', '.join(HOST_LABELS[host] for host in hosts)
-            if not prompt_y_n(f'Authorize native user/global installation and enablement for {labels}?', default='n'):
-                return
-        except (NoTTYException, EOFError, KeyboardInterrupt):
-            return
-    else:
-        _disclose_setup()
-    _install_selected_hosts(hosts, explicit=install_azure_plugin is True)
+        logger.warning('For optional Azure plugin setup, use --install-azure-plugin true --plugin-hosts <host>.')
+        return
+    _disclose_setup()
+    _install_selected_hosts(hosts)
 
 
-def _install_selected_hosts(hosts, *, explicit):
+def _install_selected_hosts(hosts):
     failures = []
     outcomes = []
     for host in hosts:
@@ -92,11 +89,10 @@ def _install_selected_hosts(hosts, *, explicit):
             outcome = f'{HOST_LABELS[host]}: {status}.'
             outcomes.append(outcome)
             print(outcome, file=sys.stderr)
+            if installed:
+                print(_LIFECYCLE_GUIDANCE[host], file=sys.stderr)
     if failures:
-        message = _setup_summary(outcomes)
-        if explicit:
-            raise type(failures[0])(message) from None
-        logger.warning(message)
+        raise type(failures[0])(_setup_summary(outcomes)) from None
 
 
 def _setup_summary(outcomes):
@@ -107,43 +103,18 @@ def _setup_summary(outcomes):
             'No automatic retry or rollback was attempted.')
 
 
-def _select_hosts():
-    detected = discover_hosts()
-    choices = '\n'.join(f'  {index}. {HOST_LABELS[host]}' + (' [detected]' if host in detected else '')
-                        for index, host in enumerate(HOST_IDS, 1))
-    defaults = ' '.join(str(index) for index, host in enumerate(HOST_IDS, 1) if host in detected) or '0'
-    while True:
-        answer = prompt(f'{choices}\nSelect host numbers separated by spaces (replaces defaults); '
-                        f'0 selects none. Enter keeps [{defaults}]: ').strip()
-        if not answer:
-            return detected
-        if answer == '0':
-            return []
-        numbers = answer.split()
-        if all(number in ('1', '2', '3') for number in numbers):
-            return [host for index, host in enumerate(HOST_IDS, 1) if str(index) in numbers]
-        print('Choose 1, 2 and/or 3 separated by spaces, or 0 for none.', file=sys.stderr)
-
-
 def _disclose_setup():
     # Consent context must remain visible even with --only-show-errors.
     print(
-        'Azure plugin setup installs the full Azure plugin (skills, MCP configuration and hooks) in native '
-        'user/global scope, not repository scope. Native inventory-reported Azure installations, including '
-        'disabled ones, are skipped. When inventory reports absence, consent authorizes normal native installation '
-        'and enablement, including changes to hidden/stale disable preferences or registrations.\n'
-        'New installations require an installed host CLI and Node.js 22+ with npx on PATH. '
-        'The stock MCP runtime uses @azure/mcp@latest and is not pinned by the plugin version. '
-        'Hosts own permissions, marketplace sources/pins and updates; Azure CLI adds no custom updater or bypass. '
-        'Azure authentication, MCP activation, hook trust and sovereign-cloud setup may still be required. '
-        'No prerequisites are installed and no Azure login or resource operations are performed.',
+        'Installing the full Azure plugin (skills, MCP configuration and hooks) in native user/global scope, '
+        'not repository scope. New installs require an installed host CLI and Node.js 22+ with npx on PATH. '
+        'Azure authentication, MCP activation, hook trust and sovereign-cloud setup may still be required.\n'
+        'Reported existing Azure plugins, including disabled ones, stay unchanged. Inventory absence authorizes '
+        'native installation and enablement, including changes to hidden/stale preferences or registrations.\n'
+        '@azure/mcp@latest is not pinned by the plugin version. Host policy, marketplace sources/pins and updates '
+        'remain authoritative. Azure CLI installs no prerequisites and performs no Azure login or resource operations.',
         file=sys.stderr,
     )
-
-
-def discover_hosts() -> list[str]:
-    """Discover executables without running hosts or inspecting their configuration."""
-    return [host for host in HOST_IDS if shutil.which(_EXECUTABLES[host])]
 
 
 def install_plugin(host_id: str) -> bool:
