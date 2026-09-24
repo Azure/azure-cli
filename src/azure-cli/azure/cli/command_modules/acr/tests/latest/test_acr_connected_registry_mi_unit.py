@@ -336,8 +336,8 @@ class TestConnectedRegistryDelete(unittest.TestCase):
                             mock.call.begin_delete().result(),
                         ])
                         confirm.assert_called_once_with(
-                            "Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
-                                TEST_CR, TEST_REGISTRY, '' if cleanup else ' without cleanup flag enabled'), False)
+                            "Are you sure you want to delete the connected registry '{}' in '{}'?".format(
+                                TEST_CR, TEST_REGISTRY), False)
                         token_lookup.assert_not_called()
                         scope_lookup.assert_not_called()
                         tokens.assert_not_called()
@@ -407,8 +407,8 @@ class TestConnectedRegistryDelete(unittest.TestCase):
                     client.begin_delete.assert_called_once_with(TEST_RG, TEST_REGISTRY, TEST_CR)
                     client.begin_delete.return_value.result.assert_called_once_with()
                     confirm.assert_called_once_with(
-                        "Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
-                            TEST_CR, TEST_REGISTRY, '' if cleanup else ' without cleanup flag enabled'), True)
+                        "Are you sure you want to delete the connected registry '{}' in '{}'?".format(
+                            TEST_CR, TEST_REGISTRY), True)
                     token_lookup.assert_called_once_with(cmd, token_id)
                     if cleanup:
                         tokens.assert_called_once_with(cmd.cli_ctx)
