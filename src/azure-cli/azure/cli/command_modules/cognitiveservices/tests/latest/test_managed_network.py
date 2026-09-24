@@ -13,7 +13,6 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-@unittest.skip("Skipped: pending service fix")
 class CognitiveServicesManagedNetworkTests(ScenarioTest):
 
     INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data', 'managed_network')
@@ -161,8 +160,9 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
             'storage_id': storage_id
         })
 
-        # Create cognitive services account with system-assigned identity
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --assign-identity --yes',
+        # Create cognitive services account with system-assigned identity and custom subdomain
+        # (custom subdomain is required for managed network PE provisioning)
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --assign-identity --custom-domain {sname} --yes',
                  checks=[self.check('name', '{sname}')])
 
         # Get the managed identity principal ID
@@ -172,10 +172,20 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
 
         # Grant the CS account's identity "Contributor" on the storage account
         # (needs privateEndpointConnectionsApproval/action which Network Contributor lacks)
-        self.cmd('az role assignment create --assignee-object-id {principal_id} --assignee-principal-type ServicePrincipal --role "Contributor" --scope {storage_id}')
+        # Use create_guid() for a deterministic GUID (stable for VCR playback, unique per recording)
+        self.kwargs['ra_name_1'] = self.create_guid()
+        self.cmd('az role assignment create --assignee-object-id {principal_id} --assignee-principal-type ServicePrincipal --role "Contributor" --scope {storage_id} --name {ra_name_1}')
 
-        # Wait for RBAC propagation
-        time.sleep(60)
+        # Grant the CS account's identity "Contributor" on the CS account itself
+        # (required to read and approve private endpoint connections on the CS resource)
+        cs_account_id = identity['id']
+        self.kwargs['cs_account_id'] = cs_account_id
+        self.kwargs['ra_name_2'] = self.create_guid()
+        self.cmd('az role assignment create --assignee-object-id {principal_id} --assignee-principal-type ServicePrincipal --role "Contributor" --scope {cs_account_id} --name {ra_name_2}')
+
+        # Wait for RBAC propagation (can take several minutes; skip during playback)
+        if self.is_live or self.in_recording:
+            time.sleep(180)
 
         # Create managed network
         self.cmd('az cognitiveservices account managed-network create -n {sname} -g {rg} --managed-network allow_only_approved_outbound')
