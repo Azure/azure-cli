@@ -7,6 +7,7 @@ import os.path
 import platform
 
 from argcomplete.completers import FilesCompleter
+from azure.cli.command_modules.acs._azure_plugin import HOST_IDS
 from azure.cli.command_modules.acs._completers import (
     get_k8s_upgrades_completion_list, get_k8s_versions_completion_list)
 from azure.cli.command_modules.acs._consts import (
@@ -1024,6 +1025,16 @@ def load_arguments(self, _):
         c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin. Note: the path should contain the binary filename.')
         c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
         c.argument('gh_token', help='GitHub authentication token used when downloading kubelogin binaries from GitHub releases. Supplying a token helps avoid GitHub API rate limits.')
+
+    with self.argument_context('aks install-cli', arg_group='Azure Plugin') as c:
+        c.argument('install_azure_plugin', arg_type=get_three_state_flag(),
+                   help='Install Azure plugin skills, MCP configuration and hooks in native user/global scope. '
+                   'True requires --plugin-hosts and authorizes setup without prompts after both binaries install. '
+                   'Omission only allows an opt-in hint; false suppresses it. See command help for prerequisites '
+                   'and native enablement behavior.')
+        c.argument('plugin_hosts', arg_type=get_enum_type(HOST_IDS), nargs='+',
+                   help='Installed host CLIs to configure. Requires --install-azure-plugin true; '
+                   'new plugins also require Node.js 22+ with npx on PATH.')
 
     with self.argument_context('aks install-desktop') as c:
         c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')
