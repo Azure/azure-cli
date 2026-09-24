@@ -442,6 +442,26 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     raise ValueError('Fail to find source. Neither blob container nor file share is specified')
 
 
+def _get_blob_download_path(destination, normalized_blob_name, blob_name):
+    """Build the local path for a blob, ensuring it cannot escape the destination directory."""
+    destination_path = os.path.join(destination, os.path.normpath(normalized_blob_name))
+    # Blob names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on Windows),
+    # so resolve the final path and verify it is strictly inside the destination before writing anything.
+    real_destination = os.path.normcase(os.path.realpath(destination))
+    real_destination_path = os.path.normcase(os.path.realpath(destination_path))
+    try:
+        is_within_destination = real_destination_path != real_destination and \
+            os.path.commonpath([real_destination, real_destination_path]) == real_destination
+    except ValueError:  # paths are on different drives
+        is_within_destination = False
+    if not is_within_destination:
+        raise FileOperationError('Blob "{}" cannot be downloaded because its name resolves to a path outside the '
+                                 'destination directory "{}". Use the `--pattern` parameter to exclude it, or use '
+                                 'the `storage blob download` command to download it to an explicit file path.'
+                                 .format(blob_name, destination))
+    return destination_path
+
+
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, overwrite=False, **kwargs):
@@ -455,6 +475,8 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     for blob_name in source_blobs:
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
+        # validate every blob before downloading any of them, so a malicious name fails the batch up front
+        _get_blob_download_path(destination, normalized_blob_name, blob_name)
         if normalized_blob_name in blobs_to_download:
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
@@ -483,7 +505,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
                 index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
         blob_client = client.get_blob_client(container=source_container_name,
                                              blob=blobs_to_download[blob_normed])
-        destination_path = os.path.join(destination, os.path.normpath(blob_normed))
+        destination_path = _get_blob_download_path(destination, blob_normed, blobs_to_download[blob_normed])
         destination_folder = os.path.dirname(destination_path)
         # Failed when there is same name for file and folder
         if os.path.isfile(destination_path) and os.path.exists(destination_folder) and not overwrite:
