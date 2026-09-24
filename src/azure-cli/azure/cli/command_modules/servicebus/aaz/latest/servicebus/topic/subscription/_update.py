@@ -104,7 +104,7 @@ class Update(AAZCommand):
         _args_schema.auto_delete_on_idle = AAZDurationArg(
             options=["--auto-delete-on-idle"],
             arg_group="Properties",
-            help="ISO 8061 timeSpan idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.",
+            help="ISO 8601 timeSpan idle interval after which the topic is automatically deleted. The minimum duration is 5 minutes.",
             nullable=True,
         )
         _args_schema.dead_letter_on_filter_exceptions = AAZBoolArg(
@@ -122,7 +122,7 @@ class Update(AAZCommand):
         _args_schema.default_message_time_to_live = AAZDurationArg(
             options=["--default-message-time-to-live"],
             arg_group="Properties",
-            help="ISO 8061 Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.",
+            help="ISO 8601 Default message timespan to live value. This is the duration after which the message expires, starting from when the message is sent to Service Bus. This is the default value used when TimeToLive is not set on a message itself.",
             nullable=True,
         )
         _args_schema.duplicate_detection_history_time_window = AAZDurationArg(
@@ -158,7 +158,7 @@ class Update(AAZCommand):
         _args_schema.lock_duration = AAZDurationArg(
             options=["--lock-duration"],
             arg_group="Properties",
-            help="ISO 8061 lock duration timespan for the subscription. The default value is 1 minute.",
+            help="ISO 8601 lock duration timespan for the subscription. The default value is 1 minute.",
             nullable=True,
         )
         _args_schema.max_delivery_count = AAZIntArg(
