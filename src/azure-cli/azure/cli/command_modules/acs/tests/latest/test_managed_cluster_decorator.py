@@ -249,6 +249,40 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             ctx._AKSManagedClusterContext__validate_cluster_autoscaler_profile(s10)
 
+        # SDK boolean values
+        s11 = [
+            "daemonset-eviction-for-empty-nodes=true",
+            "daemonset-eviction-for-occupied-nodes=FALSE",
+            "ignore-daemonsets-utilization=True",
+            "balance-similar-node-groups=true",
+        ]
+        t11 = ctx._AKSManagedClusterContext__validate_cluster_autoscaler_profile(s11)
+        g11 = {
+            "daemonset-eviction-for-empty-nodes": True,
+            "daemonset-eviction-for-occupied-nodes": False,
+            "ignore-daemonsets-utilization": True,
+            "balance-similar-node-groups": "true",
+        }
+        self.assertEqual(t11, g11)
+
+        # already-normalized SDK boolean values
+        s12 = {
+            "daemonset-eviction-for-empty-nodes": False,
+            "daemonset-eviction-for-occupied-nodes": True,
+            "ignore-daemonsets-utilization": False,
+        }
+        t12 = ctx._AKSManagedClusterContext__validate_cluster_autoscaler_profile(s12)
+        self.assertEqual(t12, s12)
+
+        # invalid SDK boolean value
+        for key in (
+            "daemonset-eviction-for-empty-nodes",
+            "daemonset-eviction-for-occupied-nodes",
+            "ignore-daemonsets-utilization",
+        ):
+            with self.subTest(key=key), self.assertRaises(InvalidArgumentValueError):
+                ctx._AKSManagedClusterContext__validate_cluster_autoscaler_profile({key: "yes"})
+
     def test_validate_gmsa_options(self):
         # default
         ctx = AKSManagedClusterContext(

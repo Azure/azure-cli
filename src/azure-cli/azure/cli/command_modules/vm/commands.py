@@ -329,6 +329,9 @@ def load_command_table(self, _):
 
     with self.command_group('vmss extension image') as g:
         g.custom_command('list', 'list_vm_extension_images')
+        from .operations.vmss_extension_image import VMSSExtensionImageListVersions, VMSSExtensionImageShow
+        self.command_table['vmss extension image list-versions'] = VMSSExtensionImageListVersions(loader=self)
+        self.command_table['vmss extension image show'] = VMSSExtensionImageShow(loader=self)
 
     with self.command_group('vmss run-command') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
@@ -378,7 +381,7 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-version') as g:
         g.custom_command('create', 'create_image_version', supports_no_wait=True, validator=process_image_version_create_namespace)
-        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, validator=process_image_version_undelete_namespace, is_preview=True)
+        g.custom_command('undelete', 'undelete_image_version', supports_no_wait=True, validator=process_image_version_undelete_namespace)
         g.generic_update_command('update', getter_name='get_image_version_to_update', setter_arg_name='gallery_image_version', setter_name='update_image_version', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_image_version_update_namespace)
         from .aaz.latest.sig.image_version import Show as SigImageVersionShow
         self.command_table['sig image-version show'] = SigImageVersionShow(loader=self,

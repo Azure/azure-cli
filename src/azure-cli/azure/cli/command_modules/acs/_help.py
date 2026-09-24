@@ -186,6 +186,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Omit to default to StandardV2 where the region supports it, otherwise Standard. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -867,6 +871,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Migrate an existing Standard (V1) cluster to StandardV2 by passing StandardV2. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth. Downgrade from StandardV2 to Standard is not supported.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -1474,6 +1482,27 @@ type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
+helps["aks install-desktop"] = """
+type: command
+short-summary: Download and install AKS Desktop for the current platform.
+long-summary: >
+  On macOS and Linux systems using Debian packages, complete installation in the opened application.
+  GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
+  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open
+  and a graphical session. Other Linux systems, or systems where the Debian installer cannot be opened,
+  use the portable archive when available.
+  If GitHub API requests are rate-limited, set the GH_TOKEN environment variable or wait for the rate limit to reset.
+  Prefer GH_TOKEN over --gh-token, which can expose credentials in shell history, process listings, and debug logs.
+  An explicit --gh-token value overrides GH_TOKEN.
+  The token is used only to retrieve release metadata, not to download the installer. If requests with a token
+  are rate-limited, wait for the rate limit to reset and check the token's quota.
+examples:
+  - name: Install the latest stable version of AKS Desktop
+    text: az aks install-desktop
+  - name: Install a specific version of AKS Desktop
+    text: az aks install-desktop --version 0.9.1
+"""
+
 helps["aks list"] = """
 type: command
 short-summary: List managed Kubernetes clusters.
@@ -2065,6 +2094,9 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2240,6 +2272,9 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
     short-summary: The os-sku of the agent node pool.

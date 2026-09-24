@@ -293,6 +293,15 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
+def _build_capacity_reservation_profile(capacity_reservation_group, disable_assignment):
+    profile = {}
+    if capacity_reservation_group and capacity_reservation_group != 'None':
+        profile['capacityReservationGroup'] = {'id': capacity_reservation_group}
+    if disable_assignment is not None:
+        profile['disableCapacityReservationAssignment'] = disable_assignment
+    return profile
+
+
 def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
@@ -761,15 +770,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
-        vm_properties['capacityReservation'] = {}
-        if capacity_reservation_group:
-            vm_properties['capacityReservation']['capacityReservationGroup'] = {
-                'id': capacity_reservation_group
-            }
-        if disable_capacity_reservation_assignment is not None:
-            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
-                disable_capacity_reservation_assignment
+    capacity_reservation = _build_capacity_reservation_profile(
+        capacity_reservation_group, disable_capacity_reservation_assignment)
+    if capacity_reservation:
+        vm_properties['capacityReservation'] = capacity_reservation
 
     vm = {
         'apiVersion': '2026-04-01',
@@ -1708,15 +1712,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
-        virtual_machine_profile['capacityReservation'] = {}
-        if capacity_reservation_group:
-            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
-                'id': capacity_reservation_group
-            }
-        if disable_capacity_reservation_assignment is not None:
-            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
-                disable_capacity_reservation_assignment
+    capacity_reservation = _build_capacity_reservation_profile(
+        capacity_reservation_group, disable_capacity_reservation_assignment)
+    if capacity_reservation:
+        virtual_machine_profile['capacityReservation'] = capacity_reservation
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {
