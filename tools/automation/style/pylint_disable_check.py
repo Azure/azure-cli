@@ -20,7 +20,7 @@ def get_files(root):
 
 
 def get_rules(file_path):
-    rgx = re.compile('# pylint: disable=(\w|-|,|\s)+')
+    rgx = re.compile(r'# pylint: disable=(\w|-|,|\s)+')
     with open(file_path) as f:
         for index, l in enumerate(f.readlines()):
             if not l:
