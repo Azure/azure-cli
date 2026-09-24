@@ -13,17 +13,18 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption pricesheet show",
-    is_preview=True,
 )
 class Show(AAZCommand):
-    """Show the price sheet for an Azure subscription within a billing period.
+    """Get the price sheet for a subscription. Price sheet is available via this API only for May 1, 2014 or later.
+
+    :example: PriceSheet
+        az consumption pricesheet show
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.billing/billingperiods/{}/providers/microsoft.consumption/pricesheets/default", "2023-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/pricesheets/default", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/pricesheets/default", "2024-08-01"],
         ]
     }
 
@@ -43,11 +44,6 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.billing_period_name = AAZStrArg(
-            options=["-p", "--billing-period-name"],
-            help="Name of the billing period to get the price sheet.",
-            id_part="name",
-        )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
             help="May be used to expand the properties/meterDetails within a price sheet. By default, these fields are not included when returning price sheet.",
@@ -57,8 +53,8 @@ class Show(AAZCommand):
             help="Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.",
         )
         _args_schema.top = AAZIntArg(
-            options=["-t", "--top"],
-            help="Maximum number of items to return. Value range: 1-1000.",
+            options=["--top"],
+            help="May be used to limit the number of results to the top N results.",
             fmt=AAZIntArgFormat(
                 maximum=1000,
                 minimum=1,
@@ -68,12 +64,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.billing_period_name) is not True
-        condition_1 = has_value(self.ctx.args.billing_period_name) and has_value(self.ctx.subscription_id)
-        if condition_0:
-            self.PriceSheetGet(ctx=self.ctx)()
-        if condition_1:
-            self.PriceSheetGetByBillingPeriod(ctx=self.ctx)()
+        self.PriceSheetGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -112,7 +103,7 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -137,7 +128,7 @@ class Show(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -170,6 +161,9 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
+            _schema_on_200.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -179,6 +173,10 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType(
                 flags={"read_only": True},
             )
@@ -187,6 +185,10 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
+            properties.download = AAZObjectType(
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_meter_details_read(properties.download)
             properties.next_link = AAZStrType(
                 serialized_name="nextLink",
                 flags={"read_only": True},
@@ -213,13 +215,23 @@ class Show(AAZCommand):
             )
             _element.meter_details = AAZObjectType(
                 serialized_name="meterDetails",
+                flags={"read_only": True},
             )
+            _ShowHelper._build_schema_meter_details_read(_element.meter_details)
             _element.meter_id = AAZStrType(
                 serialized_name="meterId",
                 flags={"read_only": True},
             )
+            _element.offer_id = AAZStrType(
+                serialized_name="offerId",
+                flags={"read_only": True},
+            )
             _element.part_number = AAZStrType(
                 serialized_name="partNumber",
+                flags={"read_only": True},
+            )
+            _element.savings_plan = AAZObjectType(
+                serialized_name="savingsPlan",
                 flags={"read_only": True},
             )
             _element.unit_of_measure = AAZStrType(
@@ -231,214 +243,37 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            meter_details = cls._schema_on_200.properties.pricesheets.Element.meter_details
-            meter_details.meter_category = AAZStrType(
-                serialized_name="meterCategory",
+            savings_plan = cls._schema_on_200.properties.pricesheets.Element.savings_plan
+            savings_plan.effective_price = AAZFloatType(
+                serialized_name="effectivePrice",
                 flags={"read_only": True},
             )
-            meter_details.meter_location = AAZStrType(
-                serialized_name="meterLocation",
+            savings_plan.market_price = AAZFloatType(
+                serialized_name="marketPrice",
                 flags={"read_only": True},
             )
-            meter_details.meter_name = AAZStrType(
-                serialized_name="meterName",
-                flags={"read_only": True},
-            )
-            meter_details.meter_sub_category = AAZStrType(
-                serialized_name="meterSubCategory",
-                flags={"read_only": True},
-            )
-            meter_details.pretax_standard_rate = AAZFloatType(
-                serialized_name="pretaxStandardRate",
-                flags={"read_only": True},
-            )
-            meter_details.total_included_quantity = AAZFloatType(
-                serialized_name="totalIncludedQuantity",
-                flags={"read_only": True},
-            )
-            meter_details.unit = AAZStrType(
+            savings_plan.term = AAZStrType(
                 flags={"read_only": True},
             )
 
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class PriceSheetGetByBillingPeriod(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/pricesheets/default",
-                **self.url_parameters
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
             )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "billingPeriodName", self.ctx.args.billing_period_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
-                **self.serialize_query_param(
-                    "$skiptoken", self.ctx.args.skiptoken,
-                ),
-                **self.serialize_query_param(
-                    "$top", self.ctx.args.top,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2023-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
             )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
             )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
             )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
             )
-            _schema_on_200.tags = AAZDictType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.next_link = AAZStrType(
-                serialized_name="nextLink",
-                flags={"read_only": True},
-            )
-            properties.pricesheets = AAZListType(
-                flags={"read_only": True},
-            )
-
-            pricesheets = cls._schema_on_200.properties.pricesheets
-            pricesheets.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.pricesheets.Element
-            _element.billing_period_id = AAZStrType(
-                serialized_name="billingPeriodId",
-                flags={"read_only": True},
-            )
-            _element.currency_code = AAZStrType(
-                serialized_name="currencyCode",
-                flags={"read_only": True},
-            )
-            _element.included_quantity = AAZFloatType(
-                serialized_name="includedQuantity",
-                flags={"read_only": True},
-            )
-            _element.meter_details = AAZObjectType(
-                serialized_name="meterDetails",
-            )
-            _element.meter_id = AAZStrType(
-                serialized_name="meterId",
-                flags={"read_only": True},
-            )
-            _element.part_number = AAZStrType(
-                serialized_name="partNumber",
-                flags={"read_only": True},
-            )
-            _element.unit_of_measure = AAZStrType(
-                serialized_name="unitOfMeasure",
-                flags={"read_only": True},
-            )
-            _element.unit_price = AAZFloatType(
-                serialized_name="unitPrice",
-                flags={"read_only": True},
-            )
-
-            meter_details = cls._schema_on_200.properties.pricesheets.Element.meter_details
-            meter_details.meter_category = AAZStrType(
-                serialized_name="meterCategory",
-                flags={"read_only": True},
-            )
-            meter_details.meter_location = AAZStrType(
-                serialized_name="meterLocation",
-                flags={"read_only": True},
-            )
-            meter_details.meter_name = AAZStrType(
-                serialized_name="meterName",
-                flags={"read_only": True},
-            )
-            meter_details.meter_sub_category = AAZStrType(
-                serialized_name="meterSubCategory",
-                flags={"read_only": True},
-            )
-            meter_details.pretax_standard_rate = AAZFloatType(
-                serialized_name="pretaxStandardRate",
-                flags={"read_only": True},
-            )
-            meter_details.total_included_quantity = AAZFloatType(
-                serialized_name="totalIncludedQuantity",
-                flags={"read_only": True},
-            )
-            meter_details.unit = AAZStrType(
-                flags={"read_only": True},
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.tags
@@ -449,6 +284,73 @@ class Show(AAZCommand):
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_meter_details_read = None
+
+    @classmethod
+    def _build_schema_meter_details_read(cls, _schema):
+        if cls._schema_meter_details_read is not None:
+            _schema.meter_category = cls._schema_meter_details_read.meter_category
+            _schema.meter_location = cls._schema_meter_details_read.meter_location
+            _schema.meter_name = cls._schema_meter_details_read.meter_name
+            _schema.meter_sub_category = cls._schema_meter_details_read.meter_sub_category
+            _schema.pretax_standard_rate = cls._schema_meter_details_read.pretax_standard_rate
+            _schema.service_name = cls._schema_meter_details_read.service_name
+            _schema.service_tier = cls._schema_meter_details_read.service_tier
+            _schema.total_included_quantity = cls._schema_meter_details_read.total_included_quantity
+            _schema.unit = cls._schema_meter_details_read.unit
+            return
+
+        cls._schema_meter_details_read = _schema_meter_details_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        meter_details_read = _schema_meter_details_read
+        meter_details_read.meter_category = AAZStrType(
+            serialized_name="meterCategory",
+            flags={"read_only": True},
+        )
+        meter_details_read.meter_location = AAZStrType(
+            serialized_name="meterLocation",
+            flags={"read_only": True},
+        )
+        meter_details_read.meter_name = AAZStrType(
+            serialized_name="meterName",
+            flags={"read_only": True},
+        )
+        meter_details_read.meter_sub_category = AAZStrType(
+            serialized_name="meterSubCategory",
+            flags={"read_only": True},
+        )
+        meter_details_read.pretax_standard_rate = AAZFloatType(
+            serialized_name="pretaxStandardRate",
+            flags={"read_only": True},
+        )
+        meter_details_read.service_name = AAZStrType(
+            serialized_name="serviceName",
+            flags={"read_only": True},
+        )
+        meter_details_read.service_tier = AAZStrType(
+            serialized_name="serviceTier",
+            flags={"read_only": True},
+        )
+        meter_details_read.total_included_quantity = AAZFloatType(
+            serialized_name="totalIncludedQuantity",
+            flags={"read_only": True},
+        )
+        meter_details_read.unit = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        _schema.meter_category = cls._schema_meter_details_read.meter_category
+        _schema.meter_location = cls._schema_meter_details_read.meter_location
+        _schema.meter_name = cls._schema_meter_details_read.meter_name
+        _schema.meter_sub_category = cls._schema_meter_details_read.meter_sub_category
+        _schema.pretax_standard_rate = cls._schema_meter_details_read.pretax_standard_rate
+        _schema.service_name = cls._schema_meter_details_read.service_name
+        _schema.service_tier = cls._schema_meter_details_read.service_tier
+        _schema.total_included_quantity = cls._schema_meter_details_read.total_included_quantity
+        _schema.unit = cls._schema_meter_details_read.unit
 
 
 __all__ = ["Show"]

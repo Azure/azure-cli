@@ -13,10 +13,9 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "consumption usage",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Inspect the usage of Azure resources.
+    """Manage Usage Detail
     """
     pass
 

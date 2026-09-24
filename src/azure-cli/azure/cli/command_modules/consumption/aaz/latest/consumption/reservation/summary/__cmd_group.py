@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "consumption reservation summary",
 )
 class __CMDGroup(AAZCommandGroup):
-    """List reservation summaries.
+    """Manage Reservation Summary
     """
     pass
 
