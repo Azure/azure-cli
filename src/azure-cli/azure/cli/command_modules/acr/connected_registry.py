@@ -365,11 +365,14 @@ def acr_connected_registry_delete(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
-    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
-        connected_registry_name, registry_name), yes)
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
+        extra_msg = ""
+        if not cleanup and _get_current_auth_type(connected_registry) == AUTH_TYPE_SYNC_TOKEN:
+            extra_msg = " without cleanup flag enabled"
+        user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
+            connected_registry_name, registry_name, extra_msg), yes)
         result = client.begin_delete(resource_group_name, registry_name, connected_registry_name).result()
         if _get_current_auth_type(connected_registry) == AUTH_TYPE_MANAGED_IDENTITY:
             if cleanup:
