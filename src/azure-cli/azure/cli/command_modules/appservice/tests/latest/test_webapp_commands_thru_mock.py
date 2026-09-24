@@ -92,7 +92,11 @@ class TestSecureBuildMocked(unittest.TestCase):
 
         result = show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp', slot='staging', rescan=True)
 
-        self.assertEqual(result, report)
+        self.assertEqual(result['summary'], report['summary'])
+        self.assertEqual(result['findings'], report['findings'])
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/api/securebuild')
         requests_get_mock.assert_called_once_with(
             'https://myapp.scm.azurewebsites.net/api/securebuild',
             headers={'Authorization': 'Bearer token'},
@@ -177,6 +181,9 @@ class TestTroubleshootDeploymentMocked(unittest.TestCase):
         self.assertEqual(result['state'], 'RuntimeSuccessful')
         self.assertFalse(result['inProgress'])
         self.assertEqual(result['runtime']['instancesSuccessful'], 2)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1')
         requests_get_mock.assert_called_once_with(
             'https://myapp.scm.azurewebsites.net/api/deployments/latest',
             headers={'Authorization': 'Bearer token'},
@@ -207,6 +214,24 @@ class TestTroubleshootDeploymentMocked(unittest.TestCase):
         self.assertTrue(result['inProgress'])
         self.assertFalse(result['active'])
         self.assertEqual(result['kudu']['statusCode'], 202)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://scm/api/deployments/deployment-1')
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_id_links_to_deployment_list(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {'status': 4, 'complete': True, 'active': True}
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
 
     @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
@@ -221,6 +246,7 @@ class TestTroubleshootDeploymentMocked(unittest.TestCase):
         self.assertEqual(result['state'], 'NoDeployment')
         self.assertFalse(result['inProgress'])
         self.assertEqual(result['slot'], 'staging')
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
 
     def test_troubleshoot_deployment_table_output(self):
         rows = transform_troubleshoot_deployment_output({

@@ -6919,6 +6919,7 @@ def _request_secure_build_report(cmd, resource_group_name, name, slot=None, resc
         raise AzureResponseError('The Secure Build endpoint returned invalid JSON.') from ex
     if not isinstance(report, dict):
         raise AzureResponseError('The Secure Build endpoint returned an unexpected response.')
+    report['kuduUrl'] = report_url
     return report
 
 
@@ -6926,7 +6927,10 @@ def show_secure_build_report(cmd, resource_group_name, name, slot=None, rescan=F
     _ensure_linux_webapp(
         cmd, resource_group_name, name, slot,
         command_label="'az webapp secure-build show'")
-    return _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
+    report = _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
+    logger.warning('View Secure Build analysis in Kudu: %s', report['kuduUrl'])
+    logger.warning('Kudu access is required to open this link.')
+    return report
 
 
 def _secure_build_command(name, resource_group_name, slot=None):
@@ -6962,12 +6966,13 @@ def _show_secure_build_after_deployment(params):
         str((finding.get('advisory') or {}).get('severity', '')).upper() == 'CRITICAL')
     logger.warning(
         'Secure Build analysis: %s package(s) assessed, %s vulnerable package(s), '
-        '%s vulnerability finding(s), %s critical. Run \'%s\' for the full report.',
+        '%s vulnerability finding(s), %s critical. Run \'%s\' for the full report. View in Kudu: %s',
         summary.get('packagesAssessed', 'unknown'),
         summary.get('vulnerablePackages', 'unknown'),
         summary.get('vulnerabilitiesFound', len(findings)),
         critical_findings,
-        command)
+        command,
+        report['kuduUrl'])
 
 
 _KUDU_DEPLOYMENT_STATES = {
@@ -7026,7 +7031,7 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
             "Failed to connect to deployment status for web app '{}'.".format(name)) from ex
 
     if response.status_code == 404:
-        return {
+        result = {
             'name': name,
             'resourceGroup': resource_group_name,
             'slot': slot,
@@ -7034,8 +7039,12 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
             'inProgress': False,
             'complete': False,
             'active': False,
+            'kuduUrl': '{}/api/deployments'.format(scm_url),
             'kudu': {'reachable': True, 'statusCode': 404},
         }
+        logger.warning('View deployments in Kudu: %s', result['kuduUrl'])
+        logger.warning('Kudu access is required to open this link.')
+        return result
     if response.status_code == 401:
         raise UnauthorizedError('Authentication to the deployment status endpoint failed.')
     if response.status_code == 403:
@@ -7070,6 +7079,9 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
         deployment.get('end_time') or
         deployment.get('start_time') or
         deployment.get('received_time'))
+    kudu_url = '{}/api/deployments'.format(scm_url)
+    if deployment_id:
+        kudu_url += '/{}'.format(quote(str(deployment_id), safe=''))
 
     payload = {
         'name': name,
@@ -7077,6 +7089,7 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
         'slot': slot,
         'deploymentId': deployment_id,
         'activeDeploymentId': deployment_id if active else None,
+        'kuduUrl': kudu_url,
         'state': state,
         'inProgress': in_progress,
         'complete': complete,
@@ -7107,6 +7120,8 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
             'errors': arm_status.get('errors') or [],
             'failedInstancesLogs': arm_status.get('failedInstancesLogs') or [],
         }
+    logger.warning('View deployment details in Kudu: %s', payload['kuduUrl'])
+    logger.warning('Kudu access is required to open this link.')
     return payload
 
 
