@@ -5,6 +5,7 @@
 
 import ntpath
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -35,13 +36,21 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
     def tearDown(self):
         self._root.cleanup()
 
-    def _run(self, blob_names, dryrun=False):
+    def _run(self, blob_names, dryrun=False, overwrite=False):
         client = mock.Mock()
         with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=list(blob_names)), \
                 mock.patch(BLOB_MODULE + '.download_blob', side_effect=_fake_download_blob) as download:
             storage_blob_download_batch(client, source='container', destination=self.destination,
-                                        source_container_name='container', dryrun=dryrun)
+                                        source_container_name='container', dryrun=dryrun, overwrite=overwrite)
         return download
+
+    @staticmethod
+    def _make_directory_link(target, link):
+        if sys.platform == 'win32':
+            # Unlike symlinks, junctions can be created without elevated privileges
+            subprocess.run(['cmd', '/c', 'mklink', '/J', link, target], check=True, capture_output=True)
+        else:
+            os.symlink(target, link)
 
     def _files_written(self):
         return sorted(os.path.relpath(os.path.join(d, f), self.root)
@@ -76,11 +85,20 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
         with self.assertRaises(FileOperationError):
             self._run(['../../evil.txt'], dryrun=True)
 
-    @unittest.skipIf(sys.platform == 'win32', 'Creating symlinks may require elevated privileges on Windows')
-    def test_download_batch_rejects_symlink_escape(self):
+    def test_download_batch_with_overwrite_does_not_replace_files_outside_destination(self):
+        outside_file = os.path.join(self.root, 'a', 'existing.txt')
+        with open(outside_file, 'wb') as stream:
+            stream.write(b'original')
+
+        with self.assertRaises(FileOperationError):
+            self._run(['../../existing.txt'], overwrite=True)
+        with open(outside_file, 'rb') as stream:
+            self.assertEqual(stream.read(), b'original')
+
+    def test_download_batch_rejects_directory_link_escape(self):
         outside = os.path.join(self.root, 'outside')
         os.makedirs(outside)
-        os.symlink(outside, os.path.join(self.destination, 'link'))
+        self._make_directory_link(outside, os.path.join(self.destination, 'link'))
 
         with self.assertRaises(FileOperationError):
             self._run(['link/evil.txt'])
@@ -108,8 +126,9 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
 
     @unittest.skipUnless(sys.platform == 'win32', 'Windows path semantics')
     def test_download_batch_rejects_windows_traversal_blob_names(self):
-        drive = os.path.splitdrive(self.root)[0]
-        for blob_name in ('..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', drive + '/evil.txt', drive + '\\evil.txt'):
+        # drive-absolute names point back into the temp root so a vulnerable build can't write elsewhere
+        outside = os.path.join(self.root, 'evil.txt')
+        for blob_name in ('..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', outside, outside.replace('\\', '/')):
             with self.subTest(blob_name=blob_name):
                 with self.assertRaises(FileOperationError):
                     self._run([blob_name])
