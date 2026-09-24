@@ -3612,4 +3612,33 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a Python app and show a Secure Build summary after deployment.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --show-secure-build
+"""
+
+helps['webapp secure-build'] = """
+    type: group
+    short-summary: Review dependency vulnerability analysis for a web app.
+"""
+
+helps['webapp secure-build show'] = """
+    type: command
+    short-summary: Show the Secure Build report for the active deployment of a Linux web app.
+    long-summary: The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Secure Build currently supports Python dependency information produced by supported platform builds.
+    examples:
+    - name: Show the Secure Build report for the active deployment.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName
+    - name: Run a fresh analysis for a deployment slot and show critical findings.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']"
+"""
+
+helps['webapp troubleshoot deployment'] = """
+    type: command
+    short-summary: Show the latest deployment state and diagnostic information for a web app.
+    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command does not wait for deployment completion.
+    examples:
+    - name: Show the latest deployment status for a web app.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName
+    - name: Show the latest deployment status for a deployment slot.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName --slot staging
 """

@@ -48,6 +48,54 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_secure_build_output(result):
+    from collections import OrderedDict
+
+    if not isinstance(result, dict):
+        return []
+    findings = result.get('findings') or []
+    rows = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        advisory = finding.get('advisory') or {}
+        rows.append(OrderedDict([
+            ('Package', finding.get('package') or '-'),
+            ('Version', finding.get('version') or '-'),
+            ('Severity', advisory.get('severity') or '-'),
+            ('Advisory', advisory.get('cve') or advisory.get('advisoryId') or '-'),
+            ('FixedVersion', advisory.get('firstPatchedVersion') or '-'),
+        ]))
+    if rows:
+        return rows
+    return [OrderedDict([
+        ('Package', 'No vulnerabilities found'),
+        ('Version', '-'),
+        ('Severity', '-'),
+        ('Advisory', '-'),
+        ('FixedVersion', '-'),
+    ])]
+
+
+def transform_troubleshoot_deployment_output(result):
+    from collections import OrderedDict
+
+    if not isinstance(result, dict):
+        return []
+    runtime = result.get('runtime') or {}
+    return [OrderedDict([
+        ('DeploymentId', result.get('deploymentId') or '-'),
+        ('State', result.get('state') or 'Unknown'),
+        ('InProgress', result.get('inProgress', False)),
+        ('Complete', result.get('complete', False)),
+        ('Active', result.get('active', False)),
+        ('Deployer', result.get('deployer') or '-'),
+        ('LastDeploymentTime', result.get('lastDeploymentTime') or '-'),
+        ('InstancesSuccessful', runtime.get('instancesSuccessful', '-')),
+        ('InstancesFailed', runtime.get('instancesFailed', '-')),
+    ])]
+
+
 def transform_troubleshoot_config_output(result):
     """Flatten the troubleshoot config payload into a per-setting table.
 
@@ -380,6 +428,12 @@ def load_command_table(self, _):
                          table_transformer=transform_troubleshoot_config_output)
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
+        g.custom_command('deployment', 'troubleshoot_deployment',
+                         table_transformer=transform_troubleshoot_deployment_output)
+
+    with self.command_group('webapp secure-build', is_preview=True) as g:
+        g.custom_show_command('show', 'show_secure_build_report',
+                              table_transformer=transform_secure_build_output)
 
     with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
         g.custom_command('network-capture', 'collect_network_capture',

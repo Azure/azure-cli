@@ -45,8 +45,13 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _extract_runtime_error,
                                                          _log_webapp_troubleshoot_config_tip,
                                                          troubleshoot_status,
+                                                         troubleshoot_deployment,
+                                                         show_secure_build_report,
+                                                         _show_secure_build_after_deployment,
                                                          create_webapp)
-from azure.cli.command_modules.appservice.commands import transform_troubleshoot_config_output
+from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
+                                                            transform_secure_build_output,
+                                                            transform_troubleshoot_deployment_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
@@ -63,6 +68,175 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestSecureBuildMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_returns_report(self, requests_get_mock, _ensure_linux_mock,
+                                              _scm_url_mock, _headers_mock, _verify_mock):
+        report = {
+            'summary': {'packagesAssessed': 10, 'vulnerablePackages': 1, 'vulnerabilitiesFound': 1},
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'cve': 'CVE-2026-0001', 'firstPatchedVersion': '1.1'}}]
+        }
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = report
+        requests_get_mock.return_value = response
+
+        result = show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp', slot='staging', rescan=True)
+
+        self.assertEqual(result, report)
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/securebuild',
+            headers={'Authorization': 'Bearer token'},
+            params={'rescan': 'true'},
+            timeout=330,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_404_is_unavailable(self, requests_get_mock, _ensure_linux_mock,
+                                                  _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        with self.assertRaises(ResourceNotFoundError):
+            show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_summary_does_not_raise(self, request_mock, logger_mock):
+        request_mock.side_effect = AzureResponseError('scan failed')
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        logger_mock.warning.assert_called_once()
+        self.assertIn('Deployment succeeded', logger_mock.warning.call_args.args[0])
+
+    def test_secure_build_table_output(self):
+        rows = transform_secure_build_output({
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test', 'firstPatchedVersion': '1.1'}}]
+        })
+
+        self.assertEqual(rows[0]['Package'], 'sample')
+        self.assertEqual(rows[0]['Advisory'], 'GHSA-test')
+        self.assertEqual(rows[0]['FixedVersion'], '1.1')
+
+
+class TestTroubleshootDeploymentMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_combines_kudu_and_arm(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 4,
+            'status_text': '',
+            'complete': True,
+            'active': True,
+            'end_time': '2026-09-24T10:56:30Z',
+            'deployer': 'OneDeploy',
+            'provisioningState': 'Succeeded',
+            'log_url': 'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1/log',
+        }
+        requests_get_mock.return_value = response
+        arm_status_mock.return_value = {
+            'status': 'RuntimeSuccessful',
+            'numberOfInstancesInProgress': 0,
+            'numberOfInstancesSuccessful': 2,
+            'numberOfInstancesFailed': 0,
+        }
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['deploymentId'], 'deployment-1')
+        self.assertEqual(result['activeDeploymentId'], 'deployment-1')
+        self.assertEqual(result['state'], 'RuntimeSuccessful')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['runtime']['instancesSuccessful'], 2)
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            headers={'Authorization': 'Bearer token'},
+            timeout=30,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_accepts_in_progress_response(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=202)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 1,
+            'status_text': 'Building and Deploying',
+            'complete': False,
+            'active': False,
+            'start_time': '2026-09-24T10:56:30Z',
+        }
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['state'], 'Building and Deploying')
+        self.assertTrue(result['inProgress'])
+        self.assertFalse(result['active'])
+        self.assertEqual(result['kudu']['statusCode'], 202)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_history(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp', slot='staging')
+
+        self.assertEqual(result['state'], 'NoDeployment')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['slot'], 'staging')
+
+    def test_troubleshoot_deployment_table_output(self):
+        rows = transform_troubleshoot_deployment_output({
+            'deploymentId': 'deployment-1',
+            'state': 'BuildInProgress',
+            'inProgress': True,
+            'complete': False,
+            'active': False,
+            'deployer': 'OneDeploy',
+            'lastDeploymentTime': '2026-09-24T10:56:30Z',
+            'runtime': {'instancesSuccessful': 1, 'instancesFailed': 0},
+        })
+
+        self.assertEqual(rows[0]['State'], 'BuildInProgress')
+        self.assertTrue(rows[0]['InProgress'])
+        self.assertEqual(rows[0]['InstancesSuccessful'], 1)
 
 
 class TestTroubleshootConfigDiscovery(unittest.TestCase):
@@ -1658,6 +1832,17 @@ class TestOneDeployTag(unittest.TestCase):
 
         warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
         self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_webapp_deploy_passes_secure_build_option(self, site_operation_mock, perform_deploy_mock):
+        from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
+        site_operation_mock.return_value = mock.MagicMock(kind='app,linux', reserved=True)
+
+        perform_onedeploy_webapp(
+            mock.MagicMock(), 'myRG', 'myApp', show_secure_build=True)
+
+        self.assertTrue(perform_deploy_mock.call_args.args[0].show_secure_build)
 
     def test_arm_body_includes_tag(self):
         import json
