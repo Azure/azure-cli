@@ -22,7 +22,8 @@ from ._resource_config import (
     TARGET_RESOURCES,
     AUTH_TYPE,
     RESOURCE,
-    OPT_OUT_OPTION
+    OPT_OUT_OPTION,
+    TARGET_RESOURCES_BLOCKED
 )
 from ._validators import (
     get_source_resource_name,
@@ -322,6 +323,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       fabric_sql_db_uuid=None,
                       no_recreate=False,
                       ):
+    # Check if target resource is blocked
+    target_type = get_target_resource_name(cmd)
+    if target_type and target_type in TARGET_RESOURCES_BLOCKED:
+        raise ValidationError(f"Creating connections to '{target_type.value}' is no longer supported. "
+                              "This resource type has been deprecated and blocked.")
+
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
     config_action = 'optOut' if (opt_out_list is not None and
@@ -705,6 +712,11 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       connstr_props=None,           # Resource.FabricSql
                       opt_out_list=None,
                       ):
+    # Check if target resource is blocked
+    target_type = get_target_resource_name(cmd)
+    if target_type and target_type in TARGET_RESOURCES_BLOCKED:
+        raise ValidationError(f"Updating connections to '{target_type.value}' is no longer supported. "
+                              "This resource type has been deprecated and blocked.")
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
 
