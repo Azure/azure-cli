@@ -8,9 +8,9 @@ import datetime as dt
 from datetime import datetime
 import os
 import random
+import re
 import subprocess
 import secrets
-import shlex
 import string
 import yaml
 from knack.log import get_logger
@@ -34,6 +34,28 @@ DEFAULT_LOCATION_MySQL = 'westus2'
 AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_MYSQL_CONNECTION_STRING = 'AZURE_MYSQL_CONNECTION_STRING'
 GITHUB_ACTION_PATH = '/.github/workflows/'
+
+
+def validate_git_ref(git_ref):
+    """Validate git reference to prevent shell injection attacks.
+    
+    Rejects shell metacharacters: ; $ ( ) ` | & < > " ' \\ \n
+    
+    Args:
+        git_ref: The git reference (branch, tag, or action name) to validate
+        
+    Raises:
+        InvalidArgumentValueError: If the reference contains shell metacharacters
+    """
+    if not isinstance(git_ref, str) or not git_ref:
+        raise InvalidArgumentValueError('Git reference must be a non-empty string')
+    
+    # Pattern to detect shell metacharacters and command injection attempts
+    if re.search(r'[;&$`|<>"\'\\]|\n', git_ref):
+        raise InvalidArgumentValueError(
+            'Git reference contains invalid characters. Allowed: alphanumeric, -, _, ., /')
+    
+    return git_ref
 
 
 def resolve_poller(result, cli_ctx, name):
@@ -298,15 +320,40 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
-def run_subprocess(command, stdout_show=None):
-    commands = shlex.split(command)
-    if stdout_show:
-        process = subprocess.Popen(commands)
-    else:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.wait()
-    if process.returncode:
-        logger.warning(process.stderr.read().strip().decode('UTF-8'))
+def run_subprocess(args, stdout_show=None, stdin_file=None):
+    """Run a subprocess with list-based arguments to prevent command injection.
+    
+    Args:
+        args: List of command arguments (e.g., ['gh', 'secret', 'set', 'KEY', '--repo', 'repo'])
+        stdout_show: If True, display stdout. If None, capture it.
+        stdin_file: Optional file path to use as stdin (replaces shell redirection)
+        
+    Raises:
+        CLIError: If the subprocess returns a non-zero exit code
+    """
+    if not isinstance(args, list):
+        raise CLIError('run_subprocess requires args to be a list, not a string')
+    
+    stdin_handle = None
+    try:
+        if stdin_file:
+            stdin_handle = open(stdin_file, 'r')
+        
+        if stdout_show:
+            process = subprocess.Popen(args, stdin=stdin_handle)
+        else:
+            process = subprocess.Popen(args, stdin=stdin_handle, 
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.wait()
+        
+        if process.returncode:
+            if not stdout_show:
+                stderr_output = process.stderr.read().strip().decode('UTF-8')
+                logger.warning(stderr_output)
+            raise CLIError('Command failed with exit code {}'.format(process.returncode))
+    finally:
+        if stdin_handle:
+            stdin_handle.close()
 
 
 def register_credential_secrets(cmd, database_engine, server, repository):
@@ -330,14 +377,18 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
-    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
-    os.remove(credential_file)
+    try:
+        run_subprocess(['gh', 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository], 
+                       stdin_file=credential_file)
+    finally:
+        if os.path.exists(credential_file):
+            os.remove(credential_file)
 
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
     logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository, '-b', connection_string])
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
