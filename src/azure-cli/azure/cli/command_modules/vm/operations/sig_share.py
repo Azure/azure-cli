@@ -207,7 +207,36 @@ class SigShareWait(_SigWait):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.gallery_name._help['short-summary'] = 'Gallery name.'
+
+        args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand query option to apply on the operation.",
+            enum={"SharingProfile/Groups": "SharingProfile/Groups"},
+        )
+        args_schema.select = AAZStrArg(
+            options=["--select"],
+            help="The select expression to apply on the operation.",
+            enum={"Permissions": "Permissions"},
+        )
+
         args_schema.expand._registered = False
         args_schema.select._registered = False
 
         return args_schema
+
+    class GalleriesGet(_SigWait.GalleriesGet):
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
+                **self.serialize_query_param(
+                    "$select", self.ctx.args.select,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2026-03-03",
+                    required=True,
+                ),
+            }
+            return parameters
