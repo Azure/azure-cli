@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig image-version list-community",
+    "sig image-version list-soft-deleted",
 )
-class ListCommunity(AAZCommand):
-    """List VM Image Versions in a gallery community
+class ListSoftDeleted(AAZCommand):
+    """List soft-deleted resources of an artifact in the gallery, such as soft-deleted gallery image version of an image.
 
-    :example: List an image versions in a gallery community.
-        az sig image-version list-community --public-gallery-name publicGalleryName --gallery-image-definition MyImage --location myLocation
+    :example: List soft-deleted image versions for an image definition
+        az sig image-version list-soft-deleted --resource-group myResourceGroup --gallery-name myGalleryName --gallery-image-definition myGalleryImageName
     """
 
     _aaz_info = {
         "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}/images/{}/versions", "2026-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/softdeletedartifacttypes/{}/artifacts/{}/versions", "2026-03-03"],
         ]
     }
 
@@ -46,29 +46,38 @@ class ListCommunity(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.gallery_image_definition = AAZStrArg(
-            options=["-i", "--gallery-image-definition"],
-            help="The name of the community gallery image definition from which the image versions are to be listed.",
+            options=["-i", "--gallery-image-name", "--gallery-image-definition"],
+            help="The artifact name to be listed. If artifact type is Images, then the artifact name should be the gallery image name.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="",
+                pattern="^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$",
             ),
         )
-        _args_schema.location = AAZResourceLocationArg(
+        _args_schema.artifact_type = AAZStrArg(
+            options=["--artifact-type"],
+            help="The type of the artifact to be listed, such as gallery image version.",
             required=True,
+            default="Images",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+([_]?[a-zA-Z0-9]+)*$",
+            ),
         )
-        _args_schema.public_gallery_name = AAZStrArg(
-            options=["--public-gallery-name"],
-            help="The public name of the community gallery.",
+        _args_schema.gallery_name = AAZStrArg(
+            options=["-r", "--gallery-name"],
+            help="The name of the Shared Image Gallery.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CommunityGalleryImageVersionsList(ctx=self.ctx)()
+        self.SoftDeletedResourceListByArtifactName(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -84,7 +93,7 @@ class ListCommunity(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class CommunityGalleryImageVersionsList(AAZHttpOperation):
+    class SoftDeletedResourceListByArtifactName(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -98,7 +107,7 @@ class ListCommunity(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/communityGalleries/{publicGalleryName}/images/{galleryImageName}/versions",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/softdeletedartifacttypes/{artifactType}/artifacts/{artifactName}/versions",
                 **self.url_parameters
             )
 
@@ -114,15 +123,19 @@ class ListCommunity(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "galleryImageName", self.ctx.args.gallery_image_definition,
+                    "artifactName", self.ctx.args.gallery_image_definition,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "location", self.ctx.args.location,
+                    "artifactType", self.ctx.args.artifact_type,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "publicGalleryName", self.ctx.args.public_gallery_name,
+                    "galleryName", self.ctx.args.gallery_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -180,11 +193,11 @@ class ListCommunity(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.identifier = AAZObjectType(
-                flags={"client_flatten": True},
+            _element.id = AAZStrType(
+                flags={"read_only": True},
             )
             _element.location = AAZStrType(
-                flags={"read_only": True},
+                flags={"required": True},
             )
             _element.name = AAZStrType(
                 flags={"read_only": True},
@@ -192,81 +205,62 @@ class ListCommunity(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            identifier = cls._schema_on_200.value.Element.identifier
-            identifier.unique_id = AAZStrType(
-                serialized_name="uniqueId",
-            )
-
             properties = cls._schema_on_200.value.Element.properties
-            properties.artifact_tags = AAZDictType(
-                serialized_name="artifactTags",
-            )
             properties.consumption_end_time = AAZStrType(
                 serialized_name="consumptionEndTime",
                 flags={"read_only": True},
             )
-            properties.disclaimer = AAZStrType()
-            properties.end_of_life_date = AAZStrType(
-                serialized_name="endOfLifeDate",
-            )
-            properties.exclude_from_latest = AAZBoolType(
-                serialized_name="excludeFromLatest",
-            )
-            properties.image_state = AAZStrType(
-                serialized_name="imageState",
+            properties.hard_deletion_target_time = AAZStrType(
+                serialized_name="hardDeletionTargetTime",
                 flags={"read_only": True},
             )
-            properties.published_date = AAZStrType(
-                serialized_name="publishedDate",
+            properties.resource_arm_id = AAZStrType(
+                serialized_name="resourceArmId",
             )
-            properties.storage_profile = AAZObjectType(
-                serialized_name="storageProfile",
+            properties.soft_deleted_artifact_type = AAZStrType(
+                serialized_name="softDeletedArtifactType",
             )
-
-            artifact_tags = cls._schema_on_200.value.Element.properties.artifact_tags
-            artifact_tags.Element = AAZStrType()
-
-            storage_profile = cls._schema_on_200.value.Element.properties.storage_profile
-            storage_profile.data_disk_images = AAZListType(
-                serialized_name="dataDiskImages",
-            )
-            storage_profile.os_disk_image = AAZObjectType(
-                serialized_name="osDiskImage",
+            properties.soft_deleted_time = AAZStrType(
+                serialized_name="softDeletedTime",
             )
 
-            data_disk_images = cls._schema_on_200.value.Element.properties.storage_profile.data_disk_images
-            data_disk_images.Element = AAZObjectType()
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
-            _element = cls._schema_on_200.value.Element.properties.storage_profile.data_disk_images.Element
-            _element.disk_size_gb = AAZIntType(
-                serialized_name="diskSizeGB",
-                flags={"read_only": True},
-            )
-            _element.host_caching = AAZStrType(
-                serialized_name="hostCaching",
-            )
-            _element.lun = AAZIntType(
-                flags={"required": True},
-            )
-
-            os_disk_image = cls._schema_on_200.value.Element.properties.storage_profile.os_disk_image
-            os_disk_image.disk_size_gb = AAZIntType(
-                serialized_name="diskSizeGB",
-                flags={"read_only": True},
-            )
-            os_disk_image.host_caching = AAZStrType(
-                serialized_name="hostCaching",
-            )
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListCommunityHelper:
-    """Helper class for ListCommunity"""
+class _ListSoftDeletedHelper:
+    """Helper class for ListSoftDeleted"""
 
 
-__all__ = ["ListCommunity"]
+__all__ = ["ListSoftDeleted"]

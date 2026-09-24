@@ -8316,8 +8316,8 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
+    @ResourceGroupPreparer(location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -8334,7 +8334,7 @@ class VMGalleryImage(ScenarioTest):
             'des1': self.create_random_name(prefix='des1-', length=20),
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --location {location}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1',
@@ -8343,14 +8343,14 @@ class VMGalleryImage(ScenarioTest):
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
         self.kwargs['image_id'] = res['id']
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
                  '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
 
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
-        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('image create -g {rg} -n {captured} --location {location} --source {vm}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
                  checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
 
@@ -8366,7 +8366,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
                      self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
                      self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
-                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
+                     self.check('publishingProfile.targetRegions[1].name', 'West US'),
                      self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
                      self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
                  ])
@@ -8379,7 +8379,7 @@ class VMGalleryImage(ScenarioTest):
             'kid': kid
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --location {location} --key-url {kid} --source-vault {vault}')
         des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
         des1_sp_id = des1_show_output['identity']['principalId']
         des1_id = des1_show_output['id']
@@ -8399,14 +8399,14 @@ class VMGalleryImage(ScenarioTest):
 
         # Test --target-region-encryption
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}'),
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 '
+        self.cmd('vm create -g {rg} -n {vm2} --location {location} --image {image_id} --admin-username clitest1 '
                  '--generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3',
                  checks=self.check('powerState', 'VM running'))
 
@@ -8835,7 +8835,7 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
             ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -8859,7 +8859,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey ')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVMEncryptionType', 'EncryptedWithPmk'),
         ])
@@ -9240,6 +9240,87 @@ class VMGalleryImage(ScenarioTest):
             time.sleep(30)
 
         self.cmd('sig delete -g {rg} -r {gallery}')
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_policy_', location='westus')
+    def test_gallery_soft_delete_policy_and_recycle_bin(self, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': self.create_random_name('sig_', 10),
+            'image_name': self.create_random_name('img_', 10),
+            'version': '1.1.1',
+            'loc': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery} --location {loc} --soft-delete true '
+                 '--soft-delete-retention-period 30 --soft-delete-grace-period 7', checks=[
+            self.check('location', '{loc}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 30),
+            self.check('softDeletePolicy.gracePeriodInDays', 7),
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery} --soft-delete-retention-period 31 '
+                 '--soft-delete-grace-period 8', checks=[
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 31),
+            self.check('softDeletePolicy.gracePeriodInDays', 8),
+        ])
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --os-type linux --os-state Specialized '
+                 '--publisher publisher1 --offer offer1 --sku sku1 --hyper-v-generation v1')
+
+        vm_id = self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} --image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--size Standard_D2s_v3 --admin-username clitest1 --generate-ssh-key '
+            '--public-ip-address "" --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs['vm_id'] = vm_id
+
+        version = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} '
+            '--gallery-image-definition {image_name} --gallery-image-version {version} '
+            '--virtual-machine {vm_id}', checks=[
+                self.check('location', '{loc}'),
+                self.check('name', '{version}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('storageProfile.source.virtualMachineId', '{vm_id}'),
+            ]).get_output_in_json()
+        self.kwargs['version_id'] = version['id']
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].resourceArmId', '{version_id}'),
+            self.check('[0].softDeletedArtifactType', 'Images'),
+            self.exists('[0].softDeletedTime'),
+            self.exists('[0].consumptionEndTime'),
+            self.exists('[0].hardDeletionTargetTime'),
+        ])
+
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}', checks=[
+            self.check('name', '{version}'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version} '
+                 '--bypass-soft-delete')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 0),
+        ])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
