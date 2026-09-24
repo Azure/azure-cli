@@ -22,7 +22,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 apt-get update
 # uuid-dev is used to build _uuid module: https://github.com/python/cpython/pull/3796
 # libbz2-dev is used to install bz2 module: https://github.com/Azure/azure-cli/pull/32163
-apt-get install -y libssl-dev libffi-dev python3-dev zlib1g-dev uuid-dev wget debhelper libbz2-dev
+# lsb-release is used to determine whether install pymsalruntime
+apt-get install -y libssl-dev libffi-dev python3-dev zlib1g-dev uuid-dev wget debhelper libbz2-dev lsb-release
 # Git is not strictly necessary, but it would allow building an experimental package
 # with dependency which is currently only available in its git repo feature branch.
 apt-get install -y git
@@ -44,6 +45,10 @@ export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
+# Only install pymsalruntime for Ubuntu, as it does not fully support other Linux distributions
+if [[ "$(lsb_release --id --short)" == "Ubuntu" && "$(dpkg --print-architecture)" == "amd64" ]]; then
+    pip3 install pymsalruntime==0.20.2
+fi
 $WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 
 # Create create directory for debian build
