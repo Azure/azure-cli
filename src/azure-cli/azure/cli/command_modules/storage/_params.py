@@ -224,9 +224,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_group='Azure Files Identity Based Authentication',
         help='Default share permission for users using Kerberos authentication if RBAC role is not assigned.')
 
-    t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
+    t_blob_tier = self.get_sdk('_generated.models._enums#AccessTier',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
-    t_rehydrate_priority = self.get_sdk('_generated.models._azure_blob_storage_enums#RehydratePriority',
+    t_rehydrate_priority = self.get_sdk('_generated.models._enums#RehydratePriority',
                                         resource_type=ResourceType.DATA_STORAGE_BLOB)
     tier_type = CLIArgumentType(
         arg_type=get_enum_type(t_blob_tier),
@@ -956,7 +956,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob list') as c:
         from ._validators import get_include_help_string
-        t_blob_include = self.get_sdk('_generated.models._azure_blob_storage_enums#ListBlobsIncludeItem',
+        t_blob_include = self.get_sdk('_generated.models._enums#ListBlobsIncludeItem',
                                       resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_container_arguments()
         c.argument('delimiter',
@@ -1975,7 +1975,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
 
     with self.argument_context('storage share delete') as c:
-        t_delete_snapshot = self.get_sdk('_generated.models._azure_file_storage_enums#DeleteSnapshotsOptionType',
+        t_delete_snapshot = self.get_sdk('_generated.models._enums#DeleteSnapshotsOptionType',
                                          resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
         c.argument('delete_snapshots', arg_type=get_enum_type(t_delete_snapshot),
@@ -2131,14 +2131,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('group', help='Only applicable to NFS Files. Only work together with parameter '
                               '`--owner-copy-mode Override`. The owner group identifier (GID) '
                               'to be set on the directory. The default value is 0 (root group).')
-        t_file_mode_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#ModeCopyMode',
+        t_file_mode_copy_mode_type = self.get_sdk('_generated.models._enums#ModeCopyMode',
                                                   resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('file_mode_copy_mode',
                 arg_type=get_enum_type(t_file_mode_copy_mode_type),
                 help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
                      'Determines the copy behavior of the mode bits of the destination file. '
                      'If not populated, the destination file will have the default File Mode.')
-        t_owner_copy_mode_type = self.get_sdk('_generated.models._azure_file_storage_enums#OwnerCopyMode',
+        t_owner_copy_mode_type = self.get_sdk('_generated.models._enums#OwnerCopyMode',
                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)
         c.extra('owner_copy_mode', arg_type=get_enum_type(t_owner_copy_mode_type),
                 help='Only applicable to NFS Files. Applicable only when the copy source is a File. '
