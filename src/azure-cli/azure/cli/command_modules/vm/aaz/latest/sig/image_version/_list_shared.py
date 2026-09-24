@@ -25,9 +25,9 @@ class ListShared(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/sharedgalleries/{}/images/{}/versions", "2023-07-03"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/sharedgalleries/{}/images/{}/versions", "2026-03-03"],
         ]
     }
 
@@ -52,11 +52,17 @@ class ListShared(AAZCommand):
             options=["-i", "--gallery-image-definition"],
             help="The name of the Shared Gallery Image Definition from which the Image Versions are to be listed.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_unique_name = AAZStrArg(
             options=["--gallery-unique-name"],
             help="The unique name of the Shared Gallery.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.location = AAZResourceLocationArg(
             required=True,
@@ -141,7 +147,7 @@ class ListShared(AAZCommand):
                     "sharedTo", self.ctx.args.shared_to,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-07-03",
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }
@@ -207,11 +213,19 @@ class ListShared(AAZCommand):
             properties.artifact_tags = AAZDictType(
                 serialized_name="artifactTags",
             )
+            properties.consumption_end_time = AAZStrType(
+                serialized_name="consumptionEndTime",
+                flags={"read_only": True},
+            )
             properties.end_of_life_date = AAZStrType(
                 serialized_name="endOfLifeDate",
             )
             properties.exclude_from_latest = AAZBoolType(
                 serialized_name="excludeFromLatest",
+            )
+            properties.image_state = AAZStrType(
+                serialized_name="imageState",
+                flags={"read_only": True},
             )
             properties.published_date = AAZStrType(
                 serialized_name="publishedDate",

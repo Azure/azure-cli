@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-03-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2026-03-03"],
         ]
     }
 
@@ -47,21 +47,11 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.expand = AAZStrArg(
-            options=["--expand"],
-            help="The expand query option to apply on the operation.",
-            enum={"SharingProfile/Groups": "SharingProfile/Groups"},
-        )
-        _args_schema.select = AAZStrArg(
-            options=["--select"],
-            help="The select expression to apply on the operation.",
-            enum={"Permissions": "Permissions"},
         )
         return cls._args_schema
 
@@ -130,13 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
-                **self.serialize_query_param(
-                    "$select", self.ctx.args.select,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2025-03-03",
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }
@@ -302,8 +286,14 @@ class Show(AAZCommand):
             )
 
             soft_delete_policy = cls._schema_on_200.properties.soft_delete_policy
+            soft_delete_policy.grace_period_in_days = AAZIntType(
+                serialized_name="gracePeriodInDays",
+            )
             soft_delete_policy.is_soft_delete_enabled = AAZBoolType(
                 serialized_name="isSoftDeleteEnabled",
+            )
+            soft_delete_policy.retention_period_in_days = AAZIntType(
+                serialized_name="retentionPeriodInDays",
             )
 
             system_data = cls._schema_on_200.system_data
