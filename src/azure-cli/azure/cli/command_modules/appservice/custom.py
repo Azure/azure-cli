@@ -45,7 +45,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.style import Style, print_styled_text
+from azure.cli.core.style import Style, format_styled_text, print_styled_text
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
@@ -6929,15 +6929,7 @@ def show_secure_build_report(cmd, resource_group_name, name, slot=None, rescan=F
     _ensure_linux_webapp(
         cmd, resource_group_name, name, slot,
         command_label="'az webapp secure-build show'")
-    report = _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
-    from azure.cli.core._output import get_output_format
-    output_format = get_output_format(cmd.cli_ctx) if getattr(cmd.cli_ctx, 'invocation', None) else None
-    if output_format == 'table':
-        _render_secure_build_table_report(report)
-        return []
-    _log_secure_build_report_summary(report)
-    _print_secure_build_kudu_footer(report)
-    return report
+    return _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
 
 
 def _secure_build_command(name, resource_group_name, slot=None):
@@ -6948,7 +6940,10 @@ def _secure_build_command(name, resource_group_name, slot=None):
     return command
 
 
-def _log_secure_build_report_summary(report):
+def _log_secure_build_report_summary(report, file=None):
+    from collections import OrderedDict
+
+    output_file = file or sys.stderr
     summary = report.get('summary') if isinstance(report.get('summary'), dict) else {}
     runtime = report.get('runtime') if isinstance(report.get('runtime'), dict) else {}
     findings = [finding for finding in report.get('findings') or [] if isinstance(finding, dict)]
@@ -6957,15 +6952,15 @@ def _log_secure_build_report_summary(report):
     vulnerability_count = summary.get('vulnerabilitiesFound', len(findings))
     affected_package_count = summary.get('vulnerablePackages', 'Unknown')
 
-    rows = [
+    scan_context = OrderedDict([
         ('Deployment ID', report.get('deploymentId') or 'Unknown'),
         ('Runtime', runtime_name),
         ('Packages scanned', summary.get('packagesAssessed', 'Unknown')),
-    ]
+    ])
     if report.get('generatedAtUtc'):
-        rows.append(('Report generated', report['generatedAtUtc']))
-    scan_summary = tabulate(rows, tablefmt='plain', disable_numparse=True)
-    rule = '-' * 72
+        scan_context['Report generated'] = report['generatedAtUtc']
+    scan_summary = tabulate(
+        [scan_context], headers='keys', tablefmt='simple', disable_numparse=True)
 
     if findings:
         vulnerability_label = '{} critical {}'.format(
@@ -6975,29 +6970,31 @@ def _log_secure_build_report_summary(report):
             affected_package_count,
             'package' if affected_package_count == 1 else 'packages')
         print_styled_text([
-            (Style.HIGHLIGHT, '\nSecure Build scan completed\n'),
-            (Style.PRIMARY, '{}\nSummary\nSecure Build found '.format(rule)),
+            (Style.HIGHLIGHT, '\nSecure Build: Open source vulnerabilities in app packages\n'),
+            (Style.PRIMARY, 'Secure Build found '),
             (Style.ERROR, vulnerability_label),
-            (Style.PRIMARY, ' in {}.\n\n{}\n{}'.format(
-                affected_package_label, scan_summary, rule)),
-        ], file=sys.stderr)
+            (Style.PRIMARY, ' in {}.\n\n{}'.format(affected_package_label, scan_summary)),
+        ], file=output_file)
     else:
         print_styled_text([
-            (Style.HIGHLIGHT, '\nSecure Build scan completed\n'),
-            (Style.PRIMARY, '{}\nSummary\n'.format(rule)),
+            (Style.HIGHLIGHT, '\nSecure Build: Open source vulnerabilities in app packages\n'),
             (Style.SUCCESS, 'Secure Build detected no critical vulnerabilities. '
                             'The scanned packages have no matching alerts.'),
-            (Style.PRIMARY, '\n\n{}\n{}'.format(scan_summary, rule)),
-        ], file=sys.stderr)
+            (Style.PRIMARY, '\n\n{}'.format(scan_summary)),
+        ], file=output_file)
 
 
 def _secure_build_finding_rows(report):
     from collections import OrderedDict
 
     rows = []
-    if not isinstance(report, dict):
+    if isinstance(report, dict):
+        findings = report.get('findings') or []
+    elif isinstance(report, list):
+        findings = report
+    else:
         return rows
-    for finding in report.get('findings') or []:
+    for finding in findings:
         if not isinstance(finding, dict):
             continue
         advisory = finding.get('advisory') or {}
@@ -7016,20 +7013,26 @@ def _secure_build_finding_rows(report):
 def _terminal_hyperlink(label, url):
     if not url:
         return label
-    return '\x1b]8;;{0}\x1b\\\x1b[4m{1}\x1b[24m\x1b]8;;\x1b\\'.format(url, label)
+    styled_label = format_styled_text((Style.HYPERLINK, label))
+    return '\x1b]8;;{0}\x1b\\{1}\x1b]8;;\x1b\\'.format(url, styled_label)
 
 
-def _print_secure_build_kudu_footer(report, include_rule=False):
-    prefix = '{}\n'.format('-' * 72) if include_rule else ''
-    print_styled_text((Style.PRIMARY, '{}Source: GitHub Advisory Database'.format(prefix)), file=sys.stderr)
+def _print_secure_build_kudu_footer(report, file=None):
+    output_file = file or sys.stderr
     print_styled_text([
-        (Style.PRIMARY, '\nFull report:\n'),
-        ('\x1b[4m', report['kuduUrl']),
-    ], file=sys.stderr)
+        (Style.PRIMARY, '\nSource: '),
+        (Style.HYPERLINK, 'https://github.com/advisories'),
+        (Style.PRIMARY, ' (Critical vulnerabilities only).'),
+    ], file=output_file)
+    print_styled_text([
+        (Style.PRIMARY, '\nTo view the full report, visit: '),
+        (Style.HYPERLINK, report['kuduUrl']),
+    ], file=output_file)
 
 
-def _render_secure_build_table_report(report):
-    _log_secure_build_report_summary(report)
+def _render_secure_build_table_report(report, file=None):
+    output_file = file or sys.stderr
+    _log_secure_build_report_summary(report, file=output_file)
     finding_rows = _secure_build_finding_rows(report)
     if finding_rows:
         finding_count = len([
@@ -7050,8 +7053,8 @@ def _render_secure_build_table_report(report):
             findings_table = findings_table.replace(label, _terminal_hyperlink(label, url), 1)
         print_styled_text((
             Style.PRIMARY,
-            '\n{}\n{}'.format(heading, findings_table)), file=sys.stderr)
-    _print_secure_build_kudu_footer(report, include_rule=bool(finding_rows))
+            '\n{}\n{}'.format(heading, findings_table)), file=output_file)
+    _print_secure_build_kudu_footer(report, file=output_file)
 
 
 def _show_secure_build_after_deployment(params):
@@ -7071,7 +7074,7 @@ def _show_secure_build_after_deployment(params):
         logger.debug('Secure Build report retrieval failed after deployment: %s', ex, exc_info=True)
         return
 
-    logger.warning("Run '%s' to view findings in the CLI.", command)
+    logger.warning("Run '%s' to view findings from this report in the CLI.", command)
     _log_secure_build_report_summary(report)
     _print_secure_build_kudu_footer(report)
 

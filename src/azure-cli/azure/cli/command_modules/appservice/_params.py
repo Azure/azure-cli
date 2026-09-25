@@ -1162,7 +1162,8 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_three_state_flag(), default=True)
         c.argument('tag', help='Linux only. A friendly name used to identify the deployment.')
         c.argument('show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
-                   help='Show a Secure Build summary after deployment. This option can add several minutes to the command.')
+                   help='Show a Secure Build summary and full-report link after deployment. '
+                        'This option can add several minutes to the command.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')

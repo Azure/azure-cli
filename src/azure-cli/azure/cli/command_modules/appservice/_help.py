@@ -3612,24 +3612,24 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
-    - name: Deploy a Python app and show a Secure Build summary after deployment.
+    - name: Deploy a Python app and show a Secure Build summary and full-report link.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --show-secure-build
 """
 
 helps['webapp secure-build'] = """
     type: group
-    short-summary: Review dependency vulnerability analysis for a web app.
+    short-summary: Review open source vulnerabilities in a web app's packages.
 """
 
 helps['webapp secure-build show'] = """
     type: command
     short-summary: Show the Secure Build report for the active deployment of a Linux web app.
-    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Table output shows up to 20 findings; use JSON output or the provided Kudu link for the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Default table output shows a human-readable summary and up to 20 findings. Standard --query processing remains available and controls the resulting table shape. Use JSON output or the provided Kudu link for the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
     examples:
     - name: Show the Secure Build report for the active deployment.
-      text: az webapp secure-build show --resource-group ResourceGroup --name AppName
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output table
     - name: Run a fresh analysis for a deployment slot and show critical findings.
-      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']"
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']" --output table
 """
 
 helps['webapp troubleshoot deployment'] = """

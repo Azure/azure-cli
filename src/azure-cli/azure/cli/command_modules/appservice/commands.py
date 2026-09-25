@@ -49,7 +49,11 @@ def transform_runtime_list_output(result):
 
 
 def transform_secure_build_output(result):
-    from .custom import _secure_build_finding_rows
+    import sys
+    from .custom import _render_secure_build_table_report, _secure_build_finding_rows
+    if isinstance(result, dict):
+        _render_secure_build_table_report(result, file=sys.stdout)
+        return []
     rows = _secure_build_finding_rows(result)
     for row in rows:
         row.pop('Details URL', None)
