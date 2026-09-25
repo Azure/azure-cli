@@ -28,6 +28,7 @@ from nacl import encoding, public
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.primitives import hashes
 from fabric import Connection
+from tabulate import tabulate
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -44,6 +45,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
+from azure.cli.core.style import Style, print_styled_text
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
@@ -6919,7 +6921,7 @@ def _request_secure_build_report(cmd, resource_group_name, name, slot=None, resc
         raise AzureResponseError('The Secure Build endpoint returned invalid JSON.') from ex
     if not isinstance(report, dict):
         raise AzureResponseError('The Secure Build endpoint returned an unexpected response.')
-    report['kuduUrl'] = report_url
+    report['kuduUrl'] = '{}/securebuild'.format(scm_url)
     return report
 
 
@@ -6928,8 +6930,13 @@ def show_secure_build_report(cmd, resource_group_name, name, slot=None, rescan=F
         cmd, resource_group_name, name, slot,
         command_label="'az webapp secure-build show'")
     report = _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
-    logger.warning('View Secure Build analysis in Kudu: %s', report['kuduUrl'])
-    logger.warning('Kudu access is required to open this link.')
+    from azure.cli.core._output import get_output_format
+    output_format = get_output_format(cmd.cli_ctx) if getattr(cmd.cli_ctx, 'invocation', None) else None
+    if output_format == 'table':
+        _render_secure_build_table_report(report)
+        return []
+    _log_secure_build_report_summary(report)
+    _print_secure_build_kudu_footer(report)
     return report
 
 
@@ -6939,6 +6946,112 @@ def _secure_build_command(name, resource_group_name, slot=None):
     if slot:
         command += ' --slot {}'.format(slot)
     return command
+
+
+def _log_secure_build_report_summary(report):
+    summary = report.get('summary') if isinstance(report.get('summary'), dict) else {}
+    runtime = report.get('runtime') if isinstance(report.get('runtime'), dict) else {}
+    findings = [finding for finding in report.get('findings') or [] if isinstance(finding, dict)]
+    runtime_name = ' '.join(str(value) for value in (
+        runtime.get('framework'), runtime.get('version')) if value) or 'Unknown'
+    vulnerability_count = summary.get('vulnerabilitiesFound', len(findings))
+    affected_package_count = summary.get('vulnerablePackages', 'Unknown')
+
+    rows = [
+        ('Deployment ID', report.get('deploymentId') or 'Unknown'),
+        ('Runtime', runtime_name),
+        ('Packages scanned', summary.get('packagesAssessed', 'Unknown')),
+    ]
+    if report.get('generatedAtUtc'):
+        rows.append(('Report generated', report['generatedAtUtc']))
+    scan_summary = tabulate(rows, tablefmt='plain', disable_numparse=True)
+    rule = '-' * 72
+
+    if findings:
+        vulnerability_label = '{} critical {}'.format(
+            vulnerability_count,
+            'vulnerability' if vulnerability_count == 1 else 'vulnerabilities')
+        affected_package_label = '{} affected {}'.format(
+            affected_package_count,
+            'package' if affected_package_count == 1 else 'packages')
+        print_styled_text([
+            (Style.HIGHLIGHT, '\nSecure Build scan completed\n'),
+            (Style.PRIMARY, '{}\nSummary\nSecure Build found '.format(rule)),
+            (Style.ERROR, vulnerability_label),
+            (Style.PRIMARY, ' in {}.\n\n{}\n{}'.format(
+                affected_package_label, scan_summary, rule)),
+        ], file=sys.stderr)
+    else:
+        print_styled_text([
+            (Style.HIGHLIGHT, '\nSecure Build scan completed\n'),
+            (Style.PRIMARY, '{}\nSummary\n'.format(rule)),
+            (Style.SUCCESS, 'Secure Build detected no critical vulnerabilities. '
+                            'The scanned packages have no matching alerts.'),
+            (Style.PRIMARY, '\n\n{}\n{}'.format(scan_summary, rule)),
+        ], file=sys.stderr)
+
+
+def _secure_build_finding_rows(report):
+    from collections import OrderedDict
+
+    rows = []
+    if not isinstance(report, dict):
+        return rows
+    for finding in report.get('findings') or []:
+        if not isinstance(finding, dict):
+            continue
+        advisory = finding.get('advisory') or {}
+        rows.append(OrderedDict([
+            ('Component', finding.get('package') or '-'),
+            ('Installed', finding.get('version') or '-'),
+            ('Vulnerability', advisory.get('cve') or advisory.get('advisoryId') or '-'),
+            ('Fixed version', advisory.get('firstPatchedVersion') or '-'),
+            ('Details URL', advisory.get('detailsUrl')),
+        ]))
+        if len(rows) == 20:
+            break
+    return rows
+
+
+def _terminal_hyperlink(label, url):
+    if not url:
+        return label
+    return '\x1b]8;;{0}\x1b\\\x1b[4m{1}\x1b[24m\x1b]8;;\x1b\\'.format(url, label)
+
+
+def _print_secure_build_kudu_footer(report, include_rule=False):
+    prefix = '{}\n'.format('-' * 72) if include_rule else ''
+    print_styled_text((Style.PRIMARY, '{}Source: GitHub Advisory Database'.format(prefix)), file=sys.stderr)
+    print_styled_text([
+        (Style.PRIMARY, '\nFull report:\n'),
+        ('\x1b[4m', report['kuduUrl']),
+    ], file=sys.stderr)
+
+
+def _render_secure_build_table_report(report):
+    _log_secure_build_report_summary(report)
+    finding_rows = _secure_build_finding_rows(report)
+    if finding_rows:
+        finding_count = len([
+            finding for finding in report.get('findings') or [] if isinstance(finding, dict)])
+        heading = 'Critical vulnerabilities'
+        if finding_count > 20:
+            heading += ' (showing first 20 of {})'.format(finding_count)
+        else:
+            heading += ' ({})'.format(finding_count)
+        links = []
+        for row in finding_rows:
+            details_url = row.pop('Details URL', None)
+            if details_url:
+                links.append((row['Vulnerability'], details_url))
+        findings_table = tabulate(
+            finding_rows, headers='keys', tablefmt='simple', disable_numparse=True)
+        for label, url in links:
+            findings_table = findings_table.replace(label, _terminal_hyperlink(label, url), 1)
+        print_styled_text((
+            Style.PRIMARY,
+            '\n{}\n{}'.format(heading, findings_table)), file=sys.stderr)
+    _print_secure_build_kudu_footer(report, include_rule=bool(finding_rows))
 
 
 def _show_secure_build_after_deployment(params):
@@ -6958,21 +7071,9 @@ def _show_secure_build_after_deployment(params):
         logger.debug('Secure Build report retrieval failed after deployment: %s', ex, exc_info=True)
         return
 
-    summary = report.get('summary') if isinstance(report.get('summary'), dict) else {}
-    findings = report.get('findings') if isinstance(report.get('findings'), list) else []
-    critical_findings = sum(
-        1 for finding in findings
-        if isinstance(finding, dict) and
-        str((finding.get('advisory') or {}).get('severity', '')).upper() == 'CRITICAL')
-    logger.warning(
-        'Secure Build analysis: %s package(s) assessed, %s vulnerable package(s), '
-        '%s vulnerability finding(s), %s critical. Run \'%s\' for the full report. View in Kudu: %s',
-        summary.get('packagesAssessed', 'unknown'),
-        summary.get('vulnerablePackages', 'unknown'),
-        summary.get('vulnerabilitiesFound', len(findings)),
-        critical_findings,
-        command,
-        report['kuduUrl'])
+    logger.warning("Run '%s' to view findings in the CLI.", command)
+    _log_secure_build_report_summary(report)
+    _print_secure_build_kudu_footer(report)
 
 
 _KUDU_DEPLOYMENT_STATES = {

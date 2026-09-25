@@ -47,6 +47,9 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          troubleshoot_status,
                                                          troubleshoot_deployment,
                                                          show_secure_build_report,
+                                                         _log_secure_build_report_summary,
+                                                         _render_secure_build_table_report,
+                                                         _terminal_hyperlink,
                                                          _show_secure_build_after_deployment,
                                                          create_webapp)
 from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
@@ -96,7 +99,7 @@ class TestSecureBuildMocked(unittest.TestCase):
         self.assertEqual(result['findings'], report['findings'])
         self.assertEqual(
             result['kuduUrl'],
-            'https://myapp.scm.azurewebsites.net/api/securebuild')
+            'https://myapp.scm.azurewebsites.net/securebuild')
         requests_get_mock.assert_called_once_with(
             'https://myapp.scm.azurewebsites.net/api/securebuild',
             headers={'Authorization': 'Bearer token'},
@@ -138,9 +141,112 @@ class TestSecureBuildMocked(unittest.TestCase):
                 'severity': 'CRITICAL', 'advisoryId': 'GHSA-test', 'firstPatchedVersion': '1.1'}}]
         })
 
-        self.assertEqual(rows[0]['Package'], 'sample')
-        self.assertEqual(rows[0]['Advisory'], 'GHSA-test')
-        self.assertEqual(rows[0]['FixedVersion'], '1.1')
+        self.assertEqual(rows[0]['Component'], 'sample')
+        self.assertEqual(rows[0]['Vulnerability'], 'GHSA-test')
+        self.assertEqual(rows[0]['Fixed version'], '1.1')
+        self.assertNotIn('Severity', rows[0])
+
+    def test_secure_build_table_output_is_limited_to_twenty_findings(self):
+        findings = [
+            {'package': 'sample-{}'.format(index), 'version': '1.0', 'advisory': {}}
+            for index in range(25)
+        ]
+
+        rows = transform_secure_build_output({'findings': findings})
+
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(rows[-1]['Component'], 'sample-19')
+
+    def test_secure_build_table_output_is_empty_without_findings(self):
+        self.assertEqual(transform_secure_build_output({'findings': []}), [])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_includes_scan_context(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'deploymentId': 'deployment-1',
+            'generatedAtUtc': '2026-09-25T10:00:00Z',
+            'runtime': {'framework': 'PYTHON', 'version': '3.13'},
+            'summary': {
+                'packagesAssessed': 9,
+                'vulnerabilitiesFound': 2,
+                'vulnerablePackages': 1,
+            },
+            'findings': [{}, {}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        self.assertEqual(summary_parts[0][0].value, 'highlight')
+        self.assertEqual(summary_parts[2][0].value, 'error')
+        self.assertIn('Secure Build scan completed', summary_text)
+        self.assertIn('Summary\nSecure Build found 2 critical vulnerabilities in 1 affected package.', summary_text)
+        self.assertNotIn('Summary\n  Secure Build', summary_text)
+        self.assertIn('Deployment ID', summary_text)
+        self.assertIn('deployment-1', summary_text)
+        self.assertIn('Runtime', summary_text)
+        self.assertIn('PYTHON 3.13', summary_text)
+        self.assertIn('Packages scanned', summary_text)
+        self.assertIn('Report generated', summary_text)
+        self.assertIn('2026-09-25T10:00:00Z', summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_reports_truncated_findings(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{} for _ in range(38)],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (showing first 20 of 38)', findings_section)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_styles_clean_result_as_success(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'findings': [],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        self.assertEqual(summary_parts[2][0].value, 'success')
+        self.assertEqual(
+            summary_parts[2][1],
+            'Secure Build detected no critical vulnerabilities. '
+            'The scanned packages have no matching alerts.')
+        self.assertIn('Summary\nSecure Build detected no critical vulnerabilities.', summary_text)
+        self.assertNotIn('Summary\n  Secure Build', summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_ends_with_kudu_link(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test',
+                'detailsUrl': 'https://github.com/advisories/GHSA-test'}}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (1)', findings_section)
+        self.assertNotIn('showing first', findings_section)
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', findings_section)
+        self.assertIn('\x1b[4mGHSA-test\x1b[24m', findings_section)
+        _, source = print_styled_text_mock.call_args_list[-2].args[0]
+        self.assertIn('Source: GitHub Advisory Database', source)
+        self.assertNotIn('critical vulnerabilities only', source)
+        self.assertNotIn('Kudu access is required', source)
+        footer = print_styled_text_mock.call_args_list[-1].args[0]
+        self.assertEqual(footer[0][1], '\nFull report:\n')
+        self.assertNotIn('Ctrl+click', footer[0][1])
+        self.assertEqual(footer[-1][0], '\x1b[4m')
+        self.assertEqual(footer[-1][1], 'https://myapp.scm.azurewebsites.net/securebuild')
+
+    def test_secure_build_vulnerability_uses_terminal_hyperlink(self):
+        link = _terminal_hyperlink('CVE-2026-0001', 'https://github.com/advisories/GHSA-test')
+
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', link)
+        self.assertIn('\x1b[4mCVE-2026-0001\x1b[24m', link)
+        self.assertTrue(link.endswith('\x1b]8;;\x1b\\'))
 
 
 class TestTroubleshootDeploymentMocked(unittest.TestCase):

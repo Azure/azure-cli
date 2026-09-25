@@ -49,32 +49,11 @@ def transform_runtime_list_output(result):
 
 
 def transform_secure_build_output(result):
-    from collections import OrderedDict
-
-    if not isinstance(result, dict):
-        return []
-    findings = result.get('findings') or []
-    rows = []
-    for finding in findings:
-        if not isinstance(finding, dict):
-            continue
-        advisory = finding.get('advisory') or {}
-        rows.append(OrderedDict([
-            ('Package', finding.get('package') or '-'),
-            ('Version', finding.get('version') or '-'),
-            ('Severity', advisory.get('severity') or '-'),
-            ('Advisory', advisory.get('cve') or advisory.get('advisoryId') or '-'),
-            ('FixedVersion', advisory.get('firstPatchedVersion') or '-'),
-        ]))
-    if rows:
-        return rows
-    return [OrderedDict([
-        ('Package', 'No vulnerabilities found'),
-        ('Version', '-'),
-        ('Severity', '-'),
-        ('Advisory', '-'),
-        ('FixedVersion', '-'),
-    ])]
+    from .custom import _secure_build_finding_rows
+    rows = _secure_build_finding_rows(result)
+    for row in rows:
+        row.pop('Details URL', None)
+    return rows
 
 
 def transform_troubleshoot_deployment_output(result):

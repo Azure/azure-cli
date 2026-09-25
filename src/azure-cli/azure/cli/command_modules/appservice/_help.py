@@ -3624,7 +3624,7 @@ helps['webapp secure-build'] = """
 helps['webapp secure-build show'] = """
     type: command
     short-summary: Show the Secure Build report for the active deployment of a Linux web app.
-    long-summary: The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Secure Build currently supports Python dependency information produced by supported platform builds.
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Table output shows up to 20 findings; use JSON output or the provided Kudu link for the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
     examples:
     - name: Show the Secure Build report for the active deployment.
       text: az webapp secure-build show --resource-group ResourceGroup --name AppName
