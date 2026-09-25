@@ -12253,7 +12253,7 @@ def _build_onedeploy_scm_url(params):
         deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
     if params.tag is not None:
-        deploy_url = deploy_url + '&tag=' + quote(params.tag, safe='')
+        deploy_url = deploy_url + '&deploymentTag=' + quote(params.tag, safe='')
 
     return deploy_url
 
@@ -12372,7 +12372,7 @@ def _get_onedeploy_request_body(params):
                 "ignorestack": params.should_ignore_stack,
                 "clean": params.is_clean_deployment,
                 "restart": params.should_restart,
-                "tag": params.tag,
+                "deploymentTag": params.tag,
             }
         }
         body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
