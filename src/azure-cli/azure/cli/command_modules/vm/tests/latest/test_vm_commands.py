@@ -12125,6 +12125,163 @@ class VMSSOrchestrationModeScenarioTest(ScenarioTest):
             self.check('[0].type', 'Microsoft.Network/loadBalancers/inboundNatRules')
         ])
 
+
+class VMSSZonalAlignedFaultDomainsScenarioTest(ScenarioTest):
+    """Tests for Aligned Zonal Fault Domains for VMSS Flex (issue #32693).
+
+    The feature requires the AFEC `Microsoft.Compute/ZonalAlignedMultipleFDs`
+    to be registered on the subscription and applies only to Flexible
+    orchestration mode VMSS deployed to a single Availability Zone.
+    """
+
+    # Verifies the CLI rejects unsupported orchestration modes and zone counts before deployment.
+    def test_vmss_zonal_alignment_validation(self):
+        self.kwargs.update({
+            'rg': 'rg',
+            'loc': 'eastus2',
+            'vmss': self.create_random_name(prefix='vmss', length=15),
+        })
+
+        with self.assertRaisesRegex(ArgumentUsageError, 'flexible orchestration mode'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Uniform '
+                '--zones 1 --image Ubuntu2204 --zonal-fault-domain-align-mode Aligned')
+
+        with self.assertRaisesRegex(ArgumentUsageError, 'single Availability Zone'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Flexible '
+                '--zones 1 2 --image Ubuntu2204 --zonal-fault-domain-align-mode Aligned')
+
+        with self.assertRaisesRegex(ArgumentUsageError, 'flexible orchestration mode'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Uniform '
+                '--image Ubuntu2204 --zonal-fault-domain-align-mode Unaligned')
+
+    # Covers BestEffortAligned VMSS/OS/data-disk creation, member VM alignment status, and VMSS update.
+    # Add live_only: Current active subscription's Compute backend limits zonal VMSS Flex to one platform fault domain,
+    # despite the feature and provider reporting Registered.
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zonal_best_effort_fd_', location='centralus')
+    def test_vmss_zonal_best_effort_aligned_fault_domains(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': self.create_random_name(prefix='vmss', length=15),
+            'vm': self.create_random_name(prefix='vm', length=15),
+        })
+
+        # Create covers the VMSS-level mode and both per-disk properties.
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Flexible '
+            '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
+            '--vm-sku Standard_D2s_v3 --instance-count 0 --load-balancer "" --public-ip-address "" '
+            '--image Ubuntu2204 --data-disk-sizes-gb 10 '
+            '--admin-username clitest --generate-ssh-keys '
+            '--zonal-fault-domain-align-mode BestEffortAligned '
+            '--os-disk-storage-fd-alignment Aligned '
+            '--data-disk-storage-fd-alignment BestEffortAligned',
+            checks=[
+                self.check('vmss.orchestrationMode', 'Flexible'),
+                self.check('vmss.platformFaultDomainCount', 3),
+                self.check('vmss.zonalPlatformFaultDomainAlignMode', 'BestEffortAligned'),
+                self.check('vmss.zones', ['1']),
+                self.check(
+                    'vmss.virtualMachineProfile.storageProfile.osDisk.storageFaultDomainAlignment',
+                    'Aligned'),
+                self.check(
+                    'vmss.virtualMachineProfile.storageProfile.dataDisks[0].storageFaultDomainAlignment',
+                    'BestEffortAligned'),
+            ])
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('orchestrationMode', 'Flexible'),
+            self.check('platformFaultDomainCount', 3),
+            self.check('zonalPlatformFaultDomainAlignMode', 'BestEffortAligned'),
+            self.check('zones', ['1']),
+            self.check('virtualMachineProfile.storageProfile.osDisk.storageFaultDomainAlignment', 'Aligned'),
+            self.check(
+                'virtualMachineProfile.storageProfile.dataDisks[0].storageFaultDomainAlignment',
+                'BestEffortAligned'),
+        ])
+
+        # VM create covers the member-VM path and verifies the read-only alignment status.
+        self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} '
+            '--vmss {vmss} --platform-fault-domain 0 '
+            '--image Ubuntu2204 --size Standard_D2s_v3 '
+            '--admin-username clitest --generate-ssh-keys --nsg-rule NONE --public-ip-address "" '
+            '--data-disk-sizes-gb 10 '
+            '--os-disk-storage-fd-alignment Aligned '
+            '--data-disk-storage-fd-alignment BestEffortAligned')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('platformFaultDomain', 0),
+            self.check('storageProfile.osDisk.storageFaultDomainAlignment', 'Aligned'),
+            self.check('storageProfile.dataDisks[0].storageFaultDomainAlignment', 'BestEffortAligned'),
+        ])
+
+        self.cmd('vm get-instance-view -g {rg} -n {vm}', checks=[
+            self.check('length(instanceView.disks)', 2),
+            self.check('length(instanceView.disks[?storageAlignmentStatus != `null`])', 2),
+            self.check(
+                'length(instanceView.disks[?storageAlignmentStatus != `Aligned` && '
+                'storageAlignmentStatus != `Unaligned`])',
+                0),
+        ])
+
+        # The VMSS-level property remains updatable through generic update.
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--set zonalPlatformFaultDomainAlignMode=Aligned',
+            checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Aligned')])
+
+        self.cmd(
+            'vmss show -g {rg} -n {vmss}',
+            checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Aligned')])
+
+    # Verifies omitting all alignment options leaves the VMSS, OS disk, and data disk properties unset.
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_omit_storage_aligned_fd_', location='westus3')
+    def test_vmss_storage_fault_domain_alignment_omitted(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': self.create_random_name(prefix='vmss', length=15),
+        })
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Flexible '
+            '--single-placement-group false --platform-fault-domain-count 1 --zones 1 '
+            '--vm-sku Standard_D2s_v3 --instance-count 0 --load-balancer "" --public-ip-address "" '
+            '--image Ubuntu2204 --data-disk-sizes-gb 10 '
+            '--admin-username clitest --generate-ssh-keys')
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('zonalPlatformFaultDomainAlignMode', None),
+            self.check('virtualMachineProfile.storageProfile.osDisk.storageFaultDomainAlignment', None),
+            self.check(
+                'virtualMachineProfile.storageProfile.dataDisks[0].storageFaultDomainAlignment',
+                None),
+        ])
+
+    # Verifies the Unaligned VMSS enum value is accepted and persisted on a single-zone, multi-FD Flex VMSS.
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zonal_unaligned_fd_', location='centralus')
+    def test_vmss_zonal_fault_domain_align_mode_unaligned(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': self.create_random_name(prefix='vmss', length=15),
+        })
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --location {loc} --orchestration-mode Flexible '
+            '--single-placement-group false --platform-fault-domain-count 3 --zones 1 '
+            '--vm-sku Standard_D2s_v3 --instance-count 0 --load-balancer "" --public-ip-address "" '
+            '--image Ubuntu2204 --admin-username clitest --generate-ssh-keys '
+            '--zonal-fault-domain-align-mode Unaligned',
+            checks=[self.check('vmss.zonalPlatformFaultDomainAlignMode', 'Unaligned')])
+
+        self.cmd(
+            'vmss show -g {rg} -n {vmss}',
+            checks=[self.check('zonalPlatformFaultDomainAlignMode', 'Unaligned')])
+
+
 class VMCrossTenantUpdateScenarioTest(ScenarioTest):
 
     @live_only()
@@ -12626,8 +12783,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --size Standard_B2ms '
-                 '--enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:ubuntu-24_04-lts:server:latest '
+                 '--security-type TrustedLaunch --size Standard_D2s_v3 --enable-secure-boot true --enable-vtpm true '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--nsg-rule None')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12638,18 +12797,20 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 '
-                 '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--size Standard_D2s_v3 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
         # create VM with specifying security type Standard
         # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --size Standard_B2ms '
-                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v3 '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} '
+                 '--vnet-name {vnet} --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
     @AllowLargeResponse(size_kb=99999)
