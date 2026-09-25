@@ -214,6 +214,11 @@ def validate_feature_query_fields(namespace):
         namespace.fields = fields
 
 
+def validate_enhanced_feature_query_fields(namespace):
+    if namespace.fields:
+        namespace.fields = [field.lower() for field in namespace.fields]
+
+
 def validate_snapshot_query_fields(namespace):
     if namespace.fields:
         fields = []
