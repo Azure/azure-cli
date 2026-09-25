@@ -1635,7 +1635,7 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
 
 class TestOneDeployTag(unittest.TestCase):
 
-    def test_scm_url_includes_encoded_tag(self):
+    def test_scm_url_includes_encoded_deployment_tag(self):
         from azure.cli.command_modules.appservice.custom import OneDeployParams, _build_onedeploy_scm_url
         params = OneDeployParams()
         params.artifact_type = 'zip'
@@ -1645,21 +1645,23 @@ class TestOneDeployTag(unittest.TestCase):
                         return_value='https://example.scm.azurewebsites.net'):
             result = _build_onedeploy_scm_url(params)
 
-        self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
+        self.assertEqual(
+            result,
+            'https://example.scm.azurewebsites.net/api/publish?type=zip&deploymentTag=release%202026%2F08')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
-    def test_webapp_deploy_ignores_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
+    def test_webapp_deploy_ignores_deployment_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
         from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
         site_operation_mock.return_value = mock.MagicMock(kind='app', reserved=False)
 
         with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
-            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', tag='windows-tag')
+            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', deployment_tag='windows-tag')
 
-        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
+        warning_mock.assert_any_call('--deploymentTag is only supported for Linux web apps and will be ignored.')
         self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
 
-    def test_arm_body_includes_tag(self):
+    def test_arm_body_includes_deployment_tag(self):
         import json
         from azure.cli.command_modules.appservice.custom import OneDeployParams, _get_onedeploy_request_body
         params = OneDeployParams()
@@ -1669,7 +1671,7 @@ class TestOneDeployTag(unittest.TestCase):
 
         body, file_hash = _get_onedeploy_request_body(params)
 
-        self.assertEqual(json.loads(body)['properties']['tag'], 'release-2026-08')
+        self.assertEqual(json.loads(body)['properties']['deploymentTag'], 'release-2026-08')
         self.assertIsNone(file_hash)
 
 
