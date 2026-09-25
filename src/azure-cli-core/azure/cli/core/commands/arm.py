@@ -105,13 +105,36 @@ def raise_subdivision_deployment_error(error_message, error_code=None):
 
 
 def handle_template_based_exception(ex):
+    from azure.core.exceptions import (
+        DecodeError, ODataV4Format, ResponseNotReadError, ServiceRequestError, ServiceResponseError,
+        StreamClosedError, StreamConsumedError)
+
+    inner_error = getattr(getattr(ex, 'inner_exception', None), 'error', None)
+    if inner_error is not None and hasattr(inner_error, 'message'):
+        raise CLIError(inner_error.message)
+
+    response = getattr(ex, 'response', None)
+    if response is None:
+        raise CLIError(ex)
+
+    error = getattr(ex, 'error', None)
+    # Retain parsed details if the body is consumed, but preserve a readable body in full:
+    # ODataV4Format omits ARM-specific fields such as additionalInfo.
+    error_message = str(error) if isinstance(error, ODataV4Format) else None
     try:
-        raise CLIError(ex.inner_exception.error.message)
-    except AttributeError:
-        if hasattr(ex, 'response'):
-            raise_subdivision_deployment_error(ex.response.internal_response.text, ex.error.code if ex.error else None)
-        else:
-            raise CLIError(ex)
+        text = getattr(response, 'text', None)
+        if text is None:
+            text = getattr(getattr(response, 'internal_response', None), 'text', None)
+        response_message = text() if callable(text) else text
+        if response_message:
+            error_message = response_message
+    except (AttributeError, OSError, RuntimeError, ValueError, DecodeError, ServiceRequestError,
+            ServiceResponseError, ResponseNotReadError, StreamClosedError, StreamConsumedError):
+        logger.debug('Unable to read the deployment error response.', exc_info=True)
+    if not error_message:
+        error_message = getattr(ex, 'message', None) or str(ex)
+
+    raise_subdivision_deployment_error(error_message, getattr(error, 'code', None))
 
 
 def handle_long_running_operation_exception(ex):
