@@ -7147,7 +7147,6 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
             'kudu': {'reachable': True, 'statusCode': 404},
         }
         logger.warning('View deployments in Kudu: %s', result['kuduUrl'])
-        logger.warning('Kudu access is required to open this link.')
         return result
     if response.status_code == 401:
         raise UnauthorizedError('Authentication to the deployment status endpoint failed.')
@@ -7225,7 +7224,6 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
             'failedInstancesLogs': arm_status.get('failedInstancesLogs') or [],
         }
     logger.warning('View deployment details in Kudu: %s', payload['kuduUrl'])
-    logger.warning('Kudu access is required to open this link.')
     return payload
 
 
