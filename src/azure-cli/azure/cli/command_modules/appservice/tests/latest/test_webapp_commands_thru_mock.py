@@ -5,13 +5,15 @@
 import unittest
 from unittest import mock
 import os
+import sys
 import types
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
-from knack.util import CLIError
+from knack.output import format_table
+from knack.util import CLIError, CommandResultItem
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
@@ -45,8 +47,16 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _extract_runtime_error,
                                                          _log_webapp_troubleshoot_config_tip,
                                                          troubleshoot_status,
+                                                         troubleshoot_deployment,
+                                                         show_secure_build_report,
+                                                         _log_secure_build_report_summary,
+                                                         _render_secure_build_table_report,
+                                                         _terminal_hyperlink,
+                                                         _show_secure_build_after_deployment,
                                                          create_webapp)
-from azure.cli.command_modules.appservice.commands import transform_troubleshoot_config_output
+from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
+                                                            transform_secure_build_output,
+                                                            transform_troubleshoot_deployment_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
@@ -63,6 +73,372 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestSecureBuildMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_returns_report(self, requests_get_mock, _ensure_linux_mock,
+                                              _scm_url_mock, _headers_mock, _verify_mock):
+        report = {
+            'summary': {'packagesAssessed': 10, 'vulnerablePackages': 1, 'vulnerabilitiesFound': 1},
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'cve': 'CVE-2026-0001', 'firstPatchedVersion': '1.1'}}]
+        }
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = report
+        requests_get_mock.return_value = response
+
+        result = show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp', slot='staging', rescan=True)
+
+        self.assertEqual(result['summary'], report['summary'])
+        self.assertEqual(result['findings'], report['findings'])
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/securebuild')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/securebuild',
+            headers={'Authorization': 'Bearer token'},
+            params={'rescan': 'true'},
+            timeout=330,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_404_is_unavailable(self, requests_get_mock, _ensure_linux_mock,
+                                                  _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        with self.assertRaises(ResourceNotFoundError):
+            show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_summary_does_not_raise(self, request_mock, logger_mock):
+        request_mock.side_effect = AzureResponseError('scan failed')
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        logger_mock.warning.assert_called_once()
+        self.assertIn('Deployment succeeded', logger_mock.warning.call_args.args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._print_secure_build_kudu_footer')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_secure_build_report_summary')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_shows_summary_and_link_for_same_report(
+            self, request_mock, logger_mock, summary_mock, footer_mock):
+        report = {'summary': {'vulnerabilitiesFound': 1}, 'kuduUrl': 'https://scm/securebuild'}
+        request_mock.return_value = report
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        summary_mock.assert_called_once_with(report)
+        footer_mock.assert_called_once_with(report)
+        self.assertIn('view findings from this report', logger_mock.warning.call_args.args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._render_secure_build_table_report')
+    def test_secure_build_table_output_renders_full_report(self, render_mock):
+        report = {
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test', 'firstPatchedVersion': '1.1'}}]
+        }
+
+        rows = transform_secure_build_output(report)
+
+        self.assertEqual(rows, [])
+        render_mock.assert_called_once_with(report, file=sys.stdout)
+
+    def test_secure_build_table_output_is_limited_to_twenty_findings(self):
+        findings = [
+            {'package': 'sample-{}'.format(index), 'version': '1.0', 'advisory': {}}
+            for index in range(25)
+        ]
+
+        rows = transform_secure_build_output(findings)
+
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(rows[-1]['Component'], 'sample-19')
+
+    def test_secure_build_table_output_is_empty_without_findings(self):
+        self.assertEqual(transform_secure_build_output([]), [])
+
+    def test_secure_build_table_output_accepts_queried_findings(self):
+        rows = transform_secure_build_output([
+            {'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test',
+                'firstPatchedVersion': '1.1'}}
+        ])
+
+        self.assertEqual(rows[0]['Component'], 'sample')
+        self.assertEqual(rows[0]['Vulnerability'], 'GHSA-test')
+
+    def test_secure_build_query_active_table_skips_rich_transformer(self):
+        transformer = mock.MagicMock(side_effect=AssertionError(
+            'The table transformer must not run after --query.'))
+        queried_findings = [
+            {'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test'}}
+        ]
+
+        output = format_table(CommandResultItem(
+            queried_findings,
+            table_transformer=transformer,
+            is_query_active=True))
+
+        transformer.assert_not_called()
+        self.assertIn('Package', output)
+        self.assertIn('sample', output)
+        self.assertNotIn('Secure Build:', output)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_includes_scan_context(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'deploymentId': 'deployment-1',
+            'generatedAtUtc': '2026-09-25T10:00:00Z',
+            'runtime': {'framework': 'PYTHON', 'version': '3.13'},
+            'summary': {
+                'packagesAssessed': 9,
+                'vulnerabilitiesFound': 2,
+                'vulnerablePackages': 1,
+            },
+            'findings': [{}, {}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        self.assertEqual(summary_parts[0][0].value, 'highlight')
+        self.assertEqual(summary_parts[2][0].value, 'error')
+        self.assertIn('Secure Build: Open source vulnerabilities in app packages', summary_text)
+        self.assertIn('Secure Build found 2 critical vulnerabilities in 1 affected package.', summary_text)
+        self.assertNotIn('scan completed', summary_text)
+        self.assertNotIn('Summary', summary_text)
+        self.assertIn('Deployment ID', summary_text)
+        self.assertIn('deployment-1', summary_text)
+        self.assertIn('Runtime', summary_text)
+        self.assertIn('PYTHON 3.13', summary_text)
+        self.assertIn('Packages scanned', summary_text)
+        self.assertIn('Report generated', summary_text)
+        self.assertIn('2026-09-25T10:00:00Z', summary_text)
+        self.assertNotIn('-' * 72, summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_reports_truncated_findings(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{} for _ in range(38)],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (showing first 20 of 38)', findings_section)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_styles_clean_result_as_success(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'findings': [],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        success_parts = [part for part in summary_parts if part[0].value == 'success']
+        self.assertEqual(len(success_parts), 1)
+        self.assertEqual(
+            success_parts[0][1],
+            'Secure Build detected no critical vulnerabilities. '
+            'The scanned packages have no matching alerts.')
+        self.assertIn('Secure Build: Open source vulnerabilities in app packages', summary_text)
+        self.assertNotIn('scan completed', summary_text)
+        self.assertNotIn('Summary', summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_ends_with_kudu_link(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test',
+                'detailsUrl': 'https://github.com/advisories/GHSA-test'}}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (1)\nComponent', findings_section)
+        self.assertNotIn('showing first', findings_section)
+        self.assertIn('GHSA-test', findings_section)
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', findings_section)
+        self.assertNotIn('\x1b[4m', findings_section)
+        source_parts = print_styled_text_mock.call_args_list[-2].args[0]
+        source_text = ''.join(part[1] for part in source_parts)
+        self.assertIn('Source: https://github.com/advisories', source_text)
+        self.assertIn(' (Critical vulnerabilities only).', source_text)
+        self.assertNotIn('\x1b]8;;', source_text)
+        self.assertNotIn('Kudu access is required', source_text)
+        footer_parts = print_styled_text_mock.call_args_list[-1].args[0]
+        footer_text = ''.join(part[1] for part in footer_parts)
+        self.assertIn('\nTo view the full report, visit: ', footer_text)
+        self.assertIn('https://myapp.scm.azurewebsites.net/securebuild', footer_text)
+        self.assertNotIn('\x1b]8;;', footer_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.format_styled_text',
+                return_value='<hyperlink>CVE-2026-0001</hyperlink>')
+    def test_secure_build_vulnerability_uses_terminal_hyperlink(
+            self, format_styled_text_mock):
+        link = _terminal_hyperlink(
+            'CVE-2026-0001', 'https://github.com/advisories/GHSA-test')
+
+        style, label = format_styled_text_mock.call_args.args[0]
+        self.assertEqual(style.value, 'hyperlink')
+        self.assertEqual(label, 'CVE-2026-0001')
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', link)
+        self.assertIn('<hyperlink>CVE-2026-0001</hyperlink>', link)
+        self.assertNotIn('\x1b[4m', link)
+        self.assertTrue(link.endswith('\x1b]8;;\x1b\\'))
+
+
+class TestTroubleshootDeploymentMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_combines_kudu_and_arm(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 4,
+            'status_text': '',
+            'complete': True,
+            'active': True,
+            'end_time': '2026-09-24T10:56:30Z',
+            'deployer': 'OneDeploy',
+            'provisioningState': 'Succeeded',
+            'log_url': 'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1/log',
+        }
+        requests_get_mock.return_value = response
+        arm_status_mock.return_value = {
+            'status': 'RuntimeSuccessful',
+            'numberOfInstancesInProgress': 0,
+            'numberOfInstancesSuccessful': 2,
+            'numberOfInstancesFailed': 0,
+        }
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['deploymentId'], 'deployment-1')
+        self.assertEqual(result['activeDeploymentId'], 'deployment-1')
+        self.assertEqual(result['state'], 'RuntimeSuccessful')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['runtime']['instancesSuccessful'], 2)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            headers={'Authorization': 'Bearer token'},
+            timeout=30,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_accepts_in_progress_response(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=202)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 1,
+            'status_text': 'Building and Deploying',
+            'complete': False,
+            'active': False,
+            'start_time': '2026-09-24T10:56:30Z',
+        }
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['state'], 'Building and Deploying')
+        self.assertTrue(result['inProgress'])
+        self.assertFalse(result['active'])
+        self.assertEqual(result['kudu']['statusCode'], 202)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://scm/api/deployments/deployment-1')
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_id_links_to_deployment_list(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {'status': 4, 'complete': True, 'active': True}
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_history(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp', slot='staging')
+
+        self.assertEqual(result['state'], 'NoDeployment')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['slot'], 'staging')
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
+
+    def test_troubleshoot_deployment_table_output(self):
+        rows = transform_troubleshoot_deployment_output({
+            'deploymentId': 'deployment-1',
+            'state': 'BuildInProgress',
+            'inProgress': True,
+            'complete': False,
+            'active': False,
+            'deployer': 'OneDeploy',
+            'lastDeploymentTime': '2026-09-24T10:56:30Z',
+            'runtime': {'instancesSuccessful': 1, 'instancesFailed': 0},
+        })
+
+        self.assertEqual(rows[0]['State'], 'BuildInProgress')
+        self.assertFalse(rows[0]['Active'])
+        self.assertEqual(rows[0]['Succeeded'], 1)
+        self.assertEqual(rows[0]['Failed'], 0)
+        self.assertEqual(list(rows[0]), [
+            'DeploymentId', 'State', 'Active', 'Succeeded', 'Failed', 'LastDeploymentTime'])
 
 
 class TestTroubleshootConfigDiscovery(unittest.TestCase):
@@ -1658,6 +2034,17 @@ class TestOneDeployTag(unittest.TestCase):
 
         warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
         self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_webapp_deploy_passes_secure_build_option(self, site_operation_mock, perform_deploy_mock):
+        from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
+        site_operation_mock.return_value = mock.MagicMock(kind='app,linux', reserved=True)
+
+        perform_onedeploy_webapp(
+            mock.MagicMock(), 'myRG', 'myApp', show_secure_build=True)
+
+        self.assertTrue(perform_deploy_mock.call_args.args[0].show_secure_build)
 
     def test_arm_body_includes_tag(self):
         import json

@@ -28,6 +28,7 @@ from nacl import encoding, public
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.primitives import hashes
 from fabric import Connection
+from tabulate import tabulate
 
 from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from knack.util import CLIError
@@ -44,6 +45,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
+from azure.cli.core.style import Style, format_styled_text, print_styled_text
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, \
     ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
@@ -51,7 +53,8 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
                                        UnclassifiedUserFault, AzureResponseError, AzureInternalError,
-                                       ArgumentUsageError, FileOperationError)
+                                       ArgumentUsageError, FileOperationError, AzureConnectionError,
+                                       BadRequestError, UnauthorizedError, ForbiddenError)
 
 from .tunnel import TunnelServer
 
@@ -6874,6 +6877,356 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
+_SECURE_BUILD_TIMEOUT_SECONDS = 330
+
+
+def _request_secure_build_report(cmd, resource_group_name, name, slot=None, rescan=False):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    report_url = '{}/api/securebuild'.format(scm_url)
+
+    try:
+        response = requests.get(
+            report_url,
+            headers=headers,
+            params={'rescan': str(bool(rescan)).lower()},
+            timeout=_SECURE_BUILD_TIMEOUT_SECONDS,
+            verify=not should_disable_connection_verify())
+    except requests.RequestException as ex:
+        raise AzureConnectionError(
+            "Failed to connect to the Secure Build endpoint for web app '{}'.".format(name)) from ex
+
+    if response.status_code == 404:
+        raise ResourceNotFoundError(
+            'Secure Build analysis is unavailable for this web app.',
+            recommendation=(
+                'Verify that Secure Build is enabled and that the active deployment contains '
+                'supported Python dependency information.'))
+    if response.status_code == 400:
+        raise BadRequestError('The Secure Build service rejected the analysis request.')
+    if response.status_code == 401:
+        raise UnauthorizedError('Authentication to the Secure Build endpoint failed.')
+    if response.status_code == 403:
+        raise ForbiddenError('Access to the Secure Build endpoint was denied.')
+    if response.status_code != 200:
+        raise AzureResponseError(
+            "Secure Build analysis failed with status code {}.".format(response.status_code))
+
+    try:
+        report = response.json()
+    except ValueError as ex:
+        raise AzureResponseError('The Secure Build endpoint returned invalid JSON.') from ex
+    if not isinstance(report, dict):
+        raise AzureResponseError('The Secure Build endpoint returned an unexpected response.')
+    report['kuduUrl'] = '{}/securebuild'.format(scm_url)
+    return report
+
+
+def show_secure_build_report(cmd, resource_group_name, name, slot=None, rescan=False):
+    _ensure_linux_webapp(
+        cmd, resource_group_name, name, slot,
+        command_label="'az webapp secure-build show'")
+    return _request_secure_build_report(cmd, resource_group_name, name, slot, rescan)
+
+
+def _secure_build_command(name, resource_group_name, slot=None):
+    command = 'az webapp secure-build show --name {} --resource-group {}'.format(
+        name, resource_group_name)
+    if slot:
+        command += ' --slot {}'.format(slot)
+    return command
+
+
+def _log_secure_build_report_summary(report, file=None):
+    from collections import OrderedDict
+
+    output_file = file or sys.stderr
+    summary = report.get('summary') if isinstance(report.get('summary'), dict) else {}
+    runtime = report.get('runtime') if isinstance(report.get('runtime'), dict) else {}
+    findings = [finding for finding in report.get('findings') or [] if isinstance(finding, dict)]
+    runtime_name = ' '.join(str(value) for value in (
+        runtime.get('framework'), runtime.get('version')) if value) or 'Unknown'
+    vulnerability_count = summary.get('vulnerabilitiesFound', len(findings))
+    affected_package_count = summary.get('vulnerablePackages', 'Unknown')
+
+    scan_context = OrderedDict([
+        ('Deployment ID', report.get('deploymentId') or 'Unknown'),
+        ('Runtime', runtime_name),
+        ('Packages scanned', summary.get('packagesAssessed', 'Unknown')),
+    ])
+    if report.get('generatedAtUtc'):
+        scan_context['Report generated'] = report['generatedAtUtc']
+    scan_summary = tabulate(
+        [scan_context], headers='keys', tablefmt='simple', disable_numparse=True)
+
+    if findings:
+        vulnerability_label = '{} critical {}'.format(
+            vulnerability_count,
+            'vulnerability' if vulnerability_count == 1 else 'vulnerabilities')
+        affected_package_label = '{} affected {}'.format(
+            affected_package_count,
+            'package' if affected_package_count == 1 else 'packages')
+        print_styled_text([
+            (Style.HIGHLIGHT, '\nSecure Build: Open source vulnerabilities in app packages\n'),
+            (Style.PRIMARY, 'Secure Build found '),
+            (Style.ERROR, vulnerability_label),
+            (Style.PRIMARY, ' in {}.\n\n{}'.format(affected_package_label, scan_summary)),
+        ], file=output_file)
+    else:
+        print_styled_text([
+            (Style.HIGHLIGHT, '\nSecure Build: Open source vulnerabilities in app packages\n'),
+            (Style.SUCCESS, 'Secure Build detected no critical vulnerabilities. '
+                            'The scanned packages have no matching alerts.'),
+            (Style.PRIMARY, '\n\n{}'.format(scan_summary)),
+        ], file=output_file)
+
+
+def _secure_build_finding_rows(report):
+    from collections import OrderedDict
+
+    rows = []
+    if isinstance(report, dict):
+        findings = report.get('findings') or []
+    elif isinstance(report, list):
+        findings = report
+    else:
+        return rows
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        advisory = finding.get('advisory') or {}
+        rows.append(OrderedDict([
+            ('Component', finding.get('package') or '-'),
+            ('Installed', finding.get('version') or '-'),
+            ('Vulnerability', advisory.get('cve') or advisory.get('advisoryId') or '-'),
+            ('Fixed version', advisory.get('firstPatchedVersion') or '-'),
+            ('Details URL', advisory.get('detailsUrl')),
+        ]))
+        if len(rows) == 20:
+            break
+    return rows
+
+
+def _terminal_hyperlink(label, url):
+    if not url:
+        return label
+    styled_label = format_styled_text((Style.HYPERLINK, label))
+    return '\x1b]8;;{0}\x1b\\{1}\x1b]8;;\x1b\\'.format(url, styled_label)
+
+
+def _print_secure_build_kudu_footer(report, file=None):
+    output_file = file or sys.stderr
+    print_styled_text([
+        (Style.PRIMARY, '\nSource: '),
+        (Style.HYPERLINK, 'https://github.com/advisories'),
+        (Style.PRIMARY, ' (Critical vulnerabilities only).'),
+    ], file=output_file)
+    print_styled_text([
+        (Style.PRIMARY, '\nTo view the full report, visit: '),
+        (Style.HYPERLINK, report['kuduUrl']),
+    ], file=output_file)
+
+
+def _render_secure_build_table_report(report, file=None):
+    output_file = file or sys.stderr
+    _log_secure_build_report_summary(report, file=output_file)
+    finding_rows = _secure_build_finding_rows(report)
+    if finding_rows:
+        finding_count = len([
+            finding for finding in report.get('findings') or [] if isinstance(finding, dict)])
+        heading = 'Critical vulnerabilities'
+        if finding_count > 20:
+            heading += ' (showing first 20 of {})'.format(finding_count)
+        else:
+            heading += ' ({})'.format(finding_count)
+        links = []
+        for row in finding_rows:
+            details_url = row.pop('Details URL', None)
+            if details_url:
+                links.append((row['Vulnerability'], details_url))
+        findings_table = tabulate(
+            finding_rows, headers='keys', tablefmt='simple', disable_numparse=True)
+        for label, url in links:
+            findings_table = findings_table.replace(label, _terminal_hyperlink(label, url), 1)
+        print_styled_text((
+            Style.PRIMARY,
+            '\n{}\n{}'.format(heading, findings_table)), file=output_file)
+    _print_secure_build_kudu_footer(report, file=output_file)
+
+
+def _show_secure_build_after_deployment(params):
+    if not params.is_linux_webapp:
+        logger.warning('Secure Build analysis is currently supported only for Linux web apps.')
+        return
+
+    command = _secure_build_command(
+        params.webapp_name, params.resource_group_name, params.slot)
+    try:
+        report = _request_secure_build_report(
+            params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning(
+            "Deployment succeeded, but Secure Build analysis could not be retrieved. Run '%s' to try again.",
+            command)
+        logger.debug('Secure Build report retrieval failed after deployment: %s', ex, exc_info=True)
+        return
+
+    logger.warning("Run '%s' to view findings from this report in the CLI.", command)
+    _log_secure_build_report_summary(report)
+    _print_secure_build_kudu_footer(report)
+
+
+_KUDU_DEPLOYMENT_STATES = {
+    0: 'Pending',
+    1: 'Building',
+    2: 'Deploying',
+    3: 'Failed',
+    4: 'Succeeded',
+    5: 'Cancelled',
+    6: 'PartiallySucceeded',
+}
+_ARM_DEPLOYMENT_IN_PROGRESS_STATES = {
+    'BuildRequestReceived',
+    'BuildInProgress',
+    'BuildSuccessful',
+    'RuntimeStarting',
+}
+
+
+def _get_arm_deployment_status(cmd, resource_group_name, name, slot, deployment_id):
+    deployment_status_url = _build_deploymentstatus_url(
+        cmd, resource_group_name, name, slot, deployment_id)
+    try:
+        response = send_raw_request(cmd.cli_ctx, 'GET', deployment_status_url)
+        body = response.json()
+    except (HttpResponseError, ValueError) as ex:
+        logger.debug(
+            "ARM deployment status is unavailable for deployment '%s': %s",
+            deployment_id, ex)
+        return None
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug(
+            "Unexpected error retrieving ARM deployment status for deployment '%s': %s",
+            deployment_id, ex, exc_info=True)
+        return None
+
+    properties = body.get('properties') if isinstance(body, dict) else None
+    return properties if isinstance(properties, dict) else None
+
+
+def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    latest_url = '{}/api/deployments/latest'.format(scm_url)
+    try:
+        response = requests.get(
+            latest_url,
+            headers=headers,
+            timeout=30,
+            verify=not should_disable_connection_verify())
+    except requests.RequestException as ex:
+        raise AzureConnectionError(
+            "Failed to connect to deployment status for web app '{}'.".format(name)) from ex
+
+    if response.status_code == 404:
+        result = {
+            'name': name,
+            'resourceGroup': resource_group_name,
+            'slot': slot,
+            'state': 'NoDeployment',
+            'inProgress': False,
+            'complete': False,
+            'active': False,
+            'kuduUrl': '{}/api/deployments'.format(scm_url),
+            'kudu': {'reachable': True, 'statusCode': 404},
+        }
+        logger.warning('View deployments in Kudu: %s', result['kuduUrl'])
+        return result
+    if response.status_code == 401:
+        raise UnauthorizedError('Authentication to the deployment status endpoint failed.')
+    if response.status_code == 403:
+        raise ForbiddenError('Access to the deployment status endpoint was denied.')
+    if response.status_code not in (200, 202):
+        raise AzureResponseError(
+            'Deployment status retrieval failed with status code {}.'.format(response.status_code))
+
+    try:
+        deployment = response.json()
+    except ValueError as ex:
+        raise AzureResponseError('The deployment status endpoint returned invalid JSON.') from ex
+    if not isinstance(deployment, dict):
+        raise AzureResponseError('The deployment status endpoint returned an unexpected response.')
+
+    deployment_id = deployment.get('id')
+    kudu_status = deployment.get('status')
+    complete = bool(deployment.get('complete'))
+    active = bool(deployment.get('active'))
+    arm_status = _get_arm_deployment_status(
+        cmd, resource_group_name, name, slot, deployment_id) if deployment_id else None
+    runtime_state = arm_status.get('status') if arm_status else None
+    state = (
+        runtime_state or
+        deployment.get('provisioningState') or
+        deployment.get('status_text') or
+        _KUDU_DEPLOYMENT_STATES.get(kudu_status, 'Unknown'))
+    in_progress = (
+        runtime_state in _ARM_DEPLOYMENT_IN_PROGRESS_STATES
+        if runtime_state else not complete and kudu_status in (0, 1, 2))
+    last_deployment_time = (
+        deployment.get('end_time') or
+        deployment.get('start_time') or
+        deployment.get('received_time'))
+    kudu_url = '{}/api/deployments'.format(scm_url)
+    if deployment_id:
+        kudu_url += '/{}'.format(quote(str(deployment_id), safe=''))
+
+    payload = {
+        'name': name,
+        'resourceGroup': resource_group_name,
+        'slot': slot,
+        'deploymentId': deployment_id,
+        'activeDeploymentId': deployment_id if active else None,
+        'kuduUrl': kudu_url,
+        'state': state,
+        'inProgress': in_progress,
+        'complete': complete,
+        'active': active,
+        'lastDeploymentTime': last_deployment_time,
+        'receivedTime': deployment.get('received_time'),
+        'startTime': deployment.get('start_time'),
+        'endTime': deployment.get('end_time'),
+        'lastSuccessfulTime': deployment.get('last_success_end_time'),
+        'deployer': deployment.get('deployer'),
+        'message': deployment.get('message'),
+        'progress': deployment.get('progress'),
+        'kudu': {
+            'reachable': True,
+            'statusCode': response.status_code,
+            'status': kudu_status,
+            'statusText': deployment.get('status_text'),
+            'provisioningState': deployment.get('provisioningState'),
+            'logUrl': deployment.get('log_url'),
+        },
+    }
+    if arm_status:
+        payload['runtime'] = {
+            'status': runtime_state,
+            'instancesInProgress': arm_status.get('numberOfInstancesInProgress'),
+            'instancesSuccessful': arm_status.get('numberOfInstancesSuccessful'),
+            'instancesFailed': arm_status.get('numberOfInstancesFailed'),
+            'errors': arm_status.get('errors') or [],
+            'failedInstancesLogs': arm_status.get('failedInstancesLogs') or [],
+        }
+    logger.warning('View deployment details in Kudu: %s', payload['kuduUrl'])
+    return payload
+
+
 def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
     _ensure_linux_webapp(cmd, resource_group, name, slot,
                          command_label="'az webapp log startup'")
@@ -12045,7 +12398,8 @@ def perform_onedeploy_webapp(cmd,
                              track_status=True,
                              enable_kudu_warmup=True,
                              enriched_errors=True,
-                             tag=None):
+                             tag=None,
+                             show_secure_build=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -12065,6 +12419,7 @@ def perform_onedeploy_webapp(cmd,
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
     params.tag = tag
+    params.show_secure_build = show_secure_build
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -12112,6 +12467,7 @@ class OneDeployParams:
         self.is_functionapp = None
         self.enriched_errors = True
         self.tag = None
+        self.show_secure_build = False
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -12570,6 +12926,14 @@ def _make_onedeploy_request(params):
         logger.warning("Deployment has completed successfully")
         if not (poll_async_deployment_for_debugging and params.track_status):
             _log_webapp_troubleshoot_status_tip(params.webapp_name, params.resource_group_name, params.is_linux_webapp)
+        if params.show_secure_build:
+            if poll_async_deployment_for_debugging:
+                _show_secure_build_after_deployment(params)
+            else:
+                logger.warning(
+                    "Deployment was submitted asynchronously. Run '%s' after it completes to view Secure Build "
+                    "analysis.",
+                    _secure_build_command(params.webapp_name, params.resource_group_name, params.slot))
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 
