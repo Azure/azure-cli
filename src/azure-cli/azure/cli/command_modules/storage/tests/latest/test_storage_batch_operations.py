@@ -644,7 +644,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
                              src_share, path).assert_with_checks(JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     @live_only()
     def test_storage_blob_batch_sas_scenarios(self, test_dir, storage_account_info):
