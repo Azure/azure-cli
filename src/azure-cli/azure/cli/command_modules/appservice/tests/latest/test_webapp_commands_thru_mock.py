@@ -367,8 +367,11 @@ class TestTroubleshootDeploymentMocked(unittest.TestCase):
         })
 
         self.assertEqual(rows[0]['State'], 'BuildInProgress')
-        self.assertTrue(rows[0]['InProgress'])
-        self.assertEqual(rows[0]['InstancesSuccessful'], 1)
+        self.assertFalse(rows[0]['Active'])
+        self.assertEqual(rows[0]['Succeeded'], 1)
+        self.assertEqual(rows[0]['Failed'], 0)
+        self.assertEqual(list(rows[0]), [
+            'DeploymentId', 'State', 'Active', 'Succeeded', 'Failed', 'LastDeploymentTime'])
 
 
 class TestTroubleshootConfigDiscovery(unittest.TestCase):

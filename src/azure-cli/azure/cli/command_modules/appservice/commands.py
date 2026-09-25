@@ -65,13 +65,10 @@ def transform_troubleshoot_deployment_output(result):
     return [OrderedDict([
         ('DeploymentId', result.get('deploymentId') or '-'),
         ('State', result.get('state') or 'Unknown'),
-        ('InProgress', result.get('inProgress', False)),
-        ('Complete', result.get('complete', False)),
         ('Active', result.get('active', False)),
-        ('Deployer', result.get('deployer') or '-'),
+        ('Succeeded', runtime.get('instancesSuccessful', '-')),
+        ('Failed', runtime.get('instancesFailed', '-')),
         ('LastDeploymentTime', result.get('lastDeploymentTime') or '-'),
-        ('InstancesSuccessful', runtime.get('instancesSuccessful', '-')),
-        ('InstancesFailed', runtime.get('instancesFailed', '-')),
     ])]
 
 
