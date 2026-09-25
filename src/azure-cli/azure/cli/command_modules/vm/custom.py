@@ -1887,12 +1887,17 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm.get("capacity_reservation") is None:
             vm["capacity_reservation"] = {}
         vm["capacity_reservation"]["capacity_reservation_group"] = sub_resource
+        if capacity_reservation_group is not None and \
+                vm["capacity_reservation"].get("disable_capacity_reservation_assignment") is True:
+            vm["capacity_reservation"].pop("disable_capacity_reservation_assignment", None)
 
     if disable_capacity_reservation_assignment is not None:
         if vm.get("capacity_reservation") is None:
             vm["capacity_reservation"] = {}
         vm["capacity_reservation"]["disable_capacity_reservation_assignment"] = \
             disable_capacity_reservation_assignment
+        if disable_capacity_reservation_assignment:
+            vm["capacity_reservation"].pop("capacity_reservation_group", None)
 
     if dedicated_host is not None:
         if vm.get("host", None) is None:
