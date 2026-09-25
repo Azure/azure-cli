@@ -6,6 +6,80 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
+import json
+import re
+from datetime import datetime
+
+from azure.core.exceptions import DeserializationError
+from azure.core.pipeline.policies import ContentDecodePolicy
+
+
+class _ProductListResponse:
+    def __init__(self, response, content, encoding):
+        self._response = response
+        self._encoding = encoding or 'utf-8'
+        self._body = json.dumps(content).encode(self._encoding)
+
+    def __getattr__(self, name):
+        return getattr(self._response, name)
+
+    def body(self):
+        return self._body
+
+    def text(self, encoding=None):
+        return self._body.decode(encoding or self._encoding)
+
+
+def _normalize_product_dates(response):
+    if response.http_response.status_code != 200:
+        return
+
+    encoding = response.context.get('response_encoding')
+    content = ContentDecodePolicy.deserialize_from_http_generics(response.http_response, encoding)
+    # Leave response shape validation to the SDK.
+    if not isinstance(content, dict) or not isinstance(content.get('value'), list):
+        return
+
+    changed = False
+    for product in content['value']:
+        if not isinstance(product, dict):
+            continue
+        properties = product.get('properties')
+        if not isinstance(properties, dict):
+            continue
+        for field in ('purchaseDate', 'endDate', 'lastChargeDate'):
+            value = properties.get(field)
+            if isinstance(value, str) and re.fullmatch(r'[0-9]{2}/[0-9]{2}/[0-9]{4}', value):
+                try:
+                    # The service's date-only values have no timezone.
+                    properties[field] = datetime.strptime(value, '%m/%d/%Y').isoformat()
+                except ValueError as ex:
+                    raise DeserializationError("Invalid product {}: {!r}".format(field, value)) from ex
+                changed = True
+
+    if changed:
+        # The raw hook runs before ContentDecodePolicy on every SDK pager request.
+        response.http_response = _ProductListResponse(response.http_response, content, encoding)
+
+
+def billing_product_list(client,
+                         account_name,
+                         profile_name=None,
+                         invoice_section_name=None,
+                         filter_=None,
+                         customer_name=None):
+    kwargs = {'billing_account_name': account_name, 'raw_response_hook': _normalize_product_dates}
+    if account_name is not None and profile_name is not None and invoice_section_name is not None:
+        return client.list_by_invoice_section(billing_profile_name=profile_name,
+                                              invoice_section_name=invoice_section_name,
+                                              filter=filter_,
+                                              **kwargs)
+    if account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_profile_name=profile_name, filter=filter_, **kwargs)
+    if account_name is not None and customer_name is not None:
+        return client.list_by_customer(customer_name=customer_name, **kwargs)
+    return client.list_by_billing_account(filter=filter_, **kwargs)
+
 
 def billing_invoice_download(client,
                              account_name=None,
