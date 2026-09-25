@@ -139,7 +139,7 @@ class TestCmdRetryDispatch(unittest.TestCase):
 
 class TestCreateContainerInsightsWorkspace(unittest.TestCase):
 
-    def test_solution_payload_is_passed_as_registered_kwarg(self):
+    def test_creates_dedicated_workspace_for_msi_monitoring(self):
         from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
             AzureKubernetesServiceScenarioTest,
         )
@@ -152,19 +152,15 @@ class TestCreateContainerInsightsWorkspace(unittest.TestCase):
                 'Microsoft.OperationalInsights/workspaces/workspace'
             )
         })
-        solution_result = MockExecutionResult({})
-        instance.cmd = MagicMock(side_effect=[workspace_result, solution_result])
+        instance.cmd = MagicMock(return_value=workspace_result)
 
         workspace_id = instance._create_container_insights_workspace('rg', 'westus2')
 
         self.assertEqual(workspace_result.get_output_in_json()['id'], workspace_id)
-        self.assertEqual(
-            json.loads(instance.kwargs['container_insights_solution'])['location'],
-            'westus2',
+        instance.cmd.assert_called_once_with(
+            'monitor log-analytics workspace create '
+            '--resource-group rg --name workspace --location westus2'
         )
-        solution_command = instance.cmd.call_args_list[1].args[0]
-        self.assertIn("'{container_insights_solution}'", solution_command)
-        self.assertNotIn('{"location"', solution_command)
 
 
 class TestWaitForClusterUpdate(unittest.TestCase):
