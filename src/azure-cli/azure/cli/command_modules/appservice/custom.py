@@ -12045,7 +12045,7 @@ def perform_onedeploy_webapp(cmd,
                              track_status=True,
                              enable_kudu_warmup=True,
                              enriched_errors=True,
-                             tag=None):
+                             deployment_tag=None):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -12064,7 +12064,7 @@ def perform_onedeploy_webapp(cmd,
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
-    params.tag = tag
+    params.tag = deployment_tag
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -12073,8 +12073,8 @@ def perform_onedeploy_webapp(cmd,
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     params._cached_site = app  # pylint: disable=protected-access
     params.is_linux_webapp = is_linux_webapp(app)
-    if tag is not None and not params.is_linux_webapp:
-        logger.warning("--tag is only supported for Linux web apps and will be ignored.")
+    if deployment_tag is not None and not params.is_linux_webapp:
+        logger.warning("--deploymentTag is only supported for Linux web apps and will be ignored.")
         params.tag = None
 
     # Warn that zip deploy won't auto-build on Linux
