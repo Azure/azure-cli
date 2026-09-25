@@ -23,6 +23,8 @@ server_friendly_sql = 'sql-clitestvm-d'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item1_sql = 'SQLDataBase;mssqlserver;msdb'
 item1_sql_fname = 'msdb'
+item_irpending_sql = 'SQLDataBase;mssqlserver;msdb_restored'
+item_irpending_sql_fname = 'msdb_restored'
 instance_name = 'sqlinstance;mssqlserver'
 
 
@@ -353,11 +355,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'item': item1_sql,
+            'item': item_irpending_sql,
             'pit': 'SQLDatabase',
             'item_id': item_id_sql,
             'id': id_sql,
-            'fitem': item1_sql_fname
+            'fitem': item_irpending_sql_fname
         })
 
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
