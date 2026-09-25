@@ -8,7 +8,7 @@ from azure.cli.command_modules.cognitiveservices._client_factory import cf_accou
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
     cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections, \
     cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule, \
-    cf_managed_compute_deployments, cf_computes
+    cf_managed_compute_deployments, cf_adapter_deployments, cf_computes
 
 
 def load_command_table(self, _):
@@ -212,6 +212,19 @@ def load_command_table(self, _):
         g.custom_command('list', 'managed_compute_deployment_list')
         g.custom_command('update', 'managed_compute_deployment_update')
         g.custom_command('delete', 'managed_compute_deployment_delete')
+
+    adapter_deployments_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#AdapterDeploymentsOperations.{}',
+        client_factory=cf_adapter_deployments
+    )
+
+    with self.command_group(
+            'cognitiveservices account adapter-deployment', adapter_deployments_type,
+            client_factory=cf_adapter_deployments, is_preview=True) as g:
+        g.custom_command('create', 'adapter_deployment_create')
+        g.custom_show_command('show', 'adapter_deployment_show')
+        g.custom_command('list', 'adapter_deployment_list')
+        g.custom_command('delete', 'adapter_deployment_delete')
 
     computes_type = CliCommandType(
         operations_tmpl='azure.mgmt.cognitiveservices.operations#ComputesOperations.{}',

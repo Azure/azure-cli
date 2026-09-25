@@ -458,6 +458,43 @@ def managed_compute_deployment_delete(client, resource_group_name, account_name,
     return client.begin_delete(resource_group_name, account_name, deployment_name)
 
 
+def adapter_deployment_create(
+        client, resource_group_name, account_name, adapter_deployment_name,
+        source_model_id, target_deployment_name):
+    """
+    Create (or replace / re-target) a LoRA adapter deployment attached to a managed compute deployment.
+    """
+    from azure.mgmt.cognitiveservices.models import AdapterDeployment, AdapterDeploymentProperties
+    properties = AdapterDeploymentProperties(
+        source_model_id=source_model_id,
+        target_deployment_name=target_deployment_name,
+    )
+    adapter_deployment = AdapterDeployment(properties=properties)
+    return client.begin_create_or_update(
+        resource_group_name, account_name, adapter_deployment_name, adapter_deployment)
+
+
+def adapter_deployment_show(client, resource_group_name, account_name, adapter_deployment_name):
+    """
+    Show an adapter deployment for Azure Cognitive Services account.
+    """
+    return client.get(resource_group_name, account_name, adapter_deployment_name)
+
+
+def adapter_deployment_list(client, resource_group_name, account_name):
+    """
+    List adapter deployments for Azure Cognitive Services account.
+    """
+    return client.list(resource_group_name, account_name)
+
+
+def adapter_deployment_delete(client, resource_group_name, account_name, adapter_deployment_name):
+    """
+    Delete an adapter deployment from Azure Cognitive Services account.
+    """
+    return client.begin_delete(resource_group_name, account_name, adapter_deployment_name)
+
+
 def commitment_plan_create_or_update(
     client,
     resource_group_name,
