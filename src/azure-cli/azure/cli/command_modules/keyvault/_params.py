@@ -361,7 +361,6 @@ def load_arguments(self, _):
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
         c.argument('external_key_id', options_list=['--external-key-id'], arg_group='External Key',
-                   is_preview=True,
                    help='Create an external Managed HSM key backed by an External Key Manager (EKM) key id.')
 
     with self.argument_context('keyvault key import') as c:
