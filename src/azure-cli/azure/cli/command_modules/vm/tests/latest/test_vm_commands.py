@@ -12508,11 +12508,12 @@ class VMSSReimageScenarioTest(ScenarioTest):
 
 class VMSSHKeyScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
-    def test_vm_ssh_key(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_', location='westus')
+    def test_vm_ssh_key(self, resource_group, resource_group_location):
         self.kwargs.update({
             'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0=',
             'updated-key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+4oSAGj8KYVXKmikS/sCD9zCTq1AqpK/jzKGhe6ujvl8B1JelAij9qkS7Maf6HdPjZmgChTbDcZmbfrOcT6opL/SCiFiGKgKi7cpL4Vo4K6DecHOtQ5cg4lUJrCDtSjuwwnuTsJvPym/AnBSW+OCGDkLC8CUdaMtdwLo6yYTSZ2fiRVTKz8/Kqv2HmXk4+M4T4U4V9enDepaCyZrFPdqaCZxzcQNQxNJhGpTGahDsCoFwsL8KNNPV3fXe12K0xJ1QEhd2MeCofDE1xkD0wr1BO5hMh7x5ui2JwOK/7BYyPNZ5Cr2UxzA/ty/L/I/qHTVoDCmaZT0gjXNp6zMz1bApJ91iGtQAr+WNsOhvXRYcTmwBzzBtMaFEYxNgv+O1qi8h++E+GH3d62NIp8rIya7JgBzjhmArefO4xSDqlQrl9vHliTBW8+58Mm0zWGMqODD3B13FG5B0f4KaZWiniDWiKNLosKsV08yK+eMulIuY2s8XvjqDifx8YPOQv+bYGL0=',
+            'loc': resource_group_location,
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
@@ -12534,20 +12535,25 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         ])
 
         # Use existing key
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-name k1 --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n vm1 --location {loc} --image Ubuntu2204 --size Standard_D2s_v3 '
+                 '--public-ip-address "" --nsg-rule NONE --ssh-key-name k1 --admin-username vmtest '
+                 '--subnet {subnet} --vnet-name {vnet}')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # Create new one
-        self.cmd('vm create -g {rg} -n vm3 --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-name k3 --generate-ssh-keys --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n vm3 --location {loc} --image Ubuntu2204 --size Standard_D2s_v3 '
+                 '--public-ip-address "" --nsg-rule NONE --ssh-key-name k3 --generate-ssh-keys '
+                 '--admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
         self.cmd('sshkey show -g {rg} -n k3')
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_ed25519', location='eastus')
-    def test_vm_ssh_key_ed25519(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_ed25519', location='westus')
+    def test_vm_ssh_key_ed25519(self, resource_group, resource_group_location):
         self.kwargs.update({
             'key_name': 'key',
+            'loc': resource_group_location,
             "ssh_key": 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure',
             'vm1': 'vm1',
             'vm2': 'vm2',
@@ -12558,14 +12564,20 @@ class VMSSHKeyScenarioTest(ScenarioTest):
         self.cmd('sshkey create -g {rg} -n {key_name} --encryption-type ed25519')
 
         # Create VM using ed25519 key
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-name {key_name} --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm1} --location {loc} --image Ubuntu2204 --size Standard_D2s_v3 '
+                 '--public-ip-address "" --nsg-rule NONE --ssh-key-name {key_name} --admin-username vmtest '
+                 '--subnet {subnet} --vnet-name {vnet}')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm2} --location {loc} --image Ubuntu2204 --size Standard_D2s_v3 '
+                 '--public-ip-address "" --nsg-rule NONE --ssh-key-value \'{ssh_key}\' --admin-username vmtest2 '
+                 '--subnet {subnet} --vnet-name {vnet}')
 
-        self.cmd('vm create -g {rg} -n {vm3} --image OpenLogic:CentOS:7.5:latest --nsg-rule None --generate-ssh-keys --ssh-key-type ed25519 --admin-username vmtest3 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm3} --location {loc} --image Ubuntu2204 --size Standard_D2s_v3 '
+                 '--public-ip-address "" --nsg-rule NONE --generate-ssh-keys --ssh-key-type ed25519 '
+                 '--admin-username vmtest3 --subnet {subnet} --vnet-name {vnet}')
 
 
 class VMInstallPatchesScenarioTest(ScenarioTest):
