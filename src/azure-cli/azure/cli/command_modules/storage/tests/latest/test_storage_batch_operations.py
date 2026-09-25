@@ -11,7 +11,7 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_download_scenarios(self, test_dir, storage_account_info):
         src_container = 'container1'

@@ -446,12 +446,13 @@ def _get_blob_download_path(destination, normalized_blob_name, blob_name):
     """Build the local path for a blob, ensuring it cannot escape the destination directory."""
     destination_path = os.path.join(destination, os.path.normpath(normalized_blob_name))
     # Blob names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on Windows),
-    # so resolve the final path and verify it is strictly inside the destination before writing anything.
-    real_destination = os.path.normcase(os.path.realpath(destination))
-    real_destination_path = os.path.normcase(os.path.realpath(destination_path))
+    # so verify the final path is strictly inside the destination before writing anything. The check is lexical on
+    # purpose: existing symlinks/junctions under the destination are followed, preserving user-created layouts.
+    abs_destination = os.path.normcase(os.path.abspath(destination))
+    abs_destination_path = os.path.normcase(os.path.abspath(destination_path))
     try:
-        is_within_destination = real_destination_path != real_destination and \
-            os.path.commonpath([real_destination, real_destination_path]) == real_destination
+        is_within_destination = abs_destination_path != abs_destination and \
+            os.path.commonpath([abs_destination, abs_destination_path]) == abs_destination
     except ValueError:  # paths are on different drives
         is_within_destination = False
     if not is_within_destination:

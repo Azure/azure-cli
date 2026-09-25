@@ -95,14 +95,20 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
         with open(outside_file, 'rb') as stream:
             self.assertEqual(stream.read(), b'original')
 
-    def test_download_batch_rejects_directory_link_escape(self):
+    def test_download_batch_follows_existing_directory_links(self):
+        # Existing symlinks/junctions under the destination are user-created layouts (e.g. routing a subtree to another
+        # disk), so they are followed as before; only the blob name itself is constrained.
         outside = os.path.join(self.root, 'outside')
         os.makedirs(outside)
         self._make_directory_link(outside, os.path.join(self.destination, 'link'))
 
+        download = self._run(['link/file.txt'])
+        self.assertEqual(download.call_count, 1)
+        self.assertEqual(os.listdir(outside), ['file.txt'])
+
         with self.assertRaises(FileOperationError):
-            self._run(['link/evil.txt'])
-        self.assertEqual(os.listdir(outside), [])
+            self._run(['link/../../evil.txt'])
+        self.assertEqual(os.listdir(outside), ['file.txt'])
 
     def test_download_batch_rejects_windows_blob_names_with_simulated_windows_paths(self):
         # Exercise Windows path semantics on any platform by swapping os.path for ntpath in the code under test
