@@ -8383,6 +8383,12 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             ]
         )
 
+        # Confirm record-type cannot be changed after it has been set
+        with self.assertRaisesRegex(
+                HttpResponseError,
+                'Record type cannot be modified once set.'):
+            self.cmd('network traffic-manager profile update -n {tm} -g {rg} --record-type AAAA')
+
         # Clean up
         self.cmd('network traffic-manager endpoint delete -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
