@@ -587,7 +587,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
         ])
 
-    @unittest.skip("Requires recovery points that have completed source-side threat scanning, which depends on the Defender-for-Cloud detection pipeline populating threat info (up to ~48h) on a dedicated scanned vault. Config-plane source-scan enable/disable is covered by test_backup_vault_source_scan_configuration and test_backup_item_source_scan_configuration; this data-plane scenario will be re-recorded against the new API version once scanned recovery points are available.")
+    # DATA-PLANE: asserts threat info on a source-scanned recovery point. Targets the pre-onboarded
+    # vault swbela-mdc-vault-1 / Sample-VM and RP 1134701036948821, which the Defender-for-Cloud scan
+    # pipeline marked UnHealthy with populated threatInfo (verified live 2026-09-25).
     @record_only()
     def test_backup_source_scan_recovery_points(self):
         self.kwargs.update({
@@ -596,7 +598,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': 'swbela-ransom-rg',
             'vault': 'swbela-mdc-vault-1',
             'vm': 'Sample-VM',
-            'rp': '1141447822743501'
+            'rp': '1134701036948821'
         })
 
         self.cmd('backup vault show --subscription {sub} -g {rg} -n {vault}', checks=[
