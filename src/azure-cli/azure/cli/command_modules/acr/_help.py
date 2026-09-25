@@ -1640,11 +1640,16 @@ examples:
     text: |
         az acr connected-registry create --registry mycloudregistry  --name myreadonlyacr \\
             --mode readonly --parent myconnectedregistry --sync-token mySyncTokenName
-  - name: Create a read only connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
+  - name: Create a read only connected registry with client tokens, that syncs every day at midnight and sync window of 4 hours.
     text: |
         az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
             --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
+  - name: Create a connected registry that authenticates with its parent using a user-assigned managed identity.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
 helps['acr connected-registry delete'] = """
@@ -1654,7 +1659,7 @@ examples:
   - name: Delete a read only connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
-  - name: Delete a read only connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+  - name: Delete a read only connected registry 'myconnectedregistry' and its sync token and scope-map from parent registry 'mycloudregistry'.
     text: >
         az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
 """
@@ -1675,7 +1680,7 @@ examples:
   - name: List all the connected registries of 'mycloudregistry' in table format.
     text: >
         az acr connected-registry list --registry mycloudregistry --output table
-  - name: List only the inmediate children of 'mycloudregistry' in expanded form in a table.
+  - name: List only the immediate children of 'mycloudregistry' in expanded form in a table.
     text: >
         az acr connected-registry list --registry mycloudregistry --no-children --output table
   - name: List all the offspring of 'myconnectedregistry' in expanded form inside a table.
@@ -1704,6 +1709,10 @@ examples:
 helps['acr connected-registry update'] = """
 type: command
 short-summary: Update a connected registry for an Azure Container Registry.
+long-summary: |
+    Only one-way migration from SyncToken to ManagedIdentity authentication is supported, and the
+    connected registry must be in Offline state. Run `az acr connected-registry deactivate` before
+    invoking the migration.
 examples:
   - name: Update the connected registry client Tokens.
     text: |
@@ -1714,6 +1723,11 @@ examples:
     text: |
         az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
+  - name: Migrate an offline connected registry from SyncToken to ManagedIdentity authentication.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentitiy"
 """
 
 helps['acr connected-registry get-settings'] = """
@@ -1730,12 +1744,12 @@ examples:
 
 helps['acr connected-registry permissions'] = """
 type: group
-short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Manage the repository permissions across multiple connected registries. Only supported for connected registries configured with SyncToken authentication (output is derived from the sync-token scope map). Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry permissions update'] = """
 type: command
-short-summary: Add and remove repository permissions accross all the necessary connected registry sync scope maps.
+short-summary: Add and remove repository permissions across all the necessary connected registry sync scope maps. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
@@ -1750,7 +1764,7 @@ examples:
 
 helps['acr connected-registry permissions show'] = """
 type: command
-short-summary: Show the connected registry sync scope map information.
+short-summary: Show the connected registry sync scope map information. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Show details and attributes of a sync scope map for a connected registry.
     text: >
