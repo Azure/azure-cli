@@ -807,6 +807,21 @@ def _normalize_ekm_host(host: str):
     return f'{hostname}:{port}'
 
 
+def _validate_ekm_private_endpoint_name(name):
+    if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,22}[A-Za-z0-9])?', name):
+        raise InvalidArgumentValueError('The EKM private endpoint name must be 1-24 letters, digits or hyphens, '
+                                        'and start and end with a letter or digit.')
+    return name
+
+
+def _normalize_ekm_connection_host(host, connectivity_mode=None):
+    if connectivity_mode == 'PrivateEndpoint':
+        return _validate_ekm_private_endpoint_name(host)
+    if connectivity_mode not in (None, 'Public'):
+        raise InvalidArgumentValueError('--connectivity-mode must be Public or PrivateEndpoint.')
+    return _normalize_ekm_host(host)
+
+
 def _flatten_list(value):
     if value is None:
         return None
@@ -872,7 +887,7 @@ def validate_ekm_connection_base(cmd, ns):  # pylint: disable=unused-argument
 
 def validate_ekm_connection_create(cmd, ns):
     validate_ekm_connection_base(cmd, ns)
-    ns.host = _normalize_ekm_host(ns.host)
+    ns.host = _normalize_ekm_connection_host(ns.host, getattr(ns, 'connectivity_mode', None))
     _validate_ekm_path_prefix(getattr(ns, 'path_prefix', None))
     server_ca_certificates = _load_certificates_as_der_bytes(getattr(ns, 'server_ca_certificates', None))
     if not server_ca_certificates:
@@ -882,11 +897,17 @@ def validate_ekm_connection_create(cmd, ns):
 
 def validate_ekm_connection_update(cmd, ns):
     validate_ekm_connection_base(cmd, ns)
-    if getattr(ns, 'host', None):
-        ns.host = _normalize_ekm_host(ns.host)
+    if getattr(ns, 'host', None) is not None and getattr(ns, 'connectivity_mode', None) is not None:
+        ns.host = _normalize_ekm_connection_host(ns.host, ns.connectivity_mode)
     _validate_ekm_path_prefix(getattr(ns, 'path_prefix', None))
     if getattr(ns, 'server_ca_certificates', None):
         ns.server_ca_certificates = _load_certificates_as_der_bytes(ns.server_ca_certificates)
+
+
+def validate_ekm_private_endpoint(cmd, ns):
+    validate_ekm_connection_base(cmd, ns)
+    if getattr(ns, 'private_endpoint_name', None) is not None:
+        _validate_ekm_private_endpoint_name(ns.private_endpoint_name)
 
 
 # pylint: disable=line-too-long, too-many-locals

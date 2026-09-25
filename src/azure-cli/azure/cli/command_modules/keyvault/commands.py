@@ -27,7 +27,8 @@ from azure.cli.command_modules.keyvault._format import transform_secret_list_tab
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, validate_key_create,
     validate_private_endpoint_connection_id, validate_role_assignment_args,
-    validate_ekm_connection_base, validate_ekm_connection_create, validate_ekm_connection_update)
+    validate_ekm_connection_base, validate_ekm_connection_create, validate_ekm_connection_update,
+    validate_ekm_private_endpoint)
 
 
 def transform_assignment_list(result):
@@ -152,6 +153,21 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault ekm-connection certificate', command_type=data_ekm_custom, is_preview=True) as g:
         g.keyvault_custom('show', 'get_ekm_certificate', validator=validate_ekm_connection_base)
+
+    with self.command_group('keyvault ekm-connection private-endpoint', command_type=data_ekm_custom,
+                            is_preview=True) as g:
+        g.keyvault_custom('create', 'create_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
+                          supports_no_wait=True)
+        g.keyvault_custom('delete', 'delete_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
+                          supports_no_wait=True, confirmation=True)
+        g.keyvault_custom('show', 'get_ekm_private_endpoint', validator=validate_ekm_private_endpoint)
+        g.keyvault_custom('list', 'list_ekm_private_endpoints', validator=validate_ekm_connection_base)
+        g.custom_wait_command('wait', 'get_ekm_private_endpoint', validator=validate_ekm_private_endpoint,
+                              custom_command_type=data_ekm_custom)
+
+    with self.command_group('keyvault ekm-connection private-endpoint operation', command_type=data_ekm_custom,
+                            is_preview=True) as g:
+        g.keyvault_custom('show', 'get_ekm_private_endpoint_operation', validator=validate_ekm_connection_base)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)
