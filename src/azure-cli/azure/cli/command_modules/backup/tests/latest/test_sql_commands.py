@@ -736,6 +736,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
+    @unittest.skip("Requires VaultArchive-tier recovery points, which take multiple days of archive aging to become ready-for-move. Setup is being provisioned separately; this scenario will be re-recorded against the new API version in the next release.")
     @AllowLargeResponse()
     @record_only()
     def test_backup_wl_sql_archive (self):

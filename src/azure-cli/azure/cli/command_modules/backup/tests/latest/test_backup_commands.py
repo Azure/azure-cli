@@ -587,6 +587,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
         ])
 
+    @unittest.skip("Requires recovery points that have completed source-side threat scanning, which depends on the Defender-for-Cloud detection pipeline populating threat info (up to ~48h) on a dedicated scanned vault. Config-plane source-scan enable/disable is covered by test_backup_vault_source_scan_configuration and test_backup_item_source_scan_configuration; this data-plane scenario will be re-recorded against the new API version once scanned recovery points are available.")
     @record_only()
     def test_backup_source_scan_recovery_points(self):
         self.kwargs.update({
