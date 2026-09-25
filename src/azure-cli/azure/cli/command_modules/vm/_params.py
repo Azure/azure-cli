@@ -520,13 +520,19 @@ def load_arguments(self, _):
             'data_disk_storage_fault_domain_alignment',
             options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
-            help='Specifies the storage fault domain alignment type for the disk.'
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for data disks. This option is only valid when '
+                 'the VM joins a single-zone Flexible VMSS and is set at create time. Omit this option to leave '
+                 'data disks unaligned.'
         )
         c.argument(
             'os_disk_storage_fault_domain_alignment',
             options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
-            help='Specifies the storage fault domain alignment type for the disk.'
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for the OS disk. This option is only valid when '
+                 'the VM joins a single-zone Flexible VMSS and is set at create time. Omit this option to leave '
+                 'the OS disk unaligned.'
         )
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
@@ -862,19 +868,27 @@ def load_arguments(self, _):
             'data_disk_storage_fault_domain_alignment',
             options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
-            help='Specifies the storage fault domain alignment type for the disk.'
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for data disks. This option is only valid for '
+                 'a single-zone Flexible VMSS and is set at create time. Omit this option to leave data disks '
+                 'unaligned.'
         )
         c.argument(
             'os_disk_storage_fault_domain_alignment',
             options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
-            help='Specifies the storage fault domain alignment type for the disk.'
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for the OS disk. This option is only valid for '
+                 'a single-zone Flexible VMSS and is set at create time. Omit this option to leave the OS disk '
+                 'unaligned.'
         )
         c.argument(
             'zonal_platform_fault_domain_align_mode',
             options_list=['--zonal-fault-domain-align-mode', '--zonal-fda'],
             arg_type=get_enum_type(FaultDomainAlignment),
-            help='Specifies the align mode between Virtual Machine Scale Set compute and storage Fault Domain count.'
+            is_preview=True,
+            help='Specifies the alignment mode between Virtual Machine Scale Set compute and storage fault domains. '
+                 'This option is only valid for a single-zone Flexible VMSS.'
         )
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:

@@ -1121,6 +1121,12 @@ examples:
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
             --image Ubuntu2204 --data-disk-sizes-gb 10 20 --size Standard_DS2_v2 \\
             --generate-ssh-keys
+  - name: Create a VM in a single-zone Flexible VMSS with aligned OS and data disks.
+    text: |
+        az vm create -g MyResourceGroup -n MyVm --location eastus2 --vmss MyFlexibleVmss \\
+            --platform-fault-domain 0 --image Ubuntu2204 --size Standard_D4s_v5 \\
+            --data-disk-sizes-gb 10 --os-disk-storage-fd-alignment Aligned \\
+            --data-disk-storage-fd-alignment BestEffortAligned
   - name: Create a Debian11 VM using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
@@ -2297,6 +2303,14 @@ examples:
     supported-profiles: latest
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image CentOS85Gen2 --zones 1
+  - name: Create a single-zone Flexible VMSS with aligned compute and storage fault domains.
+    text: |
+        az vmss create -g MyResourceGroup -n MyVmss --location eastus2 --zones 1 \\
+            --orchestration-mode Flexible --platform-fault-domain-count 3 \\
+            --zonal-fault-domain-align-mode BestEffortAligned \\
+            --os-disk-storage-fd-alignment Aligned --data-disk-sizes-gb 10 \\
+            --data-disk-storage-fd-alignment BestEffortAligned \\
+            --image Ubuntu2204 --vm-sku Standard_D4s_v5
   - name: Create a VMSS that supports SpotRestore.
     text: >
         az vmss create -n MyVmss -g MyResourceGroup  --location NorthEurope --instance-count 2 --image CentOS85Gen2 --priority Spot --eviction-policy Deallocate --single-placement-group --enable-spot-restore True --spot-restore-timeout PT1H

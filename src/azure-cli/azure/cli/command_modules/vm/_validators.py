@@ -780,9 +780,7 @@ def _validate_vm_create_disk_alignment(cmd, namespace):
         'vm_scale_set_name': vmss_id['name']
     })
 
-    flexible_str = 'Flexible'
-
-    if vmss_show.get('orchestrationMode') != flexible_str:
+    if vmss_show.get('orchestrationMode', '').lower() != 'flexible':
         raise ArgumentUsageError('usage error: --data-disk-storage-fd-alignment/ '
                                  '--os-disk-storage-fd-alignment '
                                  'is only available for VM in a Flex VMSS.')
@@ -791,6 +789,38 @@ def _validate_vm_create_disk_alignment(cmd, namespace):
         raise ArgumentUsageError('usage error: --data-disk-storage-fd-alignment/ '
                                  '--os-disk-storage-fd-alignment '
                                  'is only available for VM in a single Availability Zone VMSS.')
+
+    _validate_data_disk_alignment(namespace)
+
+
+def _validate_data_disk_alignment(namespace):
+    if namespace.data_disk_storage_fault_domain_alignment is None:
+        return
+
+    data_disks = [disk for name, disk in getattr(namespace, 'disk_info', {}).items() if name != 'os']
+    if not data_disks:
+        raise ArgumentUsageError(
+            'usage error: --data-disk-storage-fd-alignment requires at least one data disk.')
+
+
+def _validate_vmss_create_alignment(namespace):
+    disk_alignment_requested = namespace.data_disk_storage_fault_domain_alignment is not None \
+        or namespace.os_disk_storage_fault_domain_alignment is not None
+    alignment_mode_requested = namespace.zonal_platform_fault_domain_align_mode is not None
+
+    if not disk_alignment_requested and not alignment_mode_requested:
+        return
+
+    if (namespace.orchestration_mode or '').lower() != 'flexible':
+        raise ArgumentUsageError('usage error: --data-disk-storage-fd-alignment/ '
+                                 '--os-disk-storage-fd-alignment/ '
+                                 '--zonal-fault-domain-align-mode '
+                                 'is only available for VMSS with flexible orchestration mode')
+    if not namespace.zones or len(namespace.zones) != 1:
+        raise ArgumentUsageError('usage error: --data-disk-storage-fd-alignment/ '
+                                 '--os-disk-storage-fd-alignment/ '
+                                 '--zonal-fault-domain-align-mode '
+                                 'is only available for VMSS with single Availability Zone')
 
 
 def _validate_vm_create_vmss(cmd, namespace):
@@ -1642,8 +1672,8 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_vm_create_storage_account(cmd, namespace)
 
     _validate_vm_create_availability_set(cmd, namespace)
-    _validate_vm_create_disk_alignment(cmd, namespace)
     _validate_vm_create_vmss(cmd, namespace)
+    _validate_vm_create_disk_alignment(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
     _validate_vm_vmss_create_public_ip(cmd, namespace)
@@ -1843,19 +1873,7 @@ def process_vmss_create_namespace(cmd, namespace):
             raise InvalidArgumentValueError('usage error: --regular-priority-count/--regular-priority-percentage is '
                                             'only available for VMSS with flexible orchestration mode')
 
-    if namespace.data_disk_storage_fault_domain_alignment is not None \
-            or namespace.os_disk_storage_fault_domain_alignment is not None \
-            or namespace.zonal_platform_fault_domain_align_mode is not None:
-        if namespace.orchestration_mode.lower() != flexible_str.lower():
-            raise ArgumentUsageError('usage error: --data-disk-storage-fault-domain-alignment/ '
-                                     '--os-disk-storage-fault-domain-alignment/ '
-                                     '--zonal-platform-fault-domain-align-mode '
-                                     'is only available for VMSS with flexible orchestration mode')
-        if not namespace.zones or len(namespace.zones) != 1:
-            raise ArgumentUsageError('usage error: --data-disk-storage-fault-domain-alignment/ '
-                                     '--os-disk-storage-fault-domain-alignment/ '
-                                     '--zonal-platform-fault-domain-align-mode '
-                                     'is only available for VMSS with single Availability Zone')
+    _validate_vmss_create_alignment(namespace)
 
     if namespace.orchestration_mode.lower() == flexible_str.lower():
 
@@ -1915,6 +1933,7 @@ def process_vmss_create_namespace(cmd, namespace):
 
         if getattr(namespace, 'attach_os_disk', None) or namespace.image is not None:
             _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+        _validate_data_disk_alignment(namespace)
 
         if namespace.vnet_name or namespace.subnet or namespace.image:
             _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
@@ -1965,6 +1984,7 @@ def process_vmss_create_namespace(cmd, namespace):
     validate_edge_zone(cmd, namespace)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+    _validate_data_disk_alignment(namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
     _validate_vmss_single_placement_group(namespace)
