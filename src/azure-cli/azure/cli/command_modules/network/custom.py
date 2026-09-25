@@ -2705,6 +2705,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':
                 record_obj.update({'alias': ''})
+            elif record_type == 'txt':
+                record_obj.update({'txt': ''})
             zone_obj[record_set_name][record_type].append(record_obj)
     zone_file_content = make_zone_file(zone_obj)
     print(zone_file_content)
