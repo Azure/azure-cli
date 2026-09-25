@@ -5462,11 +5462,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None,
                             enriched_errors=False):
+    if hyper_v and is_managed_instance:
+        raise MutuallyExclusiveArgumentError(
+            '--hyper-v and --is-managed-instance cannot be used together because Windows Containers '
+            'are not supported in Managed Instance on Azure App Service.')
+
     if is_linux is None:
-        is_linux = not hyper_v
-    elif is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
-                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
+        is_linux = not (hyper_v or is_managed_instance)
+    elif is_linux and (hyper_v or is_managed_instance):
+        windows_plan_argument = '--hyper-v' if hyper_v else '--is-managed-instance'
+        raise MutuallyExclusiveArgumentError(
+            '{} creates a Windows plan and cannot be combined with --is-linux true. '
+            'Omit --is-linux or use "--is-linux false".'.format(windows_plan_argument))
 
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'

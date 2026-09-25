@@ -135,9 +135,12 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
-                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v or '
+                        '--is-managed-instance is specified. '
                         'Use "--is-linux false" to create a Windows plan.')
-        c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
+        c.argument('hyper_v', action='store_true', required=False,
+                   help='Host Windows Container Web App on Hyper-V worker. Cannot be used with '
+                        '--is-managed-instance.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
@@ -145,7 +148,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_managed_instance', action='store_true', help='host web app on managed instance')
+        c.argument('is_managed_instance', action='store_true',
+                   help='Host web app on Managed Instance. Managed Instance supports Windows plans only and '
+                        'cannot be used with --hyper-v.')
         c.argument('mi_system_assigned',
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")

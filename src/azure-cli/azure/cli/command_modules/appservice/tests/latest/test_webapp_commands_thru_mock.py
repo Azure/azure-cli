@@ -1767,6 +1767,43 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = mock_app_service_plan_cls.call_args
         self.assertIn('reserved=False', str(call_kwargs))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_managed_instance_defaults_to_windows(self, mock_location, mock_client_factory):
+        """When --is-managed-instance is specified, an omitted --is-linux defaults to false."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_app_service_plan_cls = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock_app_service_plan_cls)
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client_factory.return_value = mock.MagicMock()
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=None, hyper_v=False,
+                                    is_managed_instance=True)
+        except Exception:
+            pass
+
+        mock_app_service_plan_cls.assert_called()
+        self.assertIn('reserved=False', str(mock_app_service_plan_cls.call_args))
+
+    def test_managed_instance_rejects_linux(self):
+        """Managed Instance on App Service supports only Windows plans."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, '--is-managed-instance creates a Windows plan'):
+            create_app_service_plan(mock.MagicMock(), 'rg', 'plan', is_linux=True, hyper_v=False,
+                                    is_managed_instance=True)
+
+    def test_managed_instance_rejects_hyper_v(self):
+        """Managed Instance on App Service does not support Windows Containers."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    '--hyper-v and --is-managed-instance cannot be used together'):
+            create_app_service_plan(mock.MagicMock(), 'rg', 'plan', is_linux=None, hyper_v=True,
+                                    is_managed_instance=True)
+
 
 class TestOneDeployScmCache(unittest.TestCase):
     """Tests for the per-invocation SCM URL / SCM headers cache on OneDeployParams.
