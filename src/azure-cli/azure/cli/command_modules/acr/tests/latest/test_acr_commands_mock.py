@@ -1458,9 +1458,10 @@ class ResolveAcrScopeTests(unittest.TestCase):
     """
 
     @staticmethod
-    def _ctx(configured):
+    def _ctx(configured, cloud_name='AzureCloud'):
         cli_ctx = mock.MagicMock()
         cli_ctx.config.get.return_value = configured
+        cli_ctx.cloud.name = cloud_name
         return cli_ctx
 
     def test_default_when_unset(self):
@@ -1487,4 +1488,40 @@ class ResolveAcrScopeTests(unittest.TestCase):
         self.assertEqual(
             _resolve_acr_scope(cli_ctx),
             "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME),
+        )
+
+    def test_private_cloud_derives_resource_from_login_server(self):
+        """For private/local clouds (e.g. Azure Local), the audience is derived from the
+        registry's login server URL so the local IDP can recognise the resource."""
+        cli_ctx = self._ctx(None, cloud_name='CustomLocalCloud')
+        self.assertEqual(
+            _resolve_acr_scope(cli_ctx, login_server='edgeartifacts.edgeacr.local.private'),
+            "https://edgeartifacts.edgeacr.local.private",
+        )
+
+    def test_standard_cloud_uses_default_audience_regardless_of_login_server(self):
+        """Standard Azure clouds always use the shared containerregistry.azure.net audience."""
+        for cloud_name in ('AzureCloud', 'AzureChinaCloud', 'AzureUSGovernment',
+                           'AzureGermanCloud', 'AzureBleuCloud'):
+            with self.subTest(cloud_name=cloud_name):
+                cli_ctx = self._ctx(None, cloud_name=cloud_name)
+                self.assertEqual(
+                    _resolve_acr_scope(cli_ctx, login_server='myregistry.azurecr.io'),
+                    "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME),
+                )
+
+    def test_private_cloud_no_login_server_uses_default(self):
+        """If login_server is not provided even on a private cloud, fall back to the default."""
+        cli_ctx = self._ctx(None, cloud_name='CustomLocalCloud')
+        self.assertEqual(
+            _resolve_acr_scope(cli_ctx),
+            "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME),
+        )
+
+    def test_config_overrides_private_cloud_derivation(self):
+        """An explicit acr.audience_resource config always wins, even on a private cloud."""
+        cli_ctx = self._ctx("https://override.example.com", cloud_name='CustomLocalCloud')
+        self.assertEqual(
+            _resolve_acr_scope(cli_ctx, login_server='edgeartifacts.edgeacr.local.private'),
+            "https://override.example.com",
         )
