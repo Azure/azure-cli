@@ -275,47 +275,50 @@ test_validate_disk_encryption_set_data = [
         None
     ),
     (
-        "should not raise any exception when compute_client.disk_encryption_sets.get() not raises CludError exception",
+        "should not raise any exception when the AAZ disk encryption set show command succeeds",
         Mock(cli_ctx=None),
         Mock(disk_encryption_set="something different than None"),
         True,
         Mock(),
         None,
-        {"resource_group": None, "name": None}
+        {"resource_group": "des-resource-group", "name": "des-name"}
     )
 ]
 
 
 @pytest.mark.parametrize(
-    "test_description, cmd_mock, namespace, is_valid_resource_id_return_value, compute_client_mock, expected_exception, parse_resource_id_mock_return_value",
+    "test_description, cmd_mock, namespace, is_valid_resource_id_return_value, show_mock, expected_exception, parse_resource_id_mock_return_value",
     test_validate_disk_encryption_set_data,
     ids=[i[0] for i in test_validate_disk_encryption_set_data]
 )
-@patch('azure.cli.command_modules.aro._validators.get_mgmt_service_client')
+@patch('azure.cli.command_modules.vm.aaz.latest.disk_encryption_set.Show')
 @patch('azure.cli.command_modules.aro._validators.parse_resource_id')
 @patch('azure.cli.command_modules.aro._validators.is_valid_resource_id')
 def test_validate_disk_encryption_set(
-    # Mocks:
     is_valid_resource_id_mock,
     parse_resource_id_mock,
-    get_mgmt_service_client_mock,
-
-    # Test cases parameters:
+    aaz_show_mock,
     test_description, cmd_mock, namespace, is_valid_resource_id_return_value,
-    compute_client_mock, expected_exception, parse_resource_id_mock_return_value
+    show_mock, expected_exception, parse_resource_id_mock_return_value
 ):
     is_valid_resource_id_mock.return_value = is_valid_resource_id_return_value
     parse_resource_id_mock.return_value = parse_resource_id_mock_return_value
 
-    if compute_client_mock is not None:
-        compute_client_mock.get.return_value = None
-        get_mgmt_service_client_mock.return_value = compute_client_mock
+    if show_mock is not None:
+        aaz_show_mock.return_value = show_mock
 
     if expected_exception is None:
         validate_disk_encryption_set(cmd_mock, namespace)
     else:
         with pytest.raises(expected_exception):
             validate_disk_encryption_set(cmd_mock, namespace)
+
+    if show_mock is not None:
+        aaz_show_mock.assert_called_once_with(cli_ctx=cmd_mock.cli_ctx)
+        show_mock.assert_called_once_with(command_args={
+            'resource_group': 'des-resource-group',
+            'disk_encryption_set_name': 'des-name'
+        })
 
 
 test_validate_domain_data = [
