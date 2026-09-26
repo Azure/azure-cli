@@ -191,6 +191,9 @@ examples:
   - name: Create a managed container registry with writable cache repositories enabled.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Premium --writable-cache-repos enabled
+  - name: Create a Premium registry encrypted with a customer-managed key in Managed HSM.
+    text: >
+        az acr create --name myregistry --resource-group MyResourceGroup --sku Premium --identity myidentity --key-encryption-key https://myhsm.managedhsm.azure.net/keys/mykey
 """
 
 helps['acr credential'] = """
@@ -1628,6 +1631,10 @@ short-summary: Manage connected registry resources with Azure Container Registri
 helps['acr connected-registry create'] = """
 type: command
 short-summary: Create a connected registry for an Azure Container Registry.
+long-summary: |
+    ManagedIdentity authentication requires --identity and cannot be combined with --parent, --sync-token, or --repository.
+    ManagedIdentity connected registries must be top-level and cannot have children.
+    If --auth-type is omitted, SyncToken authentication is used.
 examples:
   - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
     text: |
@@ -1642,6 +1649,11 @@ examples:
         az acr connected-registry create -r mycloudregistry -n myreadonlyacr -p myconnectedregistry \\
             --repository "app/mycomponent" -m ReadOnly -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
+  - name: Create a connected registry that authenticates with its parent using a user-assigned managed identity.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['acr connected-registry delete'] = """
@@ -1701,6 +1713,10 @@ examples:
 helps['acr connected-registry update'] = """
 type: command
 short-summary: Update a connected registry for an Azure Container Registry.
+long-summary: |
+    Only one-way migration from SyncToken to ManagedIdentity authentication is supported.
+    The connected registry must have an Offline connection state before migration. If it is Online, run `az acr connected-registry deactivate` and wait until it is Offline.
+    Changing the managed identity of a connected registry already using ManagedIdentity authentication is not supported.
 examples:
   - name: Update the connected registry client Tokens.
     text: |
@@ -1711,11 +1727,17 @@ examples:
     text: |
         az acr connected-registry update --registry mycloudregistry --name myreadonlyacr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
+  - name: Migrate an offline connected registry from SyncToken to ManagedIdentity authentication.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --auth-type ManagedIdentity \\
+            --identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
 """
 
 helps['acr connected-registry get-settings'] = """
 type: command
-short-summary: Retrieve information required to activate a connected registry, and creates or rotates the sync token credentials.
+short-summary: Retrieve information required to activate a connected registry, optionally generating SyncToken credentials.
+long-summary: ManagedIdentity settings do not require a sync token password and do not support --generate-password.
 examples:
   - name: Get the settings information required to install a connected registry without the password.
     text: >
@@ -1727,12 +1749,12 @@ examples:
 
 helps['acr connected-registry permissions'] = """
 type: group
-short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Manage the repository permissions across multiple connected registries. Only supported for connected registries configured with SyncToken authentication (output is derived from the sync-token scope map). Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry permissions update'] = """
 type: command
-short-summary: Add and remove repository permissions accross all the necessary connected registry sync scope maps.
+short-summary: Add and remove repository permissions across all the necessary connected registry sync scope maps. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
@@ -1747,7 +1769,7 @@ examples:
 
 helps['acr connected-registry permissions show'] = """
 type: command
-short-summary: Show the connected registry sync scope map information.
+short-summary: Show the connected registry sync scope map information. Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Show details and attributes of a sync scope map for a connected registry.
     text: >
@@ -1772,6 +1794,7 @@ examples:
 helps['acr connected-registry install renew-credentials'] = """
 type: command
 short-summary: Retrieve information required to activate a connected registry, and renews the sync token credentials.
+long-summary: Only supported for connected registries configured with SyncToken authentication.
 examples:
   - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
     text: >
@@ -1856,14 +1879,21 @@ short-summary: list the private link resources supported for a registry
 # region encryption
 helps['acr encryption'] = """
 type: group
-short-summary: Manage container registry encryption
+short-summary: Manage customer-managed encryption for a container registry.
 long-summary: For more information, see http://aka.ms/acr/cmk
 """
 
 helps['acr encryption rotate-key'] = """
 type: command
-short-summary: Rotate (update) the container registry's encryption key
-long-summary: For more information, see http://aka.ms/acr/cmk
+short-summary: Rotate the customer-managed encryption key for a container registry.
+long-summary: The registry must already have customer-managed key encryption enabled. The managed identity must have permission to use the new Azure Key Vault or Managed HSM key. For more information, see http://aka.ms/acr/cmk
+examples:
+  - name: Rotate to a versionless Managed HSM key to enable automatic key rotation.
+    text: >
+        az acr encryption rotate-key --name myregistry --resource-group MyResourceGroup --identity myidentity --key-encryption-key https://myhsm.managedhsm.azure.net/keys/mykey
+  - name: Rotate manually to a specific Azure Key Vault key version.
+    text: >
+        az acr encryption rotate-key --name myregistry --resource-group MyResourceGroup --identity myidentity --key-encryption-key https://myvault.vault.azure.net/keys/mykey/00000000000000000000000000000000
 """
 
 helps['acr encryption show'] = """

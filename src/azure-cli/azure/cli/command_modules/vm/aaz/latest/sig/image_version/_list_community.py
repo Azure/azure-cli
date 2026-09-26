@@ -22,9 +22,9 @@ class ListCommunity(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-07-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}/images/{}/versions", "2023-07-03"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}/images/{}/versions", "2026-03-03"],
         ]
     }
 
@@ -49,6 +49,9 @@ class ListCommunity(AAZCommand):
             options=["-i", "--gallery-image-definition"],
             help="The name of the community gallery image definition from which the image versions are to be listed.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.location = AAZResourceLocationArg(
             required=True,
@@ -57,6 +60,9 @@ class ListCommunity(AAZCommand):
             options=["--public-gallery-name"],
             help="The public name of the community gallery.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         return cls._args_schema
 
@@ -130,7 +136,7 @@ class ListCommunity(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-07-03",
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }
@@ -199,12 +205,20 @@ class ListCommunity(AAZCommand):
             properties.artifact_tags = AAZDictType(
                 serialized_name="artifactTags",
             )
+            properties.consumption_end_time = AAZStrType(
+                serialized_name="consumptionEndTime",
+                flags={"read_only": True},
+            )
             properties.disclaimer = AAZStrType()
             properties.end_of_life_date = AAZStrType(
                 serialized_name="endOfLifeDate",
             )
             properties.exclude_from_latest = AAZBoolType(
                 serialized_name="excludeFromLatest",
+            )
+            properties.image_state = AAZStrType(
+                serialized_name="imageState",
+                flags={"read_only": True},
             )
             properties.published_date = AAZStrType(
                 serialized_name="publishedDate",
