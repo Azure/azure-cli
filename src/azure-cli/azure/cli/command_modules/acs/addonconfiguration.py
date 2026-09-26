@@ -16,10 +16,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_SUBNET_ID,
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_VIRTUAL_NODE_ADDON_NAME,
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
+from azure.cli.command_modules.acs._helpers import safe_lower
 from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
@@ -370,6 +372,83 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
+def get_existing_container_insights_extension_dcr(cmd, dcr_url):
+    """Fetch the Container Insights extension DCR that already exists, or {} if there is none."""
+    _MAX_RETRY_TIMES = 3
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resp = send_raw_request(
+                cmd.cli_ctx, "GET", dcr_url
+            )
+            return json.loads(resp.text)
+        except CLIError as e:
+            if "ResourceNotFound" in str(e):
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise e
+    return {}
+
+
+def get_existing_data_collection_endpoint(cmd, dce_resource_id):
+    """Fetch the data collection endpoint that already exists, or {} if there is none."""
+    dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+        f"{dce_resource_id}?api-version=2022-06-01"
+    _MAX_RETRY_TIMES = 3
+    for retry_count in range(0, _MAX_RETRY_TIMES):
+        try:
+            resp = send_raw_request(cmd.cli_ctx, "GET", dce_url)
+            return json.loads(resp.text)
+        except CLIError as e:
+            if "ResourceNotFound" in str(e):
+                break
+            if retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise e
+    return {}
+
+
+def _resolve_dcr_settings_from_existing(
+    existing_dcr, enable_syslog, data_collection_settings, enable_high_log_scale_mode
+):
+    """Carry over DCR settings the caller did not specify from the DCR that already exists.
+
+    The DCR is rebuilt from scratch on every reconfiguration, so a setting that is not supplied on
+    the command line is otherwise silently dropped: 'az aks update --enable-syslog' on a cluster
+    using high log scale mode would rebuild the DCR without the high scale streams, its custom data
+    collection settings and its ingestion DCE, and '--data-collection-settings' on its own would
+    drop syslog. Only explicitly supplied settings should change anything.
+
+    None means "not specified"; an explicit True or False always wins. Returns the resolved
+    (enable_syslog, existing_data_collection_settings, enable_high_log_scale_mode), where the
+    middle value is an already-parsed settings dict to fall back on, or None.
+    """
+    properties = (existing_dcr or {}).get("properties") or {}
+    data_sources = properties.get("dataSources") or {}
+    ci_extension = next(
+        (
+            extension
+            for extension in (data_sources.get("extensions") or [])
+            if extension.get("extensionName") == "ContainerInsights"
+        ),
+        {},
+    )
+
+    if enable_syslog is None:
+        enable_syslog = bool(data_sources.get("syslog"))
+
+    if enable_high_log_scale_mode is None:
+        enable_high_log_scale_mode = "Microsoft-ContainerLogV2-HighScale" in (
+            ci_extension.get("streams") or []
+        )
+
+    existing_data_collection_settings = None
+    if data_collection_settings is None:
+        existing_data_collection_settings = (
+            ci_extension.get("extensionSettings") or {}
+        ).get("dataCollectionSettings") or None
+
+    return enable_syslog, existing_data_collection_settings, enable_high_log_scale_mode
+
+
 def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     tags = {}
     _MAX_RETRY_TIMES = 3
@@ -390,6 +469,28 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
+def warn_on_legacy_monitoring_auth(enable_msi_auth_for_monitoring, addons):
+    """Warn when the user explicitly opts into legacy shared key authentication for monitoring.
+
+    The argument level deprecation already fires for any explicit use of
+    --enable-msi-auth-for-monitoring. This adds the migration pointer for the value that actually
+    leaves the cluster on shared key authentication, which is also the state that later blocks
+    --enable-azure-monitor-logs.
+    """
+    if enable_msi_auth_for_monitoring is not False:
+        return
+    requested_addons = {addon.strip().lower() for addon in (addons or "").split(",")}
+    if "monitoring" not in requested_addons:
+        return
+    logger.warning(
+        "--enable-msi-auth-for-monitoring false configures Container Insights with legacy shared "
+        "key authentication. Managed identity authentication is recommended, and is required by "
+        "'--enable-azure-monitor-logs'. See "
+        "https://learn.microsoft.com/en-us/azure/azure-monitor/containers/"
+        "container-insights-authentication?tabs=cli#migrate-to-managed-identity-authentication"
+    )
+
+
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -407,6 +508,7 @@ def ensure_container_insights_for_monitoring(
     is_private_cluster=False,
     ampls_resource_id=None,
     enable_high_log_scale_mode=False,
+    preserve_existing_dcr_settings=False,
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -488,6 +590,30 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
+        dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
+            f"{dcr_resource_id}?api-version=2022-06-01"
+
+        existing_dcr = {}
+        existing_data_collection_settings = None
+        if create_dcr:
+            # The DCR is rebuilt from scratch below, so read the one that already exists to keep
+            # customer-added tags.
+            existing_dcr = get_existing_container_insights_extension_dcr(cmd, dcr_url)
+            if preserve_existing_dcr_settings:
+                # Reconfiguring a cluster that is already onboarded: carry over any setting the
+                # caller did not supply instead of dropping it. A fresh onboarding deliberately
+                # skips this. Disabling monitoring leaves the DCR behind, so inheriting from it
+                # would make re-enabling pick up the previous onboarding's syslog, high log scale
+                # mode and custom data collection settings, when re-enabling is meant to start
+                # from the documented defaults just like the container insights profile does.
+                (
+                    enable_syslog,
+                    existing_data_collection_settings,
+                    enable_high_log_scale_mode,
+                ) = _resolve_dcr_settings_from_existing(
+                    existing_dcr, enable_syslog, data_collection_settings, enable_high_log_scale_mode
+                )
+        existing_tags = existing_dcr.get("tags") or {}
 
         # ingestion DCE MUST be in workspace region
         ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
@@ -534,22 +660,35 @@ def ensure_container_insights_for_monitoring(
                     "name"
                 ]
 
-            dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{dcr_resource_id}?api-version=2022-06-01"
-            # get existing tags on the container insights extension DCR if the customer added any
-            existing_tags = get_existing_container_insights_extension_dcr_tags(
-                cmd, dcr_url)
             # get data collection settings
             extensionSettings = {}
             cistreams = ["Microsoft-ContainerInsights-Group-Default"]
             if enable_high_log_scale_mode:
-                cistreams = ContainerInsightsStreams
+                cistreams = list(ContainerInsightsStreams)
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
                 dataCollectionSettings.setdefault("enableContainerLogV2", True)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
                 cistreams = dataCollectionSettings["streams"]
+            elif existing_data_collection_settings is not None:
+                # inherited from the existing DCR, which was validated when it was first written
+                dataCollectionSettings = dict(existing_data_collection_settings)
+                dataCollectionSettings.setdefault("enableContainerLogV2", True)
+                if dataCollectionSettings.get("streams"):
+                    # the stored streams were rewritten to match the high log scale mode the DCR
+                    # was written with, so normalise them back to whichever mode applies now
+                    inherited_streams = list(dataCollectionSettings["streams"])
+                    if not enable_high_log_scale_mode:
+                        inherited_streams = [
+                            "Microsoft-ContainerLogV2"
+                            if stream == "Microsoft-ContainerLogV2-HighScale"
+                            else stream
+                            for stream in inherited_streams
+                        ]
+                    dataCollectionSettings["streams"] = inherited_streams
+                    cistreams = inherited_streams
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
             else:
                 # If data_collection_settings is None, set default dataCollectionSettings
                 dataCollectionSettings = {
@@ -838,18 +977,30 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
         f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
         f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
     )
+    public_network_access = "Disabled" if is_ampls else "Enabled"
+    if not is_ampls:
+        # This is a create_or_update, and an endpoint that is already private has to stay private.
+        # --ampls-resource-id is only supplied on the command that links the scope, so any later
+        # reconfiguration of an onboarded cluster ('az aks update --enable-syslog', for example)
+        # arrives here with is_ampls False and would otherwise reopen public network access on an
+        # existing private ingestion endpoint. The network configuration is only changed when the
+        # caller explicitly asks for it.
+        existing_dce = get_existing_data_collection_endpoint(cmd, dce_resource_id)
+        existing_network_acls = (existing_dce.get("properties") or {}).get("networkAcls") or {}
+        existing_public_network_access = existing_network_acls.get("publicNetworkAccess")
+        if existing_public_network_access:
+            public_network_access = existing_public_network_access
+
     # create the DCE
     dce_creation_body_common = {
         "location": region,
         "kind": "Linux",
         "properties": {
             "networkAcls": {
-                "publicNetworkAccess": "Enabled"
+                "publicNetworkAccess": public_network_access
             }
         }
     }
-    if is_ampls:
-        dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
     dce_creation_body_ = json.dumps(dce_creation_body_common)
     resources = get_resources_client(cmd.cli_ctx, subscription)
     for _ in range(3):
@@ -897,16 +1048,15 @@ def validate_data_collection_settings(dataCollectionSettings):
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     service_principal_msi_id = None
     is_useAADAuth = False
+    addon_profiles = getattr(result, "addon_profiles", None) or {}
+    monitoring_addon = addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+    monitoring_config = getattr(monitoring_addon, "config", None)
     # Check if monitoring addon enabled with useAADAuth = True, if it does, ignore role assignment
     # Check if service principal exists, if it does, assign permissions to service principal
     # Else, provide permissions to MSI
-    if (
-        (hasattr(result, "addon_profiles")) and
-        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], "config") and
-        hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].config, "useAADAuth") and
-        result.addon_profiles[CONST_MONITORING_ADDON_NAME].config.useAADAuth
-    ):
+    if monitoring_config and safe_lower(
+        monitoring_config.get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+    ) == "true":
         is_useAADAuth = True
     elif (
         hasattr(result, "service_principal_profile") and
@@ -916,25 +1066,11 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         logger.info("valid service principal exists, using it")
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
-    elif (
-        (hasattr(result, "addon_profiles")) and
-        (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-        (
-            hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME], "identity"
-            )
-        ) and
-        (
-            hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity,
-                "object_id",
-            )
-        )
+    elif hasattr(monitoring_addon, "identity") and hasattr(
+        monitoring_addon.identity, "object_id"
     ):
         logger.info("omsagent MSI exists, using it")
-        service_principal_msi_id = result.addon_profiles[
-            CONST_MONITORING_ADDON_NAME
-        ].identity.object_id
+        service_principal_msi_id = monitoring_addon.identity.object_id
         is_service_principal = False
 
     if is_useAADAuth:
@@ -954,7 +1090,7 @@ def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
             )
     else:
         logger.warning(
-            "Could not find service principal or user assigned MSI for role"
+            "Could not find service principal or user assigned MSI for role "
             "assignment"
         )
 
