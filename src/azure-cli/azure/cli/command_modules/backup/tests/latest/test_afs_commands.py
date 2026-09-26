@@ -281,15 +281,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_afs_cross_region_restore(self):
         self.kwargs.update({
-            'sub': ('14d16a2a-56f6-4c75-b091-084df9640297'
-                    if self.is_live else self.get_subscription_id()),
-            'rg': 'afsbvtlonghaulrgne',
-            'vault': 'afsbvtcrrlonghaulvaultne',
-            'container': 'StorageContainer;Storage;afsbvtlonghaulrgne;afsbvtlonghaulcrrsane',
-            'item': 'AzureFileShare;DCAEC29D689395B269170A2156B6771285091236BA6D65E2A8FAD70B90587754',
-            'friendly_item': 'afs1hrtestfs',
-            'target_sa': 'afsbvttargetsacrrne',
-            'target_share': 'afsfilesharetarget1hr'
+            'sub': '38304e13-357e-405e-9e9a-220351dcce8c',
+            'rg': 'DONOTUSE-CLItest-afscrr-09251156',
+            'vault': 'DONOTUSE-CLItest-afs-09251156',
+            'container': 'donotuseclitestafs115651',
+            'item': 'AzureFileShare;7a5f85f67647cd11af8bf6e400320292eecbca58b993799b7dc62b2a213de5e5',
+            'friendly_item': 'donotuseclitestshare',
+            'target_sa': 'donotuseclitgt115652',
+            'target_share': 'donotuseclitesttarget'
         })
 
         self.cmd(
