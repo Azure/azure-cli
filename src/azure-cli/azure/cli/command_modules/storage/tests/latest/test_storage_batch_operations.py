@@ -647,7 +647,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     @live_only()
-    def test_storage_blob_batch_sas_scenarios(self, test_dir, storage_account_info):
+    def test_storage_blob_batch_sas_scenarios(self, test_dir, resource_group, storage_account_info):
         from datetime import datetime, timedelta
 
         container_name = 'container1'
@@ -658,7 +658,9 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions dwrl --expiry {}',
                                      storage_account_info, container_name, expiry).get_output_in_json()
 
-        storage_account = self.cmd('storage account show -n {}'.format(storage_account_info[0])).get_output_in_json()
+        # pass -g so the account is looked up directly rather than by listing every account in the subscription
+        storage_account = self.cmd('storage account show -n {} -g {}'.format(
+            storage_account_info[0], resource_group)).get_output_in_json()
 
         # create container url with sas token
         container_url = storage_account.get('primaryEndpoints').get('blob') + container_name
