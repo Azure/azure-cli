@@ -19,6 +19,7 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client_track2,
                                                            validate_encryption_source, validate_source_uri,
+                                                           validate_source_url,
                                                            validate_encryption_services, as_user_validator,
                                                            get_not_none_validator, validate_upload_blob)
 
@@ -161,6 +162,47 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
                        source_sas='some_sas_token')
         validate_source_uri(MockCmd(self.cli), ns)
         self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
+
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    def test_validate_source_url_marks_structured_same_account_blob(self, _):
+        ns = Namespace(
+            source_url=None, source_sas=None, source_container='src', source_blob='input',
+            source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+            source_account_name='account', source_account_key=None, token_credential=None,
+            account_name='account', account_key='key', account_url='https://storage.internal.example',
+            connection_string=None, sas_token=None, location_mode=None, connection_timeout=None,
+            container_name='dst', share_name=None)
+
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertTrue(ns.source_is_validated_same_account)
+        self.assertEqual(ns.source_url, 'https://account.blob.core.windows.net/src/input')
+
+    def test_validate_source_url_does_not_mark_arbitrary_uri_as_same_account(self):
+        source_url = 'https://account.blob.core.windows.net.attacker.example/src/input'
+        ns = Namespace(
+            source_url=source_url, source_sas=None, source_container=None, source_blob=None,
+            source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+            source_account_name=None, source_account_key=None)
+        validate_source_url(MockCmd(self.cli), ns)
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertFalse(ns.source_is_validated_same_account)
+        self.assertEqual(ns.source_url, source_url)
+
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    @mock.patch('azure.cli.command_modules.storage.util.create_short_lived_file_sas_v2', return_value='sas')
+    def test_validate_source_url_does_not_mark_structured_file_as_same_account(self, _, __):
+        ns = Namespace(
+            source_url=None, source_sas=None, source_container=None, source_blob=None,
+            source_snapshot=None, source_share='src', source_path='input', file_snapshot=None,
+            source_account_name='account', source_account_key=None, token_credential=None,
+            account_name='account', account_key='key', sas_token=None,
+            container_name='dst', share_name=None)
+
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertFalse(ns.source_is_validated_same_account)
 
     def test_get_not_none_validator(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError

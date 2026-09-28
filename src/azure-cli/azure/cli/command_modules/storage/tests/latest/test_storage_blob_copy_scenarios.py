@@ -110,6 +110,61 @@ class StorageBlobCopySecurityTests(TestCase):
             standard_blob_tier=None, source_if_modified_since=None, source_if_unmodified_since=None,
             if_modified_since=None, if_unmodified_since=None, timeout=None)
 
+    @mock.patch.object(blob_operations, 'generate_sas_blob_uri')
+    def test_storage_blob_copy_reuses_credentials_for_validated_same_account_source(self, generate_sas):
+        source_url = 'https://account.blob.core.windows.net/src/input'
+        signed_source_url = source_url + '?sig=generated'
+        generate_sas.return_value = signed_source_url
+
+        destination_client = mock.MagicMock()
+        destination_client.url = 'https://storage.internal.example/dst/output'
+        destination_client.credential = mock.MagicMock(account_key='key')
+
+        anonymous_source_client = mock.MagicMock()
+        authenticated_source_client = mock.MagicMock()
+        source_service_client = authenticated_source_client._get_container_client.return_value. \
+            _get_blob_service_client.return_value
+        source_service_client.credential = destination_client.credential
+        destination_client.from_blob_url.side_effect = [anonymous_source_client, authenticated_source_client]
+
+        cmd = mock.MagicMock()
+        blob_operations.copy_blob(
+            cmd, destination_client, source_url, source_is_validated_same_account=True,
+            requires_sync=False, destination_blob_type='BlockBlob')
+
+        destination_client.from_blob_url.assert_has_calls([
+            mock.call(source_url),
+            mock.call(source_url, credential=destination_client.credential)
+        ])
+        generate_sas.assert_called_once()
+        destination_client.upload_blob_from_url.assert_called_once_with(
+            source_url=signed_source_url, overwrite=True, tags=None, destination_lease=None,
+            standard_blob_tier=None, source_if_modified_since=None, source_if_unmodified_since=None,
+            if_modified_since=None, if_unmodified_since=None, timeout=None)
+
+    @mock.patch.object(blob_operations, 'generate_sas_blob_uri')
+    def test_storage_blob_copy_does_not_reuse_credentials_across_path_style_accounts(self, generate_sas):
+        source_url = 'http://127.0.0.1:10000/account2/src/input'
+
+        destination_client = mock.MagicMock()
+        destination_client.account_name = 'account1'
+        destination_client.url = 'http://127.0.0.1:10000/account1/dst/output'
+        destination_client.credential = mock.sentinel.destination_credential
+
+        source_client = mock.MagicMock()
+        source_client.account_name = 'account2'
+        source_service_client = source_client._get_container_client.return_value. \
+            _get_blob_service_client.return_value
+        source_service_client.credential = None
+        destination_client.from_blob_url.return_value = source_client
+
+        cmd = mock.MagicMock()
+        blob_operations.copy_blob(
+            cmd, destination_client, source_url, requires_sync=False, destination_blob_type='BlockBlob')
+
+        destination_client.from_blob_url.assert_called_once_with(source_url)
+        generate_sas.assert_not_called()
+
 
 class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
