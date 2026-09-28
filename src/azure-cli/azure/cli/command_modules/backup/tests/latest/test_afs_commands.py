@@ -279,7 +279,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @AllowLargeResponse()
     @record_only()
-    @unittest.skip("CRR cross-region cross-subscription restore needs a GRS vault with multi-day cross-region-replicated recovery points + cross-subscription playback support; setup unavailable. Tracked for re-record once secondary RPs replicate (MSRC-114273 ILR CHAP re-record).")
+    @unittest.skip("Requires a GRS vault with cross-region-replicated recovery points and cross-subscription playback support; setup unavailable.")
     def test_afs_cross_region_restore(self):
         self.kwargs.update({
             'sub': '38304e13-357e-405e-9e9a-220351dcce8c',

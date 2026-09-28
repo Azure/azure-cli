@@ -167,7 +167,6 @@ Release History
 **Backup**
 
 * Add support for cost management settings (#33757)
-* `az backup restore files mount-rp`: Fetch ILR mount scripts through the dedicated list action for CHAP credential redaction.
 
 **Cognitive Services**
 
