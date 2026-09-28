@@ -3624,10 +3624,12 @@ helps['webapp secure-build'] = """
 helps['webapp secure-build show'] = """
     type: command
     short-summary: Show the Secure Build report for the active deployment of a Linux web app.
-    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Default table output shows a human-readable summary and up to 20 findings. Standard --query processing remains available and controls the resulting table shape. Use JSON output or the provided Kudu link for the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Output follows the Azure CLI output configuration and is JSON when no format is configured. Use --output table for a human-readable summary and up to 20 findings; when --query is supplied, standard query processing controls the resulting table shape. JSON output and the provided Kudu link contain the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
     examples:
-    - name: Show the Secure Build report for the active deployment.
+    - name: Show a human-readable Secure Build report for the active deployment.
       text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output table
+    - name: Show the complete Secure Build report as JSON.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output json
     - name: Run a fresh analysis for a deployment slot and show critical findings.
       text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']" --output table
 """
