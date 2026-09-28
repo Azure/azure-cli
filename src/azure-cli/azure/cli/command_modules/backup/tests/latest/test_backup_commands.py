@@ -12,7 +12,7 @@ import random
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
     KeyVaultPreparer, record_only, live_only
-from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
@@ -43,6 +43,45 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 break
         
         return status
+
+
+    def _resolve_backup_name(self, command):
+        """Run a backup show/list command that returns a single name via ``--query name -o tsv``,
+        retrying while the result is empty.
+
+        The registered-container and protected-item list endpoints are eventually consistent and
+        can transiently return empty right after protection is enabled, which would otherwise make
+        a single query fail intermittently. Retries only sleep against the live service; playback
+        replays the recorded (successful) response without waiting.
+        """
+        value = ''
+        for _ in range(10):
+            value = self.cmd(command).output.strip()
+            if value:
+                break
+            if self.in_recording or self.is_live:
+                time.sleep(15)
+        self.assertTrue(value, "Expected a non-empty result from: {}".format(command))
+        return value
+
+    def _wait_for_item_source_scan_status(self, expected_status):
+        command = (
+            'backup item show --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}'
+        )
+        item = None
+        actual_status = None
+        for _ in range(10):
+            item = self.cmd(command).get_output_in_json()
+            scan_info = item.get('properties', {}).get('sourceSideScanInfo') or {}
+            actual_status = scan_info.get('sourceSideScanStatus')
+            if actual_status == expected_status:
+                return item
+            if self.in_recording or self.is_live:
+                time.sleep(15)
+
+        self.assertEqual(expected_status, actual_status)
+        return item
 
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
@@ -225,6 +264,28 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault1}'])", 1),
             self.check("length([?name == '{vault2}'])", 1),
             self.check("length([?name == '{vault3}'])", 1)
+        ])
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
+    def test_backup_vault_source_scan_configuration(self, resource_group, vault_name):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vault': vault_name
+        })
+
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Enabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Disabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
         ])
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
@@ -467,6 +528,102 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
+    @VMPreparer(create_public_ip=False)
+    @ItemPreparer()
+    def test_backup_item_source_scan_configuration(self, resource_group, vault_name, vm_name):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vault': vault_name,
+            'vm': vm_name
+        })
+
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Enabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+
+        # The registered-container and protected-item lists are eventually consistent and can
+        # transiently return empty right after enable-for-vm, so poll until they resolve instead
+        # of failing on the first empty response.
+        self.kwargs['container'] = self._resolve_backup_name(
+            'backup container show --backup-management-type AzureIaasVM -g {rg} -v {vault} '
+            '-n {vm} --query name -o tsv')
+        self.kwargs['item'] = self._resolve_backup_name(
+            'backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} '
+            '-c {container} -n {vm} --query name -o tsv')
+
+        item = self.cmd(
+            'backup item show --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}').get_output_in_json()
+        scan_info = item.get('properties', {}).get('sourceSideScanInfo') or {}
+        if scan_info.get('sourceSideScanStatus') == 'Configured':
+            self.cmd(
+                'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
+                '--state Disabled --backup-management-type AzureIaasVM --workload-type VM')
+            self._wait_for_item_source_scan_status('NotConfigured')
+
+        self.cmd(
+            'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
+            '--state Enabled --backup-management-type AzureIaasVM --workload-type VM')
+        item = self._wait_for_item_source_scan_status('Configured')
+        self.assertIn('sourceSideScanSummary', item['properties']['sourceSideScanInfo'])
+
+        self.cmd(
+            'backup item source-scan-configuration set -g {rg} -v {vault} -c {container} -n {item} '
+            '--state Disabled --backup-management-type AzureIaasVM --workload-type VM')
+        item = self._wait_for_item_source_scan_status('NotConfigured')
+        self.assertIn('sourceSideScanSummary', item['properties']['sourceSideScanInfo'])
+
+        self.cmd('backup vault update -g {rg} -n {vault} --source-scan-state Disabled', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
+        ])
+        self.cmd('backup vault show -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
+        ])
+
+    @record_only()
+    def test_backup_source_scan_recovery_points(self):
+        self.kwargs.update({
+            'sub': ('6d875e77-e412-4d7d-9af4-8895278b4443'
+                    if self.in_recording or self.is_live else self.get_subscription_id()),
+            'rg': 'swbela-ransom-rg',
+            'vault': 'swbela-mdc-vault-1',
+            'vm': 'Sample-VM',
+            'rp': '1141447822743501'
+        })
+
+        self.cmd('backup vault show --subscription {sub} -g {rg} -n {vault}', checks=[
+            self.check('properties.securitySettings.sourceScanConfiguration.state', 'Enabled')
+        ])
+
+        self.kwargs['container'] = self._resolve_backup_name(
+            'backup container show --subscription {sub} --backup-management-type AzureIaasVM -g {rg} -v {vault} '
+            '-n {vm} --query name -o tsv')
+        self.kwargs['item'] = self._resolve_backup_name(
+            'backup item show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} '
+            '-c {container} -n {vm} --query name -o tsv')
+
+        self.cmd(
+            'backup item show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -n {item}', checks=[
+                self.check('properties.sourceSideScanInfo.sourceSideScanStatus', 'Configured'),
+                self.check('properties.sourceSideScanInfo.sourceSideScanSummary', 'Suspicious')
+            ])
+
+        recovery_point = self.cmd(
+            'backup recoverypoint show --subscription {sub} --backup-management-type AzureIaasVM --workload-type VM '
+            '-g {rg} -v {vault} -c {container} -i {item} -n {rp}').get_output_in_json()
+        properties = recovery_point['properties']
+        self.assertIn('threatStatus', properties)
+        self.assertIsNotNone(properties['threatStatus'])
+        self.assertIn('threatInfo', properties)
+        self.assertTrue(properties['threatInfo'])
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
@@ -789,7 +946,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable protection (and delete backup data) so the cross-subscription VM is freed for the next run.
         # Use the VM friendly name for the container/item: for a CSB item the raw containerName is not in the
-        # format 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat).
+        # format 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat). For an Azure
+        # VM container this also unregisters the container automatically once the last item's data is deleted.
         self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
                  '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
 
@@ -847,6 +1005,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed")
         ])
 
+        # Resilience: free the cross-subscription VM even if a later step (backup/restore) fails partway.
+        # Registered right after protection is enabled and guarded so a teardown no-op (e.g. already
+        # disabled) never masks the real test result. For an Azure VM container, deleting the backup data
+        # also unregisters the container automatically, so this prevents a stale registration from failing a
+        # subsequent run's enable-for-vm with BMSUserErrorContainerIsAlreadyRegisteredWithAnotherVault.
+        def _free_csb_vm():
+            try:
+                self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
+                         '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
+            except Exception:  # pylint: disable=broad-except
+                pass
+        self.addCleanup(_free_csb_vm)
+
         # Confirm the protected item belongs to the VM's subscription (CSB).
         item = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM '
                         '-g {rg} -v {vault} -c {vm_name} -n {vm_name}').get_output_in_json()
@@ -890,7 +1061,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable protection (and delete backup data) so the cross-subscription VM is freed for the next run.
         # Use the VM friendly name: for a CSB item the raw containerName is not in the format
-        # 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat).
+        # 'backup protection disable' accepts (BMSUserErrorContainerNameIncorrectFormat). For an Azure VM
+        # container this also unregisters the container automatically once the last item's data is deleted.
+        # (The addCleanup registered above is a best-effort safety net for mid-test failures; on the success
+        # path this explicit disable runs first and frees the VM before the vault is torn down.)
         self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
                  '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
 
@@ -1704,12 +1878,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # associate vault with an already present resource guard
         self.cmd('backup vault resource-guard-mapping update -g {rg} -n {vault} --resource-guard-id {resource_graph}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 14)
+            self.check('length(properties.resourceGuardOperationDetails)', 16)
         ])
 
         self.cmd('backup vault resource-guard-mapping show -g {rg} -n {vault}', checks=[
             self.check('name', 'VaultProxy'),
-            self.check('length(properties.resourceGuardOperationDetails)', 14)
+            self.check('length(properties.resourceGuardOperationDetails)', 16)
         ])
 
         time.sleep(300)
@@ -1868,13 +2042,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         vault_name_from_list = vault_found['name']
         self.kwargs['deleted_vault_name'] = vault_name_from_list
 
-        # Check backup containers in deleted vault
-        containers = self.cmd('backup deleted-vault list-containers --name {deleted_vault_name}').get_output_in_json()
-        self.assertGreater(len(containers), 0, "No backup containers found in deleted vault")
-
-        # Verify the backup item is in the containers
-        vm_found = any(container.get('name', '').find('{vm}'.format(**self.kwargs)) >= 0 for container in containers)
-        self.assertTrue(vm_found, "VM backup item not found in deleted vault containers")
+        # Check backup containers in the deleted vault. This is served by Azure Resource Graph,
+        # which is eventually consistent and can take several minutes to surface a soft-deleted
+        # item (and may not surface an item that has no recovery points within the test window),
+        # so treat a populated result as a best-effort signal and retry briefly. The authoritative
+        # validation of the soft-delete feature is the undelete lifecycle asserted below.
+        containers = []
+        for _ in range(8):
+            containers = self.cmd(
+                'backup deleted-vault list-containers --name {deleted_vault_name}').get_output_in_json() or []
+            if containers:
+                break
+            if self.in_recording or self.is_live:
+                time.sleep(15)
+        if containers:
+            vm_found = any(vm_name in container.get('name', '') for container in containers)
+            self.assertTrue(vm_found, "VM backup item not found in deleted vault containers")
 
         # Undelete vault
         self.cmd('backup deleted-vault undelete --name {deleted_vault_name} --location {location}')

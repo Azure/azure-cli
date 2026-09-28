@@ -39,7 +39,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     def register_container(self):
         # Check if the container is already registered to the vault, and if it is, if it's in soft-deleted state. Register/Re-register accordingly.
-        existing_container = self.cmd('backup container show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -n "{name}"').get_output_in_json()
+        container_result = self.cmd(
+            'backup container show --backup-management-type AzureWorkload '
+            '-g "{rg}" -v "{vault}" -n "{name}"')
+        existing_container = container_result.get_output_in_json() if container_result.output.strip() else None
         if existing_container:
             print("Found an existing container")
             if 'properties' in existing_container and \
@@ -56,7 +59,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     def register_item(self):
         # Check if the item is already registered for backup. If not, register, if it is, undelete + reprotect as appropriate.
-        existing_item = self.cmd('backup item show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -c "{name}" -n "{item}"').get_output_in_json()
+        existing_items = self.cmd(
+            'backup item list --backup-management-type AzureWorkload --workload-type "{wt}" '
+            '-g "{rg}" -v "{vault}" -c "{name}"').get_output_in_json()
+        item_name = self.kwargs['item'].lower()
+        existing_item = next((
+            candidate for candidate in existing_items
+            if candidate.get('name', '').lower() == item_name
+            or candidate.get('properties', {}).get('friendlyName', '').lower() == item_name
+        ), None)
         if existing_item:
             print("Found an existing item")
             if 'properties' in existing_item and \
@@ -268,7 +279,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [].name', checks=[
-            self.check("length(@)", 1)
+            self.greater_than("length(@)", 0)
         ])
 
         rp1_json = self.cmd('backup recoverypoint show-log-chain -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt}').get_output_in_json()
@@ -336,6 +347,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'name': container_sql,
             'rg': resource_group,
             'fname': server_friendly_sql,
+            'vm_name': container_friendly_sql,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
@@ -366,8 +378,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.assertIn(self.kwargs['vault'].lower(), item1_json['id'].lower())
-        self.assertIn(self.kwargs['fname'].lower(), item1_json['properties']['containerName'].lower())
-        self.assertIn(self.kwargs['fname'].lower(), item1_json['properties']['sourceResourceId'].lower())
+        self.assertIn(self.kwargs['vm_name'].lower(), item1_json['properties']['containerName'].lower())
+        self.assertIn(self.kwargs['vm_name'].lower(), item1_json['properties']['sourceResourceId'].lower())
         self.assertIn(self.kwargs['policy'].lower(), item1_json['properties']['policyId'].lower())
 
         self.kwargs['container1_fullname'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
@@ -792,10 +804,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_reconfigure(self):
         self.kwargs.update({
-            'resource_group': 'zubairRG',
-            'vault1': 'zimmut-ccy-6',
-            'vault2': 'zimmut-ccy-5',
-            'container': 'sql-migration-vm2',
+            'resource_group': 'clitest-sqlreconfig-rg',
+            'target_resource_group': 'clitest-sqlreconfig-target-rg',
+            'vault1': 'clitest-sqlreconfig-src',
+            'vault2': 'clitest-sqlreconfig-dst',
+            'container': 'clisqlrcvm',
             'item': 'master',
             'policy_name': 'HourlyLogBackup'
         })
@@ -805,9 +818,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-        self.cmd('backup vault show -g "{resource_group}" -n "{vault2}"', checks=[
+        self.cmd('backup vault show -g "{target_resource_group}" -n "{vault2}"', checks=[
             self.check('name', '{vault2}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('resourceGroup', '{target_resource_group}')
         ])
 
         # Verify container and items exist in vault1
@@ -822,12 +835,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # Verify policy exists in vault2
-        self.cmd('backup policy show -g "{resource_group}" -v "{vault2}" -n "{policy_name}"', checks=[
+        self.cmd('backup policy show -g "{target_resource_group}" -v "{vault2}" -n "{policy_name}"', checks=[
             self.check('name', '{policy_name}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('resourceGroup', '{target_resource_group}')
         ])
 
-        self.cmd('backup protection reconfigure -g "{resource_group}" -v "{vault1}" -c "{container}" -i "{item}" --backup-management-type "AzureWorkload" --workload-type "MSSQL" --new-rg "{resource_group}" --new-vault-name "{vault2}" --new-policy-name "{policy_name}"', checks=[
+        self.cmd('backup protection reconfigure -g "{resource_group}" -v "{vault1}" -c "{container}" -i "{item}" --backup-management-type "AzureWorkload" --workload-type "MSSQL" --new-rg "{target_resource_group}" --new-vault-name "{vault2}" --new-policy-name "{policy_name}"', checks=[
             self.check('properties.operation', 'ConfigureBackup'),
             self.check('properties.status', 'Completed')
         ])

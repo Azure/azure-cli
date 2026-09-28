@@ -35,7 +35,7 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
         })
     if min_compaction_lag_in_mins:
         command_arg_dict.update({
-            "min_compaction_lag_time_in_minutes": int(min_compaction_lag_in_mins)
+            "min_compaction_lag_in_mins": int(min_compaction_lag_in_mins)
         })
     if partition_count:
         command_arg_dict.update({
@@ -120,7 +120,7 @@ def cli_eventhub_update(cmd, resource_group_name, namespace_name, event_hub_name
         })
     if min_compaction_lag_in_mins:
         command_arg_dict.update({
-            "min_compaction_lag_time_in_minutes": int(min_compaction_lag_in_mins)
+            "min_compaction_lag_in_mins": int(min_compaction_lag_in_mins)
         })
     if partition_count:
         command_arg_dict.update({

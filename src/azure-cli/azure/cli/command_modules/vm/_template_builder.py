@@ -293,6 +293,15 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
+def _build_capacity_reservation_profile(capacity_reservation_group, disable_assignment):
+    profile = {}
+    if capacity_reservation_group and capacity_reservation_group != 'None':
+        profile['capacityReservationGroup'] = {'id': capacity_reservation_group}
+    if disable_assignment is not None:
+        profile['disableCapacityReservationAssignment'] = disable_assignment
+    return profile
+
+
 def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_values=None, ssh_key_path=None,
@@ -306,7 +315,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
         capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
-        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+        enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, processor_mode=None,
         os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None, disk_controller_type=None,
         enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
@@ -590,6 +599,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+    if processor_mode is not None:
+        vm_properties['hardwareProfile']['processorMode'] = processor_mode
 
     resiliency_profile = {}
     if zone_movement is not None:
@@ -754,15 +765,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
 
-    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
-        vm_properties['capacityReservation'] = {}
-        if capacity_reservation_group:
-            vm_properties['capacityReservation']['capacityReservationGroup'] = {
-                'id': capacity_reservation_group
-            }
-        if disable_capacity_reservation_assignment is not None:
-            vm_properties['capacityReservation']['disableCapacityReservationAssignment'] = \
-                disable_capacity_reservation_assignment
+    capacity_reservation = _build_capacity_reservation_profile(
+        capacity_reservation_group, disable_capacity_reservation_assignment)
+    if capacity_reservation:
+        vm_properties['capacityReservation'] = capacity_reservation
 
     vm = {
         'apiVersion': '2026-04-01',
@@ -1068,7 +1074,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         disable_capacity_reservation_assignment=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
                         enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
-                        v_cpus_per_core=None, os_disk_security_encryption_type=None,
+                        v_cpus_per_core=None, processor_mode=None, os_disk_security_encryption_type=None,
                         os_disk_secure_vm_disk_encryption_set=None, os_disk_delete_option=None,
                         regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                         enable_osimage_notification=None, max_surge=None, enable_hibernation=None,
@@ -1379,6 +1385,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         virtual_machine_profile['storageProfile'] = storage_properties
 
     hardware_profile = {}
+    if processor_mode is not None:
+        hardware_profile['processorMode'] = processor_mode
+
     vm_size_properties = {}
     if v_cpus_available is not None:
         vm_size_properties['vCPUsAvailable'] = v_cpus_available
@@ -1687,15 +1696,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
 
-    if capacity_reservation_group or disable_capacity_reservation_assignment is not None:
-        virtual_machine_profile['capacityReservation'] = {}
-        if capacity_reservation_group:
-            virtual_machine_profile['capacityReservation']['capacityReservationGroup'] = {
-                'id': capacity_reservation_group
-            }
-        if disable_capacity_reservation_assignment is not None:
-            virtual_machine_profile['capacityReservation']['disableCapacityReservationAssignment'] = \
-                disable_capacity_reservation_assignment
+    capacity_reservation = _build_capacity_reservation_profile(
+        capacity_reservation_group, disable_capacity_reservation_assignment)
+    if capacity_reservation:
+        virtual_machine_profile['capacityReservation'] = capacity_reservation
 
     if security_posture_reference_id:
         virtual_machine_profile['securityPostureReference'] = {

@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List a list of authorization rules for a Namespace.
+
+    :example: ListAuthorizationRules
+        az eventhubs georecovery-alias authorization-rule list --resource-group exampleResourceGroup --namespace-name sdk-Namespace-9080 --alias sdk-DisasterRecovery-4047
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/authorizationrules", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/authorizationrules", "2026-07-01-preview"],
         ]
     }
 
@@ -136,7 +139,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

@@ -75,6 +75,8 @@ from .aaz.latest.network.express_route.peering.connection import Create as _Expr
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
+from .aaz.latest.network.first_party_service_tag import Create as _FirstPartyServiceTagCreate, \
+    List as _FirstPartyServiceTagList, Show as _FirstPartyServiceTagShow, Update as _FirstPartyServiceTagUpdate
 from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
 from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
 from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
@@ -90,7 +92,7 @@ from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpoi
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
-from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate, Update as _PublicIpPrefixUpdate
 from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
     Update as _SecurityPartnerProviderUpdate
 from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
@@ -1006,6 +1008,24 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 # region application-gateway ssl-profile
 class SSLProfileAdd(_SSLProfileAdd):
+    AZ_HELP = {
+        **_SSLProfileAdd.AZ_HELP,
+        "examples": [
+            {
+                "name": "Add an SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile",
+            },
+            {
+                "name": "Add an SSL profile in Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1024,7 +1044,6 @@ class SSLProfileAdd(_SSLProfileAdd):
                          "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
             ),
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
@@ -1044,6 +1063,24 @@ class SSLProfileAdd(_SSLProfileAdd):
 
 
 class SSLProfileUpdate(_SSLProfileUpdate):
+    AZ_HELP = {
+        **_SSLProfileUpdate.AZ_HELP,
+        "examples": [
+            {
+                "name": "Update SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile --client-auth-configuration False",
+            },
+            {
+                "name": "Update an SSL profile to Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1065,7 +1102,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
             ),
             nullable=True,
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
@@ -5204,11 +5240,80 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 
 # region PublicIPAddresses
+def _add_root_resource_guid(schema):
+    from azure.cli.core.aaz import AAZStrType
+    if not hasattr(schema, "resource_guid"):
+        schema.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
+    return schema
+
+
+class FirstPartyServiceTagCreate(_FirstPartyServiceTagCreate):
+    class FirstPartyServiceTagsCreateOrUpdate(_FirstPartyServiceTagCreate.FirstPartyServiceTagsCreateOrUpdate):
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200_201())
+
+
+class FirstPartyServiceTagShow(_FirstPartyServiceTagShow):
+    class FirstPartyServiceTagsGet(_FirstPartyServiceTagShow.FirstPartyServiceTagsGet):
+        @classmethod
+        def _build_schema_on_200(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200())
+
+
+class FirstPartyServiceTagList(_FirstPartyServiceTagList):
+    class FirstPartyServiceTagsList(_FirstPartyServiceTagList.FirstPartyServiceTagsList):
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+            _add_root_resource_guid(schema.value.Element)
+            return schema
+
+
+class FirstPartyServiceTagUpdate(_FirstPartyServiceTagUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.value._registered = False
+        args_schema.location._registered = False
+        return args_schema
+
+    class FirstPartyServiceTagsGet(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsGet):
+        @classmethod
+        def _build_schema_on_200(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200())
+
+    class FirstPartyServiceTagsCreateOrUpdate(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsCreateOrUpdate):
+        @property
+        def method(self):
+            return "PATCH"
+
+        @property
+        def content(self):
+            from azure.cli.core.aaz import AAZObjectType, AAZDictType, AAZStrType
+            content, builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True}},
+            )
+            builder.set_prop("tags", AAZDictType, ".tags")
+            builder.get(".tags").set_elements(AAZStrType, ".")
+            return self.serialize_content(content)
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200_201())
+
+
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
-                     protection_mode=None, ddos_protection_plan=None, ddos_custom_policy=None):
+                     protection_mode=None, ddos_protection_plan=None, ddos_custom_policy=None,
+                     first_party_service_tag_id=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -5217,7 +5322,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'allocation_method': allocation_method,
         'idle_timeout': idle_timeout,
         'ip_address': ip_address,
-        'ip_tags': ip_tags
+        'ip_tags': ip_tags,
+        'first_party_service_tag_id': first_party_service_tag_id
     }
 
     if public_ip_prefix:
@@ -5279,6 +5385,41 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
+def _add_first_party_service_tag_argument(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+    args_schema.first_party_service_tag_id = AAZResourceIdArg(
+        options=["--first-party-service-tag-id", "--fpst-id"],
+        help="The resource ID of the first party service tag associated with the IP tag.",
+        fmt=AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/firstPartyServiceTags/{}",
+        ),
+    )
+
+
+def _normalize_ip_tags(ip_tags_arg, first_party_service_tag_id_arg):
+    first_party_service_tag_id = (
+        first_party_service_tag_id_arg.to_serialized_data()
+        if has_value(first_party_service_tag_id_arg) else None
+    )
+    if not has_value(ip_tags_arg):
+        if first_party_service_tag_id:
+            raise ArgumentUsageError("`--first-party-service-tag-id` requires exactly one value in `--ip-tags`.")
+        return None
+
+    ip_tags = ip_tags_arg.to_serialized_data()
+    if ip_tags is None:
+        return []
+    if isinstance(ip_tags, dict):
+        ip_tags = [{"ip_tag_type": key, "tag": value} for key, value in ip_tags.items()]
+
+    if first_party_service_tag_id:
+        if len(ip_tags) != 1:
+            raise ArgumentUsageError("`--first-party-service-tag-id` requires exactly one value in `--ip-tags`.")
+        ip_tags[0]["first_party_service_tag_id"] = first_party_service_tag_id
+    return ip_tags
+
+
 class PublicIPCreate(_PublicIPCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -5292,7 +5433,13 @@ class PublicIPCreate(_PublicIPCreate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
+        _add_first_party_service_tag_argument(args_schema)
         return args_schema
+
+    def pre_operations(self):
+        ip_tags = _normalize_ip_tags(self.ctx.args.ip_tags, self.ctx.args.first_party_service_tag_id)
+        if ip_tags is not None:
+            self.ctx.args.ip_tags = ip_tags
 
 
 class PublicIPUpdate(_PublicIPUpdate):
@@ -5315,16 +5462,15 @@ class PublicIPUpdate(_PublicIPUpdate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.ip_tags_list._registered = False
+        _add_first_party_service_tag_argument(args_schema)
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ip_tags):
-            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
-                args.ip_tags_list = []
-            else:
-                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
+        ip_tags = _normalize_ip_tags(args.ip_tags, args.first_party_service_tag_id)
+        if ip_tags is not None:
+            args.ip_tags_list = ip_tags
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
@@ -5349,6 +5495,7 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
         args_schema.ip_tags_list._registered = False
+        _add_first_party_service_tag_argument(args_schema)
 
         return args_schema
 
@@ -5356,11 +5503,30 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args = self.ctx.args
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
-        if has_value(args.ip_tags):
-            ip_tags = []
-            for k, v in args.ip_tags.to_serialized_data().items():
-                ip_tags.append({"ip_tag_type": k, "tag": v})
+        ip_tags = _normalize_ip_tags(args.ip_tags, args.first_party_service_tag_id)
+        if ip_tags is not None:
             args.ip_tags_list = ip_tags
+
+
+class PublicIpPrefixUpdate(_PublicIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="The list of tags associated with the public IP prefix in 'TYPE=VAL' format.",
+            nullable=True,
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
+        _add_first_party_service_tag_argument(args_schema)
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        ip_tags = _normalize_ip_tags(self.ctx.args.ip_tags, self.ctx.args.first_party_service_tag_id)
+        if ip_tags is not None:
+            instance.properties.ip_tags = ip_tags
 # endregion
 
 

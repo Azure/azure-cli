@@ -28,12 +28,15 @@ class Create(AAZCommand):
 
     :example: Create a shared image gallery with both system and user assigned identity.
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --system-assigned --user-assigned id1
+
+    :example: Create a gallery with soft deletion enabled.
+        az sig create --resource-group myResourceGroup --gallery-name myGalleryName --location westus --soft-delete True --soft-delete-retention-period 7 --soft-delete-grace-period 30
     """
 
     _aaz_info = {
-        "version": "2025-03-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2026-03-03"],
         ]
     }
 
@@ -59,7 +62,7 @@ class Create(AAZCommand):
             help="The name of the Shared Image Gallery.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -151,10 +154,20 @@ class Create(AAZCommand):
         # define Arg Group "SoftDeletePolicy"
 
         _args_schema = cls._args_schema
+        _args_schema.soft_delete_grace_period = AAZIntArg(
+            options=["--soft-delete-grace", "--soft-delete-grace-period"],
+            arg_group="SoftDeletePolicy",
+            help="The grace period in days for a simulated hard-deleted resource. During this period the gallery image version is unusable but can still be recovered if required. After this period elapses, the gallery image version is permanently (hard) deleted.",
+        )
         _args_schema.soft_delete = AAZBoolArg(
             options=["--soft-delete"],
             arg_group="SoftDeletePolicy",
             help="Enable soft-deletion for resources in this gallery, allowing them to be recovered within retention time.",
+        )
+        _args_schema.soft_delete_retention_period = AAZIntArg(
+            options=["--soft-delete-retention", "--soft-delete-retention-period"],
+            arg_group="SoftDeletePolicy",
+            help="The retention period in days for a soft-deleted resource. After this period elapses, the soft-deleted gallery image version transitions to a simulated hard-deleted state.",
         )
         return cls._args_schema
 
@@ -239,7 +252,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-03-03",
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }
@@ -298,7 +311,9 @@ class Create(AAZCommand):
 
             soft_delete_policy = _builder.get(".properties.softDeletePolicy")
             if soft_delete_policy is not None:
+                soft_delete_policy.set_prop("gracePeriodInDays", AAZIntType, ".soft_delete_grace_period")
                 soft_delete_policy.set_prop("isSoftDeleteEnabled", AAZBoolType, ".soft_delete")
+                soft_delete_policy.set_prop("retentionPeriodInDays", AAZIntType, ".soft_delete_retention_period")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -481,8 +496,14 @@ class _CreateHelper:
         )
 
         soft_delete_policy = _schema_gallery_read.properties.soft_delete_policy
+        soft_delete_policy.grace_period_in_days = AAZIntType(
+            serialized_name="gracePeriodInDays",
+        )
         soft_delete_policy.is_soft_delete_enabled = AAZBoolType(
             serialized_name="isSoftDeleteEnabled",
+        )
+        soft_delete_policy.retention_period_in_days = AAZIntType(
+            serialized_name="retentionPeriodInDays",
         )
 
         system_data = _schema_gallery_read.system_data

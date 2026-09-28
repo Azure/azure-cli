@@ -342,6 +342,10 @@ examples:
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServer}
   - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' using Premium SSD v2 Disks by setting storage type to "PremiumV2_LRS"
     text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --storage-type PremiumV2_LRS
+  - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' with a different compute size.
+    text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --sku-name Standard_D4s_v3
+  - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' with a different compute tier and compute size.
+    text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --tier MemoryOptimized --sku-name Standard_E2ds_v4
 """
 
 helps['postgres flexible-server maintenance-event'] = """

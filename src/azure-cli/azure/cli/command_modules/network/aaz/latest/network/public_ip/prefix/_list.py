@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/publicipprefixes", "2024-07-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/publicipprefixes", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipprefixes", "2025-09-01"],
         ]
     }
 
@@ -54,9 +54,9 @@ class List(AAZCommand):
         condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
         condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PublicIPPrefixesListAll(ctx=self.ctx)()
+            self.PublicIpPrefixesListAll(ctx=self.ctx)()
         if condition_1:
-            self.PublicIPPrefixesList(ctx=self.ctx)()
+            self.PublicIpPrefixesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +72,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class PublicIPPrefixesListAll(AAZHttpOperation):
+    class PublicIpPrefixesListAll(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -112,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -148,7 +148,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -183,7 +185,7 @@ class List(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _ListHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _ListHelper._build_schema_common_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -195,7 +197,7 @@ class List(AAZCommand):
                 serialized_name="loadBalancerFrontendIpConfiguration",
                 flags={"read_only": True},
             )
-            _ListHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _ListHelper._build_schema_common_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -217,11 +219,18 @@ class List(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.upgraded_to_v2 = AAZBoolType(
+                serialized_name="upgradedToV2",
+                flags={"read_only": True},
+            )
 
             ip_tags = cls._schema_on_200.value.Element.properties.ip_tags
             ip_tags.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.ip_tags.Element
+            _element.first_party_service_tag_id = AAZStrType(
+                serialized_name="firstPartyServiceTagId",
+            )
             _element.ip_tag_type = AAZStrType(
                 serialized_name="ipTagType",
             )
@@ -250,6 +259,7 @@ class List(AAZCommand):
             properties.idle_timeout_in_minutes = AAZIntType(
                 serialized_name="idleTimeoutInMinutes",
             )
+            properties.nat64 = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -270,33 +280,37 @@ class List(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.service_gateway = AAZObjectType(
+                serialized_name="serviceGateway",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.service_gateway)
             properties.source_virtual_network = AAZObjectType(
                 serialized_name="sourceVirtualNetwork",
             )
-            _ListHelper._build_schema_sub_resource_read(properties.source_virtual_network)
+            _ListHelper._build_schema_common_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
 
             public_ip_addresses = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_addresses_v6 = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_addresses_v6
             public_ip_addresses_v6.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_addresses_v6.Element)
 
             public_ip_prefixes = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_prefixes.Element)
 
             public_ip_prefixes_v6 = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_prefixes_v6
             public_ip_prefixes_v6.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200.value.Element.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(subnets.Element)
+            _ListHelper._build_schema_common_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200.value.Element.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -325,7 +339,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class PublicIPPrefixesList(AAZHttpOperation):
+    class PublicIpPrefixesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -369,7 +383,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -405,7 +419,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -440,7 +456,7 @@ class List(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _ListHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _ListHelper._build_schema_common_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -452,7 +468,7 @@ class List(AAZCommand):
                 serialized_name="loadBalancerFrontendIpConfiguration",
                 flags={"read_only": True},
             )
-            _ListHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _ListHelper._build_schema_common_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -474,11 +490,18 @@ class List(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.upgraded_to_v2 = AAZBoolType(
+                serialized_name="upgradedToV2",
+                flags={"read_only": True},
+            )
 
             ip_tags = cls._schema_on_200.value.Element.properties.ip_tags
             ip_tags.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.ip_tags.Element
+            _element.first_party_service_tag_id = AAZStrType(
+                serialized_name="firstPartyServiceTagId",
+            )
             _element.ip_tag_type = AAZStrType(
                 serialized_name="ipTagType",
             )
@@ -507,6 +530,7 @@ class List(AAZCommand):
             properties.idle_timeout_in_minutes = AAZIntType(
                 serialized_name="idleTimeoutInMinutes",
             )
+            properties.nat64 = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -527,33 +551,37 @@ class List(AAZCommand):
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
             )
+            properties.service_gateway = AAZObjectType(
+                serialized_name="serviceGateway",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.service_gateway)
             properties.source_virtual_network = AAZObjectType(
                 serialized_name="sourceVirtualNetwork",
             )
-            _ListHelper._build_schema_sub_resource_read(properties.source_virtual_network)
+            _ListHelper._build_schema_common_sub_resource_read(properties.source_virtual_network)
             properties.subnets = AAZListType(
                 flags={"read_only": True},
             )
 
             public_ip_addresses = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_addresses_v6 = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_addresses_v6
             public_ip_addresses_v6.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_addresses_v6.Element)
 
             public_ip_prefixes = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_prefixes.Element)
 
             public_ip_prefixes_v6 = cls._schema_on_200.value.Element.properties.nat_gateway.properties.public_ip_prefixes_v6
             public_ip_prefixes_v6.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_prefixes_v6.Element)
 
             subnets = cls._schema_on_200.value.Element.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _ListHelper._build_schema_sub_resource_read(subnets.Element)
+            _ListHelper._build_schema_common_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200.value.Element.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -586,22 +614,22 @@ class List(AAZCommand):
 class _ListHelper:
     """Helper class for List"""
 
-    _schema_sub_resource_read = None
+    _schema_common_sub_resource_read = None
 
     @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
             flags={"read_only": True}
         )
 
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
 
-        _schema.id = cls._schema_sub_resource_read.id
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["List"]

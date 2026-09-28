@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an EventHub schema group.
+
+    :example: SchemaRegistryCreate
+        az eventhubs namespace schema-registry update --resource-group alitest --namespace-name ali-ua-test-eh-system-1 --schema-group-name testSchemaGroup1
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -80,16 +83,16 @@ class Update(AAZCommand):
         _args_schema.schema_compatibility = AAZStrArg(
             options=["--schema-compatibility"],
             arg_group="Properties",
+            help="Compatibility of Schema.",
             nullable=True,
             enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
-            help="Compatibility of Schema.",
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
+            help="Type of Schema.",
             nullable=True,
             enum={"Avro": "Avro", "Json": "Json", "ProtoBuf": "ProtoBuf", "Unknown": "Unknown"},
-            help="Type of Schema.",
         )
 
         group_properties = cls._args_schema.group_properties
@@ -180,7 +183,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -267,7 +270,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

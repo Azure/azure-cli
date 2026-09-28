@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new Event Hub as a nested resource within a Namespace.
+
+    :example: EHEventHubCreate
+        az eventhubs eventhub update --resource-group Default-NotificationHubs-AustraliaEast --namespace-name sdk-Namespace-5357 --event-hub-name sdk-EventHub-6547
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -197,7 +200,7 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
-        _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
+        _args_schema.min_compaction_lag_in_mins = AAZIntArg(
             options=["--min-lag", "--min-compaction-lag-in-mins"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
@@ -299,7 +302,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -386,7 +389,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -488,7 +491,7 @@ class Update(AAZCommand):
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
                 retention_description.set_prop("cleanupPolicy", AAZStrType, ".cleanup_policy")
-                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_time_in_minutes")
+                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_in_mins")
                 retention_description.set_prop("retentionTimeInHours", AAZIntType, ".retention_time_in_hours")
                 retention_description.set_prop("tombstoneRetentionTimeInHours", AAZIntType, ".tombstone_retention_time_in_hours")
 

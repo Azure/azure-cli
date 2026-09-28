@@ -418,6 +418,9 @@ def convert_show_result_to_snake_case(result):
         boot_diagnostics.pop("storageUri")
 
     hardware_profile = new_result.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSize" in hardware_profile:
         hardware_profile["vm_size"] = hardware_profile["vmSize"]
         hardware_profile.pop("vmSize")

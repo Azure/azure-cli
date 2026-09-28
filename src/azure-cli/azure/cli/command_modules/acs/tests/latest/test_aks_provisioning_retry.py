@@ -200,6 +200,192 @@ class TestWaitForClusterUpdate(unittest.TestCase):
         )
 
 
+class TestWaitForClusterProperty(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance(values, is_live=True, in_recording=False):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.is_live = is_live
+        instance.in_recording = in_recording
+        instance.cmd = MagicMock(
+            side_effect=[MockExecutionResult(value) for value in values]
+        )
+        return instance
+
+    @patch('time.sleep', return_value=None)
+    def test_polls_until_property_matches_case_insensitively(self, mock_sleep):
+        instance = self._make_instance(['true', 'False'])
+
+        instance._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
+
+        self.assertEqual(instance.cmd.call_count, 2)
+        mock_sleep.assert_called_once_with(30)
+
+    def test_replay_does_not_issue_poll_requests(self):
+        instance = self._make_instance([], is_live=False)
+
+        instance._wait_for_cluster_property('addonProfiles.omsagent.enabled', False)
+
+        instance.cmd.assert_not_called()
+
+    @patch('time.sleep', return_value=None)
+    def test_raises_when_property_never_matches(self, _mock_sleep):
+        instance = self._make_instance(['true', 'true'])
+
+        with self.assertRaisesRegex(AssertionError, 'last value'):
+            instance._wait_for_cluster_property(
+                'addonProfiles.omsagent.enabled', False, attempts=2
+            )
+
+
+class TestAlreadyExistsConflictHandling(unittest.TestCase):
+
+    @staticmethod
+    def _make_instance():
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cli_ctx = MagicMock()
+        instance._allow_retried_create_recovery = False
+        return instance
+
+    def test_builds_show_command_for_create(self):
+        instance = self._make_instance()
+
+        command = instance._build_show_command_for_already_existing_resource(
+            'aks create -g rg --name cluster --node-count 1'
+        )
+
+        self.assertEqual(command, 'aks show --resource-group rg --name cluster')
+
+    def test_does_not_translate_non_create_command(self):
+        instance = self._make_instance()
+
+        self.assertIsNone(
+            instance._build_show_command_for_already_existing_resource(
+                'aks update -g rg -n cluster'
+            )
+        )
+
+    @patch.dict(os.environ, {
+        'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3',
+        'AZURE_CLI_TEST_OPERATION_BASE_DELAY': '0.01',
+    })
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_already_exists_after_transient_retry_uses_show(
+        self, mock_execute, _mock_random, mock_sleep
+    ):
+        expected = MockExecutionResult({'provisioningState': 'Succeeded'})
+        mock_execute.side_effect = [
+            CLIError('Another operation is in progress.'),
+            CLIError("The cluster 'cluster' already exists."),
+            expected,
+        ]
+        instance = self._make_instance()
+        instance._allow_retried_create_recovery = True
+
+        result = instance._execute_with_transient_conflict_retry(
+            'aks create --resource-group rg --name cluster', False
+        )
+
+        self.assertIs(result, expected)
+        mock_execute.assert_called_with(
+            instance.cli_ctx,
+            'aks show --resource-group rg --name cluster',
+            expect_failure=False,
+        )
+        mock_sleep.assert_called_once()
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3'})
+    @patch('time.sleep', return_value=None)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_first_attempt_already_exists_still_raises(
+        self, mock_execute, mock_sleep
+    ):
+        mock_execute.side_effect = CLIError("The cluster 'cluster' already exists.")
+
+        with self.assertRaisesRegex(CLIError, 'already exists'):
+            self._make_instance()._execute_with_transient_conflict_retry(
+                'aks create --resource-group rg --name cluster', False
+            )
+
+        mock_execute.assert_called_once()
+        mock_sleep.assert_not_called()
+
+    @patch.dict(os.environ, {
+        'AZURE_CLI_TEST_OPERATION_MAX_RETRIES': '3',
+        'AZURE_CLI_TEST_OPERATION_BASE_DELAY': '0.01',
+    })
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_already_exists_without_explicit_recovery_still_raises(
+        self, mock_execute, _mock_random, _mock_sleep
+    ):
+        mock_execute.side_effect = [
+            CLIError('Another operation is in progress.'),
+            CLIError("The cluster 'cluster' already exists."),
+        ]
+
+        with self.assertRaisesRegex(CLIError, 'already exists'):
+            self._make_instance()._execute_with_transient_conflict_retry(
+                'aks create --resource-group rg --name cluster', False
+            )
+
+    def test_recovery_wrapper_restores_previous_state(self):
+        instance = self._make_instance()
+        instance.cmd = MagicMock(return_value='result')
+
+        result = instance._cmd_with_retried_create_recovery(
+            'aks create -g rg -n cluster', checks=['check']
+        )
+
+        self.assertEqual(result, 'result')
+        instance.cmd.assert_called_once_with(
+            'aks create -g rg -n cluster', checks=['check']
+        )
+        self.assertFalse(instance._allow_retried_create_recovery)
+
+
+class TestArtifactStreamingStableApiHandling(unittest.TestCase):
+
+    def test_skips_only_exact_stable_api_unmarshal_error(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cmd = MagicMock(side_effect=CLIError(
+            'UnmarshalError: json: unknown field "artifactStreamingProfile"'
+        ))
+        instance.skipTest = MagicMock(side_effect=unittest.SkipTest('unsupported'))
+
+        with self.assertRaises(unittest.SkipTest):
+            instance._cmd_or_skip_if_artifact_streaming_unavailable('aks nodepool update')
+
+    def test_unrelated_unmarshal_error_propagates(self):
+        from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
+            AzureKubernetesServiceScenarioTest,
+        )
+        instance = object.__new__(AzureKubernetesServiceScenarioTest)
+        instance.cmd = MagicMock(
+            side_effect=CLIError('UnmarshalError: json: unknown field "other"')
+        )
+        instance.skipTest = MagicMock()
+
+        with self.assertRaisesRegex(CLIError, 'unknown field'):
+            instance._cmd_or_skip_if_artifact_streaming_unavailable(
+                'aks nodepool update'
+            )
+
+        instance.skipTest.assert_not_called()
+
+
 class TestCmdWithRetry(unittest.TestCase):
 
     def _make_instance(self):

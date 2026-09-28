@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # AZURE CLI VM TEST DEFINITIONS
+from datetime import datetime, timedelta, timezone
 import json
 import os
 import platform
@@ -2027,6 +2028,51 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
+    @live_only()
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_processor_mode_', location='westus')
+    def test_vm_processor_mode(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10),
+            'vmss': self.create_random_name('vmss-', 12),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2019-Datacenter:latest',
+            'size': 'Standard_D2als_v7'
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --image {image} --size {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --public-ip-address "" --nsg-rule NONE',
+            checks=[
+                self.check('hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --processor-mode Opportunistic', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image {image} --vm-sku {size} '
+            '--admin-username azureuser --admin-password TestPassword0! '
+            '--processor-mode Deterministic --instance-count 0 --lb-sku Standard',
+            checks=[
+                self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+            ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Deterministic')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --processor-mode Opportunistic', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.processorMode', 'Opportunistic')
+        ])
+
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):
 
@@ -2563,6 +2609,62 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
             self.check('location', '{loc}'),
             self.check("contains(id, '/Providers/Microsoft.Compute/Locations/{loc}/Publishers/{pub}/ArtifactTypes/VMExtension/Types/{ext}/Versions/{ver}')", True)
         ])
+
+    @live_only()
+    # Add live_only: Extension that is ready for testing isn’t accessible. The currently written using publicly
+    # available version of the extension, which has not yet been updated on the RP side.
+    # Required to re-record when it is ready.
+    def test_vm_vmss_extension_image(self):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'pub': 'Microsoft.Compute',
+            'ext': 'CustomScriptExtension'
+        })
+
+        command_results = {}
+        for command_group in ('vm', 'vmss'):
+            versions_without_expand = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_without_expand)
+
+            versions_with_metadata = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties'.format(command_group)
+            ).get_output_in_json()
+            self.assertTrue(versions_with_metadata)
+            self.assertEqual(
+                [version['name'] for version in versions_without_expand],
+                [version['name'] for version in versions_with_metadata]
+            )
+            self.assertTrue(all(
+                field in version
+                for version in versions_with_metadata
+                for field in ('releaseCategory', 'urgencyLevel', 'runProfile')
+            ))
+
+            self.kwargs['ver'] = self.cmd(
+                '{} extension image list-versions --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --expand properties '
+                '--query "[?releaseCategory==\'SecurityFix\' && urgencyLevel==\'Emergency\'].name | [0]" '
+                '--output tsv'.format(command_group)
+            ).output.strip()
+            self.assertTrue(self.kwargs['ver'])
+            image = self.cmd(
+                '{} extension image show --location {{loc}} --publisher {{pub}} '
+                '--name {{ext}} --version {{ver}}'.format(command_group)
+            ).get_output_in_json()
+            self.assertEqual(image['name'], self.kwargs['ver'])
+            for field in ('releaseNotes', 'releaseCategory', 'urgencyLevel', 'runProfile'):
+                self.assertIn(field, image)
+
+            feature_tags = image['extensionFeatureMetadata']['extensionFeatureTags']
+            self.assertTrue(feature_tags)
+            self.assertTrue(all('key' in tag and 'value' in tag for tag in feature_tags))
+            command_results[command_group] = (versions_without_expand, versions_with_metadata, image)
+
+        self.assertEqual(command_results['vm'], command_results['vmss'])
 
 
 class VMExtensionImageSearchScenarioTest(LiveScenarioTest):
@@ -8013,7 +8115,17 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    
+
+    @ResourceGroupPreparer(name_prefix='cli_test_sig_share_wait_', location='westus')
+    def test_sig_share_wait(self, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gallery', 16),
+            'loc': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery} --location {loc}')
+        self.cmd('sig share wait -g {rg} -r {gallery} --updated', checks=self.is_empty())
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus')
     def test_shared_gallery(self, resource_group, resource_group_location):
@@ -8214,8 +8326,8 @@ class VMGalleryImage(ScenarioTest):
                  ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(location='eastus2')
-    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='eastus2', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
+    @ResourceGroupPreparer(location='westus')
+    @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection true --enable-rbac-authorization false')
     def test_gallery_e2e(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -8232,7 +8344,7 @@ class VMGalleryImage(ScenarioTest):
             'des1': self.create_random_name(prefix='des1-', length=20),
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --location {location}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('sig show -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation V1',
@@ -8241,14 +8353,14 @@ class VMGalleryImage(ScenarioTest):
         res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
                        checks=self.check('name', self.kwargs['image'])).get_output_in_json()
         self.kwargs['image_id'] = res['id']
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
                  '--admin-username clitest1 --generate-ssh-key --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
         time.sleep(70)
 
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
-        self.cmd('image create -g {rg} -n {captured} --source {vm}')
+        self.cmd('image create -g {rg} -n {captured} --location {location} --source {vm}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
                  checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
 
@@ -8264,7 +8376,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
                      self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
                      self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
-                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
+                     self.check('publishingProfile.targetRegions[1].name', 'West US'),
                      self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
                      self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
                  ])
@@ -8277,7 +8389,7 @@ class VMGalleryImage(ScenarioTest):
             'kid': kid
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault}')
+        self.cmd('disk-encryption-set create -g {rg} -n {des1} --location {location} --key-url {kid} --source-vault {vault}')
         des1_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des1}').get_output_in_json()
         des1_sp_id = des1_show_output['identity']['principalId']
         des1_id = des1_show_output['id']
@@ -8297,14 +8409,14 @@ class VMGalleryImage(ScenarioTest):
 
         # Test --target-region-encryption
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location}=1 --target-region-encryption {des1},0,{des1} --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}'),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].lun', 0),
             self.check('publishingProfile.targetRegions[0].encryption.dataDiskImages[0].diskEncryptionSetId', '{des1_id}'),
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 '
+        self.cmd('vm create -g {rg} -n {vm2} --location {location} --image {image_id} --admin-username clitest1 '
                  '--generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3',
                  checks=self.check('powerState', 'VM running'))
 
@@ -8733,7 +8845,7 @@ class VMGalleryImage(ScenarioTest):
                 self.check('publishingProfile.targetExtendedLocations[0].extendedLocationReplicaCount', 1),
             ])
 
-    @ResourceGroupPreparer(random_name_length=15, location='CentralUSEUAP')
+    @ResourceGroupPreparer(random_name_length=15, location='westus')
     def test_create_image_version_with_region_cvm_encryption_pmk(self, resource_group, resource_group_location):
         self.kwargs.update({
             'gallery': self.create_random_name(prefix='gallery_', length=20),
@@ -8757,7 +8869,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey ')
         self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk1}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location} --target-region-cvm-encryption EncryptedWithPmk, --os-snapshot {snapshot1} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'Central US EUAP'),
+            self.check('publishingProfile.targetRegions[0].name', 'West US'),
             self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
             self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.securityProfile.confidentialVMEncryptionType', 'EncryptedWithPmk'),
         ])
@@ -9138,6 +9250,87 @@ class VMGalleryImage(ScenarioTest):
             time.sleep(30)
 
         self.cmd('sig delete -g {rg} -r {gallery}')
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_soft_delete_policy_', location='westus')
+    def test_gallery_soft_delete_policy_and_recycle_bin(self, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'gallery': self.create_random_name('sig_', 10),
+            'image_name': self.create_random_name('img_', 10),
+            'version': '1.1.1',
+            'loc': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery} --location {loc} --soft-delete true '
+                 '--soft-delete-retention-period 30 --soft-delete-grace-period 7', checks=[
+            self.check('location', '{loc}'),
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 30),
+            self.check('softDeletePolicy.gracePeriodInDays', 7),
+        ])
+
+        self.cmd('sig update -g {rg} -r {gallery} --soft-delete-retention-period 31 '
+                 '--soft-delete-grace-period 8', checks=[
+            self.check('softDeletePolicy.isSoftDeleteEnabled', True),
+            self.check('softDeletePolicy.retentionPeriodInDays', 31),
+            self.check('softDeletePolicy.gracePeriodInDays', 8),
+        ])
+
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --os-type linux --os-state Specialized '
+                 '--publisher publisher1 --offer offer1 --sku sku1 --hyper-v-generation v1')
+
+        vm_id = self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} --image Canonical:UbuntuServer:16.04-LTS:latest '
+            '--size Standard_D2s_v3 --admin-username clitest1 --generate-ssh-key '
+            '--public-ip-address "" --nsg-rule NONE').get_output_in_json()['id']
+        self.kwargs['vm_id'] = vm_id
+
+        version = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} '
+            '--gallery-image-definition {image_name} --gallery-image-version {version} '
+            '--virtual-machine {vm_id}', checks=[
+                self.check('location', '{loc}'),
+                self.check('name', '{version}'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('storageProfile.source.virtualMachineId', '{vm_id}'),
+            ]).get_output_in_json()
+        self.kwargs['version_id'] = version['id']
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].resourceArmId', '{version_id}'),
+            self.check('[0].softDeletedArtifactType', 'Images'),
+            self.exists('[0].softDeletedTime'),
+            self.exists('[0].consumptionEndTime'),
+            self.exists('[0].hardDeletionTargetTime'),
+        ])
+
+        self.cmd('sig image-version undelete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version}', checks=[
+            self.check('name', '{version}'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name} --gallery-image-version {version} '
+                 '--bypass-soft-delete')
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('sig image-version list-soft-deleted -g {rg} --gallery-name {gallery} '
+                 '--gallery-image-definition {image_name}', checks=[
+            self.check('length(@)', 0),
+        ])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(location='westus')
@@ -10313,6 +10506,51 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
 
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_spot_plus_', location='eastus2')
+    def test_vm_vmss_create_with_spot_plus_priority(self, resource_group):
+        self.kwargs.update({
+            'location': 'eastus2',
+            'vm': self.create_random_name('vm', 10),
+            'vmss_uniform': self.create_random_name('vmssu', 10),
+            'vmss_flexible': self.create_random_name('vmssf', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --location {location} --image Ubuntu2204 --size Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('priority', 'SpotPlus'),
+            self.check('evictionPolicy', 'Deallocate'),
+            self.check('billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_uniform} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Delete --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Uniform --lb ""')
+
+        self.cmd('vmss show -g {rg} -n {vmss_uniform}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Delete'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_flexible} --location {location} '
+                 '--image Ubuntu2204 --vm-sku Standard_D2s_v5 '
+                 '--priority SpotPlus --eviction-policy Deallocate --max-price -1 --instance-count 0 '
+                 '--admin-username azureuser --admin-password testPassword0 '
+                 '--authentication-type password --orchestration-mode Flexible')
+
+        self.cmd('vmss show -g {rg} -n {vmss_flexible}', checks=[
+            self.check('virtualMachineProfile.priority', 'SpotPlus'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Deallocate'),
+            self.check('virtualMachineProfile.billingProfile.maxPrice', -1)
+        ])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_priority_eviction_billing_')
@@ -13317,8 +13555,8 @@ class CapacityReservationScenarioTest(ScenarioTest):
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='eastus2euap')
-    def test_capacity_reservation_operations(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_capacity_reservation_list_delete', location='southafricanorth')
+    def test_capacity_reservation_operations(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
@@ -13381,6 +13619,57 @@ class CapacityReservationScenarioTest(ScenarioTest):
         if self.is_live:
             time.sleep(60)
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
+
+    @live_only()  # Future Capacity Reservation is a private preview that requires subscription access.
+    @ResourceGroupPreparer(name_prefix='cli_test_future_capacity_reservation_', location='westus')
+    def test_future_capacity_reservation(self, resource_group):
+        start = datetime.now(timezone.utc) + timedelta(days=90)
+        self.kwargs.update({
+            'rg': resource_group,
+            'reservation_group': self.create_random_name('cli_future_reservation_group_', 40),
+            'reservation_name': self.create_random_name('cli_future_reservation_', 40),
+            'sku': 'Standard_DS1_v2',
+            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ')
+        })
+
+        self.cmd('capacity reservation group create -n {reservation_group} -g {rg} --zones 1',
+                 checks=[
+                     self.check('name', '{reservation_group}'),
+                     self.check('zones', ['1'])
+                 ])
+
+        self.cmd('capacity reservation create -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--sku {sku} --capacity 1 --zone 1 --schedule-profile-start {start} '
+                 '--minimum-commitment-days 30',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg}',
+                 checks=[
+                     self.check('name', '{reservation_name}'),
+                     self.check('scheduleProfile.start', '{start}'),
+                     self.check('scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('scheduleProfile.modifiableUntil')
+                 ])
+
+        self.cmd('capacity reservation show -c {reservation_group} -n {reservation_name} -g {rg} '
+                 '--instance-view',
+                 checks=[
+                     self.exists('instanceView.reservationStateInfo.reservationState')
+                 ])
+
+        self.cmd('capacity reservation list -c {reservation_group} -g {rg} '
+                 '--query "[?name==\'{reservation_name}\']"',
+                 checks=[
+                     self.check('[0].name', '{reservation_name}'),
+                     self.check('[0].scheduleProfile.start', '{start}'),
+                     self.check('[0].scheduleProfile.minimumCommitmentDays', 30),
+                     self.exists('[0].scheduleProfile.modifiableUntil')
+                 ])
 
     # Open Capacity Reservation is currently enabled only in the East US 2 EUAP Canary region.
     # Provide private package for service team to test it out.

@@ -93,24 +93,32 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'retention_period': retention_period
         })
 
-        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
+        snapshot_description = "Snapshot of Test key-values"
+        self.kwargs.update({
+            'snapshot_description': snapshot_description
+        })
+
+        self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1 --description "{snapshot_description}"',
                  checks=[self.check('itemsCount', 2),
-                         self.check('status', 'ready')])
+                         self.check('status', 'ready'),
+                         self.check('description', snapshot_description)])
 
 
         # Test showing created snapshot
-        created_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
+        created_snapshot = self.cmd('appconfig snapshot show --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --fields name status items_count filters description').get_output_in_json()
 
         self.assertEqual(created_snapshot['items_count'], 2)
         self.check(created_snapshot['status'], 'ready')
         self.assertDictEqual(created_snapshot['filters'][0], filter_dict)
+        self.assertEqual(created_snapshot['description'], snapshot_description)
         self.assertRaises(KeyError, lambda: created_snapshot['created'])
 
         # Test listing snapshots
-        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --endpoint {endpoint} --auth-mode login --fields name status items_count filters').get_output_in_json()
+        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name {snapshot_name} --endpoint {endpoint} --auth-mode login --fields name status items_count filters description').get_output_in_json()
         self.assertEqual(created_snapshots[0]['items_count'], 2)
         self.assertEqual(created_snapshots[0]['status'], 'ready')
         self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
+        self.assertEqual(created_snapshots[0]['description'], snapshot_description)
 
         # Test snapshot archive
         archived_snapshot = self.cmd('appconfig snapshot archive --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name}').get_output_in_json()
@@ -358,3 +366,5 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.cmd('appconfig snapshot create --endpoint {endpoint} --auth-mode login --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])
+
+

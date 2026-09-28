@@ -48,6 +48,36 @@ function InitializeRequiredPackages {
     }
 }
 
+function UpdateServiceContactsTask {
+    [CmdletBinding()]
+    param(
+        [PSCustomObject] $ServiceContactsTask,
+        [System.Collections.Generic.SortedList[System.String, PSCustomObject]] $ServiceContacts
+    )
+
+    # Squad mentions are managed separately from the service contact wiki.
+    foreach ($rule in $ServiceContactsTask.then) {
+        $squadMentionees = @(
+            $rule.then | ForEach-Object { $_.mentionUsers.mentionees } |
+                Where-Object { $_ -match '^Azure/act-[a-z0-9-]+-squad$' }
+        )
+
+        foreach ($condition in $rule.if) {
+            $label = $condition.hasLabel.label
+            if ($null -ne $label -and $ServiceContacts.ContainsKey($label)) {
+                $mentionUsers = $ServiceContacts[$label].then[0].mentionUsers
+                foreach ($squad in $squadMentionees) {
+                    if ($mentionUsers.mentionees -notcontains $squad) {
+                        $mentionUsers.mentionees += $squad
+                    }
+                }
+            }
+        }
+    }
+
+    $ServiceContactsTask.then = $ServiceContacts.Values
+}
+
 # get wiki content
 $username = ""
 $password = $AccessToken
@@ -119,7 +149,7 @@ $jsonObjectGraph = $jsonSerializer.Serialize($yamlObjectGraph) | ConvertFrom-Jso
 
 $serviceContactsTask = $jsonObjectGraph.configuration.resourceManagementConfiguration.eventResponderTasks | Where-Object { $_.description -eq "Triage issues to the service team" }
 if ($null -ne $serviceContactsTask) {
-    $serviceContactsTask.then = $serviceContacts.Values
+    UpdateServiceContactsTask -ServiceContactsTask $serviceContactsTask -ServiceContacts $serviceContacts
 }
 
 $updatedJsonContent = $jsonObjectGraph | ConvertTo-Json -Depth 64

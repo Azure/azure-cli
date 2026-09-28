@@ -606,6 +606,14 @@ def load_command_table(self, _):
     # endregion
 
     # region PublicIPAddresses
+    with self.command_group('network first-party-service-tag'):
+        from .custom import FirstPartyServiceTagCreate, FirstPartyServiceTagList, \
+            FirstPartyServiceTagShow, FirstPartyServiceTagUpdate
+        self.command_table['network first-party-service-tag create'] = FirstPartyServiceTagCreate(loader=self)
+        self.command_table['network first-party-service-tag list'] = FirstPartyServiceTagList(loader=self)
+        self.command_table['network first-party-service-tag show'] = FirstPartyServiceTagShow(loader=self)
+        self.command_table['network first-party-service-tag update'] = FirstPartyServiceTagUpdate(loader=self)
+
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
@@ -618,8 +626,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
 
     with self.command_group('network public-ip prefix'):
-        from azure.cli.command_modules.network.custom import PublicIpPrefixCreate
+        from azure.cli.command_modules.network.custom import PublicIpPrefixCreate, PublicIpPrefixUpdate
         self.command_table['network public-ip prefix create'] = PublicIpPrefixCreate(loader=self)
+        self.command_table['network public-ip prefix update'] = PublicIpPrefixUpdate(loader=self)
     # endregion
 
     # region RouteFilters

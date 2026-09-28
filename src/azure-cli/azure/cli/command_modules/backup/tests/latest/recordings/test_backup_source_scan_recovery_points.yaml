@@ -1,0 +1,298 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup vault show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -n
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1?api-version=2026-07-01
+  response:
+    body:
+      string: '{"location":"eastus2euap","name":"swbela-mdc-vault-1","etag":"W/\"datetime''2025-10-08T15%3A46%3A37.763222Z''\"","identity":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"ba07525e-a8dd-4684-8461-df9c793265db","type":"SystemAssigned"},"properties":{"provisioningState":"Succeeded","privateEndpointStateForBackup":"None","privateEndpointStateForSiteRecovery":"None","backupStorageVersion":"V1","securitySettings":{"immutabilitySettings":{"state":"Locked"},"softDeleteSettings":{"softDeleteRetentionPeriodInDays":14,"softDeleteState":"AlwaysON","enhancedSecurityState":"AlwaysON"},"multiUserAuthorization":"Enabled","sourceScanConfiguration":{"state":"Enabled"}},"redundancySettings":{"standardTierStorageRedundancy":"GeoRedundant","crossRegionRestore":"Disabled"},"regionOfChoiceSettings":{"status":"Disabled"},"secureScore":"Maximum","bcdrSecurityLevel":"Excellent","publicNetworkAccess":"Enabled","restoreSettings":{"crossSubscriptionRestoreSettings":{"crossSubscriptionRestoreState":"Enabled"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"RS0","tier":"Standard"}}'
+    headers:
+      content-length:
+      - '1250'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:29 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 98C901E1C86F4DF0B3DA84941A5254EB Ref B: PNQ231110909029 Ref C: 2026-09-14T11:06:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --backup-management-type -g -v -n --query -o
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupProtectionContainers?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20friendlyName%20eq%20%27Sample-VM%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sample-rg;sample-vm","name":"IaasVMContainer;iaasvmcontainerv2;sample-rg;sample-vm","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","virtualMachineVersion":"Compute","resourceGroup":"Sample-RG","friendlyName":"Sample-VM","backupManagementType":"AzureIaasVM","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"Microsoft.Compute/virtualMachines","protectableObjectType":"Microsoft.Compute/virtualMachines"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '867'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/eastus2euap/7397f98a-58c8-4d1f-9e3e-6bd41a1671dd
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 676293C0F9654E80BE1C13E1810168D4 Ref B: PNQ231110909052 Ref C: 2026-09-14T11:06:31Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --backup-management-type --workload-type -g -v -c -n --query
+        -o
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupProtectedItems?api-version=2026-07-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sample-rg;Sample-VM/protectedItems/VM;iaasvmcontainerv2;sample-rg;Sample-VM","name":"VM;iaasvmcontainerv2;sample-rg;Sample-VM","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"Sample-VM","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-09-14T08:05:53.4341049Z","protectedItemDataId":"1178678470200372","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sample-rg;Sample-VM","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2026-09-14T08:08:04.5606237Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastus2euap","sourceSideScanInfo":{"sourceSideScanStatus":"Configured","sourceSideScanSummary":"Suspicious"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected-2/protectedItems/VM;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected-2","name":"VM;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected-2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"swbela-mdc-injected-2","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.Compute/virtualMachines/swbela-mdc-injected-2","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2025-11-27T20:05:09.4065627Z","protectedItemDataId":"1178677983182858","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected-2","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.Compute/virtualMachines/swbela-mdc-injected-2","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2025-11-27T20:05:12.0936364Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastus2euap","sourceSideScanInfo":{"sourceSideScanStatus":"Configured","sourceSideScanSummary":"Unknown"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected/protectedItems/VM;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected","name":"VM;iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"swbela-mdc-injected","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.Compute/virtualMachines/swbela-mdc-injected","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-09-14T08:08:20.768746Z","protectedItemDataId":"1178678499937652","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;swbela-ransom-rg;swbela-mdc-injected","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.Compute/virtualMachines/swbela-mdc-injected","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2026-09-14T08:10:28.5438209Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastus2euap","sourceSideScanInfo":{"sourceSideScanStatus":"NotConfigured","sourceSideScanSummary":"Unknown"}}}]}'
+    headers:
+      content-length:
+      - '6266'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:32 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/eastus2euap/834b063a-2141-4704-9d39-27ee0eb4e2ad
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 816FEABFDD1E456F99FE02505AE42257 Ref B: PNQ231110907034 Ref C: 2026-09-14T11:06:31Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup item show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --backup-management-type --workload-type -g -v -c -n
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bsample-rg%3Bsample-vm/protectedItems/VM%3Biaasvmcontainerv2%3Bsample-rg%3BSample-VM?api-version=2026-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sample-rg;Sample-VM/protectedItems/VM;iaasvmcontainerv2;sample-rg;Sample-VM","name":"VM;iaasvmcontainerv2;sample-rg;Sample-VM","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"Sample-VM","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-09-14T08:05:53.4341049Z","protectedItemDataId":"1178678470200372","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sample-rg;Sample-VM","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2026-09-14T08:08:04.5606237Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastus2euap","sourceSideScanInfo":{"sourceSideScanStatus":"Configured","sourceSideScanSummary":"Suspicious"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2006'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/eastus2euap/7c31dc7c-3df3-458e-b082-4f430ae2f280
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: DFAEEEBB56204FACAF00F42FEFD65EB4 Ref B: PNQ231110906025 Ref C: 2026-09-14T11:06:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --backup-management-type --workload-type -g -v -c -i -n
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bsample-rg%3Bsample-vm/protectedItems/VM%3Biaasvmcontainerv2%3Bsample-rg%3BSample-VM?api-version=2026-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sample-rg;Sample-VM/protectedItems/VM;iaasvmcontainerv2;sample-rg;Sample-VM","name":"VM;iaasvmcontainerv2;sample-rg;Sample-VM","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"Sample-VM","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","protectionStatus":"Healthy","protectionState":"Protected","healthStatus":"Passed","healthDetails":[{"code":400239,"title":"IaasVmHealthGreenDefault","message":"Backup
+        pre-check status of this virtual machine is OK.","recommendations":[]}],"lastBackupStatus":"Completed","lastBackupTime":"2026-09-14T08:05:53.4341049Z","protectedItemDataId":"1178678470200372","extendedProperties":{},"policyType":"V2","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;sample-rg;Sample-VM","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sample-RG/providers/Microsoft.Compute/virtualMachines/Sample-VM","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupPolicies/EnhancedPolicy","policyName":"EnhancedPolicy","lastRecoveryPoint":"2026-09-14T08:08:04.5606237Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastus2euap","sourceSideScanInfo":{"sourceSideScanStatus":"Configured","sourceSideScanSummary":"Suspicious"}}}'
+    headers:
+      content-length:
+      - '2006'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:34 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/eastus2euap/0f569bb5-a526-4984-9a2d-c4a9df769766
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 2AA8D62914434A85BBDC4F296E4ADC57 Ref B: PNQ231110906052 Ref C: 2026-09-14T11:06:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --backup-management-type --workload-type -g -v -c -i -n
+      User-Agent:
+      - AZURECLI/2.89.1 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bsample-rg%3BSample-VM/protectedItems/VM%3Biaasvmcontainerv2%3Bsample-rg%3BSample-VM/recoveryPoints/1141447822743501?api-version=2026-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/swbela-ransom-rg/providers/Microsoft.RecoveryServices/vaults/swbela-mdc-vault-1/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;sample-rg;Sample-VM/protectedItems/VM;iaasvmcontainerv2;sample-rg;Sample-VM/recoveryPoints/1141447822743501","name":"1141447822743501","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"IaasVMRecoveryPoint","recoveryPointType":"AppConsistent","recoveryPointTime":"2026-09-14T08:08:04.5606237Z","recoveryPointAdditionalInfo":"","sourceVMStorageType":"PremiumVMOnPartialPremiumStorage","isSourceVMEncrypted":false,"isInstantIlrSessionActive":false,"recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"isManagedVirtualMachine":true,"virtualMachineSize":"Standard_D2s_v3","originalStorageAccountOption":false,"osType":"Windows","recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"securityType":"None","recoveryPointProperties":{"isSoftDeleted":false,"immutabilityProperties":{"isImmutable":true}},"isPrivateAccessEnabledOnAnyDisk":false,"createdWithPolicyType":"V2","threatInfo":[{"threatTitle":"[SAMPLE
+        ALERT] Digital currency mining related behavior detected","threatDescription":"[SAMPLE
+        ALERT] Digital currency mining related behavior detected","lastUpdatedTime":"2026-08-13T07:47:15.8603080","threatState":"Active","threatStartTime":"2026-08-13T07:47:15.8603080","threatEndTime":"2026-08-13T07:47:15.8603080","threatURI":"https://portal.azure.com/#blade/Microsoft_Azure_Security_AzureDefenderForData/AlertBlade/alertId/136b246a-ee42-f137-a707-2c1b7c535b5a/subscriptionId/6d875e77-e412-4d7d-9af4-8895278b4443/resourceGroup/Sample-RG/referencedFrom/alertDeepLink/location/centralus","threatSeverity":"High"},{"threatTitle":"[SAMPLE
+        ALERT]  Detected suspicious file cleanup commands","threatDescription":"[SAMPLE
+        ALERT]  Detected suspicious file cleanup commands","lastUpdatedTime":"2026-08-13T07:47:11.8603080","threatState":"Active","threatStartTime":"2026-08-13T07:47:11.8603080","threatEndTime":"2026-08-13T07:47:11.8603080","threatURI":"https://portal.azure.com/#blade/Microsoft_Azure_Security_AzureDefenderForData/AlertBlade/alertId/295c973d-33f2-b61d-f808-182de9cfa921/subscriptionId/6d875e77-e412-4d7d-9af4-8895278b4443/resourceGroup/Sample-RG/referencedFrom/alertDeepLink/location/centralus","threatSeverity":"High"},{"threatTitle":"[SAMPLE
+        ALERT] Executable found running from a suspicious location","threatDescription":"[SAMPLE
+        ALERT] Executable found running from a suspicious location","lastUpdatedTime":"2026-08-13T07:47:17.8603080","threatState":"Active","threatStartTime":"2026-08-13T07:47:17.8603080","threatEndTime":"2026-08-13T07:47:17.8603080","threatURI":"https://portal.azure.com/#blade/Microsoft_Azure_Security_AzureDefenderForData/AlertBlade/alertId/551cd47d-8503-b0ad-0e77-7016ab778e09/subscriptionId/6d875e77-e412-4d7d-9af4-8895278b4443/resourceGroup/Sample-RG/referencedFrom/alertDeepLink/location/centralus","threatSeverity":"Medium"},{"threatTitle":"[SAMPLE
+        ALERT]  Detected Petya ransomware indicators","threatDescription":"[SAMPLE
+        ALERT]  Detected Petya ransomware indicators","lastUpdatedTime":"2026-08-13T07:47:09.8603080","threatState":"Active","threatStartTime":"2026-08-13T07:47:09.8603080","threatEndTime":"2026-08-13T07:47:09.8603080","threatURI":"https://portal.azure.com/#blade/Microsoft_Azure_Security_AzureDefenderForData/AlertBlade/alertId/e06d37ef-68b6-7551-1299-e39103603cdf/subscriptionId/6d875e77-e412-4d7d-9af4-8895278b4443/resourceGroup/Sample-RG/referencedFrom/alertDeepLink/location/centralus","threatSeverity":"High"},{"threatTitle":"[SAMPLE
+        ALERT]  Suspicious PHP execution detected","threatDescription":"[SAMPLE ALERT]  Suspicious
+        PHP execution detected","lastUpdatedTime":"2026-08-13T07:47:13.8603080","threatState":"Active","threatStartTime":"2026-08-13T07:47:13.8603080","threatEndTime":"2026-08-13T07:47:13.8603080","threatURI":"https://portal.azure.com/#blade/Microsoft_Azure_Security_AzureDefenderForData/AlertBlade/alertId/fa981158-b99b-96ab-5fed-085e94e09b12/subscriptionId/6d875e77-e412-4d7d-9af4-8895278b4443/resourceGroup/Sample-RG/referencedFrom/alertDeepLink/location/centralus","threatSeverity":"Medium"}],"threatStatus":"UnHealthy"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4468'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 14 Sep 2026 11:06:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=352782de-cadf-4f14-ad97-08cd2617ef55/eastus2euap/358baef8-192f-4d24-ad08-cbe93af533c1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-ms-throttling-version:
+      - v1
+      x-msedge-ref:
+      - 'Ref A: 2C2AA74A94A54553B7FCA595F2AD60B2 Ref B: PNQ231110907031 Ref C: 2026-09-14T11:06:34Z'
+    status:
+      code: 200
+      message: OK
+version: 1

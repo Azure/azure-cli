@@ -36,6 +36,7 @@ reg_vm_id = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/
 
 class ASEBackupTests(ScenarioTest, unittest.TestCase):
 
+    @unittest.skip("TODO @kumarutkarsh3b2166: 39504009 recreate ASE test resources.")
     def test_backup_wl_ase_container_policy_operations(self):
         self.kwargs.update({
             'vault': vault_ase_restore,
@@ -90,6 +91,7 @@ class ASEBackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{backup_policy}'])", 1)
         ])
 
+    @unittest.skip("TODO @kumarutkarsh3b2166: 39504009 recreate ASE test resources.")
     def test_bkp_res_ase(self):
         self.kwargs.update({
             'rg': rg_ase,

@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an EventHub schema group.
+
+    :example: SchemaRegistryCreate
+        az eventhubs namespace schema-registry create --resource-group alitest --namespace-name ali-ua-test-eh-system-1 --schema-group-name testSchemaGroup1 --group-properties "{}" --schema-compatibility Forward --schema-type Avro
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/schemagroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -75,14 +78,14 @@ class Create(AAZCommand):
         _args_schema.schema_compatibility = AAZStrArg(
             options=["--schema-compatibility"],
             arg_group="Properties",
-            enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
             help="Compatibility of Schema.",
+            enum={"Backward": "Backward", "Forward": "Forward", "None": "None"},
         )
         _args_schema.schema_type = AAZStrArg(
             options=["--schema-type"],
             arg_group="Properties",
-            enum={"Avro": "Avro", "Json": "Json", "ProtoBuf": "ProtoBuf", "Unknown": "Unknown"},
             help="Type of Schema.",
+            enum={"Avro": "Avro", "Json": "Json", "ProtoBuf": "ProtoBuf", "Unknown": "Unknown"},
         )
 
         group_properties = cls._args_schema.group_properties
@@ -158,7 +161,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
