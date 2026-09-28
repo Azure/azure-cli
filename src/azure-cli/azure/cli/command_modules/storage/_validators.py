@@ -422,6 +422,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
         '\n\tOR --source-share --source-path [--source-account-name & key]'
 
     ns = vars(namespace)
+    ns['source_is_validated_same_account'] = False
 
     # source as blob
     container = ns.pop('source_container', None)
@@ -486,6 +487,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
                 source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
                 raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
+
+    ns['source_is_validated_same_account'] = bool(valid_blob_source and same_account)
 
     # if oauth, use user delegation key to generate sas
     source_user_delegation_key = None
