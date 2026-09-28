@@ -385,7 +385,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     else:
         # Get recovery points
         recovery_points = client.list(vault_name, resource_group_name, fabric_name,
-                                      container_uri, item_uri, filter_string)
+                                      container_uri, item_uri, filter=filter_string)
         paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
     if tier:
