@@ -7121,6 +7121,9 @@ def troubleshoot_deployment(cmd, resource_group_name, name, slot=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
+    _ensure_linux_webapp(cmd, resource_group_name, name, slot,
+                         command_label="'az webapp troubleshoot deployment'")
+
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
     latest_url = '{}/api/deployments/latest'.format(scm_url)

@@ -318,6 +318,28 @@ class TestSecureBuildMocked(unittest.TestCase):
 
 class TestTroubleshootDeploymentMocked(unittest.TestCase):
 
+    def setUp(self):
+        ensure_linux_patcher = mock.patch(
+            'azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+        self.ensure_linux_mock = ensure_linux_patcher.start()
+        self.addCleanup(ensure_linux_patcher.stop)
+
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_raises_on_windows(self, requests_get_mock):
+        self.ensure_linux_mock.side_effect = ArgumentUsageError(
+            "'az webapp troubleshoot deployment' is only supported for Linux web apps.")
+
+        with self.assertRaises(ArgumentUsageError) as context:
+            troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myWindowsApp')
+
+        self.assertIn(
+            "'az webapp troubleshoot deployment' is only supported for Linux web apps.",
+            str(context.exception))
+        self.ensure_linux_mock.assert_called_once_with(
+            mock.ANY, 'myRG', 'myWindowsApp', None,
+            command_label="'az webapp troubleshoot deployment'")
+        requests_get_mock.assert_not_called()
+
     @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
     @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',

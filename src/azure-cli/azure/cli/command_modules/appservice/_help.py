@@ -3636,8 +3636,8 @@ helps['webapp secure-build show'] = """
 
 helps['webapp troubleshoot deployment'] = """
     type: command
-    short-summary: Show the latest deployment state and diagnostic information for a web app.
-    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command does not wait for deployment completion.
+    short-summary: Show the latest deployment state and diagnostic information for a Linux web app.
+    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command supports Linux web apps and does not wait for deployment completion.
     examples:
     - name: Show the latest deployment status for a web app.
       text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName
