@@ -280,7 +280,7 @@ Release History
 
 **Storage**
 
-* `az storage blob copy start`: Validate the source endpoint before reusing destination credentials
+* `az storage blob copy start`: Validate the source endpoint before reusing destination credentials (#34138)
 * `az storage account create/update`: Support new value `Smart` for `--access-tier` (#33423)
 * `az storage account create/update`: Support `--allowed-copy-scope` (#33423)
 * `az storage account blob-service-properties update`: Add `--enable-static-website`, `--index-document`, `--default-index-document-path`, `--error-document-404-path` (#33423)
