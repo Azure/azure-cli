@@ -8,6 +8,13 @@ parameters:
   - name: EnableCompactAAZ
     type: boolean
     default: false
+  # Override with a candidate wheel path when validating before the azdev release.
+  - name: AzdevPackage
+    type: string
+    default: 'azdev==0.2.14'
+  - name: DiffToolPackage
+    type: string
+    default: ''
 steps:
   - bash: |
       set -ev
@@ -16,8 +23,11 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
 
-      python -m pip install -U pip "setuptools<81"
-      pip install --upgrade "azdev==0.2.13"
+      python -m pip install -U pip "setuptools>=78.1.1"
+      if [ -n "$DIFF_TOOL_PACKAGE" ]; then
+        pip install --upgrade "$DIFF_TOOL_PACKAGE"
+      fi
+      pip install --upgrade "$AZDEV_PACKAGE"
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
@@ -37,5 +47,7 @@ steps:
       az --version
     displayName: 'azdev setup'
     env:
+      AZDEV_PACKAGE: ${{ parameters.AzdevPackage }}
+      DIFF_TOOL_PACKAGE: ${{ parameters.DiffToolPackage }}
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
       CLI_EXT_REPO_PATH: ${{ parameters.CLIExtensionRepoPath }}
