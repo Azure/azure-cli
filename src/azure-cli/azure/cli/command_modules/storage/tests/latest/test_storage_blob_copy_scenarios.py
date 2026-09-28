@@ -3,8 +3,112 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from unittest import TestCase, mock
+
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
+from ...operations import blob as blob_operations
 from ..storage_test_util import StorageScenarioMixin
+
+
+class StorageBlobCopySecurityTests(TestCase):
+    def test_storage_blob_copy_source_origin_normalization(self):
+        equivalent_origins = [
+            ('https://account.blob.core.windows.net/container/source',
+             'https://ACCOUNT.blob.core.windows.net:443/container/destination'),
+            ('https://account.blob.core.usgovcloudapi.net./container/source',
+             'https://account.blob.core.usgovcloudapi.net/container/destination'),
+            ('https://account.blob.core.windows.net。/container/source',
+             'https://account.blob.core.windows.net/container/destination'),
+            ('https://xn--bcher-kva.example/container/source',
+             'https://bücher.example:443/container/destination'),
+            ('http://127.0.0.1:10000/account/container/source',
+             'http://127.0.0.1:10000/account/container/destination'),
+            ('http://[::1]:10000/account/container/source',
+             'http://[0:0:0:0:0:0:0:1]:10000/account/container/destination'),
+        ]
+        for source_url, destination_url in equivalent_origins:
+            with self.subTest(source_url=source_url, destination_url=destination_url):
+                self.assertTrue(blob_operations._same_url_origin(source_url, destination_url))
+
+        different_origins = [
+            ('https://account.blob.core.windows.net.attacker.example/container/source',
+             'https://account.blob.core.windows.net/container/destination'),
+            ('https://account.blob.core.windows.net@attacker.example/container/source',
+             'https://account.blob.core.windows.net/container/destination'),
+            ('http://account.blob.core.windows.net/container/source',
+             'https://account.blob.core.windows.net/container/destination'),
+            ('https://account.blob.core.windows.net:444/container/source',
+             'https://account.blob.core.windows.net/container/destination'),
+            ('https://faß.example/container/source',
+             'https://fass.example/container/destination'),
+            ('https://account.blob.core.windows.net/container/source',
+             'https://custom.example/container/destination'),
+            ('not-a-url', 'https://account.blob.core.windows.net/container/destination'),
+        ]
+        for source_url, destination_url in different_origins:
+            with self.subTest(source_url=source_url, destination_url=destination_url):
+                self.assertFalse(blob_operations._same_url_origin(source_url, destination_url))
+
+    @mock.patch.object(blob_operations, 'generate_sas_blob_uri')
+    def test_storage_blob_copy_does_not_reuse_credentials_for_untrusted_source(self, generate_sas):
+        source_url = 'https://account.blob.core.windows.net.attacker.example/container/source'
+
+        for blob_type in ('BlockBlob', 'AppendBlob', 'PageBlob'):
+            with self.subTest(blob_type=blob_type):
+                destination_client = mock.MagicMock()
+                destination_client.account_name = 'account'
+                destination_client.url = 'https://account.blob.core.windows.net/container/destination'
+                destination_client.credential = mock.sentinel.destination_credential
+
+                source_client = mock.MagicMock()
+                source_client.account_name = 'account'
+                source_client.get_blob_properties.return_value.size = 512
+                source_service_client = source_client._get_container_client.return_value. \
+                    _get_blob_service_client.return_value
+                source_service_client.credential = None
+                destination_client.from_blob_url.return_value = source_client
+
+                cmd = mock.MagicMock()
+                blob_operations.copy_blob(cmd, destination_client, source_url,
+                                          requires_sync=False, destination_blob_type=blob_type)
+
+                self.assertTrue(all('credential' not in call.kwargs
+                                    for call in destination_client.from_blob_url.call_args_list))
+                generate_sas.assert_not_called()
+                generate_sas.reset_mock()
+
+    @mock.patch.object(blob_operations, 'generate_sas_blob_uri')
+    def test_storage_blob_copy_reuses_credentials_for_same_source_origin(self, generate_sas):
+        source_url = 'https://ACCOUNT.blob.core.windows.net:443/container/source'
+        signed_source_url = source_url + '?sig=generated'
+        generate_sas.return_value = signed_source_url
+
+        destination_client = mock.MagicMock()
+        destination_client.account_name = 'account'
+        destination_client.url = 'https://account.blob.core.windows.net/container/destination'
+        destination_client.credential = mock.MagicMock(account_key='key')
+
+        anonymous_source_client = mock.MagicMock()
+        anonymous_source_client.account_name = 'ACCOUNT'
+        authenticated_source_client = mock.MagicMock()
+        authenticated_source_service = authenticated_source_client._get_container_client.return_value. \
+            _get_blob_service_client.return_value
+        authenticated_source_service.credential = destination_client.credential
+        destination_client.from_blob_url.side_effect = [anonymous_source_client, authenticated_source_client]
+
+        cmd = mock.MagicMock()
+        blob_operations.copy_blob(cmd, destination_client, source_url,
+                                  requires_sync=False, destination_blob_type='BlockBlob')
+
+        destination_client.from_blob_url.assert_has_calls([
+            mock.call(source_url),
+            mock.call(source_url, credential=destination_client.credential)
+        ])
+        generate_sas.assert_called_once()
+        destination_client.upload_blob_from_url.assert_called_once_with(
+            source_url=signed_source_url, overwrite=True, tags=None, destination_lease=None,
+            standard_blob_tier=None, source_if_modified_since=None, source_if_unmodified_since=None,
+            if_modified_since=None, if_unmodified_since=None, timeout=None)
 
 
 class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
