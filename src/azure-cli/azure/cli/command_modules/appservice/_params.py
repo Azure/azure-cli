@@ -1164,11 +1164,10 @@ subscription than the app service environment, please use the resource ID for --
             'deployment_tag',
             options_list=['--deploymentTag', c.deprecate(target='--tag', redirect='--deploymentTag')],
             help='Linux only. A friendly name used to identify the deployment.')
-        c.argument(
-            'show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
-            help='Show a Secure Build summary and full-report link after a synchronous deployment. For asynchronous '
-                 'and URL deployments, show the command to retrieve the report after deployment completes. Supported '
-                 'only for Linux web apps. Secure Build analysis can add several minutes to a synchronous deployment.')
+        c.argument('show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
+                   help='Show a Secure Build summary and full-report link after a local deployment, including when --async '
+                        'true is used. For URL deployments, show the command to run after deployment completes. Supported '
+                        'only for Linux web apps. Secure Build analysis can add several minutes to a local deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')

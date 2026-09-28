@@ -164,9 +164,8 @@ class TestSecureBuildMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.logger')
     @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
-    def test_post_deployment_defers_secure_build_for_async_deployments(self, request_mock, logger_mock):
+    def test_post_deployment_defers_secure_build_for_url_deployments(self, request_mock, logger_mock):
         cases = (
-            (None, True, None, 'az webapp secure-build show --name myApp --resource-group myRG'),
             ('https://example.com/app.zip', None, 'staging',
              'az webapp secure-build show --name myApp --resource-group myRG --slot staging'),
             ('https://example.com/app.zip', False, None,
@@ -187,14 +186,39 @@ class TestSecureBuildMocked(unittest.TestCase):
                 _show_secure_build_after_deployment(params)
 
                 logger_mock.warning.assert_called_once_with(
-                    "The deployment was submitted asynchronously. After it completes, run '%s' to view Secure "
-                    "Build analysis.",
+                    "After the deployment completes, run '%s' to view Secure Build analysis.",
                     expected_command)
         request_mock.assert_not_called()
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._print_secure_build_kudu_footer')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_secure_build_report_summary')
     @mock.patch('azure.cli.command_modules.appservice.custom.logger')
     @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
-    def test_post_deployment_secure_build_reports_linux_only_before_async_guidance(
+    def test_post_deployment_shows_secure_build_for_local_async_deployment(
+            self, request_mock, logger_mock, summary_mock, footer_mock):
+        report = {'summary': {'vulnerabilitiesFound': 1}, 'kuduUrl': 'https://scm/securebuild'}
+        request_mock.return_value = report
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url=None,
+            is_async_deployment=True,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        request_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
+        summary_mock.assert_called_once_with(report)
+        footer_mock.assert_called_once_with(report)
+        logger_mock.warning.assert_called_once_with(
+            "Run '%s' to view findings from this report in the CLI.",
+            'az webapp secure-build show --name myApp --resource-group myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_secure_build_reports_linux_only_before_url_guidance(
             self, request_mock, logger_mock):
         params = mock.MagicMock(
             is_linux_webapp=False,
@@ -210,6 +234,83 @@ class TestSecureBuildMocked(unittest.TestCase):
         logger_mock.warning.assert_called_once_with(
             'Secure Build analysis is currently supported only for Linux web apps.')
         request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myApp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_webapp_troubleshoot_status_tip')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body',
+                return_value=('request-body', None))
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_url_deployment_reports_submission_and_preserves_response(
+            self, logger_mock, send_request_mock, _request_body_mock, _deploy_url_mock, _status_url_mock,
+            _headers_mock, _troubleshoot_tip_mock, _visit_url_mock):
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        response_body = {'complete': False, 'status': 0, 'status_text': 'Receiving changes.'}
+        response = mock.MagicMock(status_code=202, headers={'content-type': 'application/json'})
+        response.json.return_value = {'properties': response_body}
+        send_request_mock.return_value = response
+        params = mock.MagicMock(
+            src_url='https://example.com/app.zip',
+            is_linux_webapp=True,
+            is_functionapp=False,
+            enable_kudu_warmup=False,
+            track_status=True,
+            show_secure_build=False,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            cmd=_get_test_cmd())
+
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result, response_body)
+        logger_mock.warning.assert_any_call('Deployment was submitted asynchronously')
+        self.assertNotIn(
+            mock.call('Deployment has completed successfully'),
+            logger_mock.warning.call_args_list)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myApp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._check_runtimestatus_with_deploymentstatusapi')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body',
+                return_value=('request-body', None))
+    @mock.patch('requests.post')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_local_async_deployment_reports_completion_and_preserves_response(
+            self, logger_mock, post_mock, _request_body_mock, _deploy_url_mock, _status_url_mock,
+            _headers_mock, deployment_status_mock, _visit_url_mock):
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        response_body = {'complete': False, 'status': 0, 'status_text': 'Receiving changes.'}
+        post_mock.return_value = mock.MagicMock(status_code=202)
+        deployment_status_mock.return_value = response_body
+        params = mock.MagicMock(
+            src_url=None,
+            is_async_deployment=True,
+            is_linux_webapp=True,
+            is_functionapp=False,
+            enable_kudu_warmup=False,
+            track_status=True,
+            show_secure_build=False,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            timeout=None,
+            cmd=_get_test_cmd())
+
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result, response_body)
+        logger_mock.warning.assert_any_call('Deployment has completed successfully')
+        self.assertNotIn(
+            mock.call('Deployment was submitted asynchronously'),
+            logger_mock.warning.call_args_list)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._render_secure_build_table_report')
     def test_secure_build_table_output_renders_full_report(self, render_mock):

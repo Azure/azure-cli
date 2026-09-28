@@ -7064,10 +7064,9 @@ def _show_secure_build_after_deployment(params):
 
     command = _secure_build_command(
         params.webapp_name, params.resource_group_name, params.slot)
-    if params.src_url or params.is_async_deployment is True:
+    if params.src_url:
         logger.warning(
-            "The deployment was submitted asynchronously. After it completes, run '%s' to view Secure Build "
-            "analysis.",
+            "After the deployment completes, run '%s' to view Secure Build analysis.",
             command)
         return
 
@@ -12933,7 +12932,10 @@ def _make_onedeploy_request(params):
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
-        logger.warning("Deployment has completed successfully")
+        if params.src_url:
+            logger.warning("Deployment was submitted asynchronously")
+        else:
+            logger.warning("Deployment has completed successfully")
         if not (poll_async_deployment_for_debugging and params.track_status):
             _log_webapp_troubleshoot_status_tip(params.webapp_name, params.resource_group_name, params.is_linux_webapp)
         if params.show_secure_build:
