@@ -39,12 +39,6 @@ def get_k8s_versions(cli_ctx, location):
     return search("values[*].patchVersions.keys(@)[]", results)
 
 
-def get_vm_sizes(cli_ctx, location):
-    from azure.cli.command_modules.acs._client_factory import get_compute_client
-
-    return get_compute_client(cli_ctx).virtual_machine_sizes.list(location)
-
-
 def _get_location(cli_ctx, namespace):
     """
     Return an Azure location by using an explicit `--location` argument, then by `--resource-group`, and

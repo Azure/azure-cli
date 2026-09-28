@@ -25,6 +25,7 @@ from .policy import RetentionType
 
 from ._constants import (
     AbacRoleAssignmentMode,
+    ConnectedRegistryAuthType,
     REGISTRY_RESOURCE_TYPE,
     WEBHOOK_RESOURCE_TYPE,
     REPLICATION_RESOURCE_TYPE,
@@ -564,12 +565,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.')
         c.argument('repositories', options_list=['--repository'], nargs='+', help='Specify the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...')
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.')
-        c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.')
+        c.argument('cleanup', help='Delete the associated sync token and scope map for a connected registry configured with SyncToken authentication. This option has no effect for a connected registry configured with ManagedIdentity authentication. The connected registry is still deleted, but the managed identity and role assignments are retained.')
         c.argument('no_children', help='Used to remove all children from the list.', action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicate whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 
         c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Specify the protocol used to communicate with its parent.', required=True)
-        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.')
+        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token. Not supported for a connected registry configured with ManagedIdentity authentication.')
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
@@ -583,6 +584,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default="true")
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'],
                    help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.', required=False, default="0 0 * * *")
+        c.argument('identity', help='Resource ID of a user-assigned managed identity to authenticate the connected registry with its parent. Required when --auth-type is ManagedIdentity.')
+        c.argument('auth_type', arg_type=get_enum_type([e.value for e in ConnectedRegistryAuthType]), options_list=['--auth-type'], help='Authentication type used by the connected registry to sync with its parent. Defaults to SyncToken.')
 
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
@@ -600,6 +603,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
                    help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag())
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'], help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.')
+        c.argument('identity', help='Resource ID of a user-assigned managed identity. Requires --auth-type ManagedIdentity.')
+        c.argument('auth_type', arg_type=get_enum_type([ConnectedRegistryAuthType.MANAGED_IDENTITY.value]), options_list=['--auth-type'], help='Target authentication type. Only one-way migration from SyncToken to ManagedIdentity is supported.')
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)

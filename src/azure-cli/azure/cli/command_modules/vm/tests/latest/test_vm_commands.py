@@ -8115,7 +8115,17 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
-    
+
+    @ResourceGroupPreparer(name_prefix='cli_test_sig_share_wait_', location='westus')
+    def test_sig_share_wait(self, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gallery', 16),
+            'loc': resource_group_location,
+        })
+
+        self.cmd('sig create -g {rg} -r {gallery} --location {loc}')
+        self.cmd('sig share wait -g {rg} -r {gallery} --updated', checks=self.is_empty())
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus')
     def test_shared_gallery(self, resource_group, resource_group_location):

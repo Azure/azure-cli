@@ -29,7 +29,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
     UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, \
-    SecuredVMDetails
+    SecuredVMDetails, InstantItemRecoveryOperationResultRequest
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -1730,7 +1730,16 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
     result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                               file_restore_request, cls=cust_help.get_pipeline_response)
 
-    client_scripts = cust_help.track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
+    operation_id = cust_help.track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
+    mount_script_request = InstantItemRecoveryOperationResultRequest(
+        provision_instant_item_recovery_operation_id=operation_id)
+    recovery_target = client.list_instant_item_recovery_operation_result(
+        resource_group_name=resource_group_name, vault_name=vault_name, fabric_name=fabric_name,
+        container_name=container_uri, protected_item_name=item_uri, recovery_point_id=rp_name,
+        body=mount_script_request)
+    client_scripts = recovery_target.client_scripts if recovery_target else None
+    if not client_scripts:
+        raise CLIError('Mount script details were not returned by the backup service.')
 
     if client_scripts[0].os_type == os_windows:
         _run_client_script_for_windows(client_scripts)
