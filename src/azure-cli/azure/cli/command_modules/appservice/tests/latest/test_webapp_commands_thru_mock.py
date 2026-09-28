@@ -130,6 +130,8 @@ class TestSecureBuildMocked(unittest.TestCase):
             webapp_name='myApp',
             resource_group_name='myRG',
             slot=None,
+            src_url=None,
+            is_async_deployment=False,
             cmd=_get_test_cmd())
 
         _show_secure_build_after_deployment(params)
@@ -150,6 +152,8 @@ class TestSecureBuildMocked(unittest.TestCase):
             webapp_name='myApp',
             resource_group_name='myRG',
             slot=None,
+            src_url=None,
+            is_async_deployment=False,
             cmd=_get_test_cmd())
 
         _show_secure_build_after_deployment(params)
@@ -157,6 +161,55 @@ class TestSecureBuildMocked(unittest.TestCase):
         summary_mock.assert_called_once_with(report)
         footer_mock.assert_called_once_with(report)
         self.assertIn('view findings from this report', logger_mock.warning.call_args.args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_defers_secure_build_for_async_deployments(self, request_mock, logger_mock):
+        cases = (
+            (None, True, None, 'az webapp secure-build show --name myApp --resource-group myRG'),
+            ('https://example.com/app.zip', None, 'staging',
+             'az webapp secure-build show --name myApp --resource-group myRG --slot staging'),
+            ('https://example.com/app.zip', False, None,
+             'az webapp secure-build show --name myApp --resource-group myRG'),
+        )
+        for src_url, is_async, slot, expected_command in cases:
+            with self.subTest(src_url=src_url, is_async=is_async, slot=slot):
+                logger_mock.reset_mock()
+                params = mock.MagicMock(
+                    is_linux_webapp=True,
+                    webapp_name='myApp',
+                    resource_group_name='myRG',
+                    slot=slot,
+                    src_url=src_url,
+                    is_async_deployment=is_async,
+                    cmd=_get_test_cmd())
+
+                _show_secure_build_after_deployment(params)
+
+                logger_mock.warning.assert_called_once_with(
+                    "The deployment was submitted asynchronously. After it completes, run '%s' to view Secure "
+                    "Build analysis.",
+                    expected_command)
+        request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_secure_build_reports_linux_only_before_async_guidance(
+            self, request_mock, logger_mock):
+        params = mock.MagicMock(
+            is_linux_webapp=False,
+            webapp_name='myWindowsApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url='https://example.com/app.zip',
+            is_async_deployment=True,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        logger_mock.warning.assert_called_once_with(
+            'Secure Build analysis is currently supported only for Linux web apps.')
+        request_mock.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.appservice.custom._render_secure_build_table_report')
     def test_secure_build_table_output_renders_full_report(self, render_mock):

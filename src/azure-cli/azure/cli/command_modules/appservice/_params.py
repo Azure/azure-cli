@@ -1166,8 +1166,9 @@ subscription than the app service environment, please use the resource ID for --
             help='Linux only. A friendly name used to identify the deployment.')
         c.argument(
             'show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
-            help='Show a Secure Build summary and full-report link after deployment. '
-                 'This option can add several minutes to the command.')
+            help='Show a Secure Build summary and full-report link after a synchronous deployment. For asynchronous '
+                 'and URL deployments, show the command to retrieve the report after deployment completes. Supported '
+                 'only for Linux web apps. Secure Build analysis can add several minutes to a synchronous deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')

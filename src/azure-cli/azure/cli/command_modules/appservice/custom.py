@@ -7064,6 +7064,13 @@ def _show_secure_build_after_deployment(params):
 
     command = _secure_build_command(
         params.webapp_name, params.resource_group_name, params.slot)
+    if params.src_url or params.is_async_deployment is True:
+        logger.warning(
+            "The deployment was submitted asynchronously. After it completes, run '%s' to view Secure Build "
+            "analysis.",
+            command)
+        return
+
     try:
         report = _request_secure_build_report(
             params.cmd, params.resource_group_name, params.webapp_name, params.slot)
@@ -12930,13 +12937,7 @@ def _make_onedeploy_request(params):
         if not (poll_async_deployment_for_debugging and params.track_status):
             _log_webapp_troubleshoot_status_tip(params.webapp_name, params.resource_group_name, params.is_linux_webapp)
         if params.show_secure_build:
-            if poll_async_deployment_for_debugging:
-                _show_secure_build_after_deployment(params)
-            else:
-                logger.warning(
-                    "Deployment was submitted asynchronously. Run '%s' after it completes to view Secure Build "
-                    "analysis.",
-                    _secure_build_command(params.webapp_name, params.resource_group_name, params.slot))
+            _show_secure_build_after_deployment(params)
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 
