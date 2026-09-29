@@ -5150,9 +5150,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
         if include_zones is not None:
             vmss["placement"]["include_zones"] = include_zones
+            vmss["placement"].pop("exclude_zones", None)
 
         if exclude_zones is not None:
             vmss["placement"]["exclude_zones"] = exclude_zones
+            vmss["placement"].pop("include_zones", None)
 
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
