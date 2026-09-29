@@ -8,6 +8,14 @@ import os
 import re
 import sys
 
+# Eagerly import requests and msal here, on the main thread, so that their
+# submodules (e.g. requests.structures) are fully initialised in sys.modules
+# before any background thread can trigger a lazy import.  Python 3.14
+# detects import-lock ordering cycles and raises _DeadlockError when two
+# threads race to initialise the same module; pre-loading avoids the race.
+import msal  # noqa: F401  # pylint: disable=unused-import
+import requests  # noqa: F401  # pylint: disable=unused-import
+
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
