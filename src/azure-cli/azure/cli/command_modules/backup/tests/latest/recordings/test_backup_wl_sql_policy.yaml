@@ -13,25 +13,19 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup?api-version=2026-08-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
       - '1084'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Thu, 24 Sep 2026 14:36:37 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -39,26 +33,32 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/aa415659-24e7-43d2-ad7e-00f923b8f041
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/4c5c3070-10a1-4700-b714-25f4db6fa7b6
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: BF02180DE14C46C798E085E4E095A556 Ref B: SIN221080712039 Ref C: 2025-05-15T10:44:06Z'
+      - 'Ref A: CFC539E0A60E44449DDB4B244F0100AF Ref B: SG2AA1040520036 Ref C: 2026-09-24T14:36:37Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureWorkload",
-      "workLoadType": "SQLDataBase", "settings": {"timeZone": "UTC", "issqlcompression":
-      false, "isCompression": false}, "subProtectionPolicy": [{"policyType": "Full",
-      "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy", "scheduleRunFrequency":
-      "Daily", "scheduleRunTimes": ["2022-05-13T16:00:00.000Z"], "scheduleWeeklyFrequency":
-      0}, "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy", "dailySchedule":
-      {"retentionTimes": ["2022-05-13T16:00:00.000Z"], "retentionDuration": {"count":
-      30, "durationType": "Days"}}}}, {"policyType": "Log", "schedulePolicy": {"schedulePolicyType":
-      "LogSchedulePolicy", "scheduleFrequencyInMins": 60}, "retentionPolicy": {"retentionPolicyType":
-      "SimpleRetentionPolicy", "retentionDuration": {"count": 30, "durationType":
-      "Days"}}}]}}'
+    body: '{"eTag": null, "location": null, "properties": {"backupManagementType":
+      "AzureWorkload", "makePolicyConsistent": null, "protectedItemsCount": 0, "resourceGuardOperationRequests":
+      null, "settings": {"isCompression": false, "issqlcompression": false, "timeZone":
+      "UTC"}, "subProtectionPolicy": [{"policyType": "Full", "retentionPolicy": {"dailySchedule":
+      {"retentionDuration": {"count": 30, "durationType": "Days"}, "retentionTimes":
+      ["2022-05-13T16:00:00+00:00"]}, "monthlySchedule": null, "retentionPolicyType":
+      "LongTermRetentionPolicy", "weeklySchedule": null, "yearlySchedule": null},
+      "schedulePolicy": {"hourlySchedule": null, "schedulePolicyType": "SimpleSchedulePolicy",
+      "scheduleRunDays": null, "scheduleRunFrequency": "Daily", "scheduleRunTimes":
+      ["2022-05-13T16:00:00+00:00"], "scheduleWeeklyFrequency": 0}, "snapshotBackupAdditionalDetails":
+      null, "tieringPolicy": null}, {"policyType": "Log", "retentionPolicy": {"retentionDuration":
+      {"count": 30, "durationType": "Days"}, "retentionPolicyType": "SimpleRetentionPolicy"},
+      "schedulePolicy": {"scheduleFrequencyInMins": 60, "schedulePolicyType": "LogSchedulePolicy"},
+      "snapshotBackupAdditionalDetails": null, "tieringPolicy": null}], "workLoadType":
+      "SQLDataBase"}, "resourceGroup": "sql-clitest-rg", "tags": null}'
     headers:
       Accept:
       - application/json
@@ -69,31 +69,25 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '870'
+      - '1273'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -v --policy --backup-management-type --workload-type --name
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
-      - '1094'
+      - '1104'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Thu, 24 Sep 2026 14:36:41 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -101,13 +95,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/ec62d729-7552-4353-ae92-2cb21c6ce5bc
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/c98804d7-42ad-44b1-b122-2d4f6a791ddb
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 5F4865742D6E4E82B023CF5F6A0541D6 Ref B: SIN221080712029 Ref C: 2025-05-15T10:44:07Z'
+      - 'Ref A: 6E4BE0987DB4482B9DF400192C3A468F Ref B: SG2AA1040520029 Ref C: 2026-09-24T14:36:40Z'
     status:
       code: 200
       message: OK
@@ -125,25 +119,19 @@ interactions:
       ParameterSetName:
       - -g -v
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2026-08-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyhzumk5e457","name":"clitest-policyhzumk5e457","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyxpvdh5vaxx","name":"clitest-policyxpvdh5vaxx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policye6nop7zzzh","name":"clitest-policye6nop7zzzh","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2022-05-13T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policymwsmdq7mwx","name":"clitest-policymwsmdq7mwx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyhzumk5e457","name":"clitest-policyhzumk5e457","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyxpvdh5vaxx","name":"clitest-policyxpvdh5vaxx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policye6nop7zzzh","name":"clitest-policye6nop7zzzh","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2022-05-13T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policymwsmdq7mwx","name":"clitest-policymwsmdq7mwx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}]}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
-      - '8195'
+      - '8205'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Thu, 24 Sep 2026 14:36:43 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -151,11 +139,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/188c4a1e-e3d9-4bf3-9f53-203492431b51
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/80d05e73-7116-4bcf-abbe-917480ff84b1
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 6A6C98EF2A904356A80DF5CBC1B86659 Ref B: SIN221080715047 Ref C: 2025-05-15T10:44:10Z'
+      - 'Ref A: 9D8F6540DF4D4EBA88917AE90EA3DA45 Ref B: SG2AA1070306040 Ref C: 2026-09-24T14:36:43Z'
     status:
       code: 200
       message: OK
@@ -173,9 +163,9 @@ interactions:
       ParameterSetName:
       - -g -v --policy -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2026-08-01
   response:
     body:
       string: '{"value":[]}'
@@ -187,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:12 GMT
+      - Thu, 24 Sep 2026 14:36:45 GMT
       expires:
       - '-1'
       pragma:
@@ -199,26 +189,30 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/edc58111-c71e-4a67-91eb-91bc85e49a86
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/9885a332-bdf9-4cab-ab68-69b34049ccc9
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 465CF0ABBA7447C1923FBE0C54551A5F Ref B: SIN221080711031 Ref C: 2025-05-15T10:44:11Z'
+      - 'Ref A: 9D74FEDF6ED545018080E9338B394000 Ref B: SG2AA1040515034 Ref C: 2026-09-24T14:36:45Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureWorkload",
-      "workLoadType": "SQLDataBase", "settings": {"timeZone": "UTC", "issqlcompression":
-      true, "isCompression": true}, "subProtectionPolicy": [{"policyType": "Full",
-      "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy", "scheduleRunFrequency":
-      "Daily", "scheduleRunTimes": ["2022-05-13T16:00:00.000Z"], "scheduleWeeklyFrequency":
-      0}, "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy", "dailySchedule":
-      {"retentionTimes": ["2022-05-13T16:00:00.000Z"], "retentionDuration": {"count":
-      30, "durationType": "Days"}}}}, {"policyType": "Log", "schedulePolicy": {"schedulePolicyType":
-      "LogSchedulePolicy", "scheduleFrequencyInMins": 60}, "retentionPolicy": {"retentionPolicyType":
-      "SimpleRetentionPolicy", "retentionDuration": {"count": 30, "durationType":
-      "Days"}}}]}}'
+    body: '{"eTag": null, "location": null, "properties": {"backupManagementType":
+      "AzureWorkload", "makePolicyConsistent": null, "protectedItemsCount": 0, "resourceGuardOperationRequests":
+      null, "settings": {"isCompression": "true", "issqlcompression": "true", "timeZone":
+      "UTC"}, "subProtectionPolicy": [{"policyType": "Full", "retentionPolicy": {"dailySchedule":
+      {"retentionDuration": {"count": 30, "durationType": "Days"}, "retentionTimes":
+      ["2022-05-13T16:00:00+00:00"]}, "monthlySchedule": null, "retentionPolicyType":
+      "LongTermRetentionPolicy", "weeklySchedule": null, "yearlySchedule": null},
+      "schedulePolicy": {"hourlySchedule": null, "schedulePolicyType": "SimpleSchedulePolicy",
+      "scheduleRunDays": null, "scheduleRunFrequency": "Daily", "scheduleRunTimes":
+      ["2022-05-13T16:00:00+00:00"], "scheduleWeeklyFrequency": 0}, "snapshotBackupAdditionalDetails":
+      null, "tieringPolicy": null}, {"policyType": "Log", "retentionPolicy": {"retentionDuration":
+      {"count": 30, "durationType": "Days"}, "retentionPolicyType": "SimpleRetentionPolicy"},
+      "schedulePolicy": {"scheduleFrequencyInMins": 60, "schedulePolicyType": "LogSchedulePolicy"},
+      "snapshotBackupAdditionalDetails": null, "tieringPolicy": null}], "workLoadType":
+      "SQLDataBase"}, "resourceGroup": "sql-clitest-rg", "tags": null}'
     headers:
       Accept:
       - application/json
@@ -229,27 +223,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '868'
+      - '1275'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -v --policy -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1092'
+      - '1102'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:14 GMT
+      - Thu, 24 Sep 2026 14:36:48 GMT
       expires:
       - '-1'
       pragma:
@@ -261,13 +255,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/6612317a-da16-4b38-b589-86df933eb697
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/c18225ca-552b-4be1-b847-47e34f1f47af
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: D3FF3B7BDC164B838CBFDF399CC34C90 Ref B: SIN221080715027 Ref C: 2025-05-15T10:44:12Z'
+      - 'Ref A: E9DD987545A844D9B846B1967FAA4D86 Ref B: SG2AA1040516042 Ref C: 2026-09-24T14:36:47Z'
     status:
       code: 200
       message: OK
@@ -285,9 +279,9 @@ interactions:
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2026-08-01
   response:
     body:
       string: '{"value":[]}'
@@ -299,7 +293,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:16 GMT
+      - Thu, 24 Sep 2026 14:36:50 GMT
       expires:
       - '-1'
       pragma:
@@ -311,11 +305,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/1ba2f346-2592-4748-b72d-14485d97680c
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/ff2fa68e-178d-4f4d-bfb3-99b00d4e7355
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: BAAB982A8C5C40CDB7A8842490B70B9F Ref B: SIN221080712011 Ref C: 2025-05-15T10:44:15Z'
+      - 'Ref A: 1278AFD0E13148E9A42348A4A79D58E3 Ref B: SG2AA1040513040 Ref C: 2026-09-24T14:36:50Z'
     status:
       code: 200
       message: OK
@@ -333,21 +327,21 @@ interactions:
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1092'
+      - '1102'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:17 GMT
+      - Thu, 24 Sep 2026 14:36:51 GMT
       expires:
       - '-1'
       pragma:
@@ -359,26 +353,28 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/3aa92909-c3f4-4cfc-9780-310665a8620a
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/99efe7e2-890c-42db-a7b2-8a96861e8939
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 3AF1756BC48B4E03B75570DDB9C790E9 Ref B: SIN221080715031 Ref C: 2025-05-15T10:44:16Z'
+      - 'Ref A: 0AFB842F2D2347CCB98E239A2C4CC4BC Ref B: SG2AA1070302062 Ref C: 2026-09-24T14:36:51Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"protectedItemsCount": 0, "backupManagementType": "AzureWorkload",
-      "workLoadType": "SQLDataBase", "settings": {"timeZone": "UTC", "issqlcompression":
-      true, "isCompression": true}, "subProtectionPolicy": [{"policyType": "Full",
-      "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy", "scheduleRunFrequency":
-      "Daily", "scheduleRunTimes": ["2022-05-13T16:00:00.000Z"], "scheduleWeeklyFrequency":
-      0}, "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy", "dailySchedule":
-      {"retentionTimes": ["2022-05-13T16:00:00.000Z"], "retentionDuration": {"count":
-      30, "durationType": "Days"}}}}, {"policyType": "Log", "schedulePolicy": {"schedulePolicyType":
-      "LogSchedulePolicy", "scheduleFrequencyInMins": 60}, "retentionPolicy": {"retentionPolicyType":
-      "SimpleRetentionPolicy", "retentionDuration": {"count": 30, "durationType":
-      "Days"}}}], "makePolicyConsistent": true}}'
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "workLoadType":
+      "SQLDataBase", "settings": {"timeZone": "UTC", "issqlcompression": true, "isCompression":
+      true}, "subProtectionPolicy": [{"policyType": "Full", "schedulePolicy": {"schedulePolicyType":
+      "SimpleSchedulePolicy", "scheduleRunFrequency": "Daily", "scheduleRunTimes":
+      ["2022-05-13T16:00:00+00:00"], "scheduleWeeklyFrequency": 0}, "retentionPolicy":
+      {"retentionPolicyType": "LongTermRetentionPolicy", "dailySchedule": {"retentionTimes":
+      ["2022-05-13T16:00:00+00:00"], "retentionDuration": {"count": 30, "durationType":
+      "Days"}}}}, {"policyType": "Log", "schedulePolicy": {"schedulePolicyType": "LogSchedulePolicy",
+      "scheduleFrequencyInMins": 60}, "retentionPolicy": {"retentionPolicyType": "SimpleRetentionPolicy",
+      "retentionDuration": {"count": 30, "durationType": "Days"}}}], "protectedItemsCount":
+      0, "makePolicyConsistent": true}}'
     headers:
       Accept:
       - application/json
@@ -389,27 +385,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '898'
+      - '900'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1092'
+      - '1102'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:19 GMT
+      - Thu, 24 Sep 2026 14:36:54 GMT
       expires:
       - '-1'
       pragma:
@@ -421,13 +417,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/47cf0bbd-18f6-4587-9032-4d7dc9128b67
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/a3cd7d5f-0fc6-4535-b1b5-e7d779e7d680
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 39F0DECAEB954AFCBBA4D4721EEEA387 Ref B: SIN221080715031 Ref C: 2025-05-15T10:44:18Z'
+      - 'Ref A: 1C1C5E27F9A94D92A12E81E579E83BFB Ref B: SG2AA1070305060 Ref C: 2026-09-24T14:36:53Z'
     status:
       code: 200
       message: OK
@@ -445,25 +441,19 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00+00:00"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00+00:00"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
-      - '1092'
+      - '1102'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Thu, 24 Sep 2026 14:36:56 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -471,11 +461,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/22493a37-3155-46fa-b91a-4a7c802be74c
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/fde5dc61-9031-453d-ac92-828c0ed2a5c8
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: 11F9E611E65A49558DE0F369B69961A2 Ref B: SIN221080712033 Ref C: 2025-05-15T10:44:20Z'
+      - 'Ref A: 5A2A8F91372141DEB72F212A09D56542 Ref B: SG2AA1040520023 Ref C: 2026-09-24T14:36:55Z'
     status:
       code: 200
       message: OK
@@ -483,7 +475,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -495,9 +487,9 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2026-08-01
   response:
     body:
       string: ''
@@ -507,7 +499,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 15 May 2025 10:44:22 GMT
+      - Thu, 24 Sep 2026 14:36:59 GMT
       expires:
       - '-1'
       pragma:
@@ -519,13 +511,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/33a420cf-0e6a-4f02-8e5d-e0c4eb770401
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/d3009ce8-7264-47a0-ba13-d50a6f1c7533
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
-      x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: A82D44C31A5F4E14BC6F84B2D6DD8D72 Ref B: SIN221080712029 Ref C: 2025-05-15T10:44:21Z'
+      - 'Ref A: A23C1F600DB04F9D961A5B0C064D5E2C Ref B: SG2AA1040512036 Ref C: 2026-09-24T14:36:58Z'
     status:
       code: 200
       message: OK
@@ -543,25 +535,19 @@ interactions:
       ParameterSetName:
       - -g -v
       User-Agent:
-      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.90.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2025-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2026-08-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyhzumk5e457","name":"clitest-policyhzumk5e457","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyxpvdh5vaxx","name":"clitest-policyxpvdh5vaxx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policye6nop7zzzh","name":"clitest-policye6nop7zzzh","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2022-05-13T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policymwsmdq7mwx","name":"clitest-policymwsmdq7mwx","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}]}'
     headers:
-      cache-control:
-      - no-cache
       content-length:
       - '7100'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 15 May 2025 10:44:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
+      - Thu, 24 Sep 2026 14:37:01 GMT
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-cache:
@@ -569,11 +555,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=12f8ea5c-1212-449e-b31c-0a574f43076e/westindia/66243b6c-cf07-4af4-8d95-706b22cb7b2f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=8bf5ba20-c970-4c38-b2a6-95f5726c959a/centraluseuap/2fc031d2-bf9d-45f7-a14c-347b4f024c62
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '249'
+      - '1099'
+      x-ms-throttling-version:
+      - v1
       x-msedge-ref:
-      - 'Ref A: F249DC591BC24EF598CBC7CE33E13AFE Ref B: SIN221080715021 Ref C: 2025-05-15T10:44:22Z'
+      - 'Ref A: D8594BCD17194B10AB359F02DA3BD563 Ref B: SG2AA1070303060 Ref C: 2026-09-24T14:37:01Z'
     status:
       code: 200
       message: OK

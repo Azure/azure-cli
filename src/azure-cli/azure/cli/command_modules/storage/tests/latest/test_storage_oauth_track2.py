@@ -322,7 +322,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @live_only()
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_oauth_scenarios(self, test_dir, resource_group, storage_account):
         storage_account_info = self.get_account_info(resource_group, storage_account)

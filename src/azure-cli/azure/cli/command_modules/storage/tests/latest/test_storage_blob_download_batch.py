@@ -1,0 +1,175 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+import ntpath
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from types import SimpleNamespace
+from unittest import mock
+
+from azure.cli.core.azclierror import FileOperationError
+from azure.cli.command_modules.storage.operations.blob import storage_blob_download_batch
+
+BLOB_MODULE = 'azure.cli.command_modules.storage.operations.blob'
+UTIL_MODULE = 'azure.cli.command_modules.storage.util'
+
+
+def _fake_download_blob(client, file_path=None, **kwargs):  # pylint: disable=unused-argument
+    with open(file_path, 'wb') as stream:
+        stream.write(b'content')
+    return mock.Mock(name=file_path)
+
+
+class TestStorageBlobDownloadBatch(unittest.TestCase):
+
+    def setUp(self):
+        self._root = tempfile.TemporaryDirectory()
+        self.root = os.path.realpath(self._root.name)
+        self.destination = os.path.join(self.root, 'a', 'b', 'destination')
+        os.makedirs(self.destination)
+
+    def tearDown(self):
+        self._root.cleanup()
+
+    def _run(self, blob_names, dryrun=False, overwrite=False):
+        client = mock.Mock()
+        with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=list(blob_names)), \
+                mock.patch(BLOB_MODULE + '.download_blob', side_effect=_fake_download_blob) as download:
+            storage_blob_download_batch(client, source='container', destination=self.destination,
+                                        source_container_name='container', dryrun=dryrun, overwrite=overwrite)
+        return download
+
+    @staticmethod
+    def _make_directory_link(target, link):
+        if sys.platform == 'win32':
+            # Unlike symlinks, junctions can be created without elevated privileges
+            subprocess.run(['cmd', '/c', 'mklink', '/J', link, target], check=True, capture_output=True)
+        else:
+            os.symlink(target, link)
+
+    def _files_written(self):
+        return sorted(os.path.relpath(os.path.join(d, f), self.root)
+                      for d, _, files in os.walk(self.root) for f in files)
+
+    def test_download_batch_writes_blobs_inside_destination(self):
+        download = self._run(['file.txt', 'dir/sub/nested.txt', '/leading/slash.txt', 'x/../normalized.txt'])
+
+        self.assertEqual(download.call_count, 4)
+        expected = [os.path.join('a', 'b', 'destination', p) for p in
+                    ('dir/sub/nested.txt', 'file.txt', 'leading/slash.txt', 'normalized.txt')]
+        self.assertEqual(self._files_written(), sorted(os.path.normpath(p) for p in expected))
+
+    def test_download_batch_rejects_path_traversal_blob_names(self):
+        for blob_name in ('../evil.txt', '../../evil.txt', '../../../evil.txt', 'dir/../../evil.txt',
+                          'dir/../../destination-sibling/evil.txt', '..'):
+            with self.subTest(blob_name=blob_name):
+                with self.assertRaisesRegex(FileOperationError, 'outside the destination directory'):
+                    self._run([blob_name])
+                self.assertEqual(self._files_written(), [])
+
+    def test_download_batch_rejects_before_downloading_any_blob(self):
+        with mock.patch(BLOB_MODULE + '.download_blob', side_effect=_fake_download_blob) as download:
+            with self.assertRaises(FileOperationError):
+                with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=['good.txt', '../../evil.txt']):
+                    storage_blob_download_batch(mock.Mock(), source='container', destination=self.destination,
+                                                source_container_name='container')
+        download.assert_not_called()
+        self.assertEqual(self._files_written(), [])
+
+    def test_download_batch_dryrun_rejects_path_traversal_blob_names(self):
+        with self.assertRaises(FileOperationError):
+            self._run(['../../evil.txt'], dryrun=True)
+
+    def test_download_batch_with_overwrite_does_not_replace_files_outside_destination(self):
+        outside_file = os.path.join(self.root, 'a', 'existing.txt')
+        with open(outside_file, 'wb') as stream:
+            stream.write(b'original')
+
+        with self.assertRaises(FileOperationError):
+            self._run(['../../existing.txt'], overwrite=True)
+        with open(outside_file, 'rb') as stream:
+            self.assertEqual(stream.read(), b'original')
+
+    def test_download_batch_follows_existing_directory_links(self):
+        # Existing symlinks/junctions under the destination are user-created layouts (e.g. routing a subtree to another
+        # disk), so they are followed as before; only the blob name itself is constrained.
+        outside = os.path.join(self.root, 'outside')
+        os.makedirs(outside)
+        self._make_directory_link(outside, os.path.join(self.destination, 'link'))
+
+        download = self._run(['link/file.txt'])
+        self.assertEqual(download.call_count, 1)
+        self.assertEqual(os.listdir(outside), ['file.txt'])
+
+        with self.assertRaises(FileOperationError):
+            self._run(['link/../../evil.txt'])
+        self.assertEqual(os.listdir(outside), ['file.txt'])
+
+    def test_download_batch_rejects_windows_blob_names_with_simulated_windows_paths(self):
+        # Exercise Windows path semantics on any platform by swapping os.path for ntpath in the code under test
+        windows_os = SimpleNamespace(path=ntpath)
+        destination = 'C:\\Users\\victim\\downloads'
+        with mock.patch(BLOB_MODULE + '.os', windows_os), mock.patch(UTIL_MODULE + '.os', windows_os):
+            for blob_name in ('C:/Users/Public/evil.txt', 'C:\\Users\\Public\\evil.txt', 'D:/evil.txt', 'C:evil.txt',
+                              '..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', '../downloads2/evil.txt',
+                              # differ from the destination only by case, which is a sibling in case-sensitive dirs
+                              'C:/Users/victim/DOWNLOADS/evil.txt', '../DOWNLOADS/evil.txt'):
+                with self.subTest(blob_name=blob_name):
+                    with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=[blob_name]), \
+                            self.assertRaisesRegex(FileOperationError, 'outside the destination directory'):
+                        storage_blob_download_batch(mock.Mock(), source='container', destination=destination,
+                                                    source_container_name='container', dryrun=True)
+
+            for blob_name in ('dir/file.txt', 'dir\\file.txt', 'Dir/File.txt', '\\\\server\\share\\file.txt'):
+                with self.subTest(blob_name=blob_name):
+                    with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=[blob_name]):
+                        self.assertEqual(storage_blob_download_batch(
+                            mock.Mock(), source='container', destination=destination,
+                            source_container_name='container', dryrun=True), [])
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Windows path semantics')
+    def test_download_batch_rejects_windows_traversal_blob_names(self):
+        # drive-absolute names point back into the temp root so a vulnerable build can't write elsewhere
+        outside = os.path.join(self.root, 'evil.txt')
+        for blob_name in ('..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', outside, outside.replace('\\', '/')):
+            with self.subTest(blob_name=blob_name):
+                with self.assertRaises(FileOperationError):
+                    self._run([blob_name])
+                self.assertEqual(self._files_written(), [])
+
+    @unittest.skipUnless(sys.platform == 'win32', 'Windows per-directory case sensitivity')
+    def test_download_batch_rejects_case_variant_sibling_in_case_sensitive_directory(self):
+        work = os.path.join(self.root, 'work')
+        os.makedirs(work)
+        try:
+            subprocess.run(['fsutil', 'file', 'setCaseSensitiveInfo', work, 'enable'], check=True, capture_output=True)
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest('Per-directory case sensitivity is not available')
+        self.destination = os.path.join(work, 'dest')
+        sibling = os.path.join(work, 'DEST')
+        os.makedirs(self.destination)
+        os.makedirs(sibling)
+        sentinel = os.path.join(sibling, 'existing.txt')
+        with open(sentinel, 'wb') as stream:
+            stream.write(b'original')
+
+        for blob_name in (sentinel, sentinel.replace('\\', '/'), '..\\DEST\\existing.txt'):
+            for blobs, kwargs in (([blob_name], {}), (['good.txt', blob_name], {}),
+                                  ([blob_name], {'dryrun': True}), ([blob_name], {'overwrite': True})):
+                with self.subTest(blobs=blobs, **kwargs):
+                    with self.assertRaises(FileOperationError):
+                        self._run(blobs, **kwargs)
+                    # nothing downloaded (even the valid blob), no sibling file created and the sentinel untouched
+                    self.assertEqual(os.listdir(self.destination), [])
+                    self.assertEqual(os.listdir(sibling), ['existing.txt'])
+                    with open(sentinel, 'rb') as stream:
+                        self.assertEqual(stream.read(), b'original')
+
+
+if __name__ == '__main__':
+    unittest.main()
