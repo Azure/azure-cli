@@ -32,7 +32,7 @@ Release History
 
 **App Config**
 
-* `az appconfig kv/snapshot`: Add description support (#33840)
+* `az appconfig kv/snapshot`: Add support for `--description` parameter (#33840)
 
 **App Service**
 
