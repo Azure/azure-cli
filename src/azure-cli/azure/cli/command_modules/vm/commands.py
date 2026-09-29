@@ -450,3 +450,6 @@ def load_command_table(self, _):
 
     with self.command_group('restore-point collection') as g:
         g.custom_show_command('show', 'restore_point_collection_show')
+
+    from .operations.sshkey import SSHKeyCreate
+    self.command_table["sshkey create"] = SSHKeyCreate(loader=self)
