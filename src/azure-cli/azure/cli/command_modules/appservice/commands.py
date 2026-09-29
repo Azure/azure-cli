@@ -48,6 +48,34 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_secure_build_output(result):
+    import sys
+    from .custom import _render_secure_build_table_report, _secure_build_finding_rows
+    if isinstance(result, dict):
+        _render_secure_build_table_report(result, file=sys.stdout)
+        return []
+    rows = _secure_build_finding_rows(result)
+    for row in rows:
+        row.pop('Details URL', None)
+    return rows
+
+
+def transform_troubleshoot_deployment_output(result):
+    from collections import OrderedDict
+
+    if not isinstance(result, dict):
+        return []
+    runtime = result.get('runtime') or {}
+    return [OrderedDict([
+        ('DeploymentId', result.get('deploymentId') or '-'),
+        ('State', result.get('state') or 'Unknown'),
+        ('Active', result.get('active', False)),
+        ('Succeeded', runtime.get('instancesSuccessful', '-')),
+        ('Failed', runtime.get('instancesFailed', '-')),
+        ('LastDeploymentTime', result.get('lastDeploymentTime') or '-'),
+    ])]
+
+
 def transform_troubleshoot_config_output(result):
     """Flatten the troubleshoot config payload into a per-setting table.
 
@@ -380,6 +408,12 @@ def load_command_table(self, _):
                          table_transformer=transform_troubleshoot_config_output)
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
+        g.custom_command('deployment', 'troubleshoot_deployment',
+                         table_transformer=transform_troubleshoot_deployment_output)
+
+    with self.command_group('webapp secure-build', is_preview=True) as g:
+        g.custom_show_command('show', 'show_secure_build_report',
+                              table_transformer=transform_secure_build_output)
 
     with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
         g.custom_command('network-capture', 'collect_network_capture',
