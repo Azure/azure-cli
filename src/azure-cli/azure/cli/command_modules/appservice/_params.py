@@ -886,6 +886,20 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
 
+    with self.argument_context('webapp troubleshoot deployment') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+
+    with self.argument_context('webapp secure-build show') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('rescan', options_list=['--rescan'], action='store_true',
+                   help='Run a fresh dependency analysis instead of using a cached report.')
+
     with self.argument_context('webapp troubleshoot collect network-capture') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
@@ -1150,6 +1164,10 @@ subscription than the app service environment, please use the resource ID for --
             'deployment_tag',
             options_list=['--deploymentTag', c.deprecate(target='--tag', redirect='--deploymentTag')],
             help='Linux only. A friendly name used to identify the deployment.')
+        c.argument('show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
+                   help='Show a Secure Build summary and full-report link after a local deployment, including when --async '
+                        'true is used. For URL deployments, show the command to run after deployment completes. Supported '
+                        'only for Linux web apps. Secure Build analysis can add several minutes to a local deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
