@@ -538,6 +538,84 @@ def get_hsm_base_url_type(cli_ctx):
     return _get_base_url_type(cli_ctx, service='hsm')
 
 
+def _get_allowed_vault_dns_suffixes(cli_ctx):
+    from azure.cli.core.cloud import CloudSuffixNotSetException
+
+    suffixes = []
+    for suffix_name in ('keyvault_dns', 'mhsm_dns'):
+        try:
+            suffixes.append(getattr(cli_ctx.cloud.suffixes, suffix_name))
+        except CloudSuffixNotSetException:  # Not every cloud publishes both suffixes
+            pass
+
+    # Escape hatch for private/disconnected footprints whose suffixes aren't in the cloud metadata.
+    configured = cli_ctx.config.get('keyvault', 'allowed_dns_suffixes', None)
+    if configured:
+        suffixes.extend(configured.split(','))
+
+    normalized = []
+    for suffix in suffixes:
+        suffix = (suffix or '').strip().rstrip('.').lower()
+        if suffix:
+            normalized.append(suffix if suffix.startswith('.') else '.' + suffix)
+    return normalized
+
+
+def validate_vault_uri(cli_ctx, uri):
+    """Validate a vault URI before it is used as an authentication target, and return its origin.
+
+    Azure CLI builds its data-plane clients with `verify_challenge_resource=False`, so the SDK will
+    mint a token for whatever resource the contacted host asks for. Validating the host here is the
+    compensating control required by https://aka.ms/azsdk/blog/vault-uri.
+    """
+    from urllib.parse import urlparse
+
+    # Never echo credentials that were embedded in the URI back to the terminal or logs.
+    display = re.sub(r'(?<=//)[^/@]*@', '***@', uri, count=1) if isinstance(uri, str) else uri
+
+    def _invalid(reason):
+        return InvalidArgumentValueError(
+            "'{}' is not a valid Key Vault or Managed HSM URI: {}.".format(display, reason))
+
+    if not uri or not isinstance(uri, str):
+        raise _invalid('a value is required')
+
+    try:
+        parsed = urlparse(uri)
+        hostname = parsed.hostname
+        port = parsed.port  # raises ValueError on a malformed port
+    except ValueError:
+        raise _invalid('it is not a well-formed absolute URI')  # pylint: disable=raise-missing-from
+
+    if parsed.scheme.lower() != 'https':
+        raise _invalid('the scheme must be https')
+    if not hostname:
+        raise _invalid('it is not a well-formed absolute URI')
+    if parsed.username is not None or parsed.password is not None:
+        raise _invalid('it must not contain credentials')
+
+    # Compare against the suffixes with a leading '.' so that look-alikes such as
+    # 'maliciousvault.azure.net' don't match '.vault.azure.net'.
+    hostname = hostname[:-1] if hostname.endswith('.') else hostname  # drop a single DNS root terminator
+    hostname = hostname.lower()
+    # urlparse and the HTTP transport disagree on characters such as '\', which urlparse keeps in the
+    # host but the transport treats as a path separator. Requiring well-formed DNS labels keeps the
+    # name validated here identical to the one actually dialled.
+    if not all(re.fullmatch(r'[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?', label) for label in hostname.split('.')):
+        raise _invalid('the host is not a valid DNS name')
+    allowed = _get_allowed_vault_dns_suffixes(cli_ctx)
+    if not any(len(hostname) > len(suffix) and hostname.endswith(suffix) for suffix in allowed):
+        raise InvalidArgumentValueError(
+            "'{}' is not a recognized Key Vault or Managed HSM host in cloud '{}'. Azure CLI will not "
+            "send an access token to it. Expected a host ending in: {}. For a private or disconnected "
+            "deployment, pass the full vault URI with --id and register its suffix with "
+            "'az config set keyvault.allowed_dns_suffixes=<suffix>[,<suffix>]'.".format(
+                display, cli_ctx.cloud.name, ', '.join(allowed) or '<none configured>'))
+
+    # Rebuild from the validated host so that nothing else in the authority survives into the URL.
+    return 'https://{}{}'.format(hostname, ':{}'.format(port) if port else '')
+
+
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
     from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
