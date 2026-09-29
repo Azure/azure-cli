@@ -46,7 +46,7 @@ Release History
 
 **ARM**
 
-* `az stack-whatif`: Resource changes with the type "NoEffect" are now colored gray and marked with a cross symbol instead of using the same appearance as the "NoChange" change type (#33858)
+* `az stack-whatif`: Render `NoEffect` changes in gray with a cross symbol (#33858)
 
 **Backup**
 
