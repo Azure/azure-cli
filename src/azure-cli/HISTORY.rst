@@ -60,7 +60,7 @@ Release History
 
 * `az vm/vmss create/update`: Add new parameter `--wire-server-use-local-file-rules` to support use local file rules (#33894)
 * `az vm/vmss create`: Add `SpotPlus` option in `--priority` parameter (#34030)
-* `az vm/vmss`: Add new param `--processor-mode` to support processor mode (#33985)
+* `az vm/vmss`: Add new parameter `--processor-mode` to support processor mode (#33985)
 * `az capacity reservation create`: Add new parameters `--schedule-profile-start` and `--minimum-commitment-days` to support future capacity reservation (#34031)
 * `az vm/vmss list-versions`: Add new parameter `--expand` to support extension image release metadata (#34018)
 * `az sig create/update`: Add new parameters `--soft-delete`, `--soft-delete-retention-period` and `--soft-delete-grace-period` to support soft-delete policy (#34107)
