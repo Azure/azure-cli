@@ -99,7 +99,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01, FLEX_SUBNET_DELEGATION,
                          RUNTIME_STATUS_TEXT_MAP, LANGUAGE_EOL_DEPRECATION_NOTICES,
-                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID)
+                         STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID, FLEX_REGISTRY_API_VERSION,
+                         FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT, FLEX_DEFAULT_INSTANCE_MEMORY_MB)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, _validate_asp_sku
 
@@ -1693,10 +1694,7 @@ def _rollback_flex_deployment_storage_identity(cmd, resource_group_name, name, c
 
 def _build_flex_function_app_config(deployment_storage_value, deployment_storage_auth_config, flex_sku,
                                     instance_memory, maximum_instance_count, always_ready_instances):
-    always_ready_config = [{
-        "name": key,
-        "instanceCount": max(0, validate_and_convert_to_int(key, value))
-    } for key, value in _parse_key_value_pairs(always_ready_instances).items()]
+    always_ready_config = _build_flex_always_ready_config(always_ready_instances)
     default_instance_memory = [x for x in flex_sku['instanceMemoryMB'] if x['isDefault'] is True][0]
     runtime = flex_sku['functionAppConfigProperties']['runtime']
 
@@ -1716,6 +1714,70 @@ def _build_flex_function_app_config(deployment_storage_value, deployment_storage
             "maximumInstanceCount": maximum_instance_count or flex_sku['maximumInstanceCount']['defaultValue'],
             "instanceMemoryMB": instance_memory or default_instance_memory['size'],
             "alwaysReady": always_ready_config
+        }
+    }
+
+
+def _build_flex_always_ready_config(always_ready_instances):
+    return [{
+        "name": key,
+        "instanceCount": max(0, validate_and_convert_to_int(key, value))
+    } for key, value in _parse_key_value_pairs(always_ready_instances).items()]
+
+
+def _is_flex_registry_storage(deployment_storage):
+    return (deployment_storage.get("type") or "").lower() == "registry"
+
+
+def _build_flex_registry_authentication(auth_type, identity=None, username_setting=None, password_setting=None,
+                                        server_url=None):
+    """Return the Registry authentication object for exactly one mode, or None when no auth argument is given."""
+    basic_args = (username_setting, password_setting, server_url)
+    if auth_type is None:
+        if identity is not None or any(arg is not None for arg in basic_args):
+            raise RequiredArgumentMissingError('--deployment-image-auth-type is required when specifying '
+                                               'Registry authentication arguments.')
+        return None
+    if identity is not None and auth_type != 'UserAssignedIdentity':
+        raise ArgumentUsageError('--deployment-image-identity is only valid with '
+                                 '--deployment-image-auth-type UserAssignedIdentity.')
+    if any(arg is not None for arg in basic_args) and auth_type != 'Basic':
+        raise ArgumentUsageError('--deployment-image-username-setting, --deployment-image-password-setting and '
+                                 '--deployment-image-server-url are only valid with '
+                                 '--deployment-image-auth-type Basic.')
+
+    authentication = {"type": auth_type}
+    if auth_type == 'UserAssignedIdentity':
+        if not identity:
+            raise RequiredArgumentMissingError('--deployment-image-identity is required with '
+                                               '--deployment-image-auth-type UserAssignedIdentity.')
+        authentication["userAssignedIdentityResourceId"] = identity
+    elif auth_type == 'Basic':
+        if not username_setting or not password_setting:
+            raise RequiredArgumentMissingError('--deployment-image-username-setting and '
+                                               '--deployment-image-password-setting are required with '
+                                               '--deployment-image-auth-type Basic.')
+        authentication["usernameSettingName"] = username_setting
+        authentication["passwordSettingName"] = password_setting
+        if server_url is not None:
+            authentication["serverUrl"] = server_url
+    return authentication
+
+
+def _build_flex_registry_function_app_config(image, authentication, instance_memory, maximum_instance_count,
+                                             always_ready_instances):
+    return {
+        "deployment": {
+            "storage": {
+                "type": "Registry",
+                "value": image,
+                "authentication": authentication
+            }
+        },
+        "scaleAndConcurrency": {
+            "maximumInstanceCount": maximum_instance_count or FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT,
+            "instanceMemoryMB": instance_memory or FLEX_DEFAULT_INSTANCE_MEMORY_MB,
+            "alwaysReady": _build_flex_always_ready_config(always_ready_instances)
         }
     }
 
@@ -4152,7 +4214,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 
 def get_deployment_configs(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "deployment", {})
 
@@ -4160,7 +4222,21 @@ def get_deployment_configs(cmd, resource_group_name, name):
 def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable=too-many-branches
                               deployment_storage_name=None,
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                              deployment_storage_auth_value=None):
+                              deployment_storage_auth_value=None, deployment_image=None,
+                              deployment_image_auth_type=None, deployment_image_identity=None,
+                              deployment_image_username_setting=None, deployment_image_password_setting=None,
+                              deployment_image_server_url=None):
+
+    registry_authentication = _build_flex_registry_authentication(
+        deployment_image_auth_type, deployment_image_identity, deployment_image_username_setting,
+        deployment_image_password_setting, deployment_image_server_url)
+    if deployment_image is not None or registry_authentication is not None:
+        if any(arg is not None for arg in (deployment_storage_name, deployment_storage_container_name,
+                                           deployment_storage_auth_type, deployment_storage_auth_value)):
+            raise MutuallyExclusiveArgumentError('--deployment-image arguments cannot be used with '
+                                                 '--deployment-storage arguments.')
+        return _update_flex_registry_deployment_config(cmd, resource_group_name, name, deployment_image,
+                                                       registry_authentication)
 
     if (deployment_storage_name is not None) != (deployment_storage_container_name is not None):
         raise ArgumentUsageError("Please provide both --deployment-storage-name and "
@@ -4181,6 +4257,9 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
     functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     functionapp_deployment_storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
+    if _is_flex_registry_storage(functionapp_deployment_storage):
+        raise ValidationError('This function app uses Registry deployment storage. Use the --deployment-image '
+                              'arguments to update it.')
 
     deployment_storage = None
 
@@ -4253,6 +4332,28 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
         assign_identity(cmd, resource_group_name, name, assign_identities, 'Storage Blob Data Contributor',
                         None, deployment_storage.id)
 
+    return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
+
+
+def _update_flex_registry_deployment_config(cmd, resource_group_name, name, image, authentication):
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
+    function_app_config = functionapp["properties"]["functionAppConfig"]
+    storage = function_app_config["deployment"]["storage"]
+    if not _is_flex_registry_storage(storage) and (not image or authentication is None):
+        raise RequiredArgumentMissingError('--deployment-image and --deployment-image-auth-type are required to '
+                                           'switch to Registry deployment storage.')
+
+    storage["type"] = "Registry"
+    if image is not None:
+        storage["value"] = image
+    if authentication is None:
+        # Keep the current mode; GET returns the fields of other modes as null.
+        authentication = {key: value for key, value in storage["authentication"].items() if value is not None}
+    storage["authentication"] = authentication
+    function_app_config.pop("runtime", None)
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp,
+                                     api_version=FLEX_REGISTRY_API_VERSION)
     return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
 
 
@@ -4457,11 +4558,11 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
             raise CLIError(ex)
 
 
-def update_flex_functionapp(cmd, resource_group_name, name, functionapp):
+def update_flex_functionapp(cmd, resource_group_name, name, functionapp, api_version='2023-12-01'):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    url = url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    url = url_base.format(subscription_id, resource_group_name, name, api_version)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
     body = json.dumps(functionapp)
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
@@ -10063,7 +10164,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
                        deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
-                       auto_generated_domain_name_label_scope=None):
+                       auto_generated_domain_name_label_scope=None, deployment_image=None,
+                       deployment_image_auth_type=None, deployment_image_identity=None,
+                       deployment_image_username_setting=None, deployment_image_password_setting=None,
+                       deployment_image_server_url=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -10149,6 +10253,26 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                            "must be used with parameter --flexconsumption-location, please "
                                            "provide the name of the flex plan location using "
                                            "--flexconsumption-location.")
+
+    registry_authentication = _build_flex_registry_authentication(
+        deployment_image_auth_type, deployment_image_identity, deployment_image_username_setting,
+        deployment_image_password_setting, deployment_image_server_url)
+    is_flex_registry = deployment_image is not None or registry_authentication is not None
+    if is_flex_registry:
+        if flexconsumption_location is None:
+            raise RequiredArgumentMissingError('--deployment-image arguments must be used with '
+                                               '--flexconsumption-location.')
+        if not deployment_image or registry_authentication is None:
+            raise RequiredArgumentMissingError('--deployment-image and --deployment-image-auth-type are both required '
+                                               'to use Registry deployment storage.')
+        if any(arg is not None for arg in (runtime, runtime_version, environment, deployment_storage_name,
+                                           deployment_storage_container_name, deployment_storage_auth_type,
+                                           deployment_storage_auth_value, registry_server, registry_username,
+                                           registry_password)):
+            raise MutuallyExclusiveArgumentError(
+                '--deployment-image cannot be used with --runtime, --runtime-version, --environment, '
+                '--deployment-storage-* or --registry-* arguments. For registry credentials, use '
+                '--deployment-image-auth-type Basic with the names of the app settings that store them.')
 
     if flexconsumption_location is None:
         deployment_source_branch = deployment_source_branch or 'master'
@@ -10285,14 +10409,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         docker_registry_server_url = parse_docker_image_name(image, environment)
 
-    if is_linux and not runtime and (consumption_plan_location or not image):
+    if is_linux and not runtime and not is_flex_registry and (consumption_plan_location or not image):
         raise ArgumentUsageError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
-    if flexconsumption_location:
+    if is_flex_registry:
+        matched_runtime = None
+    elif flexconsumption_location:
         runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
@@ -10477,7 +10603,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif flexconsumption_location is None and (disable_app_insights or not matched_runtime.app_insights):
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    elif not disable_app_insights and matched_runtime.app_insights:
+    elif not disable_app_insights and (is_flex_registry or matched_runtime.app_insights):
         create_app_insights = True
 
     if flexconsumption_location is not None:
@@ -10513,20 +10639,26 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                     'StorageAccountConnectionString.'
                 )
 
-            flex_sku = matched_runtime.sku
-            flex_storage_setup = _prepare_flex_deployment_storage(
-                cmd, resource_group_name, name, deployment_storage_name, deployment_storage_container_name,
-                deployment_storage_auth_type, deployment_storage_auth_value, flexconsumption_location, flex_sku,
-                instance_memory, maximum_instance_count, always_ready_instances)
-            deployment_storage_auth_value = flex_storage_setup['deployment_storage_auth_value']
-            for setting in flex_storage_setup['app_settings_to_add']:
-                site_config.app_settings.append(NameValuePair(name=setting['name'], value=setting['value']))
+            if is_flex_registry:
+                function_app_config = _build_flex_registry_function_app_config(
+                    deployment_image, registry_authentication, instance_memory, maximum_instance_count,
+                    always_ready_instances)
+            else:
+                flex_sku = matched_runtime.sku
+                flex_storage_setup = _prepare_flex_deployment_storage(
+                    cmd, resource_group_name, name, deployment_storage_name, deployment_storage_container_name,
+                    deployment_storage_auth_type, deployment_storage_auth_value, flexconsumption_location, flex_sku,
+                    instance_memory, maximum_instance_count, always_ready_instances)
+                deployment_storage_auth_value = flex_storage_setup['deployment_storage_auth_value']
+                for setting in flex_storage_setup['app_settings_to_add']:
+                    site_config.app_settings.append(NameValuePair(name=setting['name'], value=setting['value']))
+                function_app_config = flex_storage_setup['function_app_config']
 
             # Set flex consumption properties on the site
             from azure.mgmt.web.models import SiteProperties
             if functionapp_def.properties is None:
                 functionapp_def.properties = SiteProperties()
-            functionapp_def.properties.function_app_config = flex_storage_setup['function_app_config']
+            functionapp_def.properties.function_app_config = function_app_config
             functionapp_def.properties.sku = "FlexConsumption"
             # Use a client with specific API version for flex consumption
             flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
@@ -10573,7 +10705,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                               image, registry_username,
                                               registry_password)
 
-    if flexconsumption_location is not None:
+    if flexconsumption_location is not None and not is_flex_registry:
         _prepare_flex_deployment_storage_identity(
             cmd, resource_group_name, name, flex_storage_setup)
 
@@ -10582,6 +10714,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                    role, None, scope)
         functionapp.identity = identity
 
+    if is_flex_registry:
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
     if flexconsumption_location is not None:
         return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 

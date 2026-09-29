@@ -2,8 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import io
+import json
 import unittest
+from contextlib import contextmanager
 from unittest import mock
+from urllib.parse import parse_qs, urlparse
 import os
 
 from azure.mgmt.web import WebSiteManagementClient
@@ -24,9 +28,12 @@ from azure.cli.command_modules.appservice.custom import (
     _build_flex_function_app_config,
     _prepare_flex_deployment_storage,
     _prepare_flex_deployment_storage_identity,
-    revert_flex_migration)
+    revert_flex_migration,
+    create_functionapp,
+    get_deployment_configs,
+    update_deployment_configs)
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
+from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault, HTTPError)
 from azure.cli.core.azclierror import (ResourceNotFoundError, MutuallyExclusiveArgumentError,
                                         RequiredArgumentMissingError, ValidationError, ArgumentUsageError)
 
@@ -1437,3 +1444,360 @@ class TestFlexMigrationRevertMocked(unittest.TestCase):
         long_running_operation_mock.assert_called_once_with(cmd_mock.cli_ctx)
         long_running_operation_mock.return_value.assert_called_once_with(poller_mock)
         get_functionapp_mock.assert_called_once_with(cmd_mock, 'src-rg', 'src-app')
+
+
+_REGISTRY_SUBSCRIPTION = '00000000-0000-0000-0000-000000000000'
+_REGISTRY_SITE = 'subscriptions/{}/resourceGroups/rg/providers/Microsoft.Web/sites/app'.format(_REGISTRY_SUBSCRIPTION)
+_REGISTRY_IDENTITY = ('/subscriptions/{}/resourceGroups/rg/providers/Microsoft.ManagedIdentity/'
+                      'userAssignedIdentities/acr-pull'.format(_REGISTRY_SUBSCRIPTION))
+_REGISTRY_DIGEST = 'sha256:' + 'a' * 64
+_REGISTRY_SECRET = 'SENTINEL-REGISTRY-PASSWORD-2f9c'
+
+
+def _flex_blob_site():
+    return {
+        'id': '/' + _REGISTRY_SITE,
+        'name': 'app',
+        'kind': 'functionapp,linux',
+        'location': 'East US',
+        'tags': {'team': 'functions'},
+        'properties': {
+            'sku': 'FlexConsumption',
+            'unknownSiteProperty': {'keep': True},
+            'functionAppConfig': {
+                'deployment': {
+                    'storage': {
+                        'type': 'blobContainer',
+                        'value': 'https://sa.blob.core.windows.net/app-package-app',
+                        'authentication': {
+                            'type': 'StorageAccountConnectionString',
+                            'userAssignedIdentityResourceId': None,
+                            'storageAccountConnectionStringName': 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+                        }
+                    }
+                },
+                'runtime': {'name': 'python', 'version': '3.11'},
+                'scaleAndConcurrency': {
+                    'alwaysReady': [{'name': 'http', 'instanceCount': 1}],
+                    'maximumInstanceCount': 40,
+                    'instanceMemoryMB': 4096,
+                    'triggers': {'http': {'perInstanceConcurrency': 8}}
+                },
+                'siteUpdateStrategy': {'type': 'RollingUpdate'},
+                'unknownFunctionAppConfigProperty': {'keep': True}
+            }
+        }
+    }
+
+
+def _flex_registry_site():
+    # Shape returned by the service: runtime is null and the fields of other authentication modes are null.
+    site = _flex_blob_site()
+    function_app_config = site['properties']['functionAppConfig']
+    function_app_config['runtime'] = None
+    function_app_config['deployment']['storage'] = {
+        'type': 'Registry',
+        'value': 'myacr.azurecr.io/app:v1',
+        'authentication': {
+            'type': 'UserAssignedIdentity',
+            'userAssignedIdentityResourceId': _REGISTRY_IDENTITY,
+            'storageAccountConnectionStringName': None,
+            'usernameSettingName': None,
+            'passwordSettingName': None,
+            'serverUrl': None
+        }
+    }
+    return site
+
+
+def _with_registry_storage(site, storage):
+    function_app_config = site['properties']['functionAppConfig']
+    del function_app_config['runtime']
+    function_app_config['deployment']['storage'] = storage
+    return site
+
+
+class _FakeArmSite:
+    """Stands in for ARM behind requests.Session.send, so the real send_raw_request builds, sends and logs requests.
+
+    Stores one site, echoes accepted PUT bodies, and serves a sentinel secret from the app settings endpoint.
+    """
+
+    def __init__(self, site, put_error=None):
+        self.site = site
+        self.put_error = put_error
+        self.requests = []
+
+    def send(self, _session, request, **_kwargs):
+        import requests
+        body = json.loads(request.body) if request.body else None
+        self.requests.append((request.method, request.url, body))
+        status, payload = 200, self.site
+        if '/config/appsettings/list' in request.url:
+            payload = {'properties': {'REGISTRY_PASSWORD': _REGISTRY_SECRET}}
+        elif request.method == 'PUT':
+            if self.put_error:
+                status, payload = 400, self.put_error
+            else:
+                self.site = payload = body
+        response = requests.Response()
+        response.status_code = status
+        response.reason = 'OK' if status == 200 else 'Bad Request'
+        response.headers['Content-Type'] = 'application/json'
+        response._content = json.dumps(payload).encode()  # pylint: disable=protected-access
+        response.url = request.url
+        return response
+
+    def calls(self):
+        return [(method, urlparse(url).path.lstrip('/'), parse_qs(urlparse(url).query)['api-version'][0])
+                for method, url, _ in self.requests]
+
+
+@contextmanager
+def _fake_arm(site, put_error=None):
+    arm = _FakeArmSite(site, put_error)
+    with mock.patch('requests.Session.send', autospec=True, side_effect=arm.send), \
+            mock.patch('azure.cli.core._profile.Profile.get_raw_token',
+                       return_value=(('Bearer', 'token', None), _REGISTRY_SUBSCRIPTION, 'tenant')), \
+            mock.patch('azure.cli.command_modules.appservice.utils.get_subscription_id',
+                       return_value=_REGISTRY_SUBSCRIPTION), \
+            mock.patch('azure.cli.core.commands.client_factory.get_subscription_id',
+                       return_value=_REGISTRY_SUBSCRIPTION):
+        yield arm
+
+
+class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
+    """`functionapp deployment config set/show` with Registry storage, asserted on the HTTP requests sent to ARM."""
+
+    def setUp(self):
+        self.cmd = _get_test_cmd()
+
+    def test_set_switches_blob_app_to_registry_with_exact_payload(self):
+        basic_args = {'deployment_image_auth_type': 'Basic', 'deployment_image_username_setting': 'REGISTRY_USERNAME',
+                      'deployment_image_password_setting': 'REGISTRY_PASSWORD'}
+        basic_auth = {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
+                      'passwordSettingName': 'REGISTRY_PASSWORD'}
+        cases = [
+            ('Anonymous, tag only', 'mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0',
+             {'deployment_image_auth_type': 'Anonymous'}, {'type': 'Anonymous'}),
+            ('SystemAssignedIdentity, digest only', 'myacr.azurecr.io/app@' + _REGISTRY_DIGEST,
+             {'deployment_image_auth_type': 'SystemAssignedIdentity'}, {'type': 'SystemAssignedIdentity'}),
+            ('UserAssignedIdentity, tag and digest', 'myacr.azurecr.io/app:v1@' + _REGISTRY_DIGEST,
+             {'deployment_image_auth_type': 'UserAssignedIdentity', 'deployment_image_identity': _REGISTRY_IDENTITY},
+             {'type': 'UserAssignedIdentity', 'userAssignedIdentityResourceId': _REGISTRY_IDENTITY}),
+            ('Basic', 'registry.contoso.com:5000/team/app:v1', basic_args, basic_auth),
+            ('Basic with server URL', 'registry.contoso.com:5000/team/app:v1',
+             dict(basic_args, deployment_image_server_url='https://registry.contoso.com:5000'),
+             dict(basic_auth, serverUrl='https://registry.contoso.com:5000')),
+        ]
+        for case, image, auth_args, authentication in cases:
+            with self.subTest(case):
+                storage = {'type': 'Registry', 'value': image, 'authentication': authentication}
+                with _fake_arm(_flex_blob_site()) as arm:
+                    result = update_deployment_configs(self.cmd, 'rg', 'app', deployment_image=image, **auth_args)
+                    shown = get_deployment_configs(self.cmd, 'rg', 'app')
+
+                self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2025-05-01'),
+                                               ('PUT', _REGISTRY_SITE, '2025-05-01'),
+                                               ('GET', _REGISTRY_SITE, '2025-05-01')])
+                self.assertEqual(arm.requests[1][2], _with_registry_storage(_flex_blob_site(), storage))
+                self.assertEqual(result, {'storage': storage})
+                self.assertEqual(shown, {'storage': storage})
+
+    def test_set_on_registry_app_keeps_the_unspecified_image_or_authentication(self):
+        cases = [
+            ('image only', {'deployment_image': 'myacr.azurecr.io/app:v2'},
+             {'type': 'Registry', 'value': 'myacr.azurecr.io/app:v2',
+              'authentication': {'type': 'UserAssignedIdentity',
+                                 'userAssignedIdentityResourceId': _REGISTRY_IDENTITY}}),
+            ('authentication only', {'deployment_image_auth_type': 'SystemAssignedIdentity'},
+             {'type': 'Registry', 'value': 'myacr.azurecr.io/app:v1',
+              'authentication': {'type': 'SystemAssignedIdentity'}}),
+        ]
+        for case, args, storage in cases:
+            with self.subTest(case):
+                with _fake_arm(_flex_registry_site()) as arm:
+                    update_deployment_configs(self.cmd, 'rg', 'app', **args)
+
+                self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+                self.assertEqual(arm.requests[1][2], _with_registry_storage(_flex_registry_site(), storage))
+
+    def test_set_rejects_invalid_registry_arguments_without_writing(self):
+        image_args = {'deployment_image': 'myacr.azurecr.io/app:v1', 'deployment_image_auth_type': 'Anonymous'}
+        basic_args = {'deployment_image_auth_type': 'Basic', 'deployment_image_username_setting': 'REGISTRY_USERNAME',
+                      'deployment_image_password_setting': 'REGISTRY_PASSWORD'}
+        cases = [
+            ('authentication argument without type', _flex_registry_site,
+             {'deployment_image_identity': _REGISTRY_IDENTITY}, RequiredArgumentMissingError),
+            ('empty user-assigned identity', _flex_registry_site,
+             {'deployment_image_auth_type': 'UserAssignedIdentity', 'deployment_image_identity': ''},
+             RequiredArgumentMissingError),
+            ('Basic without password setting', _flex_registry_site,
+             {'deployment_image_auth_type': 'Basic', 'deployment_image_username_setting': 'REGISTRY_USERNAME'},
+             RequiredArgumentMissingError),
+            ('identity with Basic', _flex_registry_site,
+             dict(basic_args, deployment_image_identity=_REGISTRY_IDENTITY), ArgumentUsageError),
+            ('server URL without Basic', _flex_registry_site,
+             dict(image_args, deployment_image_server_url='https://myacr.azurecr.io'), ArgumentUsageError),
+            ('Registry and blob arguments together', _flex_blob_site,
+             dict(image_args, deployment_storage_auth_type='SystemAssignedIdentity'), MutuallyExclusiveArgumentError),
+            ('switch from blob without authentication', _flex_blob_site,
+             {'deployment_image': 'myacr.azurecr.io/app:v1'}, RequiredArgumentMissingError),
+            ('switch from blob without image', _flex_blob_site,
+             {'deployment_image_auth_type': 'Anonymous'}, RequiredArgumentMissingError),
+            ('blob arguments on a Registry app', _flex_registry_site,
+             {'deployment_storage_auth_type': 'SystemAssignedIdentity'}, ValidationError),
+        ]
+        for case, site, args, error in cases:
+            with self.subTest(case):
+                with _fake_arm(site()) as arm, self.assertRaises(error):
+                    update_deployment_configs(self.cmd, 'rg', 'app', **args)
+                self.assertNotIn('PUT', [method for method, _, _ in arm.requests])
+
+    def test_set_surfaces_field_scoped_service_rejection_after_a_single_write(self):
+        # The CLI doesn't parse image references; the service rejects invalid ones with a field-scoped error.
+        field_error = {'Code': 'BadRequest', 'Message': 'The parameter Site.FunctionAppConfig.Deployment.Storage.Value '
+                                                        'has an invalid value.'}
+        with _fake_arm(_flex_blob_site(), put_error=field_error) as arm, self.assertRaises(HTTPError) as error:
+            update_deployment_configs(self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/App:Latest!',
+                                      deployment_image_auth_type='Anonymous')
+
+        self.assertIn('Site.FunctionAppConfig.Deployment.Storage.Value', str(error.exception))
+        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+        self.assertEqual(arm.requests[1][2]['properties']['functionAppConfig']['deployment']['storage']['value'],
+                         'myacr.azurecr.io/App:Latest!')
+
+    def test_set_debug_log_shows_setting_names_but_never_registry_secrets(self):
+        with _fake_arm(_flex_blob_site()) as arm, \
+                self.assertLogs('cli.azure.cli.core.util', level='DEBUG') as logs:
+            result = update_deployment_configs(
+                self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/app:v1', deployment_image_auth_type='Basic',
+                deployment_image_username_setting='REGISTRY_USERNAME',
+                deployment_image_password_setting='REGISTRY_PASSWORD')
+
+        debug_log = '\n'.join(logs.output)
+        self.assertIn('"passwordSettingName": "REGISTRY_PASSWORD"', debug_log)
+        self.assertNotIn(_REGISTRY_SECRET, debug_log + json.dumps(result))
+        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+
+
+class TestFlexRegistryCreateMocked(unittest.TestCase):
+    """`functionapp create --deployment-image` builds a Registry functionAppConfig without a runtime."""
+
+    def setUp(self):
+        self.cmd = _get_test_cmd()
+        self.web_client_factory = self._patch('web_client_factory')
+        self._patch('list_flexconsumption_locations', return_value=[{'name': 'eastus'}])
+        self._patch('is_storage_account_network_restricted', return_value=False)
+        self._patch('_validate_and_get_connection_string', return_value='storage-connection-string')
+        self._patch('create_flex_app_service_plan', return_value=mock.Mock(id='plan-id'))
+        self._patch('LongRunningOperation')
+        self._patch('_set_remote_or_local_git')
+        self.create_app_insights = self._patch('try_create_workspace_based_application_insights')
+        self.assign_identity = self._patch('assign_identity')
+        self.get_raw_functionapp = self._patch('get_raw_functionapp')
+        self.runtime_helper = self._patch('_FlexFunctionAppStackRuntimeHelper')
+        self.prepare_storage = self._patch('_prepare_flex_deployment_storage')
+        self.prepare_storage_identity = self._patch('_prepare_flex_deployment_storage_identity')
+
+    def _patch(self, name, **kwargs):
+        patcher = mock.patch('azure.cli.command_modules.appservice.custom.' + name, **kwargs)
+        self.addCleanup(patcher.stop)
+        return patcher.start()
+
+    def _created_site(self):
+        self.web_client_factory.assert_called_with(self.cmd.cli_ctx, api_version='2025-05-01')
+        return self.web_client_factory.return_value.web_apps.begin_create_or_update.call_args.args[2].as_dict()
+
+    def test_create_sends_registry_config_without_runtime_and_with_default_scale(self):
+        acr = ('/subscriptions/{}/resourceGroups/rg/providers/Microsoft.ContainerRegistry/registries/myacr'
+               .format(_REGISTRY_SUBSCRIPTION))
+        image = 'myacr.azurecr.io/app@' + _REGISTRY_DIGEST
+
+        result = create_functionapp(self.cmd, 'rg', 'app', 'sa', flexconsumption_location='eastus',
+                                    deployment_image=image, deployment_image_auth_type='SystemAssignedIdentity',
+                                    assign_identities=['[system]'], role='AcrPull', scope=acr)
+
+        site = self._created_site()
+        self.assertEqual(site['properties']['functionAppConfig'], {
+            'deployment': {'storage': {'type': 'Registry', 'value': image,
+                                       'authentication': {'type': 'SystemAssignedIdentity'}}},
+            'scaleAndConcurrency': {'maximumInstanceCount': 100, 'instanceMemoryMB': 2048, 'alwaysReady': []}
+        })
+        self.assertEqual([setting['name'] for setting in site['properties']['siteConfig']['appSettings']],
+                         ['AzureWebJobsStorage'])
+        self.runtime_helper.assert_not_called()
+        self.prepare_storage.assert_not_called()
+        self.prepare_storage_identity.assert_not_called()
+        self.create_app_insights.assert_called_once()
+        self.assign_identity.assert_called_once_with(self.cmd, 'rg', 'app', ['[system]'], 'AcrPull', None, acr)
+        self.get_raw_functionapp.assert_called_once_with(self.cmd.cli_ctx, 'rg', 'app', api_version='2025-05-01')
+        self.assertIs(result, self.get_raw_functionapp.return_value)
+
+    def test_create_with_basic_authentication_uses_explicit_scale_settings(self):
+        create_functionapp(self.cmd, 'rg', 'app', 'sa', flexconsumption_location='eastus',
+                           deployment_image='registry.contoso.com/team/app:v1', deployment_image_auth_type='Basic',
+                           deployment_image_username_setting='REGISTRY_USERNAME',
+                           deployment_image_password_setting='REGISTRY_PASSWORD',
+                           deployment_image_server_url='https://registry.contoso.com',
+                           instance_memory=4096, maximum_instance_count=40, always_ready_instances=['http=2'],
+                           disable_app_insights='true')
+
+        self.assertEqual(self._created_site()['properties']['functionAppConfig'], {
+            'deployment': {'storage': {'type': 'Registry', 'value': 'registry.contoso.com/team/app:v1',
+                                       'authentication': {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
+                                                          'passwordSettingName': 'REGISTRY_PASSWORD',
+                                                          'serverUrl': 'https://registry.contoso.com'}}},
+            'scaleAndConcurrency': {'maximumInstanceCount': 40, 'instanceMemoryMB': 4096,
+                                    'alwaysReady': [{'name': 'http', 'instanceCount': 2}]}
+        })
+        self.create_app_insights.assert_not_called()
+
+    def test_create_rejects_conflicting_registry_arguments_before_calling_azure(self):
+        registry_args = {'flexconsumption_location': 'eastus', 'deployment_image': 'myacr.azurecr.io/app:v1',
+                         'deployment_image_auth_type': 'Anonymous'}
+        cases = [
+            ('runtime', {'runtime': 'python'}, MutuallyExclusiveArgumentError),
+            ('blob deployment storage', {'deployment_storage_name': 'sa2'}, MutuallyExclusiveArgumentError),
+            ('legacy registry credentials', {'registry_password': 'password'}, MutuallyExclusiveArgumentError),
+            ('container app environment', {'environment': 'env'}, MutuallyExclusiveArgumentError),
+            ('missing authentication type', {'deployment_image_auth_type': None}, RequiredArgumentMissingError),
+            ('missing image', {'deployment_image': None}, RequiredArgumentMissingError),
+            ('not Flex Consumption', {'flexconsumption_location': None, 'plan': 'plan'}, RequiredArgumentMissingError),
+        ]
+        for case, overrides, error in cases:
+            with self.subTest(case), self.assertRaises(error):
+                create_functionapp(self.cmd, 'rg', 'app', 'sa', **dict(registry_args, **overrides))
+        self.web_client_factory.assert_not_called()
+
+
+class TestFlexRegistryArgumentParsing(unittest.TestCase):
+
+    def test_registry_arguments_and_aliases_reach_both_commands(self):
+        from azure.cli.core.mock import DummyCli
+        no_auth_fields = {'deployment_image_identity': None, 'deployment_image_username_setting': None,
+                          'deployment_image_password_setting': None, 'deployment_image_server_url': None}
+        cases = [
+            ('create_functionapp',
+             ['functionapp', 'create', '-g', 'rg', '-n', 'app', '-s', 'sa', '--flexconsumption-location', 'eastus',
+              '--deployment-image', 'myacr.azurecr.io/app:v1@' + _REGISTRY_DIGEST,
+              '--diat', 'userassignedidentity', '--dii', _REGISTRY_IDENTITY],
+             dict(no_auth_fields, deployment_image='myacr.azurecr.io/app:v1@' + _REGISTRY_DIGEST,
+                  deployment_image_auth_type='UserAssignedIdentity', deployment_image_identity=_REGISTRY_IDENTITY)),
+            ('update_deployment_configs',
+             ['functionapp', 'deployment', 'config', 'set', '-g', 'rg', '-n', 'app',
+              '--deployment-image', 'myacr.azurecr.io/app:v1', '--diat', 'basic', '--dius', 'REGISTRY_USERNAME',
+              '--dips', 'REGISTRY_PASSWORD', '--diurl', 'https://myacr.azurecr.io'],
+             dict(no_auth_fields, deployment_image='myacr.azurecr.io/app:v1', deployment_image_auth_type='Basic',
+                  deployment_image_username_setting='REGISTRY_USERNAME',
+                  deployment_image_password_setting='REGISTRY_PASSWORD',
+                  deployment_image_server_url='https://myacr.azurecr.io')),
+        ]
+        for handler, args, expected in cases:
+            with self.subTest(handler), \
+                    mock.patch('azure.cli.command_modules.appservice.custom.' + handler, autospec=True,
+                               return_value={}) as handler_mock, \
+                    mock.patch('azure.cli.command_modules.appservice.commands.validate_is_flex_functionapp'):
+                self.assertEqual(DummyCli().invoke(args, out_file=io.StringIO()), 0)
+                received = handler_mock.call_args.kwargs
+                self.assertEqual({key: received[key] for key in expected}, expected)

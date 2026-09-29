@@ -1770,6 +1770,65 @@ class FunctionAppFlex(LiveScenarioTest):
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
+    def test_functionapp_flex_registry_deployment(self, resource_group, storage_account):
+        # Requires Registry deployment storage to be enabled in the region. The service only stores the
+        # configuration; it doesn't pull the images during these commands.
+        image = 'mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0'
+        digest_image = 'mcr.microsoft.com/azure-functions/dotnet-isolated@sha256:' + 'a' * 64
+        storage = 'properties.functionAppConfig.deployment.storage'
+        identity = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, self.create_random_name('id', 8))).get_output_in_json()
+
+        uai_app = self.create_random_name('functionapp', 40)
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --deployment-image {} '
+                 '--deployment-image-auth-type UserAssignedIdentity --deployment-image-identity {} --assign-identity {}'
+                 .format(resource_group, uai_app, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, image,
+                         identity['id'], identity['id']), checks=[
+                     JMESPathCheck('properties.functionAppConfig.runtime', None),
+                     JMESPathCheck(storage + '.type', 'Registry'),
+                     JMESPathCheck(storage + '.value', image),
+                     JMESPathCheck(storage + '.authentication.type', 'UserAssignedIdentity'),
+                     JMESPathCheck(storage + '.authentication.userAssignedIdentityResourceId', identity['id'])])
+        self.cmd('functionapp deployment config show -g {} -n {}'.format(resource_group, uai_app), checks=[
+            JMESPathCheck('storage.type', 'Registry'),
+            JMESPathCheck('storage.value', image)])
+        self.cmd('functionapp deployment config set -g {} -n {} --deployment-image-auth-type Basic '
+                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD '
+                 '--deployment-image-server-url https://mcr.microsoft.com'.format(resource_group, uai_app), checks=[
+                     JMESPathCheck('storage.value', image),
+                     JMESPathCheck('storage.authentication.type', 'Basic'),
+                     JMESPathCheck('storage.authentication.usernameSettingName', 'REGISTRY_USERNAME'),
+                     JMESPathCheck('storage.authentication.passwordSettingName', 'REGISTRY_PASSWORD'),
+                     JMESPathCheck('storage.authentication.serverUrl', 'https://mcr.microsoft.com'),
+                     JMESPathCheck('storage.authentication.userAssignedIdentityResourceId', None)])
+
+        basic_app = self.create_random_name('functionapp', 40)
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --deployment-image {} --deployment-image-auth-type Basic '
+                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD '
+                 '--deployment-image-server-url https://mcr.microsoft.com'
+                 .format(resource_group, basic_app, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, image), checks=[
+                     JMESPathCheck('properties.functionAppConfig.runtime', None),
+                     JMESPathCheck(storage + '.authentication.type', 'Basic'),
+                     JMESPathCheck(storage + '.authentication.passwordSettingName', 'REGISTRY_PASSWORD'),
+                     JMESPathCheck(storage + '.authentication.serverUrl', 'https://mcr.microsoft.com')])
+
+        blob_app = self.create_random_name('functionapp', 40)
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, blob_app, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        self.cmd('functionapp deployment config set -g {} -n {} --deployment-image {} '
+                 '--deployment-image-auth-type UserAssignedIdentity --deployment-image-identity {}'
+                 .format(resource_group, blob_app, digest_image, identity['id']), checks=[
+                     JMESPathCheck('storage.type', 'Registry'),
+                     JMESPathCheck('storage.value', digest_image),
+                     JMESPathCheck('storage.authentication.userAssignedIdentityResourceId', identity['id']),
+                     JMESPathCheck('storage.authentication.storageAccountConnectionStringName', None)])
+        self.cmd('resource show -g {} -n {} --resource-type Microsoft.Web/sites --api-version 2025-05-01'
+                 .format(resource_group, blob_app), checks=[
+                     JMESPathCheck(storage + '.type', 'Registry'),
+                     JMESPathCheck('properties.functionAppConfig.runtime', None)])
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
     def test_functionapp_flex_vnet_integration(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionapp', 40)

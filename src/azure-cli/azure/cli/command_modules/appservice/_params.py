@@ -19,7 +19,8 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS,
+                         FLEX_REGISTRY_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -1229,6 +1230,23 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
+
+    for scope in ['functionapp create', 'functionapp deployment config set']:
+        with self.argument_context(scope, arg_group='Flex Registry Deployment') as c:
+            c.argument('deployment_image', options_list=['--deployment-image'],
+                       help="Container image for a Flex Consumption app, e.g. `myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`. "
+                       "Saved unchanged as the app's Registry deployment storage; the CLI doesn't validate, resolve, or pull it. Unrelated to legacy Linux container settings.")
+            c.argument('deployment_image_auth_type', options_list=['--deployment-image-auth-type', '--diat'], arg_type=get_enum_type(FLEX_REGISTRY_AUTH_TYPES),
+                       help="How the platform authenticates to the registry: Anonymous (public image), SystemAssignedIdentity, UserAssignedIdentity (requires --deployment-image-identity), "
+                       "or Basic (requires --deployment-image-username-setting and --deployment-image-password-setting). The CLI doesn't assign identities or grant registry access.")
+            c.argument('deployment_image_identity', options_list=['--deployment-image-identity', '--dii'],
+                       help="Resource ID of the user-assigned managed identity used to pull the image. Only valid with UserAssignedIdentity. Saved as provided; the CLI doesn't create, look up, or assign it.")
+            c.argument('deployment_image_username_setting', options_list=['--deployment-image-username-setting', '--dius'],
+                       help="Name of the app setting that stores the registry username. Only valid with Basic.")
+            c.argument('deployment_image_password_setting', options_list=['--deployment-image-password-setting', '--dips'],
+                       help="Name of the app setting that stores the registry password. Only valid with Basic. Pass the app setting name, not the password.")
+            c.argument('deployment_image_server_url', options_list=['--deployment-image-server-url', '--diurl'],
+                       help="Registry server URL for Basic authentication, e.g. `https://myregistry.azurecr.io`. Optional; only valid with Basic.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
