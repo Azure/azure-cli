@@ -515,6 +515,9 @@ def register_container(cmd, client, vault_name, resource_group_name, workload_ty
     if workload_type is None:
         raise RequiredArgumentMissingError(
             "--workload-type is required with --backup-management-type AzureWorkload.")
+    if workload_type.lower() in ["azurefiles", "azurefileshare"]:
+        raise InvalidArgumentValueError(
+            "--workload-type AzureFileShare requires --backup-management-type AzureStorage.")
     if resource_id is None:
         raise RequiredArgumentMissingError(
             "--resource-id is required with --backup-management-type AzureWorkload.")

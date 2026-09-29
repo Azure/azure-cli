@@ -28,6 +28,12 @@ class AfsManagedIdentityTest(unittest.TestCase):
                     Mock(), Mock(), "vault", "rg", "MSSQL",
                     resource_id="resource-id", **arguments)
 
+    def test_register_container_rejects_afs_workload_for_azure_workload(self):
+        with self.assertRaises(InvalidArgumentValueError):
+            custom_base.register_container(
+                Mock(), Mock(), "vault", "rg", "AzureFileShare",
+                resource_id="resource-id")
+
     @patch("azure.cli.command_modules.backup.custom_base.register_wl_container")
     def test_register_container_preserves_azure_workload_default(self, register_wl_container):
         cmd = Mock()
