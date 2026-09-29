@@ -177,6 +177,18 @@ class TestIdentity(unittest.TestCase):
         remove_tokens_for_client_mock.assert_called_once()
         remove_entry_mock.assert_called_with(client_id)
 
+    def test_msal_app_kwargs_verify_default(self):
+        # By default, no 'verify' kwarg is passed to MSAL apps.
+        identity = Identity('https://login.microsoftonline.com')
+        assert 'verify' not in identity._msal_app_kwargs
+
+    def test_msal_app_kwargs_disable_connection_verify(self):
+        # When AZURE_CLI_DISABLE_CONNECTION_VERIFICATION is set, verify=False is passed to MSAL apps
+        # so that login works behind TLS inspection proxies.
+        with mock.patch.dict(os.environ, {"AZURE_CLI_DISABLE_CONNECTION_VERIFICATION": "1"}):
+            identity = Identity('https://login.microsoftonline.com')
+            assert identity._msal_app_kwargs['verify'] is False
+
 
 class TestServicePrincipalAuth(unittest.TestCase):
 
