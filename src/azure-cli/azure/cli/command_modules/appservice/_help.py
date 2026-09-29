@@ -644,6 +644,9 @@ short-summary: Manage a function app's runtime configuration.
 helps['functionapp runtime config set'] = """
 type: command
 short-summary: Update an existing function app's runtime configuration.
+long-summary: >
+    Registry deployment storage has no runtime. Use `az functionapp deployment config set` to update its container
+    image instead. This command updates the runtime for Flex apps using blob container deployment storage.
 examples:
   - name: Set the function app's runtime version.
     text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11

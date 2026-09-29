@@ -4355,14 +4355,10 @@ def _update_flex_registry_deployment_config(cmd, resource_group_name, name, imag
     storage["type"] = "Registry"
     if image is not None:
         storage["value"] = image
-    if authentication is None:
-        # Keep the current mode; GET returns the fields of other modes as null.
-        authentication = {key: value for key, value in storage["authentication"].items() if value is not None}
-    storage["authentication"] = authentication
-    function_app_config.pop("runtime", None)
+    if authentication is not None:
+        storage["authentication"] = authentication
 
-    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp,
-                                     api_version=FLEX_REGISTRY_API_VERSION)
+    result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
     return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
 
 
@@ -4578,8 +4574,21 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp, api_ver
     return response.json()
 
 
+def _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp):
+    function_app_config = functionapp["properties"]["functionAppConfig"]
+    storage = function_app_config["deployment"]["storage"]
+    if _is_flex_registry_storage(storage):
+        # GET may include null fields from other auth modes and a null runtime; Registry PUT must omit them.
+        function_app_config.pop("runtime", None)
+        storage["authentication"] = {key: value for key, value in storage["authentication"].items()
+                                     if value is not None}
+        return update_flex_functionapp(cmd, resource_group_name, name, functionapp,
+                                       api_version=FLEX_REGISTRY_API_VERSION)
+    return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -4587,7 +4596,7 @@ def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
 
-    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
@@ -4602,6 +4611,10 @@ def get_runtime_config(cmd, resource_group_name, name):
 
 def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    storage = functionapp["properties"]["functionAppConfig"]["deployment"]["storage"]
+    if _is_flex_registry_storage(storage):
+        raise ValidationError('Registry deployment storage has no runtime. Use functionapp deployment config set '
+                              'to update the container image.')
 
     runtime_info = _get_functionapp_runtime_info(cmd, resource_group_name, name, None, True)
     runtime = runtime_info['app_runtime']
@@ -4621,7 +4634,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     if functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady") is None:
         functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = []
@@ -4645,7 +4658,7 @@ def update_always_ready_settings(cmd, resource_group_name, name, settings):
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = updated_always_ready_config
 
-    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
@@ -4664,7 +4677,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter "
                                            "--trigger-settings.")
 
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
@@ -4685,7 +4698,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
 
     functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"] = scale_config
 
-    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "scaleAndConcurrency", {})
@@ -4715,7 +4728,7 @@ def set_update_strategy_config(cmd, resource_group_name, name, strategy_type):
             f"Allowed values are: {', '.join(UPDATE_STRATEGY_TYPES)}."
         )
 
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     # Initialize siteUpdateStrategy if it doesn't exist
     if "siteUpdateStrategy" not in functionapp["properties"]["functionAppConfig"]:
@@ -4723,7 +4736,7 @@ def set_update_strategy_config(cmd, resource_group_name, name, strategy_type):
 
     functionapp["properties"]["functionAppConfig"]["siteUpdateStrategy"]["type"] = matched_type
 
-    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+    result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
 
     return result.get("properties", {}).get("functionAppConfig", {}).get(
         "siteUpdateStrategy", {})

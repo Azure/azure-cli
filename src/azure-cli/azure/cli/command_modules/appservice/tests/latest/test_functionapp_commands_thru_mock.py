@@ -30,9 +30,14 @@ from azure.cli.command_modules.appservice.custom import (
     _prepare_flex_deployment_storage_identity,
     revert_flex_migration,
     create_functionapp,
+    delete_always_ready_settings,
     get_deployment_configs,
+    set_update_strategy_config,
     show_functionapp,
-    update_deployment_configs)
+    update_always_ready_settings,
+    update_deployment_configs,
+    update_runtime_config,
+    update_scale_config)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault, HTTPError)
 from azure.cli.core.azclierror import (ResourceNotFoundError, MutuallyExclusiveArgumentError,
@@ -1717,6 +1722,66 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
         self.assertIn('"passwordSettingName": "REGISTRY_PASSWORD"', debug_log)
         self.assertEqual(output.count('"passwordSettingName": "REGISTRY_PASSWORD"'), 3)
         self.assertNotIn(_REGISTRY_SECRET, debug_log + output)
+
+    def test_other_flex_config_writes_preserve_basic_registry_storage(self):
+        cases = [
+            ('scale', update_scale_config, {'maximum_instance_count': 50},
+             'scaleAndConcurrency', 'maximumInstanceCount', 50),
+            ('always-ready set', update_always_ready_settings, {'settings': ['http=2']},
+             'scaleAndConcurrency', 'alwaysReady', [{'name': 'http', 'instanceCount': 2}]),
+            ('always-ready delete', delete_always_ready_settings, {'setting_names': ['http']},
+             'scaleAndConcurrency', 'alwaysReady', []),
+            ('update strategy', set_update_strategy_config, {'strategy_type': 'Recreate'},
+             'siteUpdateStrategy', 'type', 'Recreate'),
+        ]
+        authentication = {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
+                          'passwordSettingName': 'REGISTRY_PASSWORD', 'serverUrl': 'https://myacr.azurecr.io'}
+        for case, update, args, section, field, expected in cases:
+            with self.subTest(case):
+                site = _flex_registry_site()
+                site['properties']['functionAppConfig']['deployment']['storage']['authentication'].update(
+                    authentication, userAssignedIdentityResourceId=None)
+                with _fake_arm(site) as arm:
+                    update(self.cmd, 'rg', 'app', **args)
+                    shown = get_deployment_configs(self.cmd, 'rg', 'app')
+
+                self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01'),
+                                               ('GET', _REGISTRY_SITE, '2025-05-01'),
+                                               ('PUT', _REGISTRY_SITE, '2025-05-01'),
+                                               ('GET', _REGISTRY_SITE, '2023-12-01'),
+                                               ('GET', _REGISTRY_SITE, '2025-05-01')])
+                sent = arm.requests[2][2]['properties']['functionAppConfig']
+                self.assertEqual(sent['deployment']['storage']['authentication'], authentication)
+                self.assertEqual(shown['storage']['authentication'], authentication)
+                self.assertEqual(shown['storage']['value'], 'myacr.azurecr.io/app:v1')
+                self.assertNotIn('runtime', sent)
+                self.assertEqual(sent[section][field], expected)
+                self.assertEqual(sent['unknownFunctionAppConfigProperty'], {'keep': True})
+
+    def test_other_flex_config_writes_keep_blob_requests_unchanged(self):
+        cases = [
+            ('scale', update_scale_config, {'maximum_instance_count': 50}),
+            ('always-ready set', update_always_ready_settings, {'settings': ['http=2']}),
+            ('always-ready delete', delete_always_ready_settings, {'setting_names': ['http']}),
+            ('update strategy', set_update_strategy_config, {'strategy_type': 'Recreate'}),
+        ]
+        for case, update, args in cases:
+            with self.subTest(case):
+                site = _flex_blob_site()
+                with _fake_arm(site) as arm:
+                    update(self.cmd, 'rg', 'app', **args)
+
+                self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01'),
+                                               ('PUT', _REGISTRY_SITE, '2023-12-01')])
+                sent = arm.requests[1][2]['properties']['functionAppConfig']
+                self.assertEqual(sent['deployment'], site['properties']['functionAppConfig']['deployment'])
+                self.assertEqual(sent['runtime'], {'name': 'python', 'version': '3.11'})
+
+    def test_runtime_set_rejects_registry_storage_without_writing(self):
+        with _fake_arm(_flex_registry_site()) as arm, self.assertRaisesRegex(ValidationError, 'Registry.*runtime'):
+            update_runtime_config(self.cmd, 'rg', 'app', runtime_version='3.12')
+
+        self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01')])
 
 
 class TestFlexRegistryCreateMocked(unittest.TestCase):
