@@ -491,6 +491,41 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
                                            resource_id, backup_management_type)
 
 
+def register_container(cmd, client, vault_name, resource_group_name, workload_type,
+                       resource_id=None, backup_management_type="AzureWorkload",
+                       storage_account=None, access_type=None,
+                       mi_system_assigned=None, mi_user_assigned=None, yes=False):
+    if backup_management_type.lower() == "azurestorage":
+        if workload_type is None or workload_type.lower() not in ["azurefiles", "azurefileshare"]:
+            raise InvalidArgumentValueError(
+                "--workload-type AzureFileShare is required with --backup-management-type AzureStorage.")
+        if storage_account is None:
+            raise RequiredArgumentMissingError(
+                "--storage-account is required with --backup-management-type AzureStorage.")
+        if resource_id is not None:
+            raise ArgumentUsageError(
+                "--resource-id is not supported with --backup-management-type AzureStorage.")
+        return custom_afs.register_afs_container(
+            cmd, client, resource_group_name, vault_name, storage_account, access_type,
+            mi_system_assigned, mi_user_assigned, yes)
+
+    if backup_management_type.lower() != "azureworkload":
+        raise InvalidArgumentValueError(
+            "Container registration supports AzureWorkload and AzureStorage backup management types.")
+    if workload_type is None:
+        raise RequiredArgumentMissingError(
+            "--workload-type is required with --backup-management-type AzureWorkload.")
+    if resource_id is None:
+        raise RequiredArgumentMissingError(
+            "--resource-id is required with --backup-management-type AzureWorkload.")
+    if storage_account is not None or access_type is not None or mi_system_assigned or mi_user_assigned:
+        raise ArgumentUsageError(
+            "Azure Files managed identity arguments are only supported with "
+            "--backup-management-type AzureStorage.")
+    return register_wl_container(
+        cmd, client, vault_name, resource_group_name, workload_type, resource_id, backup_management_type)
+
+
 def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type, container_name,
                              backup_management_type="AzureWorkload"):
     return custom_wl.re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type,
@@ -590,15 +625,21 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
-                              azure_file_share):
+                              azure_file_share, access_type=None, mi_system_assigned=None,
+                              mi_user_assigned=None, yes=False):
     return custom_afs.enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, azure_file_share,
-                                                storage_account, policy_name)
+                                                storage_account, policy_name, access_type,
+                                                mi_system_assigned, mi_user_assigned, yes)
 
 
 def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name,
                            restore_mode, resolve_conflict, target_storage_account=None, target_file_share=None,
-                           target_folder=None, target_resource_group_name=None, tenant_id=None,
-                           use_secondary_region=None):
+                           target_folder=None, target_resource_group_name=None, target_subscription_id=None,
+                           mi_system_assigned=None, mi_user_assigned=None, use_secondary_region=None,
+                           tenant_id=None):
+    if mi_system_assigned and mi_user_assigned:
+        raise MutuallyExclusiveArgumentError(
+            "--mi-system-assigned and --mi-user-assigned cannot be used together.")
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -613,13 +654,21 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
                                              resolve_conflict, "FullShareRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
-                                             target_resource_group_name=target_resource_group_name, tenant_id=tenant_id,
-                                             use_secondary_region=use_secondary_region)
+                                             target_resource_group_name=target_resource_group_name,
+                                             target_subscription_id=target_subscription_id,
+                                             mi_system_assigned=mi_system_assigned,
+                                             mi_user_assigned=mi_user_assigned,
+                                             use_secondary_region=use_secondary_region, tenant_id=tenant_id)
 
 
 def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, container_name, item_name, restore_mode,
                        resolve_conflict, target_storage_account=None, target_file_share=None, target_folder=None,
+                       target_resource_group_name=None, target_subscription_id=None,
+                       mi_system_assigned=None, mi_user_assigned=None,
                        source_file_type=None, source_file_path=None, tenant_id=None):
+    if mi_system_assigned and mi_user_assigned:
+        raise MutuallyExclusiveArgumentError(
+            "--mi-system-assigned and --mi-user-assigned cannot be used together.")
     backup_management_type = "AzureStorage"
     workload_type = "AzureFileShare"
     items_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -633,6 +682,10 @@ def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, co
                                              resolve_conflict, "ItemLevelRestore",
                                              target_storage_account_name=target_storage_account,
                                              target_file_share_name=target_file_share, target_folder=target_folder,
+                                             target_resource_group_name=target_resource_group_name,
+                                             target_subscription_id=target_subscription_id,
+                                             mi_system_assigned=mi_system_assigned,
+                                             mi_user_assigned=mi_user_assigned,
                                              source_file_type=source_file_type, source_file_path=source_file_path,
                                              tenant_id=tenant_id)
 
