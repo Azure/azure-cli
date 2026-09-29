@@ -38,7 +38,8 @@ Release History
 
 * `az functionapp flex-migration start/revert`: Add in-place CV1 to Flex Consumption upgrade and revert support (#33863)
 * `az webapp troubleshoot config`: Provide application config evaluation summary (#33709)
-* Prevent access restriction updates from dropping site config (#34050)
+* `az webapp config access-restriction
+`: Prevent access restriction updates from dropping site config (#34050)
 * `az webapp deploy`: Add `--deploymentTag` parameter to give friendly name to deployment (#34134)
 * `az webapp deploy`: Add `--show-secure-build` to deploy and display the secure build summary afterward (#34130)
 * `az webapp secure-build show`: Add `--rescan` to force fresh dependency analysis (#34130)
