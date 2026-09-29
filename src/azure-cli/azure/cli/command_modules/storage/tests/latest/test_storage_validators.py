@@ -204,6 +204,21 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         self.assertFalse(ns.source_is_validated_same_account)
 
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    def test_validate_source_url_requires_valid_account_name_for_same_account(self, _):
+        for account_name in (None, 'same@attacker.example:443/'):
+            with self.subTest(account_name=account_name):
+                ns = Namespace(
+                    source_url=None, source_sas=None, source_container='src', source_blob='input',
+                    source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+                    source_account_name=account_name, source_account_key=None, token_credential=None,
+                    account_name=account_name, account_key='key', sas_token=None,
+                    container_name='dst', share_name=None)
+
+                validate_source_url(MockCmd(self.cli), ns)
+
+                self.assertFalse(ns.source_is_validated_same_account)
+
     def test_get_not_none_validator(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from knack.arguments import CLICommandArgument, CLIArgumentType
