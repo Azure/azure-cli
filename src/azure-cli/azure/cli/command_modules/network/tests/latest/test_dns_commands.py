@@ -5,6 +5,11 @@
 
 import os
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+from tempfile import TemporaryDirectory
+from types import SimpleNamespace
+from unittest.mock import Mock, call, patch
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
@@ -822,6 +827,304 @@ class DnsParseZoneFiles(unittest.TestCase):
         for f in ['fail1', 'fail2', 'fail3', 'fail4', 'fail5']:
             with self.assertRaises(CLIError):
                 self._get_zone_object('{}.txt'.format(f), 'example.com')
+
+
+class DnsZoneExportTest(unittest.TestCase):
+
+    def setUp(self):
+        from azure.cli.command_modules.network import custom
+
+        self.custom = custom
+        self.cmd = SimpleNamespace(cli_ctx=object())
+        self.resource_group = 'dns-test-rg'
+        self.zone_name = 'example.com'
+        self.soa = self._record_set('@', 'SOA', 3600, SOARecord={
+            'host': 'ns1.example.net.',
+            'email': 'hostmaster.example.com.',
+            'serialNumber': 1,
+            'refreshTime': 3600,
+            'retryTime': 300,
+            'expireTime': 2419200,
+            'minimumTTL': 300,
+        })
+
+    @staticmethod
+    def _record_set(name, record_type, ttl, **properties):
+        return {
+            'name': name,
+            'type': 'Microsoft.Network/dnszones/{}'.format(record_type),
+            'TTL': ttl,
+            'targetResource': {},
+            **properties,
+        }
+
+    def _export(self, record_sets, file_name=None):
+        with patch.object(self.custom, '_DNSRecordSetListByZone') as list_records, \
+                redirect_stdout(StringIO()) as stdout:
+            # The AAZ helper can return a one-shot iterator rather than a list.
+            list_records.return_value.return_value = iter([self.soa, *record_sets])
+            self.custom.export_zone(self.cmd, self.resource_group, self.zone_name, file_name)
+
+        list_records.assert_called_once_with(cli_ctx=self.cmd.cli_ctx)
+        list_records.return_value.assert_called_once_with(command_args={
+            'resource_group': self.resource_group,
+            'zone_name': self.zone_name,
+        })
+        console = stdout.getvalue()
+        if file_name:
+            with open(file_name) as zone_file:
+                content = zone_file.read()
+            self.assertEqual(console, content + '\n')
+        else:
+            self.assertTrue(console.endswith('\n'))
+            content = console[:-1]
+        self.assertIn('$TTL 300\n', content)
+        self.assertIn('$ORIGIN example.com.\n', content)
+        return content
+
+    @staticmethod
+    def _record_lines(content):
+        return [
+            line for line in content.splitlines()
+            if ' IN SOA ' not in line and (' IN ' in line or ' AZURE ALIAS ' in line)
+        ]
+
+    def _import(self, file_name):
+        commands = {record_type: Mock() for record_type in ('soa', 'txt', 'a', 'aaaa', 'cname')}
+        with patch.object(self.custom, '_DNSZoneCreate') as create_zone, \
+                patch.object(self.custom, 'DNSRecordSetSOAShow') as show_soa, \
+                patch.object(self.custom, '_record_create_func', side_effect=commands.__getitem__), \
+                redirect_stderr(StringIO()):
+            show_soa.return_value.return_value = self.soa
+            self.custom.import_zone(self.cmd, self.resource_group, self.zone_name, file_name)
+
+        create_zone.assert_called_once_with(cli_ctx=self.cmd.cli_ctx)
+        create_zone.return_value.assert_called_once_with(command_args={
+            'resource_group': self.resource_group,
+            'zone_name': self.zone_name,
+            'location': 'global',
+        })
+        show_soa.assert_called_once_with(cli_ctx=self.cmd.cli_ctx)
+        show_soa.return_value.assert_called_once_with(command_args={
+            'resource_group': self.resource_group,
+            'zone_name': self.zone_name,
+        })
+        requests = {}
+        for record_type, command in commands.items():
+            calls = command.return_value.call_args_list
+            self.assertEqual(command.call_args_list, [call(cli_ctx=self.cmd.cli_ctx)] * len(calls))
+            for request in calls:
+                arguments = request.kwargs['command_args']
+                key = (record_type, arguments['name'])
+                self.assertNotIn(key, requests)
+                requests[key] = arguments
+        return requests
+
+    def _import_args(self, name, ttl, **properties):
+        return {
+            'resource_group': self.resource_group,
+            'zone_name': self.zone_name,
+            'name': name,
+            'ttl': ttl,
+            'target_resource': None,
+            'traffic_management_profile': None,
+            **properties,
+        }
+
+    def test_export_empty_txt_collections(self):
+        cases = [
+            ('missing', '@', 0, {}, '  0 IN TXT ""'),
+            ('null', 'null', 60, {'TXTRecords': None}, 'null 60 IN TXT ""'),
+            ('empty', 'empty', 120, {'TXTRecords': []}, 'empty 120 IN TXT ""'),
+            ('empty-string', 'value', 180, {'TXTRecords': [{'value': ['']}]}, 'value 180 IN TXT ""'),
+        ]
+        with TemporaryDirectory() as directory:
+            for label, name, ttl, properties, expected_line in cases:
+                for to_file in (False, True):
+                    with self.subTest(collection=label, file_output=to_file):
+                        file_name = os.path.join(directory, 'zone.txt') if to_file else None
+                        content = self._export([self._record_set(name, 'TXT', ttl, **properties)], file_name)
+                        self.assertEqual(self._record_lines(content), [expected_line])
+                        zone = parse_zone_file(content, self.zone_name)
+                        fqdn = 'example.com.' if name == '@' else '{}.example.com.'.format(name)
+                        self.assertEqual(zone[fqdn]['txt'], [{
+                            'name': name,
+                            'ttl': ttl,
+                            'class': 'IN',
+                            'delim': 'TXT',
+                            'txt': [''],
+                        }])
+
+    def test_export_valid_txt_values(self):
+        chunks = ['a' * 255, 'b' * 255, 'tail']
+        cases = [
+            ('single', 60, [{'value': ['hello world']}],
+             ['single 60 IN TXT "hello world"'], [['hello world']]),
+            ('joined', 120, [{'value': ['hello ', 'world']}],
+             ['joined 120 IN TXT "hello world"'], [['hello world']]),
+            ('multi', 180, [{'value': ['first']}, {'value': ['second ', 'record']}],
+             ['multi 180 IN TXT "first"', '      180 IN TXT "second record"'],
+             [['first'], ['second record']]),
+            ('punctuation', 240, [{'value': ['-quoted "value"; suffix']}],
+             [r'punctuation 240 IN TXT "-quoted \"value\"; suffix"'], [[r'-quoted \"value\"; suffix']]),
+            ('escaped', 300, [{'value': [r'-quoted \"value\"; suffix']}],
+             [r'escaped 300 IN TXT "-quoted \"value\"; suffix"'], [[r'-quoted \"value\"; suffix']]),
+            ('mixed', 360, [{'value': ['text']}, {'value': ['']}, {'value': ['EMPTY']}],
+             ['mixed 360 IN TXT "text"', '      360 IN TXT ""', '      360 IN TXT "EMPTY"'],
+             [['text'], [''], ['EMPTY']]),
+            ('long', 420, [{'value': chunks}],
+             ['long 420 IN TXT "{}"'.format('a' * 255 + 'b' * 255 + 'tail')], [chunks]),
+        ]
+        for name, ttl, records, expected_lines, expected_values in cases:
+            with self.subTest(name=name):
+                content = self._export([self._record_set(name, 'TXT', ttl, TXTRecords=records)])
+                self.assertEqual(self._record_lines(content), expected_lines)
+                zone = parse_zone_file(content, self.zone_name)
+                self.assertEqual(
+                    [(record['name'], record['ttl'], record['txt'])
+                     for record in zone['{}.example.com.'.format(name)]['txt']],
+                    [(name, ttl, value) for value in expected_values],
+                )
+
+    def test_parse_empty_txt_fragments_and_naptr_regexp(self):
+        # Use raw fragments since export joins TXT values before serializing.
+        content = self._export([]) + '\n' + '\n'.join([
+            'fragments 60 IN TXT "" "text"',
+            ' 60 IN TXT "text" ""',
+            ' 60 IN TXT "" "EMPTY" ""',
+            ' 60 IN TXT "" ""',
+            'lower in txt ""',
+            ' in txt EMPTY',
+            # TXT as an owner or service must not select TXT empty-string handling.
+            'TXT 300 IN NAPTR 10 20 "A" "TXT" "" target.example.net.',
+            ' 300 IN NAPTR 20 20 "A" "TXT" EMPTY target.example.net.',
+        ])
+        zone = parse_zone_file(content, self.zone_name)
+        self.assertEqual(
+            [record['txt'] for record in zone['fragments.example.com.']['txt']],
+            [['text'], ['text'], ['EMPTY'], ['']],
+        )
+        self.assertEqual(
+            [(record['name'], record['ttl'], record['txt'])
+             for record in zone['lower.example.com.']['txt']],
+            [('lower', 300, ['']), ('lower', 300, ['EMPTY'])],
+        )
+        self.assertEqual(
+            [(record['flags'], record['services'], record['regexp'], record['replacement'])
+             for record in zone['TXT.example.com.']['naptr']],
+            [('A', 'TXT', '', 'target.example.net.')] * 2,
+        )
+
+    def test_export_mixed_records_and_import_supported_types(self):
+        txt_records = [
+            self._record_set('text', 'TXT', 300, TXTRecords=[{'value': ['valid text']}]),
+            self._record_set('empty-txt', 'TXT', 0, TXTRecords=[]),
+        ]
+        ordinary = [
+            self._record_set('ipv4', 'A', 120, ARecords=[{'ipv4Address': '192.0.2.10'}]),
+            self._record_set('ipv6', 'AAAA', 180, AAAARecords=[{'ipv6Address': '2001:db8::10'}]),
+            self._record_set('cname', 'CNAME', 240, CNAMERecord={'cname': 'target.example.net'}),
+        ]
+        empty = [
+            self._record_set('empty-a', 'A', 60, ARecords=[]),
+            self._record_set('empty-aaaa', 'AAAA', 60, AAAARecords=None),
+            self._record_set('empty-cname', 'CNAME', 60, CNAMERecord=None),
+        ]
+        resource_prefix = (
+            '/subscriptions/00000000-0000-0000-0000-000000000000'
+            '/resourceGroups/dns-test-rg/providers/Microsoft.Network/'
+        )
+        alias_targets = {
+            'A': resource_prefix + 'publicIPAddresses/ipv4',
+            'AAAA': resource_prefix + 'publicIPAddresses/ipv6',
+            'CNAME': resource_prefix + 'trafficManagerProfiles/profile',
+        }
+        aliases = [
+            self._record_set('alias-{}'.format(record_type.lower()), record_type, 600,
+                             targetResource={'id': resource_id})
+            for record_type, resource_id in alias_targets.items()
+        ]
+        expected_lines = [
+            'text 300 IN TXT "valid text"',
+            'empty-txt 0 IN TXT ""',
+            'ipv4 120 IN A 192.0.2.10',
+            'ipv6 180 IN AAAA 2001:db8::10',
+            'cname 240 IN CNAME target.example.net.',
+            'empty-a 60 IN A ',
+            'empty-aaaa 60 IN AAAA ',
+            'empty-cname 60 IN CNAME ',
+        ] + [
+            'alias-{} 600 AZURE ALIAS {} {}'.format(record_type.lower(), record_type, resource_id)
+            for record_type, resource_id in alias_targets.items()
+        ]
+        content = self._export(txt_records + ordinary + empty + aliases)
+        self.assertEqual(self._record_lines(content), expected_lines)
+
+        # Empty address/CNAME fields have existing parser limitations. Round-trip
+        # the supported types separately without changing those representations.
+        with TemporaryDirectory() as directory:
+            file_name = os.path.join(directory, 'zone.txt')
+            self._export([txt_records[0], *ordinary, *aliases], file_name)
+            imported = self._import(file_name)
+        expected = {
+            ('txt', 'text'): self._import_args('text', 300, txt_records=[{'value': ['valid text']}]),
+            ('a', 'ipv4'): self._import_args('ipv4', 120, a_records=[{'ipv4_address': '192.0.2.10'}]),
+            ('aaaa', 'ipv6'): self._import_args('ipv6', 180, aaaa_records=[{'ipv6_address': '2001:db8::10'}]),
+            ('cname', 'cname'): self._import_args('cname', 240, cname_record={'cname': 'target.example.net.'}),
+        }
+        for record_type, resource_id in alias_targets.items():
+            name = 'alias-{}'.format(record_type.lower())
+            expected[(record_type.lower(), name)] = self._import_args(name, 600, target_resource=resource_id)
+        self.assertEqual(set(imported), set(expected) | {('soa', '@')})
+        for key, arguments in expected.items():
+            with self.subTest(record=key):
+                self.assertEqual(imported[key], arguments)
+
+    def test_export_import_and_reexport_txt(self):
+        chunks = ['a' * 255, 'b' * 255, 'tail']
+        records = [
+            self._record_set('@', 'TXT', 0),
+            self._record_set('null', 'TXT', 60, TXTRecords=None),
+            self._record_set('empty', 'TXT', 120, TXTRecords=[]),
+            self._record_set('value', 'TXT', 180, TXTRecords=[{'value': ['']}]),
+            self._record_set('joined', 'TXT', 240, TXTRecords=[{'value': ['hello ', 'world']}]),
+            self._record_set('multi', 'TXT', 300, TXTRecords=[{'value': ['first']}, {'value': ['second']}]),
+            self._record_set('mixed', 'TXT', 360, TXTRecords=[
+                {'value': ['text']}, {'value': ['']}, {'value': ['EMPTY']},
+            ]),
+            self._record_set('long', 'TXT', 420, TXTRecords=[{'value': chunks}]),
+        ]
+        expected = {
+            '@': (0, [{'value': ['']}]),
+            'null': (60, [{'value': ['']}]),
+            'empty': (120, [{'value': ['']}]),
+            'value': (180, [{'value': ['']}]),
+            'joined': (240, [{'value': ['hello world']}]),
+            'multi': (300, [{'value': ['first']}, {'value': ['second']}]),
+            'mixed': (360, [{'value': ['text']}, {'value': ['']}, {'value': ['EMPTY']}]),
+            'long': (420, [{'value': chunks}]),
+        }
+        with TemporaryDirectory() as directory:
+            file_name = os.path.join(directory, 'zone.txt')
+            content = self._export(records, file_name)
+            imported = self._import(file_name)
+        self.assertEqual(set(imported), {('soa', '@')} | {('txt', name) for name in expected})
+        for name, (ttl, values) in expected.items():
+            with self.subTest(name=name):
+                self.assertEqual(imported[('txt', name)], self._import_args(name, ttl, txt_records=values))
+
+        imported_txt = [
+            self._record_set(arguments['name'], 'TXT', arguments['ttl'], TXTRecords=arguments['txt_records'])
+            for (record_type, _), arguments in imported.items() if record_type == 'txt'
+        ]
+        reexported = self._export(imported_txt)
+        self.assertEqual(self._record_lines(reexported), self._record_lines(content))
+
+    def test_export_malformed_nonempty_txt_is_not_masked(self):
+        record = self._record_set('malformed', 'TXT', 60, TXTRecords=[{}])
+        with self.assertRaises(KeyError) as error:
+            self._export([record])
+        self.assertEqual(error.exception.args, ('value',))
 
 
 if __name__ == '__main__':
