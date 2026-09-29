@@ -31,6 +31,7 @@ from azure.cli.command_modules.appservice.custom import (
     revert_flex_migration,
     create_functionapp,
     get_deployment_configs,
+    show_functionapp,
     update_deployment_configs)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault, HTTPError)
@@ -1463,6 +1464,8 @@ def _flex_blob_site():
         'tags': {'team': 'functions'},
         'properties': {
             'sku': 'FlexConsumption',
+            'serverFarmId': '/subscriptions/{}/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'.format(
+                _REGISTRY_SUBSCRIPTION),
             'unknownSiteProperty': {'keep': True},
             'functionAppConfig': {
                 'deployment': {
@@ -1520,7 +1523,8 @@ def _with_registry_storage(site, storage):
 class _FakeArmSite:
     """Stands in for ARM behind requests.Session.send, so the real send_raw_request builds, sends and logs requests.
 
-    Stores one site, echoes accepted PUT bodies, and serves a sentinel secret from the app settings endpoint.
+    Stores one site, echoes accepted PUT bodies, serves a sentinel secret from the app settings endpoint, and leaves
+    the Registry authentication fields out of GET responses for API versions older than 2025-05-01.
     """
 
     def __init__(self, site, put_error=None):
@@ -1535,6 +1539,12 @@ class _FakeArmSite:
         status, payload = 200, self.site
         if '/config/appsettings/list' in request.url:
             payload = {'properties': {'REGISTRY_PASSWORD': _REGISTRY_SECRET}}
+        elif request.method == 'GET' and 'api-version=2025-05-01' not in request.url:
+            # Only 2025-05-01 publishes the Registry authentication fields, so older versions may omit them.
+            payload = json.loads(json.dumps(self.site))
+            authentication = payload['properties']['functionAppConfig']['deployment']['storage']['authentication']
+            for field in ('usernameSettingName', 'passwordSettingName', 'serverUrl'):
+                authentication.pop(field, None)
         elif request.method == 'PUT':
             if self.put_error:
                 status, payload = 400, self.put_error
@@ -1567,7 +1577,8 @@ def _fake_arm(site, put_error=None):
 
 
 class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
-    """`functionapp deployment config set/show` with Registry storage, asserted on the HTTP requests sent to ARM."""
+    """`functionapp deployment config set/show` and `functionapp show` with Registry storage, asserted on the HTTP
+    requests sent to ARM."""
 
     def setUp(self):
         self.cmd = _get_test_cmd()
@@ -1599,10 +1610,32 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
 
                 self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2025-05-01'),
                                                ('PUT', _REGISTRY_SITE, '2025-05-01'),
+                                               ('GET', _REGISTRY_SITE, '2023-12-01'),
                                                ('GET', _REGISTRY_SITE, '2025-05-01')])
                 self.assertEqual(arm.requests[1][2], _with_registry_storage(_flex_blob_site(), storage))
                 self.assertEqual(result, {'storage': storage})
                 self.assertEqual(shown, {'storage': storage})
+
+    def test_show_reads_registry_apps_with_the_registry_api_version_and_blob_apps_unchanged(self):
+        registry_deployment = _flex_registry_site()['properties']['functionAppConfig']['deployment']
+        blob_deployment = _flex_blob_site()['properties']['functionAppConfig']['deployment']
+        cases = [
+            ('functionapp show, Registry', show_functionapp, _flex_registry_site,
+             ['2023-12-01', '2023-12-01', '2025-05-01'], _flex_registry_site()),
+            ('functionapp show, blob', show_functionapp, _flex_blob_site,
+             ['2023-12-01', '2023-12-01'], _flex_blob_site()),
+            ('deployment config show, Registry', get_deployment_configs, _flex_registry_site,
+             ['2023-12-01', '2025-05-01'], registry_deployment),
+            ('deployment config show, blob', get_deployment_configs, _flex_blob_site,
+             ['2023-12-01'], blob_deployment),
+        ]
+        for case, show, site, api_versions, expected in cases:
+            with self.subTest(case):
+                with _fake_arm(site()) as arm:
+                    result = show(self.cmd, 'rg', 'app')
+
+                self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, version) for version in api_versions])
+                self.assertEqual(result, expected)
 
     def test_set_on_registry_app_keeps_the_unspecified_image_or_authentication(self):
         cases = [
@@ -1654,31 +1687,36 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
                     update_deployment_configs(self.cmd, 'rg', 'app', **args)
                 self.assertNotIn('PUT', [method for method, _, _ in arm.requests])
 
-    def test_set_surfaces_field_scoped_service_rejection_after_a_single_write(self):
+    def test_set_surfaces_service_rejection_and_show_confirms_the_previous_config(self):
         # The CLI doesn't parse image references; the service rejects invalid ones with a field-scoped error.
         field_error = {'Code': 'BadRequest', 'Message': 'The parameter Site.FunctionAppConfig.Deployment.Storage.Value '
                                                         'has an invalid value.'}
-        with _fake_arm(_flex_blob_site(), put_error=field_error) as arm, self.assertRaises(HTTPError) as error:
-            update_deployment_configs(self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/App:Latest!',
-                                      deployment_image_auth_type='Anonymous')
+        with _fake_arm(_flex_registry_site(), put_error=field_error) as arm:
+            with self.assertRaises(HTTPError) as error:
+                update_deployment_configs(self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/App:Latest!')
+            shown = get_deployment_configs(self.cmd, 'rg', 'app')
 
         self.assertIn('Site.FunctionAppConfig.Deployment.Storage.Value', str(error.exception))
-        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT', 'GET', 'GET'])
         self.assertEqual(arm.requests[1][2]['properties']['functionAppConfig']['deployment']['storage']['value'],
                          'myacr.azurecr.io/App:Latest!')
+        self.assertEqual(shown, _flex_registry_site()['properties']['functionAppConfig']['deployment'])
 
-    def test_set_debug_log_shows_setting_names_but_never_registry_secrets(self):
-        with _fake_arm(_flex_blob_site()) as arm, \
+    def test_set_and_show_log_setting_names_but_never_registry_secrets(self):
+        with _fake_arm(_flex_blob_site()), \
                 self.assertLogs('cli.azure.cli.core.util', level='DEBUG') as logs:
-            result = update_deployment_configs(
-                self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/app:v1', deployment_image_auth_type='Basic',
-                deployment_image_username_setting='REGISTRY_USERNAME',
-                deployment_image_password_setting='REGISTRY_PASSWORD')
+            outputs = [
+                update_deployment_configs(
+                    self.cmd, 'rg', 'app', deployment_image='myacr.azurecr.io/app:v1',
+                    deployment_image_auth_type='Basic', deployment_image_username_setting='REGISTRY_USERNAME',
+                    deployment_image_password_setting='REGISTRY_PASSWORD'),
+                get_deployment_configs(self.cmd, 'rg', 'app'),
+                show_functionapp(self.cmd, 'rg', 'app')]
 
-        debug_log = '\n'.join(logs.output)
+        debug_log, output = '\n'.join(logs.output), json.dumps(outputs)
         self.assertIn('"passwordSettingName": "REGISTRY_PASSWORD"', debug_log)
-        self.assertNotIn(_REGISTRY_SECRET, debug_log + json.dumps(result))
-        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+        self.assertEqual(output.count('"passwordSettingName": "REGISTRY_PASSWORD"'), 3)
+        self.assertNotIn(_REGISTRY_SECRET, debug_log + output)
 
 
 class TestFlexRegistryCreateMocked(unittest.TestCase):
@@ -1724,6 +1762,9 @@ class TestFlexRegistryCreateMocked(unittest.TestCase):
                                        'authentication': {'type': 'SystemAssignedIdentity'}}},
             'scaleAndConcurrency': {'maximumInstanceCount': 100, 'instanceMemoryMB': 2048, 'alwaysReady': []}
         })
+        # None of the legacy Linux-container markers: container kind, linuxFxVersion or DOCKER_* app settings.
+        self.assertEqual(site['kind'], 'functionapp,linux')
+        self.assertNotIn('linuxFxVersion', site['properties']['siteConfig'])
         self.assertEqual([setting['name'] for setting in site['properties']['siteConfig']['appSettings']],
                          ['AzureWebJobsStorage'])
         self.runtime_helper.assert_not_called()

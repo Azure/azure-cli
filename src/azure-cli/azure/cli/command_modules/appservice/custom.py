@@ -1729,6 +1729,15 @@ def _is_flex_registry_storage(deployment_storage):
     return (deployment_storage.get("type") or "").lower() == "registry"
 
 
+def _get_raw_flex_functionapp(cli_ctx, resource_group_name, name):
+    # Registry apps are re-read with the API version that publishes the Registry contract; other apps are unchanged.
+    functionapp = get_raw_functionapp(cli_ctx, resource_group_name, name)
+    function_app_config = functionapp.get("properties", {}).get("functionAppConfig") or {}
+    if _is_flex_registry_storage((function_app_config.get("deployment") or {}).get("storage") or {}):
+        functionapp = get_raw_functionapp(cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
+    return functionapp
+
+
 def _build_flex_registry_authentication(auth_type, identity=None, username_setting=None, password_setting=None,
                                         server_url=None):
     """Return the Registry authentication object for exactly one mode, or None when no auth argument is given."""
@@ -2884,7 +2893,7 @@ def list_function_app(cmd, resource_group_name=None):
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
     if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
-        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+        return _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -4214,7 +4223,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 
 def get_deployment_configs(cmd, resource_group_name, name):
-    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
+    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "deployment", {})
 

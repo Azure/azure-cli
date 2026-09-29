@@ -622,6 +622,10 @@ examples:
 helps['functionapp deployment config show'] = """
 type: command
 short-summary: Get the details of a function app's deployment configuration.
+long-summary: >
+    For Registry deployment storage, shows the image reference and authentication type, with the user-assigned
+    identity resource ID or the names of the app settings that hold Basic credentials. Credential values aren't
+    retrieved or shown.
 examples:
   - name: Get the details of a function app's deployment configuration.
     text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
@@ -796,7 +800,7 @@ examples:
   - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
-  - name: Create a flex consumption function app that runs a container image from Azure Container Registry, pulled with the app's system-assigned identity. The service accepting the configuration doesn't prove that the image can be pulled.
+  - name: Create a flex consumption function app that runs a container image from Azure Container Registry, pulled with the app's system-assigned identity. The service accepting the configuration doesn't prove that the registry is reachable, that access is authorized, or that deployment succeeds.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type SystemAssignedIdentity --assign-identity [system] --role AcrPull --scope /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ContainerRegistry/registries/myregistry
 """
