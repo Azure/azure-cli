@@ -113,11 +113,18 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 def validate_asp_create(namespace):
     validate_tags(namespace)
     # is_linux is None when not explicitly provided by the user (default).
-    # Resolve the default: Linux unless --hyper-v is specified.
+    # Resolve the default: Linux unless a Windows-only plan type is specified.
+    if namespace.hyper_v and namespace.is_managed_instance:
+        raise MutuallyExclusiveArgumentError(
+            '--hyper-v and --is-managed-instance cannot be used together because Windows Containers '
+            'are not supported in Managed Instance on Azure App Service.')
     if namespace.is_linux is None:
-        namespace.is_linux = not namespace.hyper_v
-    elif namespace.is_linux and namespace.hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux true and --hyper-v cannot be used together.')
+        namespace.is_linux = not (namespace.hyper_v or namespace.is_managed_instance)
+    elif namespace.is_linux and (namespace.hyper_v or namespace.is_managed_instance):
+        windows_plan_argument = '--hyper-v' if namespace.hyper_v else '--is-managed-instance'
+        raise MutuallyExclusiveArgumentError(
+            '{} creates a Windows plan and cannot be combined with --is-linux true. '
+            'Omit --is-linux or use "--is-linux false".'.format(windows_plan_argument))
     if namespace.sku is None:
         if namespace.is_linux:
             namespace.sku = 'P0V3'
