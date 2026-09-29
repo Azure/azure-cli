@@ -55,8 +55,6 @@ Release History
 * `az backup vault update`: Add `--source-scan-state` to configure Microsoft Defender for Cloud Source Scan (#34076)
 * `az backup item source-scan-configuration set`: Add support for enabling or disabling Source Scan for Azure VM backup items (#34076)
 * `az backup restore files mount-rp`: Fetch ILR mount scripts via dedicated list action (#34073)
-* `az backup container register`: Add managed identity support for Azure Files backup (#34109)
-* `az backup container register`: Revert managed identity support for Azure Files backup (#34142)
 
 **Compute**
 
