@@ -559,7 +559,7 @@ jobs:
   - bash: |
       set -e
       python -m pip install docutils requests packaging tomli
-      python -B -m unittest discover -s tools/automation/tests -t tools -p test_packaging_migration.py -v
+      python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
       python -B scripts/ci/check_package_versions.py
     displayName: Validate source metadata and packaging automation
 
