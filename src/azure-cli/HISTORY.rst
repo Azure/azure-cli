@@ -74,7 +74,6 @@ Release History
 
 **Network**
 
-* Fix #33981: `az network application-gateway`: Incorrect GET operation API version (#33999)
 * `az network route-table route`: Support ECMP routing in route tables (#33493)
 * `az network first-party-service-tag`: Add support for First Party Service Tags (#34081)
 * `az network application-gateway ssl-profile add/update`: Expose `--auth-configuration` to support mTLS `verify-client-auth-mode=Passthrough|Strict` (#34090)
