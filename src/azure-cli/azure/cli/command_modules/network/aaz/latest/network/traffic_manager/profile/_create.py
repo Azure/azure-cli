@@ -18,16 +18,16 @@ class Create(AAZCommand):
     """Create a Traffic Manager profile.
 
     :example: Create a traffic manager profile with performance routing.
-        az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
+        az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/" --record-type A
 
     :example: Create a traffic manager profile.
-        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{name:foo,value:bar}] --status-code-ranges [{min:200,max:202}] --path "/"
+        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{name:foo,value:bar}] --status-code-ranges [{min:200,max:202}] --path "/" --record-type A
     """
 
     _aaz_info = {
-        "version": "2024-04-01-preview",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2026-09-01"],
         ]
     }
 
@@ -184,7 +184,7 @@ class Create(AAZCommand):
         _args_schema.record_type = AAZStrArg(
             options=["--record-type"],
             arg_group="Properties",
-            help="When record type is set, a traffic manager profile will allow only endpoints that match this type.",
+            help="When record type is set, a traffic manager profile will allow only endpoints that match this type. If it is not set, traffic manager profile will allow adding all types of endpoints. It is returned as null when this is not set.",
             enum={"A": "A", "AAAA": "AAAA", "CNAME": "CNAME"},
         )
         _args_schema.routing_method = AAZStrArg(
@@ -260,7 +260,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-04-01-preview",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
