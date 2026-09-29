@@ -39,6 +39,86 @@ Periodically run the following to ensure your extension will pass CI:
 
 Address comments as appropriate and consult the Azure CLI team if something is unclear.
 
+#### Validating extension dependency installation
+
+On Windows, `az extension add` and `az extension update` prefer compatible dependency
+wheels over newer source distributions. The selected versions must still satisfy
+the extension's requirements and the running Python's compatibility tags. This
+does not pin dependencies or disable pip's build isolation. Linux and macOS retain
+pip's default selection behavior.
+
+The Windows packages use embedded Python with a `python*._pth` file. This file
+disables environment-based Python path configuration, including the `PYTHONPATH`
+that pip uses to expose an isolated build environment. Consequently, a source
+distribution can fail with `BackendUnavailable` even after pip successfully
+installs its build backend. Installing that backend globally is not a substitute
+for build isolation. Prefer an available compatible wheel; an explicit source
+requirement or a dependency with no compatible wheel can still require a
+source-build-capable Python installation and the package's native build tools.
+
+In a configured development checkout with pip and a source-build-capable Python
+installation, run the offline installer regressions:
+
+```bash
+python -m pytest \
+  src/azure-cli-core/azure/cli/core/tests/test_extension_pip.py \
+  src/azure-cli/azure/cli/command_modules/extension/tests/latest/test_extension_install.py
+```
+
+These tests use local package fixtures and real pip subprocesses, including an
+embedded-style interpreter with a retained `_pth` file. They cover wheel selection,
+supported isolated source builds, and installation failures without contacting
+PyPI or Azure. The copied-interpreter case requires CPython 3.11 or later on Linux
+or Windows, with a standalone CPython DLL layout on Windows; it is skipped on
+other hosts. This case reproduces path isolation, not the complete packaged
+Windows runtime.
+The existing broader selectors are
+`src/azure-cli-core/azure/cli/core/tests/test_extension.py` and
+`src/azure-cli-core/azure/cli/core/extension/tests/latest/test_extension_commands.py`.
+The command-module test selector is `extension`; the core selector is
+`azure-cli-core`. Repository validation also includes:
+
+```bash
+azdev style extension azure-cli-core
+azdev linter extension
+azdev test extension azure-cli-core --series
+```
+
+For Windows release validation, use clean x86 and x64 candidate MSI installations
+and the x64 ZIP package. First run `az --version` and the bundled interpreter's
+`-m pip debug --verbose` to capture the actual Python version, architecture, pip
+version, and supported wheel tags. Do not infer architecture from the installation
+directory. For example, the report in [#34062](https://github.com/Azure/azure-cli/issues/34062)
+identifies 32-bit Python explicitly; cryptography 50.0.1 publishes Windows wheels
+for `win_amd64`, not `win32`.
+
+In a temporary PowerShell session, use a separate extension directory:
+
+```powershell
+$previousExtensionDir = $env:AZURE_EXTENSION_DIR
+$testExtensionDir = Join-Path $env:TEMP ("az-extension-" + [guid]::NewGuid())
+try {
+    $env:AZURE_EXTENSION_DIR = $testExtensionDir
+    az extension add --name k8s-extension --version 1.8.0 --debug
+    if ($LASTEXITCODE -ne 0) { throw "Extension installation failed" }
+    az extension show --name k8s-extension
+    if ($LASTEXITCODE -ne 0) { throw "Installed extension was not found" }
+    az k8s-extension --help
+    if ($LASTEXITCODE -ne 0) { throw "Installed extension could not load" }
+} finally {
+    $env:AZURE_EXTENSION_DIR = $previousExtensionDir
+    if (Test-Path $testExtensionDir) { Remove-Item -Recurse -Force $testExtensionDir }
+}
+```
+
+Inspect the pip debug output for the selected dependency artifacts. Also exercise
+an update and a system installation on disposable Windows installations. The
+offline tests do not validate native compilation, packaged Windows DLL loading,
+or current package-index contents. In particular, wheel preference cannot supply
+a wheel that a dependency has not published. Candidate-package Windows runs and
+repository CI remain required; this local installation smoke test needs network
+access but does not provision Azure resources.
+
 ### Publish
 
 **For the extension whose source code is hosted in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)**, we will release for you once your code is merged into `main` branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/main/src/index.json) manually in this case.
