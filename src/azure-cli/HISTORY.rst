@@ -68,6 +68,10 @@ Release History
 * `az sig image-version delete`: Add new parameter `--bypass-soft-delete` to support bypass-delete (#34107)
 * `az sig image-version list-soft-deleted`: Add new command to support soft-delete recycle-bin listing (#34107)
 
+**Key Vault**
+
+* `az keyvault ekm-connection`: Remove preview status (#34095)
+
 **MySQL**
 
 * `az mysql flexible-server upgrade`: Fix deserialization problem (#34027)
