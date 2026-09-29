@@ -43,6 +43,11 @@ def _query_account_key(cli_ctx, account_name):
     return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys_property[0].value  # pylint: disable=no-member
 
 
+def _is_valid_storage_account_name(account_name):
+    import re
+    return bool(account_name and re.fullmatch(r'[a-z0-9]{3,24}', account_name))
+
+
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
     scf = storage_client_factory(cli_ctx)
@@ -488,7 +493,8 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
             except ValueError:
                 raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
 
-    ns['source_is_validated_same_account'] = bool(valid_blob_source and same_account)
+    ns['source_is_validated_same_account'] = bool(
+        valid_blob_source and same_account and _is_valid_storage_account_name(source_account_name))
 
     # if oauth, use user delegation key to generate sas
     source_user_delegation_key = None
