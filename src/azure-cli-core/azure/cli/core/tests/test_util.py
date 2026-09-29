@@ -526,6 +526,21 @@ class TestUtils(unittest.TestCase):
         parent2.name.return_value = "bash"
         self.assertEqual(_get_parent_proc_name(), "pwsh")
 
+    @mock.patch("psutil.Process")
+    def test_get_parent_proc_name_with_bound_launcher(self, mock_process_type):
+        for wrappers in (["az-cli.exe"], ["python.exe", "az-cli.exe"]):
+            for shell in ("cmd.exe", "powershell.exe", "pwsh.exe", "bash.exe"):
+                with self.subTest(wrappers=wrappers, shell=shell):
+                    parent = mock_process_type.return_value
+                    shells = ["cmd.exe", shell] if shell in ("powershell.exe", "pwsh.exe") else [shell]
+                    for name in wrappers + shells:
+                        child = parent
+                        parent = mock.Mock()
+                        parent.name.return_value = name
+                        child.parent.return_value = parent
+                    parent.parent.return_value = None
+                    self.assertEqual(_get_parent_proc_name(), shell)
+
     def test_cli_run_cmd(self):
         cmd = ["echo", "abc"]
         if platform.system().lower() == "windows":
