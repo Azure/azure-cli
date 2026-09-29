@@ -983,11 +983,23 @@ short-summary: Manage External Key Manager (EKM) connection for a Managed HSM.
 helps['keyvault ekm-connection create'] = """
 type: command
 short-summary: Create the EKM connection.
+long-summary: In PrivateEndpoint mode, host is the name of an EKM private endpoint whose connection has been approved by the Private Link Service owner. The proxy CA certificates are required in both modes.
+examples:
+  - name: Connect to an EKM proxy over the public network.
+    text: az keyvault ekm-connection create --hsm-name MyHSM --host proxy.example.com --path-prefix /api/v1 --server-ca-certificate proxy-ca.pem
+  - name: Connect to an approved EKM private endpoint.
+    text: az keyvault ekm-connection create --hsm-name MyHSM --host ekm-proxy-pe --connectivity-mode PrivateEndpoint --path-prefix /api/v1 --server-ca-certificate proxy-ca.pem --server-cn proxy.example.com
 """
 
 helps['keyvault ekm-connection update'] = """
 type: command
 short-summary: Update the EKM connection.
+long-summary: Omitted fields retain their current values. Specify host when changing connectivity mode.
+examples:
+  - name: Switch an EKM connection to an approved private endpoint.
+    text: az keyvault ekm-connection update --hsm-name MyHSM --connectivity-mode PrivateEndpoint --host ekm-proxy-pe
+  - name: Switch an EKM connection back to a public proxy.
+    text: az keyvault ekm-connection update --hsm-name MyHSM --connectivity-mode Public --host proxy.example.com:443
 """
 
 helps['keyvault ekm-connection show'] = """
@@ -1013,6 +1025,80 @@ short-summary: Manage EKM proxy certificate information.
 helps['keyvault ekm-connection certificate show'] = """
 type: command
 short-summary: Show the EKM proxy client certificate.
+"""
+
+helps['keyvault ekm-connection private-endpoint'] = """
+type: group
+short-summary: Manage private endpoints from a Managed HSM to an EKM proxy.
+long-summary: These are outbound EKM proxy endpoints, not inbound Managed HSM private endpoint connections. A Managed HSM supports up to two EKM private endpoints.
+"""
+
+helps['keyvault ekm-connection private-endpoint create'] = """
+type: command
+short-summary: Create an EKM proxy private endpoint.
+long-summary: Returns the completed operation record unless no-wait is specified. The Private Link Service owner must approve the connection before it can be used by an EKM connection.
+examples:
+  - name: Create an endpoint using a Private Link Service alias.
+    text: az keyvault ekm-connection private-endpoint create --hsm-name MyHSM --name ekm-proxy-pe --private-link-service MyService.Alias
+  - name: Request an endpoint without waiting for provisioning.
+    text: az keyvault ekm-connection private-endpoint create --id https://MyHSM.managedhsm.azure.net --name ekm-proxy-pe --private-link-service MyService.Alias --request-message "Please approve this connection" --no-wait
+"""
+
+helps['keyvault ekm-connection private-endpoint delete'] = """
+type: command
+short-summary: Delete an EKM proxy private endpoint.
+long-summary: Deletion is rejected while an EKM connection references the endpoint. Update or remove that connection first. Returns the completed operation record unless no-wait is specified.
+examples:
+  - name: Delete an unused EKM private endpoint.
+    text: az keyvault ekm-connection private-endpoint delete --hsm-name MyHSM --name ekm-proxy-pe
+  - name: Start deletion without prompting or waiting.
+    text: az keyvault ekm-connection private-endpoint delete --id https://MyHSM.managedhsm.azure.net --name ekm-proxy-pe --yes --no-wait
+"""
+
+helps['keyvault ekm-connection private-endpoint show'] = """
+type: command
+short-summary: Show an EKM private endpoint and its connection approval status.
+examples:
+  - name: Show an EKM private endpoint.
+    text: az keyvault ekm-connection private-endpoint show --hsm-name MyHSM --name ekm-proxy-pe
+  - name: Read the Private Link Service approval status.
+    text: az keyvault ekm-connection private-endpoint show --id https://MyHSM.managedhsm.azure.net --name ekm-proxy-pe --query privateLinkServiceConnectionState.status -o tsv
+"""
+
+helps['keyvault ekm-connection private-endpoint list'] = """
+type: command
+short-summary: List EKM private endpoints on a Managed HSM.
+examples:
+  - name: List all EKM private endpoints.
+    text: az keyvault ekm-connection private-endpoint list --hsm-name MyHSM
+  - name: List the names of approved endpoints.
+    text: az keyvault ekm-connection private-endpoint list --id https://MyHSM.managedhsm.azure.net --query "[?privateLinkServiceConnectionState.status=='Approved'].name" -o tsv
+"""
+
+helps['keyvault ekm-connection private-endpoint wait'] = """
+type: command
+short-summary: Wait for an EKM private endpoint to reach a condition.
+long-summary: The created condition waits for provisioning to succeed, not for Private Link Service approval. Use a custom condition to wait for approval.
+examples:
+  - name: Wait for endpoint provisioning to complete.
+    text: az keyvault ekm-connection private-endpoint wait --hsm-name MyHSM --name ekm-proxy-pe --created
+  - name: Wait for the Private Link Service owner to approve the connection.
+    text: az keyvault ekm-connection private-endpoint wait --hsm-name MyHSM --name ekm-proxy-pe --custom "privateLinkServiceConnectionState.status=='Approved'" --interval 10 --timeout 600
+"""
+
+helps['keyvault ekm-connection private-endpoint operation'] = """
+type: group
+short-summary: Inspect EKM private endpoint operations.
+"""
+
+helps['keyvault ekm-connection private-endpoint operation show'] = """
+type: command
+short-summary: Show the status of an EKM private endpoint create or delete operation.
+examples:
+  - name: Show a private endpoint operation.
+    text: az keyvault ekm-connection private-endpoint operation show --hsm-name MyHSM --job-id 00000000-0000-0000-0000-000000000000
+  - name: Read the status of an operation without waiting for it to complete.
+    text: az keyvault ekm-connection private-endpoint operation show --id https://MyHSM.managedhsm.azure.net --job-id 00000000-0000-0000-0000-000000000000 --query status -o tsv
 """
 
 helps['keyvault security-domain'] = """
