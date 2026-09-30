@@ -612,6 +612,110 @@ helps['appconfig feature disable'] = """
             az appconfig feature disable -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta
     """
 
+helps['appconfig enhanced-feature-flag'] = """
+    type: group
+    short-summary: Manage enhanced feature flags stored in an App Configuration store.
+    """
+
+helps['appconfig enhanced-feature-flag set'] = """
+    type: command
+    short-summary: Set an enhanced feature flag.
+    examples:
+        - name: Set an enhanced feature flag with label MyLabel.
+          text:
+            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature color --label MyLabel
+        - name: Set an enhanced feature flag with null label using connection string and set a description.
+          text:
+            az appconfig enhanced-feature-flag set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --description "This is a colorful feature"
+        - name: Set an enhanced feature flag using your 'az login' credentials.
+          text:
+            az appconfig enhanced-feature-flag set --endpoint https://myappconfiguration.azconfig.io --feature color --label MyLabel --auth-mode login
+        - name: Set an enhanced feature flag with tags "tag1=value1" and "tag2=value2".
+          text:
+            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature color --tags tag1=value1 tag2=value2
+        - name: Set an enhanced feature flag with telemetry enabled.
+          text:
+            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature color --telemetry-enabled
+        - name: Disable telemetry on an enhanced feature flag.
+          text:
+            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature color --telemetry-enabled false
+    """
+
+helps['appconfig enhanced-feature-flag delete'] = """
+    type: command
+    short-summary: Delete an enhanced feature flag.
+    examples:
+        - name: Delete an enhanced feature flag using App Configuration store name without confirmation.
+          text:
+            az appconfig enhanced-feature-flag delete -n MyAppConfiguration --feature color --label MyLabel --yes
+        - name: Delete an enhanced feature flag using connection string.
+          text:
+            az appconfig enhanced-feature-flag delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label MyLabel
+        - name: Delete an enhanced feature flag using App Configuration store endpoint and your 'az login' credentials.
+          text:
+            az appconfig enhanced-feature-flag delete --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+    """
+
+helps['appconfig enhanced-feature-flag show'] = """
+    type: command
+    short-summary: Show all attributes of an enhanced feature flag.
+    examples:
+        - name: Show an enhanced feature flag using App Configuration store name with a specific label.
+          text:
+            az appconfig enhanced-feature-flag show -n MyAppConfiguration --feature color --label MyLabel
+        - name: Show an enhanced feature flag using connection string and field filters.
+          text:
+            az appconfig enhanced-feature-flag show --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --fields name enabled conditions
+        - name: Show an enhanced feature flag using App Configuration store endpoint and your 'az login' credentials.
+          text:
+            az appconfig enhanced-feature-flag show --endpoint https://myappconfiguration.azconfig.io --feature color --auth-mode login
+    """
+
+helps['appconfig enhanced-feature-flag list'] = """
+    type: command
+    short-summary: List enhanced feature flags.
+    examples:
+        - name: List all enhanced feature flags.
+          text:
+            az appconfig enhanced-feature-flag list -n MyAppConfiguration
+        - name: List a specific feature for any label starting with v1. using connection string.
+          text:
+            az appconfig enhanced-feature-flag list --feature color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
+        - name: List all features with any labels and query only name, enabled and conditions.
+          text:
+            az appconfig enhanced-feature-flag list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields name enabled conditions
+        - name: List 150 enhanced feature flags with any labels.
+          text:
+            az appconfig enhanced-feature-flag list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --top 150
+        - name: List all enhanced feature flags with specific tags.
+          text:
+            az appconfig enhanced-feature-flag list -n MyAppConfiguration --tags tag1=value1 tag2=value2
+    """
+
+helps['appconfig enhanced-feature-flag enable'] = """
+    type: command
+    short-summary: Enable an enhanced feature flag to turn it ON for use.
+    examples:
+        - name: Enable an enhanced feature flag using App Configuration store name.
+          text:
+            az appconfig enhanced-feature-flag enable -n MyAppConfiguration --feature color --label test
+        - name: Force enabling an enhanced feature flag using connection string.
+          text:
+            az appconfig enhanced-feature-flag enable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
+
+helps['appconfig enhanced-feature-flag disable'] = """
+    type: command
+    short-summary: Disable an enhanced feature flag to turn it OFF for use.
+    examples:
+        - name: Disable an enhanced feature flag using App Configuration store name.
+          text:
+            az appconfig enhanced-feature-flag disable -n MyAppConfiguration --feature color --label test
+        - name: Force disabling an enhanced feature flag using connection string.
+          text:
+            az appconfig enhanced-feature-flag disable --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature color --label test --yes
+    """
+
 helps['appconfig feature filter'] = """
     type: group
     short-summary: Manage filters associated with feature flags stored in an App Configuration store.
