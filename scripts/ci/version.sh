@@ -32,11 +32,13 @@ for each in $(find src -name __init__.py); do
     fi
 done
 
-for each in $(find src -name setup.py); do
+for each in $(find src -name pyproject.toml); do
     if [ "$platform" == "Darwin" ]; then
-        sed -i "" "s/^VERSION = [\"']\(.*\)[\"']/VERSION = \"\1.$version\"/" $each
+        sed -i "" "s/^version = [\"']\(.*\)[\"']/version = \"\1.$version\"/" "$each"
+        sed -i "" "s/azure-cli-core==\([^\"']*\)/azure-cli-core==\1.$version/" "$each"
     else
-        sed -i "s/^VERSION = [\"']\(.*\)[\"']/VERSION = \"\1.$version\"/" $each
+        sed -i "s/^version = [\"']\(.*\)[\"']/version = \"\1.$version\"/" "$each"
+        sed -i "s/azure-cli-core==\([^\"']*\)/azure-cli-core==\1.$version/" "$each"
     fi
 done
 

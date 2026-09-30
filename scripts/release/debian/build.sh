@@ -37,12 +37,12 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources); the CLI build relies on setup.py.
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip "setuptools<81"
+# Keep setuptools at or above the security floor.
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip "setuptools>=78.1.1"
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
+find ${WORKDIR}/src/ -name pyproject.toml -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
 $WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 

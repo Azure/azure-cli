@@ -1,6 +1,4 @@
 # basic
-# Cap setuptools<81: newer setuptools breaks the CLI's setup.py-based builds
-# (81 removes setup.py --dry-run and changes distutils command signatures;
-# 82 removes pkg_resources). Pin to the last 80.x line.
-setuptools>=65.5.1,<81
+# Security floor for setuptools; CLI packages use the PEP 517 build backend.
+setuptools>=78.1.1
 pip>=9.0.1
