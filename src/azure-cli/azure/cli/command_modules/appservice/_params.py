@@ -1245,8 +1245,6 @@ subscription than the app service environment, please use the resource ID for --
                        help="Name of the app setting that stores the registry username. Only valid with Basic.")
             c.argument('deployment_image_password_setting', options_list=['--deployment-image-password-setting', '--dips'],
                        help="Name of the app setting that stores the registry password. Only valid with Basic. Pass the app setting name, not the password.")
-            c.argument('deployment_image_server_url', options_list=['--deployment-image-server-url', '--diurl'],
-                       help="Registry server URL for Basic authentication, e.g. `https://myregistry.azurecr.io`. Optional; only valid with Basic.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())

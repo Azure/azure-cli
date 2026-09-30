@@ -1606,9 +1606,6 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
              {'deployment_image_auth_type': 'UserAssignedIdentity', 'deployment_image_identity': _REGISTRY_IDENTITY},
              {'type': 'UserAssignedIdentity', 'userAssignedIdentityResourceId': _REGISTRY_IDENTITY}),
             ('Basic', 'registry.contoso.com:5000/team/app:v1', basic_args, basic_auth),
-            ('Basic with server URL', 'registry.contoso.com:5000/team/app:v1',
-             dict(basic_args, deployment_image_server_url='https://registry.contoso.com:5000'),
-             dict(basic_auth, serverUrl='https://registry.contoso.com:5000')),
         ]
         for case, image, auth_args, authentication in cases:
             with self.subTest(case):
@@ -1679,8 +1676,6 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
              RequiredArgumentMissingError),
             ('identity with Basic', _flex_registry_site,
              dict(basic_args, deployment_image_identity=_REGISTRY_IDENTITY), ArgumentUsageError),
-            ('server URL without Basic', _flex_registry_site,
-             dict(image_args, deployment_image_server_url='https://myacr.azurecr.io'), ArgumentUsageError),
             ('Registry and blob arguments together', _flex_blob_site,
              dict(image_args, deployment_storage_auth_type='SystemAssignedIdentity'), MutuallyExclusiveArgumentError),
             ('switch from blob without authentication', _flex_blob_site,
@@ -1738,6 +1733,7 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
             ('update strategy', set_update_strategy_config, {'strategy_type': 'Recreate'},
              'siteUpdateStrategy', 'type', 'Recreate'),
         ]
+        # Preserve service-owned fields even when the CLI does not offer an argument to set them.
         authentication = {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
                           'passwordSettingName': 'REGISTRY_PASSWORD', 'serverUrl': 'https://myacr.azurecr.io'}
         for case, update, args, section, field, expected in cases:
@@ -1903,15 +1899,13 @@ class TestFlexRegistryCreateMocked(unittest.TestCase):
                            deployment_image='registry.contoso.com/team/app:v1', deployment_image_auth_type='Basic',
                            deployment_image_username_setting='REGISTRY_USERNAME',
                            deployment_image_password_setting='REGISTRY_PASSWORD',
-                           deployment_image_server_url='https://registry.contoso.com',
                            instance_memory=4096, maximum_instance_count=40, always_ready_instances=['http=2'],
                            disable_app_insights='true')
 
         self.assertEqual(self._created_site()['properties']['functionAppConfig'], {
             'deployment': {'storage': {'type': 'Registry', 'value': 'registry.contoso.com/team/app:v1',
                                        'authentication': {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
-                                                          'passwordSettingName': 'REGISTRY_PASSWORD',
-                                                          'serverUrl': 'https://registry.contoso.com'}}},
+                                                          'passwordSettingName': 'REGISTRY_PASSWORD'}}},
             'scaleAndConcurrency': {'maximumInstanceCount': 40, 'instanceMemoryMB': 4096,
                                     'alwaysReady': [{'name': 'http', 'instanceCount': 2}]}
         })
@@ -1940,7 +1934,7 @@ class TestFlexRegistryArgumentParsing(unittest.TestCase):
     def test_registry_arguments_and_aliases_reach_both_commands(self):
         from azure.cli.core.mock import DummyCli
         no_auth_fields = {'deployment_image_identity': None, 'deployment_image_username_setting': None,
-                          'deployment_image_password_setting': None, 'deployment_image_server_url': None}
+                          'deployment_image_password_setting': None}
         cases = [
             ('create_functionapp',
              ['functionapp', 'create', '-g', 'rg', '-n', 'app', '-s', 'sa', '--flexconsumption-location', 'eastus',
@@ -1951,11 +1945,10 @@ class TestFlexRegistryArgumentParsing(unittest.TestCase):
             ('update_deployment_configs',
              ['functionapp', 'deployment', 'config', 'set', '-g', 'rg', '-n', 'app',
               '--deployment-image', 'myacr.azurecr.io/app:v1', '--diat', 'basic', '--dius', 'REGISTRY_USERNAME',
-              '--dips', 'REGISTRY_PASSWORD', '--diurl', 'https://myacr.azurecr.io'],
+              '--dips', 'REGISTRY_PASSWORD'],
              dict(no_auth_fields, deployment_image='myacr.azurecr.io/app:v1', deployment_image_auth_type='Basic',
                   deployment_image_username_setting='REGISTRY_USERNAME',
-                  deployment_image_password_setting='REGISTRY_PASSWORD',
-                  deployment_image_server_url='https://myacr.azurecr.io')),
+                  deployment_image_password_setting='REGISTRY_PASSWORD')),
         ]
         for handler, args, expected in cases:
             with self.subTest(handler), \
@@ -1965,3 +1958,8 @@ class TestFlexRegistryArgumentParsing(unittest.TestCase):
                 self.assertEqual(DummyCli().invoke(args, out_file=io.StringIO()), 0)
                 received = handler_mock.call_args.kwargs
                 self.assertEqual({key: received[key] for key in expected}, expected)
+                for flag in ('--deployment-image-server-url', '--diurl'):
+                    with self.subTest(handler=handler, flag=flag), self.assertRaises(SystemExit) as error:
+                        DummyCli().invoke(args + [flag, 'https://myacr.azurecr.io'], out_file=io.StringIO())
+                    self.assertEqual(error.exception.code, 2)
+                handler_mock.assert_called_once()

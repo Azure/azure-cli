@@ -616,7 +616,7 @@ examples:
   - name: Pull the container image with a user-assigned identity.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type UserAssignedIdentity --deployment-image-identity /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
   - name: Pull the container image with a username and password stored in app settings (Basic authentication).
-    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type Basic --deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD --deployment-image-server-url https://myregistry.azurecr.io
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type Basic --deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD
 """
 
 helps['functionapp deployment config show'] = """

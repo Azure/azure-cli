@@ -1745,10 +1745,9 @@ def _get_raw_flex_functionapp(cli_ctx, resource_group_name, name):
     return functionapp
 
 
-def _build_flex_registry_authentication(auth_type, identity=None, username_setting=None, password_setting=None,
-                                        server_url=None):
+def _build_flex_registry_authentication(auth_type, identity=None, username_setting=None, password_setting=None):
     """Return the Registry authentication object for exactly one mode, or None when no auth argument is given."""
-    basic_args = (username_setting, password_setting, server_url)
+    basic_args = (username_setting, password_setting)
     if auth_type is None:
         if identity is not None or any(arg is not None for arg in basic_args):
             raise RequiredArgumentMissingError('--deployment-image-auth-type is required when specifying '
@@ -1758,9 +1757,8 @@ def _build_flex_registry_authentication(auth_type, identity=None, username_setti
         raise ArgumentUsageError('--deployment-image-identity is only valid with '
                                  '--deployment-image-auth-type UserAssignedIdentity.')
     if any(arg is not None for arg in basic_args) and auth_type != 'Basic':
-        raise ArgumentUsageError('--deployment-image-username-setting, --deployment-image-password-setting and '
-                                 '--deployment-image-server-url are only valid with '
-                                 '--deployment-image-auth-type Basic.')
+        raise ArgumentUsageError('--deployment-image-username-setting and --deployment-image-password-setting '
+                                 'are only valid with --deployment-image-auth-type Basic.')
 
     authentication = {"type": auth_type}
     if auth_type == 'UserAssignedIdentity':
@@ -1775,8 +1773,6 @@ def _build_flex_registry_authentication(auth_type, identity=None, username_setti
                                                '--deployment-image-auth-type Basic.')
         authentication["usernameSettingName"] = username_setting
         authentication["passwordSettingName"] = password_setting
-        if server_url is not None:
-            authentication["serverUrl"] = server_url
     return authentication
 
 
@@ -4255,12 +4251,11 @@ def update_deployment_configs(cmd, resource_group_name, name,  # pylint: disable
                               deployment_storage_container_name=None, deployment_storage_auth_type=None,
                               deployment_storage_auth_value=None, deployment_image=None,
                               deployment_image_auth_type=None, deployment_image_identity=None,
-                              deployment_image_username_setting=None, deployment_image_password_setting=None,
-                              deployment_image_server_url=None):
+                              deployment_image_username_setting=None, deployment_image_password_setting=None):
 
     registry_authentication = _build_flex_registry_authentication(
         deployment_image_auth_type, deployment_image_identity, deployment_image_username_setting,
-        deployment_image_password_setting, deployment_image_server_url)
+        deployment_image_password_setting)
     if deployment_image is not None or registry_authentication is not None:
         if any(arg is not None for arg in (deployment_storage_name, deployment_storage_container_name,
                                            deployment_storage_auth_type, deployment_storage_auth_value)):
@@ -10215,8 +10210,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
                        auto_generated_domain_name_label_scope=None, deployment_image=None,
                        deployment_image_auth_type=None, deployment_image_identity=None,
-                       deployment_image_username_setting=None, deployment_image_password_setting=None,
-                       deployment_image_server_url=None):
+                       deployment_image_username_setting=None, deployment_image_password_setting=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -10305,7 +10299,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     registry_authentication = _build_flex_registry_authentication(
         deployment_image_auth_type, deployment_image_identity, deployment_image_username_setting,
-        deployment_image_password_setting, deployment_image_server_url)
+        deployment_image_password_setting)
     is_flex_registry = deployment_image is not None or registry_authentication is not None
     if is_flex_registry:
         if flexconsumption_location is None:

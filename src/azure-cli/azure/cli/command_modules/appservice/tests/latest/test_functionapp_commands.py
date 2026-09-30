@@ -1797,13 +1797,12 @@ class FunctionAppFlex(LiveScenarioTest):
             JMESPathCheck('storage.value', image),
             JMESPathCheck('storage.authentication.userAssignedIdentityResourceId', identity['id'])])
         self.cmd('functionapp deployment config set -g {} -n {} --deployment-image-auth-type Basic '
-                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD '
-                 '--deployment-image-server-url https://mcr.microsoft.com'.format(resource_group, uai_app), checks=[
+                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD'
+                 .format(resource_group, uai_app), checks=[
                      JMESPathCheck('storage.value', image),
                      JMESPathCheck('storage.authentication.type', 'Basic'),
                      JMESPathCheck('storage.authentication.usernameSettingName', 'REGISTRY_USERNAME'),
                      JMESPathCheck('storage.authentication.passwordSettingName', 'REGISTRY_PASSWORD'),
-                     JMESPathCheck('storage.authentication.serverUrl', 'https://mcr.microsoft.com'),
                      JMESPathCheck('storage.authentication.userAssignedIdentityResourceId', None)])
         # The service rejects a blank image; the accepted configuration must be unchanged.
         self.cmd("functionapp deployment config set -g {} -n {} --deployment-image ' '".format(resource_group, uai_app),
@@ -1815,13 +1814,11 @@ class FunctionAppFlex(LiveScenarioTest):
 
         basic_app = self.create_random_name('functionapp', 40)
         self.cmd('functionapp create -g {} -n {} -f {} -s {} --deployment-image {} --deployment-image-auth-type Basic '
-                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD '
-                 '--deployment-image-server-url https://mcr.microsoft.com'
+                 '--deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD'
                  .format(resource_group, basic_app, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account, image), checks=[
                      JMESPathCheck('properties.functionAppConfig.runtime', None),
                      JMESPathCheck(storage + '.authentication.type', 'Basic'),
-                     JMESPathCheck(storage + '.authentication.passwordSettingName', 'REGISTRY_PASSWORD'),
-                     JMESPathCheck(storage + '.authentication.serverUrl', 'https://mcr.microsoft.com')])
+                     JMESPathCheck(storage + '.authentication.passwordSettingName', 'REGISTRY_PASSWORD')])
         tag_digest_image = image + '@sha256:' + 'b' * 64
         self.cmd('functionapp deployment config set -g {} -n {} --deployment-image {}'
                  .format(resource_group, basic_app, tag_digest_image))
