@@ -906,6 +906,20 @@ long-summary: Requests that a backup of the specified secret be downloaded to th
     the secret will be downloaded. This operation requires the secrets/backup permission.
 """
 
+helps['keyvault secret copy'] = """
+type: command
+short-summary: Copy a secret from one Key Vault to another.
+long-summary: Copies the latest version of a secret from a source Key Vault to a destination Key Vault.
+    This operation copies the secret value and its metadata (tags, content-type, attributes).
+examples:
+  - name: Copy a specific secret from one vault to another.
+    text: az keyvault secret copy --source-vault SourceVault --destination-vault DestVault --name MySecret
+  - name: Copy all secrets from one vault to another.
+    text: az keyvault secret copy --source-vault SourceVault --destination-vault DestVault --all
+  - name: Copy a secret and overwrite if it already exists in the destination.
+    text: az keyvault secret copy --source-vault SourceVault --destination-vault DestVault --name MySecret --overwrite
+"""
+
 helps['keyvault secret restore'] = """
 type: command
 short-summary: Restores a backed up secret to a vault.
