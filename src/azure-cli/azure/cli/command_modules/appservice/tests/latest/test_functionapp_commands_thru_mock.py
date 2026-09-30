@@ -29,9 +29,11 @@ from azure.cli.command_modules.appservice.custom import (
     _prepare_flex_deployment_storage,
     _prepare_flex_deployment_storage_identity,
     revert_flex_migration,
+    assign_identity,
     create_functionapp,
     delete_always_ready_settings,
     get_deployment_configs,
+    remove_identity,
     set_update_strategy_config,
     show_functionapp,
     update_always_ready_settings,
@@ -1560,6 +1562,8 @@ class _FakeArmSite:
         response.reason = 'OK' if status == 200 else 'Bad Request'
         response.headers['Content-Type'] = 'application/json'
         response._content = json.dumps(payload).encode()  # pylint: disable=protected-access
+        response.raw = mock.Mock()
+        response.raw.stream.return_value = iter([response._content])  # pylint: disable=protected-access
         response.url = request.url
         return response
 
@@ -1784,6 +1788,60 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
         self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01')])
 
 
+class TestFlexRegistryIdentityMocked(unittest.TestCase):
+    def test_identity_changes_preserve_registry_authentication_and_blob_requests(self):
+        from azure.core.credentials import AccessToken
+
+        credential = mock.Mock()
+        credential.get_token.return_value = AccessToken('token', 2147483647)
+
+        def client_factory(_cli_ctx, api_version=None):
+            return WebSiteManagementClient(credential, _REGISTRY_SUBSCRIPTION,
+                                           api_version=api_version or '2023-12-01')
+
+        actions = [
+            ('assign', assign_identity, None, 'SystemAssigned'),
+            ('remove', remove_identity, {'type': 'SystemAssigned'}, 'None'),
+        ]
+        storage_cases = [
+            ('Registry Basic', _flex_registry_site, ['2023-12-01', '2025-05-01', '2025-05-01']),
+            ('Blob', _flex_blob_site, ['2023-12-01', '2023-12-01']),
+        ]
+        for action, update, starting_identity, expected_identity_type in actions:
+            for storage_type, make_site, versions in storage_cases:
+                with self.subTest(action=action, storage=storage_type):
+                    site = make_site()
+                    if starting_identity:
+                        site['identity'] = starting_identity
+                    if storage_type == 'Registry Basic':
+                        site['properties']['functionAppConfig']['deployment']['storage']['authentication'].update(
+                            type='Basic', userAssignedIdentityResourceId=None,
+                            usernameSettingName='REGISTRY_USERNAME', passwordSettingName='REGISTRY_PASSWORD')
+                    cmd = _get_test_cmd()
+                    with _fake_arm(site) as arm, \
+                            mock.patch('azure.cli.command_modules.appservice._appservice_utils.web_client_factory',
+                                       side_effect=client_factory), \
+                            mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation',
+                                       side_effect=lambda _ctx: lambda poller: poller.result()):
+                        identity = update(cmd, 'rg', 'app', ['[system]'])
+
+                    self.assertEqual(arm.calls(), [(method, _REGISTRY_SITE, version) for method, version in
+                                                   zip(['GET'] * (len(versions) - 1) + ['PUT'], versions)])
+                    sent = arm.requests[-1][2]
+                    self.assertEqual(sent['identity']['type'], expected_identity_type)
+                    self.assertIsNotNone(identity)
+                    config = sent['properties']['functionAppConfig']
+                    if storage_type == 'Registry Basic':
+                        self.assertEqual(config['deployment']['storage']['authentication'], {
+                            'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
+                            'passwordSettingName': 'REGISTRY_PASSWORD'})
+                        self.assertNotIn('runtime', config)
+                        self.assertEqual(config['unknownFunctionAppConfigProperty'], {'keep': True})
+                    else:
+                        self.assertEqual(config['deployment'], site['properties']['functionAppConfig']['deployment'])
+                        self.assertEqual(config['runtime'], {'name': 'python', 'version': '3.11'})
+
+
 class TestFlexRegistryCreateMocked(unittest.TestCase):
     """`functionapp create --deployment-image` builds a Registry functionAppConfig without a runtime."""
 
@@ -1825,7 +1883,7 @@ class TestFlexRegistryCreateMocked(unittest.TestCase):
         self.assertEqual(site['properties']['functionAppConfig'], {
             'deployment': {'storage': {'type': 'Registry', 'value': image,
                                        'authentication': {'type': 'SystemAssignedIdentity'}}},
-            'scaleAndConcurrency': {'maximumInstanceCount': 100, 'instanceMemoryMB': 2048, 'alwaysReady': []}
+            'scaleAndConcurrency': {'maximumInstanceCount': 1000, 'instanceMemoryMB': 2048, 'alwaysReady': []}
         })
         # None of the legacy Linux-container markers: container kind, linuxFxVersion or DOCKER_* app settings.
         self.assertEqual(site['kind'], 'functionapp,linux')

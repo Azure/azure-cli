@@ -151,8 +151,8 @@ FLEX_REGISTRY_AUTH_TYPES = ['Anonymous', 'SystemAssignedIdentity', 'UserAssigned
 
 FLEX_REGISTRY_API_VERSION = '2025-05-01'
 
-# Registry apps have no runtime stack to supply scale defaults, so use the Flex Consumption stack defaults.
-FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT = 100
+# Registry apps have no runtime stack to supply scale defaults.
+FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT = 1000
 FLEX_DEFAULT_INSTANCE_MEMORY_MB = 2048
 
 UPDATE_STRATEGY_TYPES = ['Recreate', 'RollingUpdate']

@@ -1729,6 +1729,13 @@ def _is_flex_registry_storage(deployment_storage):
     return (deployment_storage.get("type") or "").lower() == "registry"
 
 
+def _flex_registry_config_from_site(site):
+    config = getattr(getattr(site, 'properties', None), 'function_app_config', None)
+    if config and _is_flex_registry_storage((config.get('deployment') or {}).get('storage') or {}):
+        return config
+    return None
+
+
 def _get_raw_flex_functionapp(cli_ctx, resource_group_name, name):
     # Registry apps are re-read with the API version that publishes the Registry contract; other apps are unchanged.
     functionapp = get_raw_functionapp(cli_ctx, resource_group_name, name)
@@ -3816,6 +3823,24 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=False):
     logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
 
 
+def _get_site_for_identity_update(cli_ctx, resource_group_name, name, slot):
+    webapp = _generic_site_operation(cli_ctx, resource_group_name, name, 'get', slot)
+    if _flex_registry_config_from_site(webapp):
+        return _generic_site_operation(cli_ctx, resource_group_name, name, 'get', slot,
+                                       api_version=FLEX_REGISTRY_API_VERSION)
+    return webapp
+
+
+def _persist_identity_update(cmd, resource_group_name, name, slot, webapp):
+    registry_config = _flex_registry_config_from_site(webapp)
+    if registry_config:
+        _prepare_flex_registry_config_for_update(registry_config)
+    poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update',
+                                     extra_parameter=webapp, slot=slot,
+                                     api_version=FLEX_REGISTRY_API_VERSION if registry_config else None)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
@@ -3823,7 +3848,7 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+        return _get_site_for_identity_update(cmd.cli_ctx, resource_group_name, name, slot)
 
     def setter(webapp):
         if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
@@ -3849,9 +3874,7 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
             for identity in external_identities:
                 webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update',
-                                         extra_parameter=webapp, slot=slot)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+        return _persist_identity_update(cmd, resource_group_name, name, slot, webapp)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
     webapp = _assign_identity(cmd.cli_ctx, getter, setter, identity_role=role, identity_scope=scope)
@@ -3871,7 +3894,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+        return _get_site_for_identity_update(cmd.cli_ctx, resource_group_name, name, slot)
 
     def setter(webapp):
         if webapp.identity is None:
@@ -3905,8 +3928,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
             for identity in list(existing_identities):
                 webapp.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot, webapp)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+        return _persist_identity_update(cmd, resource_group_name, name, slot, webapp)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
     webapp = _assign_identity(cmd.cli_ctx, getter, setter)
@@ -4574,14 +4596,19 @@ def update_flex_functionapp(cmd, resource_group_name, name, functionapp, api_ver
     return response.json()
 
 
+def _prepare_flex_registry_config_for_update(function_app_config):
+    # GET may include null fields from other auth modes and a null runtime; Registry PUT must omit them.
+    function_app_config.pop("runtime", None)
+    storage = function_app_config["deployment"]["storage"]
+    storage["authentication"] = {key: value for key, value in storage["authentication"].items()
+                                 if value is not None}
+
+
 def _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp):
     function_app_config = functionapp["properties"]["functionAppConfig"]
     storage = function_app_config["deployment"]["storage"]
     if _is_flex_registry_storage(storage):
-        # GET may include null fields from other auth modes and a null runtime; Registry PUT must omit them.
-        function_app_config.pop("runtime", None)
-        storage["authentication"] = {key: value for key, value in storage["authentication"].items()
-                                     if value is not None}
+        _prepare_flex_registry_config_for_update(function_app_config)
         return update_flex_functionapp(cmd, resource_group_name, name, functionapp,
                                        api_version=FLEX_REGISTRY_API_VERSION)
     return update_flex_functionapp(cmd, resource_group_name, name, functionapp)
