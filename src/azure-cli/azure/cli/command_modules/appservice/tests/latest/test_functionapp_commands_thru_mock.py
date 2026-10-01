@@ -1500,6 +1500,13 @@ def _flex_blob_site():
     }
 
 
+def _non_flex_site():
+    site = _flex_blob_site()
+    site['properties']['sku'] = 'Dynamic'
+    del site['properties']['functionAppConfig']
+    return site
+
+
 def _flex_registry_site():
     # Shape returned by the service: runtime is null and the fields of other authentication modes are null.
     site = _flex_blob_site()
@@ -1530,8 +1537,7 @@ def _with_registry_storage(site, storage):
 class _FakeArmSite:
     """Stands in for ARM behind requests.Session.send, so the real send_raw_request builds, sends and logs requests.
 
-    Stores one site, echoes accepted PUT bodies, serves a sentinel secret from the app settings endpoint, and leaves
-    the Registry authentication fields out of GET responses for API versions older than 2025-05-01.
+    Stores one site, echoes accepted PUT bodies, and serves a sentinel secret from the app settings endpoint.
     """
 
     def __init__(self, site, put_error=None):
@@ -1546,12 +1552,6 @@ class _FakeArmSite:
         status, payload = 200, self.site
         if '/config/appsettings/list' in request.url:
             payload = {'properties': {'REGISTRY_PASSWORD': _REGISTRY_SECRET}}
-        elif request.method == 'GET' and 'api-version=2025-05-01' not in request.url:
-            # Only 2025-05-01 publishes the Registry authentication fields, so older versions may omit them.
-            payload = json.loads(json.dumps(self.site))
-            authentication = payload['properties']['functionAppConfig']['deployment']['storage']['authentication']
-            for field in ('usernameSettingName', 'passwordSettingName', 'serverUrl'):
-                authentication.pop(field, None)
         elif request.method == 'PUT':
             if self.put_error:
                 status, payload = 400, self.put_error
@@ -1616,22 +1616,21 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
 
                 self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2025-05-01'),
                                                ('PUT', _REGISTRY_SITE, '2025-05-01'),
-                                               ('GET', _REGISTRY_SITE, '2023-12-01'),
-                                               ('GET', _REGISTRY_SITE, '2025-05-01')])
+                                               ('GET', _REGISTRY_SITE, '2023-12-01')])
                 self.assertEqual(arm.requests[1][2], _with_registry_storage(_flex_blob_site(), storage))
                 self.assertEqual(result, {'storage': storage})
                 self.assertEqual(shown, {'storage': storage})
 
-    def test_show_reads_registry_apps_with_the_registry_api_version_and_blob_apps_unchanged(self):
+    def test_show_preserves_registry_configuration_and_keeps_blob_requests_unchanged(self):
         registry_deployment = _flex_registry_site()['properties']['functionAppConfig']['deployment']
         blob_deployment = _flex_blob_site()['properties']['functionAppConfig']['deployment']
         cases = [
             ('functionapp show, Registry', show_functionapp, _flex_registry_site,
-             ['2023-12-01', '2023-12-01', '2025-05-01'], _flex_registry_site()),
+             ['2023-12-01', '2023-12-01'], _flex_registry_site()),
             ('functionapp show, blob', show_functionapp, _flex_blob_site,
              ['2023-12-01', '2023-12-01'], _flex_blob_site()),
             ('deployment config show, Registry', get_deployment_configs, _flex_registry_site,
-             ['2023-12-01', '2025-05-01'], registry_deployment),
+             ['2023-12-01'], registry_deployment),
             ('deployment config show, blob', get_deployment_configs, _flex_blob_site,
              ['2023-12-01'], blob_deployment),
         ]
@@ -1642,6 +1641,28 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
 
                 self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, version) for version in api_versions])
                 self.assertEqual(result, expected)
+
+    def test_show_keeps_non_flex_apps_and_slots_on_the_existing_sdk_path(self):
+        for slot in (None, 'staging'):
+            with self.subTest(slot=slot):
+                app, config = mock.Mock(), mock.Mock()
+                with _fake_arm(_non_flex_site()) as arm, \
+                        mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation',
+                                   side_effect=[app, config]) as operation, \
+                        mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp',
+                                   return_value=False), \
+                        mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props') as rename, \
+                        mock.patch('azure.cli.command_modules.appservice.custom._fill_ftp_publishing_url') as fill_ftp:
+                    result = show_functionapp(self.cmd, 'rg', 'app', slot)
+
+                self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01')])
+                self.assertEqual(operation.call_args_list, [
+                    mock.call(self.cmd.cli_ctx, 'rg', 'app', 'get', slot),
+                    mock.call(self.cmd.cli_ctx, 'rg', 'app', 'get_configuration', slot)])
+                self.assertIs(result, app)
+                self.assertIs(app.site_config, config)
+                rename.assert_called_once_with(app)
+                fill_ftp.assert_called_once_with(self.cmd, app, 'rg', 'app', slot)
 
     def test_set_on_registry_app_keeps_the_unspecified_image_or_authentication(self):
         cases = [
@@ -1668,6 +1689,8 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
         cases = [
             ('authentication argument without type', _flex_registry_site,
              {'deployment_image_identity': _REGISTRY_IDENTITY}, RequiredArgumentMissingError),
+            ('empty image', _flex_registry_site,
+             {'deployment_image': ''}, RequiredArgumentMissingError),
             ('empty user-assigned identity', _flex_registry_site,
              {'deployment_image_auth_type': 'UserAssignedIdentity', 'deployment_image_identity': ''},
              RequiredArgumentMissingError),
@@ -1691,6 +1714,39 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
                     update_deployment_configs(self.cmd, 'rg', 'app', **args)
                 self.assertNotIn('PUT', [method for method, _, _ in arm.requests])
 
+    def test_set_requires_nonempty_image_and_authentication_on_existing_registry_apps(self):
+        cases = [
+            ('value', {'deployment_image_auth_type': 'Anonymous'}, '--deployment-image',
+             [mock.sentinel.missing, None, '']),
+            ('authentication', {'deployment_image': 'myacr.azurecr.io/app:v2'}, '--deployment-image-auth-type',
+             [mock.sentinel.missing, None, {}, {'type': None}, {'type': ''}]),
+        ]
+        for field, args, required_argument, invalid_values in cases:
+            for value in invalid_values:
+                with self.subTest(field=field, value=value):
+                    site = _flex_registry_site()
+                    storage = site['properties']['functionAppConfig']['deployment']['storage']
+                    if value is mock.sentinel.missing:
+                        del storage[field]
+                    else:
+                        storage[field] = value
+                    with _fake_arm(site) as arm:
+                        with self.assertRaisesRegex(RequiredArgumentMissingError, required_argument):
+                            update_deployment_configs(self.cmd, 'rg', 'app', **args)
+                    self.assertNotIn('PUT', [method for method, _, _ in arm.requests])
+
+    def test_set_can_repair_registry_storage_with_missing_image_and_authentication(self):
+        site = _flex_registry_site()
+        site['properties']['functionAppConfig']['deployment']['storage'].update(value=None, authentication=None)
+        storage = {'type': 'Registry', 'value': 'myacr.azurecr.io/app:v2', 'authentication': {'type': 'Anonymous'}}
+        with _fake_arm(site) as arm:
+            result = update_deployment_configs(self.cmd, 'rg', 'app', deployment_image=storage['value'],
+                                               deployment_image_auth_type='Anonymous')
+
+        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT'])
+        self.assertEqual(arm.requests[-1][2], _with_registry_storage(site, storage))
+        self.assertEqual(result, {'storage': storage})
+
     def test_set_surfaces_service_rejection_and_show_confirms_the_previous_config(self):
         # The CLI doesn't parse image references; the service rejects invalid ones with a field-scoped error.
         field_error = {'Code': 'BadRequest', 'Message': 'The parameter Site.FunctionAppConfig.Deployment.Storage.Value '
@@ -1701,7 +1757,7 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
             shown = get_deployment_configs(self.cmd, 'rg', 'app')
 
         self.assertIn('Site.FunctionAppConfig.Deployment.Storage.Value', str(error.exception))
-        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT', 'GET', 'GET'])
+        self.assertEqual([method for method, _, _ in arm.requests], ['GET', 'PUT', 'GET'])
         self.assertEqual(arm.requests[1][2]['properties']['functionAppConfig']['deployment']['storage']['value'],
                          'myacr.azurecr.io/App:Latest!')
         self.assertEqual(shown, _flex_registry_site()['properties']['functionAppConfig']['deployment'])
@@ -1746,11 +1802,9 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
                     shown = get_deployment_configs(self.cmd, 'rg', 'app')
 
                 self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01'),
-                                               ('GET', _REGISTRY_SITE, '2025-05-01'),
                                                ('PUT', _REGISTRY_SITE, '2025-05-01'),
-                                               ('GET', _REGISTRY_SITE, '2023-12-01'),
-                                               ('GET', _REGISTRY_SITE, '2025-05-01')])
-                sent = arm.requests[2][2]['properties']['functionAppConfig']
+                                               ('GET', _REGISTRY_SITE, '2023-12-01')])
+                sent = arm.requests[1][2]['properties']['functionAppConfig']
                 self.assertEqual(sent['deployment']['storage']['authentication'], authentication)
                 self.assertEqual(shown['storage']['authentication'], authentication)
                 self.assertEqual(shown['storage']['value'], 'myacr.azurecr.io/app:v1')
@@ -1800,8 +1854,9 @@ class TestFlexRegistryIdentityMocked(unittest.TestCase):
             ('remove', remove_identity, {'type': 'SystemAssigned'}, 'None'),
         ]
         storage_cases = [
-            ('Registry Basic', _flex_registry_site, ['2023-12-01', '2025-05-01', '2025-05-01']),
+            ('Registry Basic', _flex_registry_site, ['2023-12-01', '2023-12-01']),
             ('Blob', _flex_blob_site, ['2023-12-01', '2023-12-01']),
+            ('Non-Flex', _non_flex_site, ['2023-12-01', '2023-12-01']),
         ]
         for action, update, starting_identity, expected_identity_type in actions:
             for storage_type, make_site, versions in storage_cases:
@@ -1826,6 +1881,9 @@ class TestFlexRegistryIdentityMocked(unittest.TestCase):
                     sent = arm.requests[-1][2]
                     self.assertEqual(sent['identity']['type'], expected_identity_type)
                     self.assertIsNotNone(identity)
+                    if storage_type == 'Non-Flex':
+                        self.assertNotIn('functionAppConfig', sent['properties'])
+                        continue
                     config = sent['properties']['functionAppConfig']
                     if storage_type == 'Registry Basic':
                         self.assertEqual(config['deployment']['storage']['authentication'], {
@@ -1879,7 +1937,8 @@ class TestFlexRegistryCreateMocked(unittest.TestCase):
         self.assertEqual(site['properties']['functionAppConfig'], {
             'deployment': {'storage': {'type': 'Registry', 'value': image,
                                        'authentication': {'type': 'SystemAssignedIdentity'}}},
-            'scaleAndConcurrency': {'maximumInstanceCount': 1000, 'instanceMemoryMB': 2048, 'alwaysReady': []}
+            'scaleAndConcurrency': {'maximumInstanceCount': 1000, 'instanceMemoryMB': 2048, 'alwaysReady': []},
+            'siteUpdateStrategy': {'type': 'Recreate'}
         })
         # None of the legacy Linux-container markers: container kind, linuxFxVersion or DOCKER_* app settings.
         self.assertEqual(site['kind'], 'functionapp,linux')
@@ -1907,7 +1966,8 @@ class TestFlexRegistryCreateMocked(unittest.TestCase):
                                        'authentication': {'type': 'Basic', 'usernameSettingName': 'REGISTRY_USERNAME',
                                                           'passwordSettingName': 'REGISTRY_PASSWORD'}}},
             'scaleAndConcurrency': {'maximumInstanceCount': 40, 'instanceMemoryMB': 4096,
-                                    'alwaysReady': [{'name': 'http', 'instanceCount': 2}]}
+                                    'alwaysReady': [{'name': 'http', 'instanceCount': 2}]},
+            'siteUpdateStrategy': {'type': 'Recreate'}
         })
         self.create_app_insights.assert_not_called()
 

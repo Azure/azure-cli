@@ -1736,15 +1736,6 @@ def _flex_registry_config_from_site(site):
     return None
 
 
-def _get_raw_flex_functionapp(cli_ctx, resource_group_name, name):
-    # Registry apps are re-read with the API version that publishes the Registry contract; other apps are unchanged.
-    functionapp = get_raw_functionapp(cli_ctx, resource_group_name, name)
-    function_app_config = functionapp.get("properties", {}).get("functionAppConfig") or {}
-    if _is_flex_registry_storage((function_app_config.get("deployment") or {}).get("storage") or {}):
-        functionapp = get_raw_functionapp(cli_ctx, resource_group_name, name, api_version=FLEX_REGISTRY_API_VERSION)
-    return functionapp
-
-
 def _build_flex_registry_authentication(auth_type, identity=None, username_setting=None, password_setting=None):
     """Return the Registry authentication object for exactly one mode, or None when no auth argument is given."""
     basic_args = (username_setting, password_setting)
@@ -1790,6 +1781,9 @@ def _build_flex_registry_function_app_config(image, authentication, instance_mem
             "maximumInstanceCount": maximum_instance_count or FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT,
             "instanceMemoryMB": instance_memory or FLEX_DEFAULT_INSTANCE_MEMORY_MB,
             "alwaysReady": _build_flex_always_ready_config(always_ready_instances)
+        },
+        "siteUpdateStrategy": {
+            "type": "Recreate"
         }
     }
 
@@ -2896,7 +2890,7 @@ def list_function_app(cmd, resource_group_name=None):
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
     if is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
-        return _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+        return get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
@@ -3819,21 +3813,12 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=False):
     logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
 
 
-def _get_site_for_identity_update(cli_ctx, resource_group_name, name, slot):
-    webapp = _generic_site_operation(cli_ctx, resource_group_name, name, 'get', slot)
-    if _flex_registry_config_from_site(webapp):
-        return _generic_site_operation(cli_ctx, resource_group_name, name, 'get', slot,
-                                       api_version=FLEX_REGISTRY_API_VERSION)
-    return webapp
-
-
 def _persist_identity_update(cmd, resource_group_name, name, slot, webapp):
     registry_config = _flex_registry_config_from_site(webapp)
     if registry_config:
         _prepare_flex_registry_config_for_update(registry_config)
     poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update',
-                                     extra_parameter=webapp, slot=slot,
-                                     api_version=FLEX_REGISTRY_API_VERSION if registry_config else None)
+                                     extra_parameter=webapp, slot=slot)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
@@ -3844,7 +3829,7 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
-        return _get_site_for_identity_update(cmd.cli_ctx, resource_group_name, name, slot)
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
         if webapp.identity and webapp.identity.type == ResourceIdentityType.system_assigned_user_assigned:
@@ -3890,7 +3875,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
-        return _get_site_for_identity_update(cmd.cli_ctx, resource_group_name, name, slot)
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
         if webapp.identity is None:
@@ -4241,7 +4226,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 
 
 def get_deployment_configs(cmd, resource_group_name, name):
-    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
     return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
         "deployment", {})
 
@@ -4374,6 +4359,13 @@ def _update_flex_registry_deployment_config(cmd, resource_group_name, name, imag
         storage["value"] = image
     if authentication is not None:
         storage["authentication"] = authentication
+
+    if not storage.get("value"):
+        raise RequiredArgumentMissingError('Registry deployment storage requires a non-empty image. '
+                                           'Specify --deployment-image.')
+    if not (storage.get("authentication") or {}).get("type"):
+        raise RequiredArgumentMissingError('Registry deployment storage requires an authentication type. '
+                                           'Specify --deployment-image-auth-type.')
 
     result = _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
     return result.get("properties", {}).get("functionAppConfig", {}).get("deployment", {})
@@ -4610,7 +4602,7 @@ def _update_flex_functionapp_config(cmd, resource_group_name, name, functionapp)
 
 
 def delete_always_ready_settings(cmd, resource_group_name, name, setting_names):
-    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     always_ready_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady", [])
 
@@ -4656,7 +4648,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
 
 
 def update_always_ready_settings(cmd, resource_group_name, name, settings):
-    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     if functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"].get("alwaysReady") is None:
         functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]["alwaysReady"] = []
@@ -4699,7 +4691,7 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         raise RequiredArgumentMissingError("usage error: --trigger-type must be used with parameter "
                                            "--trigger-settings.")
 
-    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     scale_config = functionapp["properties"]["functionAppConfig"]["scaleAndConcurrency"]
 
@@ -4750,7 +4742,7 @@ def set_update_strategy_config(cmd, resource_group_name, name, strategy_type):
             f"Allowed values are: {', '.join(UPDATE_STRATEGY_TYPES)}."
         )
 
-    functionapp = _get_raw_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     # Initialize siteUpdateStrategy if it doesn't exist
     if "siteUpdateStrategy" not in functionapp["properties"]["functionAppConfig"]:

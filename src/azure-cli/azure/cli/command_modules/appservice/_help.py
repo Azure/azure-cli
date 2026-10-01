@@ -601,9 +601,10 @@ long-summary: >
     arguments for a Flex Consumption app that runs a container image (Registry deployment storage). Registry settings
     are stored in the app's functionAppConfig and are separate from the legacy Linux container settings managed by
     `az functionapp config container`. Switching to Registry removes the
-    functionAppConfig runtime. The service accepting the configuration doesn't prove that the registry is reachable,
-    that access is authorized, or that deployment succeeds. The CLI doesn't track tags; setting the same tag again
-    doesn't pull a newer image.
+    functionAppConfig runtime. An existing Registry app may update just the image or authentication, but both must be
+    present in the resulting configuration. The service accepting the configuration doesn't prove that the
+    registry is reachable, that access is authorized, or that deployment succeeds. The CLI doesn't track tags; setting
+    the same tag again doesn't pull a newer image.
 examples:
   - name: Set the function app's deployment storage.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
@@ -789,7 +790,9 @@ examples:
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
-long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+long-summary: >
+    The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+    Flex Consumption apps created with --deployment-image use the Recreate site update strategy by default.
 examples:
   - name: Create a basic function app.
     text: >
