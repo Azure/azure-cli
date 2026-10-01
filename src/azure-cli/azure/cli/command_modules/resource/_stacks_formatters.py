@@ -303,13 +303,15 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not property_changes:
             return False
 
-        if (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.CREATE)
-            and property_changes.after and property_changes.after.get("properties", None)):
-            if self._format_inline_json(resource_change.change_type, property_changes.after.get("properties"), "properties"):
+        if (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.CREATE) and
+                property_changes.after and property_changes.after.get("properties", None)):
+            if self._format_inline_json(
+                    resource_change.change_type, property_changes.after.get("properties"), "properties"):
                 return True
-        elif (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE)
-              and property_changes.before and property_changes.before.get("properties", None)):
-            if self._format_inline_json(resource_change.change_type, property_changes.before.get("properties"), "properties"):
+        elif (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE) and
+                property_changes.before and property_changes.before.get("properties", None)):
+            if self._format_inline_json(
+                    resource_change.change_type, property_changes.before.get("properties"), "properties"):
                 return True
 
         if not property_changes.delta:
