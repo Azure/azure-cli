@@ -72,6 +72,17 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksDiagnosticLevel.ERROR: Color.RED,
         })
 
+    # These properties are redundant with the overall presentation of the resource
+    EXCLUDED_RESOURCE_TOP_LEVEL_PROPERTIES_FOR_PROPERTY_CHANGE_RENDERING = [
+        "apiVersion",
+        "extension",
+        "id",
+        "identifiers",
+        "name",
+        "resourceGroup",
+        "type"
+    ]
+
     def __init__(self, enable_color=True):
         self.builder: ColoredStringBuilder = ColoredStringBuilder(enable_color)
         self.what_if_result: t.Optional[StackModels.DeploymentStacksWhatIfResult] = None
@@ -303,27 +314,41 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not property_changes:
             return False
 
-        if (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.CREATE) and
-                property_changes.after and property_changes.after.get("properties", None)):
-            if self._format_inline_json(
-                    resource_change.change_type, property_changes.after.get("properties"), "properties"):
-                return True
-        elif (str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE) and
-                property_changes.before and property_changes.before.get("properties", None)):
-            if self._format_inline_json(
-                    resource_change.change_type, property_changes.before.get("properties"), "properties"):
-                return True
-
-        if not property_changes.delta:
-            return False
-
         printed = False
 
-        for property_change in property_changes.delta:
-            if self._format_change(property_change):
-                printed = True
+        before_or_after = None
+        if str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.CREATE):
+            before_or_after = property_changes.after
+        elif str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE):
+            before_or_after = property_changes.before
+
+        if before_or_after:
+            property_keys = self._get_filtered_resource_top_level_property_keys(before_or_after)
+
+            for key in property_keys:
+                if self._format_inline_json(resource_change.change_type, before_or_after.get(key, None), key):
+                    printed = True
+        else:
+            if not property_changes.delta:
+                return False
+
+            for property_change in property_changes.delta:
+                if self._format_change(property_change):
+                    printed = True
 
         return printed
+
+    def _get_filtered_resource_top_level_property_keys(
+        self,
+        before_or_after: t.Optional[dict[str, t.Any]]
+    ) -> list[str]:
+        if not before_or_after:
+            return []
+
+        return sorted([
+            key for key, value in before_or_after.items()
+            if key not in self.EXCLUDED_RESOURCE_TOP_LEVEL_PROPERTIES_FOR_PROPERTY_CHANGE_RENDERING
+        ], key=lambda k: (k == "properties", k))
 
     def _format_diagnostics(self) -> bool:
         if not self.what_if_props or not self.what_if_props.diagnostics or len(self.what_if_props.diagnostics) == 0:

@@ -164,6 +164,7 @@ Azure
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD [2021-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"NotManaged"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus"{Color.RESET}
     {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
       {Color.GREEN}  "property1": "resourceD"{Color.RESET}
       {Color.GREEN}}}{Color.RESET}
@@ -301,6 +302,15 @@ Azure
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} kind: {Color.GREEN}"StorageV2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} sku: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "name": "Standard_LRS"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} tags: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "owner": "what-if-visual-validation",{Color.RESET}
+      {Color.GREEN}  "scenario": "definite-create"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
     {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
       {Color.GREEN}  "allowBlobPublicAccess": false,{Color.RESET}
       {Color.GREEN}  "allowSharedKeyAccess": false,{Color.RESET}
@@ -339,6 +349,16 @@ Azure
   {Color.CYAN}?{Color.RESET}{Color.GREEN}+{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} condition: {Color.GREEN}"[greater(int(utcNow('%f')), 4)]"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} kind: {Color.GREEN}"StorageV2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} sku: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "name": "Standard_LRS"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} tags: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "owner": "what-if-visual-validation",{Color.RESET}
+      {Color.GREEN}  "scenario": "potential-create"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
     {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
       {Color.GREEN}  "allowBlobPublicAccess": false,{Color.RESET}
       {Color.GREEN}  "allowSharedKeyAccess": false,{Color.RESET}
