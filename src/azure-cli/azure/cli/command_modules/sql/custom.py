@@ -1787,7 +1787,7 @@ def db_delete_replica_link(
         # provided. We don't care about this parameter and it gets handled weirdly if we
         # expliclty specify it with default value here (e.g. `yes=None` or `yes=True`), receiving
         # it in kwargs seems to work.
-        **kwargs):  # pylint: disable=unused-argument
+        **_kwargs):
     '''
     Deletes a replication link.
     '''
