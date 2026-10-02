@@ -3573,18 +3573,20 @@ def stream_containerapp_logs(cmd, resource_group_name, name, container=None, rev
         if output_format and output_format != "json":
             raise MutuallyExclusiveArgumentError("--type: only json logs supported for system logs")
 
-    sub = get_subscription_id(cmd.cli_ctx)
     token_response = ContainerAppClient.get_auth_token(cmd, resource_group_name, name)
     token = token_response["properties"]["token"]
 
-    base_url = ContainerAppClient.show(cmd, resource_group_name, name)["properties"]["eventStreamEndpoint"]
-    base_url = base_url[:base_url.index("/subscriptions/")]
-
     if kind == LOG_TYPE_CONSOLE:
-        url = (f"{base_url}/subscriptions/{sub}/resourceGroups/{resource_group_name}/containerApps/{name}"
-               f"/revisions/{revision}/replicas/{replica}/containers/{container}/logstream")
+        replica_payload = ContainerAppClient.get_replica(cmd, resource_group_name, name, revision, replica)
+        containers = safe_get(replica_payload, "properties", "containers", default=[])
+        container_name = container or ""
+        container_info = next((c for c in containers if c["name"].lower() == container_name.lower()), None)
+        if not container_info:
+            raise ResourceNotFoundError(f"Could not find container '{container}' in replica '{replica}'")
+        url = container_info["logStreamEndpoint"]
     else:
-        url = f"{base_url}/subscriptions/{sub}/resourceGroups/{resource_group_name}/containerApps/{name}/eventstream"
+        container_app = ContainerAppClient.show(cmd, resource_group_name, name)
+        url = container_app["properties"]["eventStreamEndpoint"]
 
     logger.info("connecting to : %s", url)
     request_params = {"follow": str(follow).lower(),
