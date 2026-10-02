@@ -64,6 +64,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_AVAILABILITY_SET,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_VIRTUAL_MACHINES,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
@@ -9354,6 +9357,54 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_mc_4 = dec_4.set_up_bootstrap_profile(mc_4)
 
+    def test_set_up_agentpool_profile_ssh_access(self):
+        # no ssh_access specified, no change
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        agentpool_profile_1 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[agentpool_profile_1],
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_agentpool_profile_ssh_access(mc_1)
+        ground_truth_agentpool_profile_1 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agentpool_profile_1],
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # ssh_access specified, applied to all agent pool profiles
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        agentpool_profile_2 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[agentpool_profile_2],
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_agentpool_profile_ssh_access(mc_2)
+        ground_truth_agentpool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
+            name="nodepool1",
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            ),
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agentpool_profile_2],
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -9423,6 +9474,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+            ),
         )
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
             public_keys=[self.models.ContainerServiceSshPublicKey(key_data=public_key)]

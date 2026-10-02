@@ -61,6 +61,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_WEEKINDEX_LAST,
     CONST_MANAGED_CLUSTER_SKU_NAME_BASE,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
@@ -205,6 +208,11 @@ node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WIN
 node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
+ssh_accesses = [
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
+]
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
@@ -689,6 +697,8 @@ def load_arguments(self, _):
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('enable_vtpm', action="store_true")
         c.argument('enable_secure_boot', action="store_true")
+        # in creation scenario, use "localuser" as default
+        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), default=CONST_SSH_ACCESS_LOCALUSER, is_preview=True)
         # advanced networking
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
@@ -1291,6 +1301,8 @@ def load_arguments(self, _):
         c.argument("message_of_the_day", validator=validate_message_of_the_day)
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
+        # in creation scenario, use "localuser" as default
+        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), default=CONST_SSH_ACCESS_LOCALUSER, is_preview=True)
         c.argument("if_match")
         c.argument("if_none_match")
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
@@ -1328,6 +1340,9 @@ def load_arguments(self, _):
         c.argument('disable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
+        # in update scenario, use empty str as default
+        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), is_preview=True)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')

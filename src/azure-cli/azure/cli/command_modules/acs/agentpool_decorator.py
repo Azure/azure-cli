@@ -24,6 +24,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SSH_ACCESS_LOCALUSER,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_VIRTUAL_MACHINES,
     CONST_OS_SKU_WINDOWS2019,
@@ -51,6 +52,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 logger = get_logger(__name__)
 
@@ -1990,6 +1992,18 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return workload_runtime
 
+    def get_ssh_access(self) -> Union[str, None]:
+        """Obtain the value of ssh_access.
+        """
+        return self.raw_param.get("ssh_access")
+
+    def get_yes(self) -> bool:
+        """Obtain the value of yes.
+
+        :return: bool
+        """
+        return self.raw_param.get("yes")
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -2328,6 +2342,25 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Set up the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.ssh_access = ssh_access
+            if ssh_access == CONST_SSH_ACCESS_LOCALUSER:
+                logger.warning(
+                    "The new node pool will enable SSH access, recommended to use "
+                    "'--ssh-access disabled' option to disable SSH access for the node pool to make it more secure."
+                )
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -2538,6 +2571,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_crg_id(agentpool)
         # set up agentpool security profile
         agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up agentpool ssh access
+        agentpool = self.set_up_ssh_access(agentpool)
         # set up message of the day
         agentpool = self.set_up_motd(agentpool)
         # set up gpu profile
@@ -2951,6 +2986,31 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Update the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            current_ssh_access = agentpool.security_profile.ssh_access
+            # already set to the same value, directly return
+            if current_ssh_access is not None and current_ssh_access.lower() == ssh_access.lower():
+                return agentpool
+
+            msg = (
+                f"You're going to update agentpool {agentpool.name} ssh access to '{ssh_access}' "
+                "This change will take effect after you upgrade the nodepool. Proceed?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+            agentpool.security_profile.ssh_access = ssh_access
+        return agentpool
+
     def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -3010,6 +3070,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_vtpm(agentpool)
         # update secure boot
         agentpool = self.update_secure_boot(agentpool)
+        # update ssh access
+        agentpool = self.update_ssh_access(agentpool)
         # update local DNS profile
         agentpool = self.update_localdns_profile(agentpool)
         # update gpu profile

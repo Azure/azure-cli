@@ -25,6 +25,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_VIRTUAL_MACHINES,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
@@ -2852,6 +2855,82 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_ssh_access(self):
+        # default is localuser, warning is logged
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_LOCALUSER},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_ssh_access(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_ssh_access(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # disabled
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.set_up_ssh_access(agentpool_2)
+        dec_agentpool_2 = self._restore_defaults_in_agentpool(dec_agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # entraid
+        dec_3 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_ENTRAID},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_3.context.attach_agentpool(agentpool_3)
+        dec_agentpool_3 = dec_3.set_up_ssh_access(agentpool_3)
+        dec_agentpool_3 = self._restore_defaults_in_agentpool(dec_agentpool_3)
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_ENTRAID,
+            )
+        )
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
+        # None, no change
+        dec_4 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_4.context.attach_agentpool(agentpool_4)
+        dec_agentpool_4 = dec_4.set_up_ssh_access(agentpool_4)
+        dec_agentpool_4 = self._restore_defaults_in_agentpool(dec_agentpool_4)
+        ground_truth_agentpool_4 = self.create_initialized_agentpool_instance()
+        self.assertEqual(dec_agentpool_4, ground_truth_agentpool_4)
+
     def common_set_up_gpu_profile(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
@@ -3098,6 +3177,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
+
+    def test_set_up_ssh_access(self):
+        self.common_set_up_ssh_access()
     
     def test_set_up_gpu_profile(self):
         self.common_set_up_gpu_profile()
@@ -3153,6 +3235,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        # CLI will create sshAccess=localuser by default
+        ground_truth_security_profile_1 = self.models.AgentPoolSecurityProfile()
+        ground_truth_security_profile_1.ssh_access = CONST_SSH_ACCESS_LOCALUSER
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="test_nodepool_name",
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
@@ -3170,6 +3255,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            security_profile=ground_truth_security_profile_1,
         )
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
@@ -3268,6 +3354,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
 
+    def test_set_up_ssh_access(self):
+        self.common_set_up_ssh_access()
+
     def test_set_up_virtual_machines_profile(self):
         self.common_set_up_virtual_machines_profile()
 
@@ -3316,6 +3405,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        # CLI will create sshAccess=localuser by default
+        ground_truth_security_profile_1 = self.models.AgentPoolSecurityProfile()
+        ground_truth_security_profile_1.ssh_access = CONST_SSH_ACCESS_LOCALUSER
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="nodepool1",
             orchestrator_version="",
@@ -3334,6 +3426,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            security_profile=ground_truth_security_profile_1,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -3718,6 +3811,80 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_3.update_artifact_streaming(agentpool_2)
 
+    def common_update_ssh_access(self):
+        # set a new value with --yes, no prompt
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED, "yes": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_ssh_access(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_ssh_access(agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # None, no change
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_ssh_access(agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance()
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # already set to the same value, no prompt needed, directly return
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        dec_3.context.attach_agentpool(agentpool_3)
+        dec_agentpool_3 = dec_3.update_ssh_access(agentpool_3)
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
+        # prompt rejected, early exit
+        dec_4 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_ENTRAID, "yes": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance()
+        dec_4.context.attach_agentpool(agentpool_4)
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec_4.update_ssh_access(agentpool_4)
+
     def common_update_managed_dranet(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
@@ -4016,6 +4183,9 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
     def test_update_managed_dranet(self):
         self.common_update_managed_dranet()
 
+    def test_update_ssh_access(self):
+        self.common_update_ssh_access()
+
     def test_update_agentpool_profile_default(self):
         import inspect
 
@@ -4152,6 +4322,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
 
     def test_update_managed_dranet(self):
         self.common_update_managed_dranet()
+
+    def test_update_ssh_access(self):
+        self.common_update_ssh_access()
 
     def test_update_agentpool_profile_default(self):
         import inspect
