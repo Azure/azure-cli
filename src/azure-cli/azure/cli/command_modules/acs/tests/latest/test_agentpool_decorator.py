@@ -3180,7 +3180,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_ssh_access(self):
         self.common_set_up_ssh_access()
-    
+
     def test_set_up_gpu_profile(self):
         self.common_set_up_gpu_profile()
 

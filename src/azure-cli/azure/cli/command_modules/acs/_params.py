@@ -702,7 +702,6 @@ def load_arguments(self, _):
             'ssh_access',
             arg_type=get_enum_type(ssh_accesses),
             default=CONST_SSH_ACCESS_LOCALUSER,
-            is_preview=True,
             help='Configure SSH access for the first system node pool.',
         )
         # advanced networking
@@ -1308,7 +1307,12 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         # in creation scenario, use "localuser" as default
-        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), default=CONST_SSH_ACCESS_LOCALUSER, is_preview=True)
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            default=CONST_SSH_ACCESS_LOCALUSER,
+            help='Configure SSH access for the node pool.',
+        )
         c.argument("if_match")
         c.argument("if_none_match")
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
@@ -1347,7 +1351,11 @@ def load_arguments(self, _):
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
         # in update scenario, use empty str as default
-        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), is_preview=True)
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            help='Update SSH access for the node pool. This change takes effect after the node pool is upgraded.',
+        )
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
