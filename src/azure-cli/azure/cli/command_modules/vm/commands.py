@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -180,6 +180,7 @@ def load_command_table(self, _):
         g.custom_command('stop', 'stop_vm', validator=process_vm_vmss_stop, supports_no_wait=True)
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
+        g.custom_command('cp', 'vm_cp')
 
         from .operations.vm import VMCapture
         self.command_table['vm capture'] = VMCapture(loader=self)
