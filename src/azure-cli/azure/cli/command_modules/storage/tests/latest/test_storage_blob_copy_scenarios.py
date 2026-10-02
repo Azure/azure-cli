@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 from unittest import TestCase, mock
+
+from azure.storage.blob import BlobServiceClient
 
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 from ...operations import blob as blob_operations
@@ -11,6 +14,26 @@ from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageBlobCopySecurityTests(TestCase):
+    def test_storage_blob_copy_preserves_source_sas_for_custom_endpoint(self):
+        account_key = base64.b64encode(b'account-key').decode()
+        service_client = BlobServiceClient(
+            account_url='https://storage.internal.example',
+            credential={'account_name': 'account', 'account_key': account_key})
+        destination_client = service_client.get_blob_client(container='dst', blob='output')
+        source_url = 'https://storage.internal.example/src/input?sp=r&sig=existing'
+
+        self.assertIsNone(destination_client.from_blob_url(source_url).account_name)
+
+        with mock.patch.object(destination_client, 'upload_blob_from_url') as upload_blob_from_url:
+            blob_operations.copy_blob(
+                mock.MagicMock(), destination_client, source_url,
+                requires_sync=False, destination_blob_type='BlockBlob')
+
+        upload_blob_from_url.assert_called_once_with(
+            source_url=source_url, overwrite=True, tags=None, destination_lease=None,
+            standard_blob_tier=None, source_if_modified_since=None, source_if_unmodified_since=None,
+            if_modified_since=None, if_unmodified_since=None, timeout=None)
+
     def test_storage_blob_copy_source_origin_normalization(self):
         equivalent_origins = [
             ('https://account.blob.core.windows.net/container/source',

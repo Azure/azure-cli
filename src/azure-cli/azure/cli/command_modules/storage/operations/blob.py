@@ -1120,10 +1120,10 @@ def _same_url_origin(first_url, second_url):
     return first_origin is not None and first_origin == _normalize_url_origin(second_url)
 
 
-def _account_names_match_if_available(first_client, second_client):
+def _account_names_match(first_client, second_client):
     first_account = first_client.account_name
     second_account = second_client.account_name
-    return not first_account or not second_account or first_account.lower() == second_account.lower()
+    return bool(first_account and second_account and first_account.lower() == second_account.lower())
 
 
 def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
@@ -1135,7 +1135,7 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if src_client is None:
         src_client = client.from_blob_url(source_url)
         source_matches_destination = _same_url_origin(source_url, client.url) and \
-            _account_names_match_if_available(src_client, client)
+            _account_names_match(src_client, client)
         can_reuse_destination_credential = source_is_validated_same_account or source_matches_destination
         if can_reuse_destination_credential:
             src_client = client.from_blob_url(source_url, credential=client.credential)
