@@ -698,7 +698,13 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', action="store_true")
         c.argument('enable_secure_boot', action="store_true")
         # in creation scenario, use "localuser" as default
-        c.argument('ssh_access', arg_type=get_enum_type(ssh_accesses), default=CONST_SSH_ACCESS_LOCALUSER, is_preview=True)
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            default=CONST_SSH_ACCESS_LOCALUSER,
+            is_preview=True,
+            help='Configure SSH access for the first system node pool.',
+        )
         # advanced networking
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
