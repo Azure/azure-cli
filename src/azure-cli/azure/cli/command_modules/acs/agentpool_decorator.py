@@ -24,7 +24,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
-    CONST_SSH_ACCESS_LOCALUSER,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_VIRTUAL_MACHINES,
     CONST_OS_SKU_WINDOWS2019,
@@ -2354,11 +2353,6 @@ class AKSAgentPoolAddDecorator:
             if agentpool.security_profile is None:
                 agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
             agentpool.security_profile.ssh_access = ssh_access
-            if ssh_access == CONST_SSH_ACCESS_LOCALUSER:
-                logger.warning(
-                    "The new node pool will enable SSH access, recommended to use "
-                    "'--ssh-access disabled' option to disable SSH access for the node pool to make it more secure."
-                )
         return agentpool
 
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:

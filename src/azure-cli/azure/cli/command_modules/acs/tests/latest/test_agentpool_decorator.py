@@ -2856,7 +2856,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_ssh_access(self):
-        # default is localuser, warning is logged
+        # default is localuser
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
