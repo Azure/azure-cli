@@ -1,75 +1,89 @@
+schema_version: 1
+repository: Azure/azure-cli
+profile:
+  owner: Azure
+  repo: azure-cli
+  base_branch: dev
+  kind: cli
+  live_test: true
+  generation_source_repository: Azure/aaz
+  workflow: full
+  triage_labels:
+  - bug
+  triage_agent: Fixer
+  triage_handoffs: {}
+  needs_info_label: agent-assist-needs-info
+  live_test_workflow: live-test.yml
+  module_root: src/azure-cli/azure/cli/command_modules
+  target_kind: module
+  title_style: cli
+  pr_doc_url: https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests
 agents:
-  - coordinator
-  - fixer
-  - tester
-  - reviewer
-skills:
-  - auto_trigger_pr_validation
-  - build_promoted_pr_body
-  - codegen_execution_guidance
-  - compare_issue_similarity
-  - copilot_iteration_cap_reached
-  - copilot_iteration_state
-  - daily_pr_cap_reached
-  - dispatch_live_test_workflow
-  - find_copilot_fork_prs_ready_for_promotion
-  - find_fork_prs_needing_ci
-  - find_generation_source_fork_prs_ready_for_promotion
-  - find_in_flight_prs
-  - find_promoted_generation_source_pr
-  - find_sensitive_redaction_dispute
-  - find_stale_prs
-  - follow_up_requirements
-  - format_actionable_ci_failures
-  - format_pr_risk_assessment
-  - format_review_skill_findings
-  - format_test_validation
-  - get_blocking_human_reviews
-  - get_pr
-  - get_pr_check_runs
-  - get_pr_check_summary
-  - get_pr_file_changes
-  - get_pr_review_skill_summary
-  - get_profile
-  - get_workflow_run
-  - handle_sensitive_redaction_dispute
-  - has_agent_reviewed_head
-  - list_repository_directories
-  - mark_pr_ready_for_review
-  - post_bug_analysis
-  - post_comment
-  - post_copilot_human_review_handoff
-  - post_pr_review
-  - pr_format_guidance
-  - pr_title_for
-  - promote_generation_source_fork_pr
-  - promote_copilot_fork_pr
-  - recall_repository_memory
-  - remediate_sensitive_issue
-  - remediate_sensitive_pull_request
-  - remember_repository_feedback_rule
-  - remember_repository_observation
-  - repair_pr_title_check
-  - request_copilot_changes
-  - request_copilot_human_review_changes
-  - request_requirements
-  - requirements_request_state
-  - rerun_stale_pr_checks
-  - safe_issue_view
-  - select_triagable_issues_for_repo
-  - similar_issue_candidates
-  - start_copilot_fork_task
-  - start_generation_source_task
-  - start_repository_handoff_task
-  - synchronize_pull_request_feedback
-  - synchronize_repository_feedback
-  - update_pr_branch
-custom_skills:
-  changed_test_files: changed_test_files
-  find_aaz_fork_prs_ready_for_promotion: find_aaz_fork_prs_ready_for_promotion
-  find_promoted_aaz_source_pr: find_promoted_aaz_source_pr
-  get_pr_regression_coverage_summary: get_pr_regression_coverage_summary
-  infer_target_for_repo: infer_target_for_repo
-  promote_aaz_fork_pr: promote_aaz_fork_pr
-  start_aaz_source_task: start_aaz_source_task
-  start_extension_tracker_task: start_extension_tracker_task
+  Coordinator: definitions/coordinator.md
+  Fixer: definitions/fixer.md
+  Tester: definitions/tester.md
+  Reviewer: definitions/reviewer.md
+tools:
+  fixer.azure_cli.aaz:
+    role: Fixer
+    path: tools/fixer/azure_cli/aaz.py
+  fixer.azure_cli.guidance:
+    role: Fixer
+    path: tools/fixer/azure_cli/guidance.py
+  fixer.azure_cli.routing:
+    role: Fixer
+    path: tools/fixer/azure_cli/routing.py
+  fixer.azure_cli.targets:
+    role: Fixer
+    path: tools/fixer/azure_cli/targets.py
+  tester.azure_cli.live_tests:
+    role: Tester
+    path: tools/tester/azure_cli/live_tests.py
+  reviewer.azure_cli.failures:
+    role: Reviewer
+    path: tools/reviewer/azure_cli/failures.py
+  reviewer.azure_cli.review:
+    role: Reviewer
+    path: tools/reviewer/azure_cli/review.py
+  fixer.formatting.guidance:
+    role: Fixer
+    path: tools/fixer/formatting/guidance.py
+  reviewer.policy.analysis:
+    role: Reviewer
+    path: tools/reviewer/policy/analysis.py
+  fixer.title_gate.title_repair:
+    role: Fixer
+    path: tools/fixer/title_gate/title_repair.py
+  validation.checks:
+    role: Coordinator
+    path: tools/validation/checks.py
+files:
+- README.md
+- definitions/coordinator.md
+- definitions/fixer.md
+- definitions/reviewer.md
+- definitions/tester.md
+- tools/fixer/azure_cli/aaz.py
+- tools/fixer/azure_cli/guidance.py
+- tools/fixer/azure_cli/routing.py
+- tools/fixer/azure_cli/targets.py
+- tools/fixer/formatting/guidance.py
+- tools/fixer/title_gate/title_repair.py
+- tools/reviewer/azure_cli/failures.py
+- tools/reviewer/azure_cli/review.py
+- tools/reviewer/policy/analysis.py
+- tools/settings.py
+- tools/tester/azure_cli/live_tests.py
+- tools/validation/checks.py
+dependencies:
+  validation:
+    entry_point: tools/validation/checks.py:repository_checks
+    repositories:
+    - Azure/azure-cli
+    - Azure/aaz
+  python:
+    azure-cli: 2.90.0
+    azure-cli-testsdk: 0.3.0
+    azdev: 0.2.13
+    aaz-dev: 4.6.2
+    pytest: 8.4.2
