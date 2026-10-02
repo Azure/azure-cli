@@ -67,6 +67,11 @@ CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 CONST_GPU_DRIVER_INSTALL = "Install"
 CONST_GPU_DRIVER_NONE = "None"
 
+# SSH Access Consts
+CONST_SSH_ACCESS_LOCALUSER = "localuser"
+CONST_SSH_ACCESS_DISABLED = "disabled"
+CONST_SSH_ACCESS_ENTRAID = "entraid"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
