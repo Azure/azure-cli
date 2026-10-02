@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-AZ_INSTALLER=MSI "$(dirname "${BASH_SOURCE[0]}")/../python.exe" -IBm azure.cli "$@"
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+export PYTHONPATH="$(dirname "$SCRIPT_DIR")"
+AZ_INSTALLER=MSI "$SCRIPT_DIR/../python.exe" -IBm azure.cli "$@"
