@@ -39,6 +39,7 @@ from azure.cli.command_modules.appservice.custom import (
     set_update_strategy_config,
     show_functionapp,
     update_always_ready_settings,
+    update_app_settings_functionapp,
     update_deployment_configs,
     update_runtime_config,
     update_scale_config)
@@ -1838,6 +1839,16 @@ class TestFlexRegistryDeploymentConfigMocked(unittest.TestCase):
             update_runtime_config(self.cmd, 'rg', 'app', runtime_version='3.12')
 
         self.assertEqual(arm.calls(), [('GET', _REGISTRY_SITE, '2023-12-01')])
+
+    def test_app_settings_set_skips_the_runtime_check_for_registry_storage(self):
+        with _fake_arm(_flex_registry_site()), \
+                mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory') as client_factory, \
+                mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[]), \
+                mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings') as update_settings:
+            client_factory.return_value.web_apps.get.return_value = mock.Mock(kind='functionapp,linux', reserved=True)
+            update_app_settings_functionapp(self.cmd, 'rg', 'app', settings=['REGISTRY_USERNAME=myacr'])
+
+        update_settings.assert_called_once_with(self.cmd, 'rg', 'app', ['REGISTRY_USERNAME=myacr'], None, None)
 
 
 class TestFlexRegistryIdentityMocked(unittest.TestCase):

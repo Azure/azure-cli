@@ -14293,7 +14293,8 @@ def _get_functionapp_runtime_info(cmd, resource_group, name, slot, is_linux):  #
             break
 
     if is_flex_functionapp(cmd.cli_ctx, resource_group, name):
-        app_runtime_config = get_runtime_config(cmd, resource_group, name)
+        # Apps with Registry deployment storage have no runtime.
+        app_runtime_config = get_runtime_config(cmd, resource_group, name) or {}
         app_runtime = app_runtime_config.get("name", "")
         app_runtime_version = app_runtime_config.get("version", "")
         return _get_functionapp_runtime_info_helper(cmd, app_runtime, app_runtime_version, "~4", None)
