@@ -2,9 +2,8 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Build Status](https://dev.azure.com/azure-sdk/public/_apis/build/status/cli/Azure.azure-cli?branchName=dev)](https://dev.azure.com/azure-sdk/public/_build/latest?definitionId=246&branchName=dev)
-[![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI*, our cross-platform command line experience for Azure.
 
 Take a test run now from [Azure Cloud Shell](https://portal.azure.com/#cloudshell)!
 
@@ -153,7 +152,6 @@ You can download the latest builds by following the links below:
 |:-----------------:|:-------------------------------------------|
 |        MSI        | https://aka.ms/InstallAzureCliWindowsEdge  |
 | Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
-| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
 | Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
@@ -174,7 +172,7 @@ You can install the edge build on Ubuntu Jammy with the following command:
 curl --location --silent --output azure-cli_jammy.deb https://aka.ms/InstallAzureCliJammyEdge && dpkg -i azure-cli_jammy.deb
 ```
 
-And install the edge build with rpm package on RHEL 8 or CentOS Stream 8:
+And install the edge build with rpm package on RHEL 8:
 
 ```bash
 dnf install -y $(curl --location --silent --output /dev/null --write-out %{url_effective} https://aka.ms/InstallAzureCliRpmEl8Edge)
