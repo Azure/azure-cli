@@ -13,16 +13,18 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption budget show",
-    is_preview=True,
 )
 class Show(AAZCommand):
-    """Get the budget for a subscription by budget name.
+    """Get the budget for the scope by budget name.
+
+    :example: Budget
+        az consumption budget show --scope subscriptions/00000000-0000-0000-0000-000000000000 --budget-name TestBudget
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/budgets/{}", "2023-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.consumption/budgets/{}", "2024-08-01"],
         ]
     }
 
@@ -42,11 +44,15 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.budget_name = AAZStrArg(
-            options=["-n", "--name", "--budget-name"],
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name"],
             help="Budget Name.",
             required=True,
-            id_part="name",
+        )
+        _args_schema.scope = AAZStrArg(
+            options=["--scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
+            required=True,
         )
         return cls._args_schema
 
@@ -81,7 +87,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
+                "/{scope}/providers/Microsoft.Consumption/budgets/{budgetName}",
                 **self.url_parameters
             )
 
@@ -91,17 +97,18 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "budgetName", self.ctx.args.budget_name,
+                    "budgetName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "scope", self.ctx.args.scope,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -111,7 +118,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -156,6 +163,10 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -169,8 +180,13 @@ class Show(AAZCommand):
             )
             properties.current_spend = AAZObjectType(
                 serialized_name="currentSpend",
+                flags={"read_only": True},
             )
-            properties.filters = AAZObjectType()
+            properties.filter = AAZObjectType()
+            properties.forecast_spend = AAZObjectType(
+                serialized_name="forecastSpend",
+                flags={"read_only": True},
+            )
             properties.notifications = AAZDictType()
             properties.time_grain = AAZStrType(
                 serialized_name="timeGrain",
@@ -189,21 +205,29 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            filters = cls._schema_on_200.properties.filters
-            filters.meters = AAZListType()
-            filters.resource_groups = AAZListType(
-                serialized_name="resourceGroups",
+            filter = cls._schema_on_200.properties.filter
+            filter["and"] = AAZListType()
+            filter.dimensions = AAZObjectType()
+            _ShowHelper._build_schema_budget_comparison_expression_read(filter.dimensions)
+            filter.tags = AAZObjectType()
+            _ShowHelper._build_schema_budget_comparison_expression_read(filter.tags)
+
+            and_ = cls._schema_on_200.properties.filter["and"]
+            and_.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.filter["and"].Element
+            _element.dimensions = AAZObjectType()
+            _ShowHelper._build_schema_budget_comparison_expression_read(_element.dimensions)
+            _element.tags = AAZObjectType()
+            _ShowHelper._build_schema_budget_comparison_expression_read(_element.tags)
+
+            forecast_spend = cls._schema_on_200.properties.forecast_spend
+            forecast_spend.amount = AAZFloatType(
+                flags={"read_only": True},
             )
-            filters.resources = AAZListType()
-
-            meters = cls._schema_on_200.properties.filters.meters
-            meters.Element = AAZStrType()
-
-            resource_groups = cls._schema_on_200.properties.filters.resource_groups
-            resource_groups.Element = AAZStrType()
-
-            resources = cls._schema_on_200.properties.filters.resources
-            resources.Element = AAZStrType()
+            forecast_spend.unit = AAZStrType(
+                flags={"read_only": True},
+            )
 
             notifications = cls._schema_on_200.properties.notifications
             notifications.Element = AAZObjectType()
@@ -222,11 +246,15 @@ class Show(AAZCommand):
             _element.enabled = AAZBoolType(
                 flags={"required": True},
             )
+            _element.locale = AAZStrType()
             _element.operator = AAZStrType(
                 flags={"required": True},
             )
             _element.threshold = AAZFloatType(
                 flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
             )
 
             contact_emails = cls._schema_on_200.properties.notifications.Element.contact_emails
@@ -247,11 +275,61 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
 
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
             return cls._schema_on_200
 
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_budget_comparison_expression_read = None
+
+    @classmethod
+    def _build_schema_budget_comparison_expression_read(cls, _schema):
+        if cls._schema_budget_comparison_expression_read is not None:
+            _schema.name = cls._schema_budget_comparison_expression_read.name
+            _schema.operator = cls._schema_budget_comparison_expression_read.operator
+            _schema.values = cls._schema_budget_comparison_expression_read.values
+            return
+
+        cls._schema_budget_comparison_expression_read = _schema_budget_comparison_expression_read = AAZObjectType()
+
+        budget_comparison_expression_read = _schema_budget_comparison_expression_read
+        budget_comparison_expression_read.name = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.operator = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_budget_comparison_expression_read.values
+        values.Element = AAZStrType()
+
+        _schema.name = cls._schema_budget_comparison_expression_read.name
+        _schema.operator = cls._schema_budget_comparison_expression_read.operator
+        _schema.values = cls._schema_budget_comparison_expression_read.values
 
 
 __all__ = ["Show"]
