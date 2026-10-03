@@ -278,8 +278,7 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
 
 
 def _normalize_flex_location(location):
-    # Stage geo regions use display names such as "North Central US (Stage)" for ARM location "northcentralusstage".
-    return location.lower().replace(" ", "").replace("(", "").replace(")", "")
+    return location.lower().replace(" ", "")
 
 
 # can't just normalize locations with location.lower().replace(" ", "") because of UAE/UK regions

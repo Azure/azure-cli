@@ -35,7 +35,6 @@ from azure.cli.command_modules.appservice.custom import (
     delete_always_ready_settings,
     get_deployment_configs,
     list_flexconsumption_locations,
-    list_flexconsumption_zone_redundant_locations,
     remove_identity,
     set_update_strategy_config,
     show_functionapp,
@@ -2040,6 +2039,5 @@ class TestFlexConsumptionLocationsMocked(unittest.TestCase):
             SimpleNamespace(name='West Europe', org_domain='PUBLIC;FLEXCONSUMPTION')]
         cmd = _get_test_cmd()
 
-        expected = [{'name': 'eastus'}, {'name': 'northcentralusstage'}]
+        expected = [{'name': 'eastus'}, {'name': 'northcentralus(stage)'}]
         self.assertEqual(list_flexconsumption_locations(cmd), expected)
-        self.assertEqual(list_flexconsumption_zone_redundant_locations(cmd), expected)
