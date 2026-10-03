@@ -8,6 +8,7 @@ import unittest
 from contextlib import contextmanager
 from unittest import mock
 from urllib.parse import parse_qs, urlparse
+from types import SimpleNamespace
 import os
 
 from azure.mgmt.web import WebSiteManagementClient
@@ -33,6 +34,8 @@ from azure.cli.command_modules.appservice.custom import (
     create_functionapp,
     delete_always_ready_settings,
     get_deployment_configs,
+    list_flexconsumption_locations,
+    list_flexconsumption_zone_redundant_locations,
     remove_identity,
     set_update_strategy_config,
     show_functionapp,
@@ -2023,3 +2026,20 @@ class TestFlexRegistryArgumentParsing(unittest.TestCase):
                         DummyCli().invoke(args + [flag, 'https://myacr.azurecr.io'], out_file=io.StringIO())
                     self.assertEqual(error.exception.code, 2)
                 handler_mock.assert_called_once()
+
+
+class TestFlexConsumptionLocationsMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_subscription_locations',
+                return_value=['eastus', 'northcentralusstage'])
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_stage_geo_region_names_match_subscription_locations(self, web_client_factory, _):
+        web_client_factory.return_value.list_geo_regions.return_value = [
+            SimpleNamespace(name='East US', org_domain='PUBLIC;FLEXCONSUMPTION;FCZONEREDUNDANCY'),
+            SimpleNamespace(name='North Central US (Stage)', org_domain='PUBLIC;FLEXCONSUMPTION;FCZONEREDUNDANCY'),
+            SimpleNamespace(name='West Europe', org_domain='PUBLIC;FLEXCONSUMPTION')]
+        cmd = _get_test_cmd()
+
+        expected = [{'name': 'eastus'}, {'name': 'northcentralusstage'}]
+        self.assertEqual(list_flexconsumption_locations(cmd), expected)
+        self.assertEqual(list_flexconsumption_zone_redundant_locations(cmd), expected)

@@ -11188,7 +11188,7 @@ def list_flexconsumption_locations(cmd, zone_redundant=False, show_details=False
     if zone_redundant:
         regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
 
-    regions = [x.name.lower().replace(' ', '') for x in regions]
+    regions = [_normalize_flex_location(x.name) for x in regions]
     sub_regions_list = get_subscription_locations(cmd.cli_ctx)
     regions = [x for x in regions if x in sub_regions_list]
 
@@ -11220,7 +11220,7 @@ def list_flexconsumption_zone_redundant_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku="FlexConsumption")
     regions = [x for x in regions if "FCZONEREDUNDANCY" in x.org_domain]
-    return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+    return [{'name': _normalize_flex_location(x.name)} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None, managed_instance_enabled=None):
