@@ -1,89 +1,10 @@
 schema_version: 1
 repository: Azure/azure-cli
-profile:
-  owner: Azure
-  repo: azure-cli
-  base_branch: dev
-  kind: cli
-  live_test: true
-  generation_source_repository: Azure/aaz
-  workflow: full
-  triage_labels:
-  - bug
-  triage_agent: Fixer
-  triage_handoffs: {}
-  needs_info_label: agent-assist-needs-info
-  live_test_workflow: live-test.yml
-  module_root: src/azure-cli/azure/cli/command_modules
-  target_kind: module
-  title_style: cli
-  pr_doc_url: https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests
-agents:
-  Coordinator: definitions/coordinator.md
-  Fixer: definitions/fixer.md
-  Tester: definitions/tester.md
-  Reviewer: definitions/reviewer.md
-tools:
-  fixer.azure_cli.aaz:
-    role: Fixer
-    path: tools/fixer/azure_cli/aaz.py
-  fixer.azure_cli.guidance:
-    role: Fixer
-    path: tools/fixer/azure_cli/guidance.py
-  fixer.azure_cli.routing:
-    role: Fixer
-    path: tools/fixer/azure_cli/routing.py
-  fixer.azure_cli.targets:
-    role: Fixer
-    path: tools/fixer/azure_cli/targets.py
-  tester.azure_cli.live_tests:
-    role: Tester
-    path: tools/tester/azure_cli/live_tests.py
-  reviewer.azure_cli.failures:
-    role: Reviewer
-    path: tools/reviewer/azure_cli/failures.py
-  reviewer.azure_cli.review:
-    role: Reviewer
-    path: tools/reviewer/azure_cli/review.py
-  fixer.formatting.guidance:
-    role: Fixer
-    path: tools/fixer/formatting/guidance.py
-  reviewer.policy.analysis:
-    role: Reviewer
-    path: tools/reviewer/policy/analysis.py
-  fixer.title_gate.title_repair:
-    role: Fixer
-    path: tools/fixer/title_gate/title_repair.py
-  validation.checks:
-    role: Coordinator
-    path: tools/validation/checks.py
-files:
-- README.md
-- definitions/coordinator.md
-- definitions/fixer.md
-- definitions/reviewer.md
-- definitions/tester.md
-- tools/fixer/azure_cli/aaz.py
-- tools/fixer/azure_cli/guidance.py
-- tools/fixer/azure_cli/routing.py
-- tools/fixer/azure_cli/targets.py
-- tools/fixer/formatting/guidance.py
-- tools/fixer/title_gate/title_repair.py
-- tools/reviewer/azure_cli/failures.py
-- tools/reviewer/azure_cli/review.py
-- tools/reviewer/policy/analysis.py
-- tools/settings.py
-- tools/tester/azure_cli/live_tests.py
-- tools/validation/checks.py
+profile: profile.yml
 dependencies:
-  validation:
-    entry_point: tools/validation/checks.py:repository_checks
-    repositories:
-    - Azure/azure-cli
-    - Azure/aaz
   python:
+    aaz-dev: 4.6.2
+    azdev: 0.2.13
     azure-cli: 2.90.0
     azure-cli-testsdk: 0.3.0
-    azdev: 0.2.13
-    aaz-dev: 4.6.2
     pytest: 8.4.2
