@@ -239,7 +239,7 @@ def validate_file_destination(namespace):
     file_path = path
     file_dir = os.path.dirname(path)
     if os.path.isdir(path):
-        file_name = os.path.basename(namespace.file_name)
+        file_name = os.path.basename(namespace.file_path)
         file_path = os.path.join(path, file_name)
     elif not os.path.isdir(file_dir):
         try:
