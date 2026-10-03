@@ -952,8 +952,11 @@ def create_application(cmd, client, display_name, identifier_uris=None,
             raise CLIError("More than one application have the same display name '{}': (id) {}, please remove "
                            'them first.'.format(display_name, ', '.join([x[ID] for x in existing_apps])))
         if len(existing_apps) == 1:
-            logger.warning("Found an existing application instance: (id) %s. We will patch it.",
-                           existing_apps[0][ID])
+            logger.warning("Found an existing application instance: (id) %s.", existing_apps[0][ID])
+            logger.warning("Please notice that display names aren't unique, "
+                           "which could result in credential loss or incorrect RBAC assignments. "
+                           "To create a new application, use a unique display name instead. For more details, "
+                           "see https://go.microsoft.com/fwlink/?linkid=2342455.")
             body = update_application(
                 existing_apps[0], display_name=display_name, identifier_uris=identifier_uris,
                 is_fallback_public_client=is_fallback_public_client,
