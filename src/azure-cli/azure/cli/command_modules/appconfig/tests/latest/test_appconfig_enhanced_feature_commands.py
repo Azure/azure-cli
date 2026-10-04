@@ -6,7 +6,7 @@
 import os
 
 from azure.cli.testsdk import ScenarioTest
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, MutuallyExclusiveArgumentError
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
@@ -92,6 +92,45 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('tags.tag1', 'value1'),
                          self.check('tags.tag2', 'value2'),
                          self.check('conditions.requirement_type', updated_requirement_type)])
+
+        # Toggle the enabled state with the top-level --enable argument on set (other properties preserved)
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --enable false -y',
+                 checks=[self.check('enabled', False),
+                         self.check('description', updated_entry_description),
+                         self.check('telemetry.enabled', True)])
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --enable -y',
+                 checks=[self.check('enabled', True),
+                         self.check('description', updated_entry_description),
+                         self.check('telemetry.enabled', True)])
+
+        # Set the entire flag as raw JSON with --flag (full replace of all properties)
+        self.kwargs['flag_json'] = '{"name":"Beta","enabled":true,"description":"Set via --flag JSON","conditions":{"requirement_type":"All","filters":[{"name":"Microsoft.TimeWindow","parameters":{"Start":"Wed, 01 Jan 2025 00:00:00 GMT"}}]}}'
+        self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' -y",
+                 checks=[self.check('name', entry_feature),
+                         self.check('enabled', True),
+                         self.check('description', 'Set via --flag JSON'),
+                         self.check('conditions.requirement_type', 'All'),
+                         self.check('conditions.filters[0].name', 'Microsoft.TimeWindow')])
+
+        # Overwrite the same flag with shorthand syntax - full replace drops the previous conditions
+        self.kwargs['flag_shorthand'] = "{name:Beta,enabled:true,description:'Set via --flag shorthand'}"
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag "{flag_shorthand}" -y',
+                 checks=[self.check('name', entry_feature),
+                         self.check('enabled', True),
+                         self.check('description', 'Set via --flag shorthand'),
+                         self.check('conditions', None)])
+
+        # --flag is mutually exclusive with content arguments (validated before any request)
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "--flag cannot be combined with --description"):
+            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' --description x -y")
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "--flag cannot be combined with --enable"):
+            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' --enable -y")
+
+        # The name inside --flag must match --feature-name when both are provided
+        self.kwargs['flag_mismatch'] = '{"name":"Delta","enabled":true}'
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "Feature name mismatch"):
+            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature} --label {label} --flag '{flag_mismatch}' -y")
 
         # Disable the enhanced feature flag
         self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',

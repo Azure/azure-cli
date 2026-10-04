@@ -24,45 +24,62 @@ logger = get_logger(__name__)
 
 
 def set_feature(cmd,
-                feature,
+                feature=None,
                 name=None,
                 label=None,
+                enable=None,
                 description=None,
                 requirement_type=None,
                 telemetry_enabled=None,
                 tags=None,
+                flag=None,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
                 endpoint=None):
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    try:
-        feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
-    except ResourceNotFoundError:
-        feature_flag = None
-    except HttpResponseError as exception:
-        raise CLIErrors.AzureResponseError("Failed to retrieve enhanced feature flag from config store. " + str(exception))
+    if flag is not None:
+        # --flag mirrors the data-plane /ff schema (also emitted by 'show'), so deserialize it with the SDK.
+        flag_to_load = {k: v for k, v in flag.items()
+                        if k not in (FeatureFlagConstants.LAST_MODIFIED, "etag")}
+        if feature is not None:
+            flag_to_load[FeatureFlagConstants.NAME] = feature
+        feature_flag = FeatureFlag.from_dict(flag_to_load)
+        if label is not None:
+            feature_flag.label = label
+        if tags is not None:
+            feature_flag.tags = tags
+    else:
+        try:
+            feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
+        except ResourceNotFoundError:
+            feature_flag = None
+        except HttpResponseError as exception:
+            raise CLIErrors.AzureResponseError("Failed to retrieve enhanced feature flag from config store. " + str(exception))
 
-    if feature_flag is None:
-        feature_flag = FeatureFlag(name=feature, enabled=False, label=label)
+        if feature_flag is None:
+            feature_flag = FeatureFlag(name=feature, enabled=False, label=label)
 
-    if description is not None:
-        feature_flag.description = description
+        if enable is not None:
+            feature_flag.enabled = enable
 
-    if requirement_type is not None:
-        if feature_flag.conditions is None:
-            feature_flag.conditions = FeatureFlagConditions()
-        feature_flag.conditions.requirement_type = requirement_type
+        if description is not None:
+            feature_flag.description = description
 
-    if telemetry_enabled is not None:
-        if feature_flag.telemetry is None:
-            feature_flag.telemetry = FeatureFlagTelemetryConfiguration(enabled=telemetry_enabled)
-        else:
-            feature_flag.telemetry.enabled = telemetry_enabled
+        if requirement_type is not None:
+            if feature_flag.conditions is None:
+                feature_flag.conditions = FeatureFlagConditions()
+            feature_flag.conditions.requirement_type = requirement_type
 
-    if tags is not None:
-        feature_flag.tags = tags
+        if telemetry_enabled is not None:
+            if feature_flag.telemetry is None:
+                feature_flag.telemetry = FeatureFlagTelemetryConfiguration(enabled=telemetry_enabled)
+            else:
+                feature_flag.telemetry.enabled = telemetry_enabled
+
+        if tags is not None:
+            feature_flag.tags = tags
 
     entry = json.dumps(_serialize_feature_flag(feature_flag), indent=2, sort_keys=True, ensure_ascii=False, default=str)
     confirmation_message = "Are you sure you want to set the enhanced feature flag: \n" + entry + "\n"

@@ -24,7 +24,7 @@ from ._utils import (is_valid_connection_string,
                      validate_feature_flag_key,
                      is_http_endpoint)
 from ._models import QueryFields
-from ._constants import ImportExportProfiles
+from ._constants import ImportExportProfiles, FeatureFlagConstants
 from ._featuremodels import FeatureQueryFields
 from ._snapshotmodels import SnapshotQueryFields
 
@@ -328,6 +328,72 @@ def validate_resolve_keyvault(namespace):
 def validate_feature(namespace):
     if namespace.feature is not None:
         validate_feature_flag_name(namespace.feature)
+
+
+# Properties allowed in the enhanced feature flag input accepted by --flag. Matches the schema
+# emitted by 'az appconfig enhanced-feature-flag show' and the data-plane /ff API, so a flag can be
+# shown, edited and set back.
+FEATURE_FLAG_PROPERTIES = {
+    FeatureFlagConstants.NAME,
+    FeatureFlagConstants.ENABLED,
+    FeatureFlagConstants.LABEL,
+    FeatureFlagConstants.DESCRIPTION,
+    FeatureFlagConstants.CONDITIONS,
+    FeatureFlagConstants.ALLOCATION,
+    FeatureFlagConstants.VARIANTS,
+    FeatureFlagConstants.TELEMETRY,
+    FeatureFlagConstants.TAGS,
+}
+
+# Read-only properties emitted by 'show' that are tolerated (and ignored) on input.
+FEATURE_FLAG_READONLY_PROPERTIES = {
+    FeatureFlagConstants.LAST_MODIFIED,
+    "etag",
+}
+
+
+def validate_feature_flag(namespace):
+    if getattr(namespace, 'flag', None) is None:
+        return
+
+    # --flag is a full-object replacement; it cannot be mixed with the per-property content flags.
+    conflicting = {
+        '--enable': namespace.enable,
+        '--description': namespace.description,
+        '--requirement-type': namespace.requirement_type,
+        '--telemetry-enabled': namespace.telemetry_enabled,
+    }
+    specified = [option for option, value in conflicting.items() if value is not None]
+    if specified:
+        raise MutuallyExclusiveArgumentError(
+            "--flag cannot be combined with {}. Provide the entire feature flag with --flag, "
+            "or set individual properties without --flag.".format(", ".join(specified)))
+
+    flag = namespace.flag
+    if not isinstance(flag, dict):
+        raise InvalidArgumentValueError(
+            "--flag must be a JSON object or shorthand-syntax object representing a single feature flag.")
+
+    allowed = FEATURE_FLAG_PROPERTIES | FEATURE_FLAG_READONLY_PROPERTIES
+    unknown_keys = set(flag.keys()) - allowed
+    if unknown_keys:
+        raise InvalidArgumentValueError(
+            "Unsupported feature flag propert{}: {}. Allowed properties: {}.".format(
+                "y" if len(unknown_keys) == 1 else "ies",
+                ", ".join(sorted(unknown_keys)),
+                ", ".join(sorted(FEATURE_FLAG_PROPERTIES))))
+
+    flag_name = flag.get(FeatureFlagConstants.NAME)
+    if namespace.feature is None and flag_name is None:
+        raise RequiredArgumentMissingError(
+            "The feature flag 'name' is required. Provide it inside --flag or via --feature-name.")
+
+    if namespace.feature is not None and flag_name is not None and namespace.feature != flag_name:
+        raise MutuallyExclusiveArgumentError(
+            "Feature name mismatch: --feature-name '{}' does not match the 'name' '{}' in --flag. "
+            "Provide only one, or make them identical.".format(namespace.feature, flag_name))
+
+    validate_feature_flag_name(flag_name if flag_name is not None else namespace.feature)
 
 
 def validate_feature_key(namespace):
