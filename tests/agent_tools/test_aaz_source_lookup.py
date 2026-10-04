@@ -14,7 +14,7 @@ import pytest
 
 
 def lookup(response):
-    path = Path(__file__).parents[1] / "tools/fixer/azure_cli/aaz.py"
+    path = Path(__file__).parents[2] / ".x/tools/fixer/azure_cli/aaz.py"
     tree = ast.parse(path.read_text())
     function = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
                     and node.name == "find_promoted_aaz_source_pr")
