@@ -120,7 +120,7 @@ def _release_artifact_check(repo_full_name, pr, changes, production_changes, hea
         elif _review_has_generated_history_marker(change):
             findings.append(_review_finding('release-artifact', change, 'This aggregate history file is generated and must not be edited directly.', 'Move the customer-facing entry to the durable release-note source named by the generator and regenerate this artifact.', 'Regenerate release history and confirm this file changes only as generated output.', head_repo=head_repo, head_sha=head_sha))
     customer_visible_changes = [change for change in production_changes if _review_has_customer_visible_change(change)]
-    findings.extend(_cli_release_findings(pr_title, is_hotfix, release_changes, customer_visible_changes, head_repo, head_sha, _review_finding))
+    findings.extend(_cli_release_findings(pr_title, is_hotfix, release_changes, customer_visible_changes, head_repo, head_sha, _review_finding, pr_body=str((pr or {}).get('body') or '')))
     production_components = {component for change in customer_visible_changes if (component := _review_component(repo_full_name, change['filename']))}
     release_components = {component for change in release_changes if (component := _review_component(repo_full_name, change['filename']))}
     component_scoped_history = False
@@ -145,7 +145,7 @@ def _generated_ownership_check(repo_full_name, pr, changes, production_changes, 
     generation_sources = [path for path in paths if _review_matches_any(path, _GENERATION_SOURCE_PATTERNS)]
     if generation_source_prs is None:
         linked_generation_source = bool(_GENERATION_SOURCE_PR.search(str((pr or {}).get('body') or '')))
-        linked_aaz_source = linked_generation_source
+        linked_aaz_source = False
     else:
         linked_generation_source = any((source.get('valid') for source in generation_source_prs))
         linked_aaz_source = any((source.get('valid') and str(source.get('repository') or '').casefold() == AAZ_SOURCE_REPOSITORY.casefold() for source in generation_source_prs))
@@ -276,15 +276,16 @@ def _review_risk_assessment(repo_full_name, changes, production_changes):
     changed_lines = added + deleted
     evidence = '\n'.join(('\n'.join([change['filename'], *[text for _, text in _review_added_lines(change)][:100]]) for change in production_changes))
     signals = []
+    paths = '\n'.join((change['filename'] for change in changes))
 
-    def add_signal(pattern, points, label, review):
-        if pattern.search(evidence):
+    def add_signal(pattern, points, label, review, path_only=False):
+        if pattern.search(paths if path_only else evidence):
             signals.append({'label': label, 'points': points, 'review': review})
     add_signal(_RISK_SECURITY_PATTERN, 28, 'security-sensitive behavior', 'required')
     add_signal(_RISK_SOVEREIGN_PATTERN, 18, 'sovereign-cloud behavior', 'required')
-    add_signal(_RISK_OPERATIONS_PATTERN, 22, 'delivery or infrastructure', 'required')
+    add_signal(_RISK_OPERATIONS_PATTERN, 22, 'delivery or infrastructure', 'required', True)
     add_signal(_RISK_CUSTOMER_PATTERN, 18, 'public CLI behavior', 'recommended')
-    add_signal(_RISK_DEPENDENCY_PATTERN, 18, 'dependency or supply chain', 'required')
+    add_signal(_RISK_DEPENDENCY_PATTERN, 18, 'dependency or supply chain', 'required', True)
     add_signal(_RISK_RELIABILITY_PATTERN, 12, 'failure-handling behavior', 'recommended')
     if any((_review_matches_any(change['filename'], _GENERATED_FILE_PATTERNS) for change in changes)):
         signals.append({'label': 'generated output', 'points': 12, 'review': 'recommended'})

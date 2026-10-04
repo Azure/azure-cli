@@ -211,7 +211,7 @@ def get_pr_regression_coverage_summary(
         if pr_files is not None
         else get_pr_changed_files(owner, repo, pr_number, token=token)
     )
-    if repo_full != "Azure/azure-cli":
+    if repo_full not in {"Azure/azure-cli", "Azure/azure-cli-extensions"}:
         return {
             "applicable": False,
             "gap": False,
@@ -227,7 +227,14 @@ def get_pr_regression_coverage_summary(
             "review_feedback": [],
         }
 
-    module_root = "src/azure-cli/azure/cli/command_modules/"
+    module_root = (
+        "src/azure-cli/azure/cli/command_modules/"
+        if repo_full == "Azure/azure-cli" else "src/"
+    )
+    module_pattern = (
+        _MODULE_PATH_PATTERN if repo_full == "Azure/azure-cli"
+        else re.compile(r"^src/([^/]+)/")
+    )
     production_files = [
         path for path in files
         if (
@@ -240,12 +247,12 @@ def get_pr_regression_coverage_summary(
     modules = sorted({
         match.group(1).casefold()
         for path in production_files
-        if (match := _MODULE_PATH_PATTERN.search(path))
+        if (match := module_pattern.search(path))
     })
     affected_modules = set(modules)
 
     def is_affected_module_path(path):
-        match = _MODULE_PATH_PATTERN.search(path)
+        match = module_pattern.search(path)
         return bool(
             match and match.group(1).casefold() in affected_modules
         )
@@ -272,7 +279,7 @@ def get_pr_regression_coverage_summary(
     covered_modules = {
         match.group(1).casefold()
         for path in test_files + recording_files
-        if (match := _MODULE_PATH_PATTERN.search(path))
+        if (match := module_pattern.search(path))
     }
     uncovered_modules = sorted(affected_modules - covered_modules)
     commands = _required_commands(pr)

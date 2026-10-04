@@ -37,28 +37,22 @@ def promote_aaz_fork_pr(fork_pr_number, title, body, token=None):
 def find_promoted_aaz_source_pr(issue_number, token=None):
     """Return the open upstream AAZ PR created for an Agent issue."""
     owner, repo = AAZ_SOURCE_REPOSITORY.split("/", 1)
-    response = github_get(
-        f"/repos/{owner}/{repo}/pulls",
-        params={"state": "all", "sort": "created",
-                "direction": "desc", "per_page": 100},
-        max_pages=1, token=token, sanitize=False,
-    )
     fragment = f"-issue-{issue_number}-"
-    return next(
-        (
-            pull_request for pull_request in response["data"]
-            if fragment in (
-                (pull_request.get("head") or {}).get("ref") or ""
-            )
-            and (
-                pull_request.get("state") == "open"
-                or bool(pull_request.get("merged_at"))
-            )
-            and (
-                (
-                    (pull_request.get("head") or {}).get("repo") or {}
-                ).get("full_name") == AAZ_SOURCE_FORK
-            )
-        ),
-        None,
-    )
+    for page in range(1, 11):
+        response = github_get(
+            f"/repos/{owner}/{repo}/pulls",
+            params={"state": "all", "sort": "created", "direction": "desc",
+                    "per_page": 100, "page": page},
+            max_pages=1, token=token, sanitize=False,
+        )
+        for pull_request in response["data"]:
+            head = pull_request.get("head") or {}
+            if (
+                fragment in (head.get("ref") or "")
+                and (pull_request.get("state") == "open" or pull_request.get("merged_at"))
+                and (head.get("repo") or {}).get("full_name") == AAZ_SOURCE_FORK
+            ):
+                return pull_request
+        if not response["truncated"]:
+            return None
+    raise RuntimeError("AAZ source pull request lookup is incomplete")

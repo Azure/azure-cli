@@ -6,6 +6,7 @@
 
 """Azure CLI review and release-note policy."""
 
+import re
 
 _GENERATED_HISTORY_FILES = {
     "src/azure-cli/HISTORY.rst",
@@ -16,7 +17,10 @@ _GENERATED_HISTORY_FILES = {
 def _is_cli_production_file(repository, path):
     if repository == "Azure/azure-cli":
         return (
-            path.startswith("src/azure-cli/azure/cli/command_modules/")
+            path.startswith((
+                "src/azure-cli/azure/cli/command_modules/",
+                "src/azure-cli-core/azure/cli/core/",
+            ))
             and path.endswith(".py")
         )
     return path.startswith("src/") and path.endswith(".py")
@@ -64,7 +68,7 @@ def _generated_history_finding(change, head_repo, head_sha, make_finding):
 
 def _cli_release_findings(
     pr_title, is_hotfix, release_changes, customer_visible_changes,
-    head_repo, head_sha, make_finding,
+    head_repo, head_sha, make_finding, pr_body="",
 ):
     if not customer_visible_changes:
         return []
@@ -83,7 +87,17 @@ def _cli_release_findings(
             head_repo=head_repo,
             head_sha=head_sha,
         )]
-    if not is_hotfix and not pr_title.startswith("["):
+    history_notes = re.search(
+        r"\*\*History Notes\*\*",
+        pr_body,
+    )
+    populated_notes = False
+    if history_notes:
+        section = pr_body[history_notes.end():].split("---", 1)[0]
+        populated_notes = bool(re.search(
+            r"(?m)^\s*\[(?!Component\])[^]\r\n]+\]\s+\S.+", section,
+        ))
+    if not is_hotfix and not pr_title.startswith("[") and not populated_notes:
         return [make_finding(
             "release-artifact",
             change,

@@ -89,6 +89,8 @@ def python_unit_files(repository, root, changed):
         else:
             matches = [path for path in scope.rglob(target) if python_unit_classes(path)]
             if not matches:
+                matches = [path for path in scope.rglob('test_*.py') if python_unit_classes(path)]
+            if not matches:
                 continue
             source_parts = source_dir.relative_to(scope).parts if source_dir.is_relative_to(scope) else ()
 
