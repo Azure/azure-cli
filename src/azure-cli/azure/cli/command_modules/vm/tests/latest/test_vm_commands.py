@@ -5296,6 +5296,62 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image Canonical:UbuntuServer:18.04-LTS:latest '
                  '--admin-username clitester --admin-password TestTest12#$ --orchestration-mode Uniform --lb-sku Standard')
 
+    # Regression test for https://github.com/Azure/azure-cli/issues/34133
+    # Standard_D2s_v3 is restricted for the recording subscription in all public regions, so Standard_D2s_v5 is used.
+    # The regression is in the scale-set model read-modify-write path, so no instances are required.
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_lb_pool_', location='swedencentral')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_lb_pool_lb_', location='swedencentral',
+                           parameter_name='lb_resource_group', key='lb_rg')
+    def test_vm_vmss_update_add_lb_backend_pool(self, resource_group, resource_group_location, lb_resource_group):
+        vmss_name = self.create_random_name('vmss', 15)
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vmss': vmss_name,
+            'vnet': self.create_random_name('vnet', 15),
+            'subnet': 'subnet1',
+            'lb': self.create_random_name('lb', 15),
+            'pool': '{}-pool'.format(vmss_name),
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'quotes': '""' if platform.system() == 'Windows' else "''",
+        })
+
+        # The backend pool lives in a separate resource group, matching the reported cross-resource-group ID.
+        self.kwargs['subnet_id'] = self.cmd(
+            'network vnet create -g {lb_rg} -n {vnet} -l {loc} --address-prefixes 10.0.0.0/16 '
+            '--subnet-name {subnet} --subnet-prefixes 10.0.0.0/24').get_output_in_json()['newVNet']['subnets'][0]['id']
+        self.cmd('network lb create -g {lb_rg} -n {lb} -l {loc} --sku Standard --vnet-name {vnet} --subnet {subnet} '
+                 '--frontend-ip-name fe1 --backend-pool-name {pool}')
+        self.kwargs['pool_id'] = self.cmd(
+            'network lb address-pool show -g {lb_rg} --lb-name {lb} -n {pool}').get_output_in_json()['id']
+
+        self.cmd('vmss create -g {rg} -n {vmss} -l {loc} --image Canonical:0001-com-ubuntu-server-jammy:22_04-LTS-Gen2:latest '
+                 '--vm-sku Standard_D2s_v5 --instance-count 0 --orchestration-mode Uniform --upgrade-policy-mode Manual '
+                 '--subnet {subnet_id} --lb {quotes} --admin-username azureuser --ssh-key-value \'{ssh_key}\'')
+
+        def _get_ip_config(vmss):
+            return vmss['virtualMachineProfile']['networkProfile']['networkInterfaceConfigurations'][0]['ipConfigurations'][0]
+
+        def _pool_ids(ip_config):
+            return [pool['id'].lower() for pool in (ip_config.get('loadBalancerBackendAddressPools') or [])]
+
+        def _verify(vmss):
+            ip_config = _get_ip_config(vmss)
+            self.assertEqual(_pool_ids(ip_config), [self.kwargs['pool_id'].lower()])
+            self.assertEqual(ip_config['name'], original_ip_config['name'])
+            self.assertEqual(ip_config['subnet']['id'].lower(), original_ip_config['subnet']['id'].lower())
+
+        # No load balancer is associated, so the optional backend pool collection is absent from the GET response
+        original_ip_config = _get_ip_config(self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json())
+        self.assertEqual(_pool_ids(original_ip_config), [])
+
+        # Reported command
+        result = self.cmd('vmss update --resource-group {rg} --name {vmss} '
+                          '--add virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].loadBalancerBackendAddressPools '
+                          'id={pool_id}').get_output_in_json()
+        _verify(result)
+        _verify(self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json())
+
     @record_only()
     @ResourceGroupPreparer()
     def test_vmss_single_placement_group_default_to_std_lb(self, resource_group):
