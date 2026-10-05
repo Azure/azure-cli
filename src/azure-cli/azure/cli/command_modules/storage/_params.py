@@ -1396,6 +1396,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_precondition_options()
         c.register_precondition_options(prefix='source_')
         c.register_source_uri_arguments(validator=validate_source_url)
+        c.argument('source_is_validated_same_account', ignore_type)
 
         c.ignore('incremental_copy')
         c.argument('if_match', options_list=['--destination-if-match'])
