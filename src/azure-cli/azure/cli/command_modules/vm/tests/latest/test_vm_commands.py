@@ -15258,6 +15258,8 @@ class VMSSUpdateZonePlacementPolicyTest(ScenarioTest):
             'vm_sku': 'Standard_D2s_v7'
         })
 
+        # Cross-filter transitions are covered by TestVMSSUpdateZonePlacement; adding
+        # them here requires a successful live recording with VMSS Placement preview.
         # create a vmss (with no instances so no zones are in use) and update its include zones
         self.cmd('vmss create -g {rg} -n {vmss_include} -l {location} --image {image} '
                  '--admin-username {admin_username} --admin-password {admin_password} --upgrade-policy-mode Manual '
