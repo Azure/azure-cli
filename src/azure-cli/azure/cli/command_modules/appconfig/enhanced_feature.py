@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 
 def set_feature(cmd,
-                feature=None,
+                feature_name=None,
                 name=None,
                 label=None,
                 enable=None,
@@ -43,8 +43,8 @@ def set_feature(cmd,
         # --flag mirrors the data-plane /ff schema (also emitted by 'show'), so deserialize it with the SDK.
         flag_to_load = {k: v for k, v in flag.items()
                         if k not in (FeatureFlagConstants.LAST_MODIFIED, "etag")}
-        if feature is not None:
-            flag_to_load[FeatureFlagConstants.NAME] = feature
+        if feature_name is not None:
+            flag_to_load[FeatureFlagConstants.NAME] = feature_name
         feature_flag = FeatureFlag.from_dict(flag_to_load)
         if label is not None:
             feature_flag.label = label
@@ -52,14 +52,14 @@ def set_feature(cmd,
             feature_flag.tags = tags
     else:
         try:
-            feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
+            feature_flag = feature_flag_client.get_feature_flag(name=feature_name, label=label)
         except ResourceNotFoundError:
             feature_flag = None
         except HttpResponseError as exception:
             raise CLIErrors.AzureResponseError("Failed to retrieve enhanced feature flag from config store. " + str(exception))
 
         if feature_flag is None:
-            feature_flag = FeatureFlag(name=feature, enabled=False, label=label)
+            feature_flag = FeatureFlag(name=feature_name, enabled=False, label=label)
 
         if enable is not None:
             feature_flag.enabled = enable
@@ -94,7 +94,7 @@ def set_feature(cmd,
 
 
 def show_feature(cmd,
-                 feature,
+                 feature_name,
                  name=None,
                  label=None,
                  fields=None,
@@ -104,20 +104,20 @@ def show_feature(cmd,
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
+        feature_flag = feature_flag_client.get_feature_flag(name=feature_name, label=label)
     except ResourceNotFoundError:
         feature_flag = None
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
 
     if feature_flag is None:
-        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' does not exist.".format(feature, label))
+        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' does not exist.".format(feature_name, label))
 
     return _serialize_feature_flag(feature_flag, fields)
 
 
 def list_feature(cmd,
-                 feature=None,
+                 feature_name=None,
                  name=None,
                  label=None,
                  fields=None,
@@ -130,7 +130,7 @@ def list_feature(cmd,
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        feature_flags = feature_flag_client.list_feature_flags(name_filter=feature,
+        feature_flags = feature_flag_client.list_feature_flags(name_filter=feature_name,
                                                                label_filter=label,
                                                                tags_filter=tags)
     except HttpResponseError as exception:
@@ -148,7 +148,7 @@ def list_feature(cmd,
 
 
 def delete_feature(cmd,
-                   feature,
+                   feature_name,
                    name=None,
                    label=None,
                    yes=False,
@@ -158,20 +158,20 @@ def delete_feature(cmd,
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
+        feature_flag = feature_flag_client.get_feature_flag(name=feature_name, label=label)
     except ResourceNotFoundError:
         feature_flag = None
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
 
     if feature_flag is None:
-        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' does not exist.".format(feature, label))
+        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' does not exist.".format(feature_name, label))
 
-    confirmation_message = "Are you sure you want to delete the enhanced feature flag '{}' with label '{}'?".format(feature, label)
+    confirmation_message = "Are you sure you want to delete the enhanced feature flag '{}' with label '{}'?".format(feature_name, label)
     user_confirmation(confirmation_message, yes)
 
     try:
-        deleted_feature_flag = feature_flag_client.delete_feature_flag(name=feature, label=label)
+        deleted_feature_flag = feature_flag_client.delete_feature_flag(name=feature_name, label=label)
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
 
@@ -179,45 +179,45 @@ def delete_feature(cmd,
 
 
 def enable_feature(cmd,
-                   feature,
+                   feature_name,
                    name=None,
                    label=None,
                    yes=False,
                    connection_string=None,
                    auth_mode="key",
                    endpoint=None):
-    return _set_feature_state(cmd, feature, enabled=True, name=name, label=label, yes=yes,
+    return _set_feature_state(cmd, feature_name, enabled=True, name=name, label=label, yes=yes,
                               connection_string=connection_string, auth_mode=auth_mode, endpoint=endpoint)
 
 
 def disable_feature(cmd,
-                    feature,
+                    feature_name,
                     name=None,
                     label=None,
                     yes=False,
                     connection_string=None,
                     auth_mode="key",
                     endpoint=None):
-    return _set_feature_state(cmd, feature, enabled=False, name=name, label=label, yes=yes,
+    return _set_feature_state(cmd, feature_name, enabled=False, name=name, label=label, yes=yes,
                               connection_string=connection_string, auth_mode=auth_mode, endpoint=endpoint)
 
 
-def _set_feature_state(cmd, feature, enabled, name, label, yes, connection_string, auth_mode, endpoint):
+def _set_feature_state(cmd, feature_name, enabled, name, label, yes, connection_string, auth_mode, endpoint):
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        feature_flag = feature_flag_client.get_feature_flag(name=feature, label=label)
+        feature_flag = feature_flag_client.get_feature_flag(name=feature_name, label=label)
     except ResourceNotFoundError:
         feature_flag = None
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError("Failed to retrieve enhanced feature flag from config store. " + str(exception))
 
     if feature_flag is None:
-        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' not found.".format(feature, label))
+        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' not found.".format(feature_name, label))
 
     feature_flag.enabled = enabled
     action = "enable" if enabled else "disable"
-    confirmation_message = "Are you sure you want to {} this enhanced feature flag '{}'?".format(action, feature)
+    confirmation_message = "Are you sure you want to {} this enhanced feature flag '{}'?".format(action, feature_name)
     user_confirmation(confirmation_message, yes)
 
     try:

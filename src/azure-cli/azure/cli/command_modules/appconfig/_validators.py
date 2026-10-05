@@ -330,6 +330,11 @@ def validate_feature(namespace):
         validate_feature_flag_name(namespace.feature)
 
 
+def validate_enhanced_feature_flag(namespace):
+    if namespace.feature_name is not None:
+        validate_feature_flag_name(namespace.feature_name)
+
+
 # Properties allowed in the enhanced feature flag input accepted by --flag. Matches the schema
 # emitted by 'az appconfig enhanced-feature-flag show' and the data-plane /ff API, so a flag can be
 # shown, edited and set back.
@@ -352,7 +357,7 @@ FEATURE_FLAG_READONLY_PROPERTIES = {
 }
 
 
-def validate_feature_flag(namespace):
+def validate_enhanced_feature_flag_input(namespace):
     if getattr(namespace, 'flag', None) is None:
         return
 
@@ -378,22 +383,21 @@ def validate_feature_flag(namespace):
     unknown_keys = set(flag.keys()) - allowed
     if unknown_keys:
         raise InvalidArgumentValueError(
-            "Unsupported feature flag propert{}: {}. Allowed properties: {}.".format(
-                "y" if len(unknown_keys) == 1 else "ies",
+            "Unsupported feature flag properties: {}. Allowed properties: {}.".format(
                 ", ".join(sorted(unknown_keys)),
                 ", ".join(sorted(FEATURE_FLAG_PROPERTIES))))
 
     flag_name = flag.get(FeatureFlagConstants.NAME)
-    if namespace.feature is None and flag_name is None:
+    if namespace.feature_name is None and flag_name is None:
         raise RequiredArgumentMissingError(
             "The feature flag 'name' is required. Provide it inside --flag or via --feature-name.")
 
-    if namespace.feature is not None and flag_name is not None and namespace.feature != flag_name:
+    if namespace.feature_name is not None and flag_name is not None and namespace.feature_name != flag_name:
         raise MutuallyExclusiveArgumentError(
             "Feature name mismatch: --feature-name '{}' does not match the 'name' '{}' in --flag. "
-            "Provide only one, or make them identical.".format(namespace.feature, flag_name))
+            "Provide only one, or make them identical.".format(namespace.feature_name, flag_name))
 
-    validate_feature_flag_name(flag_name if flag_name is not None else namespace.feature)
+    validate_feature_flag_name(flag_name if flag_name is not None else namespace.feature_name)
 
 
 def validate_feature_key(namespace):

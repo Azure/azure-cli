@@ -31,7 +31,8 @@ from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_n
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
                           validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period,
-                          validate_public_network_args, validate_feature_flag)
+                          validate_public_network_args,
+                          validate_enhanced_feature_flag, validate_enhanced_feature_flag_input)
 
 
 def load_arguments(self, _):
@@ -474,7 +475,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig enhanced-feature-flag') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)
-        c.argument('feature', options_list=['--feature-name', '--feature'], validator=validate_feature, help="Name of the enhanced feature flag. Enhanced feature flag name cannot contain the '%' or ':' characters.")
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help="Name of the enhanced feature flag. Enhanced feature flag name cannot contain the '%' or ':' characters.")
         c.argument('label', help="If no label specified, uses the null label.")
 
     with self.argument_context('appconfig enhanced-feature-flag set') as c:
@@ -485,7 +486,7 @@ def load_arguments(self, _):
         c.argument('telemetry_enabled', arg_type=get_three_state_flag(), help='Enable or disable telemetry for the enhanced feature flag.')
         c.argument('tags', arg_type=tags_type)
         c.argument('flag', options_list=['--flag'], type=parse_feature_flag_input,
-                   completer=FilesCompleter(), validator=validate_feature_flag,
+                   completer=FilesCompleter(), validator=validate_enhanced_feature_flag_input,
                    help="The entire enhanced feature flag, using the same property names, casing and types as the "
                         "data-plane API and 'az appconfig enhanced-feature-flag show' (name, enabled, description, "
                         "conditions, allocation, variants, telemetry, tags). Accepts a JSON object, a shorthand-syntax "
@@ -497,7 +498,7 @@ def load_arguments(self, _):
         c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
 
     with self.argument_context('appconfig enhanced-feature-flag list') as c:
-        c.argument('feature', validator=validate_feature, help='Name of the enhanced feature flag to be listed. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix.')
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help='Name of the enhanced feature flag to be listed. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")
         c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
         c.argument('all_', help="List all enhanced feature flags.")

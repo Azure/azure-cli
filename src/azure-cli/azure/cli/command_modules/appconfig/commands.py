@@ -64,6 +64,11 @@ def load_command_table(self, _):
         client_factory=cf_nsp_configurations
     )
 
+    configstore_enhanced_featureflag_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.enhanced_feature#{}',
+        table_transformer=enhanced_featureflag_entry_format
+    )
+
     def get_custom_sdk(custom_module, client_factory, table_transformer):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -144,9 +149,7 @@ def load_command_table(self, _):
 
     # Enhanced FeatureManagement Commands
     with self.command_group('appconfig enhanced-feature-flag',
-                            custom_command_type=get_custom_sdk('enhanced_feature',
-                                                               None,
-                                                               enhanced_featureflag_entry_format)) as g:
+                            custom_command_type=configstore_enhanced_featureflag_util) as g:
         g.custom_command('set', 'set_feature')
         g.custom_command('delete', 'delete_feature')
         g.custom_show_command('show', 'show_feature')

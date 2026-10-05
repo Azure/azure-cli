@@ -44,12 +44,12 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
         entry_label = 'v1'
 
         self.kwargs.update({
-            'feature': entry_feature,
+            'feature_name': entry_feature,
             'label': entry_label
         })
 
         # Create a brand new enhanced feature flag entry (disabled by default)
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', False),
                          self.check('label', entry_label)])
@@ -61,7 +61,7 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
             'description': updated_entry_description,
             'requirement_type': updated_requirement_type
         })
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', False),
                          self.check('label', entry_label),
@@ -69,23 +69,23 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('conditions.requirement_type', updated_requirement_type)])
 
         # Show the enhanced feature flag
-        self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
+        self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label}',
                  checks=[self.check('name', entry_feature),
                          self.check('label', entry_label),
                          self.check('description', updated_entry_description)])
 
         # Show with field filters
-        self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --fields name enabled',
+        self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --fields name enabled',
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', False)])
 
         # Enable the enhanced feature flag
-        self.cmd('appconfig enhanced-feature-flag enable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
+        self.cmd('appconfig enhanced-feature-flag enable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', True)])
 
         # Update telemetry and tags on the enabled flag - enabled state and description must be preserved
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --telemetry-enabled true --tags tag1=value1 tag2=value2 -y',
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --telemetry-enabled true --tags tag1=value1 tag2=value2 -y',
                  checks=[self.check('enabled', True),
                          self.check('description', updated_entry_description),
                          self.check('telemetry.enabled', True),
@@ -94,11 +94,11 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('conditions.requirement_type', updated_requirement_type)])
 
         # Toggle the enabled state with the top-level --enable argument on set (other properties preserved)
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --enable false -y',
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --enable false -y',
                  checks=[self.check('enabled', False),
                          self.check('description', updated_entry_description),
                          self.check('telemetry.enabled', True)])
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --enable -y',
+        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --enable -y',
                  checks=[self.check('enabled', True),
                          self.check('description', updated_entry_description),
                          self.check('telemetry.enabled', True)])
@@ -130,10 +130,10 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
         # The name inside --flag must match --feature-name when both are provided
         self.kwargs['flag_mismatch'] = '{"name":"Delta","enabled":true}'
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "Feature name mismatch"):
-            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature} --label {label} --flag '{flag_mismatch}' -y")
+            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --flag '{flag_mismatch}' -y")
 
         # Disable the enhanced feature flag
-        self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
+        self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', False)])
 
@@ -142,7 +142,7 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                  checks=[self.check('[0].name', entry_feature)])
 
         # Delete the enhanced feature flag
-        self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
+        self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
                  checks=[self.check('name', entry_feature),
                          self.check('label', entry_label)])
 
@@ -152,17 +152,17 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
 
         # Show a non-existent enhanced feature flag should fail
         with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' does not exist.".format(entry_feature, entry_label)):
-            self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}')
+            self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label}')
 
         # Enable a non-existent enhanced feature flag should fail
         with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' not found.".format(entry_feature, entry_label)):
-            self.cmd('appconfig enhanced-feature-flag enable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y')
+            self.cmd('appconfig enhanced-feature-flag enable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y')
 
         # Disable a non-existent enhanced feature flag should fail
         with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' not found.".format(entry_feature, entry_label)):
-            self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y')
+            self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y')
 
         # Delete a non-existent enhanced feature flag should fail
         with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' does not exist.".format(entry_feature, entry_label)):
-            self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y')
+            self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y')
 
