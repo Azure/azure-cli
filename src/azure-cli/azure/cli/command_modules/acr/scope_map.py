@@ -5,10 +5,13 @@
 
 from enum import Enum
 from azure.cli.core.util import CLIError
+from knack.log import get_logger
 from ._utils import (
     get_resource_group_name_by_registry_name,
     parse_scope_map_actions
 )
+
+logger = get_logger(__name__)
 
 
 class RepoScopeMapActions(Enum):
@@ -24,6 +27,19 @@ class GatewayScopeMapActions(Enum):
     CONFIG_WRITE = 'config/write'
     MESSAGES_READ = 'message/read'
     MESSAGES_WRITE = 'message/write'
+
+
+def _get_warning_response_hook():
+    """Create an SDK response hook that emits each LRO warning once."""
+    displayed_warnings = set()
+
+    def _show_warning(response):
+        warning = response.http_response.headers.get('x-ms-warning')
+        if warning and warning not in displayed_warnings:
+            logger.warning('%s', warning)
+            displayed_warnings.add(warning)
+
+    return _show_warning
 
 
 def acr_scope_map_create(cmd,
@@ -70,7 +86,12 @@ def acr_scope_map_delete(cmd,
             return None
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.begin_delete(resource_group_name, registry_name, scope_map_name)
+    return client.begin_delete(
+        resource_group_name,
+        registry_name,
+        scope_map_name,
+        raw_response_hook=_get_warning_response_hook()
+    )
 
 
 def acr_scope_map_update(cmd,
