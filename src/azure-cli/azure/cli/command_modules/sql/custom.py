@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=unused-argument
 # pylint: disable=C0302
 from enum import Enum
 import calendar
@@ -1787,7 +1787,7 @@ def db_delete_replica_link(
         # provided. We don't care about this parameter and it gets handled weirdly if we
         # expliclty specify it with default value here (e.g. `yes=None` or `yes=True`), receiving
         # it in kwargs seems to work.
-        **kwargs):  # pylint: disable=unused-argument
+        **kwargs):
     '''
     Deletes a replication link.
     '''
