@@ -1083,8 +1083,8 @@ def aks_create(
     existing_mc = None
     try:
         existing_mc = client.get(resource_group_name, name)
-    # pylint: disable=broad-except
-    except Exception as ex:
+
+    except Exception as ex:  # pylint: disable=broad-exception-caught
         logger.debug("failed to get cluster, error: %s", ex)
     if existing_mc:
         raise ClientRequestError(
@@ -2942,8 +2942,8 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     user_path = ""
     try:
         user_path = get_windows_user_path()
-    # pylint: disable=broad-except
-    except Exception as e:
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.debug("failed to get user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)
@@ -2960,8 +2960,8 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     try:
         subprocess.run(setxexp, shell=True, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
-    # pylint: disable=broad-except
-    except Exception as e:
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.debug("failed to set user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)
