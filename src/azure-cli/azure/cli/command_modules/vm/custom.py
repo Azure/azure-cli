@@ -4325,8 +4325,8 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
             vms["storageProfile"]["imageReference"] = None
         return vms
 
-    from .operations.vmss import VMSSShow
-    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .operations.vmss import VMSSShowForUpdate
+    vmss = VMSSShowForUpdate(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         "vm_scale_set_name": name,
     })
