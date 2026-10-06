@@ -1103,14 +1103,59 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
     return reader.readall().decode("utf-8")
 
 
+def _normalize_url_origin(url):
+    from ipaddress import ip_address
+    from urllib.parse import urlsplit
+    import idna
+
+    try:
+        parsed = urlsplit(url)
+        scheme = parsed.scheme.lower()
+        hostname = parsed.hostname
+        if scheme not in ('http', 'https') or not hostname:
+            return None
+
+        hostname = hostname.rstrip('.')
+        if not hostname:
+            return None
+        try:
+            hostname = ip_address(hostname).compressed
+        except ValueError:
+            hostname = idna.encode(hostname, uts46=True).decode('ascii').lower().rstrip('.')
+            if not hostname:
+                return None
+
+        port = parsed.port
+        if port is None:
+            port = 443 if scheme == 'https' else 80
+        return scheme, hostname, port
+    except (UnicodeError, ValueError):
+        return None
+
+
+def _same_url_origin(first_url, second_url):
+    first_origin = _normalize_url_origin(first_url)
+    return first_origin is not None and first_origin == _normalize_url_origin(second_url)
+
+
+def _account_names_match(first_client, second_client):
+    first_account = first_client.account_name
+    second_account = second_client.account_name
+    return bool(first_account and second_account and first_account.lower() == second_account.lower())
+
+
 def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
+    source_is_validated_same_account = kwargs.pop('source_is_validated_same_account', False)
     src_client = kwargs.pop('source_client', None)
     if src_client is None:
         src_client = client.from_blob_url(source_url)
-        if src_client.account_name == client.account_name:
+        source_matches_destination = _same_url_origin(source_url, client.url) and \
+            _account_names_match(src_client, client)
+        can_reuse_destination_credential = source_is_validated_same_account or source_matches_destination
+        if can_reuse_destination_credential:
             src_client = client.from_blob_url(source_url, credential=client.credential)
     StandardBlobTier = cmd.get_models('_models#StandardBlobTier')
     if blob_type is not None and blob_type != 'Detect':
