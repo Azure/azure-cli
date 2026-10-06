@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Assign a system-assigned managed identity to a Compute Fleet.
+        az compute-fleet identity assign --resource-group MyResourceGroup --fleet-name MyFleet --system-assigned
+
+    :example: Assign a user-assigned managed identity to a Compute Fleet without waiting for the operation to finish.
+        az compute-fleet identity assign --resource-group MyResourceGroup --fleet-name MyFleet --user-assigned MyIdentityResourceId --no-wait
     """
 
     _aaz_info = {
