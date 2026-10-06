@@ -132,12 +132,17 @@ def _resolve_system_executable(executable):
     if not resolved_path:
         return None
 
-    cwd = os.path.abspath(os.getcwd())
-    resolved_path = os.path.abspath(resolved_path)
-    resolved_dirs = (
-        os.path.dirname(resolved_path),
-        os.path.dirname(os.path.realpath(resolved_path)),
-    )
+    try:
+        cwd = os.path.abspath(os.getcwd())
+        resolved_path = os.path.abspath(resolved_path)
+        resolved_dirs = (
+            os.path.dirname(resolved_path),
+            os.path.dirname(os.path.realpath(resolved_path)),
+        )
+    except (OSError, ValueError):
+        logger.warning("Ignoring %s because its path could not be validated.", executable)
+        return None
+
     for resolved_dir in resolved_dirs:
         try:
             is_cwd = os.path.samefile(resolved_dir, cwd)

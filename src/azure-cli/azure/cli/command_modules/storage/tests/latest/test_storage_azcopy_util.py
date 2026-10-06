@@ -84,6 +84,20 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)
 
+    def test_path_validation_failure_falls_back_without_probing(self):
+        managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
+
+        with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.shutil, "which", return_value="azcopy.exe"), \
+                mock.patch.object(util.os, "getcwd", side_effect=OSError), \
+                mock.patch.object(util.subprocess, "check_output") as check_output, \
+                mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+            azcopy = util.AzCopy()
+
+        check_output.assert_not_called()
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
 
 if __name__ == "__main__":
     unittest.main()
