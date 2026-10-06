@@ -9,3 +9,14 @@
 # pylint: disable=too-many-lines
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
+
+helps['compute-fleet identity assign'] = """
+type: command
+short-summary: Assign user-assigned or system-assigned managed identities to a Compute Fleet.
+examples:
+  - name: Assign a system-assigned managed identity to a Compute Fleet.
+    text: az compute-fleet identity assign --resource-group MyResourceGroup --fleet-name MyFleet --system-assigned
+  - name: Assign a user-assigned managed identity to a Compute Fleet without waiting for the operation to finish.
+    text: az compute-fleet identity assign --resource-group MyResourceGroup --fleet-name MyFleet --user-assigned MyIdentityResourceId --no-wait
+"""
