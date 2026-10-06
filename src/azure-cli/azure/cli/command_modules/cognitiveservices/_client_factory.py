@@ -3,6 +3,26 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
+
+
+_COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{1,63}")
+
+
+def _build_ai_project_endpoint(account_name, project_name):
+    from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+
+    if not account_name:
+        raise RequiredArgumentMissingError("Please specify --account-name.")
+    if (not isinstance(account_name, str) or
+            not _COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN.fullmatch(account_name)):
+        raise InvalidArgumentValueError(
+            "Invalid value for --account-name. The Cognitive Services account name must be 2-64 characters, "
+            "start with a letter or digit, and contain only letters, digits, periods, hyphens, or underscores."
+        )
+
+    return f"https://{account_name}.services.ai.azure.com/api/projects/{project_name}"
+
 
 def get_cognitiveservices_management_client(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -65,11 +85,7 @@ def cf_ai_projects(cli_ctx, command_args):
 
     # If no explicit endpoint provided, construct from account name
     if not endpoint and account_name:
-        # Construct endpoint URL from account name
-        # Format: https://{account_name}.cognitiveservices.azure.com
-        endpoint = (
-            f"https://{account_name}.services.ai.azure.com/api/projects/{project}"
-        )
+        endpoint = _build_ai_project_endpoint(account_name, project)
 
     if not endpoint:
         from azure.cli.core.azclierror import RequiredArgumentMissingError
