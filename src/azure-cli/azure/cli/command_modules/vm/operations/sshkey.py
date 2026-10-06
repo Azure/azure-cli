@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import time
 from pathlib import Path
 
@@ -53,12 +54,16 @@ class SSHKeyCreate(_SSHKeyCreate):
     def _save_key_pair(key_pair):
         ssh_path = Path.home().joinpath(".ssh")
         if not ssh_path.exists():
-            ssh_path.mkdir()
+            ssh_path.mkdir(mode=0o700)
 
         private_key_file = str(ssh_path.joinpath(str(time.time()).replace(".", "_")))
         public_key_file = private_key_file + ".pub"
 
-        with open(private_key_file, "w", newline="\n") as file:
+        # Open with restrictive permissions (0600) so the private key is not readable by other
+        # local users. O_CREAT | O_EXCL ensures we only ever write to a brand-new file (guarding
+        # against a pre-existing file/symlink at this path), and the mode is applied atomically.
+        private_key_fd = os.open(private_key_file, flags=os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode=0o600)
+        with os.fdopen(private_key_fd, "w", newline="\n") as file:
             file.write(key_pair["privateKey"])
         logger.warning('Private key is saved to "%s".', private_key_file)
 
