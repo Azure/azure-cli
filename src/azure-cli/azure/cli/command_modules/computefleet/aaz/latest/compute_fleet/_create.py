@@ -962,7 +962,9 @@ class Create(AAZCommand):
         os_profile.custom_data = AAZPasswordArg(
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please enter VM Password:", "confirm": True}},
+            blank=AAZPromptPasswordInput(
+                msg="Please enter VM Password:",
+                confirm=True),
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
@@ -1118,7 +1120,8 @@ class Create(AAZCommand):
         _element.content = AAZPasswordArg(
             options=["content"],
             help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Password:"}},
+            blank=AAZPromptPasswordInput(
+                msg="Password:"),
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
