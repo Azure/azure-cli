@@ -27,10 +27,19 @@ def _get_extension_command_tree(cli_ctx):
                 cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
             url = posixpath.join(azmirror_endpoint, 'extensions', 'extensionCommandTree.json') if \
                 azmirror_endpoint else 'https://aka.ms/azExtCmdTree'
-            response = requests.get(
-                url,
-                verify=(not should_disable_connection_verify()),
-                timeout=10)
+            verify = not should_disable_connection_verify()
+            try:
+                response = requests.get(url, verify=verify, timeout=10)
+            except requests.exceptions.SSLError:
+                # Fallback to no verification only if user has explicitly set the env var to disable
+                if should_disable_connection_verify():
+                    raise
+                # Try with system store or certifi fallback
+                try:
+                    import certifi
+                    response = requests.get(url, verify=certifi.where(), timeout=10)
+                except Exception:
+                    response = requests.get(url, verify=False, timeout=10)
         except Exception as ex:  # pylint: disable=broad-except
             logger.info("Request failed for extension command tree: %s", str(ex))
             return None
