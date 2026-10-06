@@ -18,6 +18,9 @@ from azure.cli.testsdk.utilities import GraphClientPasswordReplacer
 from azure.cli.command_modules.acs.tests.latest.recording_processors import MOCK_GUID, MOCK_SECRET
 
 
+ENV_VAR_FORCE_RESOURCE_GROUP_LOCATION = "AZURE_CLI_TEST_FORCE_RESOURCE_GROUP_LOCATION"
+
+
 def _normalize_optional_live_test_setting(value):
     if value is None:
         return None
@@ -55,9 +58,16 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
             key,
         )
 
-        # use environment variable to modify the default value of location
+        # A force location is used by managed live-test environments that must
+        # keep every resource group in one compliance-approved region.
+        force_location = _normalize_optional_live_test_setting(
+            os.environ.get(ENV_VAR_FORCE_RESOURCE_GROUP_LOCATION)
+        )
         self.dev_setting_location = os.environ.get(dev_setting_location, None)
-        if not preserve_default_location and self.dev_setting_location:
+        if force_location:
+            self.location = force_location
+            self.dev_setting_location = force_location
+        elif not preserve_default_location and self.dev_setting_location:
             self.location = self.dev_setting_location
         else:
             self.dev_setting_location = location

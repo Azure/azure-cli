@@ -90,6 +90,21 @@ examples:
     crafted: true
 """
 
+helps['backup item source-scan-configuration'] = """
+type: group
+short-summary: Manage Source Scan configuration for a backed up Azure VM item.
+"""
+
+helps['backup item source-scan-configuration set'] = """
+type: command
+short-summary: Set the Source Scan configuration used by Microsoft Defender for Cloud threat detection.
+examples:
+  - name: Enable Source Scan for a backed up Azure VM item.
+    text: az backup item source-scan-configuration set --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --name MyItem --state Enabled --backup-management-type AzureIaasVM --workload-type VM
+  - name: Disable Source Scan for a backed up Azure VM item.
+    text: az backup item source-scan-configuration set --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --name MyItem --state Disabled --backup-management-type AzureIaasVM --workload-type VM
+"""
+
 helps['backup job'] = """
 type: group
 short-summary: Entity which contains details of the job.
@@ -297,8 +312,10 @@ helps['backup protection undelete'] = """
 type: command
 short-summary: Rehydrate an item from softdeleted state to stop protection with retained data state.
 examples:
-  - name: Rehydrate an item from softdeleted state to stop protection with retained data state.
+  - name: Rehydrate a VM item from softdeleted state to stop protection with retained data state.
     text: az backup protection undelete --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureIaasVM --workload-type VM
+  - name: Rehydrate an Azure File Share item from softdeleted state to stop protection with retained data state.
+    text: az backup protection undelete --container-name MyStorageAccount --item-name MyFileShare --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureStorage --workload-type AzureFileShare
 """
 
 helps['backup protection enable-for-azurewl'] = """

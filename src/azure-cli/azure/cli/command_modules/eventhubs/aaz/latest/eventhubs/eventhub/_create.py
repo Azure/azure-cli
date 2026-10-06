@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new Event Hub as a nested resource within a Namespace.
+
+    :example: EHEventHubCreate
+        az eventhubs eventhub create --resource-group Default-NotificationHubs-AustraliaEast --namespace-name sdk-Namespace-5357 --event-hub-name sdk-EventHub-6547 --destination-name EventHubArchive.AzureBlockBlob --identity "{type:UserAssigned,user-assigned-identity:/subscriptions/SampleSubscription/resourceGroups/ResurceGroupSample/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ud2}" --archive-name-format {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second} --blob-container container --storage-account /subscriptions/e2f361f0-3b27-4503-a9cc-21cfba380093/resourceGroups/Default-Storage-SouthCentralUS/providers/Microsoft.ClassicStorage/storageAccounts/arjunteststorage --enable-capture True --encoding Avro --capture-interval 120 --capture-size-limit 10485763 --partition-count 4 --status Active --user-metadata key
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -184,7 +187,7 @@ class Create(AAZCommand):
             help="Enumerates the possible values for cleanup policy",
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
-        _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
+        _args_schema.min_compaction_lag_in_mins = AAZIntArg(
             options=["--min-lag", "--min-compaction-lag-in-mins"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
@@ -270,7 +273,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -340,7 +343,7 @@ class Create(AAZCommand):
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
                 retention_description.set_prop("cleanupPolicy", AAZStrType, ".cleanup_policy")
-                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_time_in_minutes")
+                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_in_mins")
                 retention_description.set_prop("retentionTimeInHours", AAZIntType, ".retention_time_in_hours")
                 retention_description.set_prop("tombstoneRetentionTimeInHours", AAZIntType, ".tombstone_retention_time_in_hours")
 

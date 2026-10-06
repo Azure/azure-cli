@@ -418,6 +418,9 @@ def convert_show_result_to_snake_case(result):
         boot_diagnostics.pop("storageUri")
 
     hardware_profile = new_result.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSize" in hardware_profile:
         hardware_profile["vm_size"] = hardware_profile["vmSize"]
         hardware_profile.pop("vmSize")
@@ -798,6 +801,9 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in wire_server:
         wire_server["in_vm_access_control_profile_reference_id"] = wire_server["inVMAccessControlProfileReferenceId"]
         wire_server.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in wire_server:
+        wire_server["use_local_file_rules"] = wire_server["useLocalFileRules"]
+        wire_server.pop("useLocalFileRules")
 
     uefi_settings = security_profile.get("uefi_settings", {}) or {}
     if "secureBootEnabled" in uefi_settings:

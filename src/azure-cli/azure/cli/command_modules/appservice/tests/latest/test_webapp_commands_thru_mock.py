@@ -5,13 +5,15 @@
 import unittest
 from unittest import mock
 import os
+import sys
 import types
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
-from knack.util import CLIError
+from knack.output import format_table
+from knack.util import CLIError, CommandResultItem
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError,
@@ -41,8 +43,20 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_webapp,
                                                          list_startup_logs,
                                                          show_startup_log,
+                                                         troubleshoot_config,
+                                                         _extract_runtime_error,
+                                                         _log_webapp_troubleshoot_config_tip,
                                                          troubleshoot_status,
+                                                         troubleshoot_deployment,
+                                                         show_secure_build_report,
+                                                         _log_secure_build_report_summary,
+                                                         _render_secure_build_table_report,
+                                                         _terminal_hyperlink,
+                                                         _show_secure_build_after_deployment,
                                                          create_webapp)
+from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
+                                                            transform_secure_build_output,
+                                                            transform_troubleshoot_deployment_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
@@ -59,6 +73,566 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestSecureBuildMocked(unittest.TestCase):
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_returns_report(self, requests_get_mock, _ensure_linux_mock,
+                                              _scm_url_mock, _headers_mock, _verify_mock):
+        report = {
+            'summary': {'packagesAssessed': 10, 'vulnerablePackages': 1, 'vulnerabilitiesFound': 1},
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'cve': 'CVE-2026-0001', 'firstPatchedVersion': '1.1'}}]
+        }
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = report
+        requests_get_mock.return_value = response
+
+        result = show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp', slot='staging', rescan=True)
+
+        self.assertEqual(result['summary'], report['summary'])
+        self.assertEqual(result['findings'], report['findings'])
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/securebuild')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/securebuild',
+            headers={'Authorization': 'Bearer token'},
+            params={'rescan': 'true'},
+            timeout=330,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+    @mock.patch('requests.get')
+    def test_show_secure_build_404_is_unavailable(self, requests_get_mock, _ensure_linux_mock,
+                                                  _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        with self.assertRaises(ResourceNotFoundError):
+            show_secure_build_report(_get_test_cmd(), 'myRG', 'myApp')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_summary_does_not_raise(self, request_mock, logger_mock):
+        request_mock.side_effect = AzureResponseError('scan failed')
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url=None,
+            is_async_deployment=False,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        logger_mock.warning.assert_called_once()
+        self.assertIn('Deployment succeeded', logger_mock.warning.call_args.args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._print_secure_build_kudu_footer')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_secure_build_report_summary')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_shows_summary_and_link_for_same_report(
+            self, request_mock, logger_mock, summary_mock, footer_mock):
+        report = {'summary': {'vulnerabilitiesFound': 1}, 'kuduUrl': 'https://scm/securebuild'}
+        request_mock.return_value = report
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url=None,
+            is_async_deployment=False,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        summary_mock.assert_called_once_with(report)
+        footer_mock.assert_called_once_with(report)
+        self.assertIn('view findings from this report', logger_mock.warning.call_args.args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_defers_secure_build_for_url_deployments(self, request_mock, logger_mock):
+        cases = (
+            ('https://example.com/app.zip', None, 'staging',
+             'az webapp secure-build show --name myApp --resource-group myRG --slot staging'),
+            ('https://example.com/app.zip', False, None,
+             'az webapp secure-build show --name myApp --resource-group myRG'),
+        )
+        for src_url, is_async, slot, expected_command in cases:
+            with self.subTest(src_url=src_url, is_async=is_async, slot=slot):
+                logger_mock.reset_mock()
+                params = mock.MagicMock(
+                    is_linux_webapp=True,
+                    webapp_name='myApp',
+                    resource_group_name='myRG',
+                    slot=slot,
+                    src_url=src_url,
+                    is_async_deployment=is_async,
+                    cmd=_get_test_cmd())
+
+                _show_secure_build_after_deployment(params)
+
+                logger_mock.warning.assert_called_once_with(
+                    "After the deployment completes, run '%s' to view Secure Build analysis.",
+                    expected_command)
+        request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._print_secure_build_kudu_footer')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_secure_build_report_summary')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_shows_secure_build_for_local_async_deployment(
+            self, request_mock, logger_mock, summary_mock, footer_mock):
+        report = {'summary': {'vulnerabilitiesFound': 1}, 'kuduUrl': 'https://scm/securebuild'}
+        request_mock.return_value = report
+        params = mock.MagicMock(
+            is_linux_webapp=True,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url=None,
+            is_async_deployment=True,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        request_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
+        summary_mock.assert_called_once_with(report)
+        footer_mock.assert_called_once_with(report)
+        logger_mock.warning.assert_called_once_with(
+            "Run '%s' to view findings from this report in the CLI.",
+            'az webapp secure-build show --name myApp --resource-group myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom._request_secure_build_report')
+    def test_post_deployment_secure_build_reports_linux_only_before_url_guidance(
+            self, request_mock, logger_mock):
+        params = mock.MagicMock(
+            is_linux_webapp=False,
+            webapp_name='myWindowsApp',
+            resource_group_name='myRG',
+            slot=None,
+            src_url='https://example.com/app.zip',
+            is_async_deployment=True,
+            cmd=_get_test_cmd())
+
+        _show_secure_build_after_deployment(params)
+
+        logger_mock.warning.assert_called_once_with(
+            'Secure Build analysis is currently supported only for Linux web apps.')
+        request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myApp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._log_webapp_troubleshoot_status_tip')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body',
+                return_value=('request-body', None))
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_url_deployment_reports_submission_and_preserves_response(
+            self, logger_mock, send_request_mock, _request_body_mock, _deploy_url_mock, _status_url_mock,
+            _headers_mock, _troubleshoot_tip_mock, _visit_url_mock):
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        response_body = {'complete': False, 'status': 0, 'status_text': 'Receiving changes.'}
+        response = mock.MagicMock(status_code=202, headers={'content-type': 'application/json'})
+        response.json.return_value = {'properties': response_body}
+        send_request_mock.return_value = response
+        params = mock.MagicMock(
+            src_url='https://example.com/app.zip',
+            is_linux_webapp=True,
+            is_functionapp=False,
+            enable_kudu_warmup=False,
+            track_status=True,
+            show_secure_build=False,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            cmd=_get_test_cmd())
+
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result, response_body)
+        logger_mock.warning.assert_any_call('Deployment was submitted asynchronously')
+        self.assertNotIn(
+            mock.call('Deployment has completed successfully'),
+            logger_mock.warning.call_args_list)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myApp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._check_runtimestatus_with_deploymentstatusapi')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body',
+                return_value=('request-body', None))
+    @mock.patch('requests.post')
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_local_async_deployment_reports_completion_and_preserves_response(
+            self, logger_mock, post_mock, _request_body_mock, _deploy_url_mock, _status_url_mock,
+            _headers_mock, deployment_status_mock, _visit_url_mock):
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        response_body = {'complete': False, 'status': 0, 'status_text': 'Receiving changes.'}
+        post_mock.return_value = mock.MagicMock(status_code=202)
+        deployment_status_mock.return_value = response_body
+        params = mock.MagicMock(
+            src_url=None,
+            is_async_deployment=True,
+            is_linux_webapp=True,
+            is_functionapp=False,
+            enable_kudu_warmup=False,
+            track_status=True,
+            show_secure_build=False,
+            webapp_name='myApp',
+            resource_group_name='myRG',
+            slot=None,
+            timeout=None,
+            cmd=_get_test_cmd())
+
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result, response_body)
+        logger_mock.warning.assert_any_call('Deployment has completed successfully')
+        self.assertNotIn(
+            mock.call('Deployment was submitted asynchronously'),
+            logger_mock.warning.call_args_list)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._render_secure_build_table_report')
+    def test_secure_build_table_output_renders_full_report(self, render_mock):
+        report = {
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test', 'firstPatchedVersion': '1.1'}}]
+        }
+
+        rows = transform_secure_build_output(report)
+
+        self.assertEqual(rows, [])
+        render_mock.assert_called_once_with(report, file=sys.stdout)
+
+    def test_secure_build_table_output_is_limited_to_twenty_findings(self):
+        findings = [
+            {'package': 'sample-{}'.format(index), 'version': '1.0', 'advisory': {}}
+            for index in range(25)
+        ]
+
+        rows = transform_secure_build_output(findings)
+
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(rows[-1]['Component'], 'sample-19')
+
+    def test_secure_build_table_output_is_empty_without_findings(self):
+        self.assertEqual(transform_secure_build_output([]), [])
+
+    def test_secure_build_table_output_accepts_queried_findings(self):
+        rows = transform_secure_build_output([
+            {'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test',
+                'firstPatchedVersion': '1.1'}}
+        ])
+
+        self.assertEqual(rows[0]['Component'], 'sample')
+        self.assertEqual(rows[0]['Vulnerability'], 'GHSA-test')
+
+    def test_secure_build_query_active_table_skips_rich_transformer(self):
+        transformer = mock.MagicMock(side_effect=AssertionError(
+            'The table transformer must not run after --query.'))
+        queried_findings = [
+            {'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test'}}
+        ]
+
+        output = format_table(CommandResultItem(
+            queried_findings,
+            table_transformer=transformer,
+            is_query_active=True))
+
+        transformer.assert_not_called()
+        self.assertIn('Package', output)
+        self.assertIn('sample', output)
+        self.assertNotIn('Secure Build:', output)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_includes_scan_context(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'deploymentId': 'deployment-1',
+            'generatedAtUtc': '2026-09-25T10:00:00Z',
+            'runtime': {'framework': 'PYTHON', 'version': '3.13'},
+            'summary': {
+                'packagesAssessed': 9,
+                'vulnerabilitiesFound': 2,
+                'vulnerablePackages': 1,
+            },
+            'findings': [{}, {}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        self.assertEqual(summary_parts[0][0].value, 'highlight')
+        self.assertEqual(summary_parts[2][0].value, 'error')
+        self.assertIn('Secure Build: Open source vulnerabilities in app packages', summary_text)
+        self.assertIn('Secure Build found 2 critical vulnerabilities in 1 affected package.', summary_text)
+        self.assertNotIn('scan completed', summary_text)
+        self.assertNotIn('Summary', summary_text)
+        self.assertIn('Deployment ID', summary_text)
+        self.assertIn('deployment-1', summary_text)
+        self.assertIn('Runtime', summary_text)
+        self.assertIn('PYTHON 3.13', summary_text)
+        self.assertIn('Packages scanned', summary_text)
+        self.assertIn('Report generated', summary_text)
+        self.assertIn('2026-09-25T10:00:00Z', summary_text)
+        self.assertNotIn('-' * 72, summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_reports_truncated_findings(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{} for _ in range(38)],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (showing first 20 of 38)', findings_section)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_summary_styles_clean_result_as_success(self, print_styled_text_mock):
+        _log_secure_build_report_summary({
+            'findings': [],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        summary_parts = print_styled_text_mock.call_args.args[0]
+        summary_text = ''.join(part[1] for part in summary_parts)
+        success_parts = [part for part in summary_parts if part[0].value == 'success']
+        self.assertEqual(len(success_parts), 1)
+        self.assertEqual(
+            success_parts[0][1],
+            'Secure Build detected no critical vulnerabilities. '
+            'The scanned packages have no matching alerts.')
+        self.assertIn('Secure Build: Open source vulnerabilities in app packages', summary_text)
+        self.assertNotIn('scan completed', summary_text)
+        self.assertNotIn('Summary', summary_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.print_styled_text')
+    def test_secure_build_table_report_ends_with_kudu_link(self, print_styled_text_mock):
+        _render_secure_build_table_report({
+            'findings': [{'package': 'sample', 'version': '1.0', 'advisory': {
+                'severity': 'CRITICAL', 'advisoryId': 'GHSA-test',
+                'detailsUrl': 'https://github.com/advisories/GHSA-test'}}],
+            'kuduUrl': 'https://myapp.scm.azurewebsites.net/securebuild',
+        })
+
+        _, findings_section = print_styled_text_mock.call_args_list[1].args[0]
+        self.assertIn('Critical vulnerabilities (1)\nComponent', findings_section)
+        self.assertNotIn('showing first', findings_section)
+        self.assertIn('GHSA-test', findings_section)
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', findings_section)
+        self.assertNotIn('\x1b[4m', findings_section)
+        source_parts = print_styled_text_mock.call_args_list[-2].args[0]
+        source_text = ''.join(part[1] for part in source_parts)
+        self.assertIn('Source: https://github.com/advisories', source_text)
+        self.assertIn(' (Critical vulnerabilities only).', source_text)
+        self.assertNotIn('\x1b]8;;', source_text)
+        self.assertNotIn('Kudu access is required', source_text)
+        footer_parts = print_styled_text_mock.call_args_list[-1].args[0]
+        footer_text = ''.join(part[1] for part in footer_parts)
+        self.assertIn('\nTo view the full report, visit: ', footer_text)
+        self.assertIn('https://myapp.scm.azurewebsites.net/securebuild', footer_text)
+        self.assertNotIn('\x1b]8;;', footer_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.format_styled_text',
+                return_value='<hyperlink>CVE-2026-0001</hyperlink>')
+    def test_secure_build_vulnerability_uses_terminal_hyperlink(
+            self, format_styled_text_mock):
+        link = _terminal_hyperlink(
+            'CVE-2026-0001', 'https://github.com/advisories/GHSA-test')
+
+        style, label = format_styled_text_mock.call_args.args[0]
+        self.assertEqual(style.value, 'hyperlink')
+        self.assertEqual(label, 'CVE-2026-0001')
+        self.assertIn('\x1b]8;;https://github.com/advisories/GHSA-test\x1b\\', link)
+        self.assertIn('<hyperlink>CVE-2026-0001</hyperlink>', link)
+        self.assertNotIn('\x1b[4m', link)
+        self.assertTrue(link.endswith('\x1b]8;;\x1b\\'))
+
+
+class TestTroubleshootDeploymentMocked(unittest.TestCase):
+
+    def setUp(self):
+        ensure_linux_patcher = mock.patch(
+            'azure.cli.command_modules.appservice.custom._ensure_linux_webapp')
+        self.ensure_linux_mock = ensure_linux_patcher.start()
+        self.addCleanup(ensure_linux_patcher.stop)
+
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_raises_on_windows(self, requests_get_mock):
+        self.ensure_linux_mock.side_effect = ArgumentUsageError(
+            "'az webapp troubleshoot deployment' is only supported for Linux web apps.")
+
+        with self.assertRaises(ArgumentUsageError) as context:
+            troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myWindowsApp')
+
+        self.assertIn(
+            "'az webapp troubleshoot deployment' is only supported for Linux web apps.",
+            str(context.exception))
+        self.ensure_linux_mock.assert_called_once_with(
+            mock.ANY, 'myRG', 'myWindowsApp', None,
+            command_label="'az webapp troubleshoot deployment'")
+        requests_get_mock.assert_not_called()
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_combines_kudu_and_arm(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 4,
+            'status_text': '',
+            'complete': True,
+            'active': True,
+            'end_time': '2026-09-24T10:56:30Z',
+            'deployer': 'OneDeploy',
+            'provisioningState': 'Succeeded',
+            'log_url': 'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1/log',
+        }
+        requests_get_mock.return_value = response
+        arm_status_mock.return_value = {
+            'status': 'RuntimeSuccessful',
+            'numberOfInstancesInProgress': 0,
+            'numberOfInstancesSuccessful': 2,
+            'numberOfInstancesFailed': 0,
+        }
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['deploymentId'], 'deployment-1')
+        self.assertEqual(result['activeDeploymentId'], 'deployment-1')
+        self.assertEqual(result['state'], 'RuntimeSuccessful')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['runtime']['instancesSuccessful'], 2)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://myapp.scm.azurewebsites.net/api/deployments/deployment-1')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/deployments/latest',
+            headers={'Authorization': 'Bearer token'},
+            timeout=30,
+            verify=True)
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_accepts_in_progress_response(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=202)
+        response.json.return_value = {
+            'id': 'deployment-1',
+            'status': 1,
+            'status_text': 'Building and Deploying',
+            'complete': False,
+            'active': False,
+            'start_time': '2026-09-24T10:56:30Z',
+        }
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['state'], 'Building and Deploying')
+        self.assertTrue(result['inProgress'])
+        self.assertFalse(result['active'])
+        self.assertEqual(result['kudu']['statusCode'], 202)
+        self.assertEqual(
+            result['kuduUrl'],
+            'https://scm/api/deployments/deployment-1')
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_arm_deployment_status', return_value=None)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_id_links_to_deployment_list(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _arm_status_mock, _verify_mock):
+        response = mock.MagicMock(status_code=200)
+        response.json.return_value = {'status': 4, 'complete': True, 'active': True}
+        requests_get_mock.return_value = response
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
+
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://scm')
+    @mock.patch('requests.get')
+    def test_troubleshoot_deployment_without_history(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, _verify_mock):
+        requests_get_mock.return_value = mock.MagicMock(status_code=404)
+
+        result = troubleshoot_deployment(_get_test_cmd(), 'myRG', 'myApp', slot='staging')
+
+        self.assertEqual(result['state'], 'NoDeployment')
+        self.assertFalse(result['inProgress'])
+        self.assertEqual(result['slot'], 'staging')
+        self.assertEqual(result['kuduUrl'], 'https://scm/api/deployments')
+
+    def test_troubleshoot_deployment_table_output(self):
+        rows = transform_troubleshoot_deployment_output({
+            'deploymentId': 'deployment-1',
+            'state': 'BuildInProgress',
+            'inProgress': True,
+            'complete': False,
+            'active': False,
+            'deployer': 'OneDeploy',
+            'lastDeploymentTime': '2026-09-24T10:56:30Z',
+            'runtime': {'instancesSuccessful': 1, 'instancesFailed': 0},
+        })
+
+        self.assertEqual(rows[0]['State'], 'BuildInProgress')
+        self.assertFalse(rows[0]['Active'])
+        self.assertEqual(rows[0]['Succeeded'], 1)
+        self.assertEqual(rows[0]['Failed'], 0)
+        self.assertEqual(list(rows[0]), [
+            'DeploymentId', 'State', 'Active', 'Succeeded', 'Failed', 'LastDeploymentTime'])
+
+
+class TestTroubleshootConfigDiscovery(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_tip_is_shown_for_linux_webapp(self, logger_mock):
+        _log_webapp_troubleshoot_config_tip('myApp', 'myRG', True)
+
+        logger_mock.warning.assert_called_once_with(
+            "Tip: run 'az webapp troubleshoot config --name %s --resource-group %s --report' "
+            "to validate app configuration and see recent runtime errors.",
+            'myApp', 'myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    def test_tip_is_hidden_for_windows_webapp(self, logger_mock):
+        _log_webapp_troubleshoot_config_tip('myApp', 'myRG', False)
+
+        logger_mock.warning.assert_not_called()
 
 
 class TestWebappMocked(unittest.TestCase):
@@ -1613,7 +2187,7 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
 
 class TestOneDeployTag(unittest.TestCase):
 
-    def test_scm_url_includes_encoded_tag(self):
+    def test_scm_url_includes_encoded_deployment_tag(self):
         from azure.cli.command_modules.appservice.custom import OneDeployParams, _build_onedeploy_scm_url
         params = OneDeployParams()
         params.artifact_type = 'zip'
@@ -1623,21 +2197,34 @@ class TestOneDeployTag(unittest.TestCase):
                         return_value='https://example.scm.azurewebsites.net'):
             result = _build_onedeploy_scm_url(params)
 
-        self.assertEqual(result, 'https://example.scm.azurewebsites.net/api/publish?type=zip&tag=release%202026%2F08')
+        self.assertEqual(
+            result,
+            'https://example.scm.azurewebsites.net/api/publish?type=zip&deploymentTag=release%202026%2F08')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
-    def test_webapp_deploy_ignores_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
+    def test_webapp_deploy_ignores_deployment_tag_for_windows_webapp(self, site_operation_mock, perform_deploy_mock):
         from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
         site_operation_mock.return_value = mock.MagicMock(kind='app', reserved=False)
 
         with mock.patch('azure.cli.command_modules.appservice.custom.logger.warning') as warning_mock:
-            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', tag='windows-tag')
+            perform_onedeploy_webapp(mock.MagicMock(), 'myRG', 'myApp', deployment_tag='windows-tag')
 
-        warning_mock.assert_any_call('--tag is only supported for Linux web apps and will be ignored.')
+        warning_mock.assert_any_call('--deploymentTag is only supported for Linux web apps and will be ignored.')
         self.assertIsNone(perform_deploy_mock.call_args.args[0].tag)
 
-    def test_arm_body_includes_tag(self):
+    @mock.patch('azure.cli.command_modules.appservice.custom._perform_onedeploy_internal')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_webapp_deploy_passes_secure_build_option(self, site_operation_mock, perform_deploy_mock):
+        from azure.cli.command_modules.appservice.custom import perform_onedeploy_webapp
+        site_operation_mock.return_value = mock.MagicMock(kind='app,linux', reserved=True)
+
+        perform_onedeploy_webapp(
+            mock.MagicMock(), 'myRG', 'myApp', show_secure_build=True)
+
+        self.assertTrue(perform_deploy_mock.call_args.args[0].show_secure_build)
+
+    def test_arm_body_includes_deployment_tag(self):
         import json
         from azure.cli.command_modules.appservice.custom import OneDeployParams, _get_onedeploy_request_body
         params = OneDeployParams()
@@ -1647,7 +2234,7 @@ class TestOneDeployTag(unittest.TestCase):
 
         body, file_hash = _get_onedeploy_request_body(params)
 
-        self.assertEqual(json.loads(body)['properties']['tag'], 'release-2026-08')
+        self.assertEqual(json.loads(body)['properties']['deploymentTag'], 'release-2026-08')
         self.assertIsNone(file_hash)
 
 
@@ -2281,6 +2868,797 @@ class TestOneDeploySiteCache(unittest.TestCase):
 
         self.assertEqual(result, 'https://myapp.azurewebsites.net')
         get_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
+
+
+class TestTroubleshootConfigMocked(unittest.TestCase):
+    """Tests for az webapp troubleshoot config."""
+
+    def setUp(self):
+        is_linux_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.is_linux_webapp',
+            return_value=True)
+        client_factory_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.web_client_factory')
+        subscription_id_patch = mock.patch(
+            'azure.cli.core.commands.client_factory.get_subscription_id',
+            return_value='00000000-0000-0000-0000-000000000000')
+        is_linux_patch.start()
+        client_factory_patch.start()
+        subscription_id_patch.start()
+        self.addCleanup(is_linux_patch.stop)
+        self.addCleanup(client_factory_patch.stop)
+        self.addCleanup(subscription_id_patch.stop)
+
+    def _scm_response(self, status_code=200, json_data=None):
+        resp = mock.MagicMock()
+        resp.status_code = status_code
+        resp.json.return_value = json_data
+        return resp
+
+    def _arm_response(self, json_data):
+        resp = mock.MagicMock()
+        resp.json.return_value = json_data
+        return resp
+
+    @staticmethod
+    def _printed_text(print_mock):
+        text = ''
+        for call in print_mock.call_args_list:
+            for arg in call.args:
+                if isinstance(arg, list):
+                    for item in arg:
+                        if isinstance(item, tuple) and len(item) > 1:
+                            text += str(item[1])
+                elif isinstance(arg, tuple) and len(arg) > 1:
+                    text += str(arg[1])
+                elif isinstance(arg, str):
+                    text += arg
+        return text
+
+    def test_table_output_includes_config_written_time_in_details_header(self):
+        result = transform_troubleshoot_config_output({
+            'configCheck': {
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'true',
+                    'Details': 'No issues detected.',
+                }],
+            },
+        })
+
+        self.assertEqual(
+            list(result[0].keys()),
+            ['Setting', 'Value', 'Details (Last Updated: 2026-09-02T17:30:00Z)'])
+
+    def test_table_output_uses_details_header_when_written_time_is_missing(self):
+        result = transform_troubleshoot_config_output({
+            'configCheck': {
+                'WrittenAt': '  ',
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'true',
+                    'Details': 'No issues detected.',
+                }],
+            },
+        })
+
+        self.assertEqual(list(result[0].keys()), ['Setting', 'Value', 'Details'])
+
+    def test_report_omits_empty_snapshot_metadata(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'MachineName': '  ',
+                'WrittenAt': '',
+                'Settings': [],
+            },
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertNotIn('Instance:', printed_text)
+        self.assertNotIn('Last Updated:', printed_text)
+
+    def test_report_uses_requested_machine_when_response_omits_machine_name(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [],
+            },
+            'requestedMachineName': 'pl0sdlwk000r7s',
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('pl0sdlwk000r7s', printed_text)
+
+    def test_report_uses_instance_id_when_machine_name_and_filter_are_missing(self):
+        from azure.cli.command_modules.appservice._troubleshoot_config_report import render_report
+
+        payload = {
+            'configCheck': {
+                'InstanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'WrittenAt': '2026-09-02T17:30:00Z',
+                'Settings': [],
+            },
+        }
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            render_report(payload)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('f5105a099b', printed_text)
+
+    # ---- _extract_runtime_error ----
+
+    def test_extract_runtime_error_picks_latest_timestamp(self):
+        arm = {'properties': [
+            {'state': 'Started', 'lastError': None},
+            {'state': 'Stopped', 'lastError': 'A', 'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+            {'state': 'Stopped', 'lastError': 'B', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]}
+        self.assertEqual(_extract_runtime_error(arm)['lastError'], 'B')
+
+    def test_extract_runtime_error_uses_requested_instance(self):
+        arm = {'properties': [
+            {'instanceId': 'config-instance', 'state': 'Stopped',
+             'lastError': 'ConfigWorkerError', 'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'NewerOtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]}
+
+        result = _extract_runtime_error(arm, instance_id='CONFIG-INSTANCE')
+
+        self.assertEqual(result['instanceId'], 'config-instance')
+        self.assertEqual(result['lastError'], 'ConfigWorkerError')
+
+    def test_extract_runtime_error_returns_none_when_requested_instance_has_no_error(self):
+        arm = {'properties': [
+            {'instanceId': 'config-instance', 'state': 'Started', 'lastError': None},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'OtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]}
+
+        self.assertIsNone(_extract_runtime_error(arm, instance_id='config-instance'))
+
+    def test_extract_runtime_error_returns_none_when_all_started(self):
+        arm = {'properties': [{'state': 'Started', 'lastError': None}]}
+        self.assertIsNone(_extract_runtime_error(arm))
+
+    def test_extract_runtime_error_handles_single_dict_properties(self):
+        arm = {'properties': {'state': 'Stopped', 'lastError': 'X'}}
+        self.assertEqual(_extract_runtime_error(arm)['lastError'], 'X')
+
+    def test_extract_runtime_error_handles_missing_properties(self):
+        self.assertIsNone(_extract_runtime_error({}))
+        self.assertIsNone(_extract_runtime_error(None))
+
+    # ---- troubleshoot_config ----
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_success(self, requests_get_mock, _scm_url_mock,
+                                         _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        settings = [
+            {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts', 'Details': 'No issues detected'},
+            {'Setting': 'alwaysOn', 'Value': 'false', 'Details': 'App may be unloaded when idle'},
+        ]
+        scm_body = {
+            'SiteName': 'myApp',
+            'InstanceId': 'abc123',
+            'WrittenAt': '2026-07-07T18:12:29+00:00',
+            'Settings': settings,
+        }
+        requests_get_mock.return_value = self._scm_response(200, json_data=scm_body)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'abc123', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'Container did not respond', 'lastErrorAction': 'WaitingForSiteToStart',
+             'lastErrorTimestamp': fresh_ts},
+            {'instanceId': 'other-instance', 'state': 'Stopped', 'lastError': 'OtherWorkerError',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertEqual(result['name'], 'myApp')
+        self.assertEqual(result['resourceGroup'], 'myRG')
+        # configCheck is the verbatim SCM body — PascalCase keys preserved.
+        self.assertEqual(result['configCheck'], scm_body)
+        self.assertEqual(result['configCheck']['Settings'], settings)
+        self.assertEqual(result['runtimeError']['lastError'], 'ContainerTimeout')
+        self.assertEqual(result['runtimeError']['instanceId'], 'abc123')
+        self.assertNotIn('configCheckStatus', result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_filters_by_requested_instance(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp',
+            'InstanceId': 'website-instance-id',
+            'Settings': [],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'website-instance-id', 'state': 'Stopped',
+             'lastError': 'RequestedWorkerError', 'lastErrorTimestamp': fresh_ts},
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'NewerOtherWorkerError', 'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+
+        self.assertEqual(
+            requests_get_mock.call_args.kwargs['params'],
+            {'instance': 'requested-instance'})
+        self.assertIsNone(requests_get_mock.call_args.kwargs['cookies'])
+        self.assertEqual(result['runtimeError']['instanceId'], 'website-instance-id')
+        self.assertEqual(result['runtimeError']['lastError'], 'RequestedWorkerError')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_instance_filter_maps_worker_when_snapshot_is_missing(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.side_effect = [
+            self._arm_response({'value': [
+                {'name': 'website-instance-id',
+                 'properties': {'machineName': 'requested-instance'}},
+                {'name': 'other-instance-id',
+                 'properties': {'machineName': 'other-instance'}},
+            ]}),
+            self._arm_response({'properties': [
+                {'instanceId': 'website-instance-id', 'state': 'Stopped',
+                 'lastError': 'RequestedWorkerError', 'lastErrorTimestamp': fresh_ts},
+                {'instanceId': 'other-instance-id', 'state': 'Stopped',
+                 'lastError': 'OtherWorkerError', 'lastErrorTimestamp': fresh_ts},
+            ]}),
+        ]
+
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='REQUESTED-INSTANCE')
+
+        config_calls = [
+            call for call in requests_get_mock.call_args_list
+            if call.args and call.args[0] == 'https://myapp.scm.azurewebsites.net/api/troubleshoot/config'
+        ]
+        self.assertEqual(len(config_calls), 1)
+        self.assertEqual(send_raw_request_mock.call_count, 2)
+        self.assertIn('/instances?', send_raw_request_mock.call_args_list[0].args[2])
+        self.assertIn('/siteStatus?', send_raw_request_mock.call_args_list[1].args[2])
+        self.assertEqual(result['runtimeError']['instanceId'], 'website-instance-id')
+        self.assertEqual(result['runtimeError']['lastError'], 'RequestedWorkerError')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_instance_filter_does_not_fall_back_to_another_worker(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'value': [
+            {'name': 'other-instance-id',
+             'properties': {'machineName': 'other-instance'}},
+        ]})
+
+        result = troubleshoot_config(
+            _get_test_cmd(), 'myRG', 'myApp', instance='requested-instance')
+
+        self.assertNotIn('runtimeError', result)
+        self.assertEqual(send_raw_request_mock.call_count, 1)
+        self.assertIn('/instances?', send_raw_request_mock.call_args.args[2])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_scm_404_returns_empty_settings(self, requests_get_mock,
+                                                                _scm_url_mock, _headers_mock,
+                                                                send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNone(result['configCheck'])
+        self.assertNotIn('runtimeError', result)
+        # Exactly one warning: the 404 -> feature-disabled message.
+        logger_mock.warning.assert_any_call(
+            'Configuration check feature is currently disabled. Please try again later.')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_feature_unavailable_on_404(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # SCM returns 404 -> BUILT-IN CHECKS section prints the compact
+        # feature-disabled message instead of the generic
+        # retry-and-restart guidance.
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn(
+            'Configuration check feature is currently disabled. Please try again later.',
+            printed_text)
+        self.assertNotIn('Failed to retrieve built-in configuration checks', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_404_response_message(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        response = self._scm_response(404)
+        response.text = (
+            'Config check information for PL0SDLWK000R7S could not be retrieved. '
+            'Please try a different instance.')
+        requests_get_mock.return_value = response
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(
+                _get_test_cmd(), 'myRG', 'myApp', instance='PL0SDLWK000R7S', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn(response.text, printed_text)
+        self.assertNotIn('Configuration check feature is currently disabled', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_scm_transient_5xx_retries_then_succeeds(
+            self, requests_get_mock, _sleep_mock, _scm_url_mock, _headers_mock,
+            send_raw_request_mock):
+        # First two calls fail with a transient 503, third returns the payload.
+        requests_get_mock.side_effect = [
+            self._scm_response(503),
+            self._scm_response(503),
+            self._scm_response(200, json_data={
+                'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+                'Settings': [{'Setting': 'alwaysOn', 'Value': 'true',
+                              'Details': 'No issues detected'}],
+            }),
+        ]
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNotNone(result['configCheck'])
+        self.assertEqual(len(result['configCheck']['Settings']), 1)
+        self.assertEqual(requests_get_mock.call_count, 3)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_scm_persistent_5xx_gives_up_after_max_attempts(
+            self, requests_get_mock, _sleep_mock, _scm_url_mock, _headers_mock,
+            send_raw_request_mock):
+        # All attempts return 503 → configCheck stays None after 3 tries.
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': []})
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNone(result['configCheck'])
+        self.assertEqual(requests_get_mock.call_count, 3)
+        logger_mock.warning.assert_called()
+
+    def test_runtime_error_is_recent_rejects_future_timestamp(self):
+        # Regression: a clock-skewed or malformed timestamp that lands in the
+        # future would produce a negative (now - parsed) delta which still
+        # satisfies `<= 15min`, so stale/nonsense errors were being flagged
+        # as recent. The gate must require a non-negative delta.
+        from datetime import datetime, timezone, timedelta
+        from azure.cli.command_modules.appservice.custom import _runtime_error_is_recent
+        future_ts = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        past_recent_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat().replace('+00:00', 'Z')
+        past_stale_ts = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': future_ts}))
+        self.assertTrue(_runtime_error_is_recent({'lastErrorTimestamp': past_recent_ts}))
+        self.assertFalse(_runtime_error_is_recent({'lastErrorTimestamp': past_stale_ts}))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_structured_output_suppresses_stale_runtime_error(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp',
+            'InstanceId': 'abc',
+            'Settings': [],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+        ]})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertNotIn('runtimeError', result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_no_runtime_error(self, requests_get_mock, _scm_url_mock,
+                                                  _headers_mock, send_raw_request_mock):
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+            'Settings': [{'Setting': 'alwaysOn', 'Value': 'true',
+                          'Details': 'No issues detected'}],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'other-instance', 'state': 'Stopped',
+             'lastError': 'OtherWorkerError', 'lastErrorTimestamp': '2026-07-02T00:00:00Z'},
+        ]})
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertNotIn('runtimeError', result)
+        self.assertEqual(len(result['configCheck']['Settings']), 1)
+        self.assertEqual(result['configCheck']['SiteName'], 'myApp')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_prints_and_returns_none(self, requests_get_mock,
+                                                                _scm_url_mock, _headers_mock,
+                                                                send_raw_request_mock):
+        # The runtime-error section now renders only when the ARM
+        # lastErrorTimestamp is within the last 15 minutes (or the built-in
+        # check fetch failed). Use a fresh timestamp so the section renders.
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp',
+            'MachineName': 'pl0sdlwk000r7s',
+            'InstanceId': 'abc',
+            'WrittenAt': '2026-09-02T17:30:00+00:00',
+            'Settings': [
+                {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
+                {'Setting': 'websitesPort', 'Value': '',
+                 'Details': "App doesn't respond on expected port",
+                 'DetailsLevel': 'warning'},
+            ],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ImagePullUnauthorizedFailure',
+             'lastErrorDetails': 'forbidden', 'lastErrorAction': 'StartingSiteContainers',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            result = troubleshoot_config(
+                _get_test_cmd(), 'myRG', 'myApp', slot='staging', report=True)
+
+        self.assertIsNone(result)
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('BUILT-IN CHECKS', printed_text)
+        self.assertIn('Instance:', printed_text)
+        self.assertIn('pl0sdlwk000r7s', printed_text)
+        self.assertIn('Last Updated:', printed_text)
+        self.assertIn('2026-09-02 17:30:00 UTC', printed_text)
+        self.assertLess(printed_text.index('Instance:'), printed_text.index('BUILT-IN CHECKS'))
+        self.assertLess(printed_text.index('Last Updated:'), printed_text.index('BUILT-IN CHECKS'))
+        self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+        self.assertIn('ImagePullUnauthorizedFailure', printed_text)
+        self.assertIn('Last Error', printed_text)
+        self.assertIn('Last Error Details', printed_text)
+        self.assertIn('Last Error Timestamp', printed_text)
+        self.assertIn(
+            'az webapp config appsettings set -n myApp -g myRG '
+            '--slot staging --settings KEY=VALUE',
+            printed_text)
+        self.assertIn(
+            'az webapp config set -n myApp -g myRG --slot staging --help',
+            printed_text)
+        self.assertIn(
+            'az webapp log tail -n myApp -g myRG --slot staging',
+            printed_text)
+        # Removed labels should NOT appear.
+        self.assertNotIn('Last runtime error', printed_text)
+        self.assertNotIn('Action:', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_suppresses_stale_runtime_error(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # A stale ARM timestamp suppresses the runtime recommendation.
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+            'Settings': [
+                {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
+                {'Setting': 'alwaysOn', 'Value': 'true',
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
+            ],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'abc', 'state': 'Started', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'old error', 'lastErrorAction': 'None',
+             'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('BUILT-IN CHECKS', printed_text)
+        self.assertNotIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+        self.assertNotIn('ContainerTimeout', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_runtime_when_error_is_fresh(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # All settings clean, but ARM reports a runtime error whose timestamp
+        # is within the last 15 minutes -> section should still render.
+        from datetime import datetime, timezone, timedelta
+        fresh_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(200, json_data={
+            'SiteName': 'myApp', 'InstanceId': 'abc', 'WrittenAt': 't',
+            'Settings': [
+                {'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
+                 'Details': 'No issues detected', 'DetailsLevel': 'info'},
+            ],
+        })
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'fresh error', 'lastErrorAction': 'None',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+        self.assertIn('ContainerTimeout', printed_text)
+        self.assertIn('fresh error', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_does_not_use_generic_details_for_last_error(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        from datetime import datetime, timezone
+        fresh_ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Started', 'lastError': 'IssueStartingContainer',
+             'lastErrorDetails': '', 'details': 'Site started successfully.',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('IssueStartingContainer', printed_text)
+        self.assertNotIn('Last Error Details', printed_text)
+        self.assertNotIn('Site started successfully.', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_shows_runtime_when_config_check_failed(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # All SCM retries fail (persistent 503) -> configCheck is None. The
+        # runtime section should render only when the ARM lastErrorTimestamp
+        # is fresh: the timestamp gate is applied consistently regardless of
+        # whether the built-in checks are available.
+        from datetime import datetime, timezone, timedelta
+        fresh_ts = (datetime.now(timezone.utc) - timedelta(minutes=2)).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'fresh error', 'lastErrorAction': 'None',
+             'lastErrorTimestamp': fresh_ts},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Failed to retrieve built-in configuration checks', printed_text)
+        self.assertIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+        self.assertIn('ContainerTimeout', printed_text)
+        self.assertIn('fresh error', printed_text)
+        self.assertIn('Hint:', printed_text)
+        self.assertIn('az webapp log tail', printed_text)
+        self.assertNotIn('Update flagged app setting', printed_text)
+        self.assertNotIn('Review config options', printed_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_report_suppresses_runtime_when_config_check_failed_and_error_is_stale(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # All SCM retries fail AND the ARM timestamp is stale -> runtime
+        # section should NOT render. Config-check failure alone is not enough
+        # to surface a stale runtime error.
+        requests_get_mock.return_value = self._scm_response(503)
+        send_raw_request_mock.return_value = self._arm_response({'properties': [
+            {'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'stale error', 'lastErrorAction': 'None',
+             'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
+        ]})
+
+        with mock.patch(
+                'azure.cli.command_modules.appservice._troubleshoot_config_report.print_styled_text') as print_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp', report=True)
+
+        printed_text = self._printed_text(print_mock)
+        self.assertIn('Failed to retrieve built-in configuration checks', printed_text)
+        self.assertNotIn('SITE RUNTIME ERROR RECOMMENDATION', printed_text)
+
+    def test_troubleshoot_config_raises_on_windows(self):
+        with mock.patch(
+                'azure.cli.command_modules.appservice.custom.is_linux_webapp',
+                return_value=False):
+            with self.assertRaises(ArgumentUsageError) as cm:
+                troubleshoot_config(_get_test_cmd(), 'myRG', 'myWindowsApp')
+        self.assertIn('Linux', str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_retries_across_instances_on_404(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        # First (unpinned) call and the first instance retry return 404 with
+        # KuduLite's "not available" body; the second instance retry returns
+        # the snapshot.
+        settings = [{'Setting': 'linuxFxVersion', 'Value': 'NODE|20-lts',
+                     'Details': 'No issues detected'}]
+        good = self._scm_response(200, json_data={
+            'SiteName': 'myApp', 'InstanceId': 'inst2', 'WrittenAt': 't',
+            'Settings': settings,
+        })
+        bad = mock.MagicMock()
+        bad.status_code = 404
+        bad.text = 'Config check information is not available.'
+        bad.json.side_effect = ValueError('not json')
+
+        requests_get_mock.side_effect = [bad, bad, good]
+
+        send_raw_request_mock.side_effect = [
+            # ARM /instances response (retry lookup).
+            self._arm_response({'value': [{'name': 'inst1'}, {'name': 'inst2'}]}),
+            # ARM /siteStatus response.
+            self._arm_response({'properties': []}),
+        ]
+
+        result = troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        self.assertIsNotNone(result['configCheck'])
+        self.assertEqual(result['configCheck']['InstanceId'], 'inst2')
+        # 3 SCM calls: unpinned, then per-instance retry twice.
+        self.assertEqual(requests_get_mock.call_count, 3)
+        # Second and third calls should carry ARR affinity cookies.
+        self.assertEqual(
+            requests_get_mock.call_args_list[1].kwargs['cookies'],
+            {'ARRAffinity': 'inst1', 'ARRAffinitySameSite': 'inst1'})
+        self.assertEqual(
+            requests_get_mock.call_args_list[2].kwargs['cookies'],
+            {'ARRAffinity': 'inst2', 'ARRAffinitySameSite': 'inst2'})
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
+    def test_troubleshoot_config_suppresses_arm_error_response_body(
+            self, requests_get_mock, _scm_url_mock, _headers_mock, send_raw_request_mock):
+        unavailable = mock.MagicMock()
+        unavailable.status_code = 503
+        unavailable.reason = 'Service Unavailable'
+        arm_error = HttpResponseError(
+            message='<html>Azure services are not available right now.</html>',
+            response=unavailable)
+        requests_get_mock.return_value = self._scm_response(404)
+        send_raw_request_mock.side_effect = [
+            arm_error,
+            self._arm_response({'properties': []}),
+        ]
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
+            troubleshoot_config(_get_test_cmd(), 'myRG', 'myApp')
+
+        warning = logger_mock.warning.call_args_list[0]
+        rendered_warning = warning.args[0] % warning.args[1:]
+        self.assertIn('status 503', rendered_warning)
+        self.assertNotIn('<html>', rendered_warning)
+        self.assertNotIn('Azure services are not available', rendered_warning)
 
 
 class _TypespecContainerSettings(Mapping):

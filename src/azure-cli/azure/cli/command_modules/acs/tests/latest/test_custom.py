@@ -3,34 +3,59 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import os
+import hashlib
+import io
 import shutil
+import subprocess
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
+from urllib.error import HTTPError, URLError
 import datetime
+from contextlib import contextmanager
 from dateutil.parser import parse
 
 import yaml
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
+    CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
+    CONST_CONTAINER_NETWORK_LOGS_DISABLED,
+    CONST_CONTAINER_NETWORK_LOGS_ENABLED,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
+    _create_or_update_dcr_with_table_readiness_retry,
+    _resolve_dcr_settings_from_existing,
+    add_monitoring_role_assignment,
+    create_data_collection_endpoint,
     ensure_default_log_analytics_workspace_for_monitoring,
+    warn_on_legacy_monitoring_auth,
 )
 from azure.cli.command_modules.acs.custom import (
+    _download_aks_desktop_asset,
+    _extract_aks_desktop_archive,
+    _get_aks_desktop_platform,
+    _get_aks_desktop_release,
     _get_command_context,
+    _get_latest_kubelogin_version,
+    _launch_aks_desktop_installer,
+    _select_aks_desktop_asset,
     _update_addons,
+    aks_install_desktop,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
     aks_agentpool_auto_scale_update,
     aks_agentpool_get_rollback_versions,
     aks_agentpool_rollback,
     aks_agentpool_upgrade,
+    aks_disable_addons,
     aks_enable_addons,
     aks_stop,
     aks_upgrade,
@@ -61,8 +86,11 @@ from azure.mgmt.containerservice.models import (
 )
 from azure.cli.core.azclierror import (
     ClientRequestError,
+    FileOperationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
+    ResourceNotFoundError,
+    ValidationError,
 )
 
 
@@ -846,6 +874,1223 @@ class AcsCustomCommandTest(unittest.TestCase):
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_latest_version_fallback(self, logger_mock, mock_url_retrieve, mock_urlopen_read):
+        """Test that the version file is used to install kubelogin when the GitHub API is rate limited."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            b'v0.0.30',
+        ]
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+
+            k8s_install_kubelogin(
+                mock.MagicMock(), client_version='latest', install_location=test_location,
+                arch="amd64", gh_token='ghp_test_token_123')
+
+            fallback_call = mock_urlopen_read.call_args_list[1]
+            self.assertEqual(
+                fallback_call[0][0],
+                'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt')
+            self.assertIsNone(fallback_call.kwargs.get('gh_token'))
+            mock_url_retrieve.assert_called_with(
+                MockUrlretrieveUrlValidator('https://github.com/Azure/kubelogin/releases/download', 'v0.0.30'),
+                mock.ANY)
+            self.assertTrue(
+                any('rate limit was exceeded' in str(call) for call in logger_mock.warning.call_args_list))
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_fallback_only_on_rate_limit(self, logger_mock, mock_urlopen_read):
+        """Test that the version file is only used for a rate limit, other failures are surfaced as they are."""
+        api_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+        cases = [
+            (HTTPError(api_url, 429, 'too many requests', None, None), True),
+            (HTTPError(api_url, 500, 'internal server error', None, None), False),
+            (URLError('[Errno -2] Name or service not known'), False),
+        ]
+        for error, expect_fallback in cases:
+            with self.subTest(error=error):
+                mock_urlopen_read.reset_mock()
+                mock_urlopen_read.side_effect = [error, b'v0.0.30']
+
+                if expect_fallback:
+                    self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+                    self.assertEqual(mock_urlopen_read.call_count, 2)
+                else:
+                    with self.assertRaises(type(error)) as cm:
+                        _get_latest_kubelogin_version('azurecloud')
+                    self.assertIs(cm.exception, error)
+                    mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_fallback_without_tag_prefix(self, logger_mock, mock_urlopen_read):
+        """Test that a bare version is normalized to the release tag used to build the download url."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            b'0.0.30\n',
+        ]
+
+        self.assertEqual(_get_latest_kubelogin_version('azurecloud'), 'v0.0.30')
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_all_sources_fail(self, logger_mock, mock_urlopen_read):
+        """Test that both failures are reported when the GitHub API and the version file are unavailable."""
+        mock_urlopen_read.side_effect = [
+            HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest', 403, 'rate limited', None, None),
+            HTTPError('https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt',
+                      500, 'internal server error', None, None),
+        ]
+
+        with self.assertRaises(ClientRequestError) as cm:
+            _get_latest_kubelogin_version('azurecloud')
+        self.assertIn('403', str(cm.exception))
+        self.assertIn('500', str(cm.exception))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_get_latest_kubelogin_version_unexpected_fallback_content(self, logger_mock, mock_urlopen_read):
+        """Test that content which is not exactly a version is rejected, not used to build the download url."""
+        for content in (b'<html>not found</html>', b'v0.0.30/../../evil', b'\xff\xfe\x00binary'):
+            with self.subTest(content=content):
+                mock_urlopen_read.reset_mock()
+                mock_urlopen_read.side_effect = [
+                    HTTPError('https://api.github.com/repos/Azure/kubelogin/releases/latest',
+                              403, 'rate limited', None, None),
+                    content,
+                ]
+
+                with self.assertRaises(ClientRequestError):
+                    _get_latest_kubelogin_version('azurecloud')
+
+    def test_aks_install_desktop_platform(self):
+        cases = [
+            ('Windows', 'AMD64', ('win', 'x64')),
+            ('Windows', 'arm64', ('win', 'arm64')),
+            ('Darwin', 'x86_64', ('mac', 'x64')),
+            ('Darwin', 'aarch64', ('mac', 'arm64')),
+            ('Linux', 'x86_64', ('linux', 'x64')),
+            ('Linux', 'armv7l', ('linux', 'armv7l')),
+        ]
+        for system, machine, expected in cases:
+            with self.subTest(system=system, machine=machine):
+                with mock.patch(
+                        'azure.cli.command_modules.acs.custom.platform.system',
+                        return_value=system), mock.patch(
+                            'azure.cli.command_modules.acs.custom.platform.machine',
+                            return_value=machine):
+                    self.assertEqual(_get_aks_desktop_platform(), expected)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.machine', return_value='mips64')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.system', return_value='Linux')
+    def test_aks_install_desktop_unsupported_architecture(self, _, __):
+        with self.assertRaises(ValidationError):
+            _get_aks_desktop_platform()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_specific_version(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        release, version = _get_aks_desktop_release('0.9.1')
+        self.assertEqual(version, '0.9.1')
+        self.assertEqual(release['tag_name'], 'v0.9.1')
+        mock_urlopen_read.assert_called_once_with(
+            'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1', gh_token=None)
+
+    @mock.patch.dict(os.environ, {'GH_TOKEN': 'ignored-by-release-helper'})
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_authentication(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        for version, endpoint in ((None, 'latest'), ('0.9.1', 'tags/v0.9.1'), ('v0.9.1', 'tags/v0.9.1')):
+            for token in (None, 'fake-gh-token'):
+                with self.subTest(version=version, token=token):
+                    mock_urlopen_read.reset_mock()
+                    release, release_version = _get_aks_desktop_release(version, gh_token=token)
+                    self.assertEqual(release['tag_name'], 'v0.9.1')
+                    self.assertEqual(release_version, '0.9.1')
+                    mock_urlopen_read.assert_called_once_with(
+                        'https://api.github.com/repos/Azure/aks-desktop/releases/' + endpoint, gh_token=token)
+
+    @mock.patch('http.client.HTTPSConnection.connect', side_effect=AssertionError('Network connection blocked'))
+    def test_aks_install_desktop_rejects_newlines_in_token(self, mock_connect):
+        secret = 'fake-sensitive-token'
+        for version in (None, '0.9.1'):
+            for newline in ('\r', '\n', '\r\n'):
+                with self.subTest(version=version, newline=repr(newline)):
+                    # Keep the real urllib header validation: it can echo malformed credentials.
+                    with self.assertRaises(InvalidArgumentValueError) as cm:
+                        _get_aks_desktop_release(version, gh_token=secret + newline)
+                    self.assertIn('GitHub token', str(cm.exception))
+                    self.assertNotIn(secret, str(cm.exception))
+                    self.assertNotIn(secret, ' '.join(cm.exception.recommendations))
+                    mock_connect.assert_not_called()
+
+    @mock.patch('http.client.HTTPSConnection.connect', side_effect=AssertionError('Network connection blocked'))
+    def test_aks_install_desktop_valid_token_reaches_transport(self, mock_connect):
+        for token in (None, 'fake-sensitive-token'):
+            with self.subTest(token=token):
+                mock_connect.reset_mock()
+                with self.assertRaisesRegex(AssertionError, 'Network connection blocked'):
+                    _get_aks_desktop_release(gh_token=token)
+                mock_connect.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_rejects_empty_version(self, mock_urlopen_read):
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.9.1", "assets": []}'
+        for version in ('', ' ', '\t', 'v'):
+            with self.subTest(version=version):
+                mock_urlopen_read.reset_mock()
+                with self.assertRaises(InvalidArgumentValueError):
+                    _get_aks_desktop_release(version)
+                mock_urlopen_read.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_rate_limit(self, mock_urlopen_read):
+        url = 'https://api.github.com/repos/Azure/aks-desktop/releases/latest'
+        for status, headers in ((429, None), (403, {'X-RateLimit-Remaining': '0'}),
+                                (403, {'Retry-After': '60'})):
+            for token in (None, 'fake-gh-token'):
+                with self.subTest(status=status, headers=headers, token=token):
+                    mock_urlopen_read.reset_mock()
+                    error = HTTPError(url, status, 'Forbidden', headers, None)
+                    self.addCleanup(error.close)
+                    mock_urlopen_read.side_effect = error
+                    kwargs = {'gh_token': token} if token else {}
+                    with self.assertRaises(ClientRequestError) as cm:
+                        _get_aks_desktop_release(**kwargs)
+                    message = str(cm.exception)
+                    recommendation = ' '.join(cm.exception.recommendations)
+                    self.assertIn('rate limit', message.lower())
+                    self.assertIn(str(status), message)
+                    self.assertIn(url, message)
+                    self.assertIn('wait', recommendation.lower())
+                    if token:
+                        self.assertIn('quota', recommendation.lower())
+                        self.assertNotIn('--gh-token', recommendation)
+                    else:
+                        self.assertIn('GH_TOKEN', recommendation)
+                        self.assertNotIn('--gh-token', recommendation)
+                        self.assertIn('reset', recommendation.lower())
+                    self.assertNotIn('--version', recommendation)
+                    self.assertNotIn('fake-gh-token', message + recommendation)
+                    mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    def test_aks_install_desktop_metadata_errors(self, mock_urlopen_read):
+        url = 'https://api.github.com/repos/Azure/aks-desktop/releases/latest'
+        cases = [
+            (HTTPError(url, 403, 'Forbidden', None, None), '403'),
+            (HTTPError(url, 403, 'Forbidden', {'X-RateLimit-Remaining': '10'}, None), '403'),
+            (HTTPError(url, 401, 'Unauthorized', None, None), '401'),
+            (HTTPError(url, 404, 'Not Found', None, None), '404'),
+            (URLError('network unavailable'), 'network unavailable'),
+            (b'not JSON', 'Expecting value'),
+        ]
+        for response, context in cases:
+            with self.subTest(context=context, response=response):
+                mock_urlopen_read.reset_mock()
+                if isinstance(response, HTTPError):
+                    self.addCleanup(response.close)
+                mock_urlopen_read.side_effect = response if isinstance(response, Exception) else None
+                mock_urlopen_read.return_value = response
+                with self.assertRaises(ClientRequestError) as cm:
+                    _get_aks_desktop_release()
+                message = str(cm.exception)
+                recommendation = ' '.join(cm.exception.recommendations)
+                self.assertIn('release metadata', message)
+                self.assertIn(url, message)
+                self.assertIn(context, message)
+                self.assertNotIn('rate limit', message.lower())
+                self.assertNotIn('--version', recommendation)
+                mock_urlopen_read.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('urllib.request.build_opener')
+    @mock.patch('azure.cli.command_modules.acs.custom.urlopen')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform', return_value=('win', 'x64'))
+    def test_aks_install_desktop_token_only_reaches_metadata(
+            self, _, mock_urlopen, mock_build_opener, mock_launch):
+        metadata = (
+            b'{"tag_name": "v0.9.1", "assets": [{"name": "aks-desktop-0.9.1-win-x64.exe",'
+            b'"browser_download_url": "https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+            b'aks-desktop-0.9.1-win-x64.exe", "digest": "sha256:' +
+            hashlib.sha256(b'installer').hexdigest().encode() + b'"}]}')
+
+        def launch(path, system, version):
+            with open(path, 'rb') as installer:
+                self.assertEqual(installer.read(), b'installer')
+
+        mock_launch.side_effect = launch
+        cases = [
+            ({}, None, None),
+            ({'GH_TOKEN': ''}, None, None),
+            ({'GH_TOKEN': 'environment-token'}, None, 'Bearer environment-token'),
+            ({'GH_TOKEN': 'environment-token'}, 'explicit-token', 'Bearer explicit-token'),
+            ({'GH_TOKEN': 'environment-token'}, '', None),
+            ({'GH_TOKEN': 'invalid\r\ntoken'}, 'explicit-token', 'Bearer explicit-token'),
+        ]
+        for environment, explicit, authorization in cases:
+            with self.subTest(environment=environment, explicit=explicit), \
+                    mock.patch.dict(os.environ, environment, clear=True):
+                mock_urlopen.reset_mock()
+                mock_build_opener.reset_mock()
+                mock_launch.reset_mock()
+                mock_urlopen.return_value = io.BytesIO(metadata)
+                mock_build_opener.return_value.open.return_value = io.BytesIO(b'installer')
+                aks_install_desktop(None, version='0.9.1', gh_token=explicit)
+                mock_urlopen.assert_called_once()
+                metadata_request = mock_urlopen.call_args[0][0]
+                self.assertEqual(metadata_request.full_url,
+                                 'https://api.github.com/repos/Azure/aks-desktop/releases/tags/v0.9.1')
+                self.assertEqual(metadata_request.get_header('Authorization'), authorization)
+                mock_build_opener.return_value.open.assert_called_once()
+                request = mock_build_opener.return_value.open.call_args[0][0]
+                self.assertEqual(request.full_url,
+                                 'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                                 'aks-desktop-0.9.1-win-x64.exe')
+                self.assertIsNone(request.get_header('Authorization'))
+                self.assertNotIn('token', str(request.header_items()))
+                mock_launch.assert_called_once()
+
+    @mock.patch('http.client.HTTPSConnection.connect', side_effect=AssertionError('Network connection blocked'))
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform', return_value=('win', 'x64'))
+    def test_aks_install_desktop_rejects_newlines_in_environment_token(self, _, mock_connect):
+        secret = 'fake-environment-secret'
+        for newline in ('\r', '\n', '\r\n'):
+            with self.subTest(newline=repr(newline)), \
+                    mock.patch.dict(os.environ, {'GH_TOKEN': secret + newline}):
+                with self.assertRaises(InvalidArgumentValueError) as cm:
+                    aks_install_desktop(None)
+                self.assertIn('GitHub token', str(cm.exception))
+                self.assertNotIn(secret, str(cm.exception))
+                self.assertNotIn(secret, ' '.join(cm.exception.recommendations))
+                mock_connect.assert_not_called()
+
+    @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
+    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'ubuntu', 'ID_LIKE': 'debian'})
+    def test_aks_install_desktop_selects_native_linux_package(self, _, __):
+        release = {
+            'assets': [
+                {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
+                {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
+            ]
+        }
+        asset = _select_aks_desktop_asset(
+            release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop_0.9.1-1_amd64.deb')
+
+    def test_aks_install_desktop_linux_package_compatibility(self):
+        deb = 'aks-desktop_0.9.1-1_amd64.deb'
+        archive = 'aks-desktop-0.9.1-linux-x64.tar.gz'
+        release = {'assets': [{'name': deb}, {'name': archive}]}
+        cases = [
+            ({'ID': 'debian'}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, deb),
+            ({'ID': 'linuxmint', 'ID_LIKE': 'ubuntu debian'}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, deb),
+            ({'ID': 'ubuntu'}, '/usr/bin/xdg-open', {'WAYLAND_DISPLAY': 'wayland-0'}, deb),
+            ({'ID': 'ubuntu'}, '/usr/bin/xdg-open', {}, archive),
+            ({'ID': 'ubuntu'}, '/usr/bin/xdg-open', {'DISPLAY': '', 'WAYLAND_DISPLAY': ''}, archive),
+            ({'ID': 'fedora'}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, archive),
+            ({'ID': 'rhel', 'ID_LIKE': 'fedora'}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, archive),
+            ({'ID': 'arch'}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, archive),
+            ({}, '/usr/bin/xdg-open', {'DISPLAY': ':0'}, archive),
+            ({'ID': 'ubuntu'}, None, {'DISPLAY': ':0'}, archive),
+        ]
+        for os_release, launcher, environment, expected in cases:
+            with self.subTest(os_release=os_release, launcher=launcher, environment=environment), \
+                    mock.patch.dict(os.environ, environment, clear=True), mock.patch(
+                        'azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                        return_value=os_release), mock.patch(
+                            'azure.cli.command_modules.acs.custom.shutil.which', return_value=launcher):
+                asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+                self.assertEqual(asset['name'], expected)
+
+    @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                side_effect=OSError('os-release unavailable'))
+    def test_aks_install_desktop_missing_os_release_uses_archive(self, mock_os_release):
+        release = {'assets': [
+            {'name': 'aks-desktop_0.9.1-1_amd64.deb'},
+            {'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'},
+        ]}
+        asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+        mock_os_release.assert_called_once_with()
+
+    @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
+    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'debian'})
+    def test_aks_install_desktop_missing_deb_uses_archive(self, mock_os_release, mock_which):
+        release = {'assets': [{'name': 'aks-desktop-0.9.1-linux-x64.tar.gz'}]}
+        asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
+        self.assertEqual(asset['name'], 'aks-desktop-0.9.1-linux-x64.tar.gz')
+        mock_os_release.assert_called_once_with()
+        mock_which.assert_called_once_with('xdg-open')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                return_value={'ID': 'fedora'})
+    def test_aks_install_desktop_rejects_incompatible_only_asset(self, _):
+        with self.assertRaises(ResourceNotFoundError):
+            _select_aks_desktop_asset(
+                {'assets': [{'name': 'aks-desktop_0.9.1-1_amd64.deb'}]},
+                '0.9.1', 'linux', 'x64')
+
+    def test_aks_install_desktop_missing_asset(self):
+        with self.assertRaises(ResourceNotFoundError):
+            _select_aks_desktop_asset(
+                {'assets': []}, '0.9.1', 'mac', 'arm64')
+
+    @mock.patch('urllib.request.build_opener')
+    def test_aks_install_desktop_verifies_download_digest(self, mock_build_opener):
+        content = b'AKS Desktop'
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.side_effect = [content, b'']
+        mock_build_opener.return_value.open.return_value = response
+        asset = {
+            'browser_download_url':
+                'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                'aks-desktop-0.9.1-win-x64.exe',
+            'digest': 'sha256:' + hashlib.sha256(content).hexdigest(),
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            destination = os.path.join(temp_dir, 'installer.exe')
+            _download_aks_desktop_asset(asset, destination)
+            with open(destination, 'rb') as downloaded:
+                self.assertEqual(downloaded.read(), content)
+
+    @mock.patch('urllib.request.build_opener')
+    def test_aks_install_desktop_rejects_invalid_digest(self, mock_build_opener):
+        cases = [{}, *({'digest': digest} for digest in (
+            None, 123, [], {}, '', 'sha256:', 'sha256:' + 'a' * 63,
+            'sha256:' + 'a' * 65, 'sha256:' + 'g' * 64, 'sha512:' + 'a' * 64))]
+        for metadata in cases:
+            with self.subTest(metadata=metadata), tempfile.TemporaryDirectory() as temp_dir:
+                asset = {
+                    'browser_download_url':
+                        'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/installer.exe',
+                    **metadata,
+                }
+                destination = os.path.join(temp_dir, 'installer.exe')
+                with self.assertRaisesRegex(ClientRequestError, 'valid SHA-256 digest'):
+                    _download_aks_desktop_asset(asset, destination)
+                mock_build_opener.assert_not_called()
+                self.assertFalse(os.path.exists(destination))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('urllib.request.build_opener')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform', return_value=('win', 'x64'))
+    def test_aks_install_desktop_digest_failure_prevents_launch(
+            self, _, mock_release, mock_build_opener, mock_launch):
+        for digest, error in ((None, 'valid SHA-256 digest'), ('sha256:' + '0' * 64, 'did not match')):
+            with self.subTest(digest=digest):
+                mock_build_opener.reset_mock()
+                response = mock.MagicMock()
+                response.__enter__.return_value.read.side_effect = [b'installer', b'']
+                mock_build_opener.return_value.open.return_value = response
+                mock_release.return_value = ({'assets': [{
+                    'name': 'aks-desktop-0.9.1-win-x64.exe',
+                    'browser_download_url':
+                        'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/'
+                        'aks-desktop-0.9.1-win-x64.exe',
+                    'digest': digest,
+                }]}, '0.9.1')
+                with self.assertRaisesRegex(ClientRequestError, error):
+                    aks_install_desktop(None)
+                mock_launch.assert_not_called()
+                if digest is None:
+                    mock_build_opener.assert_not_called()
+                else:
+                    mock_build_opener.return_value.open.assert_called_once()
+
+    @contextmanager
+    def _aks_desktop_archive_extractor(self, fallback):
+        if fallback:
+            # Match the old API: accepting filter= must fail, and an unfiltered call is never safe.
+            def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
+                raise AssertionError('The compatibility extractor must not call extractall')
+
+            with mock.patch.object(tarfile, 'data_filter', None, create=True), \
+                    mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall):
+                yield
+        else:
+            if not hasattr(tarfile, 'data_filter'):
+                self.skipTest('Native tar extraction filters unavailable')
+            # Exercise pre-3.14 defaults even on newer Python.
+            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+                                   staticmethod(lambda member, path: member), create=True):
+                yield
+
+    @staticmethod
+    def _write_aks_desktop_archive(archive_path, members):
+        with tarfile.open(archive_path, 'w:gz') as archive:
+            for name, member_type, linkname in members:
+                member = tarfile.TarInfo(name)
+                member.type = member_type
+                member.linkname = linkname
+                member.mode = 0o755
+                if member.isfile():
+                    member.size = len(b'executable')
+                    archive.addfile(member, io.BytesIO(b'executable'))
+                else:
+                    archive.addfile(member)
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_unsafe_members(self):
+        cases = [
+            [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
+             ('dir/foo/../../outside', tarfile.REGTYPE, '')],
+            [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
+             ('dir/link', tarfile.REGTYPE, '')],
+            [('../outside', tarfile.REGTYPE, '')],
+            [('aks-desktop/', tarfile.SYMTYPE, '../outside')],
+            [('aks-desktop\\', tarfile.SYMTYPE, '../outside')],
+            [('aks-desktop/', tarfile.LNKTYPE, 'missing')],
+            [('aks-desktop\\', tarfile.LNKTYPE, 'missing')],
+            [('pipe', tarfile.FIFOTYPE, '')],
+            [('device', tarfile.CHRTYPE, '')],
+            [('device', tarfile.BLKTYPE, '')],
+            [('unknown', b'Z', '')],
+            [('aks-desktop', tarfile.SYMTYPE, '/etc/passwd')],
+            [('aks-desktop', tarfile.LNKTYPE, '/etc/passwd')],
+        ]
+        for fallback in (False, True):
+            for members in cases:
+                with self.subTest(fallback=fallback, members=members), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    outside = os.path.join(temp_dir, 'outside')
+                    with open(outside, 'wb') as sentinel:
+                        sentinel.write(b'unchanged')
+                    self._write_aks_desktop_archive(archive_path, members)
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                    with open(outside, 'rb') as sentinel:
+                        self.assertEqual(sentinel.read(), b'unchanged')
+                    for name in ('pipe', 'device', 'unknown', 'aks-desktop'):
+                        self.assertFalse(os.path.lexists(os.path.join(destination, name)))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_existing_escaping_symlinks(self):
+        cases = [
+            [('link/aks-desktop', tarfile.REGTYPE, '')],
+            [('link', tarfile.REGTYPE, '')],
+            [('link/dir', tarfile.DIRTYPE, '')],
+            [('link', tarfile.SYMTYPE, 'safe')],
+            [('hardlink', tarfile.LNKTYPE, 'link/aks-desktop')],
+        ]
+        for fallback in (False, True):
+            for members in cases:
+                with self.subTest(fallback=fallback, members=members), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    outside = os.path.join(temp_dir, 'outside')
+                    os.mkdir(destination)
+                    os.mkdir(outside)
+                    sentinel_path = os.path.join(outside, 'aks-desktop')
+                    with open(sentinel_path, 'wb') as sentinel:
+                        sentinel.write(b'unchanged')
+                    os.symlink(outside, os.path.join(destination, 'link'))
+                    self._write_aks_desktop_archive(archive_path, members)
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                    with open(sentinel_path, 'rb') as sentinel:
+                        self.assertEqual(sentinel.read(), b'unchanged')
+                    self.assertEqual(os.listdir(outside), ['aks-desktop'])
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_preserves_safe_links(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('app/aks-desktop', tarfile.REGTYPE, ''),
+                    ('app/subdir/symlink', tarfile.SYMTYPE, '../aks-desktop'),
+                    ('app/hardlink', tarfile.LNKTYPE, 'app/aks-desktop'),
+                    ('alias', tarfile.SYMTYPE, 'app'),
+                    ('alias/resource', tarfile.REGTYPE, ''),
+                ])
+                _extract_aks_desktop_archive(archive_path, destination)
+                for name in ('aks-desktop', 'subdir/symlink', 'hardlink', 'resource'):
+                    with open(os.path.join(destination, 'app', name), 'rb') as executable:
+                        self.assertEqual(executable.read(), b'executable')
+                executable_path = os.path.join(destination, 'app', 'aks-desktop')
+                self.assertTrue(os.stat(executable_path).st_mode & 0o100)
+                self.assertEqual(os.readlink(os.path.join(destination, 'app', 'subdir', 'symlink')),
+                                 '../aks-desktop')
+                self.assertTrue(os.path.samefile(executable_path, os.path.join(destination, 'app', 'hardlink')))
+                self.assertFalse(os.path.islink(os.path.join(destination, 'app', 'hardlink')))
+
+    def test_aks_install_desktop_archive_supports_legacy_python(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+            _extract_aks_desktop_archive(archive_path, destination)
+            with open(os.path.join(destination, 'aks-desktop'), 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_resolves_forward_hardlinks(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('app/first', tarfile.LNKTYPE, 'app/second'),
+                ('app/second', tarfile.LNKTYPE, 'app/aks-desktop'),
+                ('app/aks-desktop', tarfile.REGTYPE, ''),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            for name in ('first', 'second'):
+                link = os.path.join(destination, 'app', name)
+                self.assertFalse(os.path.islink(link))
+                self.assertTrue(os.path.samefile(link, os.path.join(destination, 'app', 'aks-desktop')))
+                with open(link, 'rb') as executable:
+                    self.assertEqual(executable.read(), b'executable')
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_deferred_hardlink_collisions(self):
+        for link_name, later_name in [('a', 'a'), ('alias/a', 'dir/a')]:
+            with self.subTest(link_name=link_name), self._aks_desktop_archive_extractor(True), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    alias = tarfile.TarInfo('alias')
+                    alias.type = tarfile.SYMTYPE
+                    alias.linkname = 'dir'
+                    archive.addfile(alias)
+                    link = tarfile.TarInfo(link_name)
+                    link.type = tarfile.LNKTYPE
+                    link.linkname = 'b'
+                    link.mode = 0o755
+                    archive.addfile(link)
+                    for name, content, mode in [(later_name, b'later-a', 0o600), ('b', b'b-content', 0o755)]:
+                        member = tarfile.TarInfo(name)
+                        member.size = len(content)
+                        member.mode = mode
+                        archive.addfile(member, io.BytesIO(content))
+                with self.assertRaisesRegex(FileOperationError, 'Ambiguous.*deferred.*hardlink'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+                for name, content, mode in [(later_name, b'later-a', 0o600), ('b', b'b-content', 0o755)]:
+                    path = os.path.join(destination, name)
+                    with open(path, 'rb') as extracted:
+                        self.assertEqual(extracted.read(), content)
+                    self.assertEqual(os.stat(path).st_mode & 0o777, mode)
+                self.assertFalse(os.path.samefile(os.path.join(destination, later_name),
+                                                  os.path.join(destination, 'b')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_deferred_hardlink_parent_rebinding(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('alias', tarfile.SYMTYPE, 'first'),
+                ('alias/a', tarfile.LNKTYPE, 'b'),
+                ('alias', tarfile.SYMTYPE, 'second'),
+                ('b', tarfile.REGTYPE, ''),
+            ])
+            with self.assertRaisesRegex(FileOperationError, 'Ambiguous.*deferred.*hardlink'):
+                _extract_aks_desktop_archive(archive_path, destination)
+            self.assertEqual(os.readlink(os.path.join(destination, 'alias')), 'second')
+            self.assertFalse(os.path.lexists(os.path.join(destination, 'first')))
+            self.assertFalse(os.path.lexists(os.path.join(destination, 'second')))
+            with open(os.path.join(destination, 'b'), 'rb') as extracted:
+                self.assertEqual(extracted.read(), b'executable')
+
+    def test_aks_install_desktop_archive_rejects_unresolved_hardlinks(self):
+        cases = [
+            [('first', tarfile.LNKTYPE, 'second'), ('second', tarfile.LNKTYPE, 'first')],
+            [('first', tarfile.LNKTYPE, 'missing')],
+            [('dir', tarfile.DIRTYPE, ''), ('first', tarfile.LNKTYPE, 'dir')],
+        ]
+        for members in cases:
+            with self.subTest(members=members), self._aks_desktop_archive_extractor(True), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, members)
+                with self.assertRaisesRegex(FileOperationError, 'hardlink'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'first')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_rejects_root_replacement(self):
+        for member_type in (tarfile.SYMTYPE, tarfile.LNKTYPE):
+            for name in ('.', 'app/..', 'alias'):
+                with self.subTest(member_type=member_type, name=name), \
+                        self._aks_desktop_archive_extractor(True), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    destination = os.path.join(temp_dir, 'install')
+                    os.mkdir(destination)
+                    os.symlink('.', os.path.join(destination, 'alias'))
+                    self._write_aks_desktop_archive(archive_path, [
+                        ('aks-desktop', tarfile.REGTYPE, ''),
+                        (name, member_type, 'aks-desktop'),
+                    ])
+                    with self.assertRaises(FileOperationError):
+                        _extract_aks_desktop_archive(archive_path, destination)
+                    self.assertTrue(os.path.isdir(destination))
+                    self.assertFalse(os.path.islink(destination))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_normalizes_safe_symlink_targets(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('app/aks-desktop', tarfile.REGTYPE, ''),
+                ('app/link', tarfile.SYMTYPE, 'unused/../aks-desktop'),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            link = os.path.join(destination, 'app', 'link')
+            self.assertEqual(os.readlink(link), 'aks-desktop')
+            with open(link, 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    def test_aks_install_desktop_archive_does_not_create_outside_parents(self):
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('../outside/../install/app/aks-desktop', tarfile.REGTYPE, ''),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.lexists(os.path.join(temp_dir, 'outside')))
+            with open(os.path.join(destination, 'app', 'aks-desktop'), 'rb') as executable:
+                self.assertEqual(executable.read(), b'executable')
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_failure_does_not_launch(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('aks-desktop', tarfile.REGTYPE, ''),
+                    ('../outside', tarfile.REGTYPE, ''),
+                ])
+                with mock.patch('os.path.expanduser', return_value=temp_dir):
+                    with self.assertRaises(FileOperationError):
+                        _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                mock_popen.assert_not_called()
+                self.assertEqual(os.listdir(os.path.join(temp_dir, '.local', 'share', 'aks-desktop')), [])
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_reinstall_preserves_old_on_failure(self, mock_popen):
+        for fallback in (False, True):
+            for failure in ('missing-executable', 'extract', 'chmod', 'backup', 'publish'):
+                with self.subTest(fallback=fallback, failure=failure), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    mock_popen.reset_mock()
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                    install_dir = os.path.join(install_root, '0.9.1')
+                    os.makedirs(install_dir)
+                    for name in ('aks-desktop', 'stale'):
+                        with open(os.path.join(install_dir, name), 'wb') as output:
+                            output.write(b'old installation')
+                    members = [('app/resource', tarfile.REGTYPE, '')]
+                    if failure != 'missing-executable':
+                        members.append(('app/aks-desktop', tarfile.REGTYPE, ''))
+                    if failure == 'extract':
+                        members.append(('../outside', tarfile.REGTYPE, ''))
+                    self._write_aks_desktop_archive(archive_path, members)
+                    real_replace, real_chmod = os.replace, os.chmod
+                    publication_attempts = []
+
+                    def replace(source, destination):
+                        if failure == 'backup' and source == install_dir:
+                            raise OSError('backup failed')
+                        if failure == 'publish' and destination == install_dir:
+                            publication_attempts.append(source)
+                            if len(publication_attempts) == 1:
+                                raise OSError('publication failed')
+                        return real_replace(source, destination)
+
+                    def chmod(path, mode, *args, **kwargs):
+                        if failure == 'chmod' and os.path.basename(path) == 'aks-desktop':
+                            raise OSError('chmod failed')
+                        return real_chmod(path, mode, *args, **kwargs)
+
+                    with (
+                        mock.patch('os.path.expanduser', return_value=temp_dir),
+                        mock.patch('azure.cli.command_modules.acs.custom.os.replace', side_effect=replace),
+                        mock.patch('azure.cli.command_modules.acs.custom.os.chmod', side_effect=chmod),
+                    ):
+                        with self.assertRaises(FileOperationError):
+                            _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                    mock_popen.assert_not_called()
+                    for name in ('aks-desktop', 'stale'):
+                        with open(os.path.join(install_dir, name), 'rb') as installed:
+                            self.assertEqual(installed.read(), b'old installation')
+                    self.assertEqual(sorted(os.listdir(install_dir)), ['aks-desktop', 'stale'])
+                    self.assertEqual(os.listdir(install_root), ['0.9.1'])
+                    if failure == 'publish':
+                        self.assertEqual(len(publication_attempts), 2)
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_reinstall_replaces_contents(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                install_dir = os.path.join(install_root, '0.9.1')
+                os.makedirs(install_dir)
+                with open(os.path.join(install_dir, 'stale'), 'wb') as output:
+                    output.write(b'old installation')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    member = tarfile.TarInfo('app/aks-desktop')
+                    member.mode = 0o600
+                    member.size = len(b'new executable')
+                    archive.addfile(member, io.BytesIO(b'new executable'))
+                real_replace = os.replace
+                staged_dirs = []
+
+                def replace(source, destination):
+                    if destination == install_dir:
+                        staged_dirs.append(source)
+                        self.assertEqual(os.path.dirname(source), install_root)
+                        self.assertNotEqual(source, install_dir)
+                        executable = os.path.join(source, 'app', 'aks-desktop')
+                        self.assertTrue(os.stat(executable).st_mode & 0o100)
+                    return real_replace(source, destination)
+
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.command_modules.acs.custom.os.replace', side_effect=replace):
+                    _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                    _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                self.assertEqual(len(staged_dirs), 2)
+                self.assertNotEqual(staged_dirs[0], staged_dirs[1])
+                self.assertEqual(os.listdir(install_root), ['0.9.1'])
+                self.assertEqual(os.listdir(install_dir), ['app'])
+                executable = os.path.join(install_dir, 'app', 'aks-desktop')
+                with open(executable, 'rb') as installed:
+                    self.assertEqual(installed.read(), b'new executable')
+                self.assertEqual(mock_popen.call_args_list, [mock.call([executable]), mock.call([executable])])
+                mock_popen.reset_mock()
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_backup_cleanup_failure_still_launches(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                mock_popen.reset_mock()
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                install_dir = os.path.join(install_root, '0.9.1')
+                os.makedirs(os.path.join(install_dir, 'resources'))
+                with open(os.path.join(install_dir, 'resources', 'old'), 'wb') as output:
+                    output.write(b'old resources')
+                self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                real_rmtree = shutil.rmtree
+                backups = []
+
+                def remove_tree(path, *args, **kwargs):
+                    if os.path.basename(path).startswith('.0.9.1-backup-'):
+                        backups.append(path)
+                        raise PermissionError('backup cleanup denied')
+                    return real_rmtree(path, *args, **kwargs)
+
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.command_modules.acs.custom.shutil.rmtree', side_effect=remove_tree), \
+                        mock.patch('azure.cli.command_modules.acs.custom.logger.warning') as warning:
+                    _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                executable = os.path.join(install_dir, 'aks-desktop')
+                mock_popen.assert_called_once_with([executable])
+                with open(executable, 'rb') as installed:
+                    self.assertEqual(installed.read(), b'executable')
+                self.assertEqual(len(backups), 1)
+                self.assertTrue(os.path.isdir(backups[0]))
+                self.assertEqual(sorted(os.listdir(install_root)), [os.path.basename(backups[0]), '0.9.1'])
+                self.assertIn(backups[0], str(warning.call_args_list))
+                self.assertIn('backup cleanup denied', str(warning.call_args_list))
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_interrupted_publication_preserves_old(self, mock_popen):
+        for interruption in ('after-backup', 'publish'):
+            with self.subTest(interruption=interruption), tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                install_dir = os.path.join(install_root, '0.9.1')
+                os.makedirs(install_dir)
+                with open(os.path.join(install_dir, 'aks-desktop'), 'wb') as output:
+                    output.write(b'old executable')
+                self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                real_replace = os.replace
+                interrupted = []
+
+                def replace(source, destination):
+                    if interruption == 'after-backup' and source == install_dir:
+                        real_replace(source, destination)
+                        interrupted.append(source)
+                        raise KeyboardInterrupt()
+                    if interruption == 'publish' and destination == install_dir and not interrupted:
+                        interrupted.append(source)
+                        raise KeyboardInterrupt()
+                    return real_replace(source, destination)
+
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.command_modules.acs.custom.os.replace', side_effect=replace):
+                    with self.assertRaises(KeyboardInterrupt):
+                        _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                mock_popen.assert_not_called()
+                with open(os.path.join(install_dir, 'aks-desktop'), 'rb') as installed:
+                    self.assertEqual(installed.read(), b'old executable')
+                self.assertEqual(os.listdir(install_root), ['0.9.1'])
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_failed_rollback_retains_backup(self, mock_popen):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                install_dir = os.path.join(install_root, '0.9.1')
+                os.makedirs(install_dir)
+                with open(os.path.join(install_dir, 'aks-desktop'), 'wb') as output:
+                    output.write(b'old executable')
+                self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                real_replace = os.replace
+                backups = []
+
+                def replace(source, destination):
+                    if source == install_dir:
+                        backups.append(destination)
+                    if destination == install_dir:
+                        raise OSError('publication or rollback failed')
+                    return real_replace(source, destination)
+
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.command_modules.acs.custom.os.replace', side_effect=replace):
+                    with self.assertRaises(FileOperationError) as cm:
+                        _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                mock_popen.assert_not_called()
+                self.assertEqual(len(backups), 1)
+                self.assertIn(backups[0], str(cm.exception))
+                self.assertIn('rollback', str(cm.exception).lower())
+                with open(os.path.join(backups[0], 'aks-desktop'), 'rb') as installed:
+                    self.assertEqual(installed.read(), b'old executable')
+                self.assertFalse(os.path.lexists(install_dir))
+                self.assertEqual(len(os.listdir(install_root)), 1)
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen')
+    def test_aks_install_desktop_archive_rejects_existing_file_or_symlink(self, mock_popen):
+        for fallback in (False, True):
+            for existing_type in ('file', 'symlink'):
+                with self.subTest(fallback=fallback, existing_type=existing_type), \
+                        self._aks_desktop_archive_extractor(fallback), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    mock_popen.reset_mock()
+                    archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                    install_root = os.path.join(temp_dir, '.local', 'share', 'aks-desktop')
+                    install_dir = os.path.join(install_root, '0.9.1')
+                    outside = os.path.join(temp_dir, 'outside')
+                    os.makedirs(install_root)
+                    os.mkdir(outside)
+                    sentinel = os.path.join(outside, 'aks-desktop') if existing_type == 'symlink' else install_dir
+                    with open(sentinel, 'wb') as output:
+                        output.write(b'user data')
+                    if existing_type == 'symlink':
+                        os.symlink(outside, install_dir)
+                    self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                    with mock.patch('os.path.expanduser', return_value=temp_dir):
+                        with self.assertRaises(FileOperationError):
+                            _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                    mock_popen.assert_not_called()
+                    with open(sentinel, 'rb') as installed:
+                        self.assertEqual(installed.read(), b'user data')
+                    self.assertEqual(os.path.islink(install_dir), existing_type == 'symlink')
+                    self.assertEqual(os.listdir(install_root), ['0.9.1'])
+
+    @unittest.skipIf(os.name == 'nt', 'Requires POSIX permissions')
+    def test_aks_install_desktop_archive_sanitizes_permissions(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                with tarfile.open(archive_path, 'w:gz') as archive:
+                    directory = tarfile.TarInfo('app')
+                    directory.type = tarfile.DIRTYPE
+                    directory.mode = 0
+                    archive.addfile(directory)
+                    for name, mode in [('executable', 0o7777), ('data', 0o7033)]:
+                        member = tarfile.TarInfo('app/' + name)
+                        member.mode = mode
+                        member.uid = member.gid = 12345
+                        member.uname = member.gname = 'untrusted'
+                        archive.addfile(member)
+                _extract_aks_desktop_archive(archive_path, destination)
+                self.assertEqual(os.stat(os.path.join(destination, 'app')).st_mode & 0o700, 0o700)
+                for name, mode in [('executable', 0o755), ('data', 0o600)]:
+                    info = os.stat(os.path.join(destination, 'app', name))
+                    self.assertEqual(info.st_mode & 0o7777, mode)
+                    self.assertEqual(info.st_uid, os.getuid())
+                    self.assertEqual(info.st_gid, os.getgid())
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_replaces_link_leaf_without_following(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('old', tarfile.REGTYPE, ''),
+                    ('new', tarfile.REGTYPE, ''),
+                    ('alias', tarfile.SYMTYPE, 'old'),
+                    ('alias', tarfile.SYMTYPE, 'new'),
+                ])
+                _extract_aks_desktop_archive(archive_path, destination)
+                self.assertEqual(os.readlink(os.path.join(destination, 'alias')), 'new')
+                self.assertFalse(os.path.islink(os.path.join(destination, 'old')))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_compat_replaces_hardlink_leaf_without_following(self):
+        # Native tarfile behavior for hardlinks replacing symlinks varies across Python versions.
+        with self._aks_desktop_archive_extractor(True), tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+            destination = os.path.join(temp_dir, 'install')
+            self._write_aks_desktop_archive(archive_path, [
+                ('old', tarfile.REGTYPE, ''),
+                ('new', tarfile.REGTYPE, ''),
+                ('hardlink', tarfile.SYMTYPE, 'old'),
+                ('hardlink', tarfile.LNKTYPE, 'new'),
+            ])
+            _extract_aks_desktop_archive(archive_path, destination)
+            self.assertFalse(os.path.islink(os.path.join(destination, 'old')))
+            self.assertFalse(os.path.islink(os.path.join(destination, 'hardlink')))
+            self.assertTrue(os.path.samefile(os.path.join(destination, 'hardlink'),
+                                             os.path.join(destination, 'new')))
+
+    @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
+    def test_aks_install_desktop_launches_without_shell(self, mock_run):
+        _launch_aks_desktop_installer(
+            'aks-desktop-0.9.1-win-x64.exe', 'win', '0.9.1')
+        mock_run.assert_called_once_with(
+            ['aks-desktop-0.9.1-win-x64.exe'], check=True)
+
+    def test_aks_install_desktop_retains_gui_installer(self):
+        cases = [
+            ('mac', 'arm64', 'aks-desktop-0.9.1-mac-arm64.dmg', 'open'),
+            ('linux', 'x64', 'aks-desktop_0.9.1-1_amd64.deb', 'xdg-open'),
+        ]
+        for system, arch, name, launcher in cases:
+            with self.subTest(system=system), tempfile.TemporaryDirectory() as config_dir:
+                paths = []
+
+                def download(asset, path):
+                    with open(path, 'wb') as output:
+                        output.write(b'installer')
+
+                def launch(args, check):
+                    self.assertEqual(args[0], launcher)
+                    self.assertTrue(check)
+                    self.assertTrue(os.path.isfile(args[1]))
+                    paths.append(args[1])
+
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir, 'DISPLAY': ':0'}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=(system, arch)),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [{'name': name}]}, '0.9.1')),
+                    mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                               return_value={'ID': 'debian'}),
+                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open'),
+                    mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.run', side_effect=launch),
+                ):
+                    aks_install_desktop(None, version='0.9.1')
+                    aks_install_desktop(None, version='0.9.1')
+
+                # A dispatched GUI may read the package only after this command returns.
+                self.assertEqual(len(paths), 2)
+                self.assertNotEqual(paths[0], paths[1])
+                for path in paths:
+                    self.assertTrue(os.path.isfile(path))
+                    self.assertEqual(os.path.commonpath((config_dir, path)), config_dir)
+                    with open(path, 'rb') as installer:
+                        self.assertEqual(installer.read(), b'installer')
+
+    def test_aks_install_desktop_failed_deb_handoff_uses_archive(self):
+        deb = 'aks-desktop_0.9.1-1_amd64.deb'
+        archive = 'aks-desktop-0.9.1-linux-x64.tar.gz'
+        failures = [subprocess.CalledProcessError(3, ['xdg-open']),
+                    FileNotFoundError(2, 'not found', 'xdg-open'),
+                    PermissionError(13, 'permission denied', 'xdg-open')]
+        for failure in failures:
+            for archive_result in ('success', 'missing', 'invalid'):
+                with self.subTest(failure=failure, archive_result=archive_result), \
+                        tempfile.TemporaryDirectory() as temp_dir:
+                    assets = [{'name': deb}] if archive_result == 'missing' else [{'name': deb}, {'name': archive}]
+                    paths = []
+
+                    def download(asset, path):
+                        if paths:
+                            self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+                        paths.append(path)
+                        if asset['name'] == deb:
+                            with open(path, 'wb') as output:
+                                output.write(b'installer')
+                        else:
+                            name = 'resource' if archive_result == 'invalid' else 'aks-desktop'
+                            self._write_aks_desktop_archive(path, [(name, tarfile.REGTYPE, '')])
+
+                    with (
+                        mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': temp_dir, 'DISPLAY': ':0'}),
+                        mock.patch('os.path.expanduser', return_value=temp_dir),
+                        mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                                   return_value=('linux', 'x64')),
+                        mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                                   return_value=({'assets': assets}, '0.9.1')) as release,
+                        mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                                   return_value={'ID': 'ubuntu'}),
+                        mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/bin/xdg-open'),
+                        mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset',
+                                   side_effect=download),
+                        mock.patch('azure.cli.command_modules.acs.custom.subprocess.run',
+                                   side_effect=failure) as run,
+                        mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen') as popen,
+                    ):
+                        if archive_result == 'success':
+                            aks_install_desktop(None)
+                            executable = os.path.join(
+                                temp_dir, '.local', 'share', 'aks-desktop', '0.9.1', 'aks-desktop')
+                            popen.assert_called_once_with([executable])
+                            with open(executable, 'rb') as installed:
+                                self.assertEqual(installed.read(), b'executable')
+                        elif archive_result == 'invalid':
+                            with self.assertRaisesRegex(FileOperationError, 'expected executable'):
+                                aks_install_desktop(None)
+                            popen.assert_not_called()
+                            self.assertEqual(os.listdir(os.path.join(temp_dir, '.local', 'share', 'aks-desktop')), [])
+                        else:
+                            with self.assertRaises((ClientRequestError, FileOperationError)) as cm:
+                                aks_install_desktop(None)
+                            self.assertIn('code 3' if isinstance(failure, subprocess.CalledProcessError)
+                                          else 'xdg-open', str(cm.exception))
+                            popen.assert_not_called()
+                        release.assert_called_once()
+                        run.assert_called_once_with(['xdg-open', paths[0]], check=True)
+                    self.assertEqual([os.path.basename(path) for path in paths],
+                                     [deb] if archive_result == 'missing' else [deb, archive])
+                    for path in paths:
+                        self.assertFalse(os.path.exists(os.path.dirname(path)))
+
+    def test_aks_install_desktop_deb_download_failure_does_not_fallback(self):
+        deb = 'aks-desktop_0.9.1-1_amd64.deb'
+        archive = 'aks-desktop-0.9.1-linux-x64.tar.gz'
+        for failure in ('missing-digest', 'mismatch', 'network'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as config_dir:
+                asset = {
+                    'name': deb,
+                    'browser_download_url': 'https://github.com/Azure/aks-desktop/releases/download/v0.9.1/' + deb,
+                    'digest': None if failure == 'missing-digest' else 'sha256:' + '0' * 64,
+                }
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir, 'DISPLAY': ':0'}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=('linux', 'x64')),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [asset, {'name': archive}]}, '0.9.1')),
+                    mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                               return_value={'ID': 'debian'}),
+                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/bin/xdg-open'),
+                    mock.patch('urllib.request.build_opener') as opener,
+                    mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer') as launch,
+                ):
+                    opener.return_value.open.return_value = io.BytesIO(b'invalid installer')
+                    if failure == 'network':
+                        opener.return_value.open.side_effect = URLError('network unavailable')
+                    with self.assertRaises(ClientRequestError):
+                        aks_install_desktop(None)
+                    launch.assert_not_called()
+                    self.assertEqual(opener.return_value.open.call_count, 0 if failure == 'missing-digest' else 1)
+                    self.assertEqual(os.listdir(os.path.join(config_dir, 'aks-desktop', 'installers')), [])
+
+    def test_aks_install_desktop_cleans_installer_after_failure(self):
+        for failure in ('download', 'launch'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as config_dir:
+                paths = []
+
+                def download(asset, path):
+                    paths.append(path)
+                    with open(path, 'wb') as output:
+                        output.write(b'partial installer')
+                    if failure == 'download':
+                        raise ClientRequestError('download failed')
+
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': config_dir}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=('mac', 'arm64')),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [{'name': 'aks-desktop-0.9.1-mac-arm64.dmg'}]}, '0.9.1')),
+                    mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.run',
+                               side_effect=ClientRequestError('launch failed')),
+                ):
+                    with self.assertRaises(ClientRequestError):
+                        aks_install_desktop(None)
+                self.assertEqual(len(paths), 1)
+                self.assertFalse(os.path.exists(os.path.dirname(paths[0])))
+
+    @mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer')
+    @mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release')
+    @mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform')
+    def test_aks_install_desktop_cleans_synchronous_installer(self, mock_platform, mock_release,
+                                                              mock_download, mock_launch):
+        def download(asset, path):
+            with open(path, 'wb') as output:
+                output.write(b'installer')
+
+        def launch(path, system, version):
+            with open(path, 'rb') as installer:
+                self.assertEqual(installer.read(), b'installer')
+
+        mock_download.side_effect = download
+        mock_launch.side_effect = launch
+        cases = [
+            ('win', 'x64', 'aks-desktop-0.9.1-win-x64.exe'),
+            ('linux', 'arm64', 'aks-desktop-0.9.1-linux-arm64.tar.gz'),
+        ]
+        for system, arch, name in cases:
+            with self.subTest(system=system):
+                mock_download.reset_mock()
+                mock_launch.reset_mock()
+                mock_platform.return_value = (system, arch)
+                mock_release.return_value = ({'assets': [{'name': name}]}, '0.9.1')
+                aks_install_desktop(None)
+                mock_download.assert_called_once()
+                installer_path = mock_download.call_args[0][1]
+                mock_launch.assert_called_once_with(installer_path, system, '0.9.1')
+                self.assertFalse(os.path.exists(installer_path))
+                self.assertFalse(os.path.exists(os.path.dirname(installer_path)))
 
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
@@ -1847,6 +3092,997 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         self.assertNotIn("nodeOSUpgradeChannel", warning)
         self.assertNotIn("The orchestrator version rollback will proceed", warning)
         mock_sdk_no_wait.assert_called_once()
+
+
+class DcrTableReadinessRetryTest(unittest.TestCase):
+    def setUp(self):
+        patcher = mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.time.sleep",
+            return_value=None,
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_sleep = patcher.start()
+        self.resources = mock.Mock()
+
+    def test_succeeds_without_retry(self):
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, self.resources.begin_create_or_update_by_id.return_value)
+        self.resources.begin_create_or_update_by_id.assert_called_once_with(
+            "dcr-id", "2022-06-01", {"properties": {}}
+        )
+        self.mock_sleep.assert_not_called()
+
+    def test_retries_invalid_output_table_with_delay(self):
+        expected = mock.Mock()
+        self.resources.begin_create_or_update_by_id.side_effect = [
+            CLIError("invalidoutputtable: output table is not ready"),
+            CLIError("INVALIDOUTPUTTABLE: output table is not ready"),
+            expected,
+        ]
+
+        result = _create_or_update_dcr_with_table_readiness_retry(
+            self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+        )
+
+        self.assertIs(result, expected)
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.assertEqual(self.mock_sleep.call_count, 2)
+
+    def test_raises_after_readiness_retry_limit(self):
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "InvalidOutputTable: output table is not ready"
+        )
+
+        with self.assertRaisesRegex(CLIError, "InvalidOutputTable"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(
+            self.resources.begin_create_or_update_by_id.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES + 1,
+        )
+        self.assertEqual(
+            self.mock_sleep.call_count,
+            _DCR_TABLE_READINESS_MAX_RETRIES,
+        )
+
+    def test_other_errors_keep_three_attempt_limit(self):
+        self.resources.begin_create_or_update_by_id.side_effect = CLIError(
+            "unrelated failure"
+        )
+
+        with self.assertRaisesRegex(CLIError, "unrelated failure"):
+            _create_or_update_dcr_with_table_readiness_retry(
+                self.resources, "dcr-id", "2022-06-01", {"properties": {}}
+            )
+
+        self.assertEqual(self.resources.begin_create_or_update_by_id.call_count, 3)
+        self.mock_sleep.assert_not_called()
+
+
+class TestWarnOnLegacyMonitoringAuth(unittest.TestCase):
+    def _warn_mock(self):
+        return mock.patch("azure.cli.command_modules.acs.addonconfiguration.logger.warning")
+
+    def test_warns_for_explicit_false_with_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring")
+        warn.assert_called_once()
+        self.assertIn("legacy shared key authentication", warn.call_args[0][0])
+
+    def test_warns_when_monitoring_is_one_of_several_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "monitoring,virtual-node")
+        warn.assert_called_once()
+
+    def test_no_warning_when_msi_auth_is_true(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(True, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_when_msi_auth_is_not_specified(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(None, "monitoring")
+        warn.assert_not_called()
+
+    def test_no_warning_without_monitoring_addon(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, "virtual-node")
+        warn.assert_not_called()
+
+    def test_no_warning_without_addons(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, None)
+        warn.assert_not_called()
+
+    def test_silent_for_addon_names_that_merely_contain_monitoring(self):
+        # A substring check would misfire on these, so the list is matched token by token.
+        for addons in ("monitoring-preview", "notmonitoring"):
+            with self._warn_mock() as warn:
+                warn_on_legacy_monitoring_auth(False, addons)
+            warn.assert_not_called()
+
+    def test_tolerates_whitespace_and_casing_in_the_addon_list(self):
+        with self._warn_mock() as warn:
+            warn_on_legacy_monitoring_auth(False, " azure-policy , Monitoring ")
+        warn.assert_called_once()
+
+
+class TestMonitoringValidatorRegistration(unittest.TestCase):
+    """The monitoring cross-flag validators must stay wired to the commands.
+
+    These validators inspect the whole namespace, so the CLI runs them for every invocation as
+    long as each is attached to at least one argument of the command -- it does not matter which
+    one. Nothing else asserts that they are still attached, and detaching one would silently drop
+    every cross-flag check it performs, leaving combinations such as
+    --enable-prometheus-metrics-scraping without --enable-azure-monitor-logs, or duplicate
+    OpenTelemetry HTTP/gRPC ports, accepted and then ignored.
+    """
+
+    def _arguments(self, command_name):
+        import argparse
+
+        from azure.cli.command_modules.acs import ContainerServiceCommandsLoader
+        from azure.cli.core.mock import DummyCli
+
+        class _Invocation:
+            def __init__(self, command_string):
+                self.data = {"command_string": command_string}
+                self.parser = argparse.ArgumentParser()
+
+        cli_ctx = DummyCli()
+        cli_ctx.invocation = _Invocation(command_name)
+        loader = ContainerServiceCommandsLoader(cli_ctx)
+        loader.load_command_table(command_name.split())
+        loader.command_table[command_name].load_arguments()
+        loader.load_arguments(command_name)
+        return {
+            dest: arg.settings
+            for dest, arg in loader.argument_registry.arguments.get(command_name, {}).items()
+        }
+
+    def test_validator_is_attached_to_create_and_update(self):
+        for command_name, validator_name in (
+            ("aks create", "validate_container_insights_settings_for_create"),
+            ("aks update", "validate_container_insights_settings_for_update"),
+            ("aks create", "validate_azure_monitor_and_opentelemetry_for_create"),
+            ("aks update", "validate_azure_monitor_and_opentelemetry_for_update"),
+        ):
+            arguments = self._arguments(command_name)
+            attached = [
+                dest
+                for dest, settings in arguments.items()
+                if getattr(settings.get("validator"), "__name__", "") == validator_name
+            ]
+            self.assertTrue(
+                attached,
+                "{} has no argument carrying {}, so its cross-flag validation never "
+                "runs.".format(command_name, validator_name),
+            )
+
+    def test_container_insights_flags_are_registered_on_create_and_update(self):
+        # The validators read these off the namespace, so they can only reject bad combinations
+        # while they remain registered on the command.
+        for command_name in ("aks create", "aks update"):
+            arguments = self._arguments(command_name)
+            for dest in (
+                "enable_prometheus_metrics_scraping",
+                "disable_prometheus_metrics_scraping",
+                "syslog_port",
+                "opentelemetry_metrics_port_http",
+                "opentelemetry_metrics_port_grpc",
+                "opentelemetry_logs_traces_port_http",
+                "opentelemetry_logs_traces_port_grpc",
+            ):
+                self.assertIn(dest, arguments, command_name)
+
+
+class AKSDisableAddonsMonitoringTestCase(unittest.TestCase):
+    """`az aks disable-addons -a monitoring` must behave like --disable-azure-monitor-logs."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    def _instance(self, otlp_logs_traces=True):
+        app_monitoring = self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
+        if otlp_logs_traces:
+            app_monitoring.open_telemetry_logs_and_traces = (
+                self.models.ManagedClusterAzureMonitorProfileAppMonitoringOpenTelemetryLogsAndTraces(
+                    enabled=True, http_port=4320, grpc_port=4319
+                )
+            )
+        return self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "test_workspace",
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                    },
+                )
+            },
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                container_insights=self.models.ManagedClusterAzureMonitorProfileContainerInsights(
+                    enabled=True,
+                    log_analytics_workspace_resource_id="test_workspace",
+                    syslog_port=2832,
+                    disable_prometheus_metrics_scraping=True,
+                    container_network_logs=CONST_CONTAINER_NETWORK_LOGS_ENABLED,
+                ),
+                app_monitoring=app_monitoring,
+            ),
+        )
+
+    def _run(self, instance, addons="monitoring", answer=True, yes=False):
+        """Drive aks_disable_addons, recording prompts and cleanups in the order they happen."""
+        order = []
+        # Recorded on self as well, so assertions still see it when the call raises.
+        self.last_order = order
+        client = mock.MagicMock()
+        client.get.return_value = instance
+
+        def ask(msg, default=None):
+            order.append("prompt")
+            self.assertIn("OpenTelemetry logs and traces", msg)
+            return answer
+
+        def cleanup(*args, **kwargs):
+            order.append("dcra_cleanup")
+
+        def put(no_wait, put_func, rg, name, mc, **kwargs):
+            order.append("put")
+            return mc
+
+        with mock.patch(
+            "azure.cli.command_modules.acs.custom.get_subscription_id",
+            return_value="test_sub_id",
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.prompt_y_n", side_effect=ask
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring",
+            side_effect=cleanup,
+        ), mock.patch(
+            "azure.cli.command_modules.acs.custom.sdk_no_wait", side_effect=put
+        ):
+            result = aks_disable_addons(
+                self.cmd, client, "test_rg", "test_name", addons, yes=yes
+            )
+        return order, result
+
+    def _assert_container_insights_reset(self, instance):
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertFalse(container_insights.enabled)
+        self.assertEqual(
+            container_insights.syslog_port, CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT
+        )
+        self.assertFalse(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_DISABLED
+        )
+
+    def test_declining_the_prompt_aborts_before_any_cleanup(self):
+        instance = self._instance()
+        order, result = self._run(instance, answer=False)
+
+        # The prompt has to come first, and declining must leave the cluster completely untouched.
+        self.assertEqual(order, ["prompt"])
+        self.assertIsNone(result)
+        self.assertTrue(instance.azure_monitor_profile.container_insights.enabled)
+        self.assertEqual(instance.azure_monitor_profile.container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_accepting_the_prompt_resets_settings_and_disables_opentelemetry(self):
+        instance = self._instance()
+        order, _ = self._run(instance)
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+        open_telemetry = (
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+        )
+        self.assertFalse(open_telemetry.enabled)
+        self.assertIsNone(open_telemetry.http_port)
+        self.assertIsNone(open_telemetry.grpc_port)
+
+    def test_yes_skips_the_prompt(self):
+        instance = self._instance()
+        order, _ = self._run(instance, yes=True)
+
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_settings_are_reset_even_without_opentelemetry(self):
+        instance = self._instance(otlp_logs_traces=False)
+        order, _ = self._run(instance)
+
+        # Nothing to warn about, but a later --enable-azure-monitor-logs must still start clean.
+        self.assertEqual(order, ["dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_monitoring_is_recognised_alongside_other_addons(self):
+        instance = self._instance()
+        order, _ = self._run(
+            instance,
+            addons="kube-dashboard,monitoring",
+        )
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_disabling_another_addon_leaves_monitoring_untouched(self):
+        instance = self._instance()
+        order, _ = self._run(instance, addons="kube-dashboard")
+
+        self.assertEqual(order, ["put"])
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2832)
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+
+    def test_unknown_addon_rejected_before_any_cleanup(self):
+        instance = self._instance()
+        with self.assertRaises(CLIError) as cm:
+            self._run(instance, addons="bogus-addon,monitoring")
+
+        self.assertIn("Invalid addon name: bogus-addon", str(cm.exception))
+        self._assert_nothing_happened(instance)
+
+    def test_not_installed_addon_rejected_before_any_cleanup(self):
+        # The reported case: azure-policy is not installed, so _update_addons raises -- but only
+        # after the monitoring DCRA has been deleted, and the raise then skips the cluster PUT.
+        # Monitoring would be left enabled with its association gone.
+        instance = self._instance()
+        with self.assertRaises(CLIError) as cm:
+            self._run(instance, addons="azure-policy,monitoring")
+
+        self.assertIn("is not installed", str(cm.exception))
+        self._assert_nothing_happened(instance)
+
+    def test_validation_runs_before_cleanup_regardless_of_addon_order(self):
+        instance = self._instance()
+        with self.assertRaises(CLIError):
+            self._run(instance, addons="monitoring,azure-policy")
+
+        self._assert_nothing_happened(instance)
+
+    def test_addon_names_with_surrounding_whitespace_are_rejected_before_cleanup(self):
+        """Whitespace must be parsed the same way everywhere, or cleanup outruns validation.
+
+        _update_addons splits on ',' without stripping, so ' monitoring' is not a known addon and
+        it raises. Anything here that stripped first would decide monitoring is being disabled,
+        delete the association, and only then hit that raise -- which skips the cluster PUT and
+        leaves monitoring enabled with nothing to collect into.
+        """
+        for addons in (" monitoring", "monitoring, kube-dashboard", "monitoring ,kube-dashboard"):
+            with self.subTest(addons=addons):
+                instance = self._instance()
+                with self.assertRaises(CLIError) as cm:
+                    self._run(instance, addons=addons)
+
+                self.assertIn("Invalid addon name", str(cm.exception))
+                self._assert_nothing_happened(instance)
+
+    def test_installed_addon_alongside_monitoring_proceeds(self):
+        instance = self._instance()
+        instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        order, _ = self._run(instance, addons="azure-policy,monitoring")
+
+        self.assertEqual(order, ["prompt", "dcra_cleanup", "put"])
+        self._assert_container_insights_reset(instance)
+
+    def test_installed_addon_matched_case_insensitively(self):
+        # _update_addons normalises existing profile keys case-insensitively, so the pre-flight
+        # check must too, or a differently-cased profile key would be rejected as not installed.
+        instance = self._instance()
+        instance.addon_profiles["AzurePolicy"] = (
+            self.models.ManagedClusterAddonProfile(enabled=True)
+        )
+        order, _ = self._run(instance, addons="azure-policy")
+
+        self.assertEqual(order, ["put"])
+
+    def _assert_nothing_happened(self, instance):
+        """No prompt, no DCRA cleanup, no PUT, and the cluster payload left fully intact."""
+        self.assertEqual(self.last_order, [])
+        container_insights = instance.azure_monitor_profile.container_insights
+        self.assertTrue(container_insights.enabled)
+        self.assertEqual(container_insights.syslog_port, 2832)
+        self.assertTrue(container_insights.disable_prometheus_metrics_scraping)
+        self.assertEqual(
+            container_insights.container_network_logs, CONST_CONTAINER_NETWORK_LOGS_ENABLED
+        )
+        self.assertTrue(
+            instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces.enabled
+        )
+        self.assertTrue(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled)
+
+
+class TestResolveDcrSettingsFromExisting(unittest.TestCase):
+    """Settings the caller did not supply are carried over from the DCR that already exists."""
+
+    # The supported custom log configuration schema: interval, namespaceFilteringMode, namespaces,
+    # enableContainerLogV2 and streams.
+    CUSTOM_SETTINGS = {
+        "interval": "5m",
+        "namespaceFilteringMode": "Include",
+        "namespaces": ["kube-system"],
+        "enableContainerLogV2": True,
+        "streams": ["Microsoft-Perf", "Microsoft-ContainerLogV2"],
+    }
+
+    def _dcr(self, syslog=False, streams=None, settings=None):
+        data_sources = {
+            "extensions": [
+                {
+                    "name": "ContainerInsightsExtension",
+                    "extensionName": "ContainerInsights",
+                    "streams": streams or ["Microsoft-ContainerInsights-Group-Default"],
+                    "extensionSettings": (
+                        {"dataCollectionSettings": settings} if settings else {}
+                    ),
+                }
+            ]
+        }
+        if syslog:
+            data_sources["syslog"] = [{"streams": ["Microsoft-Syslog"]}]
+        return {"properties": {"dataSources": data_sources}}
+
+    def test_syslog_inherited_when_not_specified(self):
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), None, None, None
+        )
+        self.assertTrue(enable_syslog)
+
+    def test_syslog_absent_when_existing_dcr_has_none(self):
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=False), None, None, None
+        )
+        self.assertFalse(enable_syslog)
+
+    def test_explicit_syslog_wins_over_existing(self):
+        # Explicitly turning syslog off must not be overridden by the existing DCR having it.
+        enable_syslog, _, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), False, None, None
+        )
+        self.assertFalse(enable_syslog)
+
+    def test_high_log_scale_mode_inherited_from_streams(self):
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2-HighScale"]), None, None, None
+        )
+        self.assertTrue(high_scale)
+
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2"]), None, None, None
+        )
+        self.assertFalse(high_scale)
+
+    def test_explicit_high_log_scale_mode_wins_over_existing(self):
+        _, _, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(streams=["Microsoft-ContainerLogV2-HighScale"]), None, None, False
+        )
+        self.assertFalse(high_scale)
+
+    def test_custom_settings_inherited_whole(self):
+        _, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(settings=self.CUSTOM_SETTINGS), None, None, None
+        )
+        self.assertEqual(settings, self.CUSTOM_SETTINGS)
+
+    def test_supplied_settings_file_suppresses_inheritance(self):
+        # An explicit --data-collection-settings replaces the stored settings outright.
+        _, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(settings=self.CUSTOM_SETTINGS), None, "/path/to/settings.json", None
+        )
+        self.assertIsNone(settings)
+
+    def test_reconfiguring_syslog_preserves_everything_else(self):
+        # The reported case: 'az aks update --enable-syslog' on a cluster using high log scale mode
+        # and custom settings must not rebuild the DCR without them.
+        enable_syslog, settings, high_scale = _resolve_dcr_settings_from_existing(
+            self._dcr(
+                syslog=False,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            True,
+            None,
+            None,
+        )
+        self.assertTrue(enable_syslog)
+        self.assertTrue(high_scale)
+        self.assertEqual(settings, self.CUSTOM_SETTINGS)
+
+    def test_reconfiguring_settings_preserves_syslog(self):
+        # The converse: a standalone --data-collection-settings must not drop existing syslog.
+        enable_syslog, settings, _ = _resolve_dcr_settings_from_existing(
+            self._dcr(syslog=True), None, "/path/to/settings.json", None
+        )
+        self.assertTrue(enable_syslog)
+        self.assertIsNone(settings)
+
+    def test_missing_or_empty_dcr_is_safe(self):
+        for existing in (None, {}, {"properties": {}}, {"properties": {"dataSources": {}}}):
+            with self.subTest(existing=existing):
+                enable_syslog, settings, high_scale = _resolve_dcr_settings_from_existing(
+                    existing, None, None, None
+                )
+                self.assertFalse(enable_syslog)
+                self.assertIsNone(settings)
+                self.assertFalse(high_scale)
+
+    def test_non_container_insights_extension_ignored(self):
+        existing = {
+            "properties": {
+                "dataSources": {
+                    "extensions": [
+                        {
+                            "extensionName": "SomethingElse",
+                            "streams": ["Microsoft-ContainerLogV2-HighScale"],
+                            "extensionSettings": {
+                                "dataCollectionSettings": {"interval": "9m"}
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+        _, settings, high_scale = _resolve_dcr_settings_from_existing(existing, None, None, None)
+        self.assertIsNone(settings)
+        self.assertFalse(high_scale)
+
+
+class TestEnsureContainerInsightsDcrInheritance(unittest.TestCase):
+    """The DCR body that is actually written carries over settings the caller did not supply.
+
+    _resolve_dcr_settings_from_existing is unit tested above; these drive the real
+    ensure_container_insights_for_monitoring so that the merge staying wired into the DCR
+    rebuild is covered too.
+    """
+
+    WORKSPACE_ID = (
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg"
+        "/providers/Microsoft.OperationalInsights/workspaces/ws"
+    )
+    CUSTOM_SETTINGS = {
+        "interval": "5m",
+        "namespaceFilteringMode": "Include",
+        "namespaces": ["kube-system"],
+        "enableContainerLogV2": True,
+        "streams": ["Microsoft-Perf", "Microsoft-ContainerLogV2-HighScale"],
+    }
+
+    def _existing_dcr(self, syslog=False, streams=None, settings=None, tags=None):
+        extension = {
+            "name": "ContainerInsightsExtension",
+            "extensionName": "ContainerInsights",
+            "streams": streams or ["Microsoft-ContainerInsights-Group-Default"],
+            "extensionSettings": (
+                {"dataCollectionSettings": settings} if settings else {}
+            ),
+        }
+        data_sources = {"extensions": [extension]}
+        if syslog:
+            data_sources["syslog"] = [{"streams": ["Microsoft-Syslog"]}]
+        dcr = {"properties": {"dataSources": data_sources}}
+        if tags is not None:
+            dcr["tags"] = tags
+        return dcr
+
+    def _run(self, existing_dcr, **kwargs):
+        """Drive the real function and return the DCR body it wrote."""
+        from azure.cli.command_modules.acs.addonconfiguration import (
+            ensure_container_insights_for_monitoring,
+        )
+        from azure.cli.command_modules.acs._consts import (
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+        )
+
+        cmd = mock.Mock()
+        cmd.cli_ctx.cloud.endpoints.resource_manager = "https://management.azure.com"
+        addon = mock.Mock(
+            enabled=True,
+            config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.WORKSPACE_ID},
+        )
+
+        def fake_send_raw_request(cli_ctx, method, url, **_):
+            resp = mock.Mock()
+            if "dataCollectionRules" in url:
+                if existing_dcr is None:
+                    raise CLIError("ResourceNotFound: no such DCR")
+                resp.text = json.dumps(existing_dcr)
+            elif "/locations?" in url:
+                resp.text = json.dumps(
+                    {"value": [{"displayName": "East US", "name": "eastus"}]}
+                )
+            else:
+                raise AssertionError("unexpected request to " + url)
+            return resp
+
+        resources = mock.Mock()
+        resources.get_by_id.return_value = mock.Mock(location="East US")
+
+        base = "azure.cli.command_modules.acs.addonconfiguration."
+        with mock.patch(base + "send_raw_request", side_effect=fake_send_raw_request), \
+                mock.patch(base + "get_resources_client", return_value=resources), \
+                mock.patch(
+                    base + "create_data_collection_endpoint", return_value="dce-id"
+                ) as mock_dce, \
+                mock.patch(
+                    base + "_create_or_update_dcr_with_table_readiness_retry"
+                ) as mock_put:
+            call_kwargs = {
+                "remove_monitoring": False,
+                "aad_route": True,
+                "create_dcr": True,
+                "create_dcra": False,
+                "enable_syslog": None,
+                "data_collection_settings": None,
+                "enable_high_log_scale_mode": None,
+                "preserve_existing_dcr_settings": True,
+            }
+            call_kwargs.update(kwargs)
+            ensure_container_insights_for_monitoring(
+                cmd, addon, "sub-id", "rg", "cluster", "eastus", **call_kwargs
+            )
+
+        self.assertEqual(mock_put.call_count, 1)
+        self.mock_dce = mock_dce
+        return mock_put.call_args[0][3]
+
+    @staticmethod
+    def _ci_extension(body):
+        extensions = body["properties"]["dataSources"]["extensions"]
+        return next(e for e in extensions if e["extensionName"] == "ContainerInsights")
+
+    def test_syslog_and_high_scale_and_settings_all_inherited(self):
+        body = self._run(
+            self._existing_dcr(
+                syslog=True,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            )
+        )
+
+        # syslog survives even though it was not supplied on the command line
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        # so do the custom data collection settings, with the high scale streams intact
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            self.CUSTOM_SETTINGS,
+        )
+        self.assertIn("Microsoft-ContainerLogV2-HighScale", extension["streams"])
+        # and high log scale mode still provisions its ingestion DCE
+        self.mock_dce.assert_called_once()
+        self.assertEqual(body["properties"]["dataCollectionEndpointId"], "dce-id")
+
+    def test_high_scale_streams_normalised_when_high_scale_turned_off(self):
+        body = self._run(
+            self._existing_dcr(
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            enable_high_log_scale_mode=False,
+        )
+
+        extension = self._ci_extension(body)
+        streams = extension["extensionSettings"]["dataCollectionSettings"]["streams"]
+        self.assertIn("Microsoft-ContainerLogV2", streams)
+        self.assertNotIn("Microsoft-ContainerLogV2-HighScale", streams)
+        self.assertNotIn("Microsoft-ContainerLogV2-HighScale", extension["streams"])
+        self.mock_dce.assert_not_called()
+        self.assertIsNone(body["properties"]["dataCollectionEndpointId"])
+
+    def test_explicit_flags_win_over_existing(self):
+        body = self._run(
+            self._existing_dcr(syslog=True, streams=["Microsoft-ContainerLogV2-HighScale"]),
+            enable_syslog=False,
+            enable_high_log_scale_mode=False,
+        )
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        self.assertNotIn(
+            "Microsoft-ContainerLogV2-HighScale", self._ci_extension(body)["streams"]
+        )
+
+    def test_enabling_syslog_keeps_existing_high_scale_and_settings(self):
+        body = self._run(
+            self._existing_dcr(
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+            ),
+            enable_syslog=True,
+        )
+
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            self.CUSTOM_SETTINGS,
+        )
+        self.assertEqual(body["properties"]["dataCollectionEndpointId"], "dce-id")
+
+    def test_supplied_settings_win_over_existing(self):
+        supplied = {"enableContainerLogV2": True, "streams": ["Microsoft-Perf"]}
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration._get_data_collection_settings",
+            return_value=dict(supplied),
+        ):
+            body = self._run(
+                self._existing_dcr(settings=self.CUSTOM_SETTINGS),
+                data_collection_settings="settings.json",
+                enable_high_log_scale_mode=False,
+            )
+
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"], supplied
+        )
+
+    def test_tags_are_preserved(self):
+        body = self._run(self._existing_dcr(tags={"team": "monitoring"}))
+
+        self.assertEqual(body["tags"], {"team": "monitoring"})
+
+    def test_fresh_cluster_uses_defaults(self):
+        body = self._run(None)
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            {"enableContainerLogV2": True},
+        )
+        self.assertEqual(extension["streams"], ["Microsoft-ContainerInsights-Group-Default"])
+        self.mock_dce.assert_not_called()
+        self.assertEqual(body["tags"], {})
+
+    def test_module_level_stream_list_is_not_mutated(self):
+        """High log scale mode rewrites the stream list in place, so it must rewrite a copy."""
+        from azure.cli.command_modules.acs import addonconfiguration
+
+        streams = ["Microsoft-ContainerLog", "Microsoft-ContainerLogV2", "Microsoft-Perf"]
+        with mock.patch.object(
+            addonconfiguration, "ContainerInsightsStreams", streams
+        ):
+            self._run(self._existing_dcr(streams=["Microsoft-ContainerLogV2-HighScale"]))
+            # the in-place rewrite to the high scale stream must not leak into the global
+            self.assertEqual(
+                streams,
+                ["Microsoft-ContainerLog", "Microsoft-ContainerLogV2", "Microsoft-Perf"],
+            )
+
+    def test_fresh_onboarding_ignores_leftover_dcr(self):
+        """Disabling monitoring leaves the DCR behind; re-enabling must not inherit from it."""
+        body = self._run(
+            self._existing_dcr(
+                syslog=True,
+                streams=["Microsoft-ContainerLogV2-HighScale"],
+                settings=self.CUSTOM_SETTINGS,
+                tags={"team": "monitoring"},
+            ),
+            preserve_existing_dcr_settings=False,
+        )
+
+        self.assertNotIn("syslog", body["properties"]["dataSources"])
+        extension = self._ci_extension(body)
+        self.assertEqual(
+            extension["extensionSettings"]["dataCollectionSettings"],
+            {"enableContainerLogV2": True},
+        )
+        self.assertEqual(extension["streams"], ["Microsoft-ContainerInsights-Group-Default"])
+        self.mock_dce.assert_not_called()
+        self.assertIsNone(body["properties"]["dataCollectionEndpointId"])
+        # customer-added tags are resource metadata, not collection settings, so they still survive
+        self.assertEqual(body["tags"], {"team": "monitoring"})
+
+    def test_fresh_onboarding_still_applies_supplied_settings(self):
+        body = self._run(
+            self._existing_dcr(streams=["Microsoft-ContainerLogV2-HighScale"]),
+            preserve_existing_dcr_settings=False,
+            enable_syslog=True,
+        )
+
+        self.assertIn("syslog", body["properties"]["dataSources"])
+        self.assertNotIn(
+            "Microsoft-ContainerLogV2-HighScale", self._ci_extension(body)["streams"]
+        )
+
+
+class TestAddMonitoringRoleAssignment(unittest.TestCase):
+    """Cover add_monitoring_role_assignment, whose body was previously only ever mocked.
+
+    The 'Monitoring Metrics Publisher' grant is only needed when the monitoring addon
+    authenticates with a service principal or the addon's own MSI. When it authenticates
+    with AAD/managed identity (useAADAuth) no role assignment is required at all.
+    """
+
+    ROLE = "Monitoring Metrics Publisher"
+    CLUSTER_ID = "/subscriptions/1234/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/c"
+
+    def _cluster(self, client_id="msi", addon_identity=None, use_aad_auth="true", config=True):
+        addon = mock.MagicMock()
+        addon.identity = addon_identity
+        if config:
+            addon.config = {CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/ws"}
+            if use_aad_auth is not None:
+                addon.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = use_aad_auth
+        else:
+            addon.config = None
+        result = mock.MagicMock()
+        result.addon_profiles = {CONST_MONITORING_ADDON_NAME: addon}
+        result.service_principal_profile.client_id = client_id
+        return result
+
+    def _run(self, result):
+        with mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.add_role_assignment",
+            return_value=True,
+        ) as add_role, mock.patch(
+            "azure.cli.command_modules.acs.addonconfiguration.logger"
+        ) as log:
+            add_monitoring_role_assignment(result, self.CLUSTER_ID, mock.MagicMock())
+        self.warnings = " ".join(str(c) for c in log.warning.call_args_list)
+        return add_role
+
+    def assertNoMissingIdentityWarning(self):
+        # the user-visible symptom of the bug: a spurious warning on a correctly
+        # configured AAD-auth cluster
+        self.assertNotIn("Could not find service principal", self.warnings)
+
+    def test_msi_auth_cluster_skips_role_assignment(self):
+        # An MSI cluster onboarded through the Azure Monitor profile reports useAADAuth=true
+        # and carries the literal "msi" sentinel as its service principal client id.
+        add_role = self._run(self._cluster(client_id="msi", addon_identity=None))
+        add_role.assert_not_called()
+        self.assertNoMissingIdentityWarning()
+
+    def test_msi_auth_skips_role_assignment_even_when_addon_identity_present(self):
+        # Clusters migrated from legacy auth can retain the addon identity. useAADAuth still
+        # wins, so no unnecessary RBAC grant may be issued against it.
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(self._cluster(client_id="msi", addon_identity=addon_identity))
+        add_role.assert_not_called()
+        self.assertNoMissingIdentityWarning()
+
+    def test_use_aad_auth_false_is_not_treated_as_enabled(self):
+        # The config value is the *string* "false"; a bare truthiness check would wrongly
+        # treat it as AAD auth and skip a role assignment that is genuinely required.
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(
+            self._cluster(client_id="msi", addon_identity=addon_identity, use_aad_auth="false")
+        )
+        add_role.assert_called_once()
+        self.assertEqual(add_role.call_args[0][1], self.ROLE)
+        self.assertEqual(add_role.call_args[0][2], "addon-msi-object-id")
+        self.assertFalse(add_role.call_args[0][3])  # is_service_principal
+
+    def test_use_aad_auth_is_case_insensitive(self):
+        addon_identity = mock.MagicMock()
+        addon_identity.object_id = "addon-msi-object-id"
+        add_role = self._run(
+            self._cluster(client_id="msi", addon_identity=addon_identity, use_aad_auth="True")
+        )
+        add_role.assert_not_called()
+
+    def test_service_principal_cluster_gets_role_assignment(self):
+        add_role = self._run(self._cluster(client_id="sp-client-id", use_aad_auth="false"))
+        add_role.assert_called_once()
+        self.assertEqual(add_role.call_args[0][2], "sp-client-id")
+        self.assertTrue(add_role.call_args[0][3])  # is_service_principal
+
+    def test_missing_addon_profiles_does_not_raise(self):
+        # A cluster onboarded purely through the Azure Monitor profile may come back with no
+        # addon profiles at all; indexing into None used to raise TypeError.
+        result = mock.MagicMock()
+        result.addon_profiles = None
+        result.service_principal_profile.client_id = "msi"
+        add_role = self._run(result)
+        add_role.assert_not_called()
+
+    def test_missing_addon_config_does_not_raise(self):
+        add_role = self._run(self._cluster(client_id="msi", config=False))
+        add_role.assert_not_called()
+
+
+class TestCreateDataCollectionEndpointNetworkAccess(unittest.TestCase):
+    """The ingestion DCE must not have its network configuration reopened by an unrelated update.
+
+    create_data_collection_endpoint is a create_or_update, and is_ampls is derived purely from
+    whether --ampls-resource-id was supplied on the current command. Since that flag is only
+    passed on the command that links the scope, every later reconfiguration of an onboarded
+    cluster ('az aks update --enable-syslog', for example) arrives with is_ampls False. Without
+    the read-back below that would flip an existing private endpoint to publicNetworkAccess
+    Enabled, silently exposing it.
+    """
+
+    DCE_ID = (
+        "/subscriptions/sub-id/resourceGroups/rg"
+        "/providers/Microsoft.Insights/dataCollectionEndpoints/MSCI-ingest-eastus-cluster"
+    )
+
+    def _run(self, existing_access, is_ampls=False):
+        """Drive the real function and return (written body, GET mock)."""
+        cmd = mock.Mock()
+        cmd.cli_ctx.cloud.endpoints.resource_manager = "https://management.azure.com"
+
+        def fake_send_raw_request(cli_ctx, method, url, **_):
+            self.assertEqual(method, "GET")
+            self.assertIn("dataCollectionEndpoints", url)
+            if existing_access is None:
+                raise CLIError("ResourceNotFound: no such DCE")
+            resp = mock.Mock()
+            resp.text = json.dumps(
+                {"properties": {"networkAcls": {"publicNetworkAccess": existing_access}}}
+            )
+            return resp
+
+        resources = mock.Mock()
+        base = "azure.cli.command_modules.acs.addonconfiguration."
+        with mock.patch(
+            base + "send_raw_request", side_effect=fake_send_raw_request
+        ) as mock_get, mock.patch(base + "get_resources_client", return_value=resources):
+            returned_id = create_data_collection_endpoint(
+                cmd, "sub-id", "rg", "eastus", "MSCI-ingest-eastus-cluster", is_ampls
+            )
+
+        self.assertEqual(returned_id, self.DCE_ID)
+        resources.begin_create_or_update_by_id.assert_called_once()
+        body = resources.begin_create_or_update_by_id.call_args[0][2]
+        return body, mock_get
+
+    @staticmethod
+    def _access(body):
+        return body["properties"]["networkAcls"]["publicNetworkAccess"]
+
+    def test_existing_private_endpoint_is_not_reopened(self):
+        # the regression: a syslog-only update must leave an AMPLS endpoint private
+        body, _ = self._run("Disabled", is_ampls=False)
+        self.assertEqual(self._access(body), "Disabled")
+
+    def test_existing_public_endpoint_stays_public(self):
+        body, _ = self._run("Enabled", is_ampls=False)
+        self.assertEqual(self._access(body), "Enabled")
+
+    def test_missing_endpoint_defaults_to_public(self):
+        # first onboarding without AMPLS: nothing to preserve, keep the documented default
+        body, _ = self._run(None, is_ampls=False)
+        self.assertEqual(self._access(body), "Enabled")
+
+    def test_unrecognised_access_value_is_preserved_verbatim(self):
+        body, _ = self._run("SecuredByPerimeter", is_ampls=False)
+        self.assertEqual(self._access(body), "SecuredByPerimeter")
+
+    def test_ampls_forces_private_without_reading_the_existing_endpoint(self):
+        # an explicit --ampls-resource-id is the one case that may change the configuration
+        body, mock_get = self._run("Enabled", is_ampls=True)
+        self.assertEqual(self._access(body), "Disabled")
+        mock_get.assert_not_called()
+
+    def test_location_and_kind_are_unchanged(self):
+        body, _ = self._run("Disabled", is_ampls=False)
+        self.assertEqual(body["location"], "eastus")
+        self.assertEqual(body["kind"], "Linux")
 
 
 if __name__ == "__main__":

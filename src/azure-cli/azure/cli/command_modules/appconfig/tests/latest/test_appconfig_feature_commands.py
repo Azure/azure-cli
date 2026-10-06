@@ -12,7 +12,7 @@ from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -29,7 +29,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_feature(self, resource_group, location):
-        feature_test_store_prefix = get_resource_name_prefix('featuretest')
+        feature_test_store_prefix = 'featuretest'
         config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=24)
 
         location = 'eastus'
@@ -472,7 +472,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_feature_namespacing(self, resource_group, location):
-        feature_namespace_store_prefix = get_resource_name_prefix('featurenamespacetest')
+        feature_namespace_store_prefix = 'featurenamespacetest'
         config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=24)
 
         location = 'eastus'
@@ -576,7 +576,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_feature_telemetry(self, resource_group, location):
         """Test feature flag telemetry functionality."""
-        feature_telemetry_store_prefix = get_resource_name_prefix('featuretelemetrytest')
+        feature_telemetry_store_prefix = 'featuretelemetrytest'
         config_store_name = self.create_random_name(prefix=feature_telemetry_store_prefix, length=24)
 
         location = 'eastus'
@@ -637,7 +637,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Link App Insights to the store
         # Use a fake resource ID because the application-insights extension cannot be installed
         # in recording/playback mode — the extension index response exceeds the VCR 1024KB limit.
-        app_insights_prefix = get_resource_name_prefix('appinsights')
+        app_insights_prefix = 'appinsights'
         app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
         app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(self.kwargs['rg'], app_insights_name)
         self.kwargs.update({
@@ -670,7 +670,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_feature_filter(self, resource_group, location):
-        feature_filter_store_prefix = get_resource_name_prefix('featurefiltertest')
+        feature_filter_store_prefix = 'featurefiltertest'
         config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=24)
 
         location = 'eastus'

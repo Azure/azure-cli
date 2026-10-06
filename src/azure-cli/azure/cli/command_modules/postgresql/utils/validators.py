@@ -43,6 +43,9 @@ from ._flexible_server_util import (
 logger = get_logger(__name__)
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
+# Compute tiers ordered from lowest to highest capability.
+PG_TIER_RANK = {'burstable': 0, 'generalpurpose': 1, 'memoryoptimized': 2}
+
 
 # pylint: disable=import-outside-toplevel, raise-missing-from, unbalanced-tuple-unpacking
 def _get_resource_group_from_server_name(cli_ctx, server_name):
@@ -910,6 +913,19 @@ def pg_restore_validator(compute_tier, **args):
     if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
         raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with '
                               '--storage-type set to "PremiumV2_LRS".')
+
+
+def pg_restore_tier_validator(target_tier, source_tier, sku_info):
+    _pg_tier_validator(target_tier, sku_info)
+    target_rank = PG_TIER_RANK.get(target_tier.lower())
+    source_rank = PG_TIER_RANK.get(source_tier.lower())
+    if target_rank is not None and source_rank is not None and target_rank < source_rank:
+        raise ValidationError('Invalid value for --tier. The restored server must not go below the source server '
+                              'compute tier. The source server compute tier is {}.'.format(source_tier))
+
+
+def pg_restore_sku_validator(sku_name, sku_info, tier):
+    _pg_sku_name_validator(sku_name, sku_info, tier, None)
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,

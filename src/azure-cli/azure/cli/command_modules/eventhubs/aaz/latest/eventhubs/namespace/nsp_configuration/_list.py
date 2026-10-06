@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List list of current NetworkSecurityPerimeterConfiguration for Namespace
+
+    :example: NamspaceNetworkSecurityPerimeterConfigurationList
+        az eventhubs namespace nsp-configuration list --resource-group SDK-EventHub-4794 --namespace-name sdk-Namespace-5828
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/networksecurityperimeterconfigurations", "2026-07-01-preview"],
         ]
     }
 
@@ -121,7 +124,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

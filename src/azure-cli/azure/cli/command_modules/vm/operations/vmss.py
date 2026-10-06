@@ -70,6 +70,40 @@ class VMSSShow(_VMSSShow):
         return result
 
 
+_VMSS_IP_CONFIG_OPTIONAL_COLLECTIONS = (
+    'applicationGatewayBackendAddressPools',
+    'applicationSecurityGroups',
+    'loadBalancerBackendAddressPools',
+    'loadBalancerInboundNatPools',
+)
+
+
+def _normalize_vmss_generic_update_collections(vmss):
+    # AAZ omits unset optional properties, while generic `--add` needs them present as None.
+    vm_profile = vmss.get('virtualMachineProfile')
+    network_profile = vm_profile.get('networkProfile') if isinstance(vm_profile, dict) else None
+    nic_configs = network_profile.get('networkInterfaceConfigurations') if isinstance(network_profile, dict) else None
+    if not isinstance(nic_configs, list):
+        return vmss
+    for nic_config in nic_configs:
+        ip_configs = nic_config.get('ipConfigurations') if isinstance(nic_config, dict) else None
+        if not isinstance(ip_configs, list):
+            continue
+        for ip_config in ip_configs:
+            if isinstance(ip_config, dict):
+                for collection in _VMSS_IP_CONFIG_OPTIONAL_COLLECTIONS:
+                    ip_config.setdefault(collection, None)
+    return vmss
+
+
+class VMSSShowForUpdate(VMSSShow):
+    """Show a VMSS with optional IP-config collections initialized for generic update."""
+
+    def _output(self, *args, **kwargs):
+        result = super()._output(*args, **kwargs)
+        return _normalize_vmss_generic_update_collections(result)
+
+
 class VMSSPatch(_VMSSPatch):
 
     def _output(self, *args, **kwargs):
@@ -593,6 +627,9 @@ def convert_show_result_to_snake_case(result):
             protected_settings_from_key_vault.pop("sourceVault")
 
     hardware_profile = virtual_machine_profile.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSizeProperties" in hardware_profile:
         hardware_profile["vm_size_properties"] = hardware_profile["vmSizeProperties"]
         hardware_profile.pop("vmSizeProperties")
@@ -929,6 +966,9 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in wire_server:
         wire_server["in_vm_access_control_profile_reference_id"] = wire_server["inVMAccessControlProfileReferenceId"]
         wire_server.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in wire_server:
+        wire_server["use_local_file_rules"] = wire_server["useLocalFileRules"]
+        wire_server.pop("useLocalFileRules")
 
     uefi_settings = security_profile.get("uefi_settings", {}) or {}
     if "secureBootEnabled" in uefi_settings:

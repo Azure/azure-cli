@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a consumer group from the specified Event Hub and resource group.
+
+    :example: ConsumerGroupDelete
+        az eventhubs eventhub consumer-group delete --resource-group ArunMonocle --namespace-name sdk-Namespace-2661 --eventhub-name sdk-EventHub-6681 --consumer-group-name sdk-ConsumerGroup-5563
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -148,7 +151,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

@@ -1216,20 +1216,33 @@ short-summary: List available built-in stacks which can be used for function app
 
 helps['functionapp flex-migration'] = """
 type: group
-short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan.
+short-summary: Manage migration between Linux Consumption and Flex Consumption plans.
 """
 
 helps['functionapp flex-migration start'] = """
 type: command
-short-summary: Create a Flex Consumption app with the same settings as the provided Linux Consumption function app.
+short-summary: Migrate a Linux Consumption function app to Flex Consumption. Supports side-by-side (new app) or in-place (same app) upgrade.
 examples:
-  - name: Migrate a Linux Consumption function app to the Flex Consumption plan.
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan (side-by-side, creates a new app).
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount
 
   - name: Migrate a Linux Consumption function app to the Flex Consumption plan without migrating managed identity configurations.
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount --skip-managed-identities
+
+  - name: Upgrade a Linux Consumption function app to Flex Consumption in place (same app, same name).
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --in-place
+"""
+
+helps['functionapp flex-migration revert'] = """
+type: command
+short-summary: Revert an in-place upgraded Flex Consumption function app to Linux Consumption.
+examples:
+  - name: Revert a function app to Linux Consumption within its revert window.
+    text: >
+        az functionapp flex-migration revert --source-name MyFunctionApp --source-resource-group MyResourceGroup
 """
 
 helps['functionapp flex-migration list'] = """
@@ -2494,6 +2507,44 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface a recent runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The site runtime status error reported by App Service for the worker
+    represented by the configuration-check snapshot.
+    Use `--instance` with a worker machine name to retrieve that worker's
+    configuration checks. The instance ID returned by those checks is used
+    to select the matching runtime error. If the configuration snapshot is
+    unavailable, the machine name is resolved through ARM so an error from
+    another worker is not returned.
+    Runtime errors are surfaced only when they occurred within the last
+    15 minutes. Older errors are omitted from both structured output and
+    the `--report` view.
+    For a 24-hour lookback of runtime status and startup attempts, run
+    `az webapp troubleshoot status`.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show a recent runtime error, if any (JSON by default)
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+  - name: Run checks and show a recent runtime error for a specific worker instance
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['webapp troubleshoot'] = """
 type: group
 short-summary: Diagnose common Linux web app problems.
@@ -3561,4 +3612,35 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a Python app and show a Secure Build summary and full-report link.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --show-secure-build
+"""
+
+helps['webapp secure-build'] = """
+    type: group
+    short-summary: Review open source vulnerabilities in a web app's packages.
+"""
+
+helps['webapp secure-build show'] = """
+    type: command
+    short-summary: Show the Secure Build report for the active deployment of a Linux web app.
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Output follows the Azure CLI output configuration and is JSON when no format is configured. Use --output table for a human-readable summary and up to 20 findings; when --query is supplied, standard query processing controls the resulting table shape. JSON output and the provided Kudu link contain the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
+    examples:
+    - name: Show a human-readable Secure Build report for the active deployment.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output table
+    - name: Show the complete Secure Build report as JSON.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output json
+    - name: Run a fresh analysis for a deployment slot and show critical findings.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']" --output table
+"""
+
+helps['webapp troubleshoot deployment'] = """
+    type: command
+    short-summary: Show the latest deployment state and diagnostic information for a Linux web app.
+    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command supports Linux web apps and does not wait for deployment completion.
+    examples:
+    - name: Show the latest deployment status for a web app.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName
+    - name: Show the latest deployment status for a deployment slot.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName --slot staging
 """

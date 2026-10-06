@@ -39,7 +39,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Space-separated customized output fields.',
         validator=validate_query_fields,
-        arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'tags', 'locked', 'last_modified'])
+        arg_type=get_enum_type(['key', 'value', 'label', 'content_type', 'etag', 'tags', 'locked', 'last_modified', 'description'])
     )
     feature_fields_arg_type = CLIArgumentType(
         nargs='+',
@@ -51,7 +51,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
+        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags', 'description'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -330,17 +330,20 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('content_type', help='Content type of the key-value to be set.')
         c.argument('value', help='Value of the key-value to be set.')
+        c.argument('description', help='Description of the key-value to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
+        c.argument('description', help='Description of the key vault reference to be set.')
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv set-snapshot-reference') as c:
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
+        c.argument('description', help='Description of the snapshot reference to be set.')
         c.argument('snapshot_name', validator=validate_snapshot_reference, help='Name of the snapshot to reference. This is required.')
 
     with self.argument_context('appconfig kv delete') as c:
@@ -476,6 +479,7 @@ def load_arguments(self, _):
         c.argument('composition_type', arg_type=get_enum_type(["key", "key_label"]), help='Composition type used in building App Configuration snapshots. If not specified, defaults to key.')
         c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free and developer tier stores and 90 days (7,776,000s) for standard and premium tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
+        c.argument('description', help='Description of the App Configuration snapshot.')
 
     with self.argument_context('appconfig snapshot show') as c:
         c.argument('fields', arg_type=snapshot_fields_arg_type)

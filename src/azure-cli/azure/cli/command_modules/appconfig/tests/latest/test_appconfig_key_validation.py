@@ -11,7 +11,7 @@ import os
 from knack.util import CLIError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, register_appconfig_query_matcher, register_appconfig_recording_processors
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -28,7 +28,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
     # Uses Entra ID auth (store created with local auth disabled). For live recording, set
     # AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME to a group where you hold "App Configuration Data Owner".
     def test_azconfig_key_validation(self, resource_group, location):
-        config_store_prefix = get_resource_name_prefix('kvtest')
+        config_store_prefix = 'kvtest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'

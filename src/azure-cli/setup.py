@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.90.0"
+VERSION = "2.91.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.8.0',
+    'azure-appconfiguration==1.10.0b1',
     'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
@@ -78,9 +78,9 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices==15.0.0b4',  # 15.0.0b4 version supports compute operations which is in PrPr, pls don't remove it without consulting our team
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
-    'azure-mgmt-containerregistry==15.1.0b2',
+    'azure-mgmt-containerregistry==15.1.0b3',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
-    'azure-mgmt-containerservice~=41.5.0',
+    'azure-mgmt-containerservice~=41.7.0',
     'azure-mgmt-cosmosdb==10.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -107,8 +107,9 @@ DEPENDENCIES = [
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.1.0b3',
-    'azure-mgmt-recoveryservicesbackup~=9.2.0',
-    'azure-mgmt-recoveryservices~=4.1.0',
+    'azure-mgmt-recoveryservicesbackup~=11.1.0',
+    'azure-mgmt-recoveryservicesbackup-passivestamp==1.0.0b1',
+    'azure-mgmt-recoveryservices~=4.2.0',
     'azure-mgmt-redhatopenshift~=3.0.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==24.0.0',
@@ -153,7 +154,6 @@ DEPENDENCIES = [
     'PyNaCl~=1.6.2',
     'scp~=0.13.2',
     'semver~=3.0',
-    'setuptools',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
     # Even though knack already depends on tabulate, profile module directly uses it for interactive subscription

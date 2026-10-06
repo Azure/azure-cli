@@ -913,7 +913,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
               data_disk_delete_option=None, user_data=None, capacity_reservation_group=None,
-              disable_capacity_reservation_assignment=None, enable_hibernation=None,
+              disable_capacity_reservation_assignment=None, enable_hibernation=None, processor_mode=None,
               v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
               disable_integrity_monitoring=None,  # Unused
               enable_integrity_monitoring=False,
@@ -924,10 +924,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
               enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
               enable_all_instance_down=None, zone_placement_policy=None, include_zones=None,
-              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
+              wire_server_use_local_file_rules=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
-              disk_mbps_read_write=None, zone_movement=None):
+              disk_mbps_read_write=None, zone_movement=None,
+              os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None):
 
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1146,7 +1148,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
         disable_capacity_reservation_assignment=disable_capacity_reservation_assignment,
         enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core,
-        os_disk_security_encryption_type=os_disk_security_encryption_type,
+        processor_mode=processor_mode, os_disk_security_encryption_type=os_disk_security_encryption_type,
         os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
         disk_controller_type=disk_controller_type, enable_proxy_agent=enable_proxy_agent,
         proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
@@ -1156,12 +1158,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         enable_all_instance_down=enable_all_instance_down,
         zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
         align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
+        wire_server_use_local_file_rules=wire_server_use_local_file_rules,
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
         key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
         disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write,
-        zone_movement=zone_movement)
+        zone_movement=zone_movement, os_disk_storage_fault_domain_alignment=os_disk_storage_fault_domain_alignment,
+        data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1758,14 +1762,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              disable_capacity_reservation_assignment=None,
-              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
-              enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
-              scheduled_events_api_version=None, enable_all_instance_down=None,
-              align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
-              add_proxy_agent_extension=None,
+              disable_capacity_reservation_assignment=None, dedicated_host=None, dedicated_host_group=None, size=None,
+              ephemeral_os_disk_placement=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None,
+              processor_mode=None, disk_controller_type=None, security_type=None, enable_proxy_agent=None,
+              proxy_agent_mode=None, additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
+              enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
+              enable_all_instance_down=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
+              wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
@@ -1940,7 +1943,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm["security_profile"]["uefi_settings"] = {"secure_boot_enabled": enable_secure_boot,
                                                    "v_tpm_enabled": enable_vtpm}
 
-    proxy_agent_parameters = [enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id]
+    proxy_agent_parameters = [
+        enable_proxy_agent, wire_server_mode, wire_server_use_local_file_rules, imds_mode, key_incarnation_id
+    ]
     if any(parameter is not None for parameter in proxy_agent_parameters):
         wire_server = {}
         imds = {}
@@ -1961,6 +1966,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm["security_profile"]["proxy_agent_settings"]["key_incarnation_id"] = key_incarnation_id
         if wire_server_mode is not None:
             vm["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] = wire_server_mode
+        if wire_server_use_local_file_rules is not None:
+            vm["security_profile"]["proxy_agent_settings"]["wire_server"]["use_local_file_rules"] = \
+                wire_server_use_local_file_rules
         if imds_mode is not None:
             vm["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
@@ -1997,6 +2005,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm["hardware_profile"].get("vm_size_properties", None) is None:
             vm["hardware_profile"]["vm_size_properties"] = {}
         vm["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
+
+    if processor_mode is not None:
+        if vm.get("hardware_profile", None) is None:
+            vm["hardware_profile"] = {}
+        vm["hardware_profile"]["processor_mode"] = processor_mode
 
     if ephemeral_os_disk_placement is not None:
         if vm.get("storage_profile", {}).get("os_disk", {}).get("diff_disk_settings", None) is not None:
@@ -3728,7 +3741,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 capacity_reservation_group=None, disable_capacity_reservation_assignment=None,
                 enable_auto_update=None, patch_mode=None, enable_agent=None,
                 security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                v_cpus_available=None, v_cpus_per_core=None, accept_term=None,
+                v_cpus_available=None, v_cpus_per_core=None, processor_mode=None, accept_term=None,
                 disable_integrity_monitoring=None,  # Unused
                 enable_integrity_monitoring=False, enable_auto_os_upgrade=None,
                 os_disk_security_encryption_type=None, os_disk_secure_vm_disk_encryption_set=None,
@@ -3743,11 +3756,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_all_instance_down=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
+                wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
-                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
+                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None,
+                data_disk_storage_fault_domain_alignment=None, os_disk_storage_fault_domain_alignment=None,
+                zonal_platform_fault_domain_align_mode=None):
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import (StorageProfile, build_vmss_resource,
@@ -4048,7 +4064,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
             enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
             automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
-            v_cpus_per_core=v_cpus_per_core, os_disk_security_encryption_type=os_disk_security_encryption_type,
+            v_cpus_per_core=v_cpus_per_core, processor_mode=processor_mode,
+            os_disk_security_encryption_type=os_disk_security_encryption_type,
             os_disk_secure_vm_disk_encryption_set=os_disk_secure_vm_disk_encryption_set,
             os_disk_delete_option=os_disk_delete_option, regular_priority_count=regular_priority_count,
             regular_priority_percentage=regular_priority_percentage, disk_controller_type=disk_controller_type,
@@ -4067,7 +4084,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
-            zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            zone_balance=zone_balance, wire_server_mode=wire_server_mode,
+            wire_server_use_local_file_rules=wire_server_use_local_file_rules, imds_mode=imds_mode,
             add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
@@ -4076,7 +4094,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
             enable_automatic_repairs=enable_automatic_repairs, zone_placement_policy=zone_placement_policy,
             include_zones=include_zones, exclude_zones=exclude_zones, max_zone_count=max_zone_count,
-            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent)
+            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent,
+            data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment,
+            os_disk_storage_fault_domain_alignment=os_disk_storage_fault_domain_alignment,
+            zonal_platform_fault_domain_align_mode=zonal_platform_fault_domain_align_mode)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4311,8 +4332,8 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
             vms["storageProfile"]["imageReference"] = None
         return vms
 
-    from .operations.vmss import VMSSShow
-    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+    from .operations.vmss import VMSSShowForUpdate
+    vmss = VMSSShowForUpdate(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         "vm_scale_set_name": name,
     })
@@ -4595,6 +4616,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 disable_capacity_reservation_assignment=None,
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
+                processor_mode=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
                 enable_osimage_notification=None, custom_data=None, enable_hibernation=None,
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
@@ -4606,7 +4628,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
-                wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_mode=None, wire_server_use_local_file_rules=None, imds_mode=None,
+                add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
@@ -4719,6 +4742,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available  # pylint: disable=line-too-long
         if v_cpus_per_core is not None:
             vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core  # pylint: disable=line-too-long
+
+    if processor_mode is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("hardware_profile", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"] = {}
+        vmss["virtual_machine_profile"]["hardware_profile"]["processor_mode"] = processor_mode
 
     if capacity_reservation_group is not None:
         if vmss.get("virtual_machine_profile", None) is None:
@@ -4872,7 +4902,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     'v_tpm_enabled': enable_vtpm
                 }}
 
-    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or \
+            wire_server_use_local_file_rules is not None or imds_mode is not None:
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
 
@@ -4898,6 +4929,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if wire_server_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] \
                 = wire_server_mode
+        if wire_server_use_local_file_rules is not None:
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"][
+                "use_local_file_rules"] = wire_server_use_local_file_rules
         if imds_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 

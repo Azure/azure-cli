@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
+
+    :example: NamespaceCreate
+        az eventhubs namespace create --resource-group ResurceGroupSample --namespace-name NamespaceSample --identity "{type:'SystemAssigned, UserAssigned',user-assigned-identities:{/subscriptions/SampleSubscription/resourceGroups/ResurceGroupSample/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ud1:{},/subscriptions/SampleSubscription/resourceGroups/ResurceGroupSample/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ud2:{}}}" --location East US --cluster-arm-id /subscriptions/SampleSubscription/resourceGroups/ResurceGroupSample/providers/Microsoft.EventHub/clusters/enc-test --encryption "{key-source:Microsoft.KeyVault,key-vault-properties:[{user-assigned-identity:/subscriptions/SampleSubscription/resourceGroups/ResurceGroupSample/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ud1,key-name:Samplekey,key-vault-uri:'https://aprao-keyvault-user.vault-int.azure-int.net/'}]}" --geo-data-replication "{locations:[{location-name:eastus,role-type:Primary},{location-name:southcentralus,role-type:Secondary}],max-replication-lag-duration-in-seconds:300}"
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -54,6 +57,16 @@ class Create(AAZCommand):
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+
+        # define Arg Group "ConfidentialCompute"
+
+        _args_schema = cls._args_schema
+        _args_schema.confidential_compute_mode = AAZStrArg(
+            options=["--mode", "--confidential-compute-mode"],
+            arg_group="ConfidentialCompute",
+            help="Setting to Enable or Disable Confidential Compute",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "Parameters"
@@ -408,7 +421,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

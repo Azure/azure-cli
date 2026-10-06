@@ -17,8 +17,11 @@ echo "Branch $branch"
 echo "Search setup files from `pwd`."
 python --version
 
-# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources); `python setup.py bdist_wheel` below relies on setup.py.
-pip install -U pip "setuptools<81" wheel
+# Cap setuptools<81: setuptools 82 removes pkg_resources, which azure-cli still declares as a
+# runtime dependency. The builds below go through the PEP 517 frontend, but --no-isolation means
+# they use this setuptools too.
+# `build` is that frontend.
+pip install -U pip "setuptools<81" wheel build
 pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
@@ -29,7 +32,7 @@ fi
 
 for setup_file in $(find src -name 'setup.py' | grep -v azure-cli-testsdk); do
     pushd `dirname $setup_file`
-    python setup.py bdist_wheel -d $BUILD_STAGINGDIRECTORY
-    python setup.py sdist -d $BUILD_STAGINGDIRECTORY
+    python -m build --wheel --no-isolation --outdir $BUILD_STAGINGDIRECTORY
+    python -m build --sdist --no-isolation --outdir $BUILD_STAGINGDIRECTORY
     popd
 done

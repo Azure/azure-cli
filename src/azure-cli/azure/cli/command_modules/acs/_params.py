@@ -46,6 +46,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025,
+    CONST_NAT_GATEWAY_SKU_STANDARD, CONST_NAT_GATEWAY_SKU_STANDARD_V2,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_NONE,
@@ -119,7 +120,11 @@ from azure.cli.command_modules.acs._validators import (
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
     validate_load_balancer_sku, validate_max_surge, validate_max_unavailable,
     validate_nat_gateway_idle_timeout,
-    validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
+    validate_nat_gateway_managed_outbound_ip_count,
+    validate_nat_gateway_managed_outbound_ipv6_count,
+    validate_nat_gateway_v2_params, validate_nat_gateway_v2_params_for_update,
+    validate_network_policy,
+    validate_outbound_type_sku, validate_outbound_type_sku_for_update,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
     validate_nodepool_tags, validate_nodes_count, validate_os_sku,
     validate_pod_subnet_id, validate_ppg, validate_priority,
@@ -140,6 +145,12 @@ from azure.cli.command_modules.acs._validators import (
     validate_bootstrap_container_registry_resource_id,
     validate_gateway_prefix_size,
     validate_artifact_streaming,
+    validate_azure_monitor_logs_and_enable_addons,
+    validate_azure_monitor_logs_enable_disable,
+    validate_container_insights_settings_for_create,
+    validate_container_insights_settings_for_update,
+    validate_azure_monitor_and_opentelemetry_for_create,
+    validate_azure_monitor_and_opentelemetry_for_update,
 )
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -197,6 +208,7 @@ pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDU
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
+nat_gateway_skus = [CONST_NAT_GATEWAY_SKU_STANDARD, CONST_NAT_GATEWAY_SKU_STANDARD_V2]
 sku_names = [CONST_MANAGED_CLUSTER_SKU_NAME_BASE, CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC]
 sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
@@ -428,8 +440,21 @@ def load_arguments(self, _):
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_managed_outbound_ipv6_count',
+                   options_list=['--nat-gateway-managed-outbound-ipv6-count', '--nat-gw-ipv6-count'],
+                   type=int, validator=validate_nat_gateway_managed_outbound_ipv6_count,
+                   help='NAT gateway managed outbound IPv6 count. Only valid with --outbound-type '
+                        'managedNATGateway and --outbound-type-sku StandardV2.')
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
-        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
+        c.argument('nat_gateway_sku', options_list=['--outbound-type-sku'], arg_type=get_enum_type(nat_gateway_skus), validator=validate_outbound_type_sku)
+        c.argument('nat_gateway_outbound_ip_ids', options_list=['--nat-gateway-outbound-ips', '--nat-gw-ips'],
+                   help='Comma-separated public IP resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('nat_gateway_outbound_ip_prefix_ids',
+                   options_list=['--nat-gateway-outbound-ip-prefixes', '--nat-gw-prefixes'],
+                   help='Comma-separated public IP prefix resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types), validator=validate_nat_gateway_v2_params)
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_plugin_mode', arg_type=get_enum_type(network_plugin_modes))
         c.argument('network_policy', validator=validate_network_policy)
@@ -504,11 +529,44 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
         c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_and_enable_addons,
+        )
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_create,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_create,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -695,11 +753,24 @@ def load_arguments(self, _):
         c.argument("load_balancer_sku", arg_type=get_enum_type([CONST_LOAD_BALANCER_SKU_STANDARD]), validator=validate_load_balancer_sku)
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
+        c.argument('nat_gateway_managed_outbound_ipv6_count',
+                   options_list=['--nat-gateway-managed-outbound-ipv6-count', '--nat-gw-ipv6-count'],
+                   type=int, validator=validate_nat_gateway_managed_outbound_ipv6_count,
+                   help='NAT gateway managed outbound IPv6 count. Only valid with --outbound-type '
+                        'managedNATGateway and --outbound-type-sku StandardV2.')
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
+        c.argument('nat_gateway_sku', options_list=['--outbound-type-sku'], arg_type=get_enum_type(nat_gateway_skus), validator=validate_outbound_type_sku_for_update)
+        c.argument('nat_gateway_outbound_ip_ids', options_list=['--nat-gateway-outbound-ips', '--nat-gw-ips'],
+                   help='Comma-separated public IP resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
+        c.argument('nat_gateway_outbound_ip_prefix_ids',
+                   options_list=['--nat-gateway-outbound-ip-prefixes', '--nat-gw-prefixes'],
+                   help='Comma-separated public IP prefix resource IDs for the cluster NAT gateway. '
+                        'Only valid with --outbound-type-sku StandardV2.')
         c.argument('network_dataplane', arg_type=get_enum_type(network_dataplanes))
         c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy', arg_type=get_enum_type(network_policies))
-        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types), validator=validate_nat_gateway_v2_params_for_update)
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Comma-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
@@ -846,6 +917,45 @@ def load_arguments(self, _):
         )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('disable_azure_monitor_app_monitoring', action='store_true')
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_enable_disable,
+        )
+        c.argument('disable_azure_monitor_logs', action='store_true')
+        c.argument('workspace_resource_id')
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_update,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_update,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
@@ -955,6 +1065,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks enable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -969,7 +1080,14 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
@@ -992,6 +1110,13 @@ def load_arguments(self, _):
         c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin. Note: the path should contain the binary filename.')
         c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
         c.argument('gh_token', help='GitHub authentication token used when downloading kubelogin binaries from GitHub releases. Supplying a token helps avoid GitHub API rate limits.')
+
+    with self.argument_context('aks install-desktop') as c:
+        c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')
+        c.argument('gh_token', help='GitHub authentication token used to retrieve AKS Desktop release metadata. '
+                   'Prefer the GH_TOKEN environment variable to avoid exposing credentials in shell history, '
+                   'process listings, or debug logs. This option overrides GH_TOKEN. '
+                   'Supplying a token helps avoid GitHub API rate limits.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -1160,6 +1285,7 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('enable_managed_dranet', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
         c.argument("message_of_the_day", validator=validate_message_of_the_day)
@@ -1194,6 +1320,7 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
         c.argument('allowed_host_ports', nargs='+', validator=validate_allowed_host_ports)
         c.argument('asg_ids', nargs='+', validator=validate_application_security_groups)
+        c.argument('enable_managed_dranet', action='store_true')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_update), validator=validate_os_sku)
         c.argument("enable_fips_image", action="store_true")
         c.argument("disable_fips_image", action="store_true")

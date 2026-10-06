@@ -24,7 +24,8 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     validate_vm_name_for_monitor_metrics)
 
-from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID, CachingTypes, UpgradeMode
+from azure.cli.command_modules.vm._vm_utils import (MSI_LOCAL_ID, CachingTypes, UpgradeMode, DiskStorageAlignment,
+                                                    FaultDomainAlignment)
 from azure.cli.command_modules.vm._image_builder import ScriptType
 
 from azure.cli.command_modules.monitor.validators import validate_metric_dimension
@@ -73,7 +74,8 @@ def load_arguments(self, _):
     OrchestrationModeUniform = ['Uniform']
     OSTypes = ['Windows', 'Linux']
     PatchMode = ['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']
-    Priority = ['Regular', 'Low', 'Spot']
+    Priority = ['Regular', 'Low', 'Spot', 'SpotPlus']
+    ProcessorMode = ['Deterministic', 'Opportunistic']
     ProxyAgentMode = ['Audit', 'Enforce']
     PublicIPAddressAllocationMethod = ['dynamic', 'static']
     PublicNetworkAccess = ['Disabled', 'Enabled']
@@ -514,6 +516,24 @@ def load_arguments(self, _):
         c.argument('source_snapshots_or_disks_size_gb', options_list=['--source-snapshots-or-disks-size-gb', '--source-resource-size'], nargs='+', type=int, help='The size of the source disk in GB')
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
         c.argument('source_disk_restore_point_size_gb', options_list=['--source-disk-restore-point-size-gb', '--source-rp-size'], nargs='+', type=int, help='The size of the source disk restore point in GB')
+        c.argument(
+            'data_disk_storage_fault_domain_alignment',
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for data disks. This option is only valid when '
+                 'the VM joins a single-zone Flexible VMSS and is set at create time. Omit this option to leave '
+                 'data disks unaligned.'
+        )
+        c.argument(
+            'os_disk_storage_fault_domain_alignment',
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for the OS disk. This option is only valid when '
+                 'the VM joins a single-zone Flexible VMSS and is set at create time. Omit this option to leave '
+                 'the OS disk unaligned.'
+        )
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
@@ -843,6 +863,32 @@ def load_arguments(self, _):
             help='Specify the maximum percentage of virtual machine instances that can be allocated '
                  'to a single availability zone in the virtual machine scale set. '
                  'Valid values are integers between 1 and 100.'
+        )
+        c.argument(
+            'data_disk_storage_fault_domain_alignment',
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for data disks. This option is only valid for '
+                 'a single-zone Flexible VMSS and is set at create time. Omit this option to leave data disks '
+                 'unaligned.'
+        )
+        c.argument(
+            'os_disk_storage_fault_domain_alignment',
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            is_preview=True,
+            help='Specifies the storage fault domain alignment type for the OS disk. This option is only valid for '
+                 'a single-zone Flexible VMSS and is set at create time. Omit this option to leave the OS disk '
+                 'unaligned.'
+        )
+        c.argument(
+            'zonal_platform_fault_domain_align_mode',
+            options_list=['--zonal-fault-domain-align-mode', '--zonal-fda'],
+            arg_type=get_enum_type(FaultDomainAlignment),
+            is_preview=True,
+            help='Specifies the alignment mode between Virtual Machine Scale Set compute and storage fault domains. '
+                 'This option is only valid for a single-zone Flexible VMSS.'
         )
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -1415,17 +1461,22 @@ def load_arguments(self, _):
             c.argument('license_type', license_type)
             c.argument('priority',
                        arg_type=get_enum_type(Priority, default=None),
-                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
+                       help="Priority. Use 'Spot' or 'SpotPlus' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' or 'SpotPlus' to deploy Azure spot VM and/or VMSS. Default to Regular.")
             c.argument('max_price', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
             c.argument('capacity_reservation_group', options_list=['--capacity-reservation-group', '--crg'],
                        help='The ID or name of the capacity reservation group that is used to allocate. Pass in "None" to disassociate the capacity reservation group. Please note that if you want to delete a VM/VMSS that has been associated with capacity reservation group, you need to disassociate the capacity reservation group first.')
             c.argument('v_cpus_available', type=int, help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
+            c.argument('processor_mode', arg_type=get_enum_type(ProcessorMode),
+                       help='Specifies the processor mode for the virtual machine or virtual machine scale set. '
+                            'Optional; if omitted, the platform default applies (currently Deterministic). '
+                            'This property can be updated on a running VM or VMSS without deallocation or reboot.')
             c.argument('disk_controller_type', disk_controller_type)
             c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), help='Specify whether metadata security protoco (proxy agent) feature should be enabled on the virtual machine or virtual machine scale set.')
             c.argument('proxy_agent_mode', deprecate_info=c.deprecate(target='--proxy-agent-mode', redirect='--wire-server-mode'), arg_type=get_enum_type(ProxyAgentMode), help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('wire_server_mode', arg_type=get_enum_type(ProxyAgentMode), help='Specify the mode that proxy agent will execute on if the feature is enabled.')
+            c.argument('wire_server_use_local_file_rules', options_list=['--wire-server-use-local-file-rules', '--wire-local-rules'], arg_type=get_three_state_flag(), help='When set to true, instructs the GuestProxyAgent inside the VM to load additional access control rules defined in a local file on the VM.')
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], help='Specify the access control profile version resource id of wire server.')
             c.argument('imds_mode', arg_type=get_enum_type(ProxyAgentMode), help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], help='Specify the access control profile version resource id resource id of imds.')
@@ -1437,7 +1488,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss create') as c:
         c.argument('priority', arg_type=get_enum_type(Priority, default=None),
-                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
+                   help="Priority. Use 'Spot' or 'SpotPlus' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' or 'SpotPlus' to deploy Azure spot VM and/or VMSS. Default to Regular.")
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')
