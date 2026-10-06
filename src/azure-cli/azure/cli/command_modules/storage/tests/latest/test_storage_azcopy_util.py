@@ -84,6 +84,30 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)
 
+    def test_unusable_system_version_falls_back_to_managed_executable(self):
+        unusable_outputs = (
+            b"\xff",
+            b"unexpected output\n",
+            b"azcopy version not-a-version\n",
+        )
+
+        with tempfile.TemporaryDirectory() as cwd, tempfile.TemporaryDirectory() as system_dir:
+            managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
+            system_executable = os.path.join(system_dir, "azcopy.exe")
+
+            for output in unusable_outputs:
+                with self.subTest(output=output), \
+                        mock.patch.object(util, "_get_default_install_location",
+                                          return_value=managed_executable), \
+                        mock.patch.object(util.os, "getcwd", return_value=cwd), \
+                        mock.patch.object(util.shutil, "which", return_value=system_executable), \
+                        mock.patch.object(util.subprocess, "check_output", return_value=output), \
+                        mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+                    azcopy = util.AzCopy()
+
+                install_azcopy.assert_called_once_with(managed_executable)
+                self.assertEqual(managed_executable, azcopy.executable)
+
     def test_path_validation_failure_falls_back_without_probing(self):
         managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
 
