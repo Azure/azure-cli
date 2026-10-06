@@ -23,9 +23,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-08-01"],
         ]
     }
 
@@ -120,12 +120,6 @@ class Update(AAZCommand):
             options=["--vmsizeprof", "--vm-sizes-profile"],
             arg_group="Properties",
             help="List of VM sizes supported for Compute Fleet",
-        )
-        _args_schema.zone_allocation_policy = AAZObjectArg(
-            options=["--zone-allocation-policy"],
-            arg_group="Properties",
-            help="Zone Allocation Policy for Fleet.",
-            nullable=True,
         )
 
         additional_locations_profile = cls._args_schema.additional_locations_profile
@@ -415,38 +409,6 @@ class Update(AAZCommand):
                 maximum=65535,
                 minimum=0,
             ),
-        )
-
-        zone_allocation_policy = cls._args_schema.zone_allocation_policy
-        zone_allocation_policy.distribution_strategy = AAZStrArg(
-            options=["distribution-strategy"],
-            help="Distribution strategy used for zone allocation policy.",
-            enum={"BestEffortSingleZone": "BestEffortSingleZone", "Prioritized": "Prioritized"},
-        )
-        zone_allocation_policy.zone_preferences = AAZListArg(
-            options=["zone-preferences"],
-            help="Zone preferences, required when zone distribution strategy is Prioritized.",
-            nullable=True,
-        )
-
-        zone_preferences = cls._args_schema.zone_allocation_policy.zone_preferences
-        zone_preferences.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.zone_allocation_policy.zone_preferences.Element
-        _element.rank = AAZIntArg(
-            options=["rank"],
-            help="The rank of the zone. This is used with 'Prioritized' ZoneDistributionStrategy. The lower the number, the higher the priority, starting with 0. 0 is the highest rank. If not specified, defaults to lowest rank.",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                maximum=65535,
-                minimum=0,
-            ),
-        )
-        _element.zone = AAZStrArg(
-            options=["zone"],
-            help="Name of the zone.",
         )
 
         # define Arg Group "Resource"
@@ -1112,9 +1074,7 @@ class Update(AAZCommand):
             options=["admin-password"],
             help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
             nullable=True,
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please provide VMSS password:", "confirm": True}},
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
@@ -1135,9 +1095,7 @@ class Update(AAZCommand):
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
             nullable=True,
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please enter VM Password:", "confirm": True}},
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
@@ -1331,9 +1289,7 @@ class Update(AAZCommand):
             options=["content"],
             help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
             nullable=True,
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Password:"}},
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
@@ -1996,7 +1952,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -2095,7 +2051,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -2187,7 +2143,6 @@ class Update(AAZCommand):
                 properties.set_prop("vmAttributes", AAZObjectType, ".vm_attributes")
                 properties.set_prop("vmNamePrefix", AAZStrType, ".vm_name_prefix")
                 properties.set_prop("vmSizesProfile", AAZListType, ".vm_sizes_profile", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("zoneAllocationPolicy", AAZObjectType, ".zone_allocation_policy")
 
             additional_locations_profile = _builder.get(".properties.additionalLocationsProfile")
             if additional_locations_profile is not None:
@@ -2288,20 +2243,6 @@ class Update(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("rank", AAZIntType, ".rank")
-
-            zone_allocation_policy = _builder.get(".properties.zoneAllocationPolicy")
-            if zone_allocation_policy is not None:
-                zone_allocation_policy.set_prop("distributionStrategy", AAZStrType, ".distribution_strategy", typ_kwargs={"flags": {"required": True}})
-                zone_allocation_policy.set_prop("zonePreferences", AAZListType, ".zone_preferences")
-
-            zone_preferences = _builder.get(".properties.zoneAllocationPolicy.zonePreferences")
-            if zone_preferences is not None:
-                zone_preferences.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.zoneAllocationPolicy.zonePreferences[]")
-            if _elements is not None:
-                _elements.set_prop("rank", AAZIntType, ".rank")
-                _elements.set_prop("zone", AAZStrType, ".zone", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -3672,9 +3613,6 @@ class _UpdateHelper:
             serialized_name="vmSizesProfile",
             flags={"required": True},
         )
-        properties.zone_allocation_policy = AAZObjectType(
-            serialized_name="zoneAllocationPolicy",
-        )
 
         additional_locations_profile = _schema_fleet_read.properties.additional_locations_profile
         additional_locations_profile.location_profiles = AAZListType(
@@ -3845,24 +3783,6 @@ class _UpdateHelper:
             flags={"required": True},
         )
         _element.rank = AAZIntType()
-
-        zone_allocation_policy = _schema_fleet_read.properties.zone_allocation_policy
-        zone_allocation_policy.distribution_strategy = AAZStrType(
-            serialized_name="distributionStrategy",
-            flags={"required": True},
-        )
-        zone_allocation_policy.zone_preferences = AAZListType(
-            serialized_name="zonePreferences",
-        )
-
-        zone_preferences = _schema_fleet_read.properties.zone_allocation_policy.zone_preferences
-        zone_preferences.Element = AAZObjectType()
-
-        _element = _schema_fleet_read.properties.zone_allocation_policy.zone_preferences.Element
-        _element.rank = AAZIntType()
-        _element.zone = AAZStrType(
-            flags={"required": True},
-        )
 
         system_data = _schema_fleet_read.system_data
         system_data.created_at = AAZStrType(

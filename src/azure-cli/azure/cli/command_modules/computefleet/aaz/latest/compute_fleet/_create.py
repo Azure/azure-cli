@@ -19,13 +19,13 @@ class Create(AAZCommand):
     """Create an Azure Compute Fleet
 
     :example: Fleets_CreateOrUpdate
-        az compute-fleet create --resource-group rgazurefleet --fleet-name testFleet --spot-priority-profile "{capacity:20,min-capacity:10,max-price-per-vm:0.00865,eviction-policy:Delete,allocation-strategy:PriceCapacityOptimized,maintain:True}" --regular-priority-profile "{capacity:20,min-capacity:10,allocation-strategy:LowestPrice}" --vm-sizes-profile "[{name:Standard_d1_v2,rank:19225}]" --compute-profile "{base-virtual-machine-profile:{osProfile:{computerNamePrefix:o,adminUsername:nrgzqciiaaxjrqldbmjbqkyhntp,adminPassword:adfbrdxpv,customData:xjjib,windowsConfiguration:{provisionVMAgent:True,enableAutomaticUpdates:True,timeZone:hlyjiqcfksgrpjrct,additionalUnattendContent:[{passName:OobeSystem,componentName:Microsoft-Windows-Shell-Setup,settingName:AutoLogon,content:bubmqbxjkj}],patchSettings:{patchMode:Manual,enableHotpatching:True,assessmentMode:ImageDefault,automaticByPlatformSettings:{rebootSetting:Unknown,bypassPlatformSafetyChecksOnUserSchedule:True}},winRM:{listeners:[{protocol:Https,certificateUrl:'https://myVaultName.vault.azure.net/secrets/myCertName'}]},enableVMAgentPlatformUpdates:True},linuxConfiguration:{disablePasswordAuthentication:True,ssh:{publicKeys:[{path:kmqz,keyData:kivgsubusvpprwqaqpjcmhsv}]},provisionVMAgent:True,patchSettings:{patchMode:ImageDefault,assessmentMode:ImageDefault,automaticByPlatformSettings:{rebootSetting:Unknown,bypassPlatformSafetyChecksOnUserSchedule:True}},enableVMAgentPlatformUpdates:True},secrets:[{sourceVault:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}'},vaultCertificates:[{certificateUrl:'https://myVaultName.vault.azure.net/secrets/myCertName',certificateStore:nlxrwavpzhueffxsshlun}]}],allowExtensionOperations:True,requireGuestProvisionSignal:True},storageProfile:{imageReference:{publisher:mqxgwbiyjzmxavhbkd,offer:isxgumkarlkomp,sku:eojmppqcrnpmxirtp,version:wvpcqefgtmqdgltiuz,sharedGalleryImageId:kmkgihoxwlawuuhcinfirktdwkmx,communityGalleryImageId:vlqe,id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{imageName}/versions/{versionName}'},osDisk:{name:wfttw,caching:None,writeAcceleratorEnabled:True,createOption:FromImage,diffDiskSettings:{option:Local,placement:CacheDisk},diskSizeGB:14,osType:Windows,image:{uri:'https://myStorageAccountName.blob.core.windows.net/myContainerName/myVhdName.vhd'},vhdContainers:[tkzcwddtinkfpnfklatw],managedDisk:{storageAccountType:Standard_LRS,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'},securityProfile:{securityEncryptionType:VMGuestStateOnly,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'}}},deleteOption:Delete},dataDisks:[{name:eogiykmdmeikswxmigjws,lun:14,caching:None,writeAcceleratorEnabled:True,createOption:FromImage,diskSizeGB:6,managedDisk:{storageAccountType:Standard_LRS,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'},securityProfile:{securityEncryptionType:VMGuestStateOnly,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'}}},diskIOPSReadWrite:27,diskMBpsReadWrite:2,deleteOption:Delete}],diskControllerType:uzb},networkProfile:{healthProbe:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/probes/{probeName}'},networkInterfaceConfigurations:[{name:i,properties:{primary:True,enableAcceleratedNetworking:True,disableTcpStateTracking:True,enableFpga:True,networkSecurityGroup:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}'},dnsSettings:{dnsServers:[nxmmfolhclsesu]},ipConfigurations:[{name:oezqhkidfhyywlfzwuotilrpbqnjg,properties:{subnet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}'},primary:True,publicIPAddressConfiguration:{name:fvpqf,properties:{idleTimeoutInMinutes:9,dnsSettings:{domainNameLabel:ukrddzvmorpmfsczjwtbvp,domainNameLabelScope:TenantReuse},ipTags:[{ipTagType:sddgsoemnzgqizale,tag:wufmhrjsakbiaetyara}],publicIPPrefix:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIPPrefixName}'},publicIPAddressVersion:IPv4,deleteOption:Delete},sku:{name:Basic,tier:Regional}},privateIPAddressVersion:IPv4,applicationGatewayBackendAddressPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/backendAddressPools/{backendAddressPoolName}'}],applicationSecurityGroups:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}'}],loadBalancerBackendAddressPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}'}],loadBalancerInboundNatPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatPools/{inboundNatPoolName}'}]}}],enableIPForwarding:True,deleteOption:Delete,auxiliaryMode:None,auxiliarySku:None}}],networkApiVersion:2020-11-01},securityProfile:{uefiSettings:{secureBootEnabled:True,vTpmEnabled:True},encryptionAtHost:True,securityType:TrustedLaunch,encryptionIdentity:{userAssignedIdentityResourceId:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{userAssignedIdentityName}'},proxyAgentSettings:{enabled:True,mode:Audit,keyIncarnationId:20}},diagnosticsProfile:{bootDiagnostics:{enabled:True,storageUri:'http://myStorageAccountName.blob.core.windows.net'}},extensionProfile:{extensions:[{name:bndxuxx,properties:{forceUpdateTag:yhgxw,publisher:kpxtirxjfprhs,type:pgjilctjjwaa,typeHandlerVersion:zevivcoilxmbwlrihhhibq,autoUpgradeMinorVersion:True,enableAutomaticUpgrade:True,settings:{},protectedSettings:{},provisionAfterExtensions:[nftzosroolbcwmpupujzqwqe],suppressFailures:True,protectedSettingsFromKeyVault:{secretUrl:'https://myvaultName.vault.azure.net/secrets/secret/mySecretName',sourceVault:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}'}}}}],extensionsTimeBudget:mbhjahtdygwgyszdwjtvlvtgchdwil},licenseType:v,scheduledEventsProfile:{terminateNotificationProfile:{notBeforeTimeout:iljppmmw,enable:True},osImageNotificationProfile:{notBeforeTimeout:olbpadmevekyczfokodtfprxti,enable:True}},userData:s,capacityReservation:{capacityReservationGroup:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}'}},applicationProfile:{galleryApplications:[{tags:eyrqjbib,order:5,packageReferenceId:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/applications/{applicationName}/versions/{versionName}',configurationReference:ulztmiavpojpbpbddgnuuiimxcpau,treatFailureAsDeploymentFailure:True,enableAutomaticUpgrade:True}]},hardwareProfile:{vmSizeProperties:{vCPUsAvailable:16,vCPUsPerCore:23}},serviceArtifactReference:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/serviceArtifacts/{serviceArtifactsName}/vmArtifactsProfiles/{vmArtifactsProfileName}'},securityPostureReference:{id:'/CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest',excludeExtensions:['{securityPostureVMExtensionName}'],isOverridable:True}},compute-api-version:2023-07-01,platform-fault-domain-count:1}" --zones "[zone1,zone2]" --identity "{type:UserAssigned,user-assigned-identities:{key9851:{}}}" --tags "{key3518:luvrnuvsgdpbuofdskkcoqhfh}" --location westus --plan "{name:jwgrcrnrtfoxn,publisher:iozjbiqqckqm,product:cgopbyvdyqikahwyxfpzwaqk,promotion-code:naglezezplcaruqogtxnuizslqnnbr,version:wa}"
+        az compute-fleet create --resource-group rgazurefleet --fleet-name testFleet --mode "Launch" --vm-name-prefix "testPrefix" --spot-priority-profile "{capacity:20,min-capacity:10,max-price-per-vm:0.00865,eviction-policy:Delete,allocation-strategy:PriceCapacityOptimized,maintain:True}" --regular-priority-profile "{capacity:20,min-capacity:10,allocation-strategy:LowestPrice}" --vm-sizes-profile "[{name:Standard_d1_v2,rank:19225}]" --compute-profile "{base-virtual-machine-profile:{osProfile:{computerNamePrefix:o,adminUsername:nrgzqciiaaxjrqldbmjbqkyhntp,adminPassword:adfbrdxpv,customData:xjjib,windowsConfiguration:{provisionVMAgent:True,enableAutomaticUpdates:True,timeZone:hlyjiqcfksgrpjrct,additionalUnattendContent:[{passName:OobeSystem,componentName:Microsoft-Windows-Shell-Setup,settingName:AutoLogon,content:bubmqbxjkj}],patchSettings:{patchMode:Manual,enableHotpatching:True,assessmentMode:ImageDefault,automaticByPlatformSettings:{rebootSetting:Unknown,bypassPlatformSafetyChecksOnUserSchedule:True}},winRM:{listeners:[{protocol:Https,certificateUrl:'https://myVaultName.vault.azure.net/secrets/myCertName'}]},enableVMAgentPlatformUpdates:True},linuxConfiguration:{disablePasswordAuthentication:True,ssh:{publicKeys:[{path:kmqz,keyData:kivgsubusvpprwqaqpjcmhsv}]},provisionVMAgent:True,patchSettings:{patchMode:ImageDefault,assessmentMode:ImageDefault,automaticByPlatformSettings:{rebootSetting:Unknown,bypassPlatformSafetyChecksOnUserSchedule:True}},enableVMAgentPlatformUpdates:True},secrets:[{sourceVault:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}'},vaultCertificates:[{certificateUrl:'https://myVaultName.vault.azure.net/secrets/myCertName',certificateStore:nlxrwavpzhueffxsshlun}]}],allowExtensionOperations:True,requireGuestProvisionSignal:True},storageProfile:{imageReference:{publisher:mqxgwbiyjzmxavhbkd,offer:isxgumkarlkomp,sku:eojmppqcrnpmxirtp,version:wvpcqefgtmqdgltiuz,sharedGalleryImageId:kmkgihoxwlawuuhcinfirktdwkmx,communityGalleryImageId:vlqe,id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{imageName}/versions/{versionName}'},osDisk:{name:wfttw,caching:None,writeAcceleratorEnabled:True,createOption:FromImage,diffDiskSettings:{option:Local,placement:CacheDisk},diskSizeGB:14,osType:Windows,image:{uri:'https://myStorageAccountName.blob.core.windows.net/myContainerName/myVhdName.vhd'},vhdContainers:[tkzcwddtinkfpnfklatw],managedDisk:{storageAccountType:Standard_LRS,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'},securityProfile:{securityEncryptionType:VMGuestStateOnly,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'}}},deleteOption:Delete},dataDisks:[{name:eogiykmdmeikswxmigjws,lun:14,caching:None,writeAcceleratorEnabled:True,createOption:FromImage,diskSizeGB:6,managedDisk:{storageAccountType:Standard_LRS,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'},securityProfile:{securityEncryptionType:VMGuestStateOnly,diskEncryptionSet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/diskEncryptionSets/{diskEncryptionSetName}'}}},diskIOPSReadWrite:27,diskMBpsReadWrite:2,deleteOption:Delete}],diskControllerType:uzb},networkProfile:{healthProbe:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/probes/{probeName}'},networkInterfaceConfigurations:[{name:i,properties:{primary:True,enableAcceleratedNetworking:True,disableTcpStateTracking:True,enableFpga:True,networkSecurityGroup:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkSecurityGroups/{networkSecurityGroupName}'},dnsSettings:{dnsServers:[nxmmfolhclsesu]},ipConfigurations:[{name:oezqhkidfhyywlfzwuotilrpbqnjg,properties:{subnet:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}'},primary:True,publicIPAddressConfiguration:{name:fvpqf,properties:{idleTimeoutInMinutes:9,dnsSettings:{domainNameLabel:ukrddzvmorpmfsczjwtbvp,domainNameLabelScope:TenantReuse},ipTags:[{ipTagType:sddgsoemnzgqizale,tag:wufmhrjsakbiaetyara}],publicIPPrefix:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPPrefixes/{publicIPPrefixName}'},publicIPAddressVersion:IPv4,deleteOption:Delete},sku:{name:Basic,tier:Regional}},privateIPAddressVersion:IPv4,applicationGatewayBackendAddressPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationGateways/{applicationGatewayName}/backendAddressPools/{backendAddressPoolName}'}],applicationSecurityGroups:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}'}],loadBalancerBackendAddressPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}'}],loadBalancerInboundNatPools:[{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatPools/{inboundNatPoolName}'}]}}],enableIPForwarding:True,deleteOption:Delete,auxiliaryMode:None,auxiliarySku:None}}],networkApiVersion:2020-11-01},securityProfile:{uefiSettings:{secureBootEnabled:True,vTpmEnabled:True},encryptionAtHost:True,securityType:TrustedLaunch,encryptionIdentity:{userAssignedIdentityResourceId:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{userAssignedIdentityName}'},proxyAgentSettings:{enabled:True,mode:Audit,keyIncarnationId:20}},diagnosticsProfile:{bootDiagnostics:{enabled:True,storageUri:'http://myStorageAccountName.blob.core.windows.net'}},extensionProfile:{extensions:[{name:bndxuxx,properties:{forceUpdateTag:yhgxw,publisher:kpxtirxjfprhs,type:pgjilctjjwaa,typeHandlerVersion:zevivcoilxmbwlrihhhibq,autoUpgradeMinorVersion:True,enableAutomaticUpgrade:True,settings:{},protectedSettings:{},provisionAfterExtensions:[nftzosroolbcwmpupujzqwqe],suppressFailures:True,protectedSettingsFromKeyVault:{secretUrl:'https://myvaultName.vault.azure.net/secrets/secret/mySecretName',sourceVault:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}'}}}}],extensionsTimeBudget:mbhjahtdygwgyszdwjtvlvtgchdwil},licenseType:v,scheduledEventsProfile:{terminateNotificationProfile:{notBeforeTimeout:iljppmmw,enable:True},osImageNotificationProfile:{notBeforeTimeout:olbpadmevekyczfokodtfprxti,enable:True}},userData:s,capacityReservation:{capacityReservationGroup:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}'}},applicationProfile:{galleryApplications:[{tags:eyrqjbib,order:5,packageReferenceId:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/applications/{applicationName}/versions/{versionName}',configurationReference:ulztmiavpojpbpbddgnuuiimxcpau,treatFailureAsDeploymentFailure:True,enableAutomaticUpgrade:True}]},hardwareProfile:{vmSizeProperties:{vCPUsAvailable:16,vCPUsPerCore:23}},serviceArtifactReference:{id:'/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/serviceArtifacts/{serviceArtifactsName}/vmArtifactsProfiles/{vmArtifactsProfileName}'},securityPostureReference:{id:'/CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest',excludeExtensions:['{securityPostureVMExtensionName}'],isOverridable:True}},compute-api-version:2023-07-01,platform-fault-domain-count:1}" --zones "[zone1,zone2]" --identity "{type:UserAssigned,user-assigned-identities:{key9851:{}}}" --tags "{key3518:luvrnuvsgdpbuofdskkcoqhfh}" --location westus --plan "{name:jwgrcrnrtfoxn,publisher:iozjbiqqckqm,product:cgopbyvdyqikahwyxfpzwaqk,promotion-code:naglezezplcaruqogtxnuizslqnnbr,version:wa}"
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-08-01"],
         ]
     }
 
@@ -110,11 +110,6 @@ class Create(AAZCommand):
             options=["--vmsizeprof", "--vm-sizes-profile"],
             arg_group="Properties",
             help="List of VM sizes supported for Compute Fleet",
-        )
-        _args_schema.zone_allocation_policy = AAZObjectArg(
-            options=["--zone-allocation-policy"],
-            arg_group="Properties",
-            help="Zone Allocation Policy for Fleet.",
         )
 
         additional_locations_profile = cls._args_schema.additional_locations_profile
@@ -370,36 +365,6 @@ class Create(AAZCommand):
                 maximum=65535,
                 minimum=0,
             ),
-        )
-
-        zone_allocation_policy = cls._args_schema.zone_allocation_policy
-        zone_allocation_policy.distribution_strategy = AAZStrArg(
-            options=["distribution-strategy"],
-            help="Distribution strategy used for zone allocation policy.",
-            required=True,
-            enum={"BestEffortSingleZone": "BestEffortSingleZone", "Prioritized": "Prioritized"},
-        )
-        zone_allocation_policy.zone_preferences = AAZListArg(
-            options=["zone-preferences"],
-            help="Zone preferences, required when zone distribution strategy is Prioritized.",
-        )
-
-        zone_preferences = cls._args_schema.zone_allocation_policy.zone_preferences
-        zone_preferences.Element = AAZObjectArg()
-
-        _element = cls._args_schema.zone_allocation_policy.zone_preferences.Element
-        _element.rank = AAZIntArg(
-            options=["rank"],
-            help="The rank of the zone. This is used with 'Prioritized' ZoneDistributionStrategy. The lower the number, the higher the priority, starting with 0. 0 is the highest rank. If not specified, defaults to lowest rank.",
-            fmt=AAZIntArgFormat(
-                maximum=65535,
-                minimum=0,
-            ),
-        )
-        _element.zone = AAZStrArg(
-            options=["zone"],
-            help="Name of the zone.",
-            required=True,
         )
 
         # define Arg Group "Resource"
@@ -978,9 +943,7 @@ class Create(AAZCommand):
         os_profile.admin_password = AAZPasswordArg(
             options=["admin-password"],
             help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please provide VMSS password:", "confirm": True}},
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
@@ -997,9 +960,7 @@ class Create(AAZCommand):
         os_profile.custom_data = AAZPasswordArg(
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please enter VM Password:", "confirm": True}},
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
@@ -1155,9 +1116,7 @@ class Create(AAZCommand):
         _element.content = AAZPasswordArg(
             options=["content"],
             help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
-            blank=AAZPromptPasswordInput(
-               msg="VM Admin Password",
-               confirm=True),
+            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Password:"}},
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
@@ -1737,7 +1696,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -1803,7 +1762,6 @@ class Create(AAZCommand):
                 properties.set_prop("vmAttributes", AAZObjectType, ".vm_attributes")
                 properties.set_prop("vmNamePrefix", AAZStrType, ".vm_name_prefix")
                 properties.set_prop("vmSizesProfile", AAZListType, ".vm_sizes_profile", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("zoneAllocationPolicy", AAZObjectType, ".zone_allocation_policy")
 
             additional_locations_profile = _builder.get(".properties.additionalLocationsProfile")
             if additional_locations_profile is not None:
@@ -1904,20 +1862,6 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("rank", AAZIntType, ".rank")
-
-            zone_allocation_policy = _builder.get(".properties.zoneAllocationPolicy")
-            if zone_allocation_policy is not None:
-                zone_allocation_policy.set_prop("distributionStrategy", AAZStrType, ".distribution_strategy", typ_kwargs={"flags": {"required": True}})
-                zone_allocation_policy.set_prop("zonePreferences", AAZListType, ".zone_preferences")
-
-            zone_preferences = _builder.get(".properties.zoneAllocationPolicy.zonePreferences")
-            if zone_preferences is not None:
-                zone_preferences.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.zoneAllocationPolicy.zonePreferences[]")
-            if _elements is not None:
-                _elements.set_prop("rank", AAZIntType, ".rank")
-                _elements.set_prop("zone", AAZStrType, ".zone", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -2056,9 +2000,6 @@ class Create(AAZCommand):
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
                 flags={"required": True},
-            )
-            properties.zone_allocation_policy = AAZObjectType(
-                serialized_name="zoneAllocationPolicy",
             )
 
             additional_locations_profile = cls._schema_on_200_201.properties.additional_locations_profile
@@ -2230,24 +2171,6 @@ class Create(AAZCommand):
                 flags={"required": True},
             )
             _element.rank = AAZIntType()
-
-            zone_allocation_policy = cls._schema_on_200_201.properties.zone_allocation_policy
-            zone_allocation_policy.distribution_strategy = AAZStrType(
-                serialized_name="distributionStrategy",
-                flags={"required": True},
-            )
-            zone_allocation_policy.zone_preferences = AAZListType(
-                serialized_name="zonePreferences",
-            )
-
-            zone_preferences = cls._schema_on_200_201.properties.zone_allocation_policy.zone_preferences
-            zone_preferences.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.properties.zone_allocation_policy.zone_preferences.Element
-            _element.rank = AAZIntType()
-            _element.zone = AAZStrType(
-                flags={"required": True},
-            )
 
             system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
