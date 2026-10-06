@@ -65,7 +65,7 @@ TEST_REPOSITORY = 'testrepository'
 
 class AcrMockCommandsTests(unittest.TestCase):
 
-    @mock.patch('azure.cli.command_modules.acr.scope_map.logger')
+    @mock.patch('azure.cli.command_modules.acr._utils.logger')
     @mock.patch(
         'azure.cli.command_modules.acr.scope_map.'
         'get_resource_group_name_by_registry_name'
