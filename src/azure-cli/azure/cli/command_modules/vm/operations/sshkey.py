@@ -67,6 +67,9 @@ class SSHKeyCreate(_SSHKeyCreate):
             file.write(key_pair["privateKey"])
         logger.warning('Private key is saved to "%s".', private_key_file)
 
-        with open(public_key_file, "w", newline="\n") as file:
+        # Same exclusive-create protection as the private key: the timestamp-derived filename is
+        # predictable, so a pre-planted file/symlink at this path must not be silently followed.
+        public_key_fd = os.open(public_key_file, flags=os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode=0o644)
+        with os.fdopen(public_key_fd, "w", newline="\n") as file:
             file.write(key_pair["publicKey"])
         logger.warning('Public key is saved to "%s".', public_key_file)
