@@ -512,7 +512,7 @@ def _make_directory_in_files_share(file_service, directory_path, existing_dirs=N
 
     parents = [directory_path]
     p = os.path.dirname(directory_path)
-    while p:
+    while p and p != parents[-1]:
         parents.append(p)
         p = os.path.dirname(p)
 
