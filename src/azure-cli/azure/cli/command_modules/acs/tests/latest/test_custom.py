@@ -1349,8 +1349,6 @@ class AcsCustomCommandTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
     def test_aks_install_desktop_archive_rejects_unsafe_members(self):
         cases = [
-            [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
-             ('dir/foo/../../outside', tarfile.REGTYPE, '')],
             [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
              ('dir/link', tarfile.REGTYPE, '')],
             [('../outside', tarfile.REGTYPE, '')],
@@ -1382,6 +1380,34 @@ class AcsCustomCommandTest(unittest.TestCase):
                         self.assertEqual(sentinel.read(), b'unchanged')
                     for name in ('pipe', 'device', 'unknown', 'aks-desktop'):
                         self.assertFalse(os.path.lexists(os.path.join(destination, name)))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_contains_parent_symlink_paths(self):
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                outside = os.path.join(temp_dir, 'outside')
+                normalized_path = os.path.join(destination, 'outside')
+                with open(outside, 'wb') as sentinel:
+                    sentinel.write(b'unchanged')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('dir', tarfile.DIRTYPE, ''),
+                    ('dir/foo', tarfile.SYMTYPE, '.'),
+                    ('dir/foo/../../outside', tarfile.REGTYPE, ''),
+                ])
+                # CPython gh-155999 normalizes '..' before resolving symlinks; older filters reject this path.
+                try:
+                    _extract_aks_desktop_archive(archive_path, destination)
+                except FileOperationError:
+                    self.assertFalse(os.path.lexists(normalized_path))
+                else:
+                    self.assertFalse(fallback)
+                    with open(normalized_path, 'rb') as executable:
+                        self.assertEqual(executable.read(), b'executable')
+                with open(outside, 'rb') as sentinel:
+                    self.assertEqual(sentinel.read(), b'unchanged')
 
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
     def test_aks_install_desktop_archive_rejects_existing_escaping_symlinks(self):
