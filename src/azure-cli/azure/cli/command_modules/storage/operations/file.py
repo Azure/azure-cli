@@ -512,7 +512,8 @@ def _make_directory_in_files_share(file_service, directory_path, existing_dirs=N
 
     parents = [directory_path]
     p = os.path.dirname(directory_path)
-    while p and p != parents[-1]:
+    # Stop once p reaches the root (dirname(p) == p), so the share root is never queued for creation
+    while p and p != os.path.dirname(p):
         parents.append(p)
         p = os.path.dirname(p)
 
