@@ -1316,19 +1316,19 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @contextmanager
     def _aks_desktop_archive_extractor(self, fallback):
-        if fallback:
-            # Match the old API: accepting filter= must fail, and an unfiltered call is never safe.
-            def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
-                raise AssertionError('The compatibility extractor must not call extractall')
+        def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
+            raise AssertionError('The compatibility extractor must not call extractall')
 
+        if fallback:
             with mock.patch.object(tarfile, 'data_filter', None, create=True), \
                     mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall):
                 yield
         else:
             if not hasattr(tarfile, 'data_filter'):
                 self.skipTest('Native tar extraction filters unavailable')
-            # Exercise pre-3.14 defaults even on newer Python.
-            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+            # Exercise both filter API states; extraction always uses the strict CLI validator.
+            with mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall), \
+                    mock.patch.object(tarfile.TarFile, 'extraction_filter',
                                    staticmethod(lambda member, path: member), create=True):
                 yield
 
@@ -1349,6 +1349,8 @@ class AcsCustomCommandTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
     def test_aks_install_desktop_archive_rejects_unsafe_members(self):
         cases = [
+            [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
+             ('dir/foo/../../../outside', tarfile.REGTYPE, '')],
             [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
              ('dir/link', tarfile.REGTYPE, '')],
             [('../outside', tarfile.REGTYPE, '')],
@@ -1382,30 +1384,25 @@ class AcsCustomCommandTest(unittest.TestCase):
                         self.assertFalse(os.path.lexists(os.path.join(destination, name)))
 
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
-    def test_aks_install_desktop_archive_contains_parent_symlink_paths(self):
+    def test_aks_install_desktop_archive_contains_normalized_traversal(self):
+        name = 'dir/foo/../../outside'
         for fallback in (False, True):
             with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
                     tempfile.TemporaryDirectory() as temp_dir:
                 archive_path = os.path.join(temp_dir, 'installer.tar.gz')
                 destination = os.path.join(temp_dir, 'install')
                 outside = os.path.join(temp_dir, 'outside')
-                normalized_path = os.path.join(destination, 'outside')
                 with open(outside, 'wb') as sentinel:
                     sentinel.write(b'unchanged')
                 self._write_aks_desktop_archive(archive_path, [
                     ('dir', tarfile.DIRTYPE, ''),
                     ('dir/foo', tarfile.SYMTYPE, '.'),
-                    ('dir/foo/../../outside', tarfile.REGTYPE, ''),
+                    (name, tarfile.REGTYPE, ''),
                 ])
-                # CPython gh-155999 normalizes '..' before resolving symlinks; older filters reject this path.
-                try:
+                # The CLI validator rejects this path even when tarfile would normalize it.
+                with self.assertRaisesRegex(FileOperationError, 'Archive path escapes the extraction directory'):
                     _extract_aks_desktop_archive(archive_path, destination)
-                except FileOperationError:
-                    self.assertFalse(os.path.lexists(normalized_path))
-                else:
-                    self.assertFalse(fallback)
-                    with open(normalized_path, 'rb') as executable:
-                        self.assertEqual(executable.read(), b'executable')
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'outside')))
                 with open(outside, 'rb') as sentinel:
                     self.assertEqual(sentinel.read(), b'unchanged')
 
