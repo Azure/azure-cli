@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "relay cluster skus",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Skus
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

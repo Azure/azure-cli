@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "relay namespace private-endpoint-connection",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Private Endpoint Connection
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

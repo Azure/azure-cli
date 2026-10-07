@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "relay namespace network-rule-set",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Network Rule Set
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

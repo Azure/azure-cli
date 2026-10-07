@@ -8,3 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "relay namespace private-link-resource",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Private Link Resource
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
