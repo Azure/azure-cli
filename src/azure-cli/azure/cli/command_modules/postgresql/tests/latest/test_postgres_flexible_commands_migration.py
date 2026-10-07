@@ -10,22 +10,31 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
+    ResourceGroupPreparer,
     ScenarioTest)
+from .constants import DEFAULT_LOCATION
+from .server_preparer import ServerPreparer
 
 logger = get_logger(__name__)
 
 
 class MigrationScenarioTest(ScenarioTest):
 
+    postgres_location = DEFAULT_LOCATION
+
     @AllowLargeResponse()
-    def test_postgres_flexible_server_migration(self):
-        self._test_server_migration("28a8040d-4599-4e87-9c9e-bbab9fad6417")
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(location=postgres_location)
+    def test_postgres_flexible_server_migration(self, resource_group, server):
+        self._test_server_migration(resource_group, server, "e2c2bc23-0582-4bd7-b174-621067f6cda2")
 
-    def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise(True, "179c42a8-d048-41ca-8ae0-c64b8ce5634c")
-        self._test_server_migration_onpremise(False, "57dbbd67-5201-469b-b1a9-5dc5d108ff27")
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(location=postgres_location)
+    def test_postgres_flexible_server_onpremise_migration(self, resource_group, server):
+        self._test_server_migration_onpremise(resource_group, server, True, "0879c230-c6e2-47f9-a3ad-50f21f88ff05")
+        self._test_server_migration_onpremise(resource_group, server, False, "48cfb249-00a1-4429-a5d4-54effa84d785")
 
-    def _test_server_migration(self, migration_name=None):
+    def _test_server_migration(self, resource_group, server, migration_name=None):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
         livemode = os.environ.get(ENV_LIVE_TEST, False)
@@ -38,12 +47,10 @@ class MigrationScenarioTest(ScenarioTest):
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
 
-        target_resource_group_name = "autobot-resourcegroup"
-        target_server_name = "autobot-e2e-pg-fs-canadacentral"
+        target_resource_group_name = resource_group
+        target_server_name = server
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationPublic.json').replace('\\', '\\\\')
-
-        print(target_subscription_id)
 
         # Test check migration name availability -success
         result = self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --server-name {} --name {} '
@@ -77,7 +84,7 @@ class MigrationScenarioTest(ScenarioTest):
         result = self.cmd('postgres flexible-server migration update --subscription {} --resource-group {} --server-name {} --name {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name), expect_failure=True)
 
-    def _test_server_migration_onpremise(self, validateOnly=False, migration_name=None):
+    def _test_server_migration_onpremise(self, resource_group, server, validateOnly=False, migration_name=None):
         # Set this to True or False depending on whether we are in live mode or test mode
         # livemode = True
         livemode = os.environ.get(ENV_LIVE_TEST, False)
@@ -94,12 +101,10 @@ class MigrationScenarioTest(ScenarioTest):
         if validateOnly:
             migration_option = "Validate"
 
-        target_resource_group_name = "autobot-resourcegroup"
-        target_server_name = "autobot-e2e-pg-fs-canadacentral"
+        target_resource_group_name = resource_group
+        target_server_name = server
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationOnPremise.json').replace('\\', '\\\\')
-
-        print(target_subscription_id)
 
         # Test check migration name availability -success
         self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --server-name {} --name {} '

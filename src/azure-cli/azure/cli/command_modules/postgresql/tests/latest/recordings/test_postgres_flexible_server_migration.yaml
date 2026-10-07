@@ -7,28 +7,25 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - postgres flexible-server migration check-name-availability
+      - postgres flexible-server create
       Connection:
       - keep-alive
       ParameterSetName:
-      - --subscription --resource-group --server-name --name
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: ''
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
-      content-type:
-      - application/json; charset=utf-8
+      - '0'
       date:
-      - Mon, 15 Jun 2026 20:48:39 GMT
+      - Wed, 07 Oct 2026 17:30:43 GMT
       expires:
       - '-1'
       pragma:
@@ -39,15 +36,609 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: E34927D72B8A4EA1839A06E32409DB30 Ref B: BL2AA2030101023 Ref C: 2026-06-15T20:48:39Z'
+      - 'Ref A: 53F5893C6A114E51B7E503D9AD7C795A Ref B: SN4AA2022305035 Ref C: 2026-10-07T17:30:44Z'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"canadacentral","tags":{"product":"azurecli","cause":"automation","test":"test_postgres_flexible_server_migration","date":"2026-10-07T17:30:30Z","module":"postgresql"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '388'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:30:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 03AAE560930D43EEB6F162E37031E9BC Ref B: SN4AA2022401031 Ref C: 2026-10-07T17:30:45Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "28a8040d-4599-4e87-9c9e-bbab9fad6417", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/capabilities?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"name":"FlexibleServerCapabilities","supportedServerEditions":[{"supportedServerSkus":[{"supportedFeatures":[],"name":"Standard_B1ms","vCores":1,"supportedIops":640,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B2s","vCores":2,"supportedIops":1280,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B2ms","vCores":2,"supportedIops":1920,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B4ms","vCores":4,"supportedIops":2880,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B8ms","vCores":8,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B12ms","vCores":12,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B16ms","vCores":16,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_B20ms","vCores":20,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}],"name":"Burstable","defaultSkuName":"Standard_B2s","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}]},{"supportedServerSkus":[{"supportedFeatures":[],"name":"Standard_D2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D16s_v3","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D32s_v3","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D48s_v3","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D64s_v3","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D16ds_v4","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D32ds_v4","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D48ds_v4","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D64ds_v4","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D2ads_v5","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D16ads_v5","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D32ads_v5","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D48ads_v5","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D64ads_v5","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D96ads_v5","vCores":96,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D16ds_v5","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D32ds_v5","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D48ds_v5","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D64ds_v5","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_D96ds_v5","vCores":96,"supportedIops":80000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}],"name":"GeneralPurpose","defaultSkuName":"Standard_D4ads_v5","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]},{"name":"UltraDisk","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":4800,"supportedMaximumIops":400000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":1200,"supportedMaximumThroughput":10000,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}]},{"supportedServerSkus":[{"supportedFeatures":[],"name":"Standard_E2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E16s_v3","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E32s_v3","vCores":32,"supportedIops":32000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E48s_v3","vCores":48,"supportedIops":51200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E64s_v3","vCores":64,"supportedIops":76800,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E16ds_v4","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E20ds_v4","vCores":20,"supportedIops":32000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E32ds_v4","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E48ds_v4","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E64ds_v4","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E2ads_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E16ads_v5","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E20ads_v5","vCores":20,"supportedIops":32000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E32ads_v5","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E48ads_v5","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E64ads_v5","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E96ads_v5","vCores":96,"supportedIops":80000,"supportedMemoryPerVcoreMb":7168,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E16ds_v5","vCores":16,"supportedIops":25600,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E20ds_v5","vCores":20,"supportedIops":32000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E32ds_v5","vCores":32,"supportedIops":51200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E48ds_v5","vCores":48,"supportedIops":76800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E64ds_v5","vCores":64,"supportedIops":80000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"supportedFeatures":[],"name":"Standard_E96ds_v5","vCores":96,"supportedIops":80000,"supportedMemoryPerVcoreMb":7168,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}],"name":"MemoryOptimized","defaultSkuName":"Standard_E4ads_v5","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]},{"name":"ManagedDiskV2","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":3000,"supportedMaximumIops":80000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":125,"supportedMaximumThroughput":1200,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]},{"name":"UltraDisk","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":4800,"supportedMaximumIops":400000,"storageSizeMb":32768,"maximumStorageSizeMb":67108864,"supportedThroughput":1200,"supportedMaximumThroughput":10000,"defaultIopsTier":"None","supportedIopsTiers":[{"name":"None","iops":0}]}]}]}],"supportedServerVersions":[{"supportedFeatures":[],"name":"11","supportedVersionsToUpgrade":["12","13","14","15","16","17","18"]},{"supportedFeatures":[],"name":"12","supportedVersionsToUpgrade":["13","14","15","16","17","18"]},{"supportedFeatures":[],"name":"13","supportedVersionsToUpgrade":["14","15","16","17","18"]},{"supportedFeatures":[],"name":"14","supportedVersionsToUpgrade":["15","16","17","18"]},{"supportedFeatures":[],"name":"15","supportedVersionsToUpgrade":["16","17","18"]},{"supportedFeatures":[],"name":"16","supportedVersionsToUpgrade":["17","18"]},{"supportedFeatures":[],"name":"17","supportedVersionsToUpgrade":["18"]},{"supportedFeatures":[],"name":"18","supportedVersionsToUpgrade":[]}],"supportedFastProvisioningEditions":[],"supportedFeatures":[{"name":"FastProvisioning","status":"Disabled"},{"name":"ZoneRedundantHa","status":"Enabled"},{"name":"GeoBackup","status":"Enabled"},{"name":"ZoneRedundantHaAndGeoBackup","status":"Enabled"},{"name":"StorageAutoGrowth","status":"Enabled"},{"name":"OnlineResize","status":"Enabled"},{"name":"OfferRestricted","status":"Disabled"},{"name":"IndexTuning","status":"Enabled"},{"name":"Clusters","status":"Enabled"},{"name":"AdaptiveAutoVacuumAutoApply","status":"Enabled"},{"name":"ConfigTuning","status":"Disabled"}],"fastProvisioningSupported":"Disabled","geoBackupSupported":"Enabled","zoneRedundantHaSupported":"Enabled","zoneRedundantHaAndGeoBackupSupported":"Enabled","storageAutoGrowthSupported":"Enabled","onlineResizeSupported":"Enabled","indexTuningSupported":"Enabled"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '24490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:30:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/6fbb309a-8067-42d6-b035-60dd28edaab1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A72A570DE20C458EAB6B2EAAFADF5E3C Ref B: SN4AA2022403023 Ref C: 2026-10-07T17:30:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "azuredbclitest-000002", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '86'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/checkNameAvailability?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers","nameAvailable":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '117'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:30:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/2e4f3033-d211-4a24-8177-57a5a7ac0120
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 4A9F69E7AE334F01BB16B7817FD70076 Ref B: SN4AA2022401009 Ref C: 2026-10-07T17:30:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "canadacentral", "sku": {"name": "Standard_D4ds_v5", "tier":
+      "GeneralPurpose"}, "properties": {"highAvailability": {"mode": "Disabled"},
+      "authConfig": {"activeDirectoryAuth": "Disabled", "passwordAuth": "Enabled"},
+      "storage": {"storageSizeGB": 128, "autoGrow": "Disabled"}, "backup": {"backupRetentionDays":
+      7, "geoRedundantBackup": "Disabled"}, "createMode": "Create", "administratorLogin":
+      "mildlizard5", "version": "17", "network": {"publicNetworkAccess": "Disabled"},
+      "administratorLoginPassword": "KUdNL0kvYZIcJXFsNamgcw"}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '541'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:31:11 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/operationResults/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717797419&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=Mvm5g8DzSiyFBVGovEgnNoUh5Lhe-Bwt5wFjL5vCMSoqrGEixWifWOJLueId0zg1qBVtV1DbKYFiE8yn_iLDnBWxIofItf1mT9IJMTcklPFK2g7CbUIOsOYK18x1j1M4prahBMnchdHgXJ7IMm2iRn7EZvRf1nTLoChMnWlo7w-m5xh7IafQ8AGJdK3QWme0klz7CXUDiXycwbGHw0wPcovjGmkcaZpTs3H2FK-zXQONa8h2z8ikYAZNffLKEcT7bhQfxg4fvq2BksgiM5MgGen4b4J3puHvow2D1DnMrLT3GN57M_vLOlruyRRmDENSBy9rLqgwj62s5Q1uNpB8zQ&h=UB1ykpoe4Uz0dr90j-zDsdt01aTfEyfDv0ecyJGruK4
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/f57af9b4-0af1-41ea-98f8-b9600fa4bb8f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 612CA5BB033B41A1AB2E87D80227DDC5 Ref B: SN4AA2022403031 Ref C: 2026-10-07T17:31:10Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"InProgress","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:31:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/0626e3f2-90d3-466c-9ca1-70bdb569d2d0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2F7BC3B1C8BE4702BF4C762CB23ECC3F Ref B: SN4AA2022401021 Ref C: 2026-10-07T17:31:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"InProgress","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:32:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/dbd16980-d6f3-4f3c-958e-a85831f4e914
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CEF41FB9AA684BE6AE293114F2033E69 Ref B: SN4AA2022301035 Ref C: 2026-10-07T17:32:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"InProgress","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:33:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/552d5f75-5187-4967-b262-87bae0103045
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7CD87F2DB6454B60AF032CB8BD9CBF8A Ref B: SN4AA2022401051 Ref C: 2026-10-07T17:33:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"InProgress","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:34:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/06b598e5-7334-4b5c-9623-3a66cebbef69
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E090EB5FF65C4874AC737280D94BAF30 Ref B: SN4AA2022401011 Ref C: 2026-10-07T17:34:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"InProgress","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:36:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/24c9c284-f487-412c-9fe7-8063775f7bf3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 76E62472BA3449F7B36D1DCFBEFEFB59 Ref B: SN4AA2022304031 Ref C: 2026-10-07T17:36:09Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/canadacentral/azureAsyncOperation/781c4597-78ec-484d-a682-25e09966a6c2?api-version=2026-07-01-preview&t=639269910717641245&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=mut93acRictLVmt4gxmJm9VHZJkxWJiowuybWlinXtR5GavJeAbGm_biM0ZEddkbSoLSqn-uuZKG77QhzzNkABoricuPvtW5hM9ml6WG_ZiLTR1_kC64rzPQVLQafYisaY3Qcz6AEf4wPItYtjAGvORggGy8s9BbGwA-h9DbcTOsBLPpDiaIk0KeZmCFDSGucfFnY_gFPvlUhzXznNR8Vp2mGPjkHGBro9RnLbqK05n7TDdGJvu2-yQEo22qyFMiKLxoX4OcOr7T2NG3wxLQOsOQZ5FQqtZ21QxjMXK7MQzqkhuHmgpjH9CQd1rW0Fs7YAJur2qsHUOrbo_gfEmFzg&h=uXD4Ubx7JQQivUcv3v2TP-Gd7X7M-VO2olv2sAXNNdg
+  response:
+    body:
+      string: '{"name":"781c4597-78ec-484d-a682-25e09966a6c2","status":"Succeeded","startTime":"2026-10-07T17:31:11.693Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/b37cc42b-78a9-4ad8-b034-6191551229df
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 26EB4F371EAA4EB4A04D9A5BE6B9FAC8 Ref B: SN4AA2022403009 Ref C: 2026-10-07T17:37:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku-name --tier --storage-size --version -l --public-access --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1246'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 150A1E1ACABF41C5BF847AA9BB289F4B Ref B: SN4AA2022402009 Ref C: 2026-10-07T17:37:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration check-name-availability
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --server-name --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1246'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CC25BD93DB834E848EA2D10F8474A5E4 Ref B: SN4AA2022401047 Ref C: 2026-10-07T17:37:13Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "e2c2bc23-0582-4bd7-b174-621067f6cda2", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
       - application/json
@@ -64,12 +655,12 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/checkMigrationNameAvailability?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/checkMigrationNameAvailability?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"name":"28a8040d-4599-4e87-9c9e-bbab9fad6417","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"e2c2bc23-0582-4bd7-b174-621067f6cda2","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
@@ -78,7 +669,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:40 GMT
+      - Wed, 07 Oct 2026 17:37:14 GMT
       expires:
       - '-1'
       pragma:
@@ -90,13 +681,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/b168cc52-783f-4fe0-ba7a-feeb9641620f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/d3f576e2-9861-4e48-8422-091c04e21ae9
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
-      x-ms-throttling-version:
-      - v2
       x-msedge-ref:
-      - 'Ref A: A21F985128B34B08827214F2D4030C1C Ref B: BL2AA2010204035 Ref C: 2026-06-15T20:48:40Z'
+      - 'Ref A: 300BA3116CCE4FAA8252B8BDA138CA04 Ref B: SN4AA2022401017 Ref C: 2026-10-07T17:37:14Z'
     status:
       code: 200
       message: OK
@@ -114,22 +705,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name --properties
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:41 GMT
+      - Wed, 07 Oct 2026 17:37:15 GMT
       expires:
       - '-1'
       pragma:
@@ -140,10 +731,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 23DEDA4BA0F1413D981B6F94259CE3BF Ref B: BL2AA2010204039 Ref C: 2026-06-15T20:48:41Z'
+      - 'Ref A: CDC242F2409043A39675225C787D94C5 Ref B: SN4AA2022403011 Ref C: 2026-10-07T17:37:15Z'
     status:
       code: 200
       message: OK
@@ -161,9 +752,9 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name --properties
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: HEAD
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
       string: ''
@@ -173,7 +764,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 15 Jun 2026 20:48:41 GMT
+      - Wed, 07 Oct 2026 17:37:16 GMT
       expires:
       - '-1'
       pragma:
@@ -184,10 +775,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 6E6A060776B44697A00F17401299E67A Ref B: BL2AA2010204023 Ref C: 2026-06-15T20:48:42Z'
+      - 'Ref A: EC30FFCF186044299C57DB1CE7BDF78C Ref B: SN4AA2022402027 Ref C: 2026-10-07T17:37:16Z'
     status:
       code: 204
       message: No Content
@@ -205,21 +796,21 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name --properties
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/autobot-resourcegroup?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup","name":"autobot-resourcegroup","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"canadacentral","tags":{"product":"azurecli","cause":"automation","test":"test_postgres_flexible_server_migration","date":"2026-10-07T17:30:30Z","module":"postgresql"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '244'
+      - '388'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:42 GMT
+      - Wed, 07 Oct 2026 17:37:17 GMT
       expires:
       - '-1'
       pragma:
@@ -233,17 +824,18 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: C4C7B85878AB4E72B971EDCE14C9BACA Ref B: MNZ221060609023 Ref C: 2026-06-15T20:48:42Z'
+      - 'Ref A: 8504ABBBD70940EABB11A3007A43A427 Ref B: SN4AA2022402011 Ref C: 2026-10-07T17:37:17Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus2euap", "properties": {"overwriteDbsInTarget": "True",
-      "migrationOption": "ValidateAndMigrate", "secretParameters": {"adminCredentials":
+    body: '{"location": "canadacentral", "properties": {"migrationMode": "offline",
+      "migrationOption": "ValidateAndMigrate", "overwriteDbsInTarget": "True", "sourceDbServerResourceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss",
+      "setupLogicalReplicationOnSourceDbIfNeeded": "False", "secretParameters": {"adminCredentials":
       {"sourceServerPassword": "XXXXXXXXX", "targetServerPassword": "XXXXXXXXX"},
       "sourceServerUsername": "autobot@autobot-orcas-postgresql-ss", "targetServerUsername":
-      "portaltestuser"}, "migrationMode": "offline", "setupLogicalReplicationOnSourceDbIfNeeded":
-      "False", "dbsToMigrate": ["postgres"], "sourceDbServerResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss"}}'
+      "portaltestuser"}, "dbsToMigrate": ["postgres"]}}'
     headers:
       Accept:
       - application/json
@@ -254,27 +846,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '656'
+      - '658'
       Content-Type:
       - application/json
       ParameterSetName:
       - --subscription --resource-group --server-name --name --properties
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/28a8040d-4599-4e87-9c9e-bbab9fad6417?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations/e2c2bc23-0582-4bd7-b174-621067f6cda2?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"0582df37-111e-47b2-ad06-4cfe2c9104a3","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:44.0404022Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"eastus2euap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/28a8040d-4599-4e87-9c9e-bbab9fad6417","name":"28a8040d-4599-4e87-9c9e-bbab9fad6417","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"976398fb-9dfd-4869-add0-fed29fa1676e","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-10-07T17:37:19.2424726Z","triggerCutover":"True","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"canadacentral","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations/e2c2bc23-0582-4bd7-b174-621067f6cda2","name":"e2c2bc23-0582-4bd7-b174-621067f6cda2","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1197'
+      - '1169'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:43 GMT
+      - Wed, 07 Oct 2026 17:37:18 GMT
       expires:
       - '-1'
       pragma:
@@ -286,13 +878,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/dce877cf-245e-44db-95c0-a1369afd46be
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/6e31f052-18fa-4b3e-9d68-b963e3b018ff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
-      x-ms-throttling-version:
-      - v2
       x-msedge-ref:
-      - 'Ref A: 29D086D44676452D9A8CE4796F6E7390 Ref B: BL2AA2010204009 Ref C: 2026-06-15T20:48:43Z'
+      - 'Ref A: 3BCF2720A0594046962D429E3FDBACE8 Ref B: SN4AA2022402035 Ref C: 2026-10-07T17:37:18Z'
     status:
       code: 201
       message: Created
@@ -310,22 +902,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --filter
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:44 GMT
+      - Wed, 07 Oct 2026 17:37:19 GMT
       expires:
       - '-1'
       pragma:
@@ -336,10 +928,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 1C944715593140BD874ABF428F063C3D Ref B: BL2AA2010205027 Ref C: 2026-06-15T20:48:44Z'
+      - 'Ref A: 490639538F5347E986CDCD71C0FCF79C Ref B: SN4AA2022401009 Ref C: 2026-10-07T17:37:20Z'
     status:
       code: 200
       message: OK
@@ -357,107 +949,9 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --filter
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations?api-version=2026-04-01-preview&migrationListFilter=Active
-  response:
-    body:
-      string: '{"value":[{"properties":{"migrationId":"7b562ed1-8dc6-4162-b721-373a1e0878f3","currentStatus":{"state":"CleaningUp","error":"There
-        is already an active Migration Running on this target.","currentSubStateDetails":{"currentSubState":"CompletingMigration","dbDetails":{}}},"migrationMode":"Offline","sourceDbServerResourceId":"20.66.25.58:5432@postgres","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:43.6880696Z","triggerCutover":"True","migrateRoles":"False","targetDbServerMetadata":{"location":"Canada
-        Central","version":"16","storageMb":32768,"sku":{"name":"Standard_B1ms","tier":"Burstable"}},"migrationOption":"Validate","sourceType":"OnPremises","sslMode":"Prefer"},"location":"Canada
-        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/179c42a8-d048-41ca-8ae0-c64b8ce5634c","name":"179c42a8-d048-41ca-8ae0-c64b8ce5634c","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1352'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2026 20:48:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/22a3c0a6-d109-4c57-a057-a8f92e080bd7
-      x-ms-throttling-version:
-      - v2
-      x-msedge-ref:
-      - 'Ref A: C330FB3DB24644EFB6B8491FAAE9B989 Ref B: BL2AA2010204053 Ref C: 2026-06-15T20:48:45Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server migration list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription --resource-group --server-name
-      User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1344'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2026 20:48:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-throttling-version:
-      - v2
-      x-msedge-ref:
-      - 'Ref A: 4551FB04301A4B1CB0DADFD86E3F9A7D Ref B: BL2AA2010204051 Ref C: 2026-06-15T20:48:46Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server migration list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription --resource-group --server-name
-      User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations?api-version=2026-04-01-preview&migrationListFilter=Active
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations?api-version=2026-07-01-preview&migrationListFilter=Active
   response:
     body:
       string: '{"value":[]}'
@@ -469,7 +963,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:46 GMT
+      - Wed, 07 Oct 2026 17:37:21 GMT
       expires:
       - '-1'
       pragma:
@@ -481,11 +975,106 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/65398474-3e19-45c6-8d87-3da1a70e144e
-      x-ms-throttling-version:
-      - v2
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/227df831-5757-4f59-84ff-c9d1805e5bc1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 4FEB730D699540AFA17570A82F0792FC Ref B: BL2AA2030101053 Ref C: 2026-06-15T20:48:47Z'
+      - 'Ref A: 5B879F6D956B406A80DD779000A1A864 Ref B: SN4AA2022403051 Ref C: 2026-10-07T17:37:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --server-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1246'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0064196369F647D7833BB037B196BA92 Ref B: SN4AA2022303017 Ref C: 2026-10-07T17:37:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server migration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --resource-group --server-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations?api-version=2026-07-01-preview&migrationListFilter=Active
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/f3d50907-eb75-4acf-9b6e-773859e5fa3a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2B8EEEC98A394E09ADF02F532BA5D83A Ref B: SN4AA2022305017 Ref C: 2026-10-07T17:37:22Z'
     status:
       code: 200
       message: OK
@@ -503,22 +1092,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:47 GMT
+      - Wed, 07 Oct 2026 17:37:23 GMT
       expires:
       - '-1'
       pragma:
@@ -529,10 +1118,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: B1BA00FE1C8B431CB6590C69842B5523 Ref B: MNZ221060610039 Ref C: 2026-06-15T20:48:47Z'
+      - 'Ref A: 2C68AB6C6B8A40ACA9DD296794586B66 Ref B: SN4AA2022304033 Ref C: 2026-10-07T17:37:23Z'
     status:
       code: 200
       message: OK
@@ -550,24 +1139,24 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/28a8040d-4599-4e87-9c9e-bbab9fad6417?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations/e2c2bc23-0582-4bd7-b174-621067f6cda2?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"0582df37-111e-47b2-ad06-4cfe2c9104a3","currentStatus":{"state":"Failed","error":"S0004:
-        Failed to fetch source server details. Please make sure source server is in
-        available state and is accepting connections, before retrying the migration.","currentSubStateDetails":{"currentSubState":"Completed","dbDetails":{}}},"migrationMode":"Offline","migrationWindowEndTimeInUtc":"2026-06-15T20:48:45.4018009Z","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-06-15T20:48:44.0404022Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"Canada
-        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral/migrations/28a8040d-4599-4e87-9c9e-bbab9fad6417","name":"28a8040d-4599-4e87-9c9e-bbab9fad6417","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"976398fb-9dfd-4869-add0-fed29fa1676e","currentStatus":{"state":"Failed","error":"DB002:
+        Migration failed. Please reference MigrationId 976398fb-9dfd-4869-add0-fed29fa1676e,
+        when contacting Microsoft customer support.","currentSubStateDetails":{"currentSubState":"Completed","dbDetails":{}}},"migrationMode":"Offline","migrationWindowEndTimeInUtc":"2026-10-07T17:37:20.8744354Z","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","dbsToMigrate":["postgres"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2026-10-07T17:37:19.2424726Z","triggerCutover":"True","migrateRoles":"False","migrationOption":"ValidateAndMigrate","sourceType":"PostgreSQLSingleServer","sslMode":"VerifyFull"},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/migrations/e2c2bc23-0582-4bd7-b174-621067f6cda2","name":"e2c2bc23-0582-4bd7-b174-621067f6cda2","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1522'
+      - '1468'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:47 GMT
+      - Wed, 07 Oct 2026 17:37:24 GMT
       expires:
       - '-1'
       pragma:
@@ -579,11 +1168,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/eastus2euap/8134f5d0-d558-41a2-8d3f-aaef27e2caf9
-      x-ms-throttling-version:
-      - v2
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/8452d7c3-1e18-40e9-96b2-46023f875df4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: C897EC723115427F8A8E774A987F8A14 Ref B: BL2AA2010205045 Ref C: 2026-06-15T20:48:48Z'
+      - 'Ref A: E43A5AF1AFC14320B109D5DF921E5A1C Ref B: SN4AA2022303017 Ref C: 2026-10-07T17:37:24Z'
     status:
       code: 200
       message: OK
@@ -601,22 +1190,22 @@ interactions:
       ParameterSetName:
       - --subscription --resource-group --server-name --name
       User-Agent:
-      - AZURECLI/2.87.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral?api-version=2026-04-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_B1ms","tier":"Burstable"},"systemData":{"createdAt":"2026-06-15T20:16:25.1004083Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"storage":{"type":"","iops":120,"tier":"P4","storageSizeGB":32,"autoGrow":"Disabled"},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"autobot-e2e-pg-fs-canadacentral.postgres.database.azure.com","version":"16","minorVersion":"14","administratorLogin":"pgadmin","state":"Ready","availabilityZone":"3","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2026-06-15T20:29:00.2055827+00:00"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Enabled","dayOfWeek":2,"startHour":12,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
-        Central","tags":{"do-not-delete":"true","purpose":"e2e-tests","created-by":"copilot-cli"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/autobot-resourcegroup/providers/Microsoft.DBforPostgreSQL/flexibleServers/autobot-e2e-pg-fs-canadacentral","name":"autobot-e2e-pg-fs-canadacentral","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D4ds_v5","tier":"GeneralPurpose"},"systemData":{"createdAt":"2026-10-07T17:31:27.7012751Z"},"properties":{"storage":{"type":"Premium_LRS","iops":500,"tier":"P10","storageSizeGB":128,"autoGrow":"Disabled"},"backup":{"immutableBackup":"Disabled","backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"fipsMode":"Disabled","dataEncryption":{"type":"SystemManaged"},"replica":{"role":"Primary","capacity":5},"network":{"publicNetworkAccess":"Disabled"},"privateEndpointConnections":[],"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000002.postgres.database.azure.com","version":"17","minorVersion":"11","administratorLogin":"mildlizard5","state":"Ready","availabilityZone":"3","highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"Canada
+        Central","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002","name":"azuredbclitest-000002","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1344'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2026 20:48:48 GMT
+      - Wed, 07 Oct 2026 17:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -627,10 +1216,306 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-throttling-version:
-      - v2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 3EA64CEB3CA54F379005A44AE0A86167 Ref B: BL2AA2010204045 Ref C: 2026-06-15T20:48:49Z'
+      - 'Ref A: DD3ECC0B6AAA4C58920F92A0633DDABB Ref B: SN4AA2022301019 Ref C: 2026-10-07T17:37:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"operation":"DropServerManagementOperation","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+      cache-control:
+      - no-cache
+      content-length:
+      - '83'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:26 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/operationResults/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470167329&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=UoNiZOe39yJ8Kq_jmudNJpttVw1e6WiVSgqcJaKWL3nOZP05ALCpq3bThm8JfhdipmHFKFrTPb8tXKuiRzwFO-Jc97Xh7Cg3Ni5HfyDHJxysTUXz9kxVlxBrw4UbMcJPA4eJphcqMnN4ke74OhXscf258zCLFIK_PKzHqkZA_B2lJ_fbJhJzSJN4fyfEkNdnY2CRI50bsr4hf12MxKqi6KMNXTcwcbLN_Dxx7m7UlFD9-mbYLkYmPEZBrp0_txiEWXe8lnDUh1fAN-9JhfGKEPXTER3ZHvET9dqFRAFGU-XXtqy8VF4Mw7-G_jT2ZTqv54xxInMWC6R2m9Qacvs3tA&h=G3aA8fBF2PYPeRFw0z3Q2riLtpbL92uz2hic-EfC-jM
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/canadacentral/1346a00b-6fbc-4889-ba0c-8e9d5e09a22f
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: A1F21144A48944669DDE07EE2BAB1B34 Ref B: SN4AA2022403039 Ref C: 2026-10-07T17:37:26Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+  response:
+    body:
+      string: '{"name":"ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea","status":"InProgress","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/c51007ee-a1cb-44d6-bba4-d56dbee52a91
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8ABBF2206BFC49F18C8E652F9FBEE185 Ref B: SN4AA2022403019 Ref C: 2026-10-07T17:37:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+  response:
+    body:
+      string: '{"name":"ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea","status":"InProgress","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/c55b793d-60e3-4435-8bf9-9191b6648d19
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2BD05DA20CA0405D8408A77FFE313908 Ref B: SN4AA2022402019 Ref C: 2026-10-07T17:37:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+  response:
+    body:
+      string: '{"name":"ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea","status":"InProgress","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:37:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/7734e988-f3f8-4f6c-8711-ff45c493a19d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 5E64863C6F0249738CF5F29358B513F4 Ref B: SN4AA2022403019 Ref C: 2026-10-07T17:38:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+  response:
+    body:
+      string: '{"name":"ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea","status":"InProgress","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:38:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/b445a4f8-cbc1-4227-a314-289ec0aea4c5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 9E1D928045C9495FB841EB96EFC3570C Ref B: SN4AA2022301045 Ref C: 2026-10-07T17:38:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.10 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/Canada%20Central/azureAsyncOperation/ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea?api-version=2026-07-01-preview&t=639269914470011072&c=MIIIJjCCBw6gAwIBAgIQZS8SlDDuLnH2kGEGyOhpIzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIwMTIwM1oXDTI2MTIxMzAyMTIwM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1jHvylHwHh1hum7_I6opgjIwK_-Ks11hTIleGggiNYBGMYgiNB4gWBPUgRsQCUJ95zLdmcP_H0z61DSdD9mR8PKNX2pC5uWP7qkilzYB3V3N9E5lhub5Ct632PPaeZB0LkZfJuBrceyI6Xme9j4PMvn3GdtCXqkjl1aoyqOA7MIqECACpZFmkA0_RV2srwh7hGHce4jpHqCYou8feQ8EC7m1A-PORX0a8x8tJ1xHLMcgjpxq_GUfQxW4oJgyyW3wv53_7hm_scg4Ek_7keTgBz-vGU3SEytlfP0oVyXVnMN1YSz-n9gOZduiWpOD63c4k34ulsWaIOvDtP4UCq3k1AgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTvjOTpql04sMdaqB19tLHMqIa0_TAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzU0L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvNTQvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBACt9eaO7YBXPTiEk_TaOtTyF7LKuKrReugaPedAF1lObovxNpE-kwwmw-qtuAjDcpQMZGymBYb9IjqBrO3_rTBkWFINLQDOavtBoySI81bZDN4vnTTJ7jU7jK1I1sR6Oqbo4j0YYBtWVicXbzpv3cVD6iPzlS52L9W_Zck-lnKEz99KMz5w2hYE2GkDwnNROBPlAxAC9FhU6G8fo5WeZ1b-Rm_XhmsiGFz_9D1CuIRxg6U2wOFm_1mDscJClWJR9a4g8f7-6798p_MRbeNlwFDCrq8BrprLYlh5tw3wE3HxNWPeZvuSPTJmGNdYdKAtzV_g189_AdnjLwIs1tfJvLZc&s=csmYXp8oMjIUmV6uYwQ8aKJgUvDEkiquuuB44HxsEH9gpRrd-WKZLCziygCLlLt7MdcouHTInriTvLHYSsovJ8aJVhJdwhn6Z_OeRJLA14SoquOW4Rcb9PdBXeaXN2AHuYe4gLmKhS2UR1qmdI2RyJaMPBdZWAPOWi6WXGCcD58RFIMiWKVpFLPlwpMNAngi2y8ZxuaMj4x0e6wGM70r62-iSLSW1T2fettiVVOISSzqP44G_tOVD0YroTnjR18QIxYFD1d1uFEGK1efi8LIEVXOvVXRjgoJzKHY1nkkRo6MboopMdjf5iMOMsDIFpK5L1AZW-x24YVZSgjL7UiGwA&h=HB27pEBSvQFTmq7Wqa6974NshHXALtsyFuzGaEQN-qg
+  response:
+    body:
+      string: '{"name":"ea84b1a0-6a95-4227-bbe5-ef642c9ea9ea","status":"Succeeded","startTime":"2026-10-07T17:37:26.97Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 07 Oct 2026 17:38:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=f57d2932-2a78-450f-958a-e65997c3253b/southcentralus/0d270ca8-aae6-45b9-8fdf-babcdd72cd88
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8B0556AADEA8482DBF64BB67DE4B5C39 Ref B: SN4AA2022303035 Ref C: 2026-10-07T17:38:32Z'
     status:
       code: 200
       message: OK
