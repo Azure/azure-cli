@@ -2658,7 +2658,7 @@ def _download_aks_desktop_asset(asset, destination):
 
 
 def _extract_aks_desktop_archive_compat(archive, destination):
-    # Python 3.10.0-3.10.11 and 3.11.0-3.11.3 have no tar extraction filters.
+    # Keep path validation consistent across Python data-filter implementations.
     root = os.path.realpath(destination)
 
     def contained_path(path):
@@ -2746,11 +2746,7 @@ def _extract_aks_desktop_archive(archive_path, destination):
                 # Older data filters resolve these names differently from extraction (CPython gh-149486).
                 if (member.issym() or member.islnk()) and member.name.endswith(('/', '\\')):
                     raise FileOperationError('The AKS Desktop archive contains an unsafe link name.')
-            # Check each member against the filesystem state left by earlier members.
-            if getattr(tarfile, 'data_filter', None) is not None:
-                archive.extractall(destination, filter='data')
-            else:
-                _extract_aks_desktop_archive_compat(archive, destination)
+            _extract_aks_desktop_archive_compat(archive, destination)
     except (OSError, tarfile.TarError) as ex:
         raise FileOperationError(
             'Failed to extract the AKS Desktop archive ({}).'.format(ex))

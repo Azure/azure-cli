@@ -1316,19 +1316,19 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @contextmanager
     def _aks_desktop_archive_extractor(self, fallback):
-        if fallback:
-            # Match the old API: accepting filter= must fail, and an unfiltered call is never safe.
-            def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
-                raise AssertionError('The compatibility extractor must not call extractall')
+        def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
+            raise AssertionError('The compatibility extractor must not call extractall')
 
+        if fallback:
             with mock.patch.object(tarfile, 'data_filter', None, create=True), \
                     mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall):
                 yield
         else:
             if not hasattr(tarfile, 'data_filter'):
                 self.skipTest('Native tar extraction filters unavailable')
-            # Exercise pre-3.14 defaults even on newer Python.
-            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+            # Exercise both filter API states; extraction always uses the strict CLI validator.
+            with mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall), \
+                    mock.patch.object(tarfile.TarFile, 'extraction_filter',
                                    staticmethod(lambda member, path: member), create=True):
                 yield
 
