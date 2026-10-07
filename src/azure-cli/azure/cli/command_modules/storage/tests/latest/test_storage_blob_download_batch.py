@@ -75,11 +75,12 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
     def test_download_batch_rejects_before_downloading_any_blob(self):
         with mock.patch(BLOB_MODULE + '.download_blob', side_effect=_fake_download_blob) as download:
             with self.assertRaises(FileOperationError):
-                with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=['good.txt', '../../evil.txt']):
+                with mock.patch(BLOB_MODULE + '.collect_blobs', return_value=['new/good.txt', '../../evil.txt']):
                     storage_blob_download_batch(mock.Mock(), source='container', destination=self.destination,
                                                 source_container_name='container')
         download.assert_not_called()
         self.assertEqual(self._files_written(), [])
+        self.assertFalse(os.path.exists(os.path.join(self.destination, 'new')))
 
     def test_download_batch_dryrun_rejects_path_traversal_blob_names(self):
         with self.assertRaises(FileOperationError):
@@ -116,7 +117,7 @@ class TestStorageBlobDownloadBatch(unittest.TestCase):
         destination = 'C:\\Users\\victim\\downloads'
         with mock.patch(BLOB_MODULE + '.os', windows_os), mock.patch(UTIL_MODULE + '.os', windows_os):
             for blob_name in ('C:/Users/Public/evil.txt', 'C:\\Users\\Public\\evil.txt', 'D:/evil.txt', 'C:evil.txt',
-                              '..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', '../downloads2/evil.txt',
+                              'a:record.txt', '..\\..\\evil.txt', 'dir\\..\\..\\evil.txt', '../downloads2/evil.txt',
                               # differ from the destination only by case, which is a sibling in case-sensitive dirs
                               'C:/Users/victim/DOWNLOADS/evil.txt', '../DOWNLOADS/evil.txt'):
                 with self.subTest(blob_name=blob_name):
