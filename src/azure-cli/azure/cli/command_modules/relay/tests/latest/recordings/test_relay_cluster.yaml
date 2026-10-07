@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: '{"location": "westus2", "sku": {"capacity": 1, "name": "Dedicated"}, "tags":
+      {"tag1": "value1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --location --sku --tags
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.Relay/clusters/relay-clus1-000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ClusterProvisioningBlockedDueToCapacity","message":"Event
+        Hubs Cluster resources cannot currently be provisioned in this region due
+        to capacity constraints. Please attempt creation in another region, or contact
+        Event Hubs support."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '251'
+      content-type:
+      - application/json
+      date:
+      - Wed, 07 Oct 2026 04:09:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - bf610956-a13e-492c-96f7-f12957a8a498
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G5|2026-10-07T04:09:46
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southcentralus/ce5565f4-ebbf-4ff1-856d-cf2ba4cb23fe
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 9AD28A52838743E6AAA6C70D1E575024 Ref B: PNQ241100404025 Ref C: 2026-10-07T04:09:46Z'
+    status:
+      code: 400
+      message: Bad Request
+version: 1

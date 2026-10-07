@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -73,6 +73,68 @@ class Create(AAZCommand):
         tags.Element = AAZStrArg()
 
         # define Arg Group "Parameters"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.cluster_arm_id = AAZStrArg(
+            options=["--cluster-arm-id"],
+            arg_group="Properties",
+            help="Cluster ARM ID of the Namespace.",
+        )
+        _args_schema.minimum_tls_version = AAZStrArg(
+            options=["--minimum-tls-version"],
+            arg_group="Properties",
+            help="The minimum TLS version for the namespace. Supported values are 1.2 and 1.3. The service defaults to 1.2 when the property is omitted. Existing namespaces configured with TLS 1.0 or 1.1 are reported as TLS 1.2.",
+            enum={"1.2": "1.2", "1.3": "1.3"},
+        )
+        _args_schema.private_endpoint_connections = AAZListArg(
+            options=["--private-endpoint-connections"],
+            arg_group="Properties",
+            help="List of private endpoint connections.",
+        )
+        _args_schema.public_network_access = AAZStrArg(
+            options=["--public-network-access"],
+            arg_group="Properties",
+            help="This determines if traffic is allowed over public network. By default it is enabled.",
+            default="Enabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
+        )
+
+        private_endpoint_connections = cls._args_schema.private_endpoint_connections
+        private_endpoint_connections.Element = AAZObjectArg()
+
+        _element = cls._args_schema.private_endpoint_connections.Element
+        _element.private_endpoint = AAZObjectArg(
+            options=["private-endpoint"],
+            help="The Private Endpoint resource for this Connection.",
+        )
+        _element.private_link_service_connection_state = AAZObjectArg(
+            options=["private-link-service-connection-state"],
+            help="Details about the state of the connection.",
+        )
+        _element.provisioning_state = AAZStrArg(
+            options=["provisioning-state"],
+            help="Provisioning state of the Private Endpoint Connection.",
+            enum={"Canceled": "Canceled", "Creating": "Creating", "Deleting": "Deleting", "Failed": "Failed", "Succeeded": "Succeeded", "Updating": "Updating"},
+        )
+
+        private_endpoint = cls._args_schema.private_endpoint_connections.Element.private_endpoint
+        private_endpoint.id = AAZStrArg(
+            options=["id"],
+            help="The ARM identifier for Private Endpoint.",
+        )
+
+        private_link_service_connection_state = cls._args_schema.private_endpoint_connections.Element.private_link_service_connection_state
+        private_link_service_connection_state.description = AAZStrArg(
+            options=["description"],
+            help="Description of the connection state.",
+        )
+        private_link_service_connection_state.status = AAZStrArg(
+            options=["status"],
+            help="Status of the connection.",
+            enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -104,7 +166,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -113,7 +175,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -132,7 +194,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -156,7 +218,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -182,7 +244,38 @@ class Create(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("clusterArmId", AAZStrType, ".cluster_arm_id")
+                properties.set_prop("minimumTlsVersion", AAZStrType, ".minimum_tls_version")
+                properties.set_prop("privateEndpointConnections", AAZListType, ".private_endpoint_connections")
+                properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
+
+            private_endpoint_connections = _builder.get(".properties.privateEndpointConnections")
+            if private_endpoint_connections is not None:
+                private_endpoint_connections.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.privateEndpointConnections[]")
+            if _elements is not None:
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.privateEndpointConnections[].properties")
+            if properties is not None:
+                properties.set_prop("privateEndpoint", AAZObjectType, ".private_endpoint")
+                properties.set_prop("privateLinkServiceConnectionState", AAZObjectType, ".private_link_service_connection_state")
+                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
+
+            private_endpoint = _builder.get(".properties.privateEndpointConnections[].properties.privateEndpoint")
+            if private_endpoint is not None:
+                private_endpoint.set_prop("id", AAZStrType, ".id")
+
+            private_link_service_connection_state = _builder.get(".properties.privateEndpointConnections[].properties.privateLinkServiceConnectionState")
+            if private_link_service_connection_state is not None:
+                private_link_service_connection_state.set_prop("description", AAZStrType, ".description")
+                private_link_service_connection_state.set_prop("status", AAZStrType, ".status")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -221,12 +314,20 @@ class Create(AAZCommand):
                 flags={"client_flatten": True},
             )
             _schema_on_200_201.sku = AAZObjectType()
+            _schema_on_200_201.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _CreateHelper._build_schema_system_data_read(_schema_on_200_201.system_data)
             _schema_on_200_201.tags = AAZDictType()
             _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.cluster_arm_id = AAZStrType(
+                serialized_name="clusterArmId",
+            )
             properties.created_at = AAZStrType(
                 serialized_name="createdAt",
                 flags={"read_only": True},
@@ -235,18 +336,73 @@ class Create(AAZCommand):
                 serialized_name="metricId",
                 flags={"read_only": True},
             )
+            properties.minimum_tls_version = AAZStrType(
+                serialized_name="minimumTlsVersion",
+            )
+            properties.private_endpoint_connections = AAZListType(
+                serialized_name="privateEndpointConnections",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.public_network_access = AAZStrType(
+                serialized_name="publicNetworkAccess",
+            )
             properties.service_bus_endpoint = AAZStrType(
                 serialized_name="serviceBusEndpoint",
+                flags={"read_only": True},
+            )
+            properties.status = AAZStrType(
                 flags={"read_only": True},
             )
             properties.updated_at = AAZStrType(
                 serialized_name="updatedAt",
                 flags={"read_only": True},
             )
+
+            private_endpoint_connections = cls._schema_on_200_201.properties.private_endpoint_connections
+            private_endpoint_connections.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.private_endpoint_connections.Element
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.location = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _CreateHelper._build_schema_system_data_read(_element.system_data)
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200_201.properties.private_endpoint_connections.Element.properties
+            properties.private_endpoint = AAZObjectType(
+                serialized_name="privateEndpoint",
+            )
+            properties.private_link_service_connection_state = AAZObjectType(
+                serialized_name="privateLinkServiceConnectionState",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+            )
+
+            private_endpoint = cls._schema_on_200_201.properties.private_endpoint_connections.Element.properties.private_endpoint
+            private_endpoint.id = AAZStrType()
+
+            private_link_service_connection_state = cls._schema_on_200_201.properties.private_endpoint_connections.Element.properties.private_link_service_connection_state
+            private_link_service_connection_state.description = AAZStrType()
+            private_link_service_connection_state.status = AAZStrType()
 
             sku = cls._schema_on_200_201.sku
             sku.name = AAZStrType(
@@ -262,6 +418,50 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["Create"]
