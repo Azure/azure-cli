@@ -132,7 +132,8 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             if hasattr(n, 'account_url') and not n.account_url:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
-                n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+                n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
+                                 get_config_value(cmd, 'storage', 'account_url', None))
             else:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
@@ -168,7 +169,8 @@ def validate_client_parameters(cmd, namespace):
     if not n.account_name:
         if hasattr(n, 'account_url') and not n.account_url:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
-            n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+            n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
+                             get_config_value(cmd, 'storage', 'account_url', None))
         else:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key and not n.sas_token:
