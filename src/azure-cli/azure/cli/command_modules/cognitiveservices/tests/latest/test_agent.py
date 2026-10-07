@@ -76,7 +76,7 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
             "https://csclitest_000002.services.ai.azure.com/api/projects/Project.Name-01",
         )
 
-    def test_build_ai_project_endpoint_rejects_invalid_account_names(self):
+    def test_build_ai_project_endpoint_rejects_invalid_resource_names(self):
         invalid_names = [
             None,
             "",
@@ -98,6 +98,10 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
                 with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
                     _build_ai_project_endpoint(invalid_name, "project01")
 
+            with self.subTest(project_name=invalid_name):
+                with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
+                    _build_ai_project_endpoint("account01", invalid_name)
+
     @mock.patch("azure.cli.core._profile.Profile")
     def test_cf_ai_projects_rejects_invalid_account(self, profile):
         profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
@@ -111,12 +115,24 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
             })
 
     @mock.patch("azure.cli.core._profile.Profile")
-    def test_cf_ai_projects_requires_account_or_endpoint(self, profile):
+    def test_cf_ai_projects_rejects_invalid_project(self, profile):
         profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
         cli_ctx = mock.Mock()
         cli_ctx.data = {}
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, "--account-name or --endpoint"):
+        with self.assertRaises(InvalidArgumentValueError):
+            cf_ai_projects(cli_ctx, {
+                "account_name": "account01",
+                "project_name": "project/other",
+            })
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_requires_account_name(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "--account-name"):
             cf_ai_projects(cli_ctx, {"project_name": "project01"})
 
     def test_get_agent_container_status_builds_expected_request(self):

@@ -12,14 +12,17 @@ _COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.
 def _build_ai_project_endpoint(account_name, project_name):
     from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
-    if not account_name:
-        raise RequiredArgumentMissingError("Please specify --account-name.")
-    if (not isinstance(account_name, str) or
-            not _COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN.fullmatch(account_name)):
-        raise InvalidArgumentValueError(
-            "Invalid value for --account-name. The Cognitive Services account name must be 2-64 characters, "
-            "start with a letter or digit, and contain only letters, digits, periods, hyphens, or underscores."
-        )
+    for value, option_name, resource_type in (
+            (account_name, "--account-name", "Cognitive Services account"),
+            (project_name, "--project-name", "AI project")):
+        if not value:
+            raise RequiredArgumentMissingError(f"Please specify {option_name}.")
+        if (not isinstance(value, str) or
+                not _COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN.fullmatch(value)):
+            raise InvalidArgumentValueError(
+                f"Invalid value for {option_name}. The {resource_type} name must be 2-64 characters, "
+                "start with a letter or digit, and contain only letters, digits, periods, hyphens, or underscores."
+            )
 
     return f"https://{account_name}.services.ai.azure.com/api/projects/{project_name}"
 
@@ -90,9 +93,7 @@ def cf_ai_projects(cli_ctx, command_args):
     if not endpoint:
         from azure.cli.core.azclierror import RequiredArgumentMissingError
 
-        raise RequiredArgumentMissingError(
-            "Please specify --account-name or --endpoint"
-        )
+        raise RequiredArgumentMissingError("Please specify --account-name.")
 
     # Prepare client kwargs with proper logging and telemetry
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
