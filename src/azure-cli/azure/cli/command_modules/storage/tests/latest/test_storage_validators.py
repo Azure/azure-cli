@@ -21,7 +21,8 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_source_url,
                                                            validate_encryption_services, as_user_validator,
-                                                           get_not_none_validator, validate_upload_blob)
+                                                           get_not_none_validator, validate_upload_blob, 
+                                                           validate_client_parameters)
 
 
 class MockCLI(CLI):
@@ -252,6 +253,62 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         with self.assertRaisesRegex(InvalidArgumentValueError, 'please specify one of --file and --data'):
             validate_upload_blob(Namespace(file_path=None, data=None))
+
+
+class TestClientParametersValidator(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.local_url = 'http://localhost:10000/devstoreaccount1'
+        self.legacy_url = 'http://legacy:10000/devstoreaccount1'
+
+    def test_service_endpoint_env_var_used(self):
+        # AZURE_STORAGE_SERVICE_ENDPOINT is the documented env var, should set account_url
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def test_account_url_env_var_still_used(self):
+        # AZURE_STORAGE_ACCOUNT_URL is the legacy env var, should keep working
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_ACCOUNT_URL=self.legacy_url)
+        self.assertEqual(ns.account_url, self.legacy_url)
+
+    def test_service_endpoint_env_var_wins_over_account_url(self):
+        # both env vars set, documented one takes precedence
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url,
+                       AZURE_STORAGE_ACCOUNT_URL=self.legacy_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def test_no_endpoint_env_var(self):
+        # no endpoint env var, account_url stays empty so client factory falls back to public cloud
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns)
+        self.assertIsNone(ns.account_url)
+
+    def test_endpoint_argument_wins_over_env_var(self):
+        # --blob-endpoint given explicitly, env var is ignored
+        ns = self._create_namespace(auth_mode='key', account_url='https://flag.example.com')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, 'https://flag.example.com')
+
+    def test_service_endpoint_env_var_used_without_auth_mode(self):
+        # commands without --auth-mode go through the second lookup block in the validator
+        ns = self._create_namespace()
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def _create_namespace(self, **kwargs):
+        ns = Namespace(account_name=None, account_url=None, account_key=None, sas_token=None,
+                       connection_string=None)
+        for key in kwargs:
+            setattr(ns, key, kwargs[key])
+        return ns
+
+    def _validate(self, ns, **env):
+        env.update(AZURE_STORAGE_ACCOUNT='devstoreaccount1', AZURE_STORAGE_KEY='fake_key')
+        with mock.patch.dict('os.environ', env, clear=True):
+            validate_client_parameters(MockCmd(self.cli), ns)
 
 
 class TestEncryptionValidators(unittest.TestCase):
