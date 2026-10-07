@@ -19,8 +19,6 @@ Release History
 
 * `az aks create/update`: Preserve the default managed outbound IPv4 count when only the IPv6 count is provided (#33886)
 * `az aks nodepool add/update`: Add `--enable-managed-dranet` to enable Managed DRANET on a node pool. (#34003)
-* `az aks create`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pools. (#34161)
-* `az aks nodepool add/update`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pool. (#34161)
 * `az aks update`: Fix bug where autoscale profile boolean values could be incorrectly serialized as strings (#34058)
 * Fix #33541: `az aks install-cli`: Fall back to the kubelogin version file when the GitHub API rate limit is hit (#34075)
 * Fix #34085: `az aks update`: Correct capitalization and punctuation in reconcile prompt (#34086)
