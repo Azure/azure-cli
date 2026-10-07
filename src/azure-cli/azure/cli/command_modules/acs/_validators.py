@@ -870,8 +870,11 @@ def validate_azure_keyvault_kms_key_id(namespace):
         if not key_id.startswith(https_prefix):
             raise InvalidArgumentValueError(err_msg)
 
+        # A versioned key ID has 4 segments ({vault-url}/keys/{key-name}/{key-version}), while a versionless
+        # key ID has 3 segments ({vault-url}/keys/{key-name}). Versionless key IDs are required when KMS
+        # infrastructure encryption (platform-managed keys) is enabled.
         segments = key_id[len(https_prefix):].split("/")
-        if len(segments) != 4 or segments[1] != "keys":
+        if len(segments) < 3 or segments[1] != "keys":
             raise InvalidArgumentValueError(err_msg)
 
 
@@ -879,9 +882,30 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
     key_vault_resource_id = namespace.azure_keyvault_kms_key_vault_resource_id
     if key_vault_resource_id is None or key_vault_resource_id == '':
         return
-    from azure.mgmt.core.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if not is_valid_resource_id(key_vault_resource_id):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
+
+    try:
+        parsed = parse_resource_id(key_vault_resource_id)
+        provider = parsed.get('namespace', '').lower()
+        if provider != 'microsoft.keyvault':
+            raise InvalidArgumentValueError(
+                "--azure-keyvault-kms-key-vault-resource-id must reference a Microsoft.KeyVault resource."
+            )
+        resource_type = parsed.get('type', '').lower()
+        if resource_type not in ['vaults', 'managedhsms']:
+            raise InvalidArgumentValueError(
+                "--azure-keyvault-kms-key-vault-resource-id must reference a Key Vault "
+                "(vaults) or Managed HSM (managedHSMs)."
+            )
+    except InvalidArgumentValueError:
+        # Re-raise our validation errors
+        raise
+    except Exception as ex:
+        raise InvalidArgumentValueError(
+            f"--azure-keyvault-kms-key-vault-resource-id parsing failed: {str(ex)}"
+        )
 
 
 def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):

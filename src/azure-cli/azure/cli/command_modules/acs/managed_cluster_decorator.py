@@ -34,6 +34,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
+    CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -5845,6 +5846,28 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return profile
 
+    def get_kms_infrastructure_encryption(self) -> Union[str, None]:
+        """Obtain the value of kms_infrastructure_encryption.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        kms_infrastructure_encryption = self.raw_param.get("kms_infrastructure_encryption")
+
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if kms_infrastructure_encryption is None and self.mc:
+            security_profile = getattr(self.mc, "security_profile", None)
+            if security_profile:
+                encryption_profile = getattr(
+                    security_profile, "kubernetes_resource_object_encryption_profile", None
+                )
+                if encryption_profile:
+                    infrastructure_encryption = getattr(encryption_profile, "infrastructure_encryption", None)
+                    if infrastructure_encryption is not None:
+                        kms_infrastructure_encryption = infrastructure_encryption
+
+        return kms_infrastructure_encryption
+
     def _get_enable_azure_keyvault_kms(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_azure_keyvault_kms.
 
@@ -6047,6 +6070,9 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # validation
         if enable_validation:
+            is_pmk_enabled = (
+                self.get_kms_infrastructure_encryption() == CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED
+            )
             enable_azure_keyvault_kms = self._get_enable_azure_keyvault_kms(
                 enable_validation=False)
             if (
@@ -6058,6 +6084,12 @@ class AKSManagedClusterContext(BaseAKSContext):
             ):
                 raise RequiredArgumentMissingError(
                     '"--azure-keyvault-kms-key-vault-resource-id" requires "--enable-azure-keyvault-kms".'
+                )
+
+            if is_pmk_enabled and not azure_keyvault_kms_key_vault_resource_id:
+                raise RequiredArgumentMissingError(
+                    '"--azure-keyvault-kms-key-vault-resource-id" is required when '
+                    '"--kms-infrastructure-encryption" is set to "Enabled".'
                 )
 
             key_vault_network_access = self._get_azure_keyvault_kms_key_vault_network_access(
@@ -6074,6 +6106,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     '"--azure-keyvault-kms-key-vault-network-access" is "Private".'
                 )
             if (
+                not is_pmk_enabled and
                 key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC and
                 (
                     azure_keyvault_kms_key_vault_resource_id is not None and
@@ -7233,11 +7266,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         return mc
 
     def set_up_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
-        """Set up security profile azureKeyVaultKms for the ManagedCluster object.
+        """Set up security profile kubernetesResourceObjectEncryptionProfile and azureKeyVaultKms for
+        the ManagedCluster object.
 
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        kms_infrastructure_encryption = self.context.get_kms_infrastructure_encryption()
+        if kms_infrastructure_encryption:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            if mc.security_profile.kubernetes_resource_object_encryption_profile is None:
+                mc.security_profile.kubernetes_resource_object_encryption_profile = (
+                    self.models.KubernetesResourceObjectEncryptionProfile()
+                )
+            mc.security_profile.kubernetes_resource_object_encryption_profile.infrastructure_encryption = (
+                kms_infrastructure_encryption
+            )
 
         if self.context.get_enable_azure_keyvault_kms():
             key_id = self.context.get_azure_keyvault_kms_key_id()
@@ -7250,7 +7296,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 key_vault_network_access = self.context.get_azure_keyvault_kms_key_vault_network_access()
                 mc.security_profile.azure_key_vault_kms.key_vault_network_access = key_vault_network_access
-                if key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE:
+                if (
+                    key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE or
+                    kms_infrastructure_encryption == CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED
+                ):
                     mc.security_profile.azure_key_vault_kms.key_vault_resource_id = (
                         self.context.get_azure_keyvault_kms_key_vault_resource_id()
                     )
@@ -10390,11 +10439,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         return mc
 
     def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
-        """Update security profile azureKeyvaultKms for the ManagedCluster object.
+        """Update security profile kubernetesResourceObjectEncryptionProfile and azureKeyvaultKms for
+        the ManagedCluster object.
 
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        kms_infrastructure_encryption = self.context.get_kms_infrastructure_encryption()
+        if kms_infrastructure_encryption:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            if mc.security_profile.kubernetes_resource_object_encryption_profile is None:
+                mc.security_profile.kubernetes_resource_object_encryption_profile = (
+                    self.models.KubernetesResourceObjectEncryptionProfile()
+                )
+            mc.security_profile.kubernetes_resource_object_encryption_profile.infrastructure_encryption = (
+                kms_infrastructure_encryption
+            )
 
         if self.context.get_enable_azure_keyvault_kms():
             # get kms profile
@@ -10414,8 +10476,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             azure_key_vault_kms_profile.key_vault_network_access = (
                 self.context.get_azure_keyvault_kms_key_vault_network_access()
             )
-            # set key vault resource id
-            if azure_key_vault_kms_profile.key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE:
+            # set key vault resource id, it is also required when infrastructure encryption (PMK) is enabled
+            if (
+                azure_key_vault_kms_profile.key_vault_network_access ==
+                CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE or
+                kms_infrastructure_encryption == CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED
+            ):
                 azure_key_vault_kms_profile.key_vault_resource_id = (
                     self.context.get_azure_keyvault_kms_key_vault_resource_id()
                 )
