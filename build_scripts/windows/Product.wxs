@@ -76,6 +76,13 @@
     </Upgrade>
     <?endif ?>
 
+    <?if $(var.Platform) = "x64" ?>
+    <Upgrade Id="$(var.UpgradeCodeArm64)">
+      <UpgradeVersion Property="WIX_ARM64_INSTALLED" Minimum="0.0.0" IncludeMinimum="yes" OnlyDetect="yes" />
+    </Upgrade>
+    <Condition Message="The ARM64 version of $(var.ProductName) is already installed. Uninstall it before installing the 64-bit version.">NOT WIX_ARM64_INSTALLED</Condition>
+    <?endif ?>
+
     <?if $(var.Platform) = "arm64" ?>
     <Upgrade Id="$(var.UpgradeCode64)">
       <UpgradeVersion Property="WIX_X64_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
