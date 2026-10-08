@@ -32,6 +32,15 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn("$env:PLATFORM -eq 'x86'", script)
         self.assertIn('$env:ProgramFiles\\Microsoft SDKs\\Azure\\CLI2', script)
 
+    def test_pipeline_builds_and_tests_arm64_artifacts(self):
+        pipeline = (ROOT / 'azure-pipelines.yml').read_text()
+        variables = (ROOT / '.azure-pipelines/templates/variables.yml').read_text()
+        self.assertIn("windows_arm64_pool: 'pool-windows-2022-arm64'", variables)
+        self.assertGreaterEqual(pipeline.count('Platform: arm64'), 4)
+        self.assertGreaterEqual(pipeline.count('PoolName: ${{ variables.windows_arm64_pool }}'), 5)
+        self.assertIn('ArtifactName: msi-$(Platform)', pipeline)
+        self.assertIn('ArtifactName: zip-$(Platform)', pipeline)
+
 
 if __name__ == '__main__':
     unittest.main()
