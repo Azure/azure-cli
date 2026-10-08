@@ -72,6 +72,17 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksDiagnosticLevel.ERROR: Color.RED,
         })
 
+    # These properties are redundant with the overall presentation of the resource
+    EXCLUDED_RESOURCE_TOP_LEVEL_PROPERTIES_FOR_PROPERTY_CHANGE_RENDERING = [
+        "apiVersion",
+        "extension",
+        "id",
+        "identifiers",
+        "name",
+        "resourceGroup",
+        "type"
+    ]
+
     def __init__(self, enable_color=True):
         self.builder: ColoredStringBuilder = ColoredStringBuilder(enable_color)
         self.what_if_result: t.Optional[StackModels.DeploymentStacksWhatIfResult] = None
@@ -226,7 +237,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self._format_change(change, path)
 
         # print resource property changes
-        self._format_resource_property_changes(resource_change.resource_configuration_changes)
+        self._format_resource_property_changes(resource_change)
         self._pop_indent()
 
         return True
@@ -296,18 +307,48 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
 
     def _format_resource_property_changes(
-        self, property_changes: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord]
+        self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange
     ) -> bool:
-        if not property_changes or not property_changes.delta:
+        property_changes = resource_change.resource_configuration_changes
+
+        if not property_changes:
             return False
 
         printed = False
 
-        for property_change in property_changes.delta:
-            if self._format_change(property_change):
-                printed = True
+        before_or_after = None
+        if str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.CREATE):
+            before_or_after = property_changes.after
+        elif str_lower_eq(resource_change.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE):
+            before_or_after = property_changes.before
+
+        if before_or_after:
+            property_keys = self._get_filtered_resource_top_level_property_keys(before_or_after)
+
+            for key in property_keys:
+                if self._format_inline_json(resource_change.change_type, before_or_after.get(key, None), key):
+                    printed = True
+        else:
+            if not property_changes.delta:
+                return False
+
+            for property_change in property_changes.delta:
+                if self._format_change(property_change):
+                    printed = True
 
         return printed
+
+    def _get_filtered_resource_top_level_property_keys(
+        self,
+        before_or_after: t.Optional[dict[str, t.Any]]
+    ) -> list[str]:
+        if not before_or_after:
+            return []
+
+        return sorted([
+            key for key, value in before_or_after.items()
+            if key not in self.EXCLUDED_RESOURCE_TOP_LEVEL_PROPERTIES_FOR_PROPERTY_CHANGE_RENDERING
+        ], key=lambda k: (k == "properties", k))
 
     def _format_diagnostics(self) -> bool:
         if not self.what_if_props or not self.what_if_props.diagnostics or len(self.what_if_props.diagnostics) == 0:
@@ -407,16 +448,28 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         is_array_item: bool = False
     ) -> bool:
         inline_obj = change.after if change.after is not None else change.before
+        property_path = self._get_change_path(change, parent_path)
 
+        return self._format_inline_json(change.change_type, inline_obj, property_path, is_array_item=is_array_item)
+
+    def _format_inline_json(
+        self,
+        change_type: t.Union[StackModels.DeploymentStacksWhatIfPropertyChangeType, str],
+        inline_obj: t.Any,
+        property_path: t.Optional[str] = None,
+        is_array_item: bool = False
+    ) -> bool:
         if inline_obj is None:
             return False
 
-        symbol, color = self._get_change_type_formatting(change.change_type)
+        symbol, color = self._get_change_type_formatting(change_type)
 
         if not is_array_item:
-            property_path = self._get_change_path(change, parent_path)
             self.builder.append(symbol, color)
-            self.builder.append(f" {property_path}: ")
+            if property_path:
+                self.builder.append(f" {property_path}: ")
+            else:
+                self.builder.append(" ")
 
         self._push_indent()
 
