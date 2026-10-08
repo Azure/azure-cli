@@ -20,9 +20,11 @@ class WindowsArm64PackagingTest(unittest.TestCase):
 
     def test_wix_project_builds_arm64_packages(self):
         project = (ROOT / 'build_scripts/windows/azure-cli.wixproj').read_text(encoding='utf-8-sig')
+        solution = (ROOT / 'build_scripts/windows/azure-cli.sln').read_text(encoding='utf-8-sig')
         product = (ROOT / 'build_scripts/windows/Product.wxs').read_text()
         self.assertIn("'Release|arm64'", project)
         self.assertIn('<InstallerPlatform>arm64</InstallerPlatform>', project)
+        self.assertIn('Release|arm64 = Release|arm64', solution)
         self.assertIn('$(var.Platform) = "arm64"', product)
         self.assertIn('<?define InstallerVersion = "500" ?>', product)
         self.assertIn('<?define UpgradeCodeArm64', product)
