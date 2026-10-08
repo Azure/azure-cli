@@ -390,17 +390,27 @@ def find_executable(executable):
     # Search PATH ourselves so a git.exe or gh.exe in the project cannot win that lookup.
     # Keep Windows' .exe default; picking up a .cmd or .bat file could introduce shell parsing.
     name = executable if os.path.splitext(executable)[1] else executable + '.exe'
-    current_directory = os.path.normcase(os.path.realpath(os.getcwd()))
+    current_directory = os.path.abspath(os.getcwd())
     for directory in os.environ.get('PATH', '').split(os.pathsep):
         directory = directory.strip('"')
         # Empty and relative entries, or the project directory itself, would undo that protection.
         if not os.path.isabs(directory) or not os.path.splitdrive(directory)[0]:
             continue
-        if os.path.normcase(os.path.realpath(directory)) == current_directory:
+        try:
+            # Different names can refer to the same directory (for example, a mapped drive).
+            if os.path.samefile(directory, current_directory):
+                continue
+            candidate = os.path.join(directory, name)
+            if not os.path.isfile(candidate) or not os.access(candidate, os.X_OK):
+                continue
+            # A tool found outside the project may still be a link to a file inside it.
+            target_directory = os.path.dirname(os.path.realpath(candidate))
+            if os.path.samefile(target_directory, current_directory):
+                continue
+        except (OSError, ValueError) as ex:
+            logger.debug("Skipping executable lookup in '%s': unable to verify path safety: %s", directory, ex)
             continue
-        candidate = os.path.join(directory, name)
-        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
-            return os.path.abspath(candidate)
+        return os.path.abspath(candidate)
     return None
 
 

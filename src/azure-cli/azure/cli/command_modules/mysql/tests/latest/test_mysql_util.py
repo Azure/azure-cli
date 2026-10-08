@@ -174,6 +174,101 @@ class TestWindowsExecutableResolution(unittest.TestCase):
         os.environ['PATH'] = '"' + self.trusted + '"'
         self.assertEqual(resolve_executable('gh'), self.installed)
 
+    def test_rejects_current_directory_alias_by_identity(self):
+        alias = os.path.join(self.temp.name, 'project-alias')
+        os.makedirs(alias)
+        with open(os.path.join(alias, 'gh.exe'), 'wb'):
+            pass
+        os.environ['PATH'] = alias + ';' + self.trusted
+        samefile = os.path.samefile
+
+        def directory_identity(first, second):
+            if first == alias:
+                return samefile(self.hostile, second)
+            return samefile(first, second)
+
+        # Model an alias that realpath does not normalize to the CWD spelling.
+        with mock.patch.object(util.os.path, 'samefile', side_effect=directory_identity) as identity:
+            self.assertEqual(util.resolve_executable('gh'), self.installed)
+        identity.assert_any_call(alias, os.getcwd())
+
+    def test_rejects_executable_link_into_current_directory(self):
+        realpath = os.path.realpath
+
+        def link_target(path):
+            return self.plant if path == self.installed else realpath(path)
+
+        # Mock the link target so this test does not require Windows symlink privileges.
+        with mock.patch.object(util.os.path, 'realpath', side_effect=link_target), \
+                mock.patch.object(util.subprocess, 'run') as run:
+            with self.assertRaises(FileNotFoundError):
+                util.run_cmd(['gh'])
+        run.assert_not_called()
+
+    def test_rejects_executable_link_into_current_directory_alias(self):
+        alias = os.path.join(self.temp.name, 'target-alias')
+        realpath = os.path.realpath
+        samefile = os.path.samefile
+
+        def link_target(path):
+            return os.path.join(alias, 'gh.exe') if path == self.installed else realpath(path)
+
+        def directory_identity(first, second):
+            if first == alias:
+                return samefile(self.hostile, second)
+            return samefile(first, second)
+
+        with mock.patch.object(util.os.path, 'realpath', side_effect=link_target), \
+                mock.patch.object(util.os.path, 'samefile', side_effect=directory_identity) as identity:
+            with self.assertRaises(FileNotFoundError):
+                util.resolve_executable('gh')
+        identity.assert_any_call(alias, os.getcwd())
+
+    def test_allows_executable_link_outside_current_directory(self):
+        target_dir = os.path.join(self.temp.name, 'other installation')
+        os.makedirs(target_dir)
+        realpath = os.path.realpath
+
+        def link_target(path):
+            return os.path.join(target_dir, 'gh.exe') if path == self.installed else realpath(path)
+
+        with mock.patch.object(util.os.path, 'realpath', side_effect=link_target), \
+                mock.patch.object(util.os.path, 'samefile', wraps=os.path.samefile) as identity:
+            self.assertEqual(util.resolve_executable('gh'), self.installed)
+        identity.assert_any_call(target_dir, os.getcwd())
+
+    def test_identity_errors_skip_candidate_without_launching(self):
+        samefile = os.path.samefile
+        for error in (FileNotFoundError, PermissionError, OSError, ValueError):
+            for failed_check in (1, 2):
+                with self.subTest(error=error, failed_check=failed_check):
+                    calls = []
+
+                    def directory_identity(first, second):
+                        calls.append((first, second))
+                        if len(calls) == failed_check:
+                            raise error('Cannot verify directory identity')
+                        return samefile(first, second)
+
+                    with mock.patch.object(util.os.path, 'samefile', side_effect=directory_identity), \
+                            mock.patch.object(util.subprocess, 'run') as run:
+                        with self.assertRaises(FileNotFoundError):
+                            util.run_cmd(['gh'])
+                    run.assert_not_called()
+
+    def test_unavailable_path_entry_does_not_hide_installed_tool(self):
+        unavailable = os.path.join(self.temp.name, 'unavailable')
+        os.environ['PATH'] = unavailable + ';' + self.trusted
+        samefile = os.path.samefile
+
+        def directory_identity(first, second):
+            if first == unavailable:
+                raise PermissionError('Cannot access PATH entry')
+            return samefile(first, second)
+
+        with mock.patch.object(util.os.path, 'samefile', side_effect=directory_identity):
+            self.assertEqual(util.resolve_executable('gh'), self.installed)
+
     def test_missing_path_never_uses_current_directory(self):
         from azure.cli.command_modules.mysql._util import find_executable, resolve_executable
         for path in (None, '', '.', self.hostile, 'relative'):
