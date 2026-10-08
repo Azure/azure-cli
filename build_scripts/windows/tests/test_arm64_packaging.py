@@ -45,6 +45,11 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn('ArtifactName: msi-$(Platform)', pipeline)
         self.assertIn('ArtifactName: zip-$(Platform)', pipeline)
 
+    def test_windows_requirements_preserve_x86_psutil(self):
+        requirements = (ROOT / 'src/azure-cli/requirements.py3.windows.txt').read_text()
+        self.assertIn('psutil==6.1.0; platform_machine != "ARM64"', requirements)
+        self.assertIn('psutil==7.2.2; platform_machine == "ARM64"', requirements)
+
 
 if __name__ == '__main__':
     unittest.main()
