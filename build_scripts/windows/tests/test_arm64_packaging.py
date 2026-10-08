@@ -45,10 +45,14 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn('ArtifactName: msi-$(Platform)', pipeline)
         self.assertIn('ArtifactName: zip-$(Platform)', pipeline)
 
-    def test_windows_requirements_preserve_x86_psutil(self):
+    def test_windows_requirements_preserve_x86_native_wheels(self):
         requirements = (ROOT / 'src/azure-cli/requirements.py3.windows.txt').read_text()
+        self.assertIn('cryptography==48.0.1; platform_machine != "ARM64"', requirements)
+        self.assertIn('cryptography==51.0.0; platform_machine == "ARM64"', requirements)
         self.assertIn('psutil==6.1.0; platform_machine != "ARM64"', requirements)
         self.assertIn('psutil==7.2.2; platform_machine == "ARM64"', requirements)
+        self.assertIn('pyOpenSSL==26.2.0; platform_machine != "ARM64"', requirements)
+        self.assertIn('pyOpenSSL==26.5.0; platform_machine == "ARM64"', requirements)
 
 
 if __name__ == '__main__':
