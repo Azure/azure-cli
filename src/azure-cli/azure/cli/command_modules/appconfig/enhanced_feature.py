@@ -28,7 +28,6 @@ def set_feature(cmd,
                 feature_name=None,
                 name=None,
                 label=None,
-                enable=None,
                 description=None,
                 requirement_type=None,
                 telemetry_enabled=None,
@@ -61,9 +60,6 @@ def set_feature(cmd,
 
         if feature_flag is None:
             feature_flag = FeatureFlag(name=feature_name, enabled=False, label=label)
-
-        if enable is not None:
-            feature_flag.enabled = enable
 
         if description is not None:
             feature_flag.description = description

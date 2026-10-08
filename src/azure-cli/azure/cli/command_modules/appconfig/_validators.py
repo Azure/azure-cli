@@ -341,7 +341,6 @@ def validate_enhanced_feature_flag_input(namespace):
 
     # --flag is a full-object replacement; it cannot be mixed with the per-property content flags.
     conflicting = {
-        '--enable': namespace.enable,
         '--description': namespace.description,
         '--requirement-type': namespace.requirement_type,
         '--telemetry-enabled': namespace.telemetry_enabled,

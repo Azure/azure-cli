@@ -627,12 +627,6 @@ helps['appconfig enhanced-feature-flag set'] = """
         - name: Set an enhanced feature flag with null label using connection string and set a description.
           text:
             az appconfig enhanced-feature-flag set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature-name color --description "This is a colorful feature"
-        - name: Enable an enhanced feature flag while setting it.
-          text:
-            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature-name color --enable
-        - name: Disable an enhanced feature flag while setting it.
-          text:
-            az appconfig enhanced-feature-flag set -n MyAppConfiguration --feature-name color --enable false
         - name: Set an enhanced feature flag using your 'az login' credentials.
           text:
             az appconfig enhanced-feature-flag set --endpoint https://myappconfiguration.azconfig.io --feature-name color --label MyLabel --auth-mode login

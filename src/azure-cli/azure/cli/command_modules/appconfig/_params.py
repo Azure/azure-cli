@@ -479,7 +479,6 @@ def load_arguments(self, _):
         c.argument('label', help="If no label specified, uses the null label.")
 
     with self.argument_context('appconfig enhanced-feature-flag set') as c:
-        c.argument('enable', arg_type=get_three_state_flag(), help='Enable or disable the enhanced feature flag.')
         c.argument('description', help='Description of the enhanced feature flag to be set.')
         c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
                    help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of an enhanced feature flag.')
@@ -491,7 +490,7 @@ def load_arguments(self, _):
                         "data-plane API and 'az appconfig enhanced-feature-flag show' (name, enabled, description, "
                         "conditions, allocation, variants, telemetry, tags). Accepts a JSON object, a shorthand-syntax "
                         "object, a file path with @ prefix (e.g. @flag.json), or @- to read from stdin. Providing --flag "
-                        "replaces the entire feature flag and cannot be combined with --enable, --description, "
+                        "replaces the entire feature flag and cannot be combined with --description, "
                         "--requirement-type or --telemetry-enabled.")
 
     with self.argument_context('appconfig enhanced-feature-flag show') as c:

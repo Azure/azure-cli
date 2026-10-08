@@ -93,16 +93,6 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('tags.tag2', 'value2'),
                          self.check('conditions.requirement_type', updated_requirement_type)])
 
-        # Toggle the enabled state with the top-level --enable argument on set (other properties preserved)
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --enable false -y',
-                 checks=[self.check('enabled', False),
-                         self.check('description', updated_entry_description),
-                         self.check('telemetry.enabled', True)])
-        self.cmd('appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --enable -y',
-                 checks=[self.check('enabled', True),
-                         self.check('description', updated_entry_description),
-                         self.check('telemetry.enabled', True)])
-
         # Set the entire flag as raw JSON with --flag (full replace of all properties)
         self.kwargs['flag_json'] = '{"name":"Beta","enabled":true,"description":"Set via --flag JSON","conditions":{"requirement_type":"All","filters":[{"name":"Microsoft.TimeWindow","parameters":{"Start":"Wed, 01 Jan 2025 00:00:00 GMT"}}]}}'
         self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' -y",
@@ -123,9 +113,6 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
         # --flag is mutually exclusive with content arguments (validated before any request)
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "--flag cannot be combined with --description"):
             self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' --description x -y")
-
-        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "--flag cannot be combined with --enable"):
-            self.cmd("appconfig enhanced-feature-flag set --endpoint {endpoint} --auth-mode login --label {label} --flag '{flag_json}' --enable -y")
 
         # The name inside --flag must match --feature-name when both are provided
         self.kwargs['flag_mismatch'] = '{"name":"Delta","enabled":true}'
