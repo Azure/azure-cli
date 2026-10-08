@@ -36,6 +36,8 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn('$(var.Platform) = "arm64"', product)
         self.assertIn('<?define InstallerVersion = "500" ?>', product)
         self.assertIn('<?define UpgradeCodeArm64', product)
+        self.assertIn('Property="WIX_ARM64_INSTALLED"', product)
+        self.assertIn('NOT WIX_ARM64_INSTALLED', product)
 
     def test_installation_tests_use_native_program_files(self):
         script = (ROOT / 'build_scripts/windows/scripts/test_msi_installation.ps1').read_text()
