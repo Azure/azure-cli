@@ -1266,6 +1266,12 @@ helps['containerapp secret set'] = """
     - name: Update a secret.
       text: |
           az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
+    - name: Add a secret whose value contains spaces, colons, or semicolons by quoting the whole key=value pair.
+      text: |
+          az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets 'connString=Server=tcp:myserver;User Id=my user;Password=P@ss w0rd;'
+    - name: Add a secret whose value contains an apostrophe by using double quotes for the whole key=value pair instead.
+      text: |
+          az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets "apostrophe=Bob's secret"
 """
 
 helps['containerapp github-action'] = """
