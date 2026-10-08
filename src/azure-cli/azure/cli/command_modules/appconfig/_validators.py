@@ -335,28 +335,6 @@ def validate_enhanced_feature_flag(namespace):
         validate_feature_flag_name(namespace.feature_name)
 
 
-# Properties allowed in the enhanced feature flag input accepted by --flag. Matches the schema
-# emitted by 'az appconfig enhanced-feature-flag show' and the data-plane /ff API, so a flag can be
-# shown, edited and set back.
-FEATURE_FLAG_PROPERTIES = {
-    FeatureFlagConstants.NAME,
-    FeatureFlagConstants.ENABLED,
-    FeatureFlagConstants.LABEL,
-    FeatureFlagConstants.DESCRIPTION,
-    FeatureFlagConstants.CONDITIONS,
-    FeatureFlagConstants.ALLOCATION,
-    FeatureFlagConstants.VARIANTS,
-    FeatureFlagConstants.TELEMETRY,
-    FeatureFlagConstants.TAGS,
-}
-
-# Read-only properties emitted by 'show' that are tolerated (and ignored) on input.
-FEATURE_FLAG_READONLY_PROPERTIES = {
-    FeatureFlagConstants.LAST_MODIFIED,
-    "etag",
-}
-
-
 def validate_enhanced_feature_flag_input(namespace):
     if getattr(namespace, 'flag', None) is None:
         return
@@ -378,14 +356,6 @@ def validate_enhanced_feature_flag_input(namespace):
     if not isinstance(flag, dict):
         raise InvalidArgumentValueError(
             "--flag must be a JSON object or shorthand-syntax object representing a single feature flag.")
-
-    allowed = FEATURE_FLAG_PROPERTIES | FEATURE_FLAG_READONLY_PROPERTIES
-    unknown_keys = set(flag.keys()) - allowed
-    if unknown_keys:
-        raise InvalidArgumentValueError(
-            "Unsupported feature flag properties: {}. Allowed properties: {}.".format(
-                ", ".join(sorted(unknown_keys)),
-                ", ".join(sorted(FEATURE_FLAG_PROPERTIES))))
 
     flag_name = flag.get(FeatureFlagConstants.NAME)
     if namespace.feature_name is None and flag_name is None:

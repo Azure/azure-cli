@@ -497,6 +497,11 @@ def load_arguments(self, _):
     with self.argument_context('appconfig enhanced-feature-flag show') as c:
         c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
 
+    with self.argument_context('appconfig enhanced-feature-flag delete') as c:
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help='Name of the enhanced feature flag to be deleted. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix. If no feature name specified, delete all enhanced feature flags that match the specified label and tags.')
+        c.argument('label', help="If no label specified, delete the enhanced feature flag with null label. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, delete all enhanced feature flags with any tags that match the specified feature and label. Support space-separated tags: key[=value] [key[=value] ...].")
+
     with self.argument_context('appconfig enhanced-feature-flag list') as c:
         c.argument('feature_name', validator=validate_enhanced_feature_flag, help='Name of the enhanced feature flag to be listed. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix.')
         c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")

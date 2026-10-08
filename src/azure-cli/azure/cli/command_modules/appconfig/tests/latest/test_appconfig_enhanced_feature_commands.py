@@ -143,8 +143,8 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
 
         # Delete the enhanced feature flag
         self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
-                 checks=[self.check('name', entry_feature),
-                         self.check('label', entry_label)])
+                 checks=[self.check('[0].name', entry_feature),
+                         self.check('[0].label', entry_label)])
 
         # Confirm deletion
         self.cmd('appconfig enhanced-feature-flag list --endpoint {endpoint} --auth-mode login',
@@ -162,7 +162,7 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' not found.".format(entry_feature, entry_label)):
             self.cmd('appconfig enhanced-feature-flag disable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y')
 
-        # Delete a non-existent enhanced feature flag should fail
-        with self.assertRaisesRegex(ResourceNotFoundError, "Enhanced feature flag '{}' with label '{}' does not exist.".format(entry_feature, entry_label)):
-            self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y')
+        # Delete when no enhanced feature flag matches is a no-op that returns an empty result
+        self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
+                 checks=[self.is_empty()])
 

@@ -262,8 +262,8 @@ def get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, e
     feature_flag_client = None
     retry_policy = _get_data_plane_retry_policy()
 
-    if auth_mode == "anonymous":
-        try:
+    try:
+        if auth_mode == "anonymous":
             feature_flag_client = FeatureFlagClient(
                 base_url=endpoint,
                 credential=AzureKeyCredential(key=""),
@@ -271,27 +271,21 @@ def get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, e
                 user_agent=HttpHeaders.USER_AGENT,
                 transport=AuthHeaderRequestsTransport(),
                 retry_policy=retry_policy)
-        except (ValueError, TypeError) as ex:
-            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
 
-    if auth_mode == "key":
-        connection_string = resolve_connection_string(cmd, name, connection_string)
-        try:
+        elif auth_mode == "key":
+            connection_string = resolve_connection_string(cmd, name, connection_string)
             feature_flag_client = FeatureFlagClient.from_connection_string(connection_string=connection_string,
                                                                            user_agent=HttpHeaders.USER_AGENT,
                                                                            retry_policy=retry_policy)
-        except ValueError as ex:
-            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
 
-    if auth_mode == "login":
-        credential, endpoint = resolve_login_credential(cmd, name, endpoint)
-        try:
+        elif auth_mode == "login":
+            credential, endpoint = resolve_login_credential(cmd, name, endpoint)
             feature_flag_client = FeatureFlagClient(credential=credential,
                                                     base_url=endpoint,
                                                     user_agent=HttpHeaders.USER_AGENT,
                                                     retry_policy=retry_policy)
-        except (ValueError, TypeError) as ex:
-            raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
+    except (ValueError, TypeError) as ex:
+        raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
 
     return feature_flag_client
 

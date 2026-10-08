@@ -11,11 +11,12 @@ from knack.log import get_logger
 from azure.appconfiguration import (FeatureFlag,
                                     FeatureFlagConditions,
                                     FeatureFlagTelemetryConfiguration)
-from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.core import MatchConditions
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError, ResourceModifiedError
 from azure.cli.core.util import user_confirmation
 import azure.cli.core.azclierror as CLIErrors
 
-from ._constants import FeatureFlagConstants
+from ._constants import FeatureFlagConstants, SearchFilterOptions
 from ._utils import get_appconfig_feature_flag_client
 
 logger = get_logger(__name__)
@@ -148,9 +149,10 @@ def list_feature(cmd,
 
 
 def delete_feature(cmd,
-                   feature_name,
+                   feature_name=None,
                    name=None,
                    label=None,
+                   tags=None,
                    yes=False,
                    connection_string=None,
                    auth_mode="key",
@@ -158,24 +160,42 @@ def delete_feature(cmd,
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        feature_flag = feature_flag_client.get_feature_flag(name=feature_name, label=label)
-    except ResourceNotFoundError:
-        feature_flag = None
+        feature_flags = feature_flag_client.list_feature_flags(
+            name_filter=feature_name if feature_name else SearchFilterOptions.ANY_KEY,
+            label_filter=SearchFilterOptions.EMPTY_LABEL if label is None else label,
+            tags_filter=tags)
+        feature_flags = list(feature_flags)
     except HttpResponseError as exception:
-        raise CLIErrors.AzureResponseError(str(exception))
+        raise CLIErrors.AzureResponseError("Failed to read enhanced feature flag(s) that match the specified feature, label and tags. " + str(exception))
 
-    if feature_flag is None:
-        raise CLIErrors.ResourceNotFoundError("Enhanced feature flag '{}' with label '{}' does not exist.".format(feature_name, label))
-
-    confirmation_message = "Are you sure you want to delete the enhanced feature flag '{}' with label '{}'?".format(feature_name, label)
+    confirmation_message = "Found '{}' feature flags matching the specified feature, label, and tags. Are you sure you want to delete these feature flags?".format(len(feature_flags))
     user_confirmation(confirmation_message, yes)
 
-    try:
-        deleted_feature_flag = feature_flag_client.delete_feature_flag(name=feature_name, label=label)
-    except HttpResponseError as exception:
-        raise CLIErrors.AzureResponseError(str(exception))
+    deleted_feature_flags = []
+    exception_messages = []
+    for feature_flag in feature_flags:
+        try:
+            deleted_feature_flag = feature_flag_client.delete_feature_flag(name=feature_flag.name,
+                                                                           label=feature_flag.label,
+                                                                           etag=feature_flag.etag,
+                                                                           match_condition=MatchConditions.IfNotModified)
+            if deleted_feature_flag is not None:
+                deleted_feature_flags.append(_serialize_feature_flag(deleted_feature_flag))
+        except ResourceModifiedError:
+            exception_messages.append("Failed to delete feature flag '{}' with label '{}' due to a conflicting operation.".format(feature_flag.name, feature_flag.label))
+        except HttpResponseError as exception:
+            exception_messages.append(str(exception))
+            raise CLIErrors.AzureResponseError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
-    return _serialize_feature_flag(deleted_feature_flag)
+    # Log errors if partially succeeded
+    if exception_messages:
+        if deleted_feature_flags:
+            logger.error('Delete operation partially failed. The following error(s) occurred:\n%s\n',
+                         json.dumps(exception_messages, indent=2, ensure_ascii=False))
+        else:
+            raise CLIErrors.AzureResponseError('Delete operation failed. \n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
+
+    return deleted_feature_flags
 
 
 def enable_feature(cmd,

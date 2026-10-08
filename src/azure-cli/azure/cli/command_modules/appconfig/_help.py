@@ -661,7 +661,7 @@ helps['appconfig enhanced-feature-flag set'] = """
 
 helps['appconfig enhanced-feature-flag delete'] = """
     type: command
-    short-summary: Delete an enhanced feature flag.
+    short-summary: Delete enhanced feature flags.
     examples:
         - name: Delete an enhanced feature flag using App Configuration store name without confirmation.
           text:
@@ -669,6 +669,12 @@ helps['appconfig enhanced-feature-flag delete'] = """
         - name: Delete an enhanced feature flag using connection string.
           text:
             az appconfig enhanced-feature-flag delete --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --feature-name color --label MyLabel
+        - name: Delete all enhanced feature flags with label MyLabel using App Configuration store name.
+          text:
+            az appconfig enhanced-feature-flag delete -n MyAppConfiguration --feature-name * --label MyLabel --yes
+        - name: Delete all enhanced feature flags beginning with "MyApp" across all labels using App Configuration store name.
+          text:
+            az appconfig enhanced-feature-flag delete -n MyAppConfiguration --feature-name MyApp* --label * --yes
         - name: Delete an enhanced feature flag using App Configuration store endpoint and your 'az login' credentials.
           text:
             az appconfig enhanced-feature-flag delete --endpoint https://myappconfiguration.azconfig.io --feature-name color --auth-mode login
@@ -696,6 +702,9 @@ helps['appconfig enhanced-feature-flag list'] = """
         - name: List all enhanced feature flags.
           text:
             az appconfig enhanced-feature-flag list -n MyAppConfiguration
+        - name: List all enhanced feature flags with null labels.
+          text:
+            az appconfig enhanced-feature-flag list -n MyAppConfiguration --label \\0
         - name: List a specific feature for any label starting with v1. using connection string.
           text:
             az appconfig enhanced-feature-flag list --feature-name color --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --label v1.*
