@@ -40,19 +40,20 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         pipeline = (ROOT / 'azure-pipelines.yml').read_text()
         variables = (ROOT / '.azure-pipelines/templates/variables.yml').read_text()
         self.assertIn("windows_arm64_pool: 'pool-windows-2022-arm64'", variables)
+        self.assertIn('- name: enableWindowsArm64\n  type: boolean\n  default: false', pipeline)
         self.assertGreaterEqual(pipeline.count('Platform: arm64'), 4)
         self.assertGreaterEqual(pipeline.count('PoolName: ${{ variables.windows_arm64_pool }}'), 5)
+        self.assertGreaterEqual(pipeline.count('${{ if eq(parameters.enableWindowsArm64, true) }}:'), 5)
         self.assertIn('ArtifactName: msi-$(Platform)', pipeline)
         self.assertIn('ArtifactName: zip-$(Platform)', pipeline)
 
-    def test_windows_requirements_preserve_x86_native_wheels(self):
+    def test_unreleased_arm64_dependencies_are_not_pinned(self):
         requirements = (ROOT / 'src/azure-cli/requirements.py3.windows.txt').read_text()
-        self.assertIn('cryptography==48.0.1; platform_machine != "ARM64"', requirements)
-        self.assertIn('cryptography==51.0.0; platform_machine == "ARM64"', requirements)
-        self.assertIn('psutil==6.1.0; platform_machine != "ARM64"', requirements)
-        self.assertIn('psutil==7.2.2; platform_machine == "ARM64"', requirements)
-        self.assertIn('pyOpenSSL==26.2.0; platform_machine != "ARM64"', requirements)
-        self.assertIn('pyOpenSSL==26.5.0; platform_machine == "ARM64"', requirements)
+        self.assertIn('cryptography==48.0.1', requirements)
+        self.assertIn('psutil==6.1.0', requirements)
+        self.assertIn('pyOpenSSL==26.2.0', requirements)
+        self.assertNotIn('cryptography==51', requirements)
+        self.assertNotIn('pyOpenSSL==26.5', requirements)
 
 
 if __name__ == '__main__':

@@ -29,6 +29,9 @@ variables:
   value: '3.14'
 
 parameters:
+- name: enableWindowsArm64
+  type: boolean
+  default: false
 - name: architectures
   type: object
   default:
@@ -181,8 +184,9 @@ jobs:
     matrix:
       x64:
         PoolName: ${{ variables.windows_pool }}
-      arm64:
-        PoolName: ${{ variables.windows_arm64_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          PoolName: ${{ variables.windows_arm64_pool }}
   pool:
     name: $(PoolName)
 
@@ -229,9 +233,10 @@ jobs:
       x64:
         Platform: x64
         PoolName: ${{ variables.windows_pool }}
-      arm64:
-        Platform: arm64
-        PoolName: ${{ variables.windows_arm64_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: ExtractMetadata
   condition: succeeded()
@@ -278,9 +283,10 @@ jobs:
       x64:
         Platform: x64
         PoolName: ${{ variables.windows_pool }}
-      arm64:
-        Platform: arm64
-        PoolName: ${{ variables.windows_arm64_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: ExtractMetadata
   condition: succeeded()
@@ -330,9 +336,10 @@ jobs:
       x64:
         Platform: x64
         PoolName: ${{ variables.windows_pool }}
-      arm64:
-        Platform: arm64
-        PoolName: ${{ variables.windows_arm64_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -364,9 +371,10 @@ jobs:
       x64:
         Platform: x64
         PoolName: ${{ variables.windows_pool }}
-      arm64:
-        Platform: arm64
-        PoolName: ${{ variables.windows_arm64_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(PoolName)
