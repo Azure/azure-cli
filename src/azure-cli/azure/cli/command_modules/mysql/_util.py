@@ -12,6 +12,7 @@ import random
 import secrets
 import string
 import subprocess
+import sys
 import yaml
 from time import sleep
 import datetime as dt
@@ -22,7 +23,7 @@ from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.progress import IndeterminateProgressBar
-from azure.cli.core.util import CLIError, run_cmd
+from azure.cli.core.util import CLIError, run_cmd as core_run_cmd
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.core.rest import HttpRequest
@@ -376,11 +377,59 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
+def find_executable(executable):
+    """Find a dependency on PATH, excluding working-directory lookup on Windows."""
+    if sys.platform != 'win32':
+        import shutil
+        return shutil.which(executable)
+
+    if os.path.dirname(executable):
+        return os.path.abspath(executable) if os.path.isfile(executable) else None
+
+    # Some supported Python versions let shutil.which search the current directory first.
+    # Search PATH ourselves so a git.exe or gh.exe in the project cannot win that lookup.
+    # Keep Windows' .exe default; picking up a .cmd or .bat file could introduce shell parsing.
+    name = executable if os.path.splitext(executable)[1] else executable + '.exe'
+    current_directory = os.path.normcase(os.path.realpath(os.getcwd()))
+    for directory in os.environ.get('PATH', '').split(os.pathsep):
+        directory = directory.strip('"')
+        # Empty and relative entries, or the project directory itself, would undo that protection.
+        if not os.path.isabs(directory) or not os.path.splitdrive(directory)[0]:
+            continue
+        if os.path.normcase(os.path.realpath(directory)) == current_directory:
+            continue
+        candidate = os.path.join(directory, name)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return os.path.abspath(candidate)
+    return None
+
+
+def resolve_executable(executable):
+    """Bind Windows bare-name launches to PATH; retain explicit paths and Unix lookup behavior."""
+    if sys.platform != 'win32' or os.path.dirname(executable):
+        return executable
+    resolved = find_executable(executable)
+    if resolved is None:
+        # Do not retry the bare name: Windows could fall back to the file we meant to avoid.
+        import errno
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), executable)
+    return resolved
+
+
+def run_cmd(args, **kwargs):
+    """Run MySQL deployment tools without implicit Windows working-directory lookup."""
+    if isinstance(args, list) and args:
+        args = [resolve_executable(args[0]), *args[1:]]
+    return core_run_cmd(args, **kwargs)
+
+
 def run_subprocess(command, stdout_show=None):
+    commands = list(command)
+    commands[0] = resolve_executable(commands[0])
     if stdout_show:
-        process = subprocess.Popen(command)
+        process = subprocess.Popen(commands)
     else:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
