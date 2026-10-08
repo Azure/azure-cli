@@ -51,7 +51,7 @@ set ARTIFACTS_DIR=%~dp0..\artifacts
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
-set WIX_DIR=%ARTIFACTS_DIR%\wix
+set WIX_DIR=%ARTIFACTS_DIR%\wix-3.14.1
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
 REM Get the absolute directory since we pushd into different levels of subdirectories.
