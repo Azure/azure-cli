@@ -8,6 +8,8 @@
   <?define ProductAuthor = "Microsoft Corporation" ?>
   <?define ProductResources = ".\resources\" ?>
   <?define UpgradeCode32 = "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
+  <?define UpgradeCode64 = "90762fec-9554-4729-a107-c6a8ea316698" ?>
+  <?define UpgradeCodeArm64 = "E2FCECB7-7E7D-42E3-BC3A-FDF3004AE223" ?>
 
   <?if $(var.Platform) = "x64" ?>
   <?define AzureCliRegistryGuid = "90b6367e-4e15-4313-af33-a0ef459a56fc" ?>
@@ -16,8 +18,20 @@
   <?define ProgramFilesFolder = "ProgramFiles64Folder" ?>
   <?define RemoveAzureCLIFolderGuid = "7ce8a521-7429-4ded-9cce-0948e393cc83" ?>
   <?define RemoveCLIFolderGuid = "59fb416c-91d0-49aa-a185-d4330c435a93" ?>
-  <?define UpgradeCode = "90762fec-9554-4729-a107-c6a8ea316698" ?>
+  <?define UpgradeCode = $(var.UpgradeCode64) ?>
   <?define Architecture = "64-bit" ?>
+  <?define InstallerVersion = "200" ?>
+
+  <?elseif $(var.Platform) = "arm64" ?>
+  <?define AzureCliRegistryGuid = "43A564F2-04D5-44CA-AEF6-6188DF3A1816" ?>
+  <?define AzureCliSystemPathGuid = "3729630C-F41E-4A3C-9F6A-88BADEDF7914" ?>
+  <?define AzureCliVersionGuid = "57B936E0-734F-47FE-8D82-9303622BF9D7" ?>
+  <?define ProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define RemoveAzureCLIFolderGuid = "38254D07-0591-4079-96D8-B09406439157" ?>
+  <?define RemoveCLIFolderGuid = "88D17E6B-925E-4799-8B35-28476A0E7F85" ?>
+  <?define UpgradeCode = $(var.UpgradeCodeArm64) ?>
+  <?define Architecture = "ARM64" ?>
+  <?define InstallerVersion = "500" ?>
 
   <?elseif $(var.Platform) = "x86" ?>
   <?define AzureCliRegistryGuid = "BDEEE50E-70D3-4990-BFF9-FCF8114AA701" ?>
@@ -28,6 +42,7 @@
   <?define RemoveCLIFolderGuid = "24DA394D-B03D-4623-A0D9-852DB51EF9F4" ?>
   <?define UpgradeCode = $(var.UpgradeCode32) ?>
   <?define Architecture = "32-bit" ?>
+  <?define InstallerVersion = "200" ?>
 
   <?else ?>
   <?error Unsupported platform "$(var.Platform)" ?>
@@ -40,7 +55,7 @@
            Manufacturer="$(var.ProductAuthor)"
            UpgradeCode="$(var.UpgradeCode)">
 
-    <Package InstallerVersion="200"
+    <Package InstallerVersion="$(var.InstallerVersion)"
              Compressed="yes"
              InstallScope="perMachine" />
 
@@ -59,6 +74,15 @@
       <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
+    <?endif ?>
+
+    <?if $(var.Platform) = "arm64" ?>
+    <Upgrade Id="$(var.UpgradeCode64)">
+      <UpgradeVersion Property="WIX_X64_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
+      <UpgradeVersion Property="WIX_X64_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
+    </Upgrade>
+    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED OR WIX_X64_DOWNGRADE_DETECTED)</Condition>
+    <?elseif $(var.UpgradeCode) != $(var.UpgradeCode32) ?>
     <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
     <?else ?>
     <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>

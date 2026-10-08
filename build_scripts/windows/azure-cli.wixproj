@@ -41,6 +41,18 @@
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|arm64' ">
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
+    <InstallerPlatform>arm64</InstallerPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|arm64' ">
+    <OutputPath>out\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
+    <InstallerPlatform>arm64</InstallerPlatform>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="out\azure-cli.wxs">
       <Link>azure-cli.wxs</Link>
