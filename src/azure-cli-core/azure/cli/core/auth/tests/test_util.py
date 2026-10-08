@@ -6,7 +6,8 @@
 # pylint: disable=protected-access
 
 import unittest
-from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command
+from azure.cli.core.auth.util import (scopes_to_resource, resource_to_scopes, _generate_login_command,
+                                      read_response_templates, WAM_ENABLEMENT_URL)
 
 
 class TestUtil(unittest.TestCase):
@@ -77,6 +78,22 @@ class TestUtil(unittest.TestCase):
                           'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
                           '--scope "https://management.core.windows.net//.default" '
                           '--claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"')
+
+    def test_read_response_templates_without_wam_prompt(self):
+        # By default, the WAM prompt is not included and the placeholder is removed.
+        success_template, error_template = read_response_templates()
+        assert '{{wam_prompt}}' not in success_template
+        assert 'Web Account Manager (WAM)' not in success_template
+        assert WAM_ENABLEMENT_URL not in success_template
+        # error template is always returned
+        assert '$error' in error_template
+
+    def test_read_response_templates_with_wam_prompt(self):
+        # When requested, the WAM prompt is injected with the enablement doc link.
+        success_template, _ = read_response_templates(show_wam_prompt=True)
+        assert '{{wam_prompt}}' not in success_template
+        assert 'Web Account Manager (WAM)' in success_template
+        assert WAM_ENABLEMENT_URL in success_template
 
 
 if __name__ == '__main__':
