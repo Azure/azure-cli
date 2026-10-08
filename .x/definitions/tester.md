@@ -1,6 +1,6 @@
 # Repository scope: Azure/azure-cli
 
-This definition is active only for `Azure/azure-cli`. Its `.x/x.yml` profile determines enabled stages. Other-repository examples in the preserved charter do not grant additional capabilities. Generic helper APIs keep their existing deterministic safeguards.
+This definition is active only for `Azure/azure-cli`. Its `.x/x.yml` profile determines enabled stages. Generic helper APIs keep their existing deterministic safeguards.
 
 # Tester - Run Live Tests via GitHub Actions
 
@@ -25,7 +25,7 @@ from x_engineering_agent.tools.live_tests.workflows import (
 )
 run = dispatch_live_test_workflow(
     pr_number=33150,
-    pr_repo="Azure/azure-cli-extensions",  # or "Azure/azure-cli"
+    pr_repo="Azure/azure-cli",
 )
 print(get_workflow_run(run["id"]))
 PYEOF
@@ -44,12 +44,8 @@ The opening `<<'PYEOF'` MUST be quoted. Closing tag at column 0.
 
 Given a PR in a repository whose profile enables live tests:
 
-Do not run Tester on analysis-only `Azure/terraform-provider-azapi` or
-`Azure/azclips`; neither has a live-test path. Use upstream CI for Azclips.
-For `Azure/azure-powershell`, use the profile's
-`live-test-powershell.yml` workflow to run TestFx `Record` tests scoped to
-changed `<Service>.Test` files. Do not apply Azure CLI's `azdev test --live`
-conventions to PowerShell.
+Use the profile's `live-test.yml` workflow, which runs `azdev test --live`
+for the resolved module or extension.
 
 1. **Run for each Copilot complete inflight PR head SHA** — do not gate on draft state or "new test files". A PR is ready when timeline shows Copilot finished work ("Copilot finished work on behalf of ...").
 
@@ -66,9 +62,7 @@ conventions to PowerShell.
    ```python
    from x_engineering_agent.tools.live_tests.workflows import dispatch_live_test_workflow
    # The dispatcher reads this repository's profile and changed files.
-   # PowerShell uses changed_ps_test_files, resolves a psmodule and selects
-   # live-test-powershell.yml. An empty selection returns a neutral skip.
-   # CLI repositories resolve a module or extension and use live-test.yml.
+   # This package resolves a module or extension and uses live-test.yml.
    run = dispatch_live_test_workflow(
        pr_number=pr["pr_number"], pr_repo=pr["repo"],
    )
@@ -108,14 +102,13 @@ https://github.com/Azure/issue-sentinel/blob/main/.github/workflows/live-test.ym
 ## Tools I Use (from the Agent tools package)
 
 ```python
-from x_engineering_agent.tools.agents.tester.azure_cli import (
-    changed_test_files,
+from x_engineering_agent.tools.live_tests.selection import (
+    changed_test_files,                  # changed_test_files(repo_full, pr_files)
     get_pr_regression_coverage_summary,
-    infer_target,
-    resolve_target,
 )
-from x_engineering_agent.tools.agents.tester.azure_powershell import (
-    changed_ps_test_files,
+from x_engineering_agent.tools.targets.inference import (
+    infer_target_for_repo,
+    resolve_target_for_repo,
 )
 from x_engineering_agent.tools.live_tests.workflows import (
     dispatch_live_test_workflow,  # POST workflow_dispatch + locate the new run
@@ -126,5 +119,5 @@ from x_engineering_agent.tools.live_tests.workflows import (
 ## Boundaries
 
 **I do:** Dispatch the live test workflow once per head SHA, read its state once per round, return the conclusion or "still pending."
-**I don't:** Act on `Azure/azclips`, block the round, provision
+**I don't:** Block the round, provision
 infrastructure, SSH anywhere, write code, comment on the PR or approve PRs.
