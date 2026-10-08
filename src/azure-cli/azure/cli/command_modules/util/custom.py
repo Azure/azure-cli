@@ -181,7 +181,10 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     importlib.reload(subprocess)
     importlib.reload(json)
 
-    version_result = subprocess.check_output(['az', 'version', '-o', 'json'], shell=platform.system() == 'Windows')
+    az_cmd_prefix = _get_az_cmd_prefix()
+    # shell=False is used together with absolute executable paths (see _get_az_cmd_prefix) to avoid
+    # binary planting from the current working directory (CWE-427).
+    version_result = subprocess.check_output(az_cmd_prefix + ['version', '-o', 'json'])
     version_json = json.loads(version_result)
     new_version = version_json['azure-cli-core']
 
@@ -196,14 +199,29 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
-            cmds = ['az', 'extension', 'update', '-n', ext_name]
+            cmds = az_cmd_prefix + ['extension', 'update', '-n', ext_name]
             if allow_preview is not None:
                 cmds += ["--allow-preview", str(allow_preview)]
-            subprocess.call(cmds, shell=platform.system() == 'Windows')
+            subprocess.call(cmds)
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
     logger.warning("Upgrade finished.")
+
+
+def _get_az_cmd_prefix():
+    """Return the command prefix used to safely invoke 'az' in a subprocess.
+
+    On Windows, 'az' is a batch script (az.cmd) that must be run through cmd.exe. Both cmd.exe and
+    az are resolved to absolute paths while excluding the current working directory, so a planted
+    cmd.exe / az.{exe,cmd,bat} in the working directory cannot be executed (CWE-427). On other
+    platforms 'az' is an executable on PATH and is resolved the same way.
+    """
+    import platform
+    from azure.cli.core.util import get_safe_executable_path
+    if platform.system() == 'Windows':
+        return [get_safe_executable_path('cmd.exe'), '/c', get_safe_executable_path('az')]
+    return [get_safe_executable_path('az')]
 
 
 def _upgrade_on_windows():

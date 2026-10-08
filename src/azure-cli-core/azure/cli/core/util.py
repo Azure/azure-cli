@@ -1634,6 +1634,75 @@ def should_encrypt_token_cache(cli_ctx):
     return encrypt
 
 
+def _get_trusted_search_dirs():
+    """Return an ordered list of trusted directories to search for executables.
+
+    The current working directory (and empty ``PATH`` entries, which Windows treats as the current
+    directory) are deliberately excluded so a planted binary there can never be selected.
+    """
+    search_dirs = []
+    if sys.platform.startswith('win'):
+        # Prefer the Windows system directory for system executables such as cmd.exe.
+        system_root = os.environ.get('SystemRoot') or os.environ.get('windir') or r'C:\Windows'
+        search_dirs.append(os.path.join(system_root, 'System32'))
+        search_dirs.append(system_root)
+
+    cwd = os.path.abspath(os.getcwd())
+    for directory in os.environ.get('PATH', os.defpath).split(os.pathsep):
+        directory = directory.strip('"')
+        if directory and os.path.abspath(directory) != cwd:
+            search_dirs.append(directory)
+
+    return search_dirs
+
+
+def _get_executable_candidates(executable):
+    """Return the candidate file names for an executable, expanding Windows PATHEXT extensions."""
+    if not sys.platform.startswith('win'):
+        return [executable]
+
+    pathext = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
+    if os.path.splitext(executable)[1].lower() in [ext.lower() for ext in pathext]:
+        # The name already carries a recognized extension (e.g. cmd.exe); use it as-is.
+        return [executable]
+
+    return [executable + ext for ext in pathext] + [executable]
+
+
+def get_safe_executable_path(executable):
+    """Resolve an executable name to an absolute path using only trusted directories.
+
+    This mitigates binary planting / executable hijacking (CWE-427). On Windows, ``CreateProcess``
+    (and ``cmd.exe``) resolve a bare executable name such as ``cmd.exe`` or ``az`` against the
+    calling process's current directory *before* the system directory and ``PATH``. An attacker who
+    can drop a malicious ``cmd.exe`` / ``az.{exe,cmd,bat}`` into a directory the victim ``cd``'s into
+    could therefore get arbitrary code execution. Resolving to an absolute path from trusted
+    directories only (never the current working directory) removes that ambiguity.
+
+    :param executable: The executable name to resolve, e.g. ``cmd.exe`` or ``az``.
+    :return: The resolved absolute path if found, otherwise the original ``executable`` value so
+        callers keep their existing (pre-resolution) behavior as a fallback.
+    """
+    # Already an explicit path (absolute or containing a directory component): nothing to resolve.
+    if os.path.dirname(executable):
+        return executable
+
+    candidates = _get_executable_candidates(executable)
+    seen = set()
+    for directory in _get_trusted_search_dirs():
+        normalized = os.path.normcase(os.path.abspath(directory))
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        for candidate in candidates:
+            full_path = os.path.join(directory, candidate)
+            if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                return full_path
+
+    # Fall back to the original name if resolution fails (e.g. executable not on PATH).
+    return executable
+
+
 def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):
     """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
     and shell=False. Other arguments are keyword-only. For their documentation, see

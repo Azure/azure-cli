@@ -17,7 +17,8 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin)
+    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin,
+     get_safe_executable_path)
 from azure.cli.core.mock import DummyCli
 
 
@@ -741,6 +742,60 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(roughly_parse_command(['az']), 'az')
         self.assertEqual(roughly_parse_command(['--help']), '')  # Starts with flag
         self.assertEqual(roughly_parse_command(['-h']), '')  # Starts with short flag
+
+class TestSafeExecutablePath(unittest.TestCase):
+    """Tests for get_safe_executable_path, which mitigates binary planting (CWE-427)."""
+
+    def test_explicit_path_returned_as_is(self):
+        # A path that already includes a directory component should be returned unchanged.
+        explicit = os.path.join('some', 'dir', 'tool')
+        self.assertEqual(get_safe_executable_path(explicit), explicit)
+
+    def test_current_working_directory_is_excluded(self):
+        # A matching executable planted in the current working directory must NOT be selected.
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            exe_name = 'planted.exe' if platform.system() == 'Windows' else 'planted'
+            planted = os.path.join(tmp_dir, exe_name)
+            with open(planted, 'w', encoding='utf-8') as f:
+                f.write('')
+            os.chmod(planted, 0o755)
+
+            orig_cwd = os.getcwd()
+            try:
+                os.chdir(tmp_dir)
+                # CWD is deliberately not part of the search set, so resolution falls back
+                # to the original bare name rather than the planted binary.
+                with mock.patch.dict(os.environ, {'PATH': tmp_dir}):
+                    resolved = get_safe_executable_path(exe_name)
+                self.assertEqual(resolved, exe_name)
+                self.assertNotEqual(resolved, planted)
+            finally:
+                os.chdir(orig_cwd)
+
+    def test_resolves_from_trusted_path_dir(self):
+        # An executable located in a trusted PATH directory (not the CWD) should be resolved
+        # to its absolute path.
+        with tempfile.TemporaryDirectory() as path_dir, tempfile.TemporaryDirectory() as work_dir:
+            exe_name = 'mytool.exe' if platform.system() == 'Windows' else 'mytool'
+            target = os.path.join(path_dir, exe_name)
+            with open(target, 'w', encoding='utf-8') as f:
+                f.write('')
+            os.chmod(target, 0o755)
+
+            orig_cwd = os.getcwd()
+            try:
+                os.chdir(work_dir)
+                with mock.patch.dict(os.environ, {'PATH': path_dir}):
+                    resolved = get_safe_executable_path(exe_name)
+                self.assertEqual(os.path.normcase(resolved), os.path.normcase(target))
+            finally:
+                os.chdir(orig_cwd)
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'cmd.exe resolution is Windows-specific')
+    def test_cmd_exe_resolves_to_system32(self):
+        resolved = get_safe_executable_path('cmd.exe')
+        self.assertTrue(os.path.isabs(resolved))
+        self.assertTrue(resolved.lower().endswith('cmd.exe'))
 
 if __name__ == '__main__':
     unittest.main()
