@@ -30,9 +30,11 @@ AZURE_CLI_SITE_PACKAGES="$INSTALL_DIR/libexec/lib/python${PY_VER}/site-packages"
 
 # Use the resolved cask location so symlinked prefixes stay paired with their Python.
 CASK_DIR="${INSTALL_DIR%/*}"
-if [[ "$CASK_DIR" == */Caskroom/azure-cli ]]; then
+if [[ "$CASK_DIR" == */Caskroom/azure-cli ]] || \
+    [[ "$CASK_DIR" == */Caskroom/azure-cli-* ]]; then
     INSTALLER="HOMEBREW_CASK"
-    BREW_PREFIX="${CASK_DIR%/Caskroom/azure-cli}"
+    CASKROOM_DIR="${CASK_DIR%/*}"
+    BREW_PREFIX="${CASKROOM_DIR%/Caskroom}"
 else
     INSTALLER="TARBALL"
 fi

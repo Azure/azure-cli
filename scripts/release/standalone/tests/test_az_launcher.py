@@ -23,6 +23,8 @@ _builder_spec.loader.exec_module(builder)
 
 PYTHON_VERSION = "3.14"
 CASK_INSTALL_PATH = Path("Caskroom/azure-cli/2.85.0")
+PREVIEW_CASK_INSTALL_PATH = Path("Caskroom/azure-cli-preview/2.85.0")
+TEST_CASK_INSTALL_PATH = Path("Caskroom/azure-cli-test-ci/2.85.0")
 SITE_PACKAGES_PATH = Path(f"libexec/lib/python{PYTHON_VERSION}/site-packages")
 PYTHON_CANDIDATES = (
     f"opt/python@{PYTHON_VERSION}/libexec/bin/python",
@@ -106,13 +108,14 @@ class TestAzLauncher(unittest.TestCase):
 
     def test_cask_prefix_layouts(self):
         # Virtualize standard prefixes beneath the fixture root, without rewriting the template.
-        for layout in ("custom prefix", "opt/homebrew", "usr/local", "home/linuxbrew/.linuxbrew"):
-            with self.subTest(prefix=layout):
-                prefix = self.root / layout
-                install_dir = prefix / CASK_INSTALL_PATH
-                launcher = self._install(install_dir)
-                python = self._python(prefix / PYTHON_CANDIDATES[0])
-                self._assert_python(self._run(launcher), python, install_dir)
+        for cask_path in (CASK_INSTALL_PATH, PREVIEW_CASK_INSTALL_PATH, TEST_CASK_INSTALL_PATH):
+            for layout in ("custom prefix", "opt/homebrew", "usr/local", "home/linuxbrew/.linuxbrew"):
+                with self.subTest(cask=cask_path.parts[-2], prefix=layout):
+                    prefix = self.root / layout
+                    install_dir = prefix / cask_path
+                    launcher = self._install(install_dir)
+                    python = self._python(prefix / PYTHON_CANDIDATES[0])
+                    self._assert_python(self._run(launcher), python, install_dir)
 
     def test_relocated_cask_resolves_directory_and_launcher_symlinks(self):
         for absolute in (False, True):
@@ -237,7 +240,6 @@ class TestAzLauncher(unittest.TestCase):
         python = self._python(self.root / "explicit interpreter with spaces/python")
         for layout in (
             "tarball with spaces",
-            "Caskroom/azure-cli-preview/2.85.0",
             "not-Caskroom/azure-cli/2.85.0",
             "Caskroom/azure-cli/2.85.0/nested",
             "Caskroom/azure-cli",
