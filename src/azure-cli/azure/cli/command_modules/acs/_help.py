@@ -2191,6 +2191,7 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+    long-summary: Automatically enabled for Windows2025 node pools because Windows2025 requires a FIPS-enabled OS image.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this nodepool.
@@ -2401,7 +2402,10 @@ parameters:
     short-summary: Enable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
-    short-summary: The os-sku of the agent node pool.
+    short-summary: The OS SKU of the agent node pool.
+    long-summary: |
+        Windows2022 node pools can be upgraded to Windows2025. Specify --enable-fips-image when upgrading a non-FIPS node pool.
+        Downgrading from Windows2025 to Windows2022 is not supported.
   - name: --enable-fips-image
     type: bool
     short-summary: Switch to use FIPS-enabled OS on agent nodes.
@@ -2447,6 +2451,11 @@ examples:
     text: az aks nodepool update --disable-cluster-autoscaler -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Update min-count or max-count for cluster autoscaler.
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+  - name: Upgrade a Windows2022 node pool to Windows2025 with a FIPS-enabled OS image.
+    text: |
+        az aks nodepool update --resource-group MyResourceGroup \\
+            --cluster-name MyManagedCluster --name npwin \\
+            --os-sku Windows2025 --enable-fips-image
 """
 
 helps["aks nodepool upgrade"] = """

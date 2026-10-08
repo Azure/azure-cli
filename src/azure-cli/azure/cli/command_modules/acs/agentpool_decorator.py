@@ -1482,7 +1482,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     # Mutable Fips now allows changes after create
     def get_enable_fips_image(self) -> bool:
-        """Obtain the value of enable_fips_image, default value is False.
+        """Obtain enable_fips_image, defaulting to False except for new Windows2025 pools.
         :return: bool
         """
 
@@ -1496,6 +1496,13 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.enable_fips is not None
             ):
                 enable_fips_image = self.agentpool.enable_fips
+            elif self.get_os_sku() == CONST_OS_SKU_WINDOWS2025:
+                if self.get_disable_fips_image():
+                    raise ArgumentUsageError(
+                        '"--disable-fips-image" cannot be used with "--os-sku Windows2025", '
+                        "which requires a FIPS-enabled OS image."
+                    )
+                enable_fips_image = True
 
         # Verify both flags have not been set
         if enable_fips_image and self.get_disable_fips_image():
