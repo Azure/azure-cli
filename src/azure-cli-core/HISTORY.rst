@@ -5,6 +5,7 @@ Release History
 
 2.91.0
 ++++++
+* Add missing `synapse_analytics_resource_id` for `AzureBleuCloud` (#34059)
 * Remove AzureGermanCloud from hard-coded cloud list (#34042)
 * PREVIEW: Enable broker-based authentication on macOS (opt-in via `az config set core.enable_broker_on_mac=true`) (#33376)
 
