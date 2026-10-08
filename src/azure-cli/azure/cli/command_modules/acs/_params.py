@@ -1354,7 +1354,9 @@ def load_arguments(self, _):
         c.argument(
             'ssh_access',
             arg_type=get_enum_type(ssh_accesses),
-            help='Update SSH access for the node pool. This change takes effect after the node pool is upgraded.',
+            help='Update SSH access for the node pool. For Kubernetes versions below 1.37, this change takes '
+                 'effect after the node pool is upgraded. For Kubernetes versions 1.37 and above, this change '
+                 'can trigger node pool reimaging.',
         )
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument("if_match")

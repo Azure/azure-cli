@@ -2997,8 +2997,9 @@ class AKSAgentPoolUpdateDecorator:
                 return agentpool
 
             msg = (
-                f"You're going to update agentpool {agentpool.name} ssh access to '{ssh_access}' "
-                "This change will take effect after you upgrade the nodepool. Proceed?"
+                f"You're going to update agentpool {agentpool.name} ssh access to '{ssh_access}'. "
+                "For Kubernetes versions below 1.37, this change takes effect after you upgrade the node pool. "
+                "For Kubernetes versions 1.37 and above, this change can trigger node pool reimaging. Proceed?"
             )
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException()
