@@ -10,7 +10,7 @@ from azure.cli.command_modules.config._validators import validate_param_persist,
 def load_command_table(self, _):
     config_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.config.custom#{}')
 
-    with self.command_group('config', config_custom, is_experimental=True) as g:
+    with self.command_group('config', config_custom) as g:
         g.command('set', 'config_set')
         g.command('get', 'config_get')
         g.command('unset', 'config_unset')
