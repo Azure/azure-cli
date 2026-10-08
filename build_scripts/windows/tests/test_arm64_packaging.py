@@ -17,6 +17,8 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn('else if "%ARCH%"=="arm64"', build)
         self.assertIn('set PYTHON_ARCH=arm64', build)
         self.assertIn('wix314-binaries.zip', build)
+        self.assertIn('WIX_DOWNLOAD_SHA256=6AC824E1642D6F7277D0ED7EA09411A508F6116BA6FAE0AA5F2C7DAA2FF43D31', build)
+        self.assertIn('Get-FileHash -Algorithm SHA256 wix-archive.zip', build)
 
     def test_wix_project_builds_arm64_packages(self):
         project = (ROOT / 'build_scripts/windows/azure-cli.wixproj').read_text(encoding='utf-8-sig')

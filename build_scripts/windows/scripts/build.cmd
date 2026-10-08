@@ -35,6 +35,7 @@ if "%ARCH%"=="x86" (
 set PYTHON_VERSION=3.14.7
 
 set WIX_DOWNLOAD_URL="https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip"
+set WIX_DOWNLOAD_SHA256=6AC824E1642D6F7277D0ED7EA09411A508F6116BA6FAE0AA5F2C7DAA2FF43D31
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
@@ -88,6 +89,8 @@ if "%TARGET%" == "msi" (
         pushd %WIX_DIR%
         echo Downloading Wix.
         curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
+        powershell.exe -NoProfile -Command "if ((Get-FileHash -Algorithm SHA256 wix-archive.zip).Hash -ne '%WIX_DOWNLOAD_SHA256%') { throw 'WiX archive SHA-256 mismatch' }"
+        if %errorlevel% neq 0 goto ERROR
         unzip wix-archive.zip
         if %errorlevel% neq 0 goto ERROR
         del wix-archive.zip
