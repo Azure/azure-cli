@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -14,11 +14,17 @@ class WindowsArm64PackagingTest(unittest.TestCase):
 
     def test_build_uses_arm64_python_and_wix(self):
         build = (ROOT / 'build_scripts/windows/scripts/build.cmd').read_text()
+        project = (ROOT / 'build_scripts/windows/azure-cli.wixproj').read_text(encoding='utf-8-sig')
         self.assertIn('else if "%ARCH%"=="arm64"', build)
         self.assertIn('set PYTHON_ARCH=arm64', build)
         self.assertIn('wix314-binaries.zip', build)
-        self.assertIn('WIX_DOWNLOAD_SHA256=6AC824E1642D6F7277D0ED7EA09411A508F6116BA6FAE0AA5F2C7DAA2FF43D31', build)
+        self.assertIn(
+            'WIX_DOWNLOAD_SHA256=6AC824E1642D6F7277D0ED7EA09411A508F6116BA6FAE0AA5F2C7DAA2FF43D31',
+            build,
+        )
         self.assertIn('Get-FileHash -Algorithm SHA256 wix-archive.zip', build)
+        self.assertIn('set WIX_DIR=%ARTIFACTS_DIR%\\wix-3.14.1', build)
+        self.assertIn('<LocalWixRoot>artifacts\\wix-3.14.1</LocalWixRoot>', project)
 
     def test_wix_project_builds_arm64_packages(self):
         project = (ROOT / 'build_scripts/windows/azure-cli.wixproj').read_text(encoding='utf-8-sig')
@@ -42,8 +48,12 @@ class WindowsArm64PackagingTest(unittest.TestCase):
         self.assertIn("windows_arm64_pool: 'pool-windows-2022-arm64'", variables)
         self.assertIn('- name: enableWindowsArm64\n  type: boolean\n  default: false', pipeline)
         self.assertGreaterEqual(pipeline.count('Platform: arm64'), 4)
-        self.assertGreaterEqual(pipeline.count('PoolName: ${{ variables.windows_arm64_pool }}'), 5)
-        self.assertGreaterEqual(pipeline.count('${{ if eq(parameters.enableWindowsArm64, true) }}:'), 5)
+        self.assertGreaterEqual(
+            pipeline.count('PoolName: ${{ variables.windows_arm64_pool }}'), 5
+        )
+        self.assertGreaterEqual(
+            pipeline.count('${{ if eq(parameters.enableWindowsArm64, true) }}:'), 5
+        )
         self.assertIn('ArtifactName: msi-$(Platform)', pipeline)
         self.assertIn('ArtifactName: zip-$(Platform)', pipeline)
 
