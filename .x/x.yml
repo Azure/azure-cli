@@ -24,3 +24,37 @@ dependencies:
     azure-cli: 2.90.0
     azure-cli-testsdk: 0.3.0
     pytest: 8.4.2
+
+# How the engine publishes changes: from its fork (fork), from its fork with a verified
+# head (verified-fork) or from a branch in this repository (upstream-branch).
+publication:
+  mode: fork
+
+# What this repository's tools may reach. Reads stay within the Azure organization;
+# a write to another repository needs that repository to list this one in accept_from.
+access:
+  read:
+  - Azure/azure-cli
+  - Azure/azure-cli-extensions
+  - Azure/aaz
+  write:
+  - Azure/azure-cli
+  - Azure/azure-cli-extensions
+  accept_from:
+  - Azure/azure-cli-extensions
+  generation_source: true
+
+# Files a generated change may touch and the bounds of its execution job.
+job:
+  allowed_paths:
+  - src/*
+  - doc/*
+  - scripts/*
+  - README.*
+  - HISTORY.rst
+  - pyproject.toml
+  - setup.cfg
+  - requirements*.txt
+  execution_slice_seconds: 900
+  checkout_excludes:
+  - '**/recordings/*'
