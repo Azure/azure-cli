@@ -1431,6 +1431,41 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # Update takes directly from flag value not from agentpool property
         self.assertEqual(ctx_2.get_enable_fips_image(), False)
 
+    def common_get_enable_fips_image_windows2025(self):
+        cases = [
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2025}, True),
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2025, "enable_fips_image": True}, True),
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2022}, False),
+            (DecoratorMode.CREATE, {"os_sku": "Ubuntu"}, False),
+            (DecoratorMode.CREATE, {"os_sku": "Ubuntu", "enable_fips_image": True}, True),
+            (DecoratorMode.UPDATE, {"os_sku": CONST_OS_SKU_WINDOWS2025}, False),
+            (DecoratorMode.UPDATE, {"os_sku": CONST_OS_SKU_WINDOWS2025, "enable_fips_image": True}, True),
+        ]
+        for decorator_mode, raw_parameters, expected in cases:
+            with self.subTest(decorator_mode=decorator_mode, raw_parameters=raw_parameters):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict(raw_parameters),
+                    self.models,
+                    decorator_mode,
+                    self.agentpool_decorator_mode,
+                )
+                self.assertEqual(ctx.get_enable_fips_image(), expected)
+                ctx.attach_agentpool(
+                    self.create_initialized_agentpool_instance(os_sku=raw_parameters["os_sku"])
+                )
+                self.assertEqual(ctx.get_enable_fips_image(), expected)
+
+        ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_sku": CONST_OS_SKU_WINDOWS2025, "disable_fips_image": True}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        with self.assertRaisesRegex(ArgumentUsageError, "Windows2025"):
+            ctx.get_enable_fips_image()
+
     def common_get_disable_fips_image(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -2108,6 +2143,9 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
 
+    def test_get_enable_fips_image_windows2025(self):
+        self.common_get_enable_fips_image_windows2025()
+
     def test_get_disable_fips_image(self):
         self.common_get_disable_fips_image()
 
@@ -2318,6 +2356,9 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
 
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
+
+    def test_get_enable_fips_image_windows2025(self):
+        self.common_get_enable_fips_image_windows2025()
 
     def test_get_enable_artifact_streaming(self):
         self.common_get_enable_artifact_streaming()
@@ -4092,6 +4133,53 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             agentpool_1,
             headers={},
         )
+
+    def test_update_agentpool_windows2025(self):
+        for current_fips, enable_fips_image, expected_fips in [
+            (False, True, True),
+            (True, False, True),
+            (False, False, False),
+        ]:
+            with self.subTest(current_fips=current_fips, enable_fips_image=enable_fips_image):
+                dec = AKSAgentPoolUpdateDecorator(
+                    self.cmd,
+                    self.client,
+                    {
+                        "resource_group_name": "test_rg_name",
+                        "cluster_name": "test_cluster_name",
+                        "nodepool_name": "test_nodepool_name",
+                        "os_sku": CONST_OS_SKU_WINDOWS2025,
+                        "enable_fips_image": enable_fips_image,
+                    },
+                    self.resource_type,
+                    self.agentpool_decorator_mode,
+                )
+                self.client.get = Mock(
+                    return_value=self.create_initialized_agentpool_instance(
+                        nodepool_name="test_nodepool_name",
+                        os_type="Windows",
+                        os_sku=CONST_OS_SKU_WINDOWS2022,
+                        enable_fips=current_fips,
+                    )
+                )
+                with patch(
+                    "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+                    return_value=Mock(list=Mock(return_value=[])),
+                ):
+                    agentpool = dec.update_agentpool_profile_default()
+                self.assertEqual(agentpool.os_sku, CONST_OS_SKU_WINDOWS2025)
+                self.assertEqual(agentpool.enable_fips, expected_fips)
+                with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
+                    dec.update_agentpool(agentpool)
+                put_agentpool.assert_called_once_with(
+                    False,
+                    self.client.begin_create_or_update,
+                    "test_rg_name",
+                    "test_cluster_name",
+                    "test_nodepool_name",
+                    agentpool,
+                    headers={},
+                )
 
     def test_update_localdns_profile(self):
         self.common_update_localdns_profile()
