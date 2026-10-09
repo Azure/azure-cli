@@ -62,6 +62,10 @@ class AAZLROPoller:
         self._done = None
         self._exception = None
 
+        # MSAL lazily imports requests when the credential is created on the polling thread,
+        # which can raise _DeadlockError (seen on Python 3.14). Import it here on the main thread first.
+        import requests  # pylint: disable=unused-import
+
         self._done = threading.Event()
         self._thread = threading.Thread(
             target=with_current_context(self._start),
