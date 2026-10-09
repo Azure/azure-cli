@@ -49,6 +49,10 @@ from .aaz.latest.network.application_gateway.root_cert import Create as _RootCer
 from .aaz.latest.network.application_gateway.routing_rule import Create as _RoutingRuleCreate, \
     Update as _RoutingRuleUpdate
 from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, Update as _RuleUpdate
+from .aaz.latest.network.application_gateway.advanced_routing_map import Create as _AdvancedRoutingMapCreate, \
+    Update as _AdvancedRoutingMapUpdate
+from .aaz.latest.network.application_gateway.advanced_routing_map.rule import \
+    Create as _AdvancedRoutingMapRuleCreate, Update as _AdvancedRoutingMapRuleUpdate
 from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
@@ -356,6 +360,9 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         )
         args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
         args_schema.custom_error_configurations._registered = False
+        # managed by the advanced-routing-map / advanced-routing-condition-set subgroups
+        args_schema.advanced_routing_condition_sets._registered = False
+        args_schema.advanced_routing_maps._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -1449,6 +1456,10 @@ class RuleCreate(_RuleCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_map._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/advancedRoutingMaps/{}",
+        )
         args_schema.address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
@@ -1478,14 +1489,15 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool) and not has_value(args.redirect_config):
+        skip_backend = has_value(args.redirect_config) or has_value(args.advanced_routing_map)
+        if not has_value(args.address_pool) and not skip_backend:
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
                 raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+        if not has_value(args.http_settings) and not skip_backend:
             settings = instance.properties.backend_http_settings_collection
             if len(settings) == 1:
                 args.http_settings = instance.properties.backend_http_settings_collection[0].id
@@ -1510,6 +1522,10 @@ class RuleUpdate(_RuleUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_map._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/advancedRoutingMaps/{}",
+        )
         args_schema.address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
@@ -1547,8 +1563,105 @@ class RuleUpdate(_RuleUpdate):
             instance.properties.redirect_configuration = None
         if not has_value(instance.properties.rewrite_rule_set.id):
             instance.properties.rewrite_rule_set = None
+        if not has_value(instance.properties.advanced_routing_map.id):
+            instance.properties.advanced_routing_map = None
         if not has_value(instance.properties.url_path_map.id):
             instance.properties.url_path_map = None
+
+
+_AG_ROUTING_REFS = {
+    "address_pool": ("backendAddressPools", "backend address pool"),
+    "http_settings": ("backendHttpSettingsCollection", "HTTP settings"),
+    "redirect_config": ("redirectConfigurations", "redirect configuration"),
+    "rewrite_rule_set": ("rewriteRuleSets", "rewrite rule set"),
+}
+
+
+def _set_ag_child_id_fmt(args_schema, names, prefix=""):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    children = {k: v[0] for k, v in _AG_ROUTING_REFS.items()}
+    children["condition_set"] = "advancedRoutingConditionSets"
+    for name in names:
+        args_schema[prefix + name]._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/" + children[name] + "/{}")
+    return args_schema
+
+
+class AdvancedRoutingMapCreate(_AdvancedRoutingMapCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_rules._registered = False
+        args_schema.rule_name = AAZStrArg(
+            options=["--rule-name"], arg_group="First Rule", default="rule1",
+            help="Name of the first advanced routing rule.",
+        )
+        args_schema.priority = AAZIntArg(
+            options=["--priority"], arg_group="First Rule", required=True,
+            help="Priority of the first advanced routing rule. Rules are evaluated in ascending priority order.",
+            fmt=AAZIntArgFormat(maximum=1000, minimum=1),
+        )
+        args_schema.condition_set = AAZStrArg(
+            options=["--condition-set"], arg_group="First Rule", required=True,
+            help="Name or ID of the advanced routing condition set of the first rule.",
+        )
+        for name, (_, desc) in _AG_ROUTING_REFS.items():
+            args_schema[name] = AAZStrArg(
+                options=["--" + name.replace("_", "-")], arg_group="First Rule",
+                help=f"Name or ID of the {desc} of the first rule.",
+            )
+        _set_ag_child_id_fmt(args_schema, _AG_ROUTING_REFS, prefix="default_")
+        return _set_ag_child_id_fmt(args_schema, [*_AG_ROUTING_REFS, "condition_set"])
+
+    def pre_operations(self):
+        args = self.ctx.args
+        refs = {
+            "advanced_routing_condition_set": args.condition_set,
+            "backend_address_pool": args.address_pool,
+            "backend_http_settings": args.http_settings,
+            "redirect_configuration": args.redirect_config,
+            "rewrite_rule_set": args.rewrite_rule_set,
+        }
+        args.advanced_routing_rules = [{
+            "name": args.rule_name,
+            "priority": args.priority,
+            **{k: {"id": v} for k, v in refs.items() if has_value(v)},
+        }]
+
+
+class AdvancedRoutingMapUpdate(_AdvancedRoutingMapUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs), _AG_ROUTING_REFS,
+                                    prefix="default_")
+
+    def post_instance_update(self, instance):
+        for prop in ("default_backend_address_pool", "default_backend_http_settings",
+                     "default_redirect_configuration", "default_rewrite_rule_set"):
+            if not has_value(instance.properties[prop].id):
+                instance.properties[prop] = None
+
+
+class AdvancedRoutingMapRuleCreate(_AdvancedRoutingMapRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs),
+                                    [*_AG_ROUTING_REFS, "condition_set"])
+
+
+class AdvancedRoutingMapRuleUpdate(_AdvancedRoutingMapRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs),
+                                    [*_AG_ROUTING_REFS, "condition_set"])
+
+    def post_instance_update(self, instance):
+        for prop in ("advanced_routing_condition_set", "backend_address_pool", "backend_http_settings",
+                     "redirect_configuration", "rewrite_rule_set"):
+            if not has_value(instance.properties[prop].id):
+                instance.properties[prop] = None
 
 
 class RoutingRuleCreate(_RoutingRuleCreate):

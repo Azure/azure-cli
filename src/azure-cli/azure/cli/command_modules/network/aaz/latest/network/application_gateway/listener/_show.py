@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-07-01",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-07-01", "properties.listeners[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2026-01-01", "properties.listeners[]"],
         ]
     }
 
@@ -150,7 +150,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -203,6 +203,12 @@ class Show(AAZCommand):
             _schema_on_200.zones = AAZListType()
 
             properties = cls._schema_on_200.properties
+            properties.advanced_routing_condition_sets = AAZListType(
+                serialized_name="advancedRoutingConditionSets",
+            )
+            properties.advanced_routing_maps = AAZListType(
+                serialized_name="advancedRoutingMaps",
+            )
             properties.authentication_certificates = AAZListType(
                 serialized_name="authenticationCertificates",
             )
@@ -282,6 +288,9 @@ class Show(AAZCommand):
             properties.request_routing_rules = AAZListType(
                 serialized_name="requestRoutingRules",
             )
+            properties.reserved_capacity = AAZIntType(
+                serialized_name="reservedCapacity",
+            )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
@@ -315,6 +324,157 @@ class Show(AAZCommand):
             properties.web_application_firewall_configuration = AAZObjectType(
                 serialized_name="webApplicationFirewallConfiguration",
             )
+
+            advanced_routing_condition_sets = cls._schema_on_200.properties.advanced_routing_condition_sets
+            advanced_routing_condition_sets.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.advanced_routing_condition_sets.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties.advanced_routing_condition_sets.Element.properties
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.routing_conditions = AAZListType(
+                serialized_name="routingConditions",
+                flags={"required": True},
+            )
+
+            routing_conditions = cls._schema_on_200.properties.advanced_routing_condition_sets.Element.properties.routing_conditions
+            routing_conditions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.advanced_routing_condition_sets.Element.properties.routing_conditions.Element
+            _element.condition_type = AAZStrType(
+                serialized_name="conditionType",
+                flags={"required": True},
+            )
+            _element.property_name = AAZStrType(
+                serialized_name="propertyName",
+            )
+            _element.property_value_matcher = AAZObjectType(
+                serialized_name="propertyValueMatcher",
+            )
+            _element.property_values = AAZListType(
+                serialized_name="propertyValues",
+            )
+
+            property_value_matcher = cls._schema_on_200.properties.advanced_routing_condition_sets.Element.properties.routing_conditions.Element.property_value_matcher
+            property_value_matcher.ignore_case = AAZBoolType(
+                serialized_name="ignoreCase",
+            )
+            property_value_matcher.negate = AAZBoolType()
+            property_value_matcher.pattern = AAZStrType(
+                flags={"required": True},
+            )
+
+            property_values = cls._schema_on_200.properties.advanced_routing_condition_sets.Element.properties.routing_conditions.Element.property_values
+            property_values.Element = AAZStrType()
+
+            advanced_routing_maps = cls._schema_on_200.properties.advanced_routing_maps
+            advanced_routing_maps.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.advanced_routing_maps.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties.advanced_routing_maps.Element.properties
+            properties.advanced_routing_rules = AAZListType(
+                serialized_name="advancedRoutingRules",
+                flags={"required": True},
+            )
+            properties.default_auth_configs = AAZListType(
+                serialized_name="defaultAuthConfigs",
+            )
+            properties.default_backend_address_pool = AAZObjectType(
+                serialized_name="defaultBackendAddressPool",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            properties.default_backend_http_settings = AAZObjectType(
+                serialized_name="defaultBackendHttpSettings",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            properties.default_redirect_configuration = AAZObjectType(
+                serialized_name="defaultRedirectConfiguration",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            properties.default_rewrite_rule_set = AAZObjectType(
+                serialized_name="defaultRewriteRuleSet",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            advanced_routing_rules = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.advanced_routing_rules
+            advanced_routing_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.advanced_routing_rules.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.advanced_routing_rules.Element.properties
+            properties.advanced_routing_condition_set = AAZObjectType(
+                serialized_name="advancedRoutingConditionSet",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.advanced_routing_condition_set)
+            properties.auth_configs = AAZListType(
+                serialized_name="authConfigs",
+            )
+            properties.backend_address_pool = AAZObjectType(
+                serialized_name="backendAddressPool",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            properties.backend_http_settings = AAZObjectType(
+                serialized_name="backendHttpSettings",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            properties.priority = AAZIntType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.redirect_configuration = AAZObjectType(
+                serialized_name="redirectConfiguration",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            properties.rewrite_rule_set = AAZObjectType(
+                serialized_name="rewriteRuleSet",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+
+            auth_configs = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.advanced_routing_rules.Element.properties.auth_configs
+            auth_configs.Element = AAZObjectType()
+            _ShowHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
+
+            default_auth_configs = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.default_auth_configs
+            default_auth_configs.Element = AAZObjectType()
+            _ShowHelper._build_schema_application_gateway_auth_config_read(default_auth_configs.Element)
 
             authentication_certificates = cls._schema_on_200.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
@@ -580,6 +740,9 @@ class Show(AAZCommand):
             _ShowHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
 
             global_configuration = cls._schema_on_200.properties.global_configuration
+            global_configuration.disable_default_server_header_in_response = AAZBoolType(
+                serialized_name="disableDefaultServerHeaderInResponse",
+            )
             global_configuration.enable_request_buffering = AAZBoolType(
                 serialized_name="enableRequestBuffering",
             )
@@ -963,6 +1126,13 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties.request_routing_rules.Element.properties
+            properties.advanced_routing_map = AAZObjectType(
+                serialized_name="advancedRoutingMap",
+            )
+            _ShowHelper._build_schema_common_sub_resource_read(properties.advanced_routing_map)
+            properties.auth_configs = AAZListType(
+                serialized_name="authConfigs",
+            )
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
@@ -1003,6 +1173,10 @@ class Show(AAZCommand):
                 serialized_name="urlPathMap",
             )
             _ShowHelper._build_schema_common_sub_resource_read(properties.url_path_map)
+
+            auth_configs = cls._schema_on_200.properties.request_routing_rules.Element.properties.auth_configs
+            auth_configs.Element = AAZObjectType()
+            _ShowHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
 
             rewrite_rule_sets = cls._schema_on_200.properties.rewrite_rule_sets
             rewrite_rule_sets.Element = AAZObjectType()
@@ -1435,6 +1609,30 @@ class Show(AAZCommand):
 class _ShowHelper:
     """Helper class for Show"""
 
+    _schema_application_gateway_auth_config_read = None
+
+    @classmethod
+    def _build_schema_application_gateway_auth_config_read(cls, _schema):
+        if cls._schema_application_gateway_auth_config_read is not None:
+            _schema.authentication_policy = cls._schema_application_gateway_auth_config_read.authentication_policy
+            _schema.name = cls._schema_application_gateway_auth_config_read.name
+            return
+
+        cls._schema_application_gateway_auth_config_read = _schema_application_gateway_auth_config_read = AAZObjectType()
+
+        application_gateway_auth_config_read = _schema_application_gateway_auth_config_read
+        application_gateway_auth_config_read.authentication_policy = AAZObjectType(
+            serialized_name="authenticationPolicy",
+            flags={"required": True},
+        )
+        cls._build_schema_common_sub_resource_read(application_gateway_auth_config_read.authentication_policy)
+        application_gateway_auth_config_read.name = AAZStrType(
+            flags={"required": True},
+        )
+
+        _schema.authentication_policy = cls._schema_application_gateway_auth_config_read.authentication_policy
+        _schema.name = cls._schema_application_gateway_auth_config_read.name
+
     _schema_application_gateway_custom_error_read = None
 
     @classmethod
@@ -1738,6 +1936,9 @@ class _ShowHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -2949,6 +3150,9 @@ class _ShowHelper:
         )
 
         properties = _schema_common_private_link_service_connection_read.properties
+        properties.approval_reference = AAZObjectType(
+            serialized_name="approvalReference",
+        )
         properties.group_ids = AAZListType(
             serialized_name="groupIds",
         )
@@ -2965,6 +3169,11 @@ class _ShowHelper:
         )
         properties.request_message = AAZStrType(
             serialized_name="requestMessage",
+        )
+
+        approval_reference = _schema_common_private_link_service_connection_read.properties.approval_reference
+        approval_reference.private_endpoint_id = AAZStrType(
+            serialized_name="privateEndpointId",
         )
 
         group_ids = _schema_common_private_link_service_connection_read.properties.group_ids
@@ -3074,6 +3283,10 @@ class _ShowHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -3104,6 +3317,9 @@ class _ShowHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
