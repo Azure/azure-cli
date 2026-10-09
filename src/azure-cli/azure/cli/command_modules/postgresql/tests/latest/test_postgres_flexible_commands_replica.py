@@ -155,7 +155,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         # Test virtual-endpoint list
         self.cmd('postgres flexible-server virtual-endpoint list -g {} --server-name {}'
                 .format(resource_group, master_server),
-                expect_failure=True)
+                checks=[JMESPathCheck('length(@)', 0)])
         
         # test replica create ssdv2
         replica_ssdv2 = self.create_random_name(F'azuredbclirepssdv2', SERVER_NAME_MAX_LENGTH)

@@ -141,7 +141,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         version_arg_type = CLIArgumentType(
             options_list=['--version'],
-            help='Server major version.'
+            help='Server major version. Supported values are: 11, 12, 13, 14, 15, 16, 17, 18, 19.'
         )
 
         iops_v2_arg_type = CLIArgumentType(
@@ -265,7 +265,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         pg_version_upgrade_arg_type = CLIArgumentType(
             options_list=['--version', '-v'],
-            help='Server major version.'
+            help='Server major version. Supported values are: 12, 13, 14, 15, 16, 17, 18, 19.'
         )
 
         pg_version_upgrade_validate_arg_type = CLIArgumentType(

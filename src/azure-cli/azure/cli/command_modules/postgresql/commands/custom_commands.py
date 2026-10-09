@@ -96,10 +96,10 @@ def flexible_server_create(cmd, client,
     server_name = server_name.lower()
     high_availability_mode = "Disabled"
 
+    list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+
     if (sku_name is None) or (version is None) or \
        (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-
         # set sku_name from capability API
         if sku_name is None:
             tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
@@ -118,8 +118,8 @@ def flexible_server_create(cmd, client,
             high_availability_mode = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
+                           list_location_capability_info=list_location_capability_info,
                            server_name=server_name,
-                           location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
@@ -456,6 +456,13 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # validator
     location = ''.join(instance.location.lower().split())
+    server_id_parts = parse_resource_id(instance.id)
+    resource_group_name = server_id_parts['resource_group']
+    server_name = server_id_parts['name']
+    list_location_capability_info = get_postgres_server_capability_info(
+        cmd,
+        resource_group=resource_group_name,
+        server_name=server_name)
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
         cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
@@ -463,7 +470,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     pg_arguments_validator(db_context,
-                           location=location,
+                           list_location_capability_info=list_location_capability_info,
                            tier=tier,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -486,10 +493,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
     server_module_path = instance.__module__
     module = import_module(server_module_path)
     ServerForPatch = getattr(module, 'ServerForPatch')
-
-    server_id_parts = parse_resource_id(instance.id)
-    resource_group_name = server_id_parts['resource_group']
-    server_name = server_id_parts['name']
 
     if public_access:
         instance.network.public_network_access = public_access
