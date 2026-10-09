@@ -1,5 +1,5 @@
 ---
-applyTo: "**/HISTORY.rst"
+applyTo: "{src/azure-cli/HISTORY.rst,src/azure-cli-core/HISTORY.rst}"
 description: "Do not manually edit HISTORY.rst files; release history is generated automatically."
 ---
 
