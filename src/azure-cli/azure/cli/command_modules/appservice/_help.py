@@ -596,16 +596,37 @@ short-summary: Manage a function app's deployment configuration.
 helps['functionapp deployment config set'] = """
 type: command
 short-summary: Update an existing function app's deployment configuration.
+long-summary: >
+    Use the --deployment-storage-* arguments for blob container deployment storage, or the --deployment-image
+    arguments for a Flex Consumption app that runs a container image (Registry deployment storage). Registry settings
+    are stored in the app's functionAppConfig and are separate from the legacy Linux container settings managed by
+    `az functionapp config container`. Switching to Registry removes the
+    functionAppConfig runtime. An existing Registry app may update just the image or authentication, but both must be
+    present in the resulting configuration. The service accepting the configuration doesn't prove that the
+    registry is reachable, that access is authorized, or that deployment succeeds. The CLI doesn't track tags; setting
+    the same tag again doesn't pull a newer image.
 examples:
   - name: Set the function app's deployment storage.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
   - name: Set the function app's deployment storage authentication method.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+  - name: Run a public container image (Anonymous authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0 --deployment-image-auth-type Anonymous
+  - name: Pull a container image by digest with the app's system-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage@sha256:<digest> --deployment-image-auth-type SystemAssignedIdentity
+  - name: Pull the container image with a user-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type UserAssignedIdentity --deployment-image-identity /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+  - name: Pull the container image with a username and password stored in app settings (Basic authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type Basic --deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD
 """
 
 helps['functionapp deployment config show'] = """
 type: command
 short-summary: Get the details of a function app's deployment configuration.
+long-summary: >
+    For Registry deployment storage, shows the image reference and authentication type, with the user-assigned
+    identity resource ID or the names of the app settings that hold Basic credentials. Credential values aren't
+    retrieved or shown.
 examples:
   - name: Get the details of a function app's deployment configuration.
     text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
@@ -624,6 +645,9 @@ short-summary: Manage a function app's runtime configuration.
 helps['functionapp runtime config set'] = """
 type: command
 short-summary: Update an existing function app's runtime configuration.
+long-summary: >
+    Registry deployment storage has no runtime. Use `az functionapp deployment config set` to update its container
+    image instead. This command updates the runtime for Flex apps using blob container deployment storage.
 examples:
   - name: Set the function app's runtime version.
     text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11
@@ -766,7 +790,9 @@ examples:
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
-long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+long-summary: >
+    The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+    Flex Consumption apps created with --deployment-image use the Recreate site update strategy by default.
 examples:
   - name: Create a basic function app.
     text: >
@@ -780,6 +806,9 @@ examples:
   - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
+  - name: Create a flex consumption function app that runs a container image from Azure Container Registry, pulled with the app's system-assigned identity. The service accepting the configuration doesn't prove that the registry is reachable, that access is authorized, or that deployment succeeds.
+    text: >
+        az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type SystemAssignedIdentity --assign-identity [system] --role AcrPull --scope /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ContainerRegistry/registries/myregistry
 """
 
 helps['functionapp delete'] = """

@@ -147,6 +147,14 @@ FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
 
+FLEX_REGISTRY_AUTH_TYPES = ['Anonymous', 'SystemAssignedIdentity', 'UserAssignedIdentity', 'Basic']
+
+FLEX_REGISTRY_API_VERSION = '2025-05-01'
+
+# Registry apps have no runtime stack to supply scale defaults.
+FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT = 1000
+FLEX_DEFAULT_INSTANCE_MEMORY_MB = 2048
+
 UPDATE_STRATEGY_TYPES = ['Recreate', 'RollingUpdate']
 
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
