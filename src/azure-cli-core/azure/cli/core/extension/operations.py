@@ -157,6 +157,9 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
+    if IS_WINDOWS:
+        # Embedded Python's ._pth isolation can prevent pip from importing isolated build backends.
+        pip_args.append('--prefer-binary')
 
     if pip_proxy:
         pip_args = pip_args + ['--proxy', pip_proxy]
