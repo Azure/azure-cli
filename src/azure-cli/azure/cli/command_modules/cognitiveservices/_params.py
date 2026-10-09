@@ -690,6 +690,18 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account managed-compute-deployment update') as c:
         c.argument('tags', tags_type)
 
+    with self.argument_context('cognitiveservices account adapter-deployment') as c:
+        c.argument('adapter_deployment_name', help='Adapter deployment name.')
+
+    with self.argument_context('cognitiveservices account adapter-deployment create') as c:
+        c.argument('source_model_id', options_list=['--source-model-id'],
+                   help='Immutable Foundry fine-tuning LoRA output model URI '
+                   '(e.g., azureai://accounts/{account}/projects/{project}/models/{model}/versions/{version}).')
+        c.argument('target_deployment_name', options_list=['--target-deployment-name'],
+                   help='Name of the existing managed compute parent deployment (resolved within '
+                   'the same account) that will serve this adapter. Re-specify to re-target an '
+                   'existing adapter deployment.')
+
     with self.argument_context('cognitiveservices account commitment-plan') as c:
         c.argument('commitment_plan_name', help='Cognitive Services account commitment plan name')
         c.argument('plan_type', help='Cognitive Services account commitment plan type')
