@@ -12,6 +12,35 @@ type: group
 short-summary: Manage Azure Relay Service namespaces, WCF relays, hybrid connections, and rules
 """
 
+helps['relay cluster'] = """
+type: group
+short-summary: Manage Azure Relay Service Clusters
+"""
+
+helps['relay cluster create'] = """
+type: command
+short-summary: Create a Relay Service Cluster.
+examples:
+  - name: Create a Relay Service Cluster
+    text: az relay cluster create --resource-group myresourcegroup --name mycluster --location westus --tags tag1=value1
+"""
+
+helps['relay cluster update'] = """
+type: command
+short-summary: Update a Relay Service Cluster.
+examples:
+  - name: Update tags of a Relay Service Cluster
+    text: az relay cluster update --resource-group myresourcegroup --name mycluster --tags tag1=value1
+"""
+
+helps['relay cluster available-region'] = """
+type: command
+short-summary: List the available regions for Relay Service Clusters.
+examples:
+  - name: List the available regions for Relay Service Clusters
+    text: az relay cluster available-region
+"""
+
 helps['relay hyco'] = """
 type: group
 short-summary: Manage Azure Relay Service Hybrid Connection and Authorization Rule
@@ -248,6 +277,77 @@ short-summary: Updates a Relay Service Namespace
 examples:
   - name: Updates a Relay Service Namespace.
     text: az relay namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value
+"""
+
+helps['relay namespace network-rule-set'] = """
+type: group
+short-summary: Manage Azure Relay networkruleSet for namespace
+"""
+
+helps['relay namespace network-rule-set create'] = """
+type: command
+short-summary: Create Network rule for the given Namespace.
+examples:
+  - name: Create Network rule for the given Namespace
+    text: az relay namespace network-rule-set create --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled --default-action Allow
+"""
+
+helps['relay namespace private-endpoint-connection'] = """
+type: group
+short-summary: Manage Azure Relay Private Endpoint Connection
+"""
+
+helps['relay namespace private-endpoint-connection create'] = """
+type: command
+short-summary: Create a Private Endpoint Connection for the given Namespace.
+examples:
+  - name: Create a Private Endpoint Connection for the given Namespace
+    text: az relay namespace private-endpoint-connection create --resource-group myresourcegroup --namespace-name mynamespace --name mypeconnection --private-link-service-connection-state status=Approved description=Approved
+"""
+
+helps['relay namespace private-endpoint-connection update'] = """
+type: command
+short-summary: Update a Private Endpoint Connection for the given Namespace.
+examples:
+  - name: Approve or reject a Private Endpoint Connection for the given Namespace
+    text: az relay namespace private-endpoint-connection update --resource-group myresourcegroup --namespace-name mynamespace --name mypeconnection --private-link-service-connection-state status=Rejected description=Rejected
+"""
+
+helps['relay namespace network-rule-set ip-rule'] = """
+type: group
+short-summary: Manage Azure Relay ip-rules in networkruleSet for namespace
+"""
+
+helps['relay namespace network-rule-set ip-rule add'] = """
+type: command
+short-summary: Add an IP-Rule for network rule of namespace.
+examples:
+  - name: add an IP rule in NetworkruleSet for a namespace
+    text: az relay namespace network-rule-set ip-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24 action=Allow
+"""
+
+helps['relay namespace network-rule-set ip-rule remove'] = """
+type: command
+short-summary: Remove Ip-Rule from network rule of namespace
+examples:
+  - name: remove IP rule from NetworkruleSet for a namespace
+    text: az relay namespace network-rule-set ip-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24
+"""
+
+helps['relay namespace network-rule-set show'] = """
+type: command
+short-summary: Show properties of Network rule of the given Namespace.
+examples:
+  - name: Show properties of Network rule of the given Namespace
+    text: az relay namespace network-rule-set show --resource-group myresourcegroup --namespace-name mynamespace
+"""
+
+helps['relay namespace network-rule-set update'] = """
+type: command
+short-summary: Update network rule properties of the given Namespace.
+examples:
+  - name: Update network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
+    text: az relay namespace network-rule-set update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
 """
 
 helps['relay wcfrelay'] = """
