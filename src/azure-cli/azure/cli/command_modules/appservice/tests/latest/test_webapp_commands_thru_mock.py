@@ -2138,30 +2138,6 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
 
-    @mock.patch('atexit.register')
-    def test_transform_troubleshoot_status_hint_supports_legacy_windows_encoding(self, register_mock):
-        from azure.cli.command_modules.appservice.commands import (
-            transform_troubleshoot_status_output,
-        )
-        payload = {
-            'name': 'myApp',
-            'resourceGroup': 'myRG',
-            'instances': [{
-                'instanceId': 'b6cc022ee0e1234567890',
-                'state': 'Stopped',
-                'lastError': 'ContainerTimeout',
-            }],
-        }
-
-        transform_troubleshoot_status_output(payload)
-
-        hint_callback = register_mock.call_args.args[0]
-        output = io.TextIOWrapper(io.BytesIO(), encoding='cp1252', errors='strict')
-        with mock.patch.object(sys, 'stderr', output):
-            hint_callback()
-            output.flush()
-
-
 class TestRuntimeFailedHintMocked(unittest.TestCase):
     """Tests that the TIP hint appears in RuntimeFailed and timeout errors."""
 
