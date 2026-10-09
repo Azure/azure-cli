@@ -1550,8 +1550,8 @@ def _get_parent_proc_name():
     try:
         parent = psutil.Process(os.getpid()).parent()
 
-        # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
-        if parent and parent.name().lower() == 'python.exe':
+        # Skip the Windows virtualenv Python and interpreter-bound PyPI launcher processes.
+        while parent and parent.name().lower() in ('python.exe', 'az-cli.exe'):
             parent = parent.parent()
 
         if parent:
