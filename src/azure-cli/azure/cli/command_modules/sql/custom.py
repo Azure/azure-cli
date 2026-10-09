@@ -13,8 +13,10 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
+    user_confirmation,
 )
 from azure.cli.core.azclierror import (
+    MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
     ValidationError,
     AzCLIError,
@@ -52,7 +54,6 @@ from azure.mgmt.sql.models import (
     ManagedInstanceKey,
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
-    ManagedShortTermRetentionPolicyName,
     OutboundFirewallRule,
     PartnerInfo,
     PartnerRegionInfo,
@@ -73,7 +74,6 @@ from azure.mgmt.sql.models import (
     ServerNetworkAccessFlag,
     ServerTrustGroup,
     ServicePrincipal,
-    ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
     TransparentDataEncryptionName,
@@ -3260,45 +3260,48 @@ def get_long_term_retention(
 
 
 def update_short_term_retention(
-        client,
+        cmd,
         database_name,
         server_name,
         resource_group_name,
-        retention_days,
+        retention_days=None,
         diffbackup_hours=None,
         no_wait=False,
-        **kwargs):
+        lock_immutability=None,
+        yes=False):
     '''
     Updates short term retention for live database
     '''
+    from ._str_policy import ShortTermRetentionPolicySet
 
-    kwargs['retention_days'] = retention_days
-    kwargs['diff_backup_interval_in_hours'] = diffbackup_hours
+    if retention_days is None and diffbackup_hours is None and lock_immutability is None:
+        raise RequiredArgumentMissingError(
+            'Specify --retention-days, --diffbackup-hours or --lock-immutability.')
+    if lock_immutability is True:
+        user_confirmation('Locking backup immutability cannot be reverted. '
+                          'Are you sure you want to lock backup immutability?', yes=yes)
+    return ShortTermRetentionPolicySet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group_name': resource_group_name,
+        'parent_name': server_name,
+        'database_name': database_name,
+        'retention_days': retention_days,
+        'diffbackup_hours': diffbackup_hours,
+        'lock_immutability': lock_immutability,
+        'no_wait': no_wait,
+    })
 
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        database_name=database_name,
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        policy_name=ShortTermRetentionPolicyName.DEFAULT,
-        parameters=kwargs)
 
-
-def get_short_term_retention(
-        client,
-        database_name,
-        server_name,
-        resource_group_name):
+def get_short_term_retention(cmd, database_name, server_name, resource_group_name):
     '''
     Gets short term retention for live database
     '''
 
-    return client.get(
-        database_name=database_name,
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        policy_name=ShortTermRetentionPolicyName.DEFAULT)
+    from ._str_policy import ShortTermRetentionPolicyGet
+    return ShortTermRetentionPolicyGet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group_name': resource_group_name,
+        'parent_name': server_name,
+        'database_name': database_name,
+    })
 
 
 def _list_by_database_long_term_retention_backups(
@@ -6110,49 +6113,43 @@ def midb_advanced_threat_protection_setting_update_setter(
 
 def update_short_term_retention_mi(
         cmd,
-        client,
         database_name,
         managed_instance_name,
         resource_group_name,
         retention_days,
         deleted_time=None,
-        **kwargs):
+        lock_immutability=None,
+        yes=False,
+        no_wait=False):
     '''
     Updates short term retention for database
     '''
 
-    kwargs['retention_days'] = retention_days
+    from ._str_policy import ShortTermRetentionPolicySet
 
+    if deleted_time is not None and lock_immutability is not None:
+        raise MutuallyExclusiveArgumentError(
+            '--lock-immutability is not supported for restorable dropped managed databases. '
+            'Do not specify it with --deleted-time.')
+    if lock_immutability is True:
+        user_confirmation('Locking backup immutability cannot be reverted. '
+                          'Are you sure you want to lock backup immutability?', yes=yes)
     if deleted_time:
-        database_name = '{},{}'.format(
-            database_name,
-            _to_filetimeutc(deleted_time))
-
-        client = \
-            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
-                cmd.cli_ctx,
-                None)
-
-        policy = client.begin_create_or_update(
-            restorable_dropped_database_id=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
-            parameters=kwargs)
-    else:
-        policy = client.begin_create_or_update(
-            database_name=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
-            parameters=kwargs)
-
-    return policy
+        database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
+    return ShortTermRetentionPolicySet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group_name': resource_group_name,
+        'parent_name': managed_instance_name,
+        'database_name': database_name,
+        'managed': True,
+        'deleted': bool(deleted_time),
+        'retention_days': retention_days,
+        'lock_immutability': lock_immutability,
+        'no_wait': no_wait,
+    })
 
 
 def get_short_term_retention_mi(
         cmd,
-        client,
         database_name,
         managed_instance_name,
         resource_group_name,
@@ -6160,30 +6157,17 @@ def get_short_term_retention_mi(
     '''
     Gets short term retention for database
     '''
+    from ._str_policy import ShortTermRetentionPolicyGet
 
     if deleted_time:
-        database_name = '{},{}'.format(
-            database_name,
-            _to_filetimeutc(deleted_time))
-
-        client = \
-            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
-                cmd.cli_ctx,
-                None)
-
-        policy = client.get(
-            restorable_dropped_database_id=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
-    else:
-        policy = client.get(
-            database_name=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
-
-    return policy
+        database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
+    return ShortTermRetentionPolicyGet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group_name': resource_group_name,
+        'parent_name': managed_instance_name,
+        'database_name': database_name,
+        'managed': True,
+        'deleted': bool(deleted_time),
+    })
 
 
 def _is_int(retention):
