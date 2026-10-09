@@ -13,6 +13,11 @@ trigger:
 
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+# Temporary immutable candidates, matching the shared CI setup.
+- name: AzdevPackage
+  value: 'azdev @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e'
+- name: DiffToolPackage
+  value: 'azure-cli-diff-tool @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e#subdirectory=azure-cli-diff-tool'
 
 parameters:
 - name: maxParallel
@@ -558,7 +563,7 @@ stages:
             source env/bin/activate
     
             # TODO: support pytest-html >= 4.0.0
-            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+            python -m pip install "$(AzdevPackage)" "$(DiffToolPackage)" pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
     
             azdev setup -c azure-cli -r azure-cli-extensions
             
@@ -1136,7 +1141,7 @@ stages:
             export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
             
             # TODO: support pytest-html >= 4.0.0
-            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+            python -m pip install "$(AzdevPackage)" "$(DiffToolPackage)" pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
     
             azdev setup -c azure-cli -r azure-cli-extensions
             
@@ -1712,7 +1717,7 @@ stages:
             source env/Scripts/activate
     
             # TODO: support pytest-html >= 4.0.0
-            pip install azdev pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
+            python -m pip install "$(AzdevPackage)" "$(DiffToolPackage)" pytest-json-report pytest-html==3.2.0 pytest-rerunfailures
     
             azdev setup -c azure-cli -r azure-cli-extensions
             

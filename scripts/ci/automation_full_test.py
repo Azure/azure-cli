@@ -9,6 +9,7 @@ from azdev.utilities import get_path_table
 import json
 import logging
 import os
+from pathlib import Path
 import subprocess
 import sys
 import time
@@ -423,60 +424,73 @@ def build_pipeline_result():
     return pipeline_result
 
 
-def get_pipeline_result(test_result_fp, pipeline_result):
-    tree = ET.parse(test_result_fp)
-    root = tree.getroot()
-    for testsuite in root:
-        for testcase in testsuite:
-            # ['azure', 'cli', 'command_modules', 'network', 'tests', 'latest', 'test_network_commands', 'NetworkNicScenarioTest']
-            # ['src', 'azure-cli', 'azure', 'cli', 'command_modules', 'network', 'tests', 'hybrid_2018_03_01', 'test_dns_commands', 'DnsZoneImportTest']
-            # ['src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests', 'test_aaz_arg', 'TestAAZArg']
-            # ['src', 'azure-cli-telemetry', 'azure', 'cli', 'telemetry', 'tests', 'test_records_collection', 'TestRecordsCollection']
-            class_name = testcase.attrib['classname'].split('.')
-            # classname="azure.cli.command_modules.network.tests"
-            if class_name[2] == 'command_modules':
-                module = class_name[3]
-            # classname="azure.cli.core.tests"
-            # classname="azure.cli.telemetry.tests"
-            elif class_name[2] in ['core', 'telemetry']:
-                module = class_name[2]
-            # classname="src.azure-cli.azure.cli.command_modules.network.tests"
-            elif class_name[4] == 'command_modules':
-                module = class_name[5]
-            # classname="src.azure-cli-core.azure.cli.core.tests"
-            # classname="src.azure-cli-telemetry.azure.cli.telemetry.tests"
-            elif class_name[1] in ['azure-cli-core', 'azure-cli-telemetry']:
-                module = class_name[4]
-            else:
-                logger.error(f'unexpected class name: {class_name}')
-                module = 'unknown'
-            failures = testcase.findall('failure')
-            if failures:
-                # logger.info(f"failed testcase attributes: {testcase.attrib}")
-                state = "Failed"
-                test_case = testcase.attrib['name']
-                line = testcase.attrib['file'] + ':' + testcase.attrib['line']
-                # only get first failure
-                for failure in failures:
-                    message = failure.attrib['message'].replace('\n', '<br>').replace(' ', '&nbsp;')
-                    break
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
-                    if i['Module'] == module:
-                        i['Status'] = 'Failed'
-                        # GitHub has a comment length limit of 65535, we must ensure that the length is less than 65535.
-                        # The azure cli bot will also add extra html characters.
-                        # So the number of characters cannot be accurately calculated.
-                        # Using indent=4 is just a rough estimate.
-                        if len(json.dumps(pipeline_result, indent=4)) + len(message) > 65535:
-                            message = 'The error message is too long, please check the pipeline log for details.'
-                        i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
-                        break
-            else:
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
-                    if i['Module'] == module:
-                        i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
-                        break
+def _module_from_test_path(value):
+    # Accept dotted JUnit classnames and source paths, with or without a src prefix.
+    parts = value.replace('\\', '.').replace('/', '.').split('.')
+    for index in range(len(parts) - 2):
+        if parts[index:index + 2] == ['azure', 'cli']:
+            module = parts[index + 2]
+            if module == 'command_modules' and index + 3 < len(parts):
+                return parts[index + 3]
+            if module in ('core', 'telemetry'):
+                return module
+    for package in ('azure-cli-core', 'azure-cli-telemetry'):
+        if package in parts:
+            return package.removeprefix('azure-cli-')
+    return None
 
+
+def _test_file_modules():
+    # A pyproject root can shorten classnames to test_foo.TestClass. Resolve
+    # those from source instead of hard-coding filenames or guessing a module.
+    root = Path(working_directory) if working_directory else Path(__file__).resolve().parents[2]
+    modules = {}
+    for path in root.glob('src/azure-cli*/azure/cli/**/test_*.py'):
+        if 'tests' not in path.parts:
+            continue
+        module = _module_from_test_path(path.as_posix())
+        if module:
+            modules.setdefault(path.stem, set()).add(module)
+    return modules
+
+
+def get_pipeline_result(test_result_fp, pipeline_result):
+    root = ET.parse(test_result_fp).getroot()
+    details = pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']
+    test_modules = None
+    for testcase in root.iter('testcase'):
+        classname = testcase.get('classname', '')
+        filename = testcase.get('file', '')
+        module = _module_from_test_path(classname) or _module_from_test_path(filename)
+        if module is None:
+            if test_modules is None:
+                test_modules = _test_file_modules()
+            test_file = Path(filename.replace('\\', '/')).stem if filename else next(
+                (part for part in classname.split('.') if part.startswith('test_')), '')
+            matches = test_modules.get(test_file, set())
+            module = next(iter(matches)) if len(matches) == 1 else 'unknown'
+        if module == 'unknown':
+            logger.warning('Unable to identify test module: classname=%r file=%r', classname, filename)
+        result = next((item for item in details if item['Module'] == module), None)
+        if result is None:
+            result = {'Module': module, 'Status': 'Running', 'Content': ''}
+            details.append(result)
+        failures = testcase.findall('failure') + testcase.findall('error')
+        if failures:
+            result['Status'] = 'Failed'
+            test_case = testcase.get('name', classname)
+            line = filename or classname
+            if testcase.get('line'):
+                line += ':' + testcase.get('line')
+            failure = failures[0]
+            message = (failure.get('message') or failure.text or 'See pipeline log for details.')
+            message = message.replace('\n', '<br>').replace(' ', '&nbsp;')
+            # Leave room for the extra HTML added by the GitHub comment bot.
+            if len(json.dumps(pipeline_result, indent=4)) + len(message) > 65535:
+                message = 'The error message is too long, please check the pipeline log for details.'
+            result['Content'] = build_markdown_content('Failed', test_case, message, line, result['Content'])
+        elif result['Status'] != 'Failed':
+            result['Status'] = 'Succeeded'
     return pipeline_result
 
 

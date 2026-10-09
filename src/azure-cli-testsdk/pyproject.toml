@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=78.1.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "azure-cli-testsdk"
+version = "0.3.0"
+description = "Microsoft Azure Command-Line Tools Test SDK Module"
+dynamic = ["readme"]
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "Microsoft Corporation", email = "azpycli@microsoft.com" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    'ConfigArgParse>=0.12.0',
+    'jmespath',
+    'vcrpy>=1.10.3',
+    'pytest',
+]
+
+[project.urls]
+Homepage = "https://github.com/Azure/azure-cli"
+
+[tool.setuptools]
+include-package-data = false
+zip-safe = false
+packages = ["azure.cli.testsdk", "azure.cli.testsdk.scenario_tests"]
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.rst", "HISTORY.rst"], content-type = "text/x-rst" }

@@ -8,6 +8,14 @@ parameters:
   - name: EnableCompactAAZ
     type: boolean
     default: false
+  # Temporary immutable candidates until the validated packages are released.
+  # Keep both requirements on the same commit; overrides may also be wheel paths.
+  - name: AzdevPackage
+    type: string
+    default: 'azdev @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e'
+  - name: DiffToolPackage
+    type: string
+    default: 'azure-cli-diff-tool @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e#subdirectory=azure-cli-diff-tool'
 steps:
   - bash: |
       set -ev
@@ -16,8 +24,12 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
 
-      python -m pip install -U pip "setuptools<81"
-      pip install --upgrade "azdev==0.2.13"
+      python -m pip install -U pip "setuptools>=78.1.1"
+      packages=("$AZDEV_PACKAGE")
+      if [ -n "$DIFF_TOOL_PACKAGE" ]; then
+        packages+=("$DIFF_TOOL_PACKAGE")
+      fi
+      python -m pip install --upgrade "${packages[@]}"
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
@@ -37,5 +49,7 @@ steps:
       az --version
     displayName: 'azdev setup'
     env:
+      AZDEV_PACKAGE: ${{ parameters.AzdevPackage }}
+      DIFF_TOOL_PACKAGE: ${{ parameters.DiffToolPackage }}
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
       CLI_EXT_REPO_PATH: ${{ parameters.CLIExtensionRepoPath }}
