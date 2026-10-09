@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles account renew-credentials",
+    "netappfiles account refresh-ldap-bind-password",
 )
-class RenewCredentials(AAZCommand):
-    """Renew identity credentials that are used to authenticate to key vault, for customer-managed key encryption. If encryption.identity.principalId does not match identity.principalId, running this operation will fix it.
+class RefreshLdapBindPassword(AAZCommand):
+    """Refresh LDAP Bind DN password by fetching the latest password from Azure Key Vault.
 
-    :example: Renew identity credentials
-        az netappfiles account renew-credentials -g mygroup --a myname
+    :example: NetAppAccounts_RefreshLdapBindPassword
+        az netappfiles account refresh-ldap-bind-password --resource-group myRG --account-name account1
     """
 
     _aaz_info = {
         "version": "2026-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/renewcredentials", "2026-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/refreshldapbindpassword", "2026-07-01"],
         ]
     }
 
@@ -61,7 +61,7 @@ class RenewCredentials(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.AccountsRenewCredentials(ctx=self.ctx)()
+        yield self.NetAppAccountsRefreshLdapBindPassword(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -72,7 +72,7 @@ class RenewCredentials(AAZCommand):
     def post_operations(self):
         pass
 
-    class AccountsRenewCredentials(AAZHttpOperation):
+    class NetAppAccountsRefreshLdapBindPassword(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -82,16 +82,7 @@ class RenewCredentials(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -102,7 +93,7 @@ class RenewCredentials(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/renewCredentials",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/refreshLdapBindPassword",
                 **self.url_parameters
             )
 
@@ -142,12 +133,9 @@ class RenewCredentials(AAZCommand):
             }
             return parameters
 
-        def on_200(self, session):
-            pass
+
+class _RefreshLdapBindPasswordHelper:
+    """Helper class for RefreshLdapBindPassword"""
 
 
-class _RenewCredentialsHelper:
-    """Helper class for RenewCredentials"""
-
-
-__all__ = ["RenewCredentials"]
+__all__ = ["RefreshLdapBindPassword"]
