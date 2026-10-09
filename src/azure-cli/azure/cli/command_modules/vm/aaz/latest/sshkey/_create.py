@@ -11,11 +11,23 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sshkey create",
+)
 class Create(AAZCommand):
     """Create a new SSH public key resource.
 
     :example: Create a new SSH public key resource.
         az sshkey create --resource-group myResourceGroup --ssh-public-key-name mySshPublicKeyName --location westus --public-key {ssh-rsa public key}
+
+    :example: Create a new SSH public key resource using public key in a file.
+        az sshkey create --location "westus" --public-key "@filename" --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+
+    :example: Create a new SSH public key resource with auto-generated value.
+        az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName"
+
+    :example: Create a new SSH public key resource with Ed25519 encryption.
+        az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName" --encryption-type "Ed25519"
     """
 
     _aaz_info = {
@@ -48,6 +60,9 @@ class Create(AAZCommand):
             options=["-n", "--name", "--ssh-public-key-name"],
             help="The name of the SSH public key.",
             required=True,
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
 
         # define Arg Group "Parameters"
