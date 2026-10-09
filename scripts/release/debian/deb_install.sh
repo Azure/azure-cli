@@ -60,10 +60,21 @@ setup() {
         CLI_REPO=$(lsb_release -cs)
         shopt -s nocasematch
         ERROR_MSG="Unable to find a package for your system. Please check if an existing package in https://packages.microsoft.com/repos/azure-cli/dists/ can be used in your system and install with the dist name: 'curl -sL https://aka.ms/InstallAzureCLIDeb | sudo DIST_CODE=<dist_code_name> bash'"
-        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+        AZURE_CLI_DISTS=$(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/)
+        if [[ ! $AZURE_CLI_DISTS =~ $CLI_REPO ]]; then
             DIST=$(lsb_release -is)
             if [[ $DIST =~ "Ubuntu" ]]; then
-                CLI_REPO="jammy"
+                # Try supported Ubuntu LTS codenames newest-first
+                for lts_codename in noble jammy focal; do
+                    if [[ $AZURE_CLI_DISTS =~ $lts_codename ]]; then
+                        CLI_REPO="$lts_codename"
+                        break
+                    fi
+                done
+                if [[ -z $CLI_REPO ]]; then
+                    echo "$ERROR_MSG"
+                    exit 1
+                fi
             elif [[ $DIST =~ "Debian" ]]; then
                 CLI_REPO="bookworm"
             elif [[ $DIST =~ "LinuxMint" ]]; then
