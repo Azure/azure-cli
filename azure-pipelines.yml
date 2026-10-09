@@ -29,6 +29,9 @@ variables:
   value: '3.14'
 
 parameters:
+- name: enableWindowsArm64
+  type: boolean
+  default: false
 - name: architectures
   type: object
   default:
@@ -177,8 +180,15 @@ jobs:
 - job: VerifyWindowsRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
   condition: succeeded()
+  strategy:
+    matrix:
+      x64:
+        PoolName: ${{ variables.windows_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          PoolName: ${{ variables.windows_arm64_pool }}
   pool:
-    name: ${{ variables.windows_pool }}
+    name: $(PoolName)
 
   steps:
   - task: UsePythonVersion@0
@@ -190,6 +200,9 @@ jobs:
     inputs:
       filename: ./scripts/ci/dependency_check.bat
     displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
+
+  - script: python build_scripts/windows/tests/test_arm64_packaging.py
+    displayName: 'Verify Windows packaging configuration'
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions
@@ -216,13 +229,19 @@ jobs:
     matrix:
       x86:
         Platform: x86
+        PoolName: ${{ variables.windows_pool }}
       x64:
         Platform: x64
+        PoolName: ${{ variables.windows_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    name: ${{ variables.windows_pool }}
+    name: $(PoolName)
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -263,11 +282,16 @@ jobs:
     matrix:
       x64:
         Platform: x64
+        PoolName: ${{ variables.windows_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    name: ${{ variables.windows_pool }}
+    name: $(PoolName)
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
@@ -308,13 +332,19 @@ jobs:
     matrix:
       x86:
         Platform: x86
+        PoolName: ${{ variables.windows_pool }}
       x64:
         Platform: x64
+        PoolName: ${{ variables.windows_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: ${{ variables.windows_pool }}
+    name: $(PoolName)
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -340,9 +370,14 @@ jobs:
     matrix:
       x64:
         Platform: x64
+        PoolName: ${{ variables.windows_pool }}
+      ${{ if eq(parameters.enableWindowsArm64, true) }}:
+        arm64:
+          Platform: arm64
+          PoolName: ${{ variables.windows_arm64_pool }}
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    name: ${{ variables.windows_pool }}
+    name: $(PoolName)
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'

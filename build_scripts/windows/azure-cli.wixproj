@@ -14,7 +14,7 @@
   </PropertyGroup>
   <!-- Local WiX -->
   <PropertyGroup>
-    <LocalWixRoot>artifacts\wix</LocalWixRoot>
+    <LocalWixRoot>artifacts\wix-3.14.1</LocalWixRoot>
     <WixToolPath>$(MSBuildThisFileDirectory)$(LocalWixRoot)</WixToolPath>
     <WixTargetsPath Condition="Exists('$(WixToolPath)\Wix.targets')">$(WixToolPath)\Wix.targets</WixTargetsPath>
     <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">$(WixToolPath)\wixtasks.dll</WixTasksPath>
@@ -40,6 +40,18 @@
     <OutputPath>out\</OutputPath>
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|arm64' ">
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
+    <InstallerPlatform>arm64</InstallerPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|arm64' ">
+    <OutputPath>out\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
+    <InstallerPlatform>arm64</InstallerPlatform>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="out\azure-cli.wxs">
