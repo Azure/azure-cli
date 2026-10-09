@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get NetworkRuleSet for a Namespace.
+
+    :example: NameSpaceNetworkRuleSetGet
+        az relay namespace network-rule-set show --resource-group ResourceGroup --namespace-name example-RelayNamespace-6019
     """
 
     _aaz_info = {

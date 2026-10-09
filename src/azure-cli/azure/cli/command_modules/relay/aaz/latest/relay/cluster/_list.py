@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List Relay clusters in a subscription.
+
+    :example: ClustersListBySubscription
+        az relay cluster list
     """
 
     _aaz_info = {

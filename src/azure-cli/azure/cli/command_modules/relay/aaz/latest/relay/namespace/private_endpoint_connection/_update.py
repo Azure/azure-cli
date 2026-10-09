@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update PrivateEndpointConnections of service namespace.
+
+    :example: NameSpacePrivateEndPointConnectionCreate
+        az relay namespace private-endpoint-connection update --resource-group resourcegroup --namespace-name example-RelayNamespace-5849 --private-endpoint-connection-name {privateEndpointConnection name} --private-endpoint "{id:/subscriptions/ffffffff-ffff-ffff-ffff-ffffffffffff/resourceGroups/resourcegroup/providers/Microsoft.Network/privateEndpoints/ali-relay-pve-1}" --private-link-service-connection-state "{description:'You may pass',status:Approved}"
     """
 
     _aaz_info = {

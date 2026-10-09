@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get a private link resource by a specified group name for a container registry.
+
+    :example: NameSpacePrivateLinkResourceGet
+        az relay namespace private-link-resource show --resource-group resourcegroup --namespace-name example-RelayNamespace-5849 --private-link-resource-name {PrivateLinkResource name}
     """
 
     _aaz_info = {

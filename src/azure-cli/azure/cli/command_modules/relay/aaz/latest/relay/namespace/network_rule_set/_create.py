@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create NetworkRuleSet for a Namespace.
+
+    :example: NameSpaceNetworkRuleSetCreate
+        az relay namespace network-rule-set create --resource-group ResourceGroup --namespace-name example-RelayNamespace-6019 --default-action Deny --ip-rules "[{action:Allow,ip-mask:1.1.1.1},{action:Allow,ip-mask:1.1.1.2},{action:Allow,ip-mask:1.1.1.3},{action:Allow,ip-mask:1.1.1.4},{action:Allow,ip-mask:1.1.1.5}]" --trusted-service-access-enabled False
     """
 
     _aaz_info = {

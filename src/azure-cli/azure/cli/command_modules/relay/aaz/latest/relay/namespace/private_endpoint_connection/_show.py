@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get a description for the specified Private Endpoint Connection name.
+
+    :example: NameSpacePrivateEndPointConnectionGet
+        az relay namespace private-endpoint-connection show --resource-group myResourceGroup --namespace-name example-RelayNamespace-5849 --private-endpoint-connection-name {privateEndpointConnection name}
     """
 
     _aaz_info = {

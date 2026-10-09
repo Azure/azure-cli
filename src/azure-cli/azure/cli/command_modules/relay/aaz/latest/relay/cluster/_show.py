@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get a Relay cluster.
+
+    :example: ClusterGet
+        az relay cluster show --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the available PrivateEndpointConnections within a namespace.
+
+    :example: PrivateEndpointConnectionsList
+        az relay namespace private-endpoint-connection list --resource-group myResourceGroup --namespace-name example-RelayNamespace-5849
     """
 
     _aaz_info = {

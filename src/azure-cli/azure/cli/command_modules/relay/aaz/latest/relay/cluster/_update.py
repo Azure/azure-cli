@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Relay cluster.
+
+    :example: ClusterPut
+        az relay cluster update --resource-group myResourceGroup --cluster-name testCluster --sku Dedicated --tier Dedicated --capacity 3 --tags "{environment:production}"
     """
 
     _aaz_info = {

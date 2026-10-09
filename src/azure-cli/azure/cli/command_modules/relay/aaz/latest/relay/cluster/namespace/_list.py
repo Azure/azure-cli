@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List Relay namespace resource IDs assigned to a Relay cluster.
+
+    :example: ListNamespacesInCluster
+        az relay cluster namespace list --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {

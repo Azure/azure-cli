@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a Relay cluster.
+
+    :example: ClusterDelete
+        az relay cluster delete --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {

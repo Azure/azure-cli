@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List SKUs supported by a Relay cluster.
+
+    :example: ClusterSkusGet
+        az relay cluster skus list --resource-group myResourceGroup --cluster-name testCluster
     """
 
     _aaz_info = {

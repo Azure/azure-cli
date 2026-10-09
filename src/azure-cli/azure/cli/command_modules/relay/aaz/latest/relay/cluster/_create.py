@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Relay cluster.
+
+    :example: ClusterPut
+        az relay cluster create --resource-group myResourceGroup --cluster-name testCluster --location South Central US --zone-redundant True --sku Dedicated --tier Dedicated --capacity 3
     """
 
     _aaz_info = {
