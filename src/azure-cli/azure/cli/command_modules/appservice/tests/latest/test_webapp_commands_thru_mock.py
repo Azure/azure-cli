@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest
-from unittest import mock
+import io
 import os
 import sys
 import types
+import unittest
+from unittest import mock
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
@@ -2079,6 +2080,32 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
 
+    def test_troubleshoot_status_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{
+                'instanceId': '7c2d9',
+                'machineName': 'lw0sdlwk0007AB',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+                'startup': {'Succeeded': 1, 'Failed': 1},
+            }],
+            'orphanStartups': [{
+                'InstanceId': 'orphan',
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            }],
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
     def test_transform_troubleshoot_status_output_renders_error_columns(self):
         # Regression: the LastError* columns exercise _format_dt only when
         # any instance has a visible error. A missing import there surfaces
@@ -2110,6 +2137,29 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['LastErrorDetails'], 'boom')
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
+
+    @mock.patch('atexit.register')
+    def test_transform_troubleshoot_status_hint_supports_legacy_windows_encoding(self, register_mock):
+        from azure.cli.command_modules.appservice.commands import (
+            transform_troubleshoot_status_output,
+        )
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{
+                'instanceId': 'b6cc022ee0e1234567890',
+                'state': 'Stopped',
+                'lastError': 'ContainerTimeout',
+            }],
+        }
+
+        transform_troubleshoot_status_output(payload)
+
+        hint_callback = register_mock.call_args.args[0]
+        output = io.TextIOWrapper(io.BytesIO(), encoding='cp1252', errors='strict')
+        with mock.patch.object(sys, 'stderr', output):
+            hint_callback()
+            output.flush()
 
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
@@ -2998,6 +3048,34 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         printed_text = self._printed_text(print_mock)
         self.assertIn('Instance:', printed_text)
         self.assertIn('f5105a099b', printed_text)
+
+    def test_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_config_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'configCheck': {
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'false',
+                    'Details': 'Enable Always On.',
+                    'DetailsLevel': 'warning',
+                }],
+            },
+            'runtimeError': {
+                'instanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+            },
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
 
     # ---- _extract_runtime_error ----
 

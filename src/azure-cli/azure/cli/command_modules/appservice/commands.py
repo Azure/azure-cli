@@ -177,7 +177,7 @@ def transform_troubleshoot_status_output(result):
 
         def _print_hint(app=app_name, rg=resource_group):
             _sys.stderr.write(
-                '\n\u25b6 Hint:\n'
+                '\nHint:\n'
                 '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
                 '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
                 .format(name=app, rg=rg))

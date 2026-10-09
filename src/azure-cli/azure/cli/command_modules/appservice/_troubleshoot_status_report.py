@@ -99,7 +99,7 @@ def _emit_orphan_startup(orphan, emit):
     container's logs, but ARM has already replaced the worker-slot ID."""
     scm_id = orphan.get('InstanceId') or '<unknown>'
     emit((Style.HIGHLIGHT, 'Instance {} Startup Summary'.format(scm_id)))
-    emit([(Style.HIGHLIGHT, '─' * 76)])
+    emit([(Style.HIGHLIGHT, '-' * 76)])
     emit((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
     _print_startup_block(orphan.get('Startup'), emit)
     emit()
@@ -115,7 +115,7 @@ def _emit_hint_footer(instances, app_name, resource_group, emit):
     if not has_error:
         return
     rg = resource_group or '<resource-group>'
-    emit((Style.WARNING, '▶ Hint:'))
+    emit((Style.WARNING, 'Hint:'))
     emit('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
     emit('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
 
