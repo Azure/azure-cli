@@ -1906,7 +1906,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': '******'})
+                return_value={'Authorization': 'Bearer token'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
@@ -1933,7 +1933,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertIn("not rolled out to your app's region yet", startup.get('SummaryFetchStatus', ''))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': 'Bearer token'})
+                return_value={'Authorization': '******'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
