@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest
-from unittest import mock
+import io
 import os
 import sys
 import types
+import unittest
+from unittest import mock
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
@@ -1846,6 +1847,30 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
+    def test_troubleshoot_status_limits_orphan_startups_in_structured_output(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload({}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response([]))),
+        ]
+        requests_get_mock.return_value = self._make_response(200, json_data=[{
+            'InstanceId': 'previous-{}'.format(index),
+            'Startup': {'Succeeded': 0, 'Failed': 1},
+        } for index in range(6)])
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        self.assertEqual(len(result['orphanStartups']), 5)
+        self.assertEqual(
+            [entry['InstanceId'] for entry in result['orphanStartups']],
+            ['previous-{}'.format(index) for index in range(5)])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
     def test_troubleshoot_status_single_instance(self, requests_get_mock, send_raw_request_mock,
                                                  _scm_url_mock, _headers_mock):
         arm_item = {'instanceId': '7c2d9', 'state': 'Stopped', 'action': 'SiteStopped',
@@ -2078,6 +2103,64 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         rendered_payload = render_mock.call_args.args[0]
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
+        self.assertEqual(
+            rendered_payload['startupSummaryUrl'],
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary')
+
+    def test_troubleshoot_status_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{
+                'instanceId': '7c2d9',
+                'machineName': 'lw0sdlwk0007AB',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+                'startup': {'Succeeded': 1, 'Failed': 1},
+            }],
+            'orphanStartups': [{
+                'InstanceId': 'orphan',
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            }],
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
+    def test_troubleshoot_status_report_limits_orphan_startups(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'startupSummaryUrl': 'https://myapp.scm.azurewebsites.net/api/startuplogs/summary',
+            'orphanStartups': [{
+                'InstanceId': 'orphan-{}'.format(index),
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            } for index in range(6)],
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(report_module.sys, 'stdout', output):
+            report_module.render_report(payload)
+
+        rendered = output.getvalue()
+        for index in range(5):
+            self.assertIn('Instance orphan-{} Startup Summary'.format(index), rendered)
+        self.assertNotIn('Instance orphan-5 Startup Summary', rendered)
+        self.assertIn(
+            'Below startup records are from instances that no longer host the application '
+            'but occurred within the last 24 hours. Limited to 5 instances.',
+            rendered)
+        self.assertIn(
+            'To review the full 24-hour history, visit '
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary.',
+            rendered)
 
     def test_transform_troubleshoot_status_output_renders_error_columns(self):
         # Regression: the LastError* columns exercise _format_dt only when
@@ -2998,6 +3081,34 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         printed_text = self._printed_text(print_mock)
         self.assertIn('Instance:', printed_text)
         self.assertIn('f5105a099b', printed_text)
+
+    def test_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_config_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'configCheck': {
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'false',
+                    'Details': 'Enable Always On.',
+                    'DetailsLevel': 'warning',
+                }],
+            },
+            'runtimeError': {
+                'instanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+            },
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
 
     # ---- _extract_runtime_error ----
 
