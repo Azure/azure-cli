@@ -5996,6 +5996,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_7.get_azure_keyvault_kms_key_vault_resource_id()
 
+        # key vault resource id is allowed with "Public" network access
         ctx_8 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -6006,9 +6007,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        with self.assertRaises(ArgumentUsageError):
-            ctx_8.get_azure_keyvault_kms_key_vault_resource_id()
+        self.assertEqual(ctx_8.get_azure_keyvault_kms_key_vault_resource_id(), key_vault_resource_id_1)
 
+        # "Private" network access without a key vault resource id is rejected by
+        # get_azure_keyvault_kms_key_vault_network_access
         ctx_9 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -6019,8 +6021,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        with self.assertRaises(ArgumentUsageError):
-            ctx_9.get_azure_keyvault_kms_key_vault_resource_id()
+        self.assertEqual(ctx_9.get_azure_keyvault_kms_key_vault_resource_id(), "")
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_9.get_azure_keyvault_kms_key_vault_network_access()
 
         # PMK enabled: key vault resource id is required
         ctx_10 = AKSManagedClusterContext(

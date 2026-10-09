@@ -33,7 +33,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
-    CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
     CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
@@ -6092,32 +6091,6 @@ class AKSManagedClusterContext(BaseAKSContext):
                     '"--kms-infrastructure-encryption" is set to "Enabled".'
                 )
 
-            key_vault_network_access = self._get_azure_keyvault_kms_key_vault_network_access(
-                enable_validation=False)
-            if (
-                key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE and
-                (
-                    azure_keyvault_kms_key_vault_resource_id is None or
-                    azure_keyvault_kms_key_vault_resource_id == ""
-                )
-            ):
-                raise ArgumentUsageError(
-                    '"--azure-keyvault-kms-key-vault-resource-id" can not be empty if '
-                    '"--azure-keyvault-kms-key-vault-network-access" is "Private".'
-                )
-            if (
-                not is_pmk_enabled and
-                key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC and
-                (
-                    azure_keyvault_kms_key_vault_resource_id is not None and
-                    azure_keyvault_kms_key_vault_resource_id != ""
-                )
-            ):
-                raise ArgumentUsageError(
-                    '"--azure-keyvault-kms-key-vault-resource-id" must be empty if '
-                    '"--azure-keyvault-kms-key-vault-network-access" is "Public".'
-                )
-
         return azure_keyvault_kms_key_vault_resource_id
 
     def get_azure_keyvault_kms_key_vault_resource_id(self) -> Union[str, None]:
@@ -7296,13 +7269,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
                 key_vault_network_access = self.context.get_azure_keyvault_kms_key_vault_network_access()
                 mc.security_profile.azure_key_vault_kms.key_vault_network_access = key_vault_network_access
-                if (
-                    key_vault_network_access == CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE or
-                    kms_infrastructure_encryption == CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED
-                ):
-                    mc.security_profile.azure_key_vault_kms.key_vault_resource_id = (
-                        self.context.get_azure_keyvault_kms_key_vault_resource_id()
-                    )
+                mc.security_profile.azure_key_vault_kms.key_vault_resource_id = (
+                    self.context.get_azure_keyvault_kms_key_vault_resource_id()
+                )
 
         return mc
 
@@ -10476,17 +10445,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             azure_key_vault_kms_profile.key_vault_network_access = (
                 self.context.get_azure_keyvault_kms_key_vault_network_access()
             )
-            # set key vault resource id, it is also required when infrastructure encryption (PMK) is enabled
-            if (
-                azure_key_vault_kms_profile.key_vault_network_access ==
-                CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE or
-                kms_infrastructure_encryption == CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED
-            ):
-                azure_key_vault_kms_profile.key_vault_resource_id = (
-                    self.context.get_azure_keyvault_kms_key_vault_resource_id()
-                )
-            else:
-                azure_key_vault_kms_profile.key_vault_resource_id = ""
+            # set key vault resource id, it is required when network access is "Private" and when
+            # infrastructure encryption (PMK) is enabled; fall back to "" so that it is cleared otherwise
+            azure_key_vault_kms_profile.key_vault_resource_id = (
+                self.context.get_azure_keyvault_kms_key_vault_resource_id() or ""
+            )
 
         if self.context.get_disable_azure_keyvault_kms():
             # get kms profile
