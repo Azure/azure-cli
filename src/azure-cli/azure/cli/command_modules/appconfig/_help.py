@@ -696,7 +696,7 @@ helps['appconfig enhanced-feature-flag list'] = """
         - name: List all enhanced feature flags.
           text:
             az appconfig enhanced-feature-flag list -n MyAppConfiguration
-        - name: List all enhanced feature flags with null labels.
+        - name: List all enhanced feature flags with null labels/(No Label) in the portal.
           text:
             az appconfig enhanced-feature-flag list -n MyAppConfiguration --label \\0
         - name: List a specific feature for any label starting with v1. using connection string.
