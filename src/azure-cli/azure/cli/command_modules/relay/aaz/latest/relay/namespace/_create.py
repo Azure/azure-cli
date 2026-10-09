@@ -72,8 +72,6 @@ class Create(AAZCommand):
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
 
-        # define Arg Group "Parameters"
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -89,7 +87,7 @@ class Create(AAZCommand):
             enum={"1.2": "1.2", "1.3": "1.3"},
         )
         _args_schema.private_endpoint_connections = AAZListArg(
-            options=["--private-endpoint-connections"],
+            options=["--endpoint-connections", "--private-endpoint-connections"],
             arg_group="Properties",
             help="List of private endpoint connections.",
         )
@@ -134,6 +132,22 @@ class Create(AAZCommand):
             options=["status"],
             help="Status of the connection.",
             enum={"Approved": "Approved", "Disconnected": "Disconnected", "Pending": "Pending", "Rejected": "Rejected"},
+        )
+
+        # define Arg Group "Sku"
+
+        _args_schema = cls._args_schema
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Sku",
+            help="Name of this SKU.",
+            enum={"Standard": "Standard"},
+        )
+        _args_schema.tier = AAZStrArg(
+            options=["--tier"],
+            arg_group="Sku",
+            help="The tier of this SKU.",
+            enum={"Standard": "Standard"},
         )
         return cls._args_schema
 
@@ -245,6 +259,7 @@ class Create(AAZCommand):
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
@@ -276,6 +291,11 @@ class Create(AAZCommand):
             if private_link_service_connection_state is not None:
                 private_link_service_connection_state.set_prop("description", AAZStrType, ".description")
                 private_link_service_connection_state.set_prop("status", AAZStrType, ".status")
+
+            sku = _builder.get(".sku")
+            if sku is not None:
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
+                sku.set_prop("tier", AAZStrType, ".tier")
 
             tags = _builder.get(".tags")
             if tags is not None:

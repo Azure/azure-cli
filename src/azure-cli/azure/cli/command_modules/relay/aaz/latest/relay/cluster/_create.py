@@ -76,40 +76,39 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.sku = AAZObjectArg(
-            options=["--sku"],
-            arg_group="Resource",
-            help="The Relay cluster SKU.",
-            required=True,
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Resource",
             help="Resource tags.",
         )
 
-        sku = cls._args_schema.sku
-        sku.capacity = AAZIntArg(
-            options=["capacity"],
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
+        # define Arg Group "Sku"
+
+        _args_schema = cls._args_schema
+        _args_schema.capacity = AAZIntArg(
+            options=["--capacity"],
+            arg_group="Sku",
             help="The number of capacity units assigned to the Relay cluster.",
             fmt=AAZIntArgFormat(
                 minimum=1,
             ),
         )
-        sku.name = AAZStrArg(
-            options=["name"],
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Sku",
             help="Name of the Relay cluster SKU.",
             required=True,
             enum={"Dedicated": "Dedicated"},
         )
-        sku.tier = AAZStrArg(
-            options=["tier"],
+        _args_schema.tier = AAZStrArg(
+            options=["--tier"],
+            arg_group="Sku",
             help="Tier of the Relay cluster SKU.",
             enum={"Dedicated": "Dedicated"},
         )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -220,7 +219,7 @@ class Create(AAZCommand):
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType)
-            _builder.set_prop("sku", AAZObjectType, ".sku", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
@@ -230,7 +229,7 @@ class Create(AAZCommand):
             sku = _builder.get(".sku")
             if sku is not None:
                 sku.set_prop("capacity", AAZIntType, ".capacity")
-                sku.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
                 sku.set_prop("tier", AAZStrType, ".tier")
 
             tags = _builder.get(".tags")

@@ -19,7 +19,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/checkNameAvailability?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/checkNameAvailability?api-version=2026-07-01-preview
   response:
     body:
       string: '{"nameAvailable":true,"reason":"None","message":"Namespace name available"}'
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:12:48 GMT
+      - Fri, 09 Oct 2026 07:07:01 GMT
       expires:
       - '-1'
       pragma:
@@ -43,20 +43,21 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 76892eaf-34df-4cd3-8ee4-ebfa0c68364d
+      - be6d6633-9b2a-4edb-b57f-314341bcf18d
       x-ms-messaging-routing-id:
-      - PROD|JIOINDIAWEST|JIOINDIAWEST|G2|2026-10-07T03:12:48
+      - PROD|CENTRALINDIA|CENTRALINDIA|G9|2026-10-09T07:07:02
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiawest/5a13a61b-10fe-41da-8a94-21fa7e7898c0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/centralindia/f22edafa-25a7-4a6f-97df-53fb9e196f2d
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 059B6E6295D048D3994DFA2A4C2D5860 Ref B: PNQ241100405029 Ref C: 2026-10-07T03:12:47Z'
+      - 'Ref A: 6F5FB6A809D74B0CAC7D1F7F6AB25EC3 Ref B: PNQ241100406052 Ref C: 2026-10-09T07:07:01Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "tags": {"tag1": "value1"}}'
+    body: '{"location": "westus2", "properties": {"publicNetworkAccess": "Enabled"},
+      "tags": {"tag1": "value1"}}'
     headers:
       Accept:
       - application/json
@@ -67,7 +68,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '51'
+      - '101'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -75,25 +76,25 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Creating","status":"Creating","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Creating","status":"Creating","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Active&t=639269395726587338&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=DGUm6jFS8YItjzexGHFzWgHtCmiiRsSu-CUzqePUAGFulL6nwIzMPUUxvnIK4tVDl6bbv7ySNY7RrKO7mm2UxEFc2Or2QQGczEdDudiiRKvGabWqu_EpOBxGGb3XOOqXTn0sokTeXRXHK1awfsU7o9pJ0gBf1jWVYvIKGS6M7vUl6Hio6VxTyNjxrH5-AUUhoGtbjzgw9X8PBA2vNpj9lDmu9vLv-JM4-62bvL5UF76WpA1k-aTZM56vt7y_3JqU9wmELs35aEkTn7TV6svkZxnk70jwVDkIiDTMJ5Aes6i8kbAt4iB38sbZVQBlsSbsTaYpgWs0XxrvoahIR-08hQ&h=ay6VStIJLXwvuqCS7eC5W5tesL61KS-gd2If-iRcXRc
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271264281315319&c=MIIHlDCCBnygAwIBAgIQd-TRDRlQQGDMJjd0HAeJNjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkxODIzNDczMloXDTI2MTIxNDA1NDczMlowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCj5POiV4wvPqx-1IoKxi0t4V-2kW3IvBX2feMmGPyHzJKatYR63SfCSb6VcSDq9zqTjPeX1W0_pfrs1FIwWayz4l9At45D4sorEJ8OifqHxp5Cij4kC1rZqZNptFxbeNcz2l_6dL7s_B4ZsnKNUwFz3yZhxf6Ntmk_NHqL7hZfK4zSi37tR1BfeQVLq70XiNujt5Y4qCBVhML_iwmY2F4zdiyU9jJHyn5cTuMnFX8-eOJuuGfDS40Y28nEEkqFlSCnjDEkTB9je-TqE-TC1LCYSl2C4FZMaT1PAQyf7jSWRv86AA_cXbuDusinQS2Ztk_NYOAQ7MQz6EAqYlkBW_SJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRK6eiq7ZeZqxJQvA628kHXQok_yzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAbsjNfHH584VeIENw4qkQiRLtY5RGkggQSTjRZaXcgyFnapLw4H6PTPctt_pd54VYzqeKHYKseglVlnSMiKx5MQLmfe6a5eXsKJfu4iMmM9C9UmL76R4nPmg_iXZj4Hv5DRYhcSOZW8XWPweM1kvDIDnox387g68JGLW6UW_rpivlQf42g4O3QTeZ4Aj-0cRHVVK6T3SAMz8RvypkSDrxS7EDuS64mEdX7dsAWVfW72nxwM3bRgcRXIxaY1HEvX5Ww_dtFBYu40yw-vNf2GzdBFORKJmq_IuYIoWFyVn989bDujTTJNWemDh1x_w3KINlhzuM0HlLuG-GePhcoqqnP&s=Szzcqil69CbEiYnFYvGUBLB1zlULuApw8QG5yaKDKrxvWcgfbJ4poGC_nvGMjs9_2TkDpAoJmTZzOT1SXg5mXalRs8EXBj2sgF671cNvm6hB3N7AwZaTnRCpwQzCHMfo2Oc6c3i8RDTzzEw6vfIZvRYgkFaYWkOkSpSWiKYnCnshqkvcX7YHu_ZXahQHui8PhhzjcZx0DLv-61Kje2pirzWlzEn3fnJxFaLpjLsZQ9jJDhrW-gBAR6E5rvlDKeWnhTYTygcFoHbq12rFfRhJJ1yYBsEpIlMiLySTYK-J77EF-OBhLFETR7vBHBjAU51b-9DNmG9bPpUgZbXVFDPf_g&h=q9fwFPy7Qco_E4Lhz8Rf-2yXgUMcV0hEqe-jaWwphhM
       cache-control:
       - no-cache
       content-length:
-      - '609'
+      - '681'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:12:52 GMT
+      - Fri, 09 Oct 2026 07:07:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Active&t=639269395726587338&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=HQViUtKtygFQFNrxBntbJoppvTL37TVspCXPHdtunz_ygdEHgOHNPrYGeTDZM_oKTDWhg18fGdDmh0BTIKp98LCn49DHBpnJIlRhL0TZl-wN3WrTxW1_VgRwMxi6Tv9p_5sHsV6Bq164RSunFhU94ep-F-Pn4ULBYrU70QSOfnEIBTD29iBZXW8vsviOr9zCxt6HYJRTQN3y9JnyWCuY9YJcBMYwjCVYqVkiOlcHVnT0RKE5cWpr1wGa9KPvZdrjRtLuByXaJ-TCpUm-nKYq04q7CBeIIUAsxmgRIc8Q0HXevlsED2pBXUHDYfDr1OiN255JymZuPIT-Zv9JfWld5A&h=ay6VStIJLXwvuqCS7eC5W5tesL61KS-gd2If-iRcXRc
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271264281315319&c=MIIHlDCCBnygAwIBAgIQd-TRDRlQQGDMJjd0HAeJNjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkxODIzNDczMloXDTI2MTIxNDA1NDczMlowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCj5POiV4wvPqx-1IoKxi0t4V-2kW3IvBX2feMmGPyHzJKatYR63SfCSb6VcSDq9zqTjPeX1W0_pfrs1FIwWayz4l9At45D4sorEJ8OifqHxp5Cij4kC1rZqZNptFxbeNcz2l_6dL7s_B4ZsnKNUwFz3yZhxf6Ntmk_NHqL7hZfK4zSi37tR1BfeQVLq70XiNujt5Y4qCBVhML_iwmY2F4zdiyU9jJHyn5cTuMnFX8-eOJuuGfDS40Y28nEEkqFlSCnjDEkTB9je-TqE-TC1LCYSl2C4FZMaT1PAQyf7jSWRv86AA_cXbuDusinQS2Ztk_NYOAQ7MQz6EAqYlkBW_SJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRK6eiq7ZeZqxJQvA628kHXQok_yzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAbsjNfHH584VeIENw4qkQiRLtY5RGkggQSTjRZaXcgyFnapLw4H6PTPctt_pd54VYzqeKHYKseglVlnSMiKx5MQLmfe6a5eXsKJfu4iMmM9C9UmL76R4nPmg_iXZj4Hv5DRYhcSOZW8XWPweM1kvDIDnox387g68JGLW6UW_rpivlQf42g4O3QTeZ4Aj-0cRHVVK6T3SAMz8RvypkSDrxS7EDuS64mEdX7dsAWVfW72nxwM3bRgcRXIxaY1HEvX5Ww_dtFBYu40yw-vNf2GzdBFORKJmq_IuYIoWFyVn989bDujTTJNWemDh1x_w3KINlhzuM0HlLuG-GePhcoqqnP&s=TbJCcyZd2lJysbLhYU7-WFOQhountba-GdJHSWWPt9ibGbCfudAmZxpu7LRvJJfhzcSQF_ccNOYrzG9ghxzR1Jhn076f2tZkLiZdLluW6H3RQaJrU5LzjGExr3rzqr19APCjzy0qpkQRyPLnZvRiECypN5hKjRjyLpCzpLTTI39iBIgSohguXUqE-clYeBq-3V8E_WrySzaNoI-3wsEgP2HS60wjthK9RK8vEuNSjPrgVQAIyHghwZ3MT_9NW42gZxOZAgSaAXwaNFDIgqSLoB_6pH_Acp6kV1x-PfuZJFjyVo-_poQ70Ox2YJYjL8AS1565QHqEXJPpcXI_eMZENQ&h=q9fwFPy7Qco_E4Lhz8Rf-2yXgUMcV0hEqe-jaWwphhM
       pragma:
       - no-cache
       strict-transport-security:
@@ -103,15 +104,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 39ad9588-4d4a-446f-991a-17f7ec290056
+      - 6a06d2e4-af1e-4816-bd7c-de3f72bc4991
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G13|2026-10-07T03:12:52
+      - PROD|WESTUS2|WESTUS2|G2|2026-10-09T07:07:07
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/40626499-f34e-4628-b7c5-2e042aa0634f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southindia/8a706f06-6eec-400d-9b35-45bf41f89c3e
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '199'
       x-msedge-ref:
-      - 'Ref A: A0D7276BEEDC4975A9F2CF69479490B3 Ref B: PNQ241100406031 Ref C: 2026-10-07T03:12:50Z'
+      - 'Ref A: E3BFB01CB053402FA26D569E3E69F9CF Ref B: PNQ231110908040 Ref C: 2026-10-09T07:07:02Z'
     status:
       code: 201
       message: Created
@@ -131,10 +132,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Active&t=639269395726587338&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=DGUm6jFS8YItjzexGHFzWgHtCmiiRsSu-CUzqePUAGFulL6nwIzMPUUxvnIK4tVDl6bbv7ySNY7RrKO7mm2UxEFc2Or2QQGczEdDudiiRKvGabWqu_EpOBxGGb3XOOqXTn0sokTeXRXHK1awfsU7o9pJ0gBf1jWVYvIKGS6M7vUl6Hio6VxTyNjxrH5-AUUhoGtbjzgw9X8PBA2vNpj9lDmu9vLv-JM4-62bvL5UF76WpA1k-aTZM56vt7y_3JqU9wmELs35aEkTn7TV6svkZxnk70jwVDkIiDTMJ5Aes6i8kbAt4iB38sbZVQBlsSbsTaYpgWs0XxrvoahIR-08hQ&h=ay6VStIJLXwvuqCS7eC5W5tesL61KS-gd2If-iRcXRc
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271264281315319&c=MIIHlDCCBnygAwIBAgIQd-TRDRlQQGDMJjd0HAeJNjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkxODIzNDczMloXDTI2MTIxNDA1NDczMlowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCj5POiV4wvPqx-1IoKxi0t4V-2kW3IvBX2feMmGPyHzJKatYR63SfCSb6VcSDq9zqTjPeX1W0_pfrs1FIwWayz4l9At45D4sorEJ8OifqHxp5Cij4kC1rZqZNptFxbeNcz2l_6dL7s_B4ZsnKNUwFz3yZhxf6Ntmk_NHqL7hZfK4zSi37tR1BfeQVLq70XiNujt5Y4qCBVhML_iwmY2F4zdiyU9jJHyn5cTuMnFX8-eOJuuGfDS40Y28nEEkqFlSCnjDEkTB9je-TqE-TC1LCYSl2C4FZMaT1PAQyf7jSWRv86AA_cXbuDusinQS2Ztk_NYOAQ7MQz6EAqYlkBW_SJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRK6eiq7ZeZqxJQvA628kHXQok_yzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAbsjNfHH584VeIENw4qkQiRLtY5RGkggQSTjRZaXcgyFnapLw4H6PTPctt_pd54VYzqeKHYKseglVlnSMiKx5MQLmfe6a5eXsKJfu4iMmM9C9UmL76R4nPmg_iXZj4Hv5DRYhcSOZW8XWPweM1kvDIDnox387g68JGLW6UW_rpivlQf42g4O3QTeZ4Aj-0cRHVVK6T3SAMz8RvypkSDrxS7EDuS64mEdX7dsAWVfW72nxwM3bRgcRXIxaY1HEvX5Ww_dtFBYu40yw-vNf2GzdBFORKJmq_IuYIoWFyVn989bDujTTJNWemDh1x_w3KINlhzuM0HlLuG-GePhcoqqnP&s=Szzcqil69CbEiYnFYvGUBLB1zlULuApw8QG5yaKDKrxvWcgfbJ4poGC_nvGMjs9_2TkDpAoJmTZzOT1SXg5mXalRs8EXBj2sgF671cNvm6hB3N7AwZaTnRCpwQzCHMfo2Oc6c3i8RDTzzEw6vfIZvRYgkFaYWkOkSpSWiKYnCnshqkvcX7YHu_ZXahQHui8PhhzjcZx0DLv-61Kje2pirzWlzEn3fnJxFaLpjLsZQ9jJDhrW-gBAR6E5rvlDKeWnhTYTygcFoHbq12rFfRhJJ1yYBsEpIlMiLySTYK-J77EF-OBhLFETR7vBHBjAU51b-9DNmG9bPpUgZbXVFDPf_g&h=q9fwFPy7Qco_E4Lhz8Rf-2yXgUMcV0hEqe-jaWwphhM
   response:
     body:
-      string: '{"name":"d9be6e26-4f7d-4847-ac45-8743358a0a9f","status":"Succeeded"}'
+      string: '{"name":"2654512d-83d4-480e-939c-f9220a9bbd17","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
@@ -143,7 +144,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:12:56 GMT
+      - Fri, 09 Oct 2026 07:07:10 GMT
       expires:
       - '-1'
       pragma:
@@ -155,15 +156,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - ec5c7505-6921-4975-b26d-1ab0688e0dfe
+      - b9e7bc72-ba31-4526-94d1-4c410055e88a
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G4|2026-10-07T03:12:55
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T07:07:10
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiawest/1ee594b3-9005-4ff8-9ed2-99802c5b3606
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiacentral/c5220780-783a-4565-bcd6-6815f5b4e528
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 610C1C16CB83485E81B7C60F63EF75C0 Ref B: PNQ241100402042 Ref C: 2026-10-07T03:12:53Z'
+      - 'Ref A: 72CBA3FCAB844244A21576EA035E3973 Ref B: PNQ241100403054 Ref C: 2026-10-09T07:07:09Z'
     status:
       code: 200
       message: OK
@@ -183,21 +184,23 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271264281315319&c=MIIHlDCCBnygAwIBAgIQd-TRDRlQQGDMJjd0HAeJNjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkxODIzNDczMloXDTI2MTIxNDA1NDczMlowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCj5POiV4wvPqx-1IoKxi0t4V-2kW3IvBX2feMmGPyHzJKatYR63SfCSb6VcSDq9zqTjPeX1W0_pfrs1FIwWayz4l9At45D4sorEJ8OifqHxp5Cij4kC1rZqZNptFxbeNcz2l_6dL7s_B4ZsnKNUwFz3yZhxf6Ntmk_NHqL7hZfK4zSi37tR1BfeQVLq70XiNujt5Y4qCBVhML_iwmY2F4zdiyU9jJHyn5cTuMnFX8-eOJuuGfDS40Y28nEEkqFlSCnjDEkTB9je-TqE-TC1LCYSl2C4FZMaT1PAQyf7jSWRv86AA_cXbuDusinQS2Ztk_NYOAQ7MQz6EAqYlkBW_SJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRK6eiq7ZeZqxJQvA628kHXQok_yzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcyL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzIvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83Mi9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAbsjNfHH584VeIENw4qkQiRLtY5RGkggQSTjRZaXcgyFnapLw4H6PTPctt_pd54VYzqeKHYKseglVlnSMiKx5MQLmfe6a5eXsKJfu4iMmM9C9UmL76R4nPmg_iXZj4Hv5DRYhcSOZW8XWPweM1kvDIDnox387g68JGLW6UW_rpivlQf42g4O3QTeZ4Aj-0cRHVVK6T3SAMz8RvypkSDrxS7EDuS64mEdX7dsAWVfW72nxwM3bRgcRXIxaY1HEvX5Ww_dtFBYu40yw-vNf2GzdBFORKJmq_IuYIoWFyVn989bDujTTJNWemDh1x_w3KINlhzuM0HlLuG-GePhcoqqnP&s=TbJCcyZd2lJysbLhYU7-WFOQhountba-GdJHSWWPt9ibGbCfudAmZxpu7LRvJJfhzcSQF_ccNOYrzG9ghxzR1Jhn076f2tZkLiZdLluW6H3RQaJrU5LzjGExr3rzqr19APCjzy0qpkQRyPLnZvRiECypN5hKjRjyLpCzpLTTI39iBIgSohguXUqE-clYeBq-3V8E_WrySzaNoI-3wsEgP2HS60wjthK9RK8vEuNSjPrgVQAIyHghwZ3MT_9NW42gZxOZAgSaAXwaNFDIgqSLoB_6pH_Acp6kV1x-PfuZJFjyVo-_poQ70Ox2YJYjL8AS1565QHqEXJPpcXI_eMZENQ&h=q9fwFPy7Qco_E4Lhz8Rf-2yXgUMcV0hEqe-jaWwphhM
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '608'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:12:57 GMT
+      - Fri, 09 Oct 2026 07:07:12 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271264327712937&c=MIIIJzCCBw-gAwIBAgIRAIj-jhYgLbfUUbx2jC_SNIowDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA5MjMwNTA1MjdaFw0yNjEyMTgxMTA1MjdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyeA8ekCN9dx_H_hpaGg0NqW7Rpf7WElPTivJEXFiEUUmlDxXmilSjXjGSNwDU0ErGMVo0Chf6Fmy72cNUM_kQuAJ3NolMdTWbVSxzJ0bLkgC1JhpgihlZ7PTw21un2NfJugcLOiZe7Kj4RKErCelQjBHkTD6U7w-ceLspcQ6mCRX6luV9c8WVX31YmRIb8GZPdRP_V9JDXRW7c_yDsOqMreuRXF6cf4xlPIvaO7P34tP2C1k1rv1J8qH9if8Mn5WsckL0oLpC0ocM9YaA6z-85bY5baDtaCriWIXdPlrZ890yWcz2NnQ_2rw4WifBW1WvMk321JJpfzXuNkkYpOA9QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUVpuFQHfLHlrFfGMCLWc2_DZNu1cwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS82MS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBJa_KUCNG-f7XUiiUuDBrvYZS2Z8FofSyp6uKYLKfF9mxmD4Zy0ksWftADl_qfVGCbq-dpyuVfUjgpc2tr6XAn80Z4GKb2k0wYYO4voOJXoWOqPEpYw8SLA6tzu7AhC3bAAVZM3m-LhotavMCbONvJphXH30312kxl4AvbUBnY3wVpwm-kbibwU1os1qVnTsOCPQT_zhENQC_xt5NIu63Vv2qZzhXb7rH10GKhkqHyYSBF99cYRho7mW4CGR-b_vV4wYatAQm1AdLWZ0WH6UMh8HMgnuEVnJ1HOdWVxuk6BK5g016SXjAJk66KjOH36fAl01_LmtwI5nli8nTadkb3&s=ipNf3EGDe67OY69fQyNtbmcg9sOzAKFWTRNXQVnVKTnA9oR07fOrSshz2lJBTIT78lQi30W1f7t68ngZcwwrE86kAzYePxw6XdW8wQg1a-JO7gDLsoTErno6CsRiWQfHm2rJqUP0S9_DXw0-y9nV_RYVY0bP2fV7H-QCXSJ3zvetx4gxTM4481i6T3_eV086XaWURENrIcj31oraJBvLGIxbbf3tA-B3iLHv8OldCgKaW8J5W6KktnrGstt7H27Ahj3ghVpd6ktgVlExHuR8P5KTEL_oE7b4p7Fr8lpV_f-1Tr_z51ohJ3iJt8MztJgP5Pl947CJ1in5TDNQFGbMtw&h=ypObtqxwHyAoymx8oqAhB_MTnLyR8CtuY7Bb1V8t0k8
       pragma:
       - no-cache
       strict-transport-security:
@@ -207,13 +210,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 73e179fc-cf06-4254-b865-af9d3a32358d
+      - 6a89f8d6-b4be-4ca1-811a-d60f774eb27e
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G1|2026-10-07T03:12:57
+      - PROD|WESTUS2|WESTUS2|G8|2026-10-09T07:07:12
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/f5bf5392-8b67-4178-8eba-925d19ef66e8
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2DD5B2D79B8C44AABE81D45FD3AF423F Ref B: PNQ241100405036 Ref C: 2026-10-07T03:12:57Z'
+      - 'Ref A: 407AADDC4880446CA856CAB342A323CF Ref B: PNQ241100406054 Ref C: 2026-10-09T07:07:11Z'
     status:
       code: 200
       message: OK
@@ -233,19 +238,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '608'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:00 GMT
+      - Fri, 09 Oct 2026 07:07:14 GMT
       expires:
       - '-1'
       pragma:
@@ -257,13 +262,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d7f2b881-a4f5-439f-8c11-b2db219b20ba
+      - 28c68cf9-1b96-4cbd-b5fb-eaf69d92490c
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G8|2026-10-07T03:13:00
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T07:07:14
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 702A284E9CF14D91B9CA89DDED224477 Ref B: PNQ231110906036 Ref C: 2026-10-07T03:12:58Z'
+      - 'Ref A: 833CBDFAE8474C589BEEACD03F4B68FE Ref B: PNQ241100403025 Ref C: 2026-10-09T07:07:14Z'
     status:
       code: 200
       message: OK
@@ -283,19 +288,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '608'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:04 GMT
+      - Fri, 09 Oct 2026 07:07:17 GMT
       expires:
       - '-1'
       pragma:
@@ -307,19 +312,20 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00737b03-ed2a-4409-8129-620f3bab51f9
+      - e2a5c844-2040-4761-b372-778ec02120df
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G0|2026-10-07T03:13:05
+      - PROD|WESTUS2|WESTUS2|G6|2026-10-09T07:07:18
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 02C74B35E0F84778BC1995F4B521D0B2 Ref B: PNQ241100403029 Ref C: 2026-10-07T03:13:02Z'
+      - 'Ref A: D21AB67EC5CE4C25A10BBB7C487B307D Ref B: PNQ241100404025 Ref C: 2026-10-09T07:07:15Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "properties": {}, "sku": {"name": "Standard", "tier":
-      "Standard"}, "tags": {"tag1": "value1"}}'
+    body: '{"location": "westus2", "properties": {"minimumTlsVersion": "1.2", "publicNetworkAccess":
+      "Enabled"}, "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"tag1":
+      "value1"}}'
     headers:
       Accept:
       - application/json
@@ -330,7 +336,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '118'
+      - '178'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -338,19 +344,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '608'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:05 GMT
+      - Fri, 09 Oct 2026 07:07:19 GMT
       expires:
       - '-1'
       pragma:
@@ -362,15 +368,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 609d5f15-67f3-4511-baaf-3bbfc318a3aa
+      - 6da17eb2-bf6a-4c7a-bf92-9199c7a3d09c
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G0|2026-10-07T03:13:06
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T07:07:19
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/6f3cdef2-5fbd-4f56-a029-cbfac94d4c9d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/fdd24f92-85cf-4b35-a396-43d9a737364e
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '199'
       x-msedge-ref:
-      - 'Ref A: 67C7A75B4FCA4ECD9D33D5EBDD517F5E Ref B: PNQ241100405031 Ref C: 2026-10-07T03:13:05Z'
+      - 'Ref A: 49A05A015BBD4E949951B6EC3D2FD316 Ref B: PNQ241100402036 Ref C: 2026-10-09T07:07:18Z'
     status:
       code: 200
       message: OK
@@ -388,19 +394,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/namespaces?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/namespaces?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test","name":"jacobjordan-relay-test","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:23:29.33Z","updatedAt":"2026-06-17T21:31:19.33Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test","serviceBusEndpoint":"https://jacobjordan-relay-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-2","name":"jacobjordan-relay-test-2","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:28:28.443Z","updatedAt":"2026-06-17T21:31:19.337Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-2","serviceBusEndpoint":"https://jacobjordan-relay-test-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-3","name":"jacobjordan-relay-test-3","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:41:25.057Z","updatedAt":"2026-06-17T21:31:19.343Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-3","serviceBusEndpoint":"https://jacobjordan-relay-test-3.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-ns","name":"jacobjordan-relay-test-ns","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-20T20:10:51.753Z","updatedAt":"2026-06-17T21:31:25.137Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-ns","serviceBusEndpoint":"https://jacobjordan-relay-test-ns.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Saglodha/providers/Microsoft.Relay/namespaces/relay-namespace31","name":"relay-namespace31","type":"Microsoft.Relay/Namespaces","location":"centralindia","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-23T10:52:44.073Z","updatedAt":"2026-09-23T10:52:44.073Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-namespace31","serviceBusEndpoint":"https://relay-namespace31.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastasia","name":"jbj-relay-eastasia","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2024-12-09T20:17:08.203Z","updatedAt":"2026-06-04T16:38:12.807Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastasia","serviceBusEndpoint":"https://jbj-relay-eastasia.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastasia-2","name":"jbj-relay-eastasia-2","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2024-12-12T18:12:35.7Z","updatedAt":"2026-06-04T16:38:12.87Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastasia-2","serviceBusEndpoint":"https://jbj-relay-eastasia-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-eastasia","name":"jacobjordan-relay-eastasia","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{"test":"test"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-10T16:10:20.73Z","updatedAt":"2026-09-22T21:19:45.93Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-eastasia","serviceBusEndpoint":"https://jacobjordan-relay-eastasia.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus","name":"jbj-relay-eastus","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-04-28T22:26:58.4Z","updatedAt":"2026-06-18T03:58:38.38Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus","serviceBusEndpoint":"https://jbj-relay-eastus.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus-test","name":"jbj-relay-eastus-test","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-02T23:14:03.12Z","updatedAt":"2026-06-18T03:58:56.313Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus-test","serviceBusEndpoint":"https://jbj-relay-eastus-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus-test2","name":"jbj-relay-eastus-test2","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-02T23:33:28.047Z","updatedAt":"2026-06-17T23:01:26.65Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus-test2","serviceBusEndpoint":"https://jbj-relay-eastus-test2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/relay-script-test","name":"relay-script-test","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-09-03T20:29:04.43Z","updatedAt":"2026-07-01T17:23:12.097Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-script-test","serviceBusEndpoint":"https://relay-script-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/relay-test-2506110040013760","name":"relay-test-2506110040013760","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-09-19T19:12:16.653Z","updatedAt":"2026-06-17T23:02:02.42Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-test-2506110040013760","serviceBusEndpoint":"https://relay-test-2506110040013760.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sprelayrg/providers/Microsoft.Relay/namespaces/sprelayns0428","name":"sprelayns0428","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-04-28T16:36:17.493Z","updatedAt":"2026-09-14T15:26:45.08Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sprelayns0428","serviceBusEndpoint":"https://sprelayns0428.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-ns-relay-test","name":"jbj-ns-relay-test","type":"Microsoft.Relay/Namespaces","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-03-31T18:35:33.463Z","updatedAt":"2026-06-17T21:30:36.603Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-ns-relay-test","serviceBusEndpoint":"https://jbj-ns-relay-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/relay-video-streaming","name":"relay-video-streaming","type":"Microsoft.Relay/Namespaces","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-01T15:07:20Z","updatedAt":"2026-06-17T21:33:48.74Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-video-streaming","serviceBusEndpoint":"https://relay-video-streaming.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-wabi-ncu","name":"jbj-relay-wabi-ncu","type":"Microsoft.Relay/Namespaces","location":"northcentralus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2024-10-11T19:06:22.613Z","updatedAt":"2026-09-15T16:30:35.46Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-wabi-ncu","serviceBusEndpoint":"https://jbj-relay-wabi-ncu.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-northeurope","name":"jbj-relay-northeurope","type":"Microsoft.Relay/Namespaces","location":"northeurope","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-01T17:13:26.263Z","updatedAt":"2026-06-17T22:33:25.577Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-northeurope","serviceBusEndpoint":"https://jbj-relay-northeurope.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-vmss-relay","name":"jbj-vmss-relay","type":"Microsoft.Relay/Namespaces","location":"polandcentral","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-03T19:40:26.75Z","updatedAt":"2026-06-16T18:22:50.223Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-vmss-relay","serviceBusEndpoint":"https://jbj-vmss-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-uksouth","name":"jbj-relay-uksouth","type":"Microsoft.Relay/Namespaces","location":"uksouth","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-02-19T17:35:36.94Z","updatedAt":"2026-06-09T01:05:48.703Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-uksouth","serviceBusEndpoint":"https://jbj-relay-uksouth.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/TestRelaySample0110","name":"TestRelaySample0110","type":"Microsoft.Relay/Namespaces","location":"westcentralus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2023-01-10T22:31:23.68Z","updatedAt":"2026-06-06T07:22:50.85Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testrelaysample0110","serviceBusEndpoint":"https://TestRelaySample0110.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-westeurope-test","name":"jacobjordan-relay-westeurope-test","type":"Microsoft.Relay/Namespaces","location":"westeurope","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-28T13:30:59.967Z","updatedAt":"2026-09-28T13:30:59.967Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-westeurope-test","serviceBusEndpoint":"https://jacobjordan-relay-westeurope-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-westus","name":"jbj-relay-westus","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-06T18:13:43.813Z","updatedAt":"2026-09-09T23:03:17.947Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-westus","serviceBusEndpoint":"https://jbj-relay-westus.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-guid-repro","name":"jacobjordan-guid-repro","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-13T21:12:11.027Z","updatedAt":"2026-06-17T00:02:35.6Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-guid-repro","serviceBusEndpoint":"https://jacobjordan-guid-repro.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-guid-repro-2","name":"jacobjordan-guid-repro-2","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-15T16:23:21.767Z","updatedAt":"2026-06-17T00:02:26.56Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-guid-repro-2","serviceBusEndpoint":"https://jacobjordan-guid-repro-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-copilot","name":"jacobjordan-relay-copilot","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-16T13:55:42.18Z","updatedAt":"2026-06-16T18:14:43.767Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-copilot","serviceBusEndpoint":"https://jacobjordan-relay-copilot.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-msrc-test","name":"jacobjordan-msrc-test","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-06T14:19:34.9705432Z","updatedAt":"2026-10-06T14:19:34.9705432Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-msrc-test","serviceBusEndpoint":"https://jacobjordan-msrc-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test","name":"jacobjordan-relay-arm-test","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T15:01:48.513Z","updatedAt":"2026-06-16T18:28:07.693Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test","serviceBusEndpoint":"https://jacobjordan-relay-arm-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-3","name":"jacobjordan-relay-arm-test-name-3","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:13:57.363Z","updatedAt":"2026-06-16T18:28:07.753Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-3","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-3.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-4","name":"jacobjordan-relay-arm-test-name-4","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:16:30.133Z","updatedAt":"2026-06-16T18:28:07.73Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-4","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-4.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-5","name":"jacobjordan-relay-arm-test-name-5","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:30:35.897Z","updatedAt":"2026-06-16T18:28:07.76Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-5","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-5.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-canary","name":"jbj-relay-canary","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{"test":"test"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-05-29T17:53:25.253Z","updatedAt":"2026-09-10T16:09:27.6222784Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-canary","serviceBusEndpoint":"https://jbj-relay-canary.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesar-ehp/providers/Microsoft.Relay/namespaces/cesar-relay","name":"cesar-relay","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-13T07:42:05.847Z","updatedAt":"2026-02-13T07:42:05.847Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:cesar-relay","serviceBusEndpoint":"https://cesar-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/damorg/providers/Microsoft.Relay/namespaces/damorelay654","name":"damorelay654","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{"a":"b"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-04T07:06:41.72Z","updatedAt":"2026-05-06T16:27:55.247Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:damorelay654","serviceBusEndpoint":"https://damorelay654.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/damorg/providers/Microsoft.Relay/namespaces/relat6772","name":"relat6772","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-02T09:17:40.937Z","updatedAt":"2026-06-02T09:17:40.937Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relat6772","serviceBusEndpoint":"https://relat6772.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/leandertestcanary/providers/Microsoft.Relay/namespaces/testleanderrelay","name":"testleanderrelay","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{"hi":"hi","test":"test"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-03T22:59:43.04Z","updatedAt":"2026-02-26T18:44:45.333Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testleanderrelay","serviceBusEndpoint":"https://testleanderrelay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-test-canary-relay","name":"jbj-test-canary-relay","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-23T16:54:52.903Z","updatedAt":"2026-02-26T18:44:45.583Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-test-canary-relay","serviceBusEndpoint":"https://jbj-test-canary-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ipv6_relay/providers/Microsoft.Relay/namespaces/relay-ipv6","name":"relay-ipv6","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-23T22:10:08.367Z","updatedAt":"2026-09-23T20:27:54.24Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-ipv6","serviceBusEndpoint":"https://relay-ipv6.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rrp-relay-val-20260713-8934/providers/Microsoft.Relay/namespaces/rrpvalrel8934","name":"rrpvalrel8934","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-07-13T20:13:15.27Z","updatedAt":"2026-08-11T08:11:03.473Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:rrpvalrel8934","serviceBusEndpoint":"https://rrpvalrel8934.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-endpoints","name":"jacobjordan-relay-endpoints","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-08-06T17:07:04.597Z","updatedAt":"2026-08-06T17:07:04.597Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-endpoints","serviceBusEndpoint":"https://jacobjordan-relay-endpoints.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saglodha/providers/Microsoft.Relay/namespaces/schaudhari-relay21","name":"schaudhari-relay21","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-08T05:05:10.743Z","updatedAt":"2026-09-08T05:05:10.743Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:schaudhari-relay21","serviceBusEndpoint":"https://schaudhari-relay21.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/RelayTestNSE2E2026","name":"RelayTestNSE2E2026","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-10T10:16:33.453Z","updatedAt":"2026-09-10T10:16:33.453Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relaytestnse2e2026","serviceBusEndpoint":"https://RelayTestNSE2E2026.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/TestRelayNSE2E2026","name":"TestRelayNSE2E2026","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-11T12:36:14.84Z","updatedAt":"2026-09-11T12:36:14.84Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testrelaynse2e2026","serviceBusEndpoint":"https://TestRelayNSE2E2026.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ardsouza-test/providers/Microsoft.Relay/namespaces/ardsouza-test-Relay-southeastus5","name":"ardsouza-test-Relay-southeastus5","type":"Microsoft.Relay/Namespaces","location":"southeastus5","tags":{},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-03T19:57:34.393Z","updatedAt":"2026-06-22T23:16:27.583Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:ardsouza-test-relay-southeastus5","serviceBusEndpoint":"https://ardsouza-test-Relay-southeastus5.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test","name":"jacobjordan-relay-test","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:23:29.33Z","updatedAt":"2026-06-17T21:31:19.33Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test","serviceBusEndpoint":"https://jacobjordan-relay-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-2","name":"jacobjordan-relay-test-2","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:28:28.443Z","updatedAt":"2026-06-17T21:31:19.337Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-2","serviceBusEndpoint":"https://jacobjordan-relay-test-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-3","name":"jacobjordan-relay-test-3","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-06T20:41:25.057Z","updatedAt":"2026-06-17T21:31:19.343Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-3","serviceBusEndpoint":"https://jacobjordan-relay-test-3.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-test-ns","name":"jacobjordan-relay-test-ns","type":"Microsoft.Relay/Namespaces","location":"australiaeast","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-20T20:10:51.753Z","updatedAt":"2026-06-17T21:31:25.137Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-test-ns","serviceBusEndpoint":"https://jacobjordan-relay-test-ns.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Saglodha/providers/Microsoft.Relay/namespaces/relay-namespace31","name":"relay-namespace31","type":"Microsoft.Relay/Namespaces","location":"centralindia","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-23T10:52:44.073Z","updatedAt":"2026-09-23T10:52:44.073Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-namespace31","serviceBusEndpoint":"https://relay-namespace31.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastasia","name":"jbj-relay-eastasia","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2024-12-09T20:17:08.203Z","updatedAt":"2026-06-04T16:38:12.807Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastasia","serviceBusEndpoint":"https://jbj-relay-eastasia.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastasia-2","name":"jbj-relay-eastasia-2","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2024-12-12T18:12:35.7Z","updatedAt":"2026-06-04T16:38:12.87Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastasia-2","serviceBusEndpoint":"https://jbj-relay-eastasia-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-eastasia","name":"jacobjordan-relay-eastasia","type":"Microsoft.Relay/Namespaces","location":"eastasia","tags":{"test":"test"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-10T16:10:20.73Z","updatedAt":"2026-09-22T21:19:45.93Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-eastasia","serviceBusEndpoint":"https://jacobjordan-relay-eastasia.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus","name":"jbj-relay-eastus","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-04-28T22:26:58.4Z","updatedAt":"2026-06-18T03:58:38.38Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus","serviceBusEndpoint":"https://jbj-relay-eastus.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus-test","name":"jbj-relay-eastus-test","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-02T23:14:03.12Z","updatedAt":"2026-06-18T03:58:56.313Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus-test","serviceBusEndpoint":"https://jbj-relay-eastus-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-eastus-test2","name":"jbj-relay-eastus-test2","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-02T23:33:28.047Z","updatedAt":"2026-06-17T23:01:26.65Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-eastus-test2","serviceBusEndpoint":"https://jbj-relay-eastus-test2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/relay-script-test","name":"relay-script-test","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-09-03T20:29:04.43Z","updatedAt":"2026-07-01T17:23:12.097Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-script-test","serviceBusEndpoint":"https://relay-script-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/relay-test-2506110040013760","name":"relay-test-2506110040013760","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-09-19T19:12:16.653Z","updatedAt":"2026-06-17T23:02:02.42Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-test-2506110040013760","serviceBusEndpoint":"https://relay-test-2506110040013760.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sprelayrg/providers/Microsoft.Relay/namespaces/sprelayns0428","name":"sprelayns0428","type":"Microsoft.Relay/Namespaces","location":"eastus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-04-28T16:36:17.493Z","updatedAt":"2026-09-14T15:26:45.08Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sprelayns0428","serviceBusEndpoint":"https://sprelayns0428.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-ns-relay-test","name":"jbj-ns-relay-test","type":"Microsoft.Relay/Namespaces","location":"eastus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-03-31T18:35:33.463Z","updatedAt":"2026-06-17T21:30:36.603Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-ns-relay-test","serviceBusEndpoint":"https://jbj-ns-relay-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/relay-video-streaming","name":"relay-video-streaming","type":"Microsoft.Relay/Namespaces","location":"eastus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-01T15:07:20Z","updatedAt":"2026-06-17T21:33:48.74Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-video-streaming","serviceBusEndpoint":"https://relay-video-streaming.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-wabi-ncu","name":"jbj-relay-wabi-ncu","type":"Microsoft.Relay/Namespaces","location":"northcentralus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2024-10-11T19:06:22.613Z","updatedAt":"2026-09-15T16:30:35.46Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-wabi-ncu","serviceBusEndpoint":"https://jbj-relay-wabi-ncu.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-northeurope","name":"jbj-relay-northeurope","type":"Microsoft.Relay/Namespaces","location":"northeurope","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-01T17:13:26.263Z","updatedAt":"2026-06-17T22:33:25.577Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-northeurope","serviceBusEndpoint":"https://jbj-relay-northeurope.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-vmss-relay","name":"jbj-vmss-relay","type":"Microsoft.Relay/Namespaces","location":"polandcentral","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-vmss-relay/privateEndpointConnections/47fe1120-11c9-4b2f-a070-f1bd871a3b79","name":"47fe1120-11c9-4b2f-a070-f1bd871a3b79","type":"Microsoft.Relay/Namespaces/PrivateEndpointConnections","location":"polandcentral","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Network/privateEndpoints/jbj-privatelink"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}],"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-03T19:40:26.75Z","updatedAt":"2026-06-16T18:22:50.223Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-vmss-relay","serviceBusEndpoint":"https://jbj-vmss-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-uksouth","name":"jbj-relay-uksouth","type":"Microsoft.Relay/Namespaces","location":"uksouth","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-02-19T17:35:36.94Z","updatedAt":"2026-06-09T01:05:48.703Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-uksouth","serviceBusEndpoint":"https://jbj-relay-uksouth.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/TestRelaySample0110","name":"TestRelaySample0110","type":"Microsoft.Relay/Namespaces","location":"westcentralus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2023-01-10T22:31:23.68Z","updatedAt":"2026-06-06T07:22:50.85Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testrelaysample0110","serviceBusEndpoint":"https://TestRelaySample0110.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-westeurope-test","name":"jacobjordan-relay-westeurope-test","type":"Microsoft.Relay/Namespaces","location":"westeurope","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-28T13:30:59.967Z","updatedAt":"2026-09-28T13:30:59.967Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-westeurope-test","serviceBusEndpoint":"https://jacobjordan-relay-westeurope-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-westus","name":"jbj-relay-westus","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-06T18:13:43.813Z","updatedAt":"2026-09-09T23:03:17.947Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-westus","serviceBusEndpoint":"https://jbj-relay-westus.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-guid-repro","name":"jacobjordan-guid-repro","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-13T21:12:11.027Z","updatedAt":"2026-06-17T00:02:35.6Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-guid-repro","serviceBusEndpoint":"https://jacobjordan-guid-repro.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-guid-repro-2","name":"jacobjordan-guid-repro-2","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-15T16:23:21.767Z","updatedAt":"2026-06-17T00:02:26.56Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-guid-repro-2","serviceBusEndpoint":"https://jacobjordan-guid-repro-2.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-relay-copilot","name":"jacobjordan-relay-copilot","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-01-16T13:55:42.18Z","updatedAt":"2026-06-16T18:14:43.767Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-copilot","serviceBusEndpoint":"https://jacobjordan-relay-copilot.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jacobjordan-rg/providers/Microsoft.Relay/namespaces/jacobjordan-msrc-test","name":"jacobjordan-msrc-test","type":"Microsoft.Relay/Namespaces","location":"westus","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-06T14:19:34.9705432Z","updatedAt":"2026-10-06T14:19:34.9705432Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-msrc-test","serviceBusEndpoint":"https://jacobjordan-msrc-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test","name":"jacobjordan-relay-arm-test","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T15:01:48.513Z","updatedAt":"2026-06-16T18:28:07.693Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test","serviceBusEndpoint":"https://jacobjordan-relay-arm-test.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-3","name":"jacobjordan-relay-arm-test-name-3","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:13:57.363Z","updatedAt":"2026-06-16T18:28:07.753Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-3","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-3.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-4","name":"jacobjordan-relay-arm-test-name-4","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:16:30.133Z","updatedAt":"2026-06-16T18:28:07.73Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-4","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-4.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-arm-test-name-5","name":"jacobjordan-relay-arm-test-name-5","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-25T16:30:35.897Z","updatedAt":"2026-06-16T18:28:07.76Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-arm-test-name-5","serviceBusEndpoint":"https://jacobjordan-relay-arm-test-name-5.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-canary","name":"jbj-relay-canary","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{"test":"test"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-relay-canary/privateEndpointConnections/b4d41c9b-415c-4253-9040-af4f4bcb0af8","name":"b4d41c9b-415c-4253-9040-af4f4bcb0af8","type":"Microsoft.Relay/Namespaces/PrivateEndpointConnections","location":"centraluseuap","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-sb-testing/providers/Microsoft.Network/privateEndpoints/canary-pl"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}],"provisioningState":"Succeeded","status":"Active","createdAt":"2025-05-29T17:53:25.253Z","updatedAt":"2026-09-10T16:09:27.6222784Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-relay-canary","serviceBusEndpoint":"https://jbj-relay-canary.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesar-ehp/providers/Microsoft.Relay/namespaces/cesar-relay","name":"cesar-relay","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-02-13T07:42:05.847Z","updatedAt":"2026-02-13T07:42:05.847Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:cesar-relay","serviceBusEndpoint":"https://cesar-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/damorg/providers/Microsoft.Relay/namespaces/damorelay654","name":"damorelay654","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{"a":"b"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-05-04T07:06:41.72Z","updatedAt":"2026-05-06T16:27:55.247Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:damorelay654","serviceBusEndpoint":"https://damorelay654.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/damorg/providers/Microsoft.Relay/namespaces/relat6772","name":"relat6772","type":"Microsoft.Relay/Namespaces","location":"centraluseuap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-02T09:17:40.937Z","updatedAt":"2026-06-02T09:17:40.937Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relat6772","serviceBusEndpoint":"https://relat6772.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/leandertestcanary/providers/Microsoft.Relay/namespaces/testleanderrelay","name":"testleanderrelay","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{"hi":"hi","test":"test"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-06-03T22:59:43.04Z","updatedAt":"2026-02-26T18:44:45.333Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testleanderrelay","serviceBusEndpoint":"https://testleanderrelay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jbj-test-canary-relay","name":"jbj-test-canary-relay","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-23T16:54:52.903Z","updatedAt":"2026-02-26T18:44:45.583Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jbj-test-canary-relay","serviceBusEndpoint":"https://jbj-test-canary-relay.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ipv6_relay/providers/Microsoft.Relay/namespaces/relay-ipv6","name":"relay-ipv6","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ipv6_relay/providers/Microsoft.Relay/namespaces/relay-ipv6/privateEndpointConnections/db781419-3d49-4005-9b24-8f1bd080ded5","name":"db781419-3d49-4005-9b24-8f1bd080ded5","type":"Microsoft.Relay/Namespaces/PrivateEndpointConnections","location":"eastus2euap","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-sb-testing/providers/Microsoft.Network/privateEndpoints/ipv6-pl"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved"},"groupIds":["namespace"]}}],"provisioningState":"Succeeded","status":"Active","createdAt":"2026-06-23T22:10:08.367Z","updatedAt":"2026-09-23T20:27:54.24Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-ipv6","serviceBusEndpoint":"https://relay-ipv6.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rrp-relay-val-20260713-8934/providers/Microsoft.Relay/namespaces/rrpvalrel8934","name":"rrpvalrel8934","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-07-13T20:13:15.27Z","updatedAt":"2026-08-11T08:11:03.473Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:rrpvalrel8934","serviceBusEndpoint":"https://rrpvalrel8934.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jbj-relay-test/providers/Microsoft.Relay/namespaces/jacobjordan-relay-endpoints","name":"jacobjordan-relay-endpoints","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-08-06T17:07:04.597Z","updatedAt":"2026-08-06T17:07:04.597Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:jacobjordan-relay-endpoints","serviceBusEndpoint":"https://jacobjordan-relay-endpoints.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/saglodha/providers/Microsoft.Relay/namespaces/schaudhari-relay21","name":"schaudhari-relay21","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Disabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-08T05:05:10.743Z","updatedAt":"2026-09-08T05:05:10.743Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:schaudhari-relay21","serviceBusEndpoint":"https://schaudhari-relay21.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/RelayTestNSE2E2026","name":"RelayTestNSE2E2026","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026","minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-10T10:16:33.453Z","updatedAt":"2026-09-10T10:16:33.453Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relaytestnse2e2026","serviceBusEndpoint":"https://RelayTestNSE2E2026.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/TestRelayNSE2E2026","name":"TestRelayNSE2E2026","type":"Microsoft.Relay/Namespaces","location":"eastus2euap","tags":{},"properties":{"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026","minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-09-11T12:36:14.84Z","updatedAt":"2026-09-11T12:36:14.84Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:testrelaynse2e2026","serviceBusEndpoint":"https://TestRelayNSE2E2026.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ardsouza-test/providers/Microsoft.Relay/namespaces/ardsouza-test-Relay-southeastus5","name":"ardsouza-test-Relay-southeastus5","type":"Microsoft.Relay/Namespaces","location":"southeastus5","tags":{},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-03T19:57:34.393Z","updatedAt":"2026-06-22T23:16:27.583Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:ardsouza-test-relay-southeastus5","serviceBusEndpoint":"https://ardsouza-test-Relay-southeastus5.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '26511'
+      - '32061'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:10 GMT
+      - Fri, 09 Oct 2026 07:07:22 GMT
       expires:
       - '-1'
       pragma:
@@ -431,7 +437,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 960D77DB8D4D4500B4DB237917D7EBE0 Ref B: PNQ241100406040 Ref C: 2026-10-07T03:13:08Z'
+      - 'Ref A: 8C0FFEB0DE314956BD8CD5634F78DA77 Ref B: PNQ241100406036 Ref C: 2026-10-09T07:07:20Z'
     status:
       code: 200
       message: OK
@@ -451,19 +457,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-07T03:12:51.996286Z","updatedAt":"2026-10-07T03:12:51.996286Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002","name":"relay-nscli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:07:07.0449793Z","updatedAt":"2026-10-09T07:07:07.0449793Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nscli000002","serviceBusEndpoint":"https://relay-nscli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '620'
+      - '692'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:11 GMT
+      - Fri, 09 Oct 2026 07:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -475,15 +481,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - e447c45e-af93-40b3-b23c-cbb4e55eface
+      - 8ae8c3af-eb19-448c-bf2a-cdc8e30f280e
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G14|2026-10-07T03:13:12
+      - PROD|WESTUS2|WESTUS2|G11|2026-10-09T07:07:23
       x-ms-original-request-ids:
       - ''
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 17A0B08CE6344FE5BA034F171CF79552 Ref B: PNQ241100402023 Ref C: 2026-10-07T03:13:12Z'
+      - 'Ref A: 421D9C23F14F4B3984D2F25E614ECF4C Ref B: PNQ241100401025 Ref C: 2026-10-09T07:07:23Z'
     status:
       code: 200
       message: OK
@@ -507,7 +513,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2026-07-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Send"]}}'
@@ -519,7 +525,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:19 GMT
+      - Fri, 09 Oct 2026 07:07:31 GMT
       expires:
       - '-1'
       pragma:
@@ -531,17 +537,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d7099f37-932e-43f8-832e-84e72a0cee47
+      - 11294129-076a-45ab-a4ae-70cf2c13033e
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G2|2026-10-07T03:13:20
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T07:07:32
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/92684e33-b215-4134-828c-36c37c7ffa6b
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southindia/624b5e4c-8e1e-42bc-8bbb-f60da7f46acd
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 762E139A3AF543B9BA24A6C2E0A8B1CD Ref B: PNQ241100404023 Ref C: 2026-10-07T03:13:14Z'
+      - 'Ref A: 21F5B7AA085B46659C6CDDD510FFDEE0 Ref B: PNQ231110907036 Ref C: 2026-10-09T07:07:24Z'
     status:
       code: 200
       message: OK
@@ -561,7 +567,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2026-07-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationrules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Send"]}}'
@@ -573,7 +579,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:22 GMT
+      - Fri, 09 Oct 2026 07:07:33 GMT
       expires:
       - '-1'
       pragma:
@@ -585,15 +591,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 25d705af-c918-47fc-9153-23d9f890472a
+      - ea6eff82-662a-46ea-b50f-5341e3c0b0e1
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G6|2026-10-07T03:13:22
+      - PROD|WESTUS2|WESTUS2|G8|2026-10-09T07:07:33
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/ce60bd9c-188a-49c7-b8b0-ee459110d641
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/9184835d-d56e-4685-af5e-b6373e77dd88
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: DE65F20568184244841180A848DF6B09 Ref B: PNQ231110907042 Ref C: 2026-10-07T03:13:21Z'
+      - 'Ref A: CFF727E763B64626B4E0591353C43656 Ref B: PNQ241100402040 Ref C: 2026-10-09T07:07:33Z'
     status:
       code: 200
       message: OK
@@ -617,7 +623,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2026-07-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.Relay/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Listen"]}}'
@@ -629,7 +635,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:30 GMT
+      - Fri, 09 Oct 2026 07:07:40 GMT
       expires:
       - '-1'
       pragma:
@@ -641,17 +647,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - ae08e472-4853-4be4-b741-2a884f3c3263
+      - 45f92f64-3d18-4a09-a42b-720d3820b34c
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G13|2026-10-07T03:13:30
+      - PROD|WESTUS2|WESTUS2|G7|2026-10-09T07:07:40
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/4ad9476a-533d-4b8c-adea-4e3be549d037
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/16c4fd6a-df0f-41d7-af2c-1f73a9c772eb
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
       - '800'
       x-msedge-ref:
-      - 'Ref A: 2C44F1ED0BD1476E97A7154722DDE5B7 Ref B: PNQ241100406054 Ref C: 2026-10-07T03:13:23Z'
+      - 'Ref A: E6091AAD63724C23B5D0EE56535DBAB3 Ref B: PNQ241100402036 Ref C: 2026-10-09T07:07:34Z'
     status:
       code: 200
       message: OK
@@ -671,7 +677,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/RootManageSharedAccessKey?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/RootManageSharedAccessKey?api-version=2026-07-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationrules/RootManageSharedAccessKey","name":"RootManageSharedAccessKey","type":"Microsoft.Relay/Namespaces/AuthorizationRules","location":"westus2","properties":{"rights":["Listen","Manage","Send"]}}'
@@ -683,7 +689,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:33 GMT
+      - Fri, 09 Oct 2026 07:07:42 GMT
       expires:
       - '-1'
       pragma:
@@ -695,15 +701,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - b8531917-bdae-4f60-9db5-1d47166425f2
+      - a3a528e4-5168-4cf4-9bfb-fb11b4af14f0
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G4|2026-10-07T03:13:33
+      - PROD|WESTUS2|WESTUS2|G3|2026-10-09T07:07:42
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southindia/4aefa50b-5e45-4187-a4bb-f1d22f29f96f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/db2bd61e-ea1b-445e-aa15-2e3b226df406
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 25761D6BE63248C2BAA0F9D0A7E86B0E Ref B: PNQ231110909036 Ref C: 2026-10-07T03:13:31Z'
+      - 'Ref A: 96ACF424EF614B9BAC6EF0BC13B5D90B Ref B: PNQ241100402034 Ref C: 2026-10-09T07:07:41Z'
     status:
       code: 200
       message: OK
@@ -725,7 +731,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/listKeys?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/listKeys?api-version=2026-07-01-preview
   response:
     body:
       string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","primaryKey":"***","secondaryKey":"***","keyName":"cliAutho000003"}'
@@ -737,7 +743,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:34 GMT
+      - Fri, 09 Oct 2026 07:07:44 GMT
       expires:
       - '-1'
       pragma:
@@ -749,17 +755,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 213e8075-d44e-4cc2-a74a-638f517981ae
+      - 59daafe4-3493-42c9-a282-affb734fc032
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G5|2026-10-07T03:13:34
+      - PROD|WESTUS2|WESTUS2|G8|2026-10-09T07:07:44
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/196c7867-1a23-40d7-a9d6-99f73f506ae0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/10b283f2-758b-45f0-8336-94fabefb7ff1
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: AB4D59AC796D434CA4445AEC66865982 Ref B: PNQ231110909023 Ref C: 2026-10-07T03:13:34Z'
+      - 'Ref A: D632EAF424CA4F35A86A8DC8033DBDE7 Ref B: PNQ241100403036 Ref C: 2026-10-09T07:07:43Z'
     status:
       code: 200
       message: OK
@@ -783,7 +789,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/regenerateKeys?api-version=2026-07-01-preview
   response:
     body:
       string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","primaryKey":"***","secondaryKey":"***","keyName":"cliAutho000003"}'
@@ -795,7 +801,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:41 GMT
+      - Fri, 09 Oct 2026 07:07:50 GMT
       expires:
       - '-1'
       pragma:
@@ -807,17 +813,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 6a020bfb-cefb-44dd-ba31-620261c8a1c2
+      - 8055a9b7-ad6c-4a03-bfe1-37d1eaa370e7
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G4|2026-10-07T03:13:42
+      - PROD|WESTUS2|WESTUS2|G3|2026-10-09T07:07:51
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/72814d2d-655a-43a3-8c8b-87dfd1b2fcd8
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/f92ab70e-4c0b-4f1d-94dd-d1a49b79dae6
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
+      - '800'
       x-msedge-ref:
-      - 'Ref A: E43D531FBBD84858B766A382145F29B0 Ref B: PNQ241100406036 Ref C: 2026-10-07T03:13:36Z'
+      - 'Ref A: 3918987D13364F92A9CF8C0BF8EE00BA Ref B: PNQ231110908042 Ref C: 2026-10-09T07:07:44Z'
     status:
       code: 200
       message: OK
@@ -841,7 +847,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/regenerateKeys?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003/regenerateKeys?api-version=2026-07-01-preview
   response:
     body:
       string: '{"primaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","secondaryConnectionString":"Endpoint=sb://relay-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=***","primaryKey":"***","secondaryKey":"***","keyName":"cliAutho000003"}'
@@ -853,7 +859,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:13:49 GMT
+      - Fri, 09 Oct 2026 07:07:57 GMT
       expires:
       - '-1'
       pragma:
@@ -865,17 +871,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 89ce0207-178c-454b-83dd-2b0d6bbc7f5e
+      - 9a21f2b9-af26-4b75-ae41-85d2668eb0fc
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G4|2026-10-07T03:13:49
+      - PROD|WESTUS2|WESTUS2|G3|2026-10-09T07:07:58
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/534cbbb5-26a7-479e-87ff-bb0e9e51a164
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/90859ab3-3124-4dbd-a8f9-b3c633fdc254
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
+      - '800'
       x-msedge-ref:
-      - 'Ref A: 4FCCAC5F00634DBFB762E217E1B8B671 Ref B: PNQ231110909062 Ref C: 2026-10-07T03:13:43Z'
+      - 'Ref A: FC515A776D8941E287A78E6AF3F862E8 Ref B: PNQ231110907052 Ref C: 2026-10-09T07:07:51Z'
     status:
       code: 200
       message: OK
@@ -897,7 +903,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002/authorizationRules/cliAutho000003?api-version=2026-07-01-preview
   response:
     body:
       string: ''
@@ -907,7 +913,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 07 Oct 2026 03:13:56 GMT
+      - Fri, 09 Oct 2026 07:08:04 GMT
       expires:
       - '-1'
       pragma:
@@ -919,17 +925,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000004768
+      - 00000001-0000-0000-0002-000000008720
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G13|2026-10-07T03:13:56
+      - PROD|WESTUS2|WESTUS2|G12|2026-10-09T07:08:05
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/87b432d2-4c47-49f9-8680-9a52fad498c9
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/4e9678d8-4014-4d41-b955-8c879ac7384c
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '799'
+      - '800'
       x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      - '12000'
       x-msedge-ref:
-      - 'Ref A: C3718693A51F4E228B85496F1871A61F Ref B: PNQ241100401029 Ref C: 2026-10-07T03:13:50Z'
+      - 'Ref A: 862E65ACFA554DC98E58FC4DC694177E Ref B: PNQ231110907036 Ref C: 2026-10-09T07:07:59Z'
     status:
       code: 200
       message: OK
@@ -951,23 +957,23 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2017-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_namespace000001/providers/Microsoft.Relay/namespaces/relay-nscli000002?api-version=2026-07-01-preview
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Deleted&t=639269396389337065&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=j7VbLoTTVfap1m-dW0WfqxRgeLqUuSjkLCkuTMlWScmQUaCehmXsrqEBUSnzh0k0j3RQM2_7sYPLMinaS-hfLlGZA39RulJXwoj5f3PxnZ9cMCFx5lvoTA0V57lfVBOMdVPgpDorgTtLHDjLbQTdzAJYY35Iq3UgtMQhKg-NKmfpV8S8oP-vh086C2iPN0OvEtI9VnfJNy0M2utLpsIGUTetSwY6qUyH9HPJ62wG82Fr0zteH5Lbgcy2j7Q-OnUXjcwJzNALAkl-_Lx4mHZ-9tFdcBEFqbuSicwme81krC3wUi72JVXqHgnyMGj71AEsvDQ2j6VstilklNh-muQdRg&h=8FHWtAetu7sL32h8AJtvQBqPVx-w_RGBRCBcKsGgKbM
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271264870669589&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=bcsyUtQw5n0JfagvoDo2Q3XoHjQN8HopS0pgJ66WHj3InA1Zn4JNYKo-_T7U4i3MsaaS4Cb44wNOUleW2YYuBWkZSjhW_MY6tX4fpnjTshavtvxRQ6h6nsxqPZWBOFH8fbLfTJObPLystfoekzU-2c3EDgFewuMIxwvlD7mLSRKKt3Aooz1F10_dqdDh7CjmeHknWOUOc8A4q_6AY57qt4fEfTXKwJREHN5KlhGP5VgiRdyK99vaa4xpU3n_I3j67jshS2ewc9M3D9GDfgUX3UekCPNDOlgw6P5uiu7JmLzQb5xXraMDOd8qYy9pMMWyNCtlJojZwA6omjQ1SfiOwQ&h=IrsfcVzYuFb6ZGzCFEUAT2gkeWHweukeXsyp3zdRJC8
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Wed, 07 Oct 2026 03:13:58 GMT
+      - Fri, 09 Oct 2026 07:08:06 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Deleted&t=639269396389337065&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=tgLMl7l7W96aJcfdilV6MFDYV5gDrGkvII0sGgpD8J9mkstekeEtNSxyEuzGjWNFzzYGMFC-NZb2utXG6JM7H5Re13iUmRmAFD-TC0dDVVERJmj1gnaO-CW2M5BK3M6nuYPSVPCR-Nf6OEEXEk_hVAgMTY49teZBgiVtlgV1Xd_Ybj6q5okkJW8jo9dwBb2oQEeS9OdqJ0F4l5TN3RSQHIyHuSruwI-4VA6MV8SvXsEvJva7CXQvR78GlLNNde6otuG_m7FoI5201DOWQGhXr1siX8Ti_vlq_LEX_uXDkFc4oLUlVBiofuXrT_jQpbXPKNRX2vRN-YHW-hw6vA2dcA&h=8FHWtAetu7sL32h8AJtvQBqPVx-w_RGBRCBcKsGgKbM
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271264870826575&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=eAdkEQxiazNCV4mIExaAU-vm2XpFgsxRnsgphdrOARpALVdBWg7poKMy2A2D6WokAJQp3Moxcu5L0wONL7KSbBP9elZB-pal9a6XIXNjUbcpIRYerbhbxhhZOf6Ox7o4j_n2GSWD1Z9KW9xASUxl0h6nsjnMASYz1i_0C26EesCmH4t6EGAZBM2dLZ5pTt8Yu7nfcy7A_s15_vEGBLgTDJstV8FC78vjRkDD3EZMaTOeS4BxjV2YLPHvQEn3PmiMIj6J2BDjSgQJXLspIYOgEZFBfgPRycnmlginAD1a7cH_CnoOeEgjTBCz-TuaMJIaX7fMBK-J-eYw3p-iZkrUXg&h=usijdbYoDmJQnR0SrwT1s_Z4_-PGZwsYI1Uthymlce0
       pragma:
       - no-cache
       strict-transport-security:
@@ -977,17 +983,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000003540
+      - 00000001-0000-0000-0002-000000006660
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G3|2026-10-07T03:13:58
+      - PROD|WESTUS2|WESTUS2|G11|2026-10-09T07:08:07
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/d3ab3c5b-c62a-4980-a9cb-8db15a15ac45
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/1ec68936-137f-487c-8118-df62d1f5d17b
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
       x-ms-ratelimit-remaining-subscription-global-deletes:
       - '11999'
       x-msedge-ref:
-      - 'Ref A: 58690B9C9366484FB160B12BFC68D0FD Ref B: PNQ241100401036 Ref C: 2026-10-07T03:13:58Z'
+      - 'Ref A: 3CEBDB3D59B840DC97BA5C3F6A73CB9F Ref B: PNQ231110909023 Ref C: 2026-10-09T07:08:06Z'
     status:
       code: 202
       message: Accepted
@@ -1007,10 +1013,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Deleted&t=639269396389337065&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=j7VbLoTTVfap1m-dW0WfqxRgeLqUuSjkLCkuTMlWScmQUaCehmXsrqEBUSnzh0k0j3RQM2_7sYPLMinaS-hfLlGZA39RulJXwoj5f3PxnZ9cMCFx5lvoTA0V57lfVBOMdVPgpDorgTtLHDjLbQTdzAJYY35Iq3UgtMQhKg-NKmfpV8S8oP-vh086C2iPN0OvEtI9VnfJNy0M2utLpsIGUTetSwY6qUyH9HPJ62wG82Fr0zteH5Lbgcy2j7Q-OnUXjcwJzNALAkl-_Lx4mHZ-9tFdcBEFqbuSicwme81krC3wUi72JVXqHgnyMGj71AEsvDQ2j6VstilklNh-muQdRg&h=8FHWtAetu7sL32h8AJtvQBqPVx-w_RGBRCBcKsGgKbM
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271264870669589&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=bcsyUtQw5n0JfagvoDo2Q3XoHjQN8HopS0pgJ66WHj3InA1Zn4JNYKo-_T7U4i3MsaaS4Cb44wNOUleW2YYuBWkZSjhW_MY6tX4fpnjTshavtvxRQ6h6nsxqPZWBOFH8fbLfTJObPLystfoekzU-2c3EDgFewuMIxwvlD7mLSRKKt3Aooz1F10_dqdDh7CjmeHknWOUOc8A4q_6AY57qt4fEfTXKwJREHN5KlhGP5VgiRdyK99vaa4xpU3n_I3j67jshS2ewc9M3D9GDfgUX3UekCPNDOlgw6P5uiu7JmLzQb5xXraMDOd8qYy9pMMWyNCtlJojZwA6omjQ1SfiOwQ&h=IrsfcVzYuFb6ZGzCFEUAT2gkeWHweukeXsyp3zdRJC8
   response:
     body:
-      string: '{"name":"d9be6e26-4f7d-4847-ac45-8743358a0a9f","status":"Running"}'
+      string: '{"name":"2654512d-83d4-480e-939c-f9220a9bbd17","status":"Running"}'
     headers:
       cache-control:
       - no-cache
@@ -1019,7 +1025,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:14:00 GMT
+      - Fri, 09 Oct 2026 07:08:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,15 +1037,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 724a97fb-883e-44f4-9c2b-6ecf9f3ac18a
+      - e4347092-4664-44c1-8cdf-9e4c9fd651f8
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G11|2026-10-07T03:14:01
+      - PROD|WESTUS2|WESTUS2|G14|2026-10-09T07:08:08
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/76a36429-20bb-47f1-9ecd-bd5eab428e8e
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/3e781e42-efba-40ed-9567-59b20b8cdf3a
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 5D7F5803E34F43EC867FA54E1DD8AE56 Ref B: PNQ241100401042 Ref C: 2026-10-07T03:14:00Z'
+      - 'Ref A: 24B0D50057AF4DE8AEE393CEF1D0E836 Ref B: PNQ241100402042 Ref C: 2026-10-09T07:08:07Z'
     status:
       code: 200
       message: OK
@@ -1059,10 +1065,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/d9be6e26-4f7d-4847-ac45-8743358a0a9f?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2017-04-01&operationType=Deleted&t=639269396389337065&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=j7VbLoTTVfap1m-dW0WfqxRgeLqUuSjkLCkuTMlWScmQUaCehmXsrqEBUSnzh0k0j3RQM2_7sYPLMinaS-hfLlGZA39RulJXwoj5f3PxnZ9cMCFx5lvoTA0V57lfVBOMdVPgpDorgTtLHDjLbQTdzAJYY35Iq3UgtMQhKg-NKmfpV8S8oP-vh086C2iPN0OvEtI9VnfJNy0M2utLpsIGUTetSwY6qUyH9HPJ62wG82Fr0zteH5Lbgcy2j7Q-OnUXjcwJzNALAkl-_Lx4mHZ-9tFdcBEFqbuSicwme81krC3wUi72JVXqHgnyMGj71AEsvDQ2j6VstilklNh-muQdRg&h=8FHWtAetu7sL32h8AJtvQBqPVx-w_RGBRCBcKsGgKbM
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=true&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271264870669589&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=bcsyUtQw5n0JfagvoDo2Q3XoHjQN8HopS0pgJ66WHj3InA1Zn4JNYKo-_T7U4i3MsaaS4Cb44wNOUleW2YYuBWkZSjhW_MY6tX4fpnjTshavtvxRQ6h6nsxqPZWBOFH8fbLfTJObPLystfoekzU-2c3EDgFewuMIxwvlD7mLSRKKt3Aooz1F10_dqdDh7CjmeHknWOUOc8A4q_6AY57qt4fEfTXKwJREHN5KlhGP5VgiRdyK99vaa4xpU3n_I3j67jshS2ewc9M3D9GDfgUX3UekCPNDOlgw6P5uiu7JmLzQb5xXraMDOd8qYy9pMMWyNCtlJojZwA6omjQ1SfiOwQ&h=IrsfcVzYuFb6ZGzCFEUAT2gkeWHweukeXsyp3zdRJC8
   response:
     body:
-      string: '{"name":"d9be6e26-4f7d-4847-ac45-8743358a0a9f","status":"Succeeded"}'
+      string: '{"name":"2654512d-83d4-480e-939c-f9220a9bbd17","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
@@ -1071,7 +1077,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 03:14:34 GMT
+      - Fri, 09 Oct 2026 07:08:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1083,16 +1089,66 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 2c00c392-bc0f-49dc-8741-a0848f00c57e
+      - 39d476d5-cf95-43eb-b817-a850ba982805
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G9|2026-10-07T03:14:34
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T07:08:40
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiawest/778c094d-9917-4349-aebc-5c5566f1e9af
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/b3a0752e-0c04-4409-8fc9-d728bd0e4c0b
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1DB17473A0AF4A808E3AF3DD30594A33 Ref B: PNQ241100406062 Ref C: 2026-10-07T03:14:32Z'
+      - 'Ref A: 12BA894A908943A180F69770DFB9933F Ref B: PNQ231110908025 Ref C: 2026-10-09T07:08:39Z'
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271264870826575&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=eAdkEQxiazNCV4mIExaAU-vm2XpFgsxRnsgphdrOARpALVdBWg7poKMy2A2D6WokAJQp3Moxcu5L0wONL7KSbBP9elZB-pal9a6XIXNjUbcpIRYerbhbxhhZOf6Ox7o4j_n2GSWD1Z9KW9xASUxl0h6nsjnMASYz1i_0C26EesCmH4t6EGAZBM2dLZ5pTt8Yu7nfcy7A_s15_vEGBLgTDJstV8FC78vjRkDD3EZMaTOeS4BxjV2YLPHvQEn3PmiMIj6J2BDjSgQJXLspIYOgEZFBfgPRycnmlginAD1a7cH_CnoOeEgjTBCz-TuaMJIaX7fMBK-J-eYw3p-iZkrUXg&h=usijdbYoDmJQnR0SrwT1s_Z4_-PGZwsYI1Uthymlce0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 09 Oct 2026 07:08:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/2654512d-83d4-480e-939c-f9220a9bbd17?isAsyncHeader=false&resourceName=relay-nscli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271265234165526&c=MIIIJjCCBw6gAwIBAgIQD4Gn71TQm8PtxVMgb26w-DANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkyMjAxMTYyNloXDTI2MTIxNzA3MTYyNlowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCWj6Sg8ovv1TfLtoCExN70AqQyhUGwYBJ3UiUI813ami-BzuGguKV6dOoA8FxeuiuoC-XKcWnP-2EkDfVPb4W6jKBs3Up88XyYXjw08k3hHsGhYeVYyDhrSnZWBKMzPXRrt0rRx71AkiQsZNbobK7tLgS-tZpQ3VulCSxSWhNjzf0fnn1yoyLanddYSK-dnOgpePrCLox-4QktlEOgsTl561CSkapBhRa1rz8ABkO7nc2Dfeilsd0tXrOQ_IZuJcqITS0W0hsYTmS5OcFIndyNixkUxg2faqZB6JC8uDK0qPq-hvzNs3dWns-JRvsp8p0Ze_5qkXpOmQvXEVCkMrQxAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBSr8g0EEZFEHelNh0GTtTpWR7XVFTAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTAvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkwL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTAvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTAvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAGssb3i4ZA8zvtbnRBgoW5HYhSzRR2g2MFqUrHPkVKks2n753_XBUv9VpteikOIX4nOG8DQCWG78X1RNYH7oZv3_oq0uX7jv_6yvSAQ5xSx8tEqDxNVqrH1zQP3qzhRnpx_2uOGuzdb7y9J2Ei2cnKNMwxqLfvxmW4KFRESAT6al8afoY0oWYw_rO-vuLu8whCZ7rOa1wzpLFq0rs6UAyj72kq2pQGzu3sTTx61EwRBHDKu_pklM6FSUAZX0mM7cC6VzVqfa9fLMe1banKuIRkA2oQb4VGH1zwlm6pQQOZq8xcHReg_KoW6BWeVmvA0hP0ewIK7tb5TTvYEzfXRfMwM&s=VBags-BiADIaYtFqQZ8gBmMj1mdOD_e6_sgQX2As3Ha3wN42WrECJ6u5PQScGvZssDnpys5wYIjf2Dza4oJrW8g8uJ6bziuhac1hfA3WarAe41RIMgWC4ZkdTzhF2lojDPwAlbeLREcILZrVudCyx7u8nYIZd9Etelzn2jWCkhoNdwhyCfxkj_wZ8fy32HneBcey0mEHgppdnNJMJPejjbV9UPlBIbLrd4yKIxu69h40M6iALiEBCiqHm-oKg6fXJZmqyLvoLJnjVNNDBzCI5kws6uDQrHseuyWSsFV9G9clrtZoHHcli5n_UALWiSQxr7en6RFE0trtwzkaoPcNtw&h=_-7VDB1H1impD05yZPOaMre3Gpk-r2-XffmBHxNS8ng
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 00000001-0000-0000-0002-000000002844
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G7|2026-10-09T07:08:43
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiawest/c95a059a-14e7-4a0b-a9db-2998ff96d18d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 9D7E8D278E9449CC9EA93A39A15A6AD1 Ref B: PNQ241100401054 Ref C: 2026-10-09T07:08:41Z'
+    status:
+      code: 204
+      message: No Content
 version: 1

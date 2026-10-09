@@ -1,41 +1,33 @@
 interactions:
 - request:
-    body: '{"location": "westus2", "sku": {"capacity": 1, "name": "Dedicated"}, "tags":
-      {"tag1": "value1"}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - relay cluster create
+      - relay cluster show
       Connection:
       - keep-alive
-      Content-Length:
-      - '96'
-      Content-Type:
-      - application/json
       ParameterSetName:
-      - --resource-group --name --location --sku --tags
+      - --resource-group --name
       User-Agent:
       - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration1/providers/Microsoft.Relay/clusters/relay-clus1-000002?api-version=2026-07-01-preview
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026?api-version=2026-07-01-preview
   response:
     body:
-      string: '{"error":{"code":"ClusterProvisioningBlockedDueToCapacity","message":"Event
-        Hubs Cluster resources cannot currently be provisioned in this region due
-        to capacity constraints. Please attempt creation in another region, or contact
-        Event Hubs support."}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026","name":"RelayClusterTestE2E2026","type":"microsoft.relay/clusters","location":"eastus2euap","tags":{"tag2":"value3"},"properties":{"zoneRedundant":true,"createdAt":"2026-09-10T10:01:26.5043563Z","updatedAt":"2026-10-09T07:01:23.7079975Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-CBN-VAZR00002"},"sku":{"name":"Dedicated","capacity":3}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '251'
+      - '503'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
       date:
-      - Wed, 07 Oct 2026 04:09:46 GMT
+      - Fri, 09 Oct 2026 07:01:56 GMT
       expires:
       - '-1'
       pragma:
@@ -47,16 +39,118 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - bf610956-a13e-492c-96f7-f12957a8a498
+      - 0f439f5a-74c3-4c69-ac27-4cf5e0dd74b1
       x-ms-messaging-routing-id:
-      - PROD|WESTUS2|WESTUS2|G5|2026-10-07T04:09:46
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/southcentralus/ce5565f4-ebbf-4ff1-856d-cf2ba4cb23fe
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '199'
+      - PROD|EASTUS2EUAP|EASTUS2EUAP|G1|2026-10-09T07:01:57
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 9AD28A52838743E6AAA6C70D1E575024 Ref B: PNQ241100404025 Ref C: 2026-10-07T04:09:46Z'
+      - 'Ref A: D21A03FAA31A417FB2F92D88B24DB24D Ref B: PNQ231110907025 Ref C: 2026-10-09T07:01:57Z'
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay cluster namespace list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --cluster-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026/namespaces?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/RelayTestNSE2E2026"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/namespaces/TestRelayNSE2E2026"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '291'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 07:01:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 7ea0f59f-ba51-43a5-8b0d-c872e7bce729
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS2EUAP|EASTUS2EUAP|G7|2026-10-09T07:01:58
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/eastus/420664d6-e52c-4cd7-8623-dd5361845fec
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 47585E42D10E47559C809210C8C5C74C Ref B: PNQ241100402034 Ref C: 2026-10-09T07:01:58Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay cluster list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PPGTest/providers/Microsoft.Relay/clusters/RelayClusterTestE2E2026","name":"RelayClusterTestE2E2026","type":"microsoft.relay/clusters","location":"eastus2euap","tags":{"tag2":"value3"},"properties":{"zoneRedundant":true,"createdAt":"2026-09-10T10:01:26.5043563Z","updatedAt":"2026-10-09T07:01:23.7079975Z","provisioningState":"Succeeded","status":"Active","metricId":"PROD-CBN-VAZR00002"},"sku":{"name":"Dedicated","capacity":3}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '515'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 07:01:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 45c14c9b-9fb4-47e8-8e99-10c2dd77c036
+      x-ms-messaging-routing-id:
+      - PROD|EASTUS2EUAP|EASTUS2EUAP|G9|2026-10-09T07:02:00
+      x-ms-original-request-ids:
+      - ''
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D1A2E57AFE4D4F35BFB9F83961232B5C Ref B: PNQ231110907062 Ref C: 2026-10-09T07:01:59Z'
+    status:
+      code: 200
+      message: OK
 version: 1
