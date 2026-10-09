@@ -81,7 +81,7 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
         )
         _args_schema.trusted_service_access_enabled = AAZBoolArg(
-            options=["--trusted-service-access-enabled"],
+            options=["-t", "--trusted-service-access-enabled"],
             arg_group="Properties",
             help="Value that indicates whether Trusted Service Access is Enabled or not.",
             nullable=True,

@@ -73,7 +73,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.private_link_service_connection_state = AAZObjectArg(
-            options=["--private-link-service-connection-state"],
+            options=["--connection-state", "--private-link-service-connection-state"],
             arg_group="Properties",
             help="Details about the state of the connection.",
             nullable=True,
