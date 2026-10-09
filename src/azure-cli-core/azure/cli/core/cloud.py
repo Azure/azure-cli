@@ -505,6 +505,7 @@ AZURE_BLEU_CLOUD = Cloud(
         vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases_master.json',
         media_resource_id='https://rest.media.sovcloud-api.fr',
         ossrdbms_resource_id='https://ossrdbms-aad.database.sovcloud-api.fr',
+        synapse_analytics_resource_id='https://dev.azuresynapse.sovcloud-api.fr',
         portal='https://portal.sovcloud-azure.fr'),
     suffixes=CloudSuffixes(
         acr_login_server_endpoint='.azurecr.sovcloud-azure.fr',
