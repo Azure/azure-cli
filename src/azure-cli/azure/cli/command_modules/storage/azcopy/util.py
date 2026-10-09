@@ -5,6 +5,8 @@
 
 import os
 import platform
+import re
+import shutil
 import subprocess
 import datetime
 import stat
@@ -14,7 +16,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.api import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from packaging.version import parse as parse_version
+from packaging.version import InvalidVersion, parse as parse_version
 
 logger = get_logger(__name__)
 
@@ -27,24 +29,20 @@ AZCOPY_VERSION = '10.13.0'
 class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
-        install_location = _get_default_install_location()
+        install_location = os.path.abspath(_get_default_install_location())
         self.executable = None
         if os.path.isfile(install_location):
             self.executable = install_location
             version = self.check_version()
-            if not version or parse_version(version) < parse_version(AZCOPY_VERSION):
+            if not _is_supported_version(version):
                 self.executable = None
         else:
-            try:
-                import re
-                args = ["azcopy", "--version"]
-                out_bytes = subprocess.check_output(args)
-                out_text = out_bytes.decode('utf-8')
-                version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-                if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
-                    self.executable = "azcopy"
-            except Exception:  # pylint: disable=broad-except
-                self.executable = None
+            system_executable = _resolve_system_executable("azcopy")
+            if system_executable:
+                self.executable = system_executable
+                version = self.check_version()
+                if not _is_supported_version(version):
+                    self.executable = None
         self.creds = creds
         if not self.executable:
             logger.warning("Azcopy not found, installing at %s", install_location)
@@ -93,13 +91,12 @@ class AzCopy:
 
     def check_version(self):
         try:
-            import re
             args = [self.executable] + ["--version"]
             out_bytes = subprocess.check_output(args)
             out_text = out_bytes.decode('utf-8')
-            version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-            return version
-        except subprocess.CalledProcessError:
+            match = re.search(r"azcopy version (.+?)(?:\r?\n|$)", out_text)
+            return match.group(1) if match else ""
+        except (OSError, subprocess.CalledProcessError, UnicodeError):
             return ""
 
     def run_command(self, args):
@@ -128,6 +125,44 @@ class AzCopy:
     def sync(self, source, destination, flags=None):
         flags = flags or []
         self.run_command(['sync', source, destination] + flags)
+
+
+def _resolve_system_executable(executable):
+    resolved_path = shutil.which(executable)
+    if not resolved_path:
+        return None
+
+    try:
+        cwd = os.path.abspath(os.getcwd())
+        resolved_path = os.path.abspath(resolved_path)
+        resolved_dirs = (
+            os.path.dirname(resolved_path),
+            os.path.dirname(os.path.realpath(resolved_path)),
+        )
+    except (OSError, ValueError):
+        logger.warning("Ignoring %s because its path could not be validated.", executable)
+        return None
+
+    for resolved_dir in resolved_dirs:
+        try:
+            is_cwd = os.path.samefile(resolved_dir, cwd)
+        except (OSError, ValueError):
+            is_cwd = (os.path.normcase(os.path.normpath(resolved_dir)) ==
+                      os.path.normcase(os.path.normpath(cwd)))
+        if is_cwd:
+            logger.warning("Ignoring %s found in the current working directory.", executable)
+            return None
+
+    return resolved_path
+
+
+def _is_supported_version(version):
+    if not version:
+        return False
+    try:
+        return parse_version(version) >= parse_version(AZCOPY_VERSION)
+    except InvalidVersion:
+        return False
 
 
 class AzCopyCredentials:  # pylint: disable=too-few-public-methods
