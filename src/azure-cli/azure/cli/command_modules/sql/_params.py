@@ -1506,24 +1506,29 @@ def load_arguments(self, _):
     #                sql db str                   #
     ###############################################
     with self.argument_context('sql db str-policy set') as c:
-        create_args_for_complex_type(
-            c, 'parameters', Database, [
-                'retention_days',
-                'diffbackup_hours'
-            ])
-
         c.argument(
             'retention_days',
             options_list=['--retention-days'],
-            required=True,
+            type=int,
+            required=False,
             help='New backup short term retention policy retention in days.'
             'Valid retention days for live database of (DTU) Basic can be 1-7 days; Rest models can be 1-35 days.')
-
         c.argument(
             'diffbackup_hours',
             options_list=['--diffbackup-hours'],
+            type=int,
             help='New backup short term retention policy differential backup interval in hours.'
             'Valid differential backup interval for live database can be 12 or 24 hours.')
+        c.argument(
+            'lock_immutability',
+            arg_type=get_three_state_flag(),
+            help='Whether to lock backup immutability. Locking is irreversible. '
+                 'Setting false does not unlock an already locked policy.')
+        c.argument(
+            'yes',
+            options_list=['--yes', '-y'],
+            action='store_true',
+            help='Do not prompt for confirmation when locking backup immutability.')
 
     ###############################################
     #                sql dw                       #
@@ -2825,24 +2830,28 @@ def load_arguments(self, _):
             help='The id of recoverable database from geo-replicated instance')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
-        create_args_for_complex_type(
-            c, 'parameters', ManagedDatabase, [
-                'deleted_time',
-                'retention_days'
-            ])
-
         c.argument(
             'deleted_time',
             options_list=['--deleted-time'],
-            help='If specified, updates retention days for a deleted database, instead of an existing database.'
-            'Must match the deleted time of a deleted database on the source Managed Instance.')
-
+            help='If specified, updates retention days for a deleted database, instead of an existing database. '
+                 'Must match the deleted time of a deleted database on the source Managed Instance.')
         c.argument(
             'retention_days',
             options_list=['--retention-days'],
+            type=int,
             required=True,
-            help='New backup short term retention policy in days.'
-            'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+            help='New backup short term retention policy in days. '
+                 'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+        c.argument(
+            'lock_immutability',
+            arg_type=get_three_state_flag(),
+            help='Whether to lock backup immutability for a live managed database. '
+                 'Locking is irreversible. Cannot be used with --deleted-time, even when false.')
+        c.argument(
+            'yes',
+            options_list=['--yes', '-y'],
+            action='store_true',
+            help='Do not prompt for confirmation when locking backup immutability.')
 
     with self.argument_context('sql midb short-term-retention-policy show') as c:
         c.argument(

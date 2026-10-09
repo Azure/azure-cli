@@ -214,17 +214,23 @@ short-summary: Manage SQL database short term retention policy.
 helps['sql db str-policy set'] = """
 type: command
 short-summary: Update short term retention settings for a live database.
+long-summary: Locking backup immutability is irreversible. Confirmation is required only when --lock-immutability is true. Use --yes to skip confirmation. Specify at least one retention setting or --lock-immutability.
 examples:
   - name: Set short term retention for a live database.
-    text: az sql db str-policy set -g mygroup -s myserver -n mydb --retention-days retentionindays --diffbackup-hours diffbackuphours
+    text: az sql db str-policy set --resource-group mygroup --server myserver --name mydb --retention-days 7 --diffbackup-hours 24
+  - name: Lock backup immutability without changing the retention settings, skipping confirmation.
+    text: az sql db str-policy set --resource-group mygroup --server myserver --name mydb --lock-immutability true --yes
 """
 
 helps['sql db str-policy show'] = """
 type: command
 short-summary: Show the short term retention policy for a live database.
+long-summary: The immutabilityStatus output property reports Disabled, Enabled or Locked when returned by the service.
 examples:
   - name: Show short term retention policy for a live database.
     text: az sql db str-policy show -g mygroup -s myserver -n mydb
+  - name: Show the current backup immutability status.
+    text: az sql db str-policy show --resource-group mygroup --server myserver --name mydb --query immutabilityStatus
 """
 
 helps['sql db str-policy wait'] = """
@@ -1212,16 +1218,20 @@ short-summary: Manage SQL Managed Instance database backup short term retention 
 helps['sql midb short-term-retention-policy set'] = """
 type: command
 short-summary: Update short term retention for automated backups on a single database.
+long-summary: Locking backup immutability is irreversible and is supported only for live managed databases. Confirmation is required only when --lock-immutability is true; use --yes to skip it. Do not specify --lock-immutability with --deleted-time, even when false. Retention cannot be reduced on a dropped database whose backup immutability is locked.
 examples:
   - name: Set backup short term retention for live managed database.
-    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --retention-days retentionindays
+    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --retention-days 7
   - name: Set backup short term retention for dropped managed database.
-    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22" --retention-days retentionindays
+    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22" --retention-days 7
+  - name: Lock backup immutability for a live managed database, skipping confirmation.
+    text: az sql midb short-term-retention-policy set --resource-group mygroup --mi myinstance --name mymanageddb --retention-days 7 --lock-immutability true --yes
 """
 
 helps['sql midb short-term-retention-policy show'] = """
 type: command
 short-summary: Show short term retention for automated backups on a single database.
+long-summary: The immutabilityStatus output property reports Disabled, Enabled or Locked for live and restorable dropped managed databases when returned by the service.
 examples:
   - name: Shows backup short term retention for live managed database.
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb
