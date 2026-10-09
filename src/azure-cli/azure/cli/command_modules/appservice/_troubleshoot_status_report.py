@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 from azure.cli.core.style import Style, print_styled_text
 
 
+_MAX_ORPHAN_STARTUPS = 5
+
+
 def _emit_header(instances, orphan_startups, app_name, emit):
     """Emit the top-of-report header. Returns False when there's nothing to render
     (empty instances AND no orphan startups) so the caller can bail out early."""
@@ -140,8 +143,15 @@ def render_report(payload):
     for inst in instances:
         _emit_instance_section(inst, emit)
 
-    for orphan in orphan_startups:
+    for orphan in orphan_startups[:_MAX_ORPHAN_STARTUPS]:
         _emit_orphan_startup(orphan, emit)
+
+    omitted_orphans = len(orphan_startups) - _MAX_ORPHAN_STARTUPS
+    if omitted_orphans > 0:
+        summary_label = 'summary' if omitted_orphans == 1 else 'summaries'
+        emit((Style.WARNING, '{} additional orphan startup {} omitted.'.format(
+            omitted_orphans, summary_label)))
+        emit()
 
     _emit_hint_footer(instances, app_name, resource_group, emit)
 

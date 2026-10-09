@@ -2106,6 +2106,27 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                     report_module.render_report(payload)
                     output.flush()
 
+    def test_troubleshoot_status_report_limits_orphan_startups(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'orphanStartups': [{
+                'InstanceId': 'orphan-{}'.format(index),
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            } for index in range(6)],
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(report_module.sys, 'stdout', output):
+            report_module.render_report(payload)
+
+        rendered = output.getvalue()
+        for index in range(5):
+            self.assertIn('Instance orphan-{} Startup Summary'.format(index), rendered)
+        self.assertNotIn('Instance orphan-5 Startup Summary', rendered)
+        self.assertIn('1 additional orphan startup summary omitted.', rendered)
+
     def test_transform_troubleshoot_status_output_renders_error_columns(self):
         # Regression: the LastError* columns exercise _format_dt only when
         # any instance has a visible error. A missing import there surfaces
