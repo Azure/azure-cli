@@ -4,21 +4,25 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from argparse import Namespace
+from copy import deepcopy
 from unittest import mock
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.vm._validators import _validate_vmss_auto_zone_placement
 from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
                                                  _merge_secrets, BootLogStreamWriter,
                                                  _get_access_extension_upgrade_info,
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT,
                                                  _get_extension_instance_name,
-                                                 get_boot_log)
+                                                 get_boot_log, update_vmss)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands import AzCliCommand
 
 
@@ -165,6 +169,175 @@ class TestVmCustom(unittest.TestCase):
 
         # assert
         self.assertEqual(result, 'extension-name')
+
+
+class TestVMSSUpdateZonePlacement(unittest.TestCase):
+
+    def setUp(self):
+        self.cmd = _get_test_cmd()
+        self.parameters = {
+            'name': 'vmss',
+            'location': 'eastus2',
+            'tags': {'purpose': 'zone-placement'},
+            'sku': {'name': 'Standard_D2s_v5', 'tier': 'Standard', 'capacity': 0},
+            'orchestrationMode': 'Flexible',
+            'platformFaultDomainCount': 1,
+            'singlePlacementGroup': False,
+            'upgradePolicy': {'mode': 'Manual'},
+            'resiliencyPolicy': {'zoneAllocationPolicy': {'maxZoneCount': 2}},
+            'virtualMachineProfile': {
+                'osProfile': {'computerNamePrefix': 'vmss', 'adminUsername': 'azureuser'},
+                'storageProfile': {
+                    'imageReference': {
+                        'publisher': 'Canonical',
+                        'offer': '0001-com-ubuntu-server-jammy',
+                        'sku': '22_04-lts-gen2',
+                        'version': 'latest'
+                    }
+                }
+            }
+        }
+        self.expected_args = {
+            'resource_group': 'rg',
+            'vm_scale_set_name': 'vmss',
+            'no_wait': False,
+            'location': 'eastus2',
+            'tags': {'purpose': 'zone-placement'},
+            'sku': {'name': 'Standard_D2s_v5', 'tier': 'Standard', 'capacity': 0},
+            'orchestration_mode': 'Flexible',
+            'platform_fault_domain_count': 1,
+            'single_placement_group': False,
+            'upgrade_policy': {'mode': 'Manual'},
+            'resiliency_policy': {'zone_allocation_policy': {'max_zone_count': 2}},
+            'virtual_machine_profile': {
+                'os_profile': {'computer_name_prefix': 'vmss', 'admin_username': 'azureuser'},
+                'storage_profile': {
+                    'image_reference': {
+                        'publisher': 'Canonical',
+                        'offer': '0001-com-ubuntu-server-jammy',
+                        'sku': '22_04-lts-gen2',
+                        'version': 'latest'
+                    }
+                }
+            }
+        }
+
+    def _assert_update(self, persisted_properties, expected_properties, **updates):
+        parameters = deepcopy({**self.parameters, **persisted_properties})
+        expected_args = {**self.expected_args, **expected_properties}
+        with mock.patch('azure.cli.command_modules.vm.operations.vmss.VMSSCreate') as vmss_create:
+            result = update_vmss(self.cmd, 'rg', 'vmss', parameters=parameters, **updates)
+
+        vmss_create.assert_called_once_with(cli_ctx=self.cmd.cli_ctx)
+        vmss_create.return_value.assert_called_once_with(command_args=expected_args)
+        self.assertIs(result, vmss_create.return_value.return_value)
+        return vmss_create.return_value.call_args.kwargs['command_args']
+
+    def _assert_serialized_placement(self, command_args, expected_placement):
+        from azure.cli.command_modules.vm.operations.vmss import VMSSCreate
+        from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+
+        ctx = AAZCommandCtx(
+            cli_ctx=self.cmd.cli_ctx,
+            schema=VMSSCreate._build_arguments_schema(),
+            command_args=command_args)
+        # Exercise the generated PUT serializer without creating an authenticated client.
+        with mock.patch.object(ctx, 'get_http_client'):
+            operation = VMSSCreate.VirtualMachineScaleSetsCreateOrUpdate(ctx)
+            self.assertEqual(operation.content['placement'], expected_placement)
+
+    def test_vmss_update_include_to_exclude(self):
+        for include_zones in (['1', '2'], [], None):
+            with self.subTest(include_zones=include_zones):
+                command_args = self._assert_update(
+                    {'placement': {
+                        'zonePlacementPolicy': 'Auto', 'includeZones': include_zones, 'excludeZones': None
+                    }},
+                    {'placement': {'zone_placement_policy': 'Auto', 'exclude_zones': ['3']}},
+                    exclude_zones=['3'])
+                self._assert_serialized_placement(
+                    command_args, {'zonePlacementPolicy': 'Auto', 'excludeZones': ['3']})
+
+    def test_vmss_update_exclude_to_include(self):
+        for exclude_zones in (['3'], [], None):
+            with self.subTest(exclude_zones=exclude_zones):
+                command_args = self._assert_update(
+                    {'placement': {
+                        'zonePlacementPolicy': 'Auto', 'excludeZones': exclude_zones, 'includeZones': None
+                    }},
+                    {'placement': {'zone_placement_policy': 'Auto', 'include_zones': ['1', '2']}},
+                    include_zones=['1', '2'])
+                self._assert_serialized_placement(
+                    command_args, {'zonePlacementPolicy': 'Auto', 'includeZones': ['1', '2']})
+
+    def test_vmss_update_same_filter(self):
+        for persisted_name, argument_name in (('includeZones', 'include_zones'), ('excludeZones', 'exclude_zones')):
+            for requested_zones in (['1', '2'], ['2', '3']):
+                with self.subTest(argument=argument_name, requested_zones=requested_zones):
+                    self._assert_update(
+                        {'placement': {'zonePlacementPolicy': 'Auto', persisted_name: ['1', '2']}},
+                        {'placement': {'zone_placement_policy': 'Auto', argument_name: requested_zones}},
+                        **{argument_name: requested_zones})
+
+    def test_vmss_update_empty_filter_is_explicit(self):
+        # CLI flags require values (nargs='+'); an empty list is still explicit at the handler boundary.
+        for persisted_name, argument_name in (('includeZones', 'exclude_zones'), ('excludeZones', 'include_zones')):
+            with self.subTest(argument=argument_name):
+                self._assert_update(
+                    {'placement': {'zonePlacementPolicy': 'Auto', persisted_name: ['1', '2']}},
+                    {'placement': {'zone_placement_policy': 'Auto', argument_name: []}},
+                    **{argument_name: []})
+
+    def test_vmss_update_without_filters_preserves_placement(self):
+        for persisted_filter, expected_filter in (
+                ({'includeZones': ['1', '2'], 'excludeZones': None},
+                 {'include_zones': ['1', '2'], 'exclude_zones': None}),
+                ({'excludeZones': ['3'], 'includeZones': None},
+                 {'exclude_zones': ['3'], 'include_zones': None})):
+            for updates in ({}, {'include_zones': None, 'exclude_zones': None}, {'zone_placement_policy': 'Auto'}):
+                with self.subTest(persisted_filter=persisted_filter, updates=updates):
+                    self._assert_update(
+                        {'placement': {'zonePlacementPolicy': 'Auto', **persisted_filter}},
+                        {'placement': {'zone_placement_policy': 'Auto', **expected_filter}},
+                        **updates)
+
+    def test_vmss_update_unrelated_property_preserves_placement(self):
+        for persisted_name, argument_name in (('includeZones', 'include_zones'), ('excludeZones', 'exclude_zones')):
+            with self.subTest(filter=argument_name):
+                self._assert_update(
+                    {'placement': {'zonePlacementPolicy': 'Auto', persisted_name: ['1', '2']}},
+                    {
+                        'placement': {'zone_placement_policy': 'Auto', argument_name: ['1', '2']},
+                        'sku': {'name': 'Standard_D4s_v5', 'tier': 'Standard', 'capacity': 0},
+                        'no_wait': True
+                    },
+                    vm_sku='Standard_D4s_v5', no_wait=True)
+
+    def test_vmss_update_absent_or_null_placement(self):
+        for persisted in ({}, {'placement': None}, {'placement': {}}):
+            with self.subTest(persisted=persisted):
+                self._assert_update(persisted, persisted)
+                self._assert_update(persisted, persisted, include_zones=None, exclude_zones=None)
+                for updates in (
+                        {'zone_placement_policy': 'Auto'},
+                        {'zone_placement_policy': 'Auto', 'include_zones': ['1', '2']},
+                        {'zone_placement_policy': 'Auto', 'exclude_zones': ['3']}):
+                    with self.subTest(updates=updates):
+                        self._assert_update(persisted, {'placement': updates}, **updates)
+
+    def test_vmss_update_policy_only_preserves_filter(self):
+        for persisted_name, argument_name in (('includeZones', 'include_zones'), ('excludeZones', 'exclude_zones')):
+            with self.subTest(filter=argument_name):
+                self._assert_update(
+                    {'placement': {persisted_name: ['1', '2']}},
+                    {'placement': {'zone_placement_policy': 'Auto', argument_name: ['1', '2']}},
+                    zone_placement_policy='Auto')
+
+    def test_vmss_update_rejects_both_filters(self):
+        namespace = Namespace(include_zones=['1', '2'], exclude_zones=['3'])
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    'You can only specify one of --include-zones and --exclude-zones'):
+            _validate_vmss_auto_zone_placement(namespace)
 
 
 class TestVMBootLog(unittest.TestCase):
