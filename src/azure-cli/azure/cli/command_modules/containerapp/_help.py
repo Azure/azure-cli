@@ -766,9 +766,12 @@ helps['containerapp job execution'] = """
 helps['containerapp job execution list'] = """
     type: command
     short-summary: Get list of all executions of a Container App Job.
+    long-summary: Automatically follows pagination to return all available executions.
     examples:
     - name: List of all executions of a Container App Job.
       text: az containerapp job execution list -n my-containerapp-job -g MyResourceGroup
+    - name: List all executions using a requested page size of 1.
+      text: az containerapp job execution list -n my-containerapp-job -g MyResourceGroup --page-size 1
 """
 
 helps['containerapp job execution show'] = """

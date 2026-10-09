@@ -1651,9 +1651,13 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
         handle_raw_exception(e)
 
 
-def listexecution_containerappsjob(cmd, resource_group_name, name):
+def listexecution_containerappsjob(cmd, resource_group_name, name, page_size=None):
+    if page_size is not None and page_size < 0:
+        raise InvalidArgumentValueError("--page-size must be a non-negative integer.")
+
     try:
-        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name)
+        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name,
+                                                         page_size=page_size)
         return executions['value']
     except CLIError as e:
         handle_raw_exception(e)

@@ -482,6 +482,10 @@ def load_arguments(self, _):
         c.argument('name', id_part=None)
         c.argument('job_execution_name', help='name of the specific job execution.')
 
+    with self.argument_context('containerapp job execution list') as c:
+        c.argument('page_size', type=int, help='Requested number of executions per ARM page. Must be non-negative. '
+                   'Omit or use 0 for the service default. The service may cap the page size. All pages are returned.')
+
     with self.argument_context('containerapp job secret') as c:
         c.argument('secrets', nargs='+', options_list=['--secrets', '-s'], help="A list of secret(s) for the container app job. Space-separated values in 'key=value' or 'key=keyvaultref:keyvaulturl,identityref:identity' format (where 'key' cannot be longer than 20 characters).")
         c.argument('name', id_part=None, help="The name of the container app job for which the secret needs to be retrieved.")
