@@ -22,7 +22,7 @@ type: command
 short-summary: Create a Relay Service Cluster.
 examples:
   - name: Create a Relay Service Cluster
-    text: az relay cluster create --resource-group myresourcegroup --name mycluster --location westus --tags tag1=value1
+    text: az relay cluster create --resource-group myresourcegroup --name mycluster --location westus --sku Dedicated --tags tag1=value1
 """
 
 helps['relay cluster update'] = """
