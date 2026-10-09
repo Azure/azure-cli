@@ -7737,6 +7737,9 @@ def _fetch_site_runtime_items(cmd, subscription_id, resource_group, name, slot_s
     return runtime_items
 
 
+_MAX_ORPHAN_STARTUPS = 5
+
+
 def _parse_startup_summary_body(body, target_machine):
     """Parse the JSON body returned by KuduLite /api/startuplogs/summary.
     Returns (startup_by_machine, plaintext_notice_or_None)."""
@@ -7901,7 +7904,7 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         'instances': runtime_items,
     }
     if orphan_startups:
-        payload['orphanStartups'] = orphan_startups
+        payload['orphanStartups'] = orphan_startups[:_MAX_ORPHAN_STARTUPS]
     if report:
         payload['startupSummaryUrl'] = startup_summary_url
         from azure.cli.command_modules.appservice import _troubleshoot_status_report

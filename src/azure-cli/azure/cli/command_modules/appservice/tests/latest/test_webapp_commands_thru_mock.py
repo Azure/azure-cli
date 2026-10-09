@@ -1847,6 +1847,30 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
+    def test_troubleshoot_status_limits_orphan_startups_in_structured_output(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload({}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response([]))),
+        ]
+        requests_get_mock.return_value = self._make_response(200, json_data=[{
+            'InstanceId': 'previous-{}'.format(index),
+            'Startup': {'Succeeded': 0, 'Failed': 1},
+        } for index in range(6)])
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        self.assertEqual(len(result['orphanStartups']), 5)
+        self.assertEqual(
+            [entry['InstanceId'] for entry in result['orphanStartups']],
+            ['previous-{}'.format(index) for index in range(5)])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
     def test_troubleshoot_status_single_instance(self, requests_get_mock, send_raw_request_mock,
                                                  _scm_url_mock, _headers_mock):
         arm_item = {'instanceId': '7c2d9', 'state': 'Stopped', 'action': 'SiteStopped',
@@ -1882,7 +1906,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': 'Bearer token'})
+                return_value={'Authorization': '******'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
@@ -1909,7 +1933,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertIn("not rolled out to your app's region yet", startup.get('SummaryFetchStatus', ''))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': '******'})
+                return_value={'Authorization': 'Bearer token'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
