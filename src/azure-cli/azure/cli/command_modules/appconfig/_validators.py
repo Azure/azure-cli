@@ -24,7 +24,7 @@ from ._utils import (is_valid_connection_string,
                      validate_feature_flag_key,
                      is_http_endpoint)
 from ._models import QueryFields
-from ._constants import ImportExportProfiles
+from ._constants import ImportExportProfiles, FeatureFlagConstants
 from ._featuremodels import FeatureQueryFields
 from ._snapshotmodels import SnapshotQueryFields
 
@@ -214,6 +214,11 @@ def validate_feature_query_fields(namespace):
         namespace.fields = fields
 
 
+def validate_enhanced_feature_query_fields(namespace):
+    if namespace.fields:
+        namespace.fields = [field.lower() for field in namespace.fields]
+
+
 def validate_snapshot_query_fields(namespace):
     if namespace.fields:
         fields = []
@@ -323,6 +328,45 @@ def validate_resolve_keyvault(namespace):
 def validate_feature(namespace):
     if namespace.feature is not None:
         validate_feature_flag_name(namespace.feature)
+
+
+def validate_enhanced_feature_flag(namespace):
+    if namespace.feature_name is not None:
+        validate_feature_flag_name(namespace.feature_name)
+
+
+def validate_enhanced_feature_flag_input(namespace):
+    if getattr(namespace, 'flag', None) is None:
+        return
+
+    # --flag is a full-object replacement; it cannot be mixed with the per-property content flags.
+    conflicting = {
+        '--description': namespace.description,
+        '--requirement-type': namespace.requirement_type,
+        '--telemetry-enabled': namespace.telemetry_enabled,
+    }
+    specified = [option for option, value in conflicting.items() if value is not None]
+    if specified:
+        raise MutuallyExclusiveArgumentError(
+            "--flag cannot be combined with {}. Provide the entire feature flag with --flag, "
+            "or set individual properties without --flag.".format(", ".join(specified)))
+
+    flag = namespace.flag
+    if not isinstance(flag, dict):
+        raise InvalidArgumentValueError(
+            "--flag must be a JSON object or shorthand-syntax object representing a single feature flag.")
+
+    flag_name = flag.get(FeatureFlagConstants.NAME)
+    if namespace.feature_name is None and flag_name is None:
+        raise RequiredArgumentMissingError(
+            "The feature flag 'name' is required. Provide it inside --flag or via --feature-name.")
+
+    if namespace.feature_name is not None and flag_name is not None and namespace.feature_name != flag_name:
+        raise MutuallyExclusiveArgumentError(
+            "Feature name mismatch: --feature-name '{}' does not match the 'name' '{}' in --flag. "
+            "Provide only one, or make them identical.".format(namespace.feature_name, flag_name))
+
+    validate_feature_flag_name(flag_name if flag_name is not None else namespace.feature_name)
 
 
 def validate_feature_key(namespace):
