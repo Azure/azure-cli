@@ -3,6 +3,29 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
+
+
+_COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{1,63}")
+
+
+def _build_ai_project_endpoint(account_name, project_name):
+    from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+
+    for value, option_name, resource_type in (
+            (account_name, "--account-name", "Cognitive Services account"),
+            (project_name, "--project-name", "AI project")):
+        if not value:
+            raise RequiredArgumentMissingError(f"Please specify {option_name}.")
+        if (not isinstance(value, str) or
+                not _COGNITIVE_SERVICES_RESOURCE_NAME_PATTERN.fullmatch(value)):
+            raise InvalidArgumentValueError(
+                f"Invalid value for {option_name}. The {resource_type} name must be 2-64 characters, "
+                "start with a letter or digit, and contain only letters, digits, periods, hyphens, or underscores."
+            )
+
+    return f"https://{account_name}.services.ai.azure.com/api/projects/{project_name}"
+
 
 def get_cognitiveservices_management_client(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -65,18 +88,12 @@ def cf_ai_projects(cli_ctx, command_args):
 
     # If no explicit endpoint provided, construct from account name
     if not endpoint and account_name:
-        # Construct endpoint URL from account name
-        # Format: https://{account_name}.cognitiveservices.azure.com
-        endpoint = (
-            f"https://{account_name}.services.ai.azure.com/api/projects/{project}"
-        )
+        endpoint = _build_ai_project_endpoint(account_name, project)
 
     if not endpoint:
         from azure.cli.core.azclierror import RequiredArgumentMissingError
 
-        raise RequiredArgumentMissingError(
-            "Please specify --account-name or --endpoint"
-        )
+        raise RequiredArgumentMissingError("Please specify --account-name.")
 
     # Prepare client kwargs with proper logging and telemetry
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
