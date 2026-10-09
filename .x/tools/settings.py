@@ -46,3 +46,12 @@ _TEST_FILE_PATTERN = re.compile('(?:^|/)tests/.*?(?:^|/)?test_[^/]+\\.py$', 34)
 _TITLE_ISSUE_PATTERN = re.compile('^\\s*Fix(?:es|ed|ing)?\\s+#(\\d+)\\s*:?\\s*', 34)
 _TITLE_PREFIX_PATTERN = re.compile('^\\s*[\\[{]([^\\]}]+)[\\]}]\\s*', 32)
 _TITLE_VERB_REPLACEMENTS = {'added': 'Add', 'adding': 'Add', 'adds': 'Add', 'allowed': 'Allow', 'allowing': 'Allow', 'allows': 'Allow', 'changed': 'Change', 'changing': 'Change', 'changes': 'Change', 'collected': 'Collect', 'collecting': 'Collect', 'collects': 'Collect', 'deprecated': 'Deprecate', 'deprecating': 'Deprecate', 'deprecates': 'Deprecate', 'disabled': 'Disable', 'disabling': 'Disable', 'disables': 'Disable', 'enabled': 'Enable', 'enabling': 'Enable', 'enables': 'Enable', 'fixed': 'Fix', 'fixing': 'Fix', 'fixes': 'Fix', 'improved': 'Improve', 'improving': 'Improve', 'improves': 'Improve', 'made': 'Make', 'making': 'Make', 'makes': 'Make', 'moved': 'Move', 'moving': 'Move', 'moves': 'Move', 'renamed': 'Rename', 'renaming': 'Rename', 'renames': 'Rename', 'replaced': 'Replace', 'replacing': 'Replace', 'replaces': 'Replace', 'removed': 'Remove', 'removing': 'Remove', 'removes': 'Remove', 'supported': 'Support', 'supporting': 'Support', 'supports': 'Support', 'updated': 'Update', 'updating': 'Update', 'updates': 'Update', 'upgraded': 'Upgrade', 'upgrading': 'Upgrade', 'upgrades': 'Upgrade'}
+
+
+EXECUTION_INSTRUCTIONS = (
+    "Do not run azdev setup in this snapshot: it assumes Git metadata and a mutable developer installation.",
+    "Prefer the installed validator over rebuilding the Azure CLI development environment.",
+    "Run Flake8 with -j 1 to avoid unavailable shared-memory semaphores; keep all lint rules.",
+    "If additional diagnostics genuinely need dependencies, isolate them under TMPDIR and do not",
+    "mistake checks in that temporary environment for the required installed validation.",
+)

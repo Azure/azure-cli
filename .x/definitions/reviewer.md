@@ -1,6 +1,6 @@
 # Repository scope: Azure/azure-cli
 
-This definition is active only for `Azure/azure-cli`. Its `.x/x.yml` profile determines enabled stages. Other-repository examples in the preserved charter do not grant additional capabilities. Generic helper APIs keep their existing deterministic safeguards.
+This definition is active only for `Azure/azure-cli`. Its `.x/x.yml` profile determines enabled stages. Generic helper APIs keep their existing deterministic safeguards.
 
 # Reviewer - Combine CI and Test Results and Review PR (Non-Blocking)
 
@@ -44,13 +44,7 @@ The opening `<<'PYEOF'` MUST be quoted. Closing tag at column 0.
 
 ## What I Do
 
-Given a PR (selected by `find_in_flight_prs`) carrying `pr["repo"]`
-(`Azure/azure-cli`, `Azure/azure-cli-extensions`, `Azure/azure-powershell` or
-`Azure/azclips`):
-
-Do not review analysis-only `Azure/terraform-provider-azapi` or an Azclips
-issue. Azclips reaches Reviewer only as an in-flight PR; human-authored
-Azclips PRs remain eligible for review without a Fixer handoff.
+Given a PR in `Azure/azure-cli` selected by `find_in_flight_prs`:
 
 ### Step 1 — Read CI ONCE (no polling)
 
@@ -86,10 +80,6 @@ run Tester before Reviewer where the repository supports live tests; never
 invoke Fixer on a human branch. Review author-provided test and recording
 evidence alongside upstream CI without claiming the Agent ran tests unless
 the live-test run actually completed.
-
-For `Azure/azclips`, Tester is disabled by policy. Do not call
-`dispatch_live_test_workflow` and do not post a live-test skip comment. Record
-that upstream CI is the test authority for this PR.
 
 ### Step 3 — Respect human review state
 
@@ -264,7 +254,7 @@ from x_engineering_agent.tools.github.pull_requests import (
     get_pr,
     get_pr_changed_files,
 )
-from x_engineering_agent.tools.agents.reviewer.azure_cli import (
+from x_engineering_agent.tools.live_tests.failures import (
     classify_test_failures,
     extract_failed_tests_from_text,
 )
@@ -277,18 +267,13 @@ check_runs = get_pr_check_runs(owner, repo, pr["pr_number"])
 failed = []
 classified = {"pr_relevant": [], "out_of_scope": [], "uncertain": []}
 if live_test_comment_body:  # the comment posted by the live-test workflow
-    failed = extract_failed_tests_from_text(live_test_comment_body)
+    failed = extract_failed_tests_from_text(f"{owner}/{repo}", live_test_comment_body)
     if failed:
         pr_files = get_pr_changed_files(owner, repo, pr["pr_number"])
         # `target` is the resolved {kind, name, repo} returned by the Tester
-        # via helpers.infer_target / resolve_target.
-        classified = classify_test_failures(failed, pr_files, target=target)
+        # via infer_target_for_repo / resolve_target_for_repo.
+        classified = classify_test_failures(f"{owner}/{repo}", failed, pr_files, target=target)
 ```
-
-For Azclips, inspect the .NET diff and upstream check details directly. Review
-the changed component against the linked issue analysis and verify focused
-regression coverage. Do not apply Azure CLI module naming, `azdev` commands or
-Azure CLI PR title rules to Azclips.
 
 Decision rules:
 
@@ -410,10 +395,10 @@ if ci['failed'] > 0:
         f"{ci_failed_list}"
     )
 
-# The main loop first repairs Azure CLI and Azure PowerShell title-gate
-# failures directly and re-requests that check run. If the gate still fails,
-# or this is another repository, preserve the normal format guidance as a
-# fallback so Copilot can fix description-side or uncommon format failures.
+# The main loop first repairs title-gate failures directly when this package
+# implements title_failure_plan, and re-requests that check run. If the gate
+# still fails, preserve the normal format guidance as a fallback so Copilot can
+# fix description-side or uncommon format failures.
 format_gate_failed = any(
     any(marker in " ".join([
         str(r.get("name") or ""),
@@ -422,7 +407,6 @@ format_gate_failed = any(
     for r in ci["failed_runs"]
 )
 if format_gate_failed:
-    from x_engineering_agent.tools.targets.discovery import get_profile
     from x_engineering_agent.tools.targets.guidance import pr_format_guidance
     from x_engineering_agent.tools.targets.inference import infer_target_for_repo
     repo_full = f"{owner}/{repo}"
@@ -430,15 +414,14 @@ if format_gate_failed:
         repo_full,
         pr_files=get_pr_changed_files(owner, repo, pr["pr_number"]),
     )
-    profile = get_profile(repo_full)
     sections.append(
         "### PR title / description format\n"
         "The title-format gate still fails after deterministic metadata "
         "repair. Update the PR title and description to match:\n\n"
         + pr_format_guidance(
+            repo_full,
             component=tgt.get("name"),
             issue_number=pr.get("issue_number"),
-            style=profile.get("title_style", "cli"),
         )
     )
 test_validation = format_test_validation(
@@ -529,9 +512,9 @@ from x_engineering_agent.tools.github.pull_requests import (
     get_pr,                         # PR owner and current metadata
     get_pr_changed_files,           # PR file paths for failure classification
 )
-from x_engineering_agent.tools.agents.reviewer.azure_cli import (
-    classify_test_failures,         # bucket failures into pr_relevant / out_of_scope
-    extract_failed_tests_from_text,  # parse `FAILED <path>::<id>` lines from pytest output
+from x_engineering_agent.tools.live_tests.failures import (
+    classify_test_failures,         # this package's failure classification
+    extract_failed_tests_from_text,  # this package's live-test output parser
 )
 from x_engineering_agent.tools.live_tests.formatting import format_test_validation  # one live-test + coverage section
 # justified final risk/owner-review signal
