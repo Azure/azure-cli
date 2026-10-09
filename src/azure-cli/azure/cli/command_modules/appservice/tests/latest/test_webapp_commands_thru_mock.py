@@ -2079,6 +2079,9 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         rendered_payload = render_mock.call_args.args[0]
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
+        self.assertEqual(
+            rendered_payload['startupSummaryUrl'],
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary')
 
     def test_troubleshoot_status_report_supports_legacy_windows_encodings(self):
         from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
@@ -2111,6 +2114,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
 
         payload = {
             'name': 'myApp',
+            'startupSummaryUrl': 'https://myapp.scm.azurewebsites.net/api/startuplogs/summary',
             'orphanStartups': [{
                 'InstanceId': 'orphan-{}'.format(index),
                 'Startup': {'Succeeded': 0, 'Failed': 1},
@@ -2128,6 +2132,10 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertIn(
             'Below startup records are from instances that no longer host the application '
             'but occurred within the last 24 hours. Limited to 5 instances.',
+            rendered)
+        self.assertIn(
+            'To review the full 24-hour history, visit '
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary.',
             rendered)
 
     def test_transform_troubleshoot_status_output_renders_error_columns(self):

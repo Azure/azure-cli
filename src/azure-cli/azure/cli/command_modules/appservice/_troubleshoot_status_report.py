@@ -130,6 +130,7 @@ def render_report(payload):
     orphan_startups = payload.get('orphanStartups') or []
     app_name = payload.get('name') or '<webapp>'
     resource_group = payload.get('resourceGroup')
+    startup_summary_url = payload.get('startupSummaryUrl')
 
     def emit(*objs):
         print_styled_text(*objs, file=sys.stdout)
@@ -144,9 +145,11 @@ def render_report(payload):
         _emit_instance_section(inst, emit)
 
     if orphan_startups:
-        emit((Style.PRIMARY,
+        emit((Style.HIGHLIGHT,
               'Below startup records are from instances that no longer host the application '
               'but occurred within the last 24 hours. Limited to 5 instances.'))
+        if startup_summary_url:
+            emit((Style.HIGHLIGHT, 'To review the full 24-hour history, visit {}.'.format(startup_summary_url)))
         emit()
 
     for orphan in orphan_startups[:_MAX_ORPHAN_STARTUPS]:
