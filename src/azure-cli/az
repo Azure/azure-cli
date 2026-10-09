@@ -1,19 +1,25 @@
 #!/usr/bin/env python
 
+import runpy
 import sys
 import os
 
-dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src')
+launcher_dir = os.path.dirname(os.path.realpath(__file__))
+launcher_src_dir = os.path.join(launcher_dir, 'src')
+module_search_path = launcher_src_dir if os.path.isdir(launcher_src_dir) else launcher_dir
 
 if os.environ.get('PYTHONPATH') is None:
-    os.environ['PYTHONPATH'] = dir
+    os.environ['PYTHONPATH'] = module_search_path
 else:
     os.environ['PYTHONPATH'] = os.pathsep.join([
-        dir,
+        module_search_path,
         os.environ.get('PYTHONPATH'),
     ])
 
 if os.environ.get('AZ_INSTALLER') is None:
     os.environ['AZ_INSTALLER'] = 'PIP'
 
-os.execl(sys.executable, sys.executable, '-m', 'azure.cli', *sys.argv[1:])
+if module_search_path not in sys.path:
+    sys.path.insert(0, module_search_path)
+
+runpy.run_module('azure.cli.__main__', run_name='__main__', alter_sys=True)
