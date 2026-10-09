@@ -48,7 +48,8 @@ class WebappBasicE2ETest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        plan_id = self.cmd(
+            'appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -81,11 +82,15 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].appServicePlanId', plan_id),
+            JMESPathCheckNotExists('[0].serverFarmId'),
             JMESPathCheck('[0].hostNames[0]', webapp_name +
                           '.azurewebsites.net')
         ])
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('name', webapp_name),
+            JMESPathCheck('appServicePlanId', plan_id),
+            JMESPathCheckNotExists('serverFarmId'),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(
