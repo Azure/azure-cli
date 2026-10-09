@@ -217,6 +217,9 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
 
+# kms infrastructure encryption (platform-managed keys)
+CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED = "Enabled"
+
 # app routing nginx config options
 CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"
 CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX = "AnnotationControlled"
