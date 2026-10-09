@@ -2138,6 +2138,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
 
+
 class TestRuntimeFailedHintMocked(unittest.TestCase):
     """Tests that the TIP hint appears in RuntimeFailed and timeout errors."""
 
