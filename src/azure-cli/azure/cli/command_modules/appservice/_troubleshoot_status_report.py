@@ -143,15 +143,14 @@ def render_report(payload):
     for inst in instances:
         _emit_instance_section(inst, emit)
 
+    if orphan_startups:
+        emit((Style.PRIMARY,
+              'Below startup records are from instances that no longer host the application '
+              'but occurred within the last 24 hours. Limited to 5 instances.'))
+        emit()
+
     for orphan in orphan_startups[:_MAX_ORPHAN_STARTUPS]:
         _emit_orphan_startup(orphan, emit)
-
-    omitted_orphans = len(orphan_startups) - _MAX_ORPHAN_STARTUPS
-    if omitted_orphans > 0:
-        summary_label = 'summary' if omitted_orphans == 1 else 'summaries'
-        emit((Style.WARNING, '{} additional orphan startup {} omitted.'.format(
-            omitted_orphans, summary_label)))
-        emit()
 
     _emit_hint_footer(instances, app_name, resource_group, emit)
 

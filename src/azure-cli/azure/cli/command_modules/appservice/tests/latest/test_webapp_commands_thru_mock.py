@@ -2125,7 +2125,10 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         for index in range(5):
             self.assertIn('Instance orphan-{} Startup Summary'.format(index), rendered)
         self.assertNotIn('Instance orphan-5 Startup Summary', rendered)
-        self.assertIn('1 additional orphan startup summary omitted.', rendered)
+        self.assertIn(
+            'Below startup records are from instances that no longer host the application '
+            'but occurred within the last 24 hours. Limited to 5 instances.',
+            rendered)
 
     def test_transform_troubleshoot_status_output_renders_error_columns(self):
         # Regression: the LastError* columns exercise _format_dt only when
