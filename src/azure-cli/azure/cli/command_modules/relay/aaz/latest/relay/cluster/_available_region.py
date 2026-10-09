@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AvailableRegion(AAZCommand):
     """List regions containing available pre-provisioned Relay clusters.
+
+    :example: ListAvailableClusters
+        az relay cluster available-region
     """
 
     _aaz_info = {
