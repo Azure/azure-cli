@@ -5,11 +5,18 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+REGISTRY_TENANT_USAGE_ERROR = \
+    "--registry-tenant can only be used when --registry is a container registry resource ID."
+REGISTRY_TENANT_AUTH_ERROR = \
+    "--registry-tenant is not supported when signed in with managed identity or Cloud Shell. " \
+    "Sign in with a user or service principal that has access to both tenants."
 
-def get_acr_service_client(cli_ctx, api_version=None):
+
+def get_acr_service_client(cli_ctx, api_version=None, aux_tenants=None):
     """Returns the client for managing container registries. """
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version,
+                                   aux_tenants=aux_tenants)
 
 
 def get_acr_tasks_service_client(cli_ctx, api_version=None):
@@ -21,6 +28,33 @@ def get_acr_tasks_service_client(cli_ctx, api_version=None):
 # The function is used in Azure and Edge and hybrid profile is used to support the different API versions.
 def cf_acr_registries(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).registries
+
+
+def cf_acr_import(cli_ctx, command_args):
+    from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
+    from azure.cli.core._profile import Profile
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+
+    registry_tenant = command_args.pop('registry_tenant', None)
+    source_registry = command_args.get('source_registry')
+
+    if registry_tenant:
+        if not is_valid_resource_id(source_registry):
+            raise ArgumentUsageError(REGISTRY_TENANT_USAGE_ERROR)
+
+        resource_id = parse_resource_id(source_registry)
+        if (resource_id.get('namespace', '').lower() != 'microsoft.containerregistry' or
+                resource_id.get('type', '').lower() != 'registries'):
+            raise ArgumentUsageError(REGISTRY_TENANT_USAGE_ERROR)
+
+        profile = Profile(cli_ctx=cli_ctx)
+        account = profile.get_subscription()
+        user = account.get('user', {})
+        if user.get('name') in ('systemAssignedIdentity', 'userAssignedIdentity') or user.get('cloudShellID'):
+            raise ValidationError(REGISTRY_TENANT_AUTH_ERROR)
+
+    aux_tenants = [registry_tenant] if registry_tenant else None
+    return get_acr_service_client(cli_ctx, aux_tenants=aux_tenants).registries
 
 
 def cf_acr_cache(cli_ctx, *_):
