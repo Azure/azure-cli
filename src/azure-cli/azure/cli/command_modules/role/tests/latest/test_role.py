@@ -757,6 +757,40 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
             self.cmd('role assignment list --all --assignee-object-id {uami_object_id}',
                      checks=self.check("length([])", 0))
 
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    def test_role_assignment_at_scope(self, resource_group):
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.kwargs.update({
+                'uami': self.create_random_name('clitest', 15),  # user-assigned managed identity
+                # https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+                'role_reader_guid': 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+            })
+            self._prepare_scope_kwargs()
+
+            uami = self.cmd('identity create -g {rg} -n {uami} --location westus').get_output_in_json()
+            self.kwargs['uami_object_id'] = uami['principalId']
+
+            self.cmd('role assignment create '
+                     '--assignee-object-id {uami_object_id} --assignee-principal-type ServicePrincipal '
+                     '--role {role_reader_guid} --scope {rg_id}')
+            # Verify atScope() is not bound to scope,
+            # and when atScope() is not specified, scope can be used with `principalId eq '{}'` filter.
+            # At subscription scope
+            self.cmd('role assignment list --scope {sub_id} --at-scope false '
+                     '--assignee-object-id {uami_object_id} '
+                     '--fill-role-definition-name false --fill-principal-name false',
+                     checks=[
+                         self.check("length([])", 1),
+                         self.check("[0].scope", '{rg_id}'),
+                     ])
+            # At resource group scope
+            self.cmd('role assignment list --scope {rg_id} --at-scope false '
+                     '--assignee-object-id {uami_object_id} '
+                     '--fill-role-definition-name false --fill-principal-name false',
+                     checks=[
+                         self.check("length([])", 1),
+                         self.check("[0].scope", '{rg_id}'),
+                     ])
 
 class RoleAssignmentWithConfigScenarioTest(RoleScenarioTestBase):
 
