@@ -7,6 +7,9 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 REGISTRY_TENANT_USAGE_ERROR = \
     "--registry-tenant can only be used when --registry is a container registry resource ID."
+REGISTRY_TENANT_AUTH_ERROR = \
+    "--registry-tenant is not supported when signed in with managed identity or Cloud Shell. " \
+    "Sign in with a user or service principal that has access to both tenants."
 
 
 def get_acr_service_client(cli_ctx, api_version=None, aux_tenants=None):
@@ -28,7 +31,8 @@ def cf_acr_registries(cli_ctx, *_):
 
 
 def cf_acr_import(cli_ctx, command_args):
-    from azure.cli.core.azclierror import ArgumentUsageError
+    from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
+    from azure.cli.core._profile import Profile
     from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
     registry_tenant = command_args.pop('registry_tenant', None)
@@ -42,6 +46,12 @@ def cf_acr_import(cli_ctx, command_args):
         if (resource_id.get('namespace', '').lower() != 'microsoft.containerregistry' or
                 resource_id.get('type', '').lower() != 'registries'):
             raise ArgumentUsageError(REGISTRY_TENANT_USAGE_ERROR)
+
+        profile = Profile(cli_ctx=cli_ctx)
+        account = profile.get_subscription()
+        user = account.get('user', {})
+        if user.get('name') in ('systemAssignedIdentity', 'userAssignedIdentity') or user.get('cloudShellID'):
+            raise ValidationError(REGISTRY_TENANT_AUTH_ERROR)
 
     aux_tenants = [registry_tenant] if registry_tenant else None
     return get_acr_service_client(cli_ctx, aux_tenants=aux_tenants).registries

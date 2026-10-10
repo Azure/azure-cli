@@ -40,6 +40,7 @@ def acr_import(cmd,  # pylint: disable=too-many-locals
                resource_group_name=None,
                repository=None,
                force=False,
+               registry_tenant=None,
                no_wait=False):
 
     if source_registry_username and not source_registry_password:

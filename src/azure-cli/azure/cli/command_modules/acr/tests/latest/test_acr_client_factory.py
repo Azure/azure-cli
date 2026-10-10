@@ -6,7 +6,7 @@
 import unittest
 from unittest import mock
 
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 from azure.cli.command_modules.acr import _client_factory
 
 
@@ -21,9 +21,11 @@ class AcrClientFactoryTests(unittest.TestCase):
         self.assertEqual(kwargs['aux_tenants'], ['source-tenant'])
 
     @mock.patch.object(_client_factory, 'get_acr_service_client')
-    def test_import_client_uses_registry_tenant(self, get_acr_service_client):
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_import_client_uses_registry_tenant(self, profile, get_acr_service_client):
         registries = mock.sentinel.registries
         get_acr_service_client.return_value.registries = registries
+        profile.return_value.get_subscription.return_value = {'user': {'type': 'user'}}
         command_args = {
             'source_registry': (
                 '/subscriptions/source-subscription/resourceGroups/source-rg/providers/'
@@ -75,6 +77,44 @@ class AcrClientFactoryTests(unittest.TestCase):
         with self.assertRaisesRegex(
                 ArgumentUsageError,
                 '--registry-tenant can only be used when --registry is a container registry resource ID'):
+            _client_factory.cf_acr_import(mock.sentinel.cli_ctx, command_args)
+
+        get_acr_service_client.assert_not_called()
+
+    @mock.patch.object(_client_factory, 'get_acr_service_client')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_import_client_rejects_managed_identity(self, profile, get_acr_service_client):
+        profile.return_value.get_subscription.return_value = {
+            'user': {'name': 'systemAssignedIdentity'}
+        }
+        command_args = {
+            'source_registry': (
+                '/subscriptions/source-subscription/resourceGroups/source-rg/providers/'
+                'Microsoft.ContainerRegistry/registries/source-registry'),
+            'registry_tenant': 'source-tenant'
+        }
+
+        with self.assertRaisesRegex(
+                ValidationError,
+                '--registry-tenant is not supported when signed in with managed identity'):
+            _client_factory.cf_acr_import(mock.sentinel.cli_ctx, command_args)
+
+        get_acr_service_client.assert_not_called()
+
+    @mock.patch.object(_client_factory, 'get_acr_service_client')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_import_client_rejects_cloud_shell(self, profile, get_acr_service_client):
+        profile.return_value.get_subscription.return_value = {'user': {'cloudShellID': True}}
+        command_args = {
+            'source_registry': (
+                '/subscriptions/source-subscription/resourceGroups/source-rg/providers/'
+                'Microsoft.ContainerRegistry/registries/source-registry'),
+            'registry_tenant': 'source-tenant'
+        }
+
+        with self.assertRaisesRegex(
+                ValidationError,
+                '--registry-tenant is not supported when signed in with managed identity or Cloud Shell'):
             _client_factory.cf_acr_import(mock.sentinel.cli_ctx, command_args)
 
         get_acr_service_client.assert_not_called()
