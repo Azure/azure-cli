@@ -6989,6 +6989,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("bootstrap_artifact_source")
 
+    def get_ssh_access(self) -> Union[str, None]:
+        """Obtain the value of ssh_access.
+        """
+        return self.raw_param.get("ssh_access")
+
     def get_bootstrap_container_registry_resource_id(self) -> Union[str, None]:
         """Obtain the value of bootstrap_container_registry_resource_id.
         """
@@ -8848,6 +8853,19 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.node_resource_group_profile = node_resource_group_profile
         return mc
 
+    def set_up_agentpool_profile_ssh_access(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            for agent_pool_profile in (mc.agent_pool_profiles or []):
+                if agent_pool_profile.security_profile is None:
+                    agent_pool_profile.security_profile = (
+                        self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+                    )
+                agent_pool_profile.security_profile.ssh_access = ssh_access
+        return mc
+
     def set_up_bootstrap_profile(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
 
@@ -8994,6 +9012,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group_profile(mc)
         # set up AI toolchain operator
         mc = self.set_up_ai_toolchain_operator(mc)
+        # set up agentpool profile ssh access
+        mc = self.set_up_agentpool_profile_ssh_access(mc)
         # set up bootstrap profile
         mc = self.set_up_bootstrap_profile(mc)
         # set up static egress gateway profile
