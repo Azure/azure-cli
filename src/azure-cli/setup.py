@@ -184,6 +184,10 @@ setup(
         'az.bat',
         'azps.ps1'
     ],
+    # A distinct helper name keeps installers from replacing the extensionless az script.
+    entry_points={
+        'console_scripts': ['az-cli=azure.cli._launcher:main']
+    },
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.10.0',

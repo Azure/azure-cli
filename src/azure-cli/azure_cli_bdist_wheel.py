@@ -16,8 +16,9 @@ class azure_cli_build_py(build_py):
     def build_packages(self):
         super().build_packages()
         if self.extra_build_source_files:
-            package, module, module_file = self.extra_build_source_files.split(',')
-            self.build_module(module, module_file, package)
+            for source in self.extra_build_source_files.strip().splitlines():
+                package, module, module_file = source.strip().split(',')
+                self.build_module(module, module_file, package)
 
 
 cmdclass = {
