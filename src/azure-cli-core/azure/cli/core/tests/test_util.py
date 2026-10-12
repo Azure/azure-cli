@@ -746,56 +746,71 @@ class TestHandleException(unittest.TestCase):
 class TestSafeExecutablePath(unittest.TestCase):
     """Tests for get_safe_executable_path, which mitigates binary planting (CWE-427)."""
 
+    EXE_NAME = 'planted.exe' if platform.system() == 'Windows' else 'planted'
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.work_dir = self._tmp.name
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        self._tmp.cleanup()
+
+    def _make_exe(self, directory):
+        path = os.path.join(directory, self.EXE_NAME)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('')
+        os.chmod(path, 0o755)
+        return path
+
+    def _resolve_from_cwd(self, path_value):
+        os.chdir(self.work_dir)
+        with mock.patch.dict(os.environ, {'PATH': path_value}):
+            return get_safe_executable_path(self.EXE_NAME)
+
     def test_explicit_path_returned_as_is(self):
-        # A path that already includes a directory component should be returned unchanged.
         explicit = os.path.join('some', 'dir', 'tool')
         self.assertEqual(get_safe_executable_path(explicit), explicit)
 
-    def test_current_working_directory_is_excluded(self):
-        # A matching executable planted in the current working directory must NOT be selected.
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            exe_name = 'planted.exe' if platform.system() == 'Windows' else 'planted'
-            planted = os.path.join(tmp_dir, exe_name)
-            with open(planted, 'w', encoding='utf-8') as f:
-                f.write('')
-            os.chmod(planted, 0o755)
+    def test_cwd_on_path_is_excluded(self):
+        self._make_exe(self.work_dir)
+        self.assertIsNone(self._resolve_from_cwd(self.work_dir))
 
-            orig_cwd = os.getcwd()
-            try:
-                os.chdir(tmp_dir)
-                # CWD is deliberately not part of the search set, so resolution falls back
-                # to the original bare name rather than the planted binary.
-                with mock.patch.dict(os.environ, {'PATH': tmp_dir}):
-                    resolved = get_safe_executable_path(exe_name)
-                self.assertEqual(resolved, exe_name)
-                self.assertNotEqual(resolved, planted)
-            finally:
-                os.chdir(orig_cwd)
+    def test_relative_path_entry_is_excluded(self):
+        # '.' resolves against the current working directory, so it must never be trusted.
+        self._make_exe(self.work_dir)
+        self.assertIsNone(self._resolve_from_cwd('.'))
 
-    def test_resolves_from_trusted_path_dir(self):
-        # An executable located in a trusted PATH directory (not the CWD) should be resolved
-        # to its absolute path.
-        with tempfile.TemporaryDirectory() as path_dir, tempfile.TemporaryDirectory() as work_dir:
-            exe_name = 'mytool.exe' if platform.system() == 'Windows' else 'mytool'
-            target = os.path.join(path_dir, exe_name)
-            with open(target, 'w', encoding='utf-8') as f:
-                f.write('')
-            os.chmod(target, 0o755)
+    @unittest.skipUnless(platform.system() == 'Windows', 'Case-insensitive paths are Windows-specific')
+    def test_cwd_excluded_regardless_of_case(self):
+        self._make_exe(self.work_dir)
+        self.assertIsNone(self._resolve_from_cwd(self.work_dir.swapcase()))
 
-            orig_cwd = os.getcwd()
-            try:
-                os.chdir(work_dir)
-                with mock.patch.dict(os.environ, {'PATH': path_dir}):
-                    resolved = get_safe_executable_path(exe_name)
-                self.assertEqual(os.path.normcase(resolved), os.path.normcase(target))
-            finally:
-                os.chdir(orig_cwd)
+    def test_cwd_skipped_and_trusted_dir_used(self):
+        # A decoy in the CWD is skipped and the real binary later on PATH is selected.
+        self._make_exe(self.work_dir)
+        with tempfile.TemporaryDirectory() as path_dir:
+            target = self._make_exe(path_dir)
+            resolved = self._resolve_from_cwd(os.pathsep.join([self.work_dir, path_dir]))
+            self.assertEqual(os.path.normcase(resolved), os.path.normcase(target))
+
+    def test_not_found_returns_none(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            self.assertIsNone(self._resolve_from_cwd(path_dir))
+
+    def test_unknown_cwd_fails_closed(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            self._make_exe(path_dir)
+            with mock.patch.dict(os.environ, {'PATH': path_dir}), \
+                    mock.patch('os.getcwd', side_effect=OSError):
+                self.assertIsNone(get_safe_executable_path(self.EXE_NAME))
 
     @unittest.skipUnless(platform.system() == 'Windows', 'cmd.exe resolution is Windows-specific')
     def test_cmd_exe_resolves_to_system32(self):
         resolved = get_safe_executable_path('cmd.exe')
         self.assertTrue(os.path.isabs(resolved))
-        self.assertTrue(resolved.lower().endswith('cmd.exe'))
+        self.assertTrue(resolved.lower().endswith(os.path.join('system32', 'cmd.exe')))
 
 if __name__ == '__main__':
     unittest.main()

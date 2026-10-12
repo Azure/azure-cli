@@ -1634,11 +1634,26 @@ def should_encrypt_token_cache(cli_ctx):
     return encrypt
 
 
-def _get_trusted_search_dirs():
-    """Return an ordered list of trusted directories to search for executables.
+def _is_same_dir(dir1, dir2):
+    """Compare directories by filesystem identity, which handles case differences, short names
+    (e.g. PROGRA~1), junctions and mapped drives. Falls back to normalized string comparison."""
+    try:
+        return os.path.samefile(dir1, dir2)
 
-    The current working directory (and empty ``PATH`` entries, which Windows treats as the current
-    directory) are deliberately excluded so a planted binary there can never be selected.
+    except (OSError, ValueError):
+        return os.path.normcase(os.path.normpath(dir1)) == os.path.normcase(os.path.normpath(dir2))
+
+
+def _is_located_in_dir(path, directory):
+    """Whether ``path`` or its symlink target lives directly in ``directory``."""
+    return any(_is_same_dir(os.path.dirname(p), directory) for p in (path, os.path.realpath(path)))
+
+
+def _get_trusted_search_dirs():
+    """Return an ordered list of candidate directories to search for executables.
+
+    Empty and relative ``PATH`` entries are skipped because both resolve against the current working
+    directory. The current working directory itself is filtered out by the caller.
     """
     search_dirs = []
     if sys.platform.startswith('win'):
@@ -1647,10 +1662,9 @@ def _get_trusted_search_dirs():
         search_dirs.append(os.path.join(system_root, 'System32'))
         search_dirs.append(system_root)
 
-    cwd = os.path.abspath(os.getcwd())
     for directory in os.environ.get('PATH', os.defpath).split(os.pathsep):
         directory = directory.strip('"')
-        if directory and os.path.abspath(directory) != cwd:
+        if os.path.isabs(directory):
             search_dirs.append(directory)
 
     return search_dirs
@@ -1680,27 +1694,36 @@ def get_safe_executable_path(executable):
     directories only (never the current working directory) removes that ambiguity.
 
     :param executable: The executable name to resolve, e.g. ``cmd.exe`` or ``az``.
-    :return: The resolved absolute path if found, otherwise the original ``executable`` value so
-        callers keep their existing (pre-resolution) behavior as a fallback.
+    :return: The resolved absolute path, or ``None`` if no trusted match exists (same contract as
+        ``shutil.which``). Never fall back to the bare name: spawning it would reintroduce the
+        current-directory lookup this function exists to prevent.
     """
     # Already an explicit path (absolute or containing a directory component): nothing to resolve.
     if os.path.dirname(executable):
         return executable
 
+    try:
+        cwd = os.getcwd()
+
+    except OSError:
+        # Cannot verify that a candidate is outside the working directory: fail closed.
+        logger.debug("Unable to determine the current working directory; not resolving '%s'.", executable)
+        return None
+
     candidates = _get_executable_candidates(executable)
     seen = set()
     for directory in _get_trusted_search_dirs():
-        normalized = os.path.normcase(os.path.abspath(directory))
-        if normalized in seen:
+        normalized = os.path.normcase(os.path.normpath(directory))
+        if normalized in seen or _is_same_dir(directory, cwd):
             continue
+
         seen.add(normalized)
         for candidate in candidates:
             full_path = os.path.join(directory, candidate)
-            if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            if (os.path.isfile(full_path) and os.access(full_path, os.X_OK) and not _is_located_in_dir(full_path, cwd)):
                 return full_path
 
-    # Fall back to the original name if resolution fails (e.g. executable not on PATH).
-    return executable
+    return None
 
 
 def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):

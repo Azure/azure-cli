@@ -43,38 +43,53 @@ from azure.cli.core.util import get_safe_executable_path
 
 ### `get_safe_executable_path(executable) -> str`
 
-Resolves a bare executable **name** to an absolute path, searching only trusted directories:
+Resolves a bare executable **name** to an absolute path, searching only trusted directories. It is
+a drop-in replacement for `shutil.which` (same `None`-when-missing contract):
 
 1. If the input already contains a directory component, it is returned unchanged (nothing to do).
 2. On Windows, the Windows system directory (`%SystemRoot%\System32`) and `%SystemRoot%` are
    searched first, so system binaries like `cmd.exe` always resolve there.
-3. `PATH` entries are searched next — **but the current working directory (and empty `PATH`
-   entries, which Windows treats as the current directory) are excluded.**
-4. Windows `PATHEXT` extensions are expanded, so `az` correctly resolves to `az.cmd` / `az.exe`.
-5. If resolution fails (the binary is not on `PATH`), the original name is returned as a safe
-   fallback — callers keep their previous behavior and existing error handling.
+3. Absolute `PATH` entries are searched next. **The current working directory is skipped**, compared
+   by filesystem identity, so differences in case, short names (`PROGRA~1`) and junctions don't
+   matter. **Empty and relative entries** (`""`, `.`, `bin`) are skipped too, because they resolve
+   against the current directory.
+4. A match whose symlink target lives in the current working directory is rejected.
+5. Windows `PATHEXT` extensions are expanded, so `az` correctly resolves to `az.cmd` / `az.exe`.
+6. If no trusted match exists, or the current directory can't be determined, it returns **`None`**
+   (fail closed). It never falls back to the bare name, because spawning a bare name brings back
+   the lookup this helper prevents.
 
 ```python
 # ✅ Safe: resolve the absolute path first, then invoke it.
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import get_safe_executable_path
 
 docker = get_safe_executable_path('docker')   # e.g. C:\Program Files\Docker\docker.exe
+if not docker:
+    raise ValidationError("Docker is not installed or not on PATH.")
 run_cmd([docker, 'ps'])
 ```
 
 ### Invoking `az` itself (or any batch script) on Windows
 
 On Windows, `az` is a batch script (`az.cmd`) that must be run through `cmd.exe`. Resolve **both**
-`cmd.exe` and `az` to absolute paths and avoid `shell=True`:
+`cmd.exe` and `az` to absolute paths and avoid `shell=True`. If either can't be resolved, run the
+CLI module with the current interpreter, which is also an absolute path:
 
 ```python
 import platform
+import sys
 from azure.cli.core.util import get_safe_executable_path
 
 def _get_az_cmd_prefix():
+    az_path = get_safe_executable_path('az')
     if platform.system() == 'Windows':
-        return [get_safe_executable_path('cmd.exe'), '/c', get_safe_executable_path('az')]
-    return [get_safe_executable_path('az')]
+        cmd_path = get_safe_executable_path('cmd.exe')
+        if az_path and cmd_path:
+            return [cmd_path, '/c', az_path]
+    elif az_path:
+        return [az_path]
+    return [sys.executable, '-m', 'azure.cli']
 
 # az version
 subprocess.check_output(_get_az_cmd_prefix() + ['version', '-o', 'json'])  # shell=False
@@ -131,8 +146,6 @@ code so the logic stays centralized, but these are useful references:
 | --- | --- | --- |
 | `azure.cli.core.util.get_safe_executable_path` | Resolve to absolute path, exclude CWD | **Preferred shared helper for new code.** |
 | `command_modules/util/custom.py` (`_get_az_cmd_prefix`) | Resolve `cmd.exe` + `az`, drop `shell=True` | Used by `az upgrade`. |
-| `command_modules/acr/custom.py` (`_validate_command_path`) | Reject a binary that resolves into the CWD | Honors `DOCKER_COMMAND` override. |
-| `command_modules/acs/custom.py` (`which`) | Manual `PATH` lookup (no CWD prepend) | `kubectl` location. |
 
 ## Summary
 
@@ -142,4 +155,3 @@ code so the logic stays centralized, but these are useful references:
   using `get_safe_executable_path`.
 - Review `cmd.exe`, `docker`, `git`, `gh`, and `kubectl` invocations in your module and add a
   regression test that proves a decoy in the CWD is never selected.
-

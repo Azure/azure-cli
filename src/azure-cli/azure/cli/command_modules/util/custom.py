@@ -216,12 +216,24 @@ def _get_az_cmd_prefix():
     az are resolved to absolute paths while excluding the current working directory, so a planted
     cmd.exe / az.{exe,cmd,bat} in the working directory cannot be executed (CWE-427). On other
     platforms 'az' is an executable on PATH and is resolved the same way.
+
+    If no trusted 'az' (or cmd.exe) can be resolved, fall back to running the CLI module with the
+    current interpreter, which is also an absolute path and never consults the working directory.
     """
     import platform
+    import sys
     from azure.cli.core.util import get_safe_executable_path
+
+    az_path = get_safe_executable_path('az')
     if platform.system() == 'Windows':
-        return [get_safe_executable_path('cmd.exe'), '/c', get_safe_executable_path('az')]
-    return [get_safe_executable_path('az')]
+        cmd_path = get_safe_executable_path('cmd.exe')
+        if az_path and cmd_path:
+            return [cmd_path, '/c', az_path]
+
+    elif az_path:
+        return [az_path]
+
+    return [sys.executable, '-m', 'azure.cli']
 
 
 def _upgrade_on_windows():
