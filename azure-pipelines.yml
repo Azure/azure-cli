@@ -541,6 +541,28 @@ jobs:
       pythonVersion: '$(python.version)'
       module: 'azure-cli-core'
 
+- job: TestPackagingMetadata
+  displayName: Test Packaging Metadata
+  timeoutInMinutes: 10
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python310:
+        python.version: '3.10'
+      Python314:
+        python.version: '3.14'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: |
+      set -e
+      python -m pip install docutils requests packaging tomli
+      python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
+      python -B scripts/ci/check_package_versions.py
+    displayName: Validate source metadata and packaging automation
+
 - job: TestTelemetry
   displayName: Unit Test for Telemetry
   timeoutInMinutes: 10
@@ -577,7 +599,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel build "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -598,7 +620,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel build "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'

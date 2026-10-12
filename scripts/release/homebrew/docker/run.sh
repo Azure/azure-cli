@@ -13,7 +13,7 @@ fi
 pip install wheel
 pip install -U pip
 pip install -r $root/requirements.txt
-find /mnt/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
+find /mnt/src/ -name pyproject.toml -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
 pip install -r /mnt/src/azure-cli/requirements.py3.Darwin.txt
 
 pip list
