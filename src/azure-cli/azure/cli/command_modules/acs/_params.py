@@ -595,7 +595,8 @@ def load_arguments(self, _):
 
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
-                   help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
+                   help='Node pool name, alphanumeric characters only. '
+                   'See https://aka.ms/aks-naming-rules for length limits.', validator=validate_nodepool_name)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
         c.argument('vm_sizes')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create), validator=validate_os_sku)
@@ -1155,7 +1156,9 @@ def load_arguments(self, _):
         c.argument("tier", arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
 
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
-        c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
+        c.argument('nodepool_name', validator=validate_nodepool_name,
+                   help='Node pool name, alphanumeric characters only. '
+                   'See https://aka.ms/aks-naming-rules for length limits.')
 
     # managed namespace
     with self.argument_context("aks namespace") as c:
