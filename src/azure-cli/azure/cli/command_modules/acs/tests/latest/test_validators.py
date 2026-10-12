@@ -2442,5 +2442,14 @@ class TestNatGatewayV2Validators(unittest.TestCase):
         validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_outbound_ip_ids="/sub/ip", nat_gateway_outbound_ip_prefix_ids="/sub/pfx", outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
 
 
+class TestValidateOsSku(unittest.TestCase):
+    def test_nodepool_update_allows_windows2022_and_windows2025(self):
+        from azure.cli.command_modules.acs._params import node_os_skus_update
+
+        self.assertIn("Windows2022", node_os_skus_update)
+        self.assertIn("Windows2025", node_os_skus_update)
+        self.assertNotIn("Windows2019", node_os_skus_update)
+
+
 if __name__ == "__main__":
     unittest.main()

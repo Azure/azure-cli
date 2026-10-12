@@ -1399,14 +1399,10 @@ class AcsCustomCommandTest(unittest.TestCase):
                     ('dir/foo', tarfile.SYMTYPE, '.'),
                     (name, tarfile.REGTYPE, ''),
                 ])
-                # Newer data filters normalize filenames before resolving symlinks.
-                if fallback or tarfile.data_filter(tarfile.TarInfo(name), destination).name == name:
-                    with self.assertRaises(FileOperationError):
-                        _extract_aks_desktop_archive(archive_path, destination)
-                else:
+                # The CLI validator rejects this path even when tarfile would normalize it.
+                with self.assertRaisesRegex(FileOperationError, 'Archive path escapes the extraction directory'):
                     _extract_aks_desktop_archive(archive_path, destination)
-                    with open(os.path.join(destination, 'outside'), 'rb') as executable:
-                        self.assertEqual(executable.read(), b'executable')
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'outside')))
                 with open(outside, 'rb') as sentinel:
                     self.assertEqual(sentinel.read(), b'unchanged')
 

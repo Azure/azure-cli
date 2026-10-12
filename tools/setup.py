@@ -21,6 +21,9 @@ CLASSIFIERS = [
 
 # Until https://gitlab.com/pycqa/flake8/issues/415 is resolved, pin version of pycodestyle
 DEPENDENCIES = [
+    'build>=1.2.2',
+    'twine>=6.1.0',
+    'tomli>=2.0.1; python_version < "3.11"',
     'coverage>=4.2',
     'flake8==3.5.0',
     'pycodestyle==2.3.1',

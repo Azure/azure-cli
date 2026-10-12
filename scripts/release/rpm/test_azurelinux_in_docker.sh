@@ -14,10 +14,9 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources).
-# scripts/ci/build.sh builds with `python -m build --no-isolation`, so this pin is the setuptools the build uses.
-# `build` is the PEP 517 frontend that script invokes.
-python -m pip install --upgrade "setuptools<81" build
+# Provision build and setuptools for scripts/ci/build.sh's --no-isolation builds,
+# keeping setuptools at or above the security floor.
+python -m pip install --upgrade "setuptools>=78.1.1" build
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
