@@ -38,6 +38,8 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
             'AZURE_CONFIG_DIR': config.name,
             'AZURE_CORE_COLLECT_TELEMETRY': 'no',
         }))
+        # CLI initialization/help checks for new releases independently of the mocked ARM transport.
+        self._patch(patch('azure.cli.core.util.check_connectivity', return_value=False))
         self.cmd = SimpleNamespace(cli_ctx=DummyCli())
         self._patch(patch('azure.cli.core.commands.client_factory.get_subscription_id',
                           return_value='00000000-0000-0000-0000-000000000000'))
