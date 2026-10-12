@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.91.0
+++++++
+* Remove AzureGermanCloud from hard-coded cloud list (#34042)
+* PREVIEW: Enable broker-based authentication on macOS (opt-in via `az config set core.enable_broker_on_mac=true`) (#33376)
+
 2.90.0
 ++++++
 * Minor fixes

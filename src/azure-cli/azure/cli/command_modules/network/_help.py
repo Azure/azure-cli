@@ -1721,6 +1721,8 @@ short-summary: Add ssl profiles of the application gateway.
 examples:
   - name: Add ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+  - name: Add ssl profile with mutual authentication (mTLS) in passthrough mode. In Passthrough mode the application gateway forwards the client certificate to the backend without verifying it, so certificate validation is delegated entirely to the backend server. Use Strict to have the gateway validate the client certificate itself.
+    text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --auth-configuration verify-client-auth-mode=Passthrough
 """
 
 helps['network application-gateway ssl-profile update'] = """
@@ -1729,6 +1731,8 @@ short-summary: Update ssl profiles of the application gateway.
 examples:
   - name: Update ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
+  - name: Switch an existing ssl profile to mutual authentication (mTLS) passthrough mode. In Passthrough mode the application gateway forwards the client certificate to the backend without verifying it, leaving validation to the backend server.
+    text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --auth-configuration verify-client-auth-mode=Passthrough
 """
 
 helps['network application-gateway ssl-profile remove'] = """

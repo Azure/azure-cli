@@ -439,11 +439,14 @@ def get_target_path(resource_type, path, logical_name, data_directory_paths):
 # Tracking Utilities
 # pylint: disable=inconsistent-return-statements
 def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
-    if operation_status.properties:
-        recovery_target = operation_status.properties.recovery_target
-        return recovery_target.client_scripts
+    if operation_status.status != OperationStatusValues.succeeded.value:
+        raise CLIError('Provisioning access to the recovery point failed with status: {}.'.format(
+            operation_status.status))
+
+    return operation_id
 
 
 # pylint: disable=inconsistent-return-statements

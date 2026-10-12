@@ -334,6 +334,22 @@ parameters:
   - name: --enable-high-log-scale-mode
     type: bool
     short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
+  - name: --enable-azure-monitor-logs
+    type: bool
+    short-summary: Enable Azure Monitor logs (Container Insights) for the cluster using managed identity authentication.
+    long-summary: |
+        Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
+        Cannot be combined with "--enable-addons monitoring" or with "--enable-msi-auth-for-monitoring".
+        Requires the cluster to use a managed identity; clusters created with service principal authentication are not supported.
+  - name: --syslog-port
+    type: int
+    short-summary: TCP port that the Azure Monitor agent listens on for syslog data. Requires --enable-azure-monitor-logs.
+  - name: --enable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Enable Prometheus metrics scraping by the Azure Monitor agent. Requires --enable-azure-monitor-logs.
+  - name: --disable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Disable Prometheus metrics scraping by the Azure Monitor agent. Requires --enable-azure-monitor-logs.
   - name: --sku
     type: string
     short-summary: Specify SKU name for managed clusters. Use '--sku base' enables a base managed cluster. Use '--sku automatic' enables an automatic managed cluster.
@@ -568,6 +584,30 @@ parameters:
   - name: --enable-azure-monitor-app-monitoring
     type: bool
     short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
+  - name: --enable-opentelemetry-metrics
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) metrics receiver. Requires --enable-azure-monitor-metrics.
+  - name: --disable-opentelemetry-metrics
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) metrics receiver.
+  - name: --opentelemetry-metrics-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry metrics receiver.
+  - name: --opentelemetry-metrics-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry metrics receiver.
+  - name: --enable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) logs and traces receiver. Requires --enable-azure-monitor-logs.
+  - name: --disable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry logs and traces receiver.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -756,6 +796,14 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
+  - name: Create a kubernetes cluster with Azure Monitor logs (Container Insights) enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs
+  - name: Create a kubernetes cluster with Azure Monitor logs enabled and syslog collected on a custom port.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs --enable-syslog --syslog-port 28330
+  - name: Create a kubernetes cluster with the OpenTelemetry logs and traces receiver enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs --enable-opentelemetry-logs-traces --opentelemetry-logs-traces-port-grpc 4317
+  - name: Create a kubernetes cluster with the OpenTelemetry metrics receiver enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics --enable-opentelemetry-metrics --opentelemetry-metrics-port-grpc 4319
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
   - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
@@ -1116,6 +1164,10 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+    long-summary: |
+        If OpenTelemetry metrics are enabled, they are disabled as well, since they are collected
+        through the managed Prometheus pipeline. Confirmation is requested first unless "--yes" is
+        specified.
   - name: --enable-control-plane-metrics --enable-cp-metrics
     type: bool
     short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
@@ -1128,6 +1180,68 @@ parameters:
   - name: --disable-azure-monitor-app-monitoring
     type: bool
     short-summary: Disable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
+  - name: --enable-azure-monitor-logs
+    type: bool
+    short-summary: Enable Azure Monitor logs (Container Insights) for the cluster using managed identity authentication.
+    long-summary: |
+        Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
+        Clusters still using legacy shared key authentication must first migrate to managed identity authentication.
+        Requires the cluster to use a managed identity; clusters using service principal authentication are not supported.
+        Fails if Azure Monitor logs is already enabled on the cluster. To change the configuration, run "az aks update --disable-azure-monitor-logs" first.
+  - name: --disable-azure-monitor-logs
+    type: bool
+    short-summary: Disable Azure Monitor logs (Container Insights) for the cluster.
+    long-summary: |
+        Disables Container Insights, removes the data collection rule association, and resets the Container Insights settings (syslog port, Prometheus scraping and container network logs) back to their defaults. The workspace is left recorded on the profile but is unused while disabled, and is replaced on the next enable.
+        If OpenTelemetry logs and traces are enabled they are disabled as well, and confirmation is requested first unless "--yes" is specified.
+  - name: --workspace-resource-id
+    type: string
+    short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+  - name: --enable-msi-auth-for-monitoring
+    type: bool
+    short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon.
+  - name: --data-collection-settings
+    type: string
+    short-summary: Path to JSON file containing data collection settings for Monitoring addon.
+  - name: --ampls-resource-id
+    type: string
+    short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
+  - name: --syslog-port
+    type: int
+    short-summary: TCP port that the Azure Monitor agent listens on for syslog data. Requires Azure Monitor logs to be enabled.
+  - name: --enable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Enable Prometheus metrics scraping by the Azure Monitor agent. Requires Azure Monitor logs to be enabled.
+  - name: --disable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Disable Prometheus metrics scraping by the Azure Monitor agent. Requires Azure Monitor logs to be enabled.
+  - name: --enable-opentelemetry-metrics
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) metrics receiver. Requires Azure Monitor metrics to be enabled.
+  - name: --disable-opentelemetry-metrics
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) metrics receiver.
+  - name: --opentelemetry-metrics-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry metrics receiver.
+  - name: --opentelemetry-metrics-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry metrics receiver.
+  - name: --enable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) logs and traces receiver. Requires Azure Monitor logs to be enabled.
+  - name: --disable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry logs and traces receiver.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -1255,6 +1369,16 @@ parameters:
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
+  - name: Enable Azure Monitor logs (Container Insights) on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs
+  - name: Disable Azure Monitor logs (Container Insights) on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-monitor-logs
+  - name: Change the syslog port used by Azure Monitor logs on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-syslog --syslog-port 28330
+  - name: Enable the OpenTelemetry logs and traces receiver on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-opentelemetry-logs-traces --opentelemetry-logs-traces-port-grpc 4317
+  - name: Enable the OpenTelemetry metrics receiver on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-opentelemetry-metrics --opentelemetry-metrics-port-grpc 4319
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
@@ -1480,6 +1604,27 @@ examples:
 helps["aks install-cli"] = """
 type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
+"""
+
+helps["aks install-desktop"] = """
+type: command
+short-summary: Download and install AKS Desktop for the current platform.
+long-summary: >
+  On macOS and Linux systems using Debian packages, complete installation in the opened application.
+  GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
+  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open
+  and a graphical session. Other Linux systems, or systems where the Debian installer cannot be opened,
+  use the portable archive when available.
+  If GitHub API requests are rate-limited, set the GH_TOKEN environment variable or wait for the rate limit to reset.
+  Prefer GH_TOKEN over --gh-token, which can expose credentials in shell history, process listings, and debug logs.
+  An explicit --gh-token value overrides GH_TOKEN.
+  The token is used only to retrieve release metadata, not to download the installer. If requests with a token
+  are rate-limited, wait for the rate limit to reset and check the token's quota.
+examples:
+  - name: Install the latest stable version of AKS Desktop
+    text: az aks install-desktop
+  - name: Install a specific version of AKS Desktop
+    text: az aks install-desktop --version 0.9.1
 """
 
 helps["aks list"] = """
@@ -2046,6 +2191,7 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+    long-summary: Automatically enabled for Windows2025 node pools because Windows2025 requires a FIPS-enabled OS image.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this nodepool.
@@ -2256,7 +2402,10 @@ parameters:
     short-summary: Enable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
-    short-summary: The os-sku of the agent node pool.
+    short-summary: The OS SKU of the agent node pool.
+    long-summary: |
+        Windows2022 node pools can be upgraded to Windows2025. Specify --enable-fips-image when upgrading a non-FIPS node pool.
+        Downgrading from Windows2025 to Windows2022 is not supported.
   - name: --enable-fips-image
     type: bool
     short-summary: Switch to use FIPS-enabled OS on agent nodes.
@@ -2302,6 +2451,11 @@ examples:
     text: az aks nodepool update --disable-cluster-autoscaler -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Update min-count or max-count for cluster autoscaler.
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+  - name: Upgrade a Windows2022 node pool to Windows2025 with a FIPS-enabled OS image.
+    text: |
+        az aks nodepool update --resource-group MyResourceGroup \\
+            --cluster-name MyManagedCluster --name npwin \\
+            --os-sku Windows2025 --enable-fips-image
 """
 
 helps["aks nodepool upgrade"] = """

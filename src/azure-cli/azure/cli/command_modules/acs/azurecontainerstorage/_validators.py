@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-boolean-expressions
 
 import re
 
@@ -357,7 +358,6 @@ def validate_enable_azure_container_storage_v1_params(  # pylint: disable=too-ma
                         f'value set to {existing_ephemeral_disk_nvme_perf_tier}.'
                     )
 
-                # pylint: disable=too-many-boolean-expressions
                 if required_type_installed_for_disk_vol_type and \
                    ephemeral_disk_volume_type is not None and \
                    existing_ephemeral_disk_volume_type.lower() == ephemeral_disk_volume_type.lower() and \

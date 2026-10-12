@@ -67,6 +67,11 @@ CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 CONST_GPU_DRIVER_INSTALL = "Install"
 CONST_GPU_DRIVER_NONE = "None"
 
+# SSH Access Consts
+CONST_SSH_ACCESS_LOCALUSER = "localuser"
+CONST_SSH_ACCESS_DISABLED = "disabled"
+CONST_SSH_ACCESS_ENTRAID = "entraid"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
@@ -163,6 +168,15 @@ CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
 CONST_MONITORING_ADDON_NAME = "omsagent"
 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = "logAnalyticsWorkspaceResourceID"
 CONST_MONITORING_USING_AAD_MSI_AUTH = "useAADAuth"
+
+# container network logs (azureMonitorProfile.containerInsights.containerNetworkLogs)
+CONST_CONTAINER_NETWORK_LOGS_ENABLED = "Enabled"
+CONST_CONTAINER_NETWORK_LOGS_DISABLED = "Disabled"
+# legacy omsagent addon config key, superseded by containerNetworkLogs on the Azure Monitor
+# profile path. Only read, to keep recognizing clusters onboarded before the switch.
+CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS = "enableRetinaNetworkFlags"
+# server-side default for azureMonitorProfile.containerInsights.syslogPort
+CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT = 28330
 
 # virtual node
 CONST_VIRTUAL_NODE_ADDON_NAME = "aciConnector"
