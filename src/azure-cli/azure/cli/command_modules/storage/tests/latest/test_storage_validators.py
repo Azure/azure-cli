@@ -19,8 +19,10 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client_track2,
                                                            validate_encryption_source, validate_source_uri,
+                                                           validate_source_url,
                                                            validate_encryption_services, as_user_validator,
-                                                           get_not_none_validator, validate_upload_blob)
+                                                           get_not_none_validator, validate_upload_blob, 
+                                                           validate_client_parameters)
 
 
 class MockCLI(CLI):
@@ -162,6 +164,62 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
         validate_source_uri(MockCmd(self.cli), ns)
         self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
 
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    def test_validate_source_url_marks_structured_same_account_blob(self, _):
+        ns = Namespace(
+            source_url=None, source_sas=None, source_container='src', source_blob='input',
+            source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+            source_account_name='account', source_account_key=None, token_credential=None,
+            account_name='account', account_key='key', account_url='https://storage.internal.example',
+            connection_string=None, sas_token=None, location_mode=None, connection_timeout=None,
+            container_name='dst', share_name=None)
+
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertTrue(ns.source_is_validated_same_account)
+        self.assertEqual(ns.source_url, 'https://account.blob.core.windows.net/src/input')
+
+    def test_validate_source_url_does_not_mark_arbitrary_uri_as_same_account(self):
+        source_url = 'https://account.blob.core.windows.net.attacker.example/src/input'
+        ns = Namespace(
+            source_url=source_url, source_sas=None, source_container=None, source_blob=None,
+            source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+            source_account_name=None, source_account_key=None)
+        validate_source_url(MockCmd(self.cli), ns)
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertFalse(ns.source_is_validated_same_account)
+        self.assertEqual(ns.source_url, source_url)
+
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    @mock.patch('azure.cli.command_modules.storage.util.create_short_lived_file_sas_v2', return_value='sas')
+    def test_validate_source_url_does_not_mark_structured_file_as_same_account(self, _, __):
+        ns = Namespace(
+            source_url=None, source_sas=None, source_container=None, source_blob=None,
+            source_snapshot=None, source_share='src', source_path='input', file_snapshot=None,
+            source_account_name='account', source_account_key=None, token_credential=None,
+            account_name='account', account_key='key', sas_token=None,
+            container_name='dst', share_name=None)
+
+        validate_source_url(MockCmd(self.cli), ns)
+
+        self.assertFalse(ns.source_is_validated_same_account)
+
+    @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+    def test_validate_source_url_requires_valid_account_name_for_same_account(self, _):
+        for account_name in (None, 'same@attacker.example:443/'):
+            with self.subTest(account_name=account_name):
+                ns = Namespace(
+                    source_url=None, source_sas=None, source_container='src', source_blob='input',
+                    source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+                    source_account_name=account_name, source_account_key=None, token_credential=None,
+                    account_name=account_name, account_key='key', sas_token=None,
+                    container_name='dst', share_name=None)
+
+                validate_source_url(MockCmd(self.cli), ns)
+
+                self.assertFalse(ns.source_is_validated_same_account)
+
     def test_get_not_none_validator(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from knack.arguments import CLICommandArgument, CLIArgumentType
@@ -195,6 +253,62 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         with self.assertRaisesRegex(InvalidArgumentValueError, 'please specify one of --file and --data'):
             validate_upload_blob(Namespace(file_path=None, data=None))
+
+
+class TestClientParametersValidator(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.local_url = 'http://localhost:10000/devstoreaccount1'
+        self.legacy_url = 'http://legacy:10000/devstoreaccount1'
+
+    def test_service_endpoint_env_var_used(self):
+        # AZURE_STORAGE_SERVICE_ENDPOINT is the documented env var, should set account_url
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def test_account_url_env_var_still_used(self):
+        # AZURE_STORAGE_ACCOUNT_URL is the legacy env var, should keep working
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_ACCOUNT_URL=self.legacy_url)
+        self.assertEqual(ns.account_url, self.legacy_url)
+
+    def test_service_endpoint_env_var_wins_over_account_url(self):
+        # both env vars set, documented one takes precedence
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url,
+                       AZURE_STORAGE_ACCOUNT_URL=self.legacy_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def test_no_endpoint_env_var(self):
+        # no endpoint env var, account_url stays empty so client factory falls back to public cloud
+        ns = self._create_namespace(auth_mode='key')
+        self._validate(ns)
+        self.assertIsNone(ns.account_url)
+
+    def test_endpoint_argument_wins_over_env_var(self):
+        # --blob-endpoint given explicitly, env var is ignored
+        ns = self._create_namespace(auth_mode='key', account_url='https://flag.example.com')
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, 'https://flag.example.com')
+
+    def test_service_endpoint_env_var_used_without_auth_mode(self):
+        # commands without --auth-mode go through the second lookup block in the validator
+        ns = self._create_namespace()
+        self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
+        self.assertEqual(ns.account_url, self.local_url)
+
+    def _create_namespace(self, **kwargs):
+        ns = Namespace(account_name=None, account_url=None, account_key=None, sas_token=None,
+                       connection_string=None)
+        for key in kwargs:
+            setattr(ns, key, kwargs[key])
+        return ns
+
+    def _validate(self, ns, **env):
+        env.update(AZURE_STORAGE_ACCOUNT='devstoreaccount1', AZURE_STORAGE_KEY='fake_key')
+        with mock.patch.dict('os.environ', env, clear=True):
+            validate_client_parameters(MockCmd(self.cli), ns)
 
 
 class TestEncryptionValidators(unittest.TestCase):
