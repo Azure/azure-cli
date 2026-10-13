@@ -236,6 +236,11 @@ examples:
 helps['sql db str-policy wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until the policy is set.
+examples:
+  - name: Wait until the default short term retention policy exists.
+    text: az sql db str-policy wait --resource-group mygroup --server myserver --name mydb --policy-name default --exists
+  - name: Wait until backup immutability is locked.
+    text: az sql db str-policy wait --resource-group mygroup --server myserver --name mydb --policy-name default --custom "immutabilityStatus=='Locked'"
 """
 
 helps['sql db ltr-policy'] = """

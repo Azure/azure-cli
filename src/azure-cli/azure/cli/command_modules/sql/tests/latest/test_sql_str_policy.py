@@ -309,9 +309,41 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
         self._respond()
         code, _, stderr = self._invoke([
             'sql', 'db', 'str-policy', 'wait', '-g', 'rg', '-s', 'server', '-n', 'db',
+            '--policy-name', 'default',
             '--custom', "immutabilityStatus=='Locked'", '--interval', '1', '--timeout', '1',
         ])
         self.assertEqual(code, 0, stderr)
+
+    def test_sql_str_cli_wait_preserves_policy_name(self):
+        resource_id = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/'
+                       'providers/Microsoft.Sql/servers/server/databases/db')
+        for scope in (['-g', 'rg', '-s', 'server', '-n', 'db'], ['--ids', resource_id]):
+            for policy_name, encoded in (('default', 'default'), ('other policy/name', 'other%20policy%2Fname')):
+                with self.subTest(scope=scope, policy_name=policy_name):
+                    self.send.reset_mock()
+                    self._respond()
+                    code, stdout, stderr = self._invoke([
+                        'sql', 'db', 'str-policy', 'wait', *scope, '--policy-name', policy_name,
+                        '--custom', "immutabilityStatus=='Locked'", '--interval', '1', '--timeout', '1',
+                    ])
+                    self.assertEqual(code, 0, stderr)
+                    self.assertEqual(stdout, '')
+                    self.send.assert_called_once()
+                    self.assertEqual(self.requests[-1].method, 'GET')
+                    self.assertIn('/backupShortTermRetentionPolicies/' + encoded + '?', self.requests[-1].url)
+                    self.assertIn('api-version=2026-08-01-preview', self.requests[-1].url)
+        self.prompt.assert_not_called()
+
+    def test_sql_str_cli_wait_requires_policy_name(self):
+        code, stdout, stderr = self._invoke([
+            'sql', 'db', 'str-policy', 'wait', '-g', 'rg', '-s', 'server', '-n', 'db',
+            '--exists', '--interval', '1', '--timeout', '1',
+        ])
+        self.assertEqual(code, 2, stderr)
+        self.assertIn('--policy-name', stderr)
+        self.assertEqual(stdout, '')
+        self.send.assert_not_called()
+        self.prompt.assert_not_called()
 
     def test_sql_str_cli_show_missing_returns_exit_three(self):
         self._respond({'error': {'code': 'ResourceNotFound', 'message': 'Database not found.'}}, 404)
@@ -333,6 +365,10 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
                     self.assertIn('--yes', stdout)
                 else:
                     self.assertNotIn('--lock-immutability', stdout)
+                if command == 'sql db str-policy wait':
+                    self.assertRegex(stdout, r'--policy-name\s+\[Required\]')
+                else:
+                    self.assertNotIn('--policy-name', stdout)
         self.send.assert_not_called()
 
 

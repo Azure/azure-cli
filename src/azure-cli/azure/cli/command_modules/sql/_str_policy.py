@@ -14,7 +14,10 @@ from azure.cli.core.aaz import (
 class _ShortTermRetentionPolicy(AAZCommand):
     def _handler(self, command_args):
         # None means omitted in the existing Python handlers, not an explicit JSON null.
-        super()._handler({key: value for key, value in command_args.items() if value is not None})
+        args = {key: value for key, value in command_args.items() if value is not None}
+        # Internal command_args bypass CLI parsing and its argument defaults.
+        args.setdefault("policy_name", "default")
+        super()._handler(args)
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -22,6 +25,7 @@ class _ShortTermRetentionPolicy(AAZCommand):
         schema.resource_group_name = AAZStrArg(required=True)
         schema.parent_name = AAZStrArg(required=True)
         schema.database_name = AAZStrArg(required=True)
+        schema.policy_name = AAZStrArg(required=True)
         schema.managed = AAZBoolArg(default=False)
         schema.deleted = AAZBoolArg(default=False)
         schema.retention_days = AAZIntArg()
@@ -61,7 +65,7 @@ class _PolicyOperation(AAZHttpOperation):  # pylint: disable=abstract-method
         return self.client.format_url(
             "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
             "/providers/Microsoft.Sql/" + parent_type + "/{parentName}/" + child_type +
-            "/{databaseName}/backupShortTermRetentionPolicies/default",
+            "/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
             **self.url_parameters
         )
 
@@ -72,6 +76,7 @@ class _PolicyOperation(AAZHttpOperation):  # pylint: disable=abstract-method
             **self.serialize_url_param("resourceGroupName", self.ctx.args.resource_group_name, required=True),
             **self.serialize_url_param("parentName", self.ctx.args.parent_name, required=True),
             **self.serialize_url_param("databaseName", self.ctx.args.database_name, required=True),
+            **self.serialize_url_param("policyName", self.ctx.args.policy_name, required=True),
         }
 
     @property

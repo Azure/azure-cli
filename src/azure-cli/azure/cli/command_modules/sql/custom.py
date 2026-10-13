@@ -3295,12 +3295,21 @@ def get_short_term_retention(cmd, database_name, server_name, resource_group_nam
     '''
     Gets short term retention for live database
     '''
+    return get_short_term_retention_for_wait(cmd, database_name, server_name, resource_group_name, 'default')
 
+
+def get_short_term_retention_for_wait(cmd, database_name, server_name, resource_group_name, policy_name):
+    '''
+    Gets short term retention while preserving the wait command's policy name argument.
+
+    :param policy_name: The policy name. Should always be "default".
+    '''
     from ._str_policy import ShortTermRetentionPolicyGet
     return ShortTermRetentionPolicyGet(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group_name': resource_group_name,
         'parent_name': server_name,
         'database_name': database_name,
+        'policy_name': policy_name,
     })
 
 
