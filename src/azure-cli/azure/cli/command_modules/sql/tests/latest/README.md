@@ -1,4 +1,56 @@
-# SQL Managed Instance STR scenario recordings
+# SQL STR scenario recordings
+
+## SQL Database
+
+The SQL Database scenarios in `test_sql_db_str_policy.py` create randomized
+Standard S0 databases on an explicitly supplied existing SQL logical server.
+They never modify or delete that server or its existing databases. The ordinary
+scenario covers retention/differential-interval updates, omission, explicit false
+and no-wait. The immutability scenario covers locking with explicit retention, confirmation,
+`--yes`, retention increase, rejected decreases/unlocking, and differential-only
+updates after locking.
+
+Supply `AZURE_CLI_TEST_SQL_SERVER_RESOURCE_ID` with the complete existing-server
+resource ID. To authorize irreversible locking, additionally set
+`AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK=true`. Lock status is polled on the
+database policy GET; operation-result responses are recorded unchanged.
+
+New databases may initially report `Disabled` while the feature initializes.
+The locking scenario polls the policy GET every five seconds for up to 900 seconds
+until it reports `Enabled`, then asserts readiness before submitting a lock.
+After locking, the policy GET is polled with a 300-second timeout; status and
+retention are asserted through `show`, not the SET operation-result response.
+The ordinary scenario tolerates the automatic `Disabled` to `Enabled` transition.
+
+Live SQL Database validation found that lock-only PUTs return `InvalidParameterValue`,
+whereas including the unchanged current retention succeeds. Retention updates
+with the lock flag omitted can be interpreted as an attempted unlock. The locking
+scenario supplies retention when locking, and explicitly preserves the lock when
+testing retention reduction, so it can assert `InvalidImmutableBackupRetentionPeriod`
+separately from `CannotRemoveLockedPitrImmutability`. These backend behaviors and
+the operation-result status discrepancy are tracked separately; no CLI workaround
+or response rewriting is part of the test changes. Lock-only service success is
+not claimed by these recordings.
+
+```powershell
+$env:AZURE_CLI_TEST_SQL_SERVER_RESOURCE_ID = '/subscriptions/SUBSCRIPTION_ID/resourceGroups/TEST_GROUP/providers/Microsoft.Sql/servers/TEST_SERVER'
+$env:AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK = 'true'
+azdev test test_sql_db_short_term_retention --live
+azdev test test_sql_db_short_term_retention_immutability --live
+```
+
+By default, live-only cleanup deletes only databases created by these scenarios.
+Set `AZURE_CLI_TEST_SQL_DB_KEEP_DATABASES=true` before recording to retain them for
+inspection. Retained databases continue to incur charges. Cleanup is excluded
+from the cassette so retaining resources does not alter offline playback.
+Locked backups remain until the configured retention expires even after deletion.
+
+Playback requires no target environment variables. Missing recordings do not
+implicitly authorize a live run. A transport guard restricts writes to the
+scenario's own database and policy. A pre-create absence check prevents adopting
+an existing database.
+
+## SQL Managed Instance
 
 The two STR scenarios in `test_sql_mi_str_policy.py` use an **existing test MI**.
 They create random databases and delete only those databases. They never create,
