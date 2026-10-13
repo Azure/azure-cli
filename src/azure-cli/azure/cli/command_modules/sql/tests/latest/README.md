@@ -2,7 +2,7 @@
 
 ## SQL Database
 
-The SQL Database scenarios in `test_sql_db_str_policy.py` create randomized
+The two new-database SQL Database scenarios in `test_sql_db_str_policy.py` create randomized
 Standard S0 databases on an explicitly supplied existing SQL logical server.
 They never modify or delete that server or its existing databases. The ordinary
 scenario covers retention/differential-interval updates, omission, explicit false
@@ -49,6 +49,30 @@ Playback requires no target environment variables. Missing recordings do not
 implicitly authorize a live run. A transport guard restricts writes to the
 scenario's own database and policy. A pre-create absence check prevents adopting
 an existing database.
+
+### Policy-only locking on an existing test database
+
+`test_sql_db_existing_policy_immutability` is a separate recording path for a
+disposable test database that already reports `Enabled`. This avoids relying on
+new-database feature initialization, which can exceed the 900-second readiness
+timeout. It never creates or deletes a database, and its transport guard allows
+writes only to the explicitly supplied database's STR policy.
+
+Supply the full database ID in `AZURE_CLI_TEST_SQL_DB_RESOURCE_ID` and separately
+authorize irreversible locking with `AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK=true`.
+Do not supply a production database or one whose backups must remain unlockable.
+The scenario requires current retention above one day and `Enabled` status before
+any write. It preserves current retention and differential interval, locks with
+`--yes`, repeats the lock with `--no-wait`, verifies rejected retention reduction
+and unlocking, and confirms persisted state through policy GET. Operation-result
+responses are retained unchanged. The database is always retained; locking is
+irreversible and retained resources continue to incur charges.
+
+```powershell
+$env:AZURE_CLI_TEST_SQL_DB_RESOURCE_ID = '/subscriptions/SUBSCRIPTION_ID/resourceGroups/TEST_GROUP/providers/Microsoft.Sql/servers/TEST_SERVER/databases/DISPOSABLE_TEST_DB'
+$env:AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK = 'true'
+azdev test test_sql_db_existing_policy_immutability --live
+```
 
 ## SQL Managed Instance
 

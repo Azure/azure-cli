@@ -45,6 +45,22 @@ def _check_write_scope(request, database_id):
         raise AssertionError('SQL STR scenarios may write only their own newly created database and its STR policy.')
 
 
+def _existing_recording_target(environment):
+    target = environment.get('AZURE_CLI_TEST_SQL_DB_RESOURCE_ID', '')
+    server_id, separator, database = target.rpartition('/databases/')
+    if not separator or not database or '/' in database:
+        raise ValueError('Set AZURE_CLI_TEST_SQL_DB_RESOURCE_ID to the full ID '
+                         'of an existing disposable test database.')
+    return (*_recording_target({'AZURE_CLI_TEST_SQL_SERVER_RESOURCE_ID': server_id}), database)
+
+
+def _check_policy_only_write_scope(request, policy_id):
+    if request.method.upper() in ('GET', 'HEAD'):
+        return
+    if request.method.upper() != 'PUT' or unquote(urlsplit(request.url).path).lower() != policy_id.lower():
+        raise AssertionError('The existing-database scenario may write only the explicitly authorized STR policy.')
+
+
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def setUp(self):
         if self.in_recording:
@@ -194,7 +210,101 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         self._show_policy(days=8, hours=24, status='Locked')
 
 
+class SqlServerDbExistingPolicyLockScenarioTest(ScenarioTest):
+    """Lock an explicitly authorized, already Enabled test database without provisioning or cleanup."""
+
+    def setUp(self):
+        if self.in_recording:
+            if not self.is_live:
+                self.skipTest('Recording missing. Explicit live mode and an existing test database are required.')
+            try:
+                subscription, group, server, database = _existing_recording_target(os.environ)
+            except ValueError as ex:
+                self.skipTest(str(ex))
+            if os.environ.get('AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK', '').lower() != 'true':
+                self.skipTest('Set AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK=true '
+                              'to authorize irreversible locking of this test database.')
+            for real, moniker in ((group, 'strtestrg'), (server, 'strtestserver'), (database, 'strtestdb')):
+                self.name_replacer.register_name_pair(real, moniker)
+        else:
+            subscription, group, server, database = (
+                '00000000-0000-0000-0000-000000000000', 'strtestrg', 'strtestserver', 'strtestdb')
+        self.kwargs.update(subscription=subscription, rg=group, server=server, db=database)
+        self.kwargs['policy_id'] = (
+            '/subscriptions/{subscription}/resourceGroups/{rg}/providers/Microsoft.Sql/'
+            'servers/{server}/databases/{db}/backupShortTermRetentionPolicies/default').format(**self.kwargs)
+        self.recording_processors.append(_SqlStrRecordingSanitizer(database, 'strtestdb'))
+        super().setUp()
+        send = RequestsTransport.send
+
+        def guarded_send(transport, request, **kwargs):
+            _check_policy_only_write_scope(request, self.kwargs['policy_id'])
+            return send(transport, request, **kwargs)
+
+        guard = patch.object(RequestsTransport, 'send', guarded_send)
+        guard.start()
+        self.addCleanup(guard.stop)
+
+    def test_sql_db_existing_policy_immutability(self):
+        command = 'sql db str-policy {} --subscription {{subscription}} -g {{rg}} -s {{server}} -n {{db}}'
+        initial = self.cmd(command.format('show')).get_output_in_json()
+        self.assertEqual(initial['immutabilityStatus'], 'Enabled',
+                         'Use an already Enabled disposable test database; no initialization or cleanup is performed.')
+        self.kwargs.update(days=initial['retentionDays'], hours=initial['diffBackupIntervalInHours'])
+        self.assertGreater(self.kwargs['days'], 1, 'Use retention above one day to test rejected reduction.')
+        set_command = command.format('set')
+        # Send the current retention explicitly; do not assert status on operation-result responses.
+        with patch('knack.prompting.prompt_y_n') as prompt:
+            self.cmd(set_command + ' --retention-days {days} --lock-immutability true --yes')
+            prompt.assert_not_called()
+        self._assert_locked_policy()
+        with self.assertRaisesRegex(HttpResponseError, 'InvalidImmutableBackupRetentionPeriod'):
+            self.cmd(set_command + ' --retention-days ' + str(self.kwargs['days'] - 1) +
+                     ' --lock-immutability true --yes')
+        with self.assertRaisesRegex(HttpResponseError, 'CannotRemoveLockedPitrImmutability'):
+            self.cmd(set_command + ' --retention-days {days} --lock-immutability false')
+        self._assert_locked_policy()
+        # Submit no-wait last so subsequent writes cannot race operation completion.
+        with patch('knack.prompting.prompt_y_n') as prompt:
+            self.cmd(set_command + ' --retention-days {days} --lock-immutability true --yes --no-wait',
+                     checks=[self.is_empty()])
+            prompt.assert_not_called()
+        self._assert_locked_policy()
+
+    def _assert_locked_policy(self):
+        self.cmd('resource wait --subscription {subscription} --ids "{policy_id}"'
+                 ' --api-version 2026-08-01-preview --interval 5 --timeout 300'
+                 ' --custom "properties.immutabilityStatus==\'Locked\' && properties.retentionDays==`{days}`'
+                 ' && properties.diffBackupIntervalInHours==`{hours}`"')
+        self.cmd('sql db str-policy show --subscription {subscription} -g {rg} -s {server} -n {db}', checks=[
+            self.check('immutabilityStatus', 'Locked'),
+            self.check('retentionDays', self.kwargs['days']),
+            self.check('diffBackupIntervalInHours', self.kwargs['hours']),
+        ])
+
+
 class SqlDbStrScenarioSafetyTests(unittest.TestCase):
+    def test_sql_db_str_existing_target_is_explicit(self):
+        for target in ('', '/invalid', '/subscriptions/sub/databases/db',
+                       '/subscriptions/sub/databases/db/backupShortTermRetentionPolicies/default'):
+            with self.subTest(target=target), self.assertRaises(ValueError):
+                _existing_recording_target({'AZURE_CLI_TEST_SQL_DB_RESOURCE_ID': target})
+        target = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/'
+                  'providers/Microsoft.Sql/servers/server/databases/testdb')
+        self.assertEqual(_existing_recording_target({'AZURE_CLI_TEST_SQL_DB_RESOURCE_ID': target}),
+                         ('00000000-0000-0000-0000-000000000000', 'rg', 'server', 'testdb'))
+
+    def test_sql_db_str_existing_scope_rejects_database_writes(self):
+        database_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Sql/servers/server/databases/db'
+        policy_id = database_id + '/backupShortTermRetentionPolicies/default'
+        _check_policy_only_write_scope(SimpleNamespace(method='PUT', url='https://management.azure.com' + policy_id),
+                                       policy_id)
+        for method, path in (('PUT', database_id), ('DELETE', database_id), ('DELETE', policy_id),
+                             ('PATCH', policy_id), ('PUT', policy_id.replace('/db/', '/other/'))):
+            with self.subTest(method=method, path=path), self.assertRaises(AssertionError):
+                _check_policy_only_write_scope(
+                    SimpleNamespace(method=method, url='https://management.azure.com' + path), policy_id)
+
     def test_sql_db_str_polling_uses_policy_and_bounded_timeout(self):
         from unittest.mock import Mock
         scenario = SimpleNamespace(cmd=Mock())
