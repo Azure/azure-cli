@@ -261,7 +261,14 @@ def _upgrade_on_windows():
 
     msi_path = _download_from_url(msi_url, msi_dir)
 
-    subprocess.Popen(['msiexec.exe', '/i', msi_path])
+    # Resolve msiexec.exe to an absolute path (System32) so a planted msiexec.exe in the current
+    # working directory cannot be executed (CWE-427).
+    from azure.cli.core.util import get_safe_executable_path
+    msiexec_path = get_safe_executable_path('msiexec.exe')
+    if not msiexec_path:
+        raise CLIError("Unable to locate msiexec.exe. Please install the downloaded MSI manually: {}".format(msi_path))
+
+    subprocess.Popen([msiexec_path, '/i', msi_path])
     logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
                    "please run `az upgrade` again after completing the upgrade.")
     sys.exit(0)
