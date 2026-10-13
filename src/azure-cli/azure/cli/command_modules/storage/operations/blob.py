@@ -1144,10 +1144,10 @@ def _account_names_match(first_client, second_client):
     return bool(first_account and second_account and first_account.lower() == second_account.lower())
 
 
-def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
+def copy_blob(cmd, client, source_url, metadata=None, source_token_credential=None, **kwargs):
     source_auth_mode = kwargs.pop('source_auth_mode', None)
     if source_auth_mode == 'login':
-        kwargs['source_authorization'] = 'Bearer ' + client.credential.get_token(
+        kwargs['source_authorization'] = 'Bearer ' + source_token_credential.get_token(
             'https://storage.azure.com/.default').token
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')

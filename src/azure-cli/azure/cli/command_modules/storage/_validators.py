@@ -460,6 +460,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
                 'or blob type conversion.')
         if not _is_valid_storage_account_name(source_account_name or ns.get('account_name')):
             raise InvalidArgumentValueError('--source-auth-mode login requires a valid source storage account name.')
+        ns['source_token_credential'] = token_credential
 
     # source in the form of an uri
     uri = ns.get('source_url', None)

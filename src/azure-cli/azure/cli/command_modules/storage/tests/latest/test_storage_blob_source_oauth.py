@@ -28,6 +28,7 @@ class StorageBlobSourceOAuthTests(unittest.TestCase):
         source_client.assert_not_called()
         sas.assert_not_called()
         validate_client.assert_called_once()
+        self.assertIs(self.namespace.source_token_credential, self.namespace.token_credential)
 
     def test_source_login_rejects_unsupported_combinations(self):
         for changes in (
@@ -67,7 +68,8 @@ class StorageBlobSourceOAuthTests(unittest.TestCase):
         client.url = 'https://destination.blob.core.windows.net/backups/state.tfstate'
         client.credential.get_token.return_value.token = 'test-token'
         source_url = 'https://source.blob.core.windows.net/states/state.tfstate'
-        blob.copy_blob(self.cmd, client, source_url, source_auth_mode='login', requires_sync=True)
+        blob.copy_blob(self.cmd, client, source_url, source_auth_mode='login', requires_sync=True,
+                   source_token_credential=client.credential)
         client.credential.get_token.assert_called_once_with('https://storage.azure.com/.default')
         client.start_copy_from_url.assert_called_once_with(
             source_url=source_url, metadata=None, incremental_copy=False,
@@ -81,8 +83,37 @@ class StorageBlobSourceOAuthTests(unittest.TestCase):
         client.credential.get_token.return_value.token = 'test-token'
         blob.copy_blob(self.cmd, client,
                        'https://source.blob.core.windows.net/container/example.txt',
-                       source_auth_mode='login', requires_sync=True)
+                       source_auth_mode='login', requires_sync=True,
+                       source_token_credential=client.credential)
         client.credential.get_token.assert_called_once_with('https://storage.azure.com/.default')
+
+    @mock.patch.object(_validators, 'validate_client_parameters')
+    def test_source_login_is_independent_of_destination_credentials(self, validate_client):
+        import base64
+        from azure.storage.blob import BlobClient
+        account_key = base64.b64encode(b'synthetic-unit-test-key').decode()
+        destination_url = 'https://destination.blob.core.windows.net/container/example.txt'
+        connection_string = ('DefaultEndpointsProtocol=https;AccountName=destination;'
+                             'AccountKey=' + account_key + ';EndpointSuffix=core.windows.net')
+        clients = {
+            'account-key': BlobClient.from_blob_url(destination_url, credential=account_key),
+            'sas': BlobClient.from_blob_url(destination_url, credential='sig=synthetic'),
+            'connection-string': BlobClient.from_connection_string(
+                connection_string, container_name='container', blob_name='example.txt'),
+        }
+        for auth, client in clients.items():
+            with self.subTest(destination_auth=auth):
+                namespace = Namespace(**vars(self.namespace))
+                namespace.token_credential = mock.Mock()
+                namespace.token_credential.get_token.return_value.token = 'synthetic-unit-test-token'
+                _validators.validate_source_url(self.cmd, namespace)
+                with mock.patch.object(client, 'start_copy_from_url') as copy:
+                    blob.copy_blob(self.cmd, client, namespace.source_url, source_auth_mode='login',
+                                   requires_sync=True, source_token_credential=namespace.source_token_credential)
+                namespace.token_credential.get_token.assert_called_once_with('https://storage.azure.com/.default')
+                copy.assert_called_once_with(
+                    source_url=namespace.source_url, metadata=None, incremental_copy=False,
+                    requires_sync=True, source_authorization='Bearer synthetic-unit-test-token')
 
     def test_default_copy_does_not_request_source_bearer_token(self):
         client = mock.MagicMock()
