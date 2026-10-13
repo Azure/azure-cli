@@ -11,7 +11,6 @@ class StorageBlobSourceOAuthTests(unittest.TestCase):
     def setUp(self):
         self.cmd = mock.MagicMock()
         self.cmd.cli_ctx.cloud.suffixes.storage_endpoint = 'core.windows.net'
-        self.cmd.cli_ctx.cloud.endpoints.storage_resource_id = 'https://storage.azure.com/'
         self.namespace = Namespace(
             account_name='destination', source_account_name='source',
             source_container='states', source_blob='folder/state file.tfstate',
@@ -74,15 +73,16 @@ class StorageBlobSourceOAuthTests(unittest.TestCase):
             source_url=source_url, metadata=None, incremental_copy=False,
             requires_sync=True, source_authorization='Bearer test-token')
 
-    def test_source_login_uses_cloud_token_scope(self):
-        self.cmd.cli_ctx.cloud.endpoints.storage_resource_id = 'https://storage.azure.us/'
+    def test_source_login_uses_sdk_storage_scope_with_real_cloud(self):
+        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+        self.cmd.cli_ctx.cloud = AZURE_PUBLIC_CLOUD
         client = mock.MagicMock()
-        client.url = 'https://destination.blob.core.usgovcloudapi.net/container/example.txt'
+        client.url = 'https://destination.blob.core.windows.net/container/example.txt'
         client.credential.get_token.return_value.token = 'test-token'
         blob.copy_blob(self.cmd, client,
-                       'https://source.blob.core.usgovcloudapi.net/container/example.txt',
+                       'https://source.blob.core.windows.net/container/example.txt',
                        source_auth_mode='login', requires_sync=True)
-        client.credential.get_token.assert_called_once_with('https://storage.azure.us/.default')
+        client.credential.get_token.assert_called_once_with('https://storage.azure.com/.default')
 
     def test_default_copy_does_not_request_source_bearer_token(self):
         client = mock.MagicMock()
