@@ -32,12 +32,54 @@ def transform_web_output(web):
     props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId', 'ftpPublishingUrl']
     result = {k: web[k] for k in web if k in props}
     # to get width under control, also the plan usually is in the same RG
-    result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
+    app_service_plan_id = result.pop('appServicePlanId', None)
+    if app_service_plan_id is not None:
+        result['appServicePlan'] = app_service_plan_id.split('/')[-1]
     return result
 
 
 def transform_web_list_output(webs):
     return [transform_web_output(w) for w in webs]
+
+
+def _transform_site_output(result, remove_server_farm_id):
+    """Restore appServicePlanId after serializing azure-mgmt-web Site models."""
+    from azure.cli.core.util import todict
+    from azure.cli.core.commands import AzCliCommandInvoker
+
+    result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+    sites = result if isinstance(result, list) else [result]
+    for site in sites:
+        if not isinstance(site, dict):
+            continue
+
+        app_service_plan_id = site.get('appServicePlanId')
+        if app_service_plan_id is None:
+            app_service_plan_id = site.get('serverFarmId')
+
+        properties = site.get('properties')
+        if app_service_plan_id is None and isinstance(properties, dict):
+            app_service_plan_id = properties.get('appServicePlanId')
+            if app_service_plan_id is None:
+                app_service_plan_id = properties.get('serverFarmId')
+
+        if app_service_plan_id is not None:
+            site['appServicePlanId'] = app_service_plan_id
+
+        if remove_server_farm_id:
+            site.pop('serverFarmId', None)
+            if isinstance(properties, dict):
+                properties.pop('serverFarmId', None)
+
+    return result
+
+
+def transform_webapp_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=True)
+
+
+def transform_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=False)
 
 
 def transform_runtime_list_output(result):
@@ -46,6 +88,62 @@ def transform_runtime_list_output(result):
         ('OS', r['os']), ('Runtime', r['runtime']), ('Version', r['version']),
         ('Config', r['config']), ('Support', r['support']), ('End of Life', r['end_of_life'])
     ]) for r in result]
+
+
+def transform_secure_build_output(result):
+    import sys
+    from .custom import _render_secure_build_table_report, _secure_build_finding_rows
+    if isinstance(result, dict):
+        _render_secure_build_table_report(result, file=sys.stdout)
+        return []
+    rows = _secure_build_finding_rows(result)
+    for row in rows:
+        row.pop('Details URL', None)
+    return rows
+
+
+def transform_troubleshoot_deployment_output(result):
+    from collections import OrderedDict
+
+    if not isinstance(result, dict):
+        return []
+    runtime = result.get('runtime') or {}
+    return [OrderedDict([
+        ('DeploymentId', result.get('deploymentId') or '-'),
+        ('State', result.get('state') or 'Unknown'),
+        ('Active', result.get('active', False)),
+        ('Succeeded', runtime.get('instancesSuccessful', '-')),
+        ('Failed', runtime.get('instancesFailed', '-')),
+        ('LastDeploymentTime', result.get('lastDeploymentTime') or '-'),
+    ])]
+
+
+def transform_troubleshoot_config_output(result):
+    """Flatten the troubleshoot config payload into a per-setting table.
+
+    Reads Settings out of the nested ``configCheck`` field (the verbatim SCM
+    body). Falls back gracefully for non-dict / empty payloads (e.g. --report
+    was passed and the command returned ``None``).
+    """
+    from collections import OrderedDict
+    if not isinstance(result, dict):
+        return []
+    config_check = result.get('configCheck') or {}
+    settings = config_check.get('Settings') or config_check.get('settings') or []
+    if not isinstance(settings, list):
+        return []
+    written_at = config_check.get('WrittenAt') or config_check.get('writtenAt')
+    if isinstance(written_at, str):
+        written_at = written_at.strip()
+    details_header = (
+        'Details (Last Updated: {})'.format(written_at)
+        if written_at else 'Details'
+    )
+    return [OrderedDict([
+        ('Setting', s.get('Setting') or s.get('setting') or ''),
+        ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
+        (details_header, s.get('Details') or s.get('details') or ''),
+    ]) for s in settings if isinstance(s, dict)]
 
 
 def transform_troubleshoot_status_output(result):
@@ -127,7 +225,6 @@ def transform_troubleshoot_status_output(result):
                 .format(name=app, rg=rg))
 
         atexit.register(_print_hint)
-
     return rows
 
 
@@ -223,8 +320,10 @@ def load_command_table(self, _):
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_webapp', transform=transform_webapp_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_app', transform=transform_webapp_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -349,8 +448,16 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_startup_log')
 
     with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('config', 'troubleshoot_config',
+                         table_transformer=transform_troubleshoot_config_output)
         g.custom_command('status', 'troubleshoot_status',
                          table_transformer=transform_troubleshoot_status_output)
+        g.custom_command('deployment', 'troubleshoot_deployment',
+                         table_transformer=transform_troubleshoot_deployment_output)
+
+    with self.command_group('webapp secure-build', is_preview=True) as g:
+        g.custom_show_command('show', 'show_secure_build_report',
+                              table_transformer=transform_secure_build_output)
 
     with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
         g.custom_command('network-capture', 'collect_network_capture',
@@ -470,8 +577,10 @@ def load_command_table(self, _):
                          validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list-flexconsumption-runtimes', 'list_flex_function_app_runtimes')
-        g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_function_app', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_functionapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -695,8 +804,10 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_logicapp', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('scale', 'scale_logicapp', exception_handler=ex_handler_factory())
 
     with self.command_group('logicapp config appsettings', custom_command_type=logicapp_custom) as g:
