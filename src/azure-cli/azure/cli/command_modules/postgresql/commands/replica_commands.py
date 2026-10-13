@@ -68,8 +68,9 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, nam
         sku_name = source_server_object.sku.name
     if storage_gb is None and source_server_object is not None:
         storage_gb = source_server_object.storage.storage_size_gb
-    validate_postgres_replica(cmd, tier, location, source_server_object,
-                              sku_name, storage_gb, performance_tier, list_location_capability_info)
+    validate_postgres_replica(
+        tier, source_server_object, sku_name, storage_gb,
+        list_location_capability_info, performance_tier)
 
     if not zone:
         zone = _get_pg_replica_zone(list_location_capability_info['zones'],
