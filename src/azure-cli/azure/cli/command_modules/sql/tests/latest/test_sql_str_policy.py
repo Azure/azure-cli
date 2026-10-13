@@ -38,6 +38,13 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
             'AZURE_CONFIG_DIR': config.name,
             'AZURE_CORE_COLLECT_TELEMETRY': 'no',
         }))
+        # DummyCli reloads process-wide caches. Restore them before removing this test's config
+        # so scenario CLI instances created during test discovery do not retain deleted paths.
+        from azure.cli.core import _session
+        for session in vars(_session).values():
+            if isinstance(session, _session.Session):
+                self._patch(patch.object(session, 'filename', None))
+                self._patch(patch.object(session, 'data', {}))
         # CLI initialization/help checks for new releases independently of the mocked ARM transport.
         self._patch(patch('azure.cli.core.util.check_connectivity', return_value=False))
         self.cmd = SimpleNamespace(cli_ctx=DummyCli())
@@ -206,36 +213,128 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
         self.prompt.assert_not_called()
 
     def test_sql_str_no_wait_submits_once(self):
-        for managed in (False, True):
-            with self.subTest(managed=managed):
-                self.send.reset_mock()
-                self._respond({}, 202, {'Location': 'https://management.azure.com/operations/str'})
-                self.assertIsNone(self._set(managed, retention_days=7, lock_immutability=True,
-                                            yes=True, no_wait=True))
-                self.send.assert_called_once()
+        for managed, deleted_time in ((False, None), (True, None), (True, '2026-08-01T00:00:00Z')):
+            for headers in ({}, {'Location': 'https://management.azure.com/operations/str'}, {
+                    'Azure-AsyncOperation': 'https://management.azure.com/operations/str/status',
+                    'Location': 'https://management.azure.com/operations/str/result'}):
+                with self.subTest(managed=managed, deleted_time=deleted_time, headers=headers):
+                    self.send.reset_mock()
+                    self._respond({}, 202 if headers else 200, headers)
+                    args = {'deleted_time': deleted_time} if deleted_time else {'lock_immutability': True}
+                    self.assertIsNone(self._set(managed, retention_days=7, yes=True, no_wait=True, **args))
+                    self.send.assert_called_once()
+                    self.assertEqual(self.requests[-1].method, 'PUT')
         self.prompt.assert_not_called()
 
-    def test_sql_str_location_polling_returns_final_policy(self):
+    def test_sql_str_location_only_polling_preserves_result(self):
         for managed in (False, True):
             with self.subTest(managed=managed):
+                start = len(self.requests)
                 self._respond({}, 202, {'Location': 'https://management.azure.com/operations/str'})
                 self._respond()
                 result = self._set(managed, retention_days=7, lock_immutability=True, yes=True).result()
                 self.assertEqual(result['immutabilityStatus'], 'Locked')
+                self.assertEqual(len(self.requests) - start, 2)
                 self.assertEqual(self.requests[-1].method, 'GET')
                 self.assertEqual(self.requests[-1].url, 'https://management.azure.com/operations/str')
 
-    def test_sql_str_async_status_then_location_result(self):
-        self._respond({}, 202, {
-            'Azure-AsyncOperation': 'https://management.azure.com/operations/str/status',
-            'Location': 'https://management.azure.com/operations/str/result',
-        })
-        self._respond({'status': 'Succeeded'})
-        self._respond()
-        result = self._set(retention_days=7, lock_immutability=True, yes=True).result()
-        self.assertEqual(result['immutabilityStatus'], 'Locked')
-        self.assertEqual(self.requests[-2].url, 'https://management.azure.com/operations/str/status')
-        self.assertEqual(self.requests[-1].url, 'https://management.azure.com/operations/str/result')
+    def test_sql_str_async_status_then_policy_resource(self):
+        status_url = 'https://management.azure.com/operations/str/status'
+        result_url = 'https://management.azure.com/operations/str/result'
+        for managed, deleted_time in ((False, None), (True, None), (True, '2026-08-01T00:00:00Z')):
+            for with_location in (False, True):
+                for status in ('Disabled', 'Enabled', 'Locked'):
+                    with self.subTest(managed=managed, deleted_time=deleted_time,
+                                      with_location=with_location, status=status):
+                        start = len(self.requests)
+                        headers = {'Azure-AsyncOperation': status_url}
+                        if with_location:
+                            headers['Location'] = result_url
+                        self._respond({}, 202, headers)
+                        self._respond({'status': 'InProgress'})
+                        self._respond({'status': 'Succeeded'})
+                        self._respond({
+                            'name': 'default',
+                            'properties': {'retentionDays': 7, 'immutabilityStatus': status},
+                            'systemData': {'createdBy': 'user'},
+                        })
+                        args = {'deleted_time': deleted_time} if deleted_time else {'lock_immutability': True}
+                        with patch('azure.core.pipeline.transport.RequestsTransport.sleep'):
+                            result = self._set(managed, retention_days=7, yes=True, **args).result()
+                        requests = self.requests[start:]
+                        self.assertEqual([request.method for request in requests], ['PUT', 'GET', 'GET', 'GET'])
+                        self.assertEqual([request.url for request in requests],
+                                         [requests[0].url, status_url, status_url, requests[0].url])
+                        if deleted_time:
+                            self.assertIn('/restorableDroppedDatabases/db,134300160000000000/',
+                                          unquote(requests[-1].url))
+                        self.assertEqual(result['immutabilityStatus'], status)
+                        self.assertEqual(result['retentionDays'], 7)
+                        self.assertEqual(result['systemData'], {'createdBy': 'user'})
+                        self.assertNotIn('properties', result)
+                        self.assertFalse(self.responses)
+
+    def test_sql_str_synchronous_set_preserves_service_result(self):
+        for managed in (False, True):
+            with self.subTest(managed=managed):
+                self.send.reset_mock()
+                self._respond({'properties': {'retentionDays': 7, 'immutabilityStatus': 'Enabled'}})
+                result = self._set(managed, retention_days=7).result()
+                self.assertEqual(result, {'retentionDays': 7, 'immutabilityStatus': 'Enabled'})
+                self.send.assert_called_once()
+                self.assertEqual(self.requests[-1].method, 'PUT')
+
+    def test_sql_str_async_failure_has_no_final_read(self):
+        for managed in (False, True):
+            for status in ('Failed', 'Canceled'):
+                with self.subTest(managed=managed, status=status):
+                    start = len(self.requests)
+                    self._respond({}, 202, {
+                        'Azure-AsyncOperation': 'https://management.azure.com/operations/str/status',
+                        'Location': 'https://management.azure.com/operations/str/result',
+                    })
+                    self._respond({'status': status, 'error': {
+                        'code': 'PolicyUpdateRejected', 'message': 'The policy update was rejected.'}})
+                    with self.assertRaisesRegex(HttpResponseError, 'PolicyUpdateRejected'):
+                        self._set(managed, retention_days=7).result()
+                    self.assertEqual([request.method for request in self.requests[start:]], ['PUT', 'GET'])
+                    self.assertEqual(self.requests[-1].url, 'https://management.azure.com/operations/str/status')
+
+    def test_sql_str_final_policy_read_error_is_propagated(self):
+        for managed in (False, True):
+            for status in (403, 404):
+                with self.subTest(managed=managed, status=status):
+                    start = len(self.requests)
+                    self._respond({}, 202, {
+                        'Azure-AsyncOperation': 'https://management.azure.com/operations/str/status',
+                        'Location': 'https://management.azure.com/operations/str/result',
+                    })
+                    self._respond({'status': 'Succeeded'})
+                    self._respond({'error': {'code': 'PolicyReadFailed', 'message': 'Unable to read policy.'}}, status)
+                    with self.assertRaisesRegex(HttpResponseError, 'PolicyReadFailed'):
+                        self._set(managed, retention_days=7).result()
+                    self.assertEqual(len(self.requests) - start, 3)
+                    self.assertEqual(self.requests[-1].url, self.requests[start].url)
+
+    def test_sql_str_cli_async_set_returns_policy_resource(self):
+        for command in (
+            'sql db str-policy set -g rg -s server -n db',
+            'sql midb short-term-retention-policy set -g rg --mi server -n db',
+        ):
+            with self.subTest(command=command):
+                start = len(self.requests)
+                self._respond({}, 202, {
+                    'Azure-AsyncOperation': 'https://management.azure.com/operations/str/status',
+                    'Location': 'https://management.azure.com/operations/str/result',
+                })
+                self._respond({'status': 'Succeeded'})
+                self._respond()
+                code, stdout, stderr = self._invoke(command.split() + [
+                    '--retention-days', '7', '--lock-immutability', 'true', '--yes'])
+                self.assertEqual(code, 0, stderr)
+                self.assertEqual(json.loads(stdout)['immutabilityStatus'], 'Locked')
+                self.assertEqual(self.requests[-1].url, self.requests[start].url)
+                self.assertEqual(len(self.requests) - start, 3)
 
     def test_sql_str_system_data_remains_nested(self):
         self._respond({
@@ -365,6 +464,8 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
                     self.assertIn('--yes', stdout)
                 else:
                     self.assertNotIn('--lock-immutability', stdout)
+                if command == 'sql db str-policy set':
+                    self.assertRegex(stdout, r'--retention-\s*days\s+7\s+--lock-\s*immutability\s+true\s+--yes')
                 if command == 'sql db str-policy wait':
                     self.assertRegex(stdout, r'--policy-name\s+\[Required\]')
                 else:

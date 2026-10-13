@@ -214,12 +214,12 @@ short-summary: Manage SQL database short term retention policy.
 helps['sql db str-policy set'] = """
 type: command
 short-summary: Update short term retention settings for a live database.
-long-summary: Locking backup immutability is irreversible. Confirmation is required only when --lock-immutability is true. Use --yes to skip confirmation. Specify at least one retention setting or --lock-immutability.
+long-summary: Locking backup immutability is irreversible. Confirmation is required only when --lock-immutability is true. Use --yes to skip confirmation. Include --retention-days when locking. To preserve retention, use the current value from str-policy show. When increasing retention on a locked policy, also specify --lock-immutability true. Use str-policy show to check the policy after a --no-wait update.
 examples:
   - name: Set short term retention for a live database.
     text: az sql db str-policy set --resource-group mygroup --server myserver --name mydb --retention-days 7 --diffbackup-hours 24
-  - name: Lock backup immutability without changing the retention settings, skipping confirmation.
-    text: az sql db str-policy set --resource-group mygroup --server myserver --name mydb --lock-immutability true --yes
+  - name: Lock backup immutability with seven-day retention, skipping confirmation.
+    text: az sql db str-policy set --resource-group mygroup --server myserver --name mydb --retention-days 7 --lock-immutability true --yes
 """
 
 helps['sql db str-policy show'] = """

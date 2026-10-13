@@ -154,9 +154,10 @@ class _PolicySet(_PolicyOperation):
     def __call__(self, *args, **kwargs):
         session = self.client.send_request(request=self.make_request(), stream=False, **kwargs)
         if session.http_response.status_code in (200, 202):
+            # Use ARM's default PUT final GET of the policy after Azure-AsyncOperation succeeds,
+            # matching PowerShell. Location's operation result can report inconsistent immutability status.
             return self.client.build_lro_polling(
                 self.ctx.args.no_wait, session, self.on_success, self.on_error,
-                lro_options={"final-state-via": "location"},
                 path_format_arguments=self.url_parameters,
             )
         return self.on_error(session.http_response)

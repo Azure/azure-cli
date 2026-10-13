@@ -72,7 +72,13 @@ class _SqlStrRecordingSanitizer(RecordingProcessor):
             self.replace_header_fn(response, header, self._sanitize_url)
         body = response['body']['string']
         if body:
-            data = json.loads(body)
+            try:
+                data = json.loads(body)
+            except (ValueError, UnicodeDecodeError):
+                # Leave non-JSON gateway errors intact so normal HTTP retry/error handling can run.
+                return response
+            if not isinstance(data, dict):
+                return response
             values = data.get('value')
             if isinstance(values, list) and any(
                     item.get('type', '').lower().endswith('/restorabledroppeddatabases') for item in values):
@@ -212,8 +218,10 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         initial = self._create_database()
         self.assertEqual(initial['immutabilityStatus'], 'Enabled',
                          'Use a feature-enabled MI; this scenario must not pass without exercising locking.')
-        self._set_policy(14)
-        self._set_policy(7, '--lock-immutability false')
+        self._set_policy(14).assert_with_checks([
+            self.check('retentionDays', 14), self.check('immutabilityStatus', 'Enabled')])
+        self._set_policy(7, '--lock-immutability false').assert_with_checks([
+            self.check('retentionDays', 7), self.check('immutabilityStatus', 'Enabled')])
         self._show_policy(days=7, status='Enabled')
 
         for behavior, message in (({'return_value': False}, 'Operation cancelled'),
@@ -227,17 +235,17 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         self._show_policy(days=7, status='Enabled')
 
         # Only confirmation input is controlled; locking and all assertions use real recorded HTTP.
-        # The operation-result endpoint can report Disabled after a successful lock. Verify the
-        # persisted state through bounded polling of the database policy GET instead; do not
-        # assert immutabilityStatus on the SET result or change the CLI's polling behavior.
+        # SET returns the final policy GET, followed here by independent persisted-state checks.
         with patch('knack.prompting.prompt_y_n', return_value=True) as prompt:
-            self._set_policy(7, '--lock-immutability true')
+            self._set_policy(7, '--lock-immutability true').assert_with_checks([
+                self.check('retentionDays', 7), self.check('immutabilityStatus', 'Locked')])
             prompt.assert_called_once()
             self.assertIn('cannot be reverted', prompt.call_args.args[0])
         self._wait_policy(7, status='Locked')
         self._show_policy(days=7, status='Locked')
         with patch('knack.prompting.prompt_y_n') as prompt:
-            self._set_policy(8, '--lock-immutability true --yes')
+            self._set_policy(8, '--lock-immutability true --yes').assert_with_checks([
+                self.check('retentionDays', 8), self.check('immutabilityStatus', 'Locked')])
             prompt.assert_not_called()
         self._wait_policy(8, status='Locked')
         self._show_policy(days=8, status='Locked')
@@ -317,3 +325,11 @@ class SqlMiStrScenarioSafetyTests(unittest.TestCase):
         self.assertEqual(dict(parse_qsl(urlsplit(sanitized).query)), {
             'api-version': '2026-08-01-preview', 'c': 'REDACTED', 's': 'REDACTED', 'h': 'REDACTED', 't': 'REDACTED',
         })
+
+    def test_sql_mi_str_sanitizer_preserves_non_object_responses(self):
+        sanitizer = _SqlStrRecordingSanitizer('testdb', 'clistr000001')
+        for body in ('<html>Bad Gateway</html>', b'\xff', '[]', 'null'):
+            with self.subTest(body=body):
+                response = {'headers': {}, 'body': {'string': body}}
+                self.assertIs(sanitizer.process_response(response), response)
+                self.assertEqual(response['body']['string'], body)

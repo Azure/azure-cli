@@ -1,5 +1,21 @@
 # SQL STR scenario recordings
 
+## SET completion and PowerShell parity
+
+STR SET uses the standard ARM PUT polling behavior. For responses with an
+`Azure-AsyncOperation` header, it polls until success and retrieves the policy
+resource at the original PUT URL, matching PowerShell. It no longer forces the
+final GET to the `Location` operation-result endpoint, which has returned
+`Disabled` while the policy GET reports `Locked`. The backend response
+inconsistency remains a separate issue; no status is synthesized or rewritten.
+
+`--no-wait` still submits once without polling or a final GET. Failed or canceled
+operations are propagated before any final read; final-read errors are not hidden.
+Synchronous responses without polling headers and Location-only responses retain
+the standard ARM behavior (no additional policy GET). Offline tests cover these
+paths, both-header and async-only responses, all three resource types, output
+flattening, and nested `systemData`.
+
 ## SQL Database
 
 The two new-database SQL Database scenarios in `test_sql_db_str_policy.py` create randomized
@@ -12,14 +28,14 @@ updates after locking.
 
 Supply `AZURE_CLI_TEST_SQL_SERVER_RESOURCE_ID` with the complete existing-server
 resource ID. To authorize irreversible locking, additionally set
-`AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK=true`. Lock status is polled on the
-database policy GET; operation-result responses are recorded unchanged.
+`AZURE_CLI_TEST_SQL_DB_ALLOW_IMMUTABILITY_LOCK=true`. Locking and retention-increase
+SET results must report `Locked`; separate policy GETs also verify persisted state.
 
 New databases may initially report `Disabled` while the feature initializes.
 The locking scenario polls the policy GET every five seconds for up to 900 seconds
 until it reports `Enabled`, then asserts readiness before submitting a lock.
-After locking, the policy GET is polled with a 300-second timeout; status and
-retention are asserted through `show`, not the SET operation-result response.
+After locking, independent policy GET polling has a 300-second timeout, followed
+by status and retention assertions through `show`, in addition to SET assertions.
 The ordinary scenario tolerates the automatic `Disabled` to `Enabled` transition.
 
 Live SQL Database validation found that lock-only PUTs return `InvalidParameterValue`,
@@ -27,10 +43,9 @@ whereas including the unchanged current retention succeeds. Retention updates
 with the lock flag omitted can be interpreted as an attempted unlock. The locking
 scenario supplies retention when locking, and explicitly preserves the lock when
 testing retention reduction, so it can assert `InvalidImmutableBackupRetentionPeriod`
-separately from `CannotRemoveLockedPitrImmutability`. These backend behaviors and
-the operation-result status discrepancy are tracked separately; no CLI workaround
-or response rewriting is part of the test changes. Lock-only service success is
-not claimed by these recordings.
+separately from `CannotRemoveLockedPitrImmutability`. These payload limitations
+remain unchanged by the final-GET alignment. Lock-only service success is not
+claimed by these recordings; the command help includes explicit retention.
 
 ```powershell
 $env:AZURE_CLI_TEST_SQL_SERVER_RESOURCE_ID = '/subscriptions/SUBSCRIPTION_ID/resourceGroups/TEST_GROUP/providers/Microsoft.Sql/servers/TEST_SERVER'
@@ -64,8 +79,8 @@ Do not supply a production database or one whose backups must remain unlockable.
 The scenario requires current retention above one day and `Enabled` status before
 any write. It preserves current retention and differential interval, locks with
 `--yes`, repeats the lock with `--no-wait`, verifies rejected retention reduction
-and unlocking, and confirms persisted state through policy GET. Operation-result
-responses are retained unchanged. The database is always retained; locking is
+and unlocking, asserts `Locked` on the SET result, and independently confirms
+persisted state through policy GET. The database is always retained; locking is
 irreversible and retained resources continue to incur charges.
 
 ```powershell
@@ -111,14 +126,12 @@ azdev test test_sql_managed_db_short_retention_immutability --live
 The scenario fails (rather than silently skipping locking) if the selected MI
 does not support immutability. No MI configuration is changed to enable it.
 
-Lock status and retention after locking are validated on the **database policy
-GET**, polled every five seconds with a 300-second timeout and followed by an
-asserting `show`. The same check applies to the dropped policy. The scenario does
-not assert `immutabilityStatus` on the SET operation-result response: that endpoint
-has been observed to return `Disabled` while the policy GET reports `Locked`.
-The backend discrepancy is tracked separately. The CLI implementation still
-performs its normal operation-completion polling; no delay or readback workaround
-is added to the product code.
+Lock status and retention are asserted on the SET results after locking and
+increasing retention. Independent **database policy GET** checks poll every five
+seconds with a 300-second timeout and are followed by an asserting `show`.
+The same persisted-state check applies to the dropped policy. The product uses
+standard ARM completion polling and a final policy read, with no additional
+fixed delays or retries until a desired immutability status appears.
 
 ## Playback and safety
 

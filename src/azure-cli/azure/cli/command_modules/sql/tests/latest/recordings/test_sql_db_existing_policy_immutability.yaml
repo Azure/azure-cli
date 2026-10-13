@@ -20,7 +20,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
         "immutabilityStatus": "Enabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:37 GMT
+      - Tue, 13 Oct 2026 13:53:59 GMT
       expires:
       - '-1'
       pragma:
@@ -43,319 +43,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/378bba4d-edf3-4acf-afaf-f9adb308615f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/e2c562c6-21ec-45d0-801d-7b76cda26bff
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 35B883D1D33540B5814F75324F9BB7B5 Ref B: CWL211060613034 Ref C: 2026-10-13T07:12:37Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"retentionDays": 8, "lockImmutability": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql db str-policy set
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '62'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --subscription -g -s -n --retention-days --lock-immutability --yes
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
-  response:
-    body:
-      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T07:12:38.457Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/5c462143-4eea-4ea4-a1e4-07f6bb251d77?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-      cache-control:
-      - no-cache
-      content-length:
-      - '79'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:37 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyOperationResults/5c462143-4eea-4ea4-a1e4-07f6bb251d77?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/2c5cf5d8-12b9-462c-a54a-db86bfc9d9b0
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
-      x-msedge-ref:
-      - 'Ref A: 550674B5605642CCB44F9DE9D36A99BE Ref B: CWL211060613052 Ref C: 2026-10-13T07:12:38Z'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql db str-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription -g -s -n --retention-days --lock-immutability --yes
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/5c462143-4eea-4ea4-a1e4-07f6bb251d77?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-  response:
-    body:
-      string: '{"name": "5c462143-4eea-4ea4-a1e4-07f6bb251d77", "status": "InProgress",
-        "startTime": "2026-10-13T07:12:38.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '113'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/54a1108c-463c-4891-88de-0b284312bd81
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: B080255CB37246BB8344562F3D1C7EC8 Ref B: CWL211060413023 Ref C: 2026-10-13T07:12:38Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql db str-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription -g -s -n --retention-days --lock-immutability --yes
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/5c462143-4eea-4ea4-a1e4-07f6bb251d77?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-  response:
-    body:
-      string: '{"name": "5c462143-4eea-4ea4-a1e4-07f6bb251d77", "status": "Succeeded",
-        "startTime": "2026-10-13T07:12:38.457Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '112'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/913f342d-af92-469f-9772-7dd3606f2c41
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: E81FDC81D4FC4971AE7C828C7E32FEB7 Ref B: CWL211060613060 Ref C: 2026-10-13T07:12:54Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql db str-policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription -g -s -n --retention-days --lock-immutability --yes
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyOperationResults/5c462143-4eea-4ea4-a1e4-07f6bb251d77?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-  response:
-    body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
-        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
-        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '391'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/242a3be6-4b3e-449e-a235-baef521f92ec
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 251D2F044E1F4831B1A7080E4E1E1E9B Ref B: CWL211060413052 Ref C: 2026-10-13T07:12:54Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - resource wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription --ids --api-version --interval --timeout --custom
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
-  response:
-    body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
-        "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
-        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '389'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/7ffccc5b-c8d3-4d20-9695-a910e6caec0a
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 0CB0F3D09E8749D69EE7792E5ED60170 Ref B: CWL211060413060 Ref C: 2026-10-13T07:12:55Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql db str-policy show
-      Connection:
-      - keep-alive
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --subscription -g -s -n
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
-  response:
-    body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
-        "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
-        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '389'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 07:12:55 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/f37b238d-1d2a-4614-8ea7-2684b40eb5e8
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: CEE5FF389E21458DBF0A3EA15A935BCB Ref B: CWL211060413060 Ref C: 2026-10-13T07:12:56Z'
+      - 'Ref A: 6FCD30150EB44834AA8B659F9D1737ED Ref B: CWL211060413031 Ref C: 2026-10-13T13:53:58Z'
     status:
       code: 200
       message: OK
@@ -382,18 +74,71 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"error": {"code": "InvalidImmutableBackupRetentionPeriod", "message":
-        "Backup retention cannot be reduced from 8 to 7 days because backup immutability
-        was extended."}}'
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T13:53:59.79Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/8102d1a3-9216-4a84-80e3-a0cba3c646fe?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:53:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyOperationResults/8102d1a3-9216-4a84-80e3-a0cba3c646fe?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/b8b0e28c-a704-4324-ae8c-d8e97b5e11f3
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 23F52C5610EE4573B1D6DC82C98ABC59 Ref B: CWL211060413023 Ref C: 2026-10-13T13:53:59Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/8102d1a3-9216-4a84-80e3-a0cba3c646fe?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "8102d1a3-9216-4a84-80e3-a0cba3c646fe", "status": "InProgress",
+        "startTime": "2026-10-13T13:53:59.79Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '168'
+      - '112'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:56 GMT
+      - Tue, 13 Oct 2026 13:54:00 GMT
       expires:
       - '-1'
       pragma:
@@ -405,18 +150,273 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/ba6e278d-5ed9-4b51-acdd-fdd871821396
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/f792102f-255b-4f79-a6e4-09795669f8f2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A7F64BF887EC4831A2EFF08E40F14940 Ref B: CWL211060613034 Ref C: 2026-10-13T13:54:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/8102d1a3-9216-4a84-80e3-a0cba3c646fe?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "8102d1a3-9216-4a84-80e3-a0cba3c646fe", "status": "Succeeded",
+        "startTime": "2026-10-13T13:53:59.79Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:54:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/cc27d1bf-4e27-4b94-bdb3-09d82c0eb079
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 47B794440EEC4AE298360906E4FAAFC9 Ref B: CWL211060413031 Ref C: 2026-10-13T13:54:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '389'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:54:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/aef8f54f-3401-4886-bec5-d6377a0880e1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 88A4D8BCEC5B449EA6C83917FEF5927E Ref B: CWL211060613031 Ref C: 2026-10-13T13:54:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - resource wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --ids --api-version --interval --timeout --custom
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '389'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:54:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/81c7750f-a340-47f5-87c8-5641c4d457cf
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 16615BB9105848EEB19BC758E0E4A842 Ref B: CWL211060413054 Ref C: 2026-10-13T13:54:17Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '389'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:54:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/8b8becac-5781-4857-8af1-2452abb72251
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 986C0BEC016944438C3729D95F9FC2F6 Ref B: CWL211060613040 Ref C: 2026-10-13T13:54:17Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 6, "lockImmutability": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '62'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"error": {"code": "InvalidImmutableBackupRetentionPeriod", "message":
+        "Backup retention cannot be reduced from 7 to 6 days because backup immutability
+        was extended."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '168'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 13:54:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/32b6ec69-e774-44bc-9974-314def4a570a
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 86E3A65D5A4A4BD1992DFEFAB1951E1E Ref B: CWL211060613052 Ref C: 2026-10-13T07:12:56Z'
+      - 'Ref A: E8D43149973042819F9A02EF081F2590 Ref B: CWL211060613036 Ref C: 2026-10-13T13:54:18Z'
     status:
       code: 400
       message: Bad Request
 - request:
-    body: '{"properties": {"retentionDays": 8, "lockImmutability": false}}'
+    body: '{"properties": {"retentionDays": 7, "lockImmutability": false}}'
     headers:
       Accept:
       - application/json
@@ -449,7 +449,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:56 GMT
+      - Tue, 13 Oct 2026 13:54:18 GMT
       expires:
       - '-1'
       pragma:
@@ -461,13 +461,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/31baae90-72de-4d84-a84c-7ce41a7b9aa9
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/0f260d41-2439-40ac-8017-102489285351
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 287E363FD14E4484AE1712EA39BD726C Ref B: CWL211060613062 Ref C: 2026-10-13T07:12:57Z'
+      - 'Ref A: 13ECB706C510453BA077C2FB42302ABE Ref B: CWL211060413052 Ref C: 2026-10-13T13:54:19Z'
     status:
       code: 400
       message: Bad Request
@@ -490,7 +490,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
         "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
@@ -501,7 +501,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:58 GMT
+      - Tue, 13 Oct 2026 13:54:20 GMT
       expires:
       - '-1'
       pragma:
@@ -513,11 +513,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/0fe6200a-ef6e-49d5-9af0-1e503456b6a2
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/a5fb9148-c1cf-4baf-b269-de2a53d01da5
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16498'
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 1B91364BCDC9477884C7B437CCFED5B6 Ref B: CWL211060613060 Ref C: 2026-10-13T07:12:58Z'
+      - 'Ref A: 80C6CF4171674973852514E48D5A9594 Ref B: CWL211060413031 Ref C: 2026-10-13T13:54:20Z'
     status:
       code: 200
       message: OK
@@ -542,7 +542,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
         "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
@@ -553,7 +553,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:59 GMT
+      - Tue, 13 Oct 2026 13:54:20 GMT
       expires:
       - '-1'
       pragma:
@@ -565,16 +565,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/9fb04c3f-b0dc-4a19-809e-a26171687ac8
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/8cb89fe4-88b0-40a9-b3d7-72f298a13132
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 045130C4776C47ED99C41D5114C2950F Ref B: CWL211060613060 Ref C: 2026-10-13T07:12:59Z'
+      - 'Ref A: B7369D5A29A64F42B56778A2892E5299 Ref B: CWL211060613031 Ref C: 2026-10-13T13:54:20Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"retentionDays": 8, "lockImmutability": true}}'
+    body: '{"properties": {"retentionDays": 7, "lockImmutability": true}}'
     headers:
       Accept:
       - application/json
@@ -596,10 +596,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T07:12:59.827Z"}'
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T13:54:21.263Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/2ae000c6-0634-4dc5-869c-66ac7fb142f1?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyAzureAsyncOperation/70f76184-ec1e-4d76-b155-bc716381f35c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
@@ -607,11 +607,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:12:59 GMT
+      - Tue, 13 Oct 2026 13:54:21 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyOperationResults/2ae000c6-0634-4dc5-869c-66ac7fb142f1?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/shortTermRetentionPolicyOperationResults/70f76184-ec1e-4d76-b155-bc716381f35c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -621,13 +621,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/c0c71cb3-577e-4ab3-aff2-91026d327fe2
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/0bbffc10-beb1-4768-806b-13dd29138e1e
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: C14ECD2F6F534B1FB6A7D1B8DDCA8F6B Ref B: CWL211060413025 Ref C: 2026-10-13T07:12:59Z'
+      - 'Ref A: 9D204EF73B914C52A1C30F4576B29441 Ref B: CWL211060613052 Ref C: 2026-10-13T13:54:20Z'
     status:
       code: 202
       message: Accepted
@@ -650,7 +650,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
         "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
@@ -661,7 +661,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:13:00 GMT
+      - Tue, 13 Oct 2026 13:54:21 GMT
       expires:
       - '-1'
       pragma:
@@ -673,11 +673,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/fab291b3-43f9-411f-ab8a-61f476b6e635
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/b4da6ca2-cdad-492d-a8ed-41e9eadc2051
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2CA17AB60C994CB3AA99776F5C242A76 Ref B: CWL211060613060 Ref C: 2026-10-13T07:13:00Z'
+      - 'Ref A: DFE5F7238CFF4CCA93BACC38C210DC69 Ref B: CWL211060613023 Ref C: 2026-10-13T13:54:21Z'
     status:
       code: 200
       message: OK
@@ -702,7 +702,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
         "immutabilityStatus": "Locked"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/strtestdb/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
@@ -713,7 +713,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 07:13:00 GMT
+      - Tue, 13 Oct 2026 13:54:22 GMT
       expires:
       - '-1'
       pragma:
@@ -725,11 +725,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/42e4c76d-0141-472f-82e9-3e9bf2c96b2d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/88646337-ca24-4129-b256-4b7c4649a34c
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: A70927F8AE094CEDB622FD41394AEF77 Ref B: CWL211060613034 Ref C: 2026-10-13T07:13:00Z'
+      - 'Ref A: 721941115515414183E9D212A38C6FB7 Ref B: CWL211060413040 Ref C: 2026-10-13T13:54:22Z'
     status:
       code: 200
       message: OK

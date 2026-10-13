@@ -153,15 +153,20 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         self.assertIn(initial['immutabilityStatus'], ('Disabled', 'Enabled'))
         # New databases can transition from Disabled to Enabled during this scenario without a write.
         with patch('knack.prompting.prompt_y_n') as prompt:
-            self._set_policy('--retention-days 7 --diffbackup-hours 24')
+            self._set_policy('--retention-days 7 --diffbackup-hours 24').assert_with_checks([
+                self.check('retentionDays', 7), self.check('diffBackupIntervalInHours', 24)])
             self._show_policy(days=7, hours=24)
-            self._set_policy('--retention-days 6 --diffbackup-hours 12')
+            self._set_policy('--retention-days 6 --diffbackup-hours 12').assert_with_checks([
+                self.check('retentionDays', 6), self.check('diffBackupIntervalInHours', 12)])
             self._show_policy(days=6, hours=12)
-            self._set_policy('--retention-days 5')
+            self._set_policy('--retention-days 5').assert_with_checks([
+                self.check('retentionDays', 5), self.check('diffBackupIntervalInHours', 12)])
             self._show_policy(days=5, hours=12)
-            self._set_policy('--diffbackup-hours 24')
+            self._set_policy('--diffbackup-hours 24').assert_with_checks([
+                self.check('retentionDays', 5), self.check('diffBackupIntervalInHours', 24)])
             self._show_policy(days=5, hours=24)
-            self._set_policy('--retention-days 7 --lock-immutability false')
+            self._set_policy('--retention-days 7 --lock-immutability false').assert_with_checks([
+                self.check('retentionDays', 7), self.check('diffBackupIntervalInHours', 24)])
             self._show_policy(days=7, hours=24)
             self._set_policy('--retention-days 8 --no-wait').assert_with_checks(self.is_empty())
             self._wait_policy(8, hours=24)
@@ -175,7 +180,9 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         # Feature initialization can lag database creation. Do not submit a lock until the policy is Enabled.
         self._wait_policy(initial['retentionDays'], status='Enabled', timeout=900)
         self._show_policy(status='Enabled')
-        self._set_policy('--retention-days 7 --diffbackup-hours 12')
+        self._set_policy('--retention-days 7 --diffbackup-hours 12').assert_with_checks([
+            self.check('retentionDays', 7), self.check('diffBackupIntervalInHours', 12),
+            self.check('immutabilityStatus', 'Enabled')])
         self._show_policy(days=7, hours=12, status='Enabled')
         for behavior, message in (({'return_value': False}, 'Operation cancelled'),
                                   ({'side_effect': NoTTYException()}, 'Use --yes')):
@@ -187,15 +194,19 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
                 http.assert_not_called()
         self._show_policy(days=7, hours=12, status='Enabled')
 
-        # Record the operation result unchanged, but assert locking only on the database policy GET.
+        # SET returns the final policy GET; also verify persisted state with independent reads.
         with patch('knack.prompting.prompt_y_n', return_value=True) as prompt:
-            self._set_policy('--retention-days 7 --lock-immutability true')
+            self._set_policy('--retention-days 7 --lock-immutability true').assert_with_checks([
+                self.check('retentionDays', 7), self.check('diffBackupIntervalInHours', 12),
+                self.check('immutabilityStatus', 'Locked')])
             prompt.assert_called_once()
             self.assertIn('cannot be reverted', prompt.call_args.args[0])
         self._wait_policy(7, hours=12, status='Locked')
         self._show_policy(days=7, hours=12, status='Locked')
         with patch('knack.prompting.prompt_y_n') as prompt:
-            self._set_policy('--retention-days 8 --lock-immutability true --yes')
+            self._set_policy('--retention-days 8 --lock-immutability true --yes').assert_with_checks([
+                self.check('retentionDays', 8), self.check('diffBackupIntervalInHours', 12),
+                self.check('immutabilityStatus', 'Locked')])
             prompt.assert_not_called()
         self._wait_policy(8, hours=12, status='Locked')
         self._show_policy(days=8, hours=12, status='Locked')
@@ -253,9 +264,13 @@ class SqlServerDbExistingPolicyLockScenarioTest(ScenarioTest):
         self.kwargs.update(days=initial['retentionDays'], hours=initial['diffBackupIntervalInHours'])
         self.assertGreater(self.kwargs['days'], 1, 'Use retention above one day to test rejected reduction.')
         set_command = command.format('set')
-        # Send the current retention explicitly; do not assert status on operation-result responses.
+        # Preserve current retention and assert SET's final policy read as well as independent GETs.
         with patch('knack.prompting.prompt_y_n') as prompt:
-            self.cmd(set_command + ' --retention-days {days} --lock-immutability true --yes')
+            self.cmd(set_command + ' --retention-days {days} --lock-immutability true --yes', checks=[
+                self.check('retentionDays', self.kwargs['days']),
+                self.check('diffBackupIntervalInHours', self.kwargs['hours']),
+                self.check('immutabilityStatus', 'Locked'),
+            ])
             prompt.assert_not_called()
         self._assert_locked_policy()
         with self.assertRaisesRegex(HttpResponseError, 'InvalidImmutableBackupRetentionPeriod'):
