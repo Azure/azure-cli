@@ -1397,6 +1397,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_precondition_options(prefix='source_')
         c.register_source_uri_arguments(validator=validate_source_url)
         c.argument('source_is_validated_same_account', ignore_type)
+        c.extra('source_auth_mode', arg_type=get_enum_type(['login']), arg_group='Copy Source',
+            help='Use Entra login for a named source blob without generating a SAS. Requires '
+                 '--auth-mode login and --requires-sync true. Not supported with --source-uri '
+                 'or --destination-blob-type other than Detect.')
 
         c.ignore('incremental_copy')
         c.argument('if_match', options_list=['--destination-if-match'])

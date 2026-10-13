@@ -1145,6 +1145,10 @@ def _account_names_match(first_client, second_client):
 
 
 def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
+    source_auth_mode = kwargs.pop('source_auth_mode', None)
+    if source_auth_mode == 'login':
+        scope = cmd.cli_ctx.cloud.endpoints.storage_resource_id.rstrip('/') + '/.default'
+        kwargs['source_authorization'] = 'Bearer ' + client.credential.get_token(scope).token
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
