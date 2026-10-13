@@ -1685,7 +1685,7 @@ def _create_keyvault(cmd,
                                              permissions=permissions)]
 
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=KeyVaultSku(name=sku),
+                                 sku=KeyVaultSku(name=sku, family='A'),
                                  access_policies=access_policies,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,
