@@ -872,9 +872,9 @@ def validate_azure_keyvault_kms_key_id(namespace):
 
         # A versioned key ID has 4 segments ({vault-url}/keys/{key-name}/{key-version}), while a versionless
         # key ID has 3 segments ({vault-url}/keys/{key-name}). Versionless key IDs are required when KMS
-        # infrastructure encryption (platform-managed keys) is enabled.
+        # infrastructure encryption (platform-managed keys) is enabled. Any other number of segments is invalid.
         segments = key_id[len(https_prefix):].split("/")
-        if len(segments) < 3 or segments[1] != "keys":
+        if len(segments) not in (3, 4) or segments[1] != "keys":
             raise InvalidArgumentValueError(err_msg)
 
 

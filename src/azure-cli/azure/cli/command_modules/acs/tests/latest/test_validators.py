@@ -651,6 +651,17 @@ class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
             validators.validate_azure_keyvault_kms_key_id(namespace)
         self.assertEqual(str(cm.exception), err)
 
+    def test_invalid_azure_keyvault_kms_key_id_with_extra_segments(self):
+        invalid_azure_keyvault_kms_key_id = \
+            "https://fakekeyvault.vault.azure.net/keys/fakekeyname/fakekeyversion/extra"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
+        err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
+              'See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_azure_keyvault_kms_key_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
     def test_invalid_azure_keyvault_kms_key_id_with_wrong_object_type(self):
         invalid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/secrets/fakesecretname/fakesecretversion"
         namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
