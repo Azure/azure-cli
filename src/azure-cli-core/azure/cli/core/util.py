@@ -1634,95 +1634,35 @@ def should_encrypt_token_cache(cli_ctx):
     return encrypt
 
 
-def _is_same_dir(dir1, dir2):
-    """Compare directories by filesystem identity, which handles case differences, short names
-    (e.g. PROGRA~1), junctions and mapped drives. Falls back to normalized string comparison."""
-    try:
-        return os.path.samefile(dir1, dir2)
-
-    except (OSError, ValueError):
-        return os.path.normcase(os.path.normpath(dir1)) == os.path.normcase(os.path.normpath(dir2))
-
-
-def _is_located_in_dir(path, directory):
-    """Whether ``path`` or its symlink target lives directly in ``directory``."""
-    return any(_is_same_dir(os.path.dirname(p), directory) for p in (path, os.path.realpath(path)))
-
-
-def _get_trusted_search_dirs():
-    """Return an ordered list of candidate directories to search for executables.
-
-    Empty and relative ``PATH`` entries are skipped because both resolve against the current working
-    directory. The current working directory itself is filtered out by the caller.
-    """
-    search_dirs = []
-    if sys.platform.startswith('win'):
-        # Prefer the Windows system directory for system executables such as cmd.exe.
-        system_root = os.environ.get('SystemRoot') or os.environ.get('windir') or r'C:\Windows'
-        search_dirs.append(os.path.join(system_root, 'System32'))
-        search_dirs.append(system_root)
-
-    for directory in os.environ.get('PATH', os.defpath).split(os.pathsep):
-        directory = directory.strip('"')
-        if os.path.isabs(directory):
-            search_dirs.append(directory)
-
-    return search_dirs
-
-
-def _get_executable_candidates(executable):
-    """Return the candidate file names for an executable, expanding Windows PATHEXT extensions."""
-    if not sys.platform.startswith('win'):
-        return [executable]
-
-    pathext = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
-    if os.path.splitext(executable)[1].lower() in [ext.lower() for ext in pathext]:
-        # The name already carries a recognized extension (e.g. cmd.exe); use it as-is.
-        return [executable]
-
-    return [executable + ext for ext in pathext] + [executable]
-
-
 def get_safe_executable_path(executable):
-    """Resolve an executable name to an absolute path using only trusted directories.
-
-    This mitigates binary planting / executable hijacking (CWE-427). On Windows, ``CreateProcess``
-    (and ``cmd.exe``) resolve a bare executable name such as ``cmd.exe`` or ``az`` against the
-    calling process's current directory *before* the system directory and ``PATH``. An attacker who
-    can drop a malicious ``cmd.exe`` / ``az.{exe,cmd,bat}`` into a directory the victim ``cd``'s into
-    could therefore get arbitrary code execution. Resolving to an absolute path from trusted
-    directories only (never the current working directory) removes that ambiguity.
-
-    :param executable: The executable name to resolve, e.g. ``cmd.exe`` or ``az``.
-    :return: The resolved absolute path, or ``None`` if no trusted match exists (same contract as
-        ``shutil.which``). Never fall back to the bare name: spawning it would reintroduce the
-        current-directory lookup this function exists to prevent.
+    """Resolve an executable name to an absolute path like ``shutil.which``, but never from the current working
+    directory, which Windows searches first for bare names (binary planting, CWE-427).
+    Return ``None`` if nothing trusted is found; never fall back to the bare name.
     """
-    # Already an explicit path (absolute or containing a directory component): nothing to resolve.
     if os.path.dirname(executable):
         return executable
-
     try:
         cwd = os.getcwd()
-
     except OSError:
-        # Cannot verify that a candidate is outside the working directory: fail closed.
-        logger.debug("Unable to determine the current working directory; not resolving '%s'.", executable)
-        return None
+        return None  # Fail closed: the directory to exclude is unknown.
 
-    candidates = _get_executable_candidates(executable)
-    seen = set()
-    for directory in _get_trusted_search_dirs():
-        normalized = os.path.normcase(os.path.normpath(directory))
-        if normalized in seen or _is_same_dir(directory, cwd):
+    search_dirs = os.environ.get('PATH', os.defpath).split(os.pathsep)
+    names = [executable]
+    if sys.platform.startswith('win'):
+        system_root = os.environ.get('SystemRoot', r'C:\Windows')
+        search_dirs = [os.path.join(system_root, 'System32'), system_root] + search_dirs
+        exts = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
+        if os.path.splitext(executable)[1].upper() not in (ext.upper() for ext in exts):
+            names = [executable + ext for ext in exts]
+
+    for directory in (d.strip('"') for d in search_dirs):
+        # Relative entries ('', '.') resolve against the CWD as well.
+        if not os.path.isabs(directory) or not os.path.isdir(directory) or os.path.samefile(directory, cwd):
             continue
-
-        seen.add(normalized)
-        for candidate in candidates:
-            full_path = os.path.join(directory, candidate)
-            if (os.path.isfile(full_path) and os.access(full_path, os.X_OK) and not _is_located_in_dir(full_path, cwd)):
-                return full_path
-
+        for name in names:
+            path = os.path.join(directory, name)
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                return path
     return None
 
 

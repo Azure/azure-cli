@@ -182,8 +182,6 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     importlib.reload(json)
 
     az_cmd_prefix = _get_az_cmd_prefix()
-    # shell=False is used together with absolute executable paths (see _get_az_cmd_prefix) to avoid
-    # binary planting from the current working directory (CWE-427).
     version_result = subprocess.check_output(az_cmd_prefix + ['version', '-o', 'json'])
     version_json = json.loads(version_result)
     new_version = version_json['azure-cli-core']
@@ -210,15 +208,8 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
 
 
 def _get_az_cmd_prefix():
-    """Return the command prefix used to safely invoke 'az' in a subprocess.
-
-    On Windows, 'az' is a batch script (az.cmd) that must be run through cmd.exe. Both cmd.exe and
-    az are resolved to absolute paths while excluding the current working directory, so a planted
-    cmd.exe / az.{exe,cmd,bat} in the working directory cannot be executed (CWE-427). On other
-    platforms 'az' is an executable on PATH and is resolved the same way.
-
-    If no trusted 'az' (or cmd.exe) can be resolved, fall back to running the CLI module with the
-    current interpreter, which is also an absolute path and never consults the working directory.
+    """Return an absolute-path command prefix for spawning 'az', so nothing is resolved from the CWD (CWE-427).
+    On Windows, az.cmd runs through cmd.exe. Fall back to the current interpreter if either can't be resolved.
     """
     import platform
     import sys
@@ -229,10 +220,8 @@ def _get_az_cmd_prefix():
         cmd_path = get_safe_executable_path('cmd.exe')
         if az_path and cmd_path:
             return [cmd_path, '/c', az_path]
-
     elif az_path:
         return [az_path]
-
     return [sys.executable, '-m', 'azure.cli']
 
 
@@ -246,7 +235,7 @@ def _upgrade_on_windows():
     import sys
     import tempfile
 
-    from azure.cli.core.util import rmtree_with_retry
+    from azure.cli.core.util import rmtree_with_retry, get_safe_executable_path
 
     if platform.architecture()[0] == '32bit':
         msi_url = 'https://aka.ms/installazurecliwindows'
@@ -261,13 +250,9 @@ def _upgrade_on_windows():
 
     msi_path = _download_from_url(msi_url, msi_dir)
 
-    # Resolve msiexec.exe to an absolute path (System32) so a planted msiexec.exe in the current
-    # working directory cannot be executed (CWE-427).
-    from azure.cli.core.util import get_safe_executable_path
     msiexec_path = get_safe_executable_path('msiexec.exe')
     if not msiexec_path:
-        raise CLIError("Unable to locate msiexec.exe. Please install the downloaded MSI manually: {}".format(msi_path))
-
+        raise CLIError("Unable to locate msiexec.exe. Please install the MSI manually: {}".format(msi_path))
     subprocess.Popen([msiexec_path, '/i', msi_path])
     logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
                    "please run `az upgrade` again after completing the upgrade.")
