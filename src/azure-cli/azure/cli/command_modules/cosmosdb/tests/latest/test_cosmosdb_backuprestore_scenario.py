@@ -792,6 +792,7 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
             kwargs = mock_params.call_args.kwargs
             # Non-restore path: priority-0 location overrides arm_location.
             self.assertEqual(kwargs.get('location'), "westus2")
+
     def test_restore_timestamp_is_utc(self):
         from azure.cli.command_modules.cosmosdb.custom import _convert_to_utc_timestamp
 
