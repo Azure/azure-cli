@@ -1656,8 +1656,8 @@ def listexecution_containerappsjob(cmd, resource_group_name, name, page_size=Non
         raise InvalidArgumentValueError("--page-size must be a non-negative integer.")
 
     try:
-        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name,
-                                                         page_size=page_size)
+        executions = ContainerAppsJobClient.get_executions(
+            cmd=cmd, resource_group_name=resource_group_name, name=name, page_size=page_size)
         return executions['value']
     except CLIError as e:
         handle_raw_exception(e)
