@@ -12,6 +12,7 @@ from collections.abc import Mapping
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.web.models import Site
 from knack.output import format_table
 from knack.util import CLIError, CommandResultItem
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
@@ -56,7 +57,10 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          create_webapp)
 from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
                                                             transform_secure_build_output,
-                                                            transform_troubleshoot_deployment_output)
+                                                            transform_troubleshoot_deployment_output,
+                                                            transform_site_output,
+                                                            transform_webapp_site_output,
+                                                            transform_web_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 
 # pylint: disable=line-too-long
@@ -73,6 +77,58 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestWebappOutputTransformers(unittest.TestCase):
+
+    def test_transform_webapp_site_output_renames_server_farm_id_for_sdk_model(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        site = Site(location='westus', server_farm_id=farm_id)
+
+        result = transform_webapp_site_output(site)
+
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result)
+
+    def test_transform_webapp_site_output_renames_server_farm_id_from_properties(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        site = {
+            'location': 'westus',
+            'properties': {
+                'serverFarmId': farm_id,
+                'name': 'myapp',
+            },
+        }
+
+        result = transform_webapp_site_output(site)
+
+        self.assertEqual(result['appServicePlanId'], farm_id)
+        self.assertNotIn('serverFarmId', result['properties'])
+
+    def test_transform_site_output_preserves_server_farm_id_for_other_app_types(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        sites = [
+            {'serverFarmId': farm_id, 'name': 'app1'},
+            {'appServicePlanId': farm_id, 'name': 'app2'},
+        ]
+
+        result = transform_site_output(sites)
+
+        self.assertEqual([site['appServicePlanId'] for site in result], [farm_id, farm_id])
+        self.assertEqual(result[0]['serverFarmId'], farm_id)
+
+    def test_transform_web_output_uses_app_service_plan_name(self):
+        farm_id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+
+        result = transform_web_output({'name': 'app', 'appServicePlanId': farm_id})
+
+        self.assertEqual(result['appServicePlan'], 'plan')
+        self.assertNotIn('appServicePlanId', result)
+
+    def test_transform_web_output_tolerates_missing_app_service_plan_id(self):
+        result = transform_web_output({'name': 'app', 'state': 'Running'})
+
+        self.assertEqual(result, {'name': 'app', 'state': 'Running'})
 
 
 class TestSecureBuildMocked(unittest.TestCase):

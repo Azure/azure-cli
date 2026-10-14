@@ -541,6 +541,28 @@ jobs:
       pythonVersion: '$(python.version)'
       module: 'azure-cli-core'
 
+- job: TestPackagingMetadata
+  displayName: Test Packaging Metadata
+  timeoutInMinutes: 10
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python310:
+        python.version: '3.10'
+      Python314:
+        python.version: '3.14'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: |
+      set -e
+      python -m pip install docutils requests packaging tomli
+      python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
+      python -B scripts/ci/check_package_versions.py
+    displayName: Validate source metadata and packaging automation
+
 - job: TestTelemetry
   displayName: Unit Test for Telemetry
   timeoutInMinutes: 10
@@ -577,7 +599,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel build "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -598,160 +620,10 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel build "setuptools<81"
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
-
-- job: BuildHomebrewFormula
-  displayName: Build Homebrew Formula
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - bash: |
-      #!/bin/bash
-      
-      root=$(cd $(dirname $0); pwd)
-      
-      set -evx
-      
-      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
-      
-      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
-      
-      echo "Generating formula in docker container ... "
-      docker run -v $docker_files:/mnt/scripts \
-                 -v $src_files:/mnt/src \
-                 -e CLI_VERSION=$CLI_VERSION \
-                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
-                 --name azurecli \
-                 mcr.microsoft.com/azurelinux/base/python:3.12 \
-                 /mnt/scripts/run.sh
-      
-      # clean up
-      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-      
-      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
-      docker rm --force azurecli
-    displayName: 'Build homebrew formula'
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: homebrew'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: homebrew
-
-- job: TestHomebrewFormula
-  displayName: Test Homebrew Formula
-
-  dependsOn: BuildHomebrewFormula
-  condition: succeeded()
-  pool:
-    vmImage: ${{ variables.macos_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Homebrew'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: |
-      set -ev
-      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
-      # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.14
-      brew unlink python@$python_version && brew link --overwrite python@$python_version || true
-      
-      echo == Remove pre-installed azure-cli ==
-      if brew list --versions azure-cli >/dev/null 2>&1; then
-        brew uninstall azure-cli
-      else
-        echo "azure-cli is not pre-installed"
-      fi
-      
-      echo == Install azure-cli.rb formula ==
-      # Need to create a dummy homebrew tap to install the formula
-      git config --global user.email "you@example.com"
-      git config --global user.name "Your Name"
-      brew tap-new dev/azure-cli
-      cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
-      # `no_autobump!` is carried over from the upstream homebrew-core formula but is only
-      # allowed in official Homebrew taps. Remove it so the formula can be installed from
-      # this local dev tap. It must remain in the released formula, so we only strip it here.
-      sed -i '' '/no_autobump!/d' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
-      # TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
-      # The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
-      # Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
-      # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
-      # form for the local test install only; the generated/submitted formula stays upstream-faithful.
-      sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
-      
-      # Homebrew 6.0.0+ requires non-official taps to be explicitly trusted before it will
-      # load their Ruby code (see https://docs.brew.sh/Tap-Trust). Trust this local dev tap
-      # that we just created so the generated formula can be installed in CI.
-      brew trust dev/azure-cli
-      brew install --build-from-source dev/homebrew-azure-cli/azure-cli
-      
-      echo == Az Version ==
-      az --version
-      
-      echo == Run Self-Test ==
-      az self-test
-
-    displayName: 'Bash Script'
-
-- job: TestHomebrewPackage
-  displayName: Test Homebrew Package
-  timeoutInMinutes: 180
-  dependsOn: BuildHomebrewFormula
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  condition: false
-  pool:
-    vmImage: ${{ variables.macos_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
-
-
-    displayName: 'Test Homebrew Package'
 
 # ============================================================================
 # HOMEBREW CASK JOBS (Pre-built, signed, notarized binaries)

@@ -32,12 +32,54 @@ def transform_web_output(web):
     props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId', 'ftpPublishingUrl']
     result = {k: web[k] for k in web if k in props}
     # to get width under control, also the plan usually is in the same RG
-    result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
+    app_service_plan_id = result.pop('appServicePlanId', None)
+    if app_service_plan_id is not None:
+        result['appServicePlan'] = app_service_plan_id.split('/')[-1]
     return result
 
 
 def transform_web_list_output(webs):
     return [transform_web_output(w) for w in webs]
+
+
+def _transform_site_output(result, remove_server_farm_id):
+    """Restore appServicePlanId after serializing azure-mgmt-web Site models."""
+    from azure.cli.core.util import todict
+    from azure.cli.core.commands import AzCliCommandInvoker
+
+    result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+    sites = result if isinstance(result, list) else [result]
+    for site in sites:
+        if not isinstance(site, dict):
+            continue
+
+        app_service_plan_id = site.get('appServicePlanId')
+        if app_service_plan_id is None:
+            app_service_plan_id = site.get('serverFarmId')
+
+        properties = site.get('properties')
+        if app_service_plan_id is None and isinstance(properties, dict):
+            app_service_plan_id = properties.get('appServicePlanId')
+            if app_service_plan_id is None:
+                app_service_plan_id = properties.get('serverFarmId')
+
+        if app_service_plan_id is not None:
+            site['appServicePlanId'] = app_service_plan_id
+
+        if remove_server_farm_id:
+            site.pop('serverFarmId', None)
+            if isinstance(properties, dict):
+                properties.pop('serverFarmId', None)
+
+    return result
+
+
+def transform_webapp_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=True)
+
+
+def transform_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=False)
 
 
 def transform_runtime_list_output(result):
@@ -278,8 +320,10 @@ def load_command_table(self, _):
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_webapp', transform=transform_webapp_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_app', transform=transform_webapp_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -533,8 +577,10 @@ def load_command_table(self, _):
                          validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list-flexconsumption-runtimes', 'list_flex_function_app_runtimes')
-        g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_function_app', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_functionapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -758,8 +804,10 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_logicapp', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('scale', 'scale_logicapp', exception_handler=ex_handler_factory())
 
     with self.command_group('logicapp config appsettings', custom_command_type=logicapp_custom) as g:
