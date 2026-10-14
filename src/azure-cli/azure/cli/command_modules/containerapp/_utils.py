@@ -21,7 +21,7 @@ from enum import Enum
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
-from datetime import UTC, datetime
+import datetime as dt
 from dateutil.relativedelta import relativedelta
 from azure.cli.core.azclierror import (ValidationError, RequiredArgumentMissingError, CLIInternalError,
                                        ResourceNotFoundError, FileOperationError, CLIError, UnauthorizedError,
@@ -161,7 +161,7 @@ def create_service_principal_for_github_action(cmd, scopes=None, role="contribut
     RETRY_LIMIT = 36
 
     client = graph_client_factory(cmd.cli_ctx)
-    now = datetime.now(UTC)
+    now = dt.datetime.now(dt.UTC)
     app_display_name = 'azure-cli-' + now.strftime('%Y-%m-%d-%H-%M-%S')
     app = retry_until_success(_create_application, SP_CREATION_ERR_TXT, RETRY_LIMIT, client, display_name=app_display_name)
     sp = retry_until_success(_create_service_principal, SP_CREATION_ERR_TXT, RETRY_LIMIT, client, app_id=app["appId"])
@@ -221,7 +221,7 @@ def trigger_workflow(token, repo, workflow_name, branch):
 def await_github_action(token, repo, workflow_name, timeout_secs=1200):
     from ._clients import PollingAnimation
 
-    start = datetime.now(UTC)
+    start = dt.datetime.now(dt.UTC)
     animation = PollingAnimation()
     animation.tick()
 
@@ -237,14 +237,14 @@ def await_github_action(token, repo, workflow_name, timeout_secs=1200):
             pass
         animation.flush()
 
-        if (datetime.now(UTC) - start).seconds >= timeout_secs:
+        if (dt.datetime.now(dt.UTC) - start).seconds >= timeout_secs:
             raise CLIInternalError("Timed out while waiting for the Github action to start.")
 
     runs = workflow.get_runs()
     while runs is None or not [r for r in runs if r.status in ('queued', 'in_progress')]:
         time.sleep(SHORT_POLLING_INTERVAL_SECS)
         runs = workflow.get_runs()
-        if (datetime.now(UTC) - start).seconds >= timeout_secs:
+        if (dt.datetime.now(dt.UTC) - start).seconds >= timeout_secs:
             raise CLIInternalError("Timed out while waiting for the Github action to be started.")
     runs = [r for r in runs if r.status in ('queued', 'in_progress')]
     runs.sort(key=lambda r: r.created_at, reverse=True)
@@ -258,7 +258,7 @@ def await_github_action(token, repo, workflow_name, timeout_secs=1200):
         animation.tick()
         status = github_repo.get_workflow_run(run_id).status
         animation.flush()
-        if (datetime.now(UTC) - start).seconds >= timeout_secs:
+        if (dt.datetime.now(dt.UTC) - start).seconds >= timeout_secs:
             raise CLIInternalError("Timed out while waiting for the Github action to complete.")
 
     animation.flush()  # needed to clear the animation from the terminal
@@ -294,11 +294,11 @@ def _register_resource_provider(cmd, resource_provider):
         # wait for registration to finish
         timeout_secs = 120
         registration = _is_resource_provider_registered(cmd, resource_provider)
-        start = datetime.now(UTC)
+        start = dt.datetime.now(dt.UTC)
         while not registration:
             registration = _is_resource_provider_registered(cmd, resource_provider)
             time.sleep(SHORT_POLLING_INTERVAL_SECS)
-            if (datetime.now(UTC) - start).seconds >= timeout_secs:
+            if (dt.datetime.now(dt.UTC) - start).seconds >= timeout_secs:
                 raise CLIInternalError(f"Timed out while waiting for the {resource_provider} resource provider to be registered.")
 
     except Exception as e:
@@ -909,7 +909,7 @@ def _add_or_update_tags(containerapp_def, tags):
 def _object_to_dict(obj):
 
     def default_handler(x):
-        if isinstance(x, datetime):
+        if isinstance(x, dt.datetime):
             return x.isoformat()
         return x.__dict__
 

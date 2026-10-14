@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-import datetime
+import datetime as dt
 import time
 import unittest
 
@@ -39,8 +39,8 @@ class AzureNetAppFilesBucketServiceScenarioTest(ScenarioTest):
             .issuer_name(issuer)
             .public_key(key.public_key())
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.datetime.now(datetime.UTC))
-            .not_valid_after(datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=365))
+            .not_valid_before(dt.datetime.now(dt.UTC))
+            .not_valid_after(dt.datetime.now(dt.UTC) + dt.timedelta(days=365))
             .sign(key, hashes.SHA256())
         )
         pem_data = cert.public_bytes(serialization.Encoding.PEM) + key.private_bytes(

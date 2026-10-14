@@ -7,7 +7,7 @@
 import re
 
 from azure.cli.core.util import CLIError, user_confirmation
-from datetime import UTC, datetime, timedelta
+import datetime as dt
 from knack.log import get_logger
 from urllib.request import urlretrieve
 from .._client_factory import cf_postgres_flexible_replica
@@ -61,7 +61,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.now(UTC) - timedelta(hours=file_last_written)
+    time_line = dt.datetime.now(dt.UTC) - dt.timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:
@@ -85,7 +85,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.now(UTC) - timedelta(hours=file_last_written)
+    time_line = dt.datetime.now(dt.UTC) - dt.timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:

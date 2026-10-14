@@ -83,10 +83,10 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
             get_datetime_type(True)(input)
 
     def test_datetime_type(self):
-        import datetime
+        import datetime as dt
         input = "2017-01-01T12:30Z"
         actual = get_datetime_type(False)(input)
-        expected = datetime.datetime(2017, 1, 1, 12, 30, 0)
+        expected = dt.datetime(2017, 1, 1, 12, 30, 0)
         self.assertEqual(actual, expected)
 
         input = "2017-01-01 12:30"

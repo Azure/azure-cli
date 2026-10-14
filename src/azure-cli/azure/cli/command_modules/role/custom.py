@@ -12,7 +12,7 @@ https://learn.microsoft.com/en-us/graph/migrate-azure-ad-graph-property-differen
 """
 
 import base64
-import datetime
+import datetime as dt
 import itertools
 import json
 import os
@@ -52,7 +52,7 @@ def _coerce(value):
         return value.value
     if isinstance(value, list):
         return [_coerce(v) for v in value]
-    if isinstance(value, datetime.datetime):
+    if isinstance(value, dt.datetime):
         return value.isoformat()
     return value
 
@@ -489,21 +489,21 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
     if end_time:
         try:
-            end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT).replace(tzinfo=datetime.UTC)
+            end_time = dt.datetime.strptime(end_time, DATE_TIME_FORMAT).replace(tzinfo=dt.UTC)
         except ValueError:
             raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
     else:
-        end_time = datetime.datetime.now(datetime.UTC)
+        end_time = dt.datetime.now(dt.UTC)
 
     if start_time:
         try:
-            start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT).replace(tzinfo=datetime.UTC)
+            start_time = dt.datetime.strptime(start_time, DATE_TIME_FORMAT).replace(tzinfo=dt.UTC)
             if start_time >= end_time:
                 raise CLIError("Start time cannot be later than end time.")
         except ValueError:
             raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(start_time))
     else:
-        start_time = end_time - datetime.timedelta(hours=1)
+        start_time = end_time - dt.timedelta(hours=1)
 
     time_filter = 'eventTimestamp ge {} and eventTimestamp le {}'.format(_datetime_to_utc(start_time),
                                                                          _datetime_to_utc(end_time))
@@ -1493,14 +1493,14 @@ def create_service_principal_for_rbac(
 
     if not display_name:
         # No display name is provided, create a new one
-        app_display_name = 'azure-cli-' + datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d-%H-%M-%S')
+        app_display_name = 'azure-cli-' + dt.datetime.now(dt.UTC).strftime('%Y-%m-%d-%H-%M-%S')
     else:
         app_display_name = display_name
         # patch existing app with the same displayName to make the command idempotent
         query_exp = "displayName eq '{}'".format(display_name)
         existing_sps = list(graph_client.service_principal_list(filter=query_exp))
 
-    app_start_date = datetime.datetime.now(datetime.timezone.utc)
+    app_start_date = dt.datetime.now(dt.timezone.utc)
     app_end_date = app_start_date + relativedelta(years=years or 1)
 
     use_cert = False
@@ -1680,12 +1680,12 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     if cert_start_date > app_start_date:
         logger.warning('Certificate is not valid until %s. Adjusting key credential start date to match.',
                        cert_start_date)
-        app_start_date = cert_start_date + datetime.timedelta(seconds=1)
+        app_start_date = cert_start_date + dt.timedelta(seconds=1)
 
     if cert_end_date < app_end_date:
         logger.warning('Certificate expires %s. Adjusting key credential end date to match.',
                        cert_end_date)
-        app_end_date = cert_end_date - datetime.timedelta(seconds=1)
+        app_end_date = cert_end_date - dt.timedelta(seconds=1)
 
     return app_start_date, app_end_date, cert_start_date, cert_end_date
 
@@ -1700,7 +1700,6 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     from os import path
     import tempfile
     from OpenSSL import crypto
-    from datetime import timedelta
 
     # Create a PEM file ~/tmpxxxxxxxx.pem with both PRIVATE KEY & CERTIFICATE so users can use to log in.
     # The PEM file looks like
@@ -1729,8 +1728,8 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     subject.CN = 'CLI-Login'
     cert.set_serial_number(1000)
     asn1_format = '%Y%m%d%H%M%SZ'
-    cert_start_date = start_date - timedelta(seconds=1)
-    cert_end_date = end_date + timedelta(seconds=1)
+    cert_start_date = start_date - dt.timedelta(seconds=1)
+    cert_end_date = end_date + dt.timedelta(seconds=1)
     cert.set_notBefore(cert_start_date.strftime(asn1_format).encode('utf-8'))
     cert.set_notAfter(cert_end_date.strftime(asn1_format).encode('utf-8'))
     cert.set_issuer(cert.get_subject())
@@ -1928,8 +1927,8 @@ def _set_application_properties(body, **kwargs):
     set_object_properties('application', body, **kwargs)
 
 
-def _datetime_to_utc(dt):
-    return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+def _datetime_to_utc(value):
+    return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def _build_required_resource_accesses(required_resource_accesses):
@@ -1980,7 +1979,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
         return []
 
     if not start_date:
-        start_date = datetime.datetime.now(datetime.UTC)
+        start_date = dt.datetime.now(dt.UTC)
     elif isinstance(start_date, str):
         start_date = dateutil.parser.parse(start_date)
 
@@ -2026,7 +2025,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
     # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
     # https://github.com/Azure/azure-cli/issues/20561
 
-    app_start_date = datetime.datetime.now(datetime.timezone.utc)
+    app_start_date = dt.datetime.now(dt.timezone.utc)
     if years is not None and end_date is not None:
         raise CLIError('usage error: --years | --end-date')
     if end_date is None:
@@ -2035,7 +2034,7 @@ def _reset_credential(cmd, graph_object, add_password_func, remove_password_func
     else:
         app_end_date = dateutil.parser.parse(end_date)
         if app_end_date.tzinfo is None:
-            app_end_date = app_end_date.replace(tzinfo=datetime.timezone.utc)
+            app_end_date = app_end_date.replace(tzinfo=dt.timezone.utc)
         years = (app_end_date - app_start_date).days / 365
 
     # Created password

@@ -21,7 +21,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                   accept_terms=False, tags=None, dryrun=False, no_wait=False):
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.appservice._template_builder import (build_dns_zone, build_domain)
-    from datetime import UTC, datetime
+    import datetime as dt
     import socket
     import json
 
@@ -41,7 +41,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
                        '/blob/master/contact_info.json')
     contact_info = verify_contact_info_and_format(contact_info)
 
-    current_time = str(datetime.now(UTC)).replace('+00:00', 'Z')
+    current_time = str(dt.datetime.now(dt.UTC)).replace('+00:00', 'Z')
     local_ip_address = ''
     try:
         local_ip_address = socket.gethostbyname(socket.gethostname())

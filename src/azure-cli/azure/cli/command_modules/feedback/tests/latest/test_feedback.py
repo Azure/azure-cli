@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 import logging
 import os
 import time
@@ -102,7 +102,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertEqual(_RAW_EXTENSIONS_ISSUES_URL, repo_url)
 
     def _helper_test_log_metadata_correct(self):
-        time_now = datetime.datetime.now()
+        time_now = dt.datetime.now()
         command_log_files = _get_command_log_files(self.cli_ctx, time_now)
         p_id = os.getpid()
         self.assertEqual(len(command_log_files), 4)
@@ -123,7 +123,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertEqual("az alias list", command_log_files[3].metadata_tup.cmd)
 
     def _helper_test_log_contents_correct(self):
-        time_now = datetime.datetime.now()
+        time_now = dt.datetime.now()
         command_log_files = _get_command_log_files(self.cli_ctx, time_now)
         self.assertEqual(len(command_log_files), 4)
 

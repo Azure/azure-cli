@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from datetime import UTC, datetime, timedelta
+import datetime as dt
 from importlib import import_module
 import re
 from knack.log import get_logger
@@ -602,7 +602,7 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.now(UTC) - timedelta(hours=file_last_written)
+    time_line = dt.datetime.now(dt.UTC) - dt.timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:

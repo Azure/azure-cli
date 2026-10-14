@@ -6,7 +6,7 @@
 import os
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
-import datetime
+import datetime as dt
 
 location = 'WestEurope'
 seclocation = 'EastUS'
@@ -309,8 +309,8 @@ class RedisCacheTests(ScenarioTest):
             'containerName': "testcontainer",
             'userIdentity': user_identity,
             'storageSubscriptionId': "6364f508-1150-4431-b973-c3f133466e56",  # replace it with your subscription id while running tests in live mode
-            'startTime': (datetime.datetime.now(datetime.UTC) - datetime.timedelta(minutes=60)).strftime("%Y-%m-%dT%H:%MZ"),
-            'expiryTime': (datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=200)).strftime("%Y-%m-%dT%H:%MZ")
+            'startTime': (dt.datetime.now(dt.UTC) - dt.timedelta(minutes=60)).strftime("%Y-%m-%dT%H:%MZ"),
+            'expiryTime': (dt.datetime.now(dt.UTC) + dt.timedelta(minutes=200)).strftime("%Y-%m-%dT%H:%MZ")
         }
 
         if self.is_live :

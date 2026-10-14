@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 from os.path import exists
 import os
 from cryptography import x509
@@ -29,9 +29,9 @@ def _create_test_cert(cert_file, key_file, subject, valid_days, serial_number):
         .issuer_name(subject_name)
         .public_key(key.public_key())
         .serial_number(serial_number)
-        .not_valid_before(datetime.datetime.now(datetime.UTC))
+        .not_valid_before(dt.datetime.now(dt.UTC))
         .not_valid_after(
-            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=valid_days)
+            dt.datetime.now(dt.UTC) + dt.timedelta(days=valid_days)
         )
         .sign(key, hashes.SHA256())
     )
@@ -92,9 +92,9 @@ def _create_verification_cert(cert_file, key_file, verification_file, nonce, val
             .issuer_name(signing_cert.subject)
             .public_key(key.public_key())
             .serial_number(serial_number)
-            .not_valid_before(datetime.datetime.now(datetime.UTC))
+            .not_valid_before(dt.datetime.now(dt.UTC))
             .not_valid_after(
-                datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=valid_days)
+                dt.datetime.now(dt.UTC) + dt.timedelta(days=valid_days)
             )
             .sign(k, hashes.SHA256())
         )

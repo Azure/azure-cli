@@ -11,7 +11,7 @@ import re
 import time
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Tuple, TypeVar, Union
-import datetime
+import datetime as dt
 from dateutil.parser import parse
 
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
@@ -9601,7 +9601,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         f"{override_until} is not a valid datatime format."
                     )
             elif force_upgrade:
-                default_extended_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3)
+                default_extended_until = dt.datetime.now(dt.UTC) + dt.timedelta(days=3)
                 if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                     mc.upgrade_settings.override_settings.until = default_extended_until
 

@@ -52,9 +52,9 @@ def generate_queue_sas(cmd, client, queue_name=None, permission=None, expiry=Non
     account_key = None
     user_delegation_key = None
     if as_user:
-        from datetime import UTC, datetime
+        import datetime as dt
         user_delegation_key = client.get_user_delegation_key(
-            start=get_datetime_from_string(start) if start else datetime.now(UTC),
+            start=get_datetime_from_string(start) if start else dt.datetime.now(dt.UTC),
             expiry=get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
     else:

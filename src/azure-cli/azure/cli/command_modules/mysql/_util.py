@@ -15,7 +15,7 @@ import subprocess
 import sys
 import yaml
 from time import sleep
-from datetime import UTC, datetime
+import datetime as dt
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
@@ -325,7 +325,7 @@ def _map_maintenance_window(day_of_week):
 
 
 def get_current_time():
-    return datetime.now(UTC).replace(microsecond=0).isoformat()
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat()
 
 
 def get_id_components(rid):
@@ -615,7 +615,7 @@ def get_firewall_rules_from_paged_response(firewall_rules):
 
 
 def get_current_utc_time():
-    return datetime.now(UTC)
+    return dt.datetime.now(dt.UTC)
 
 
 class ImportFromStorageState(Enum):
@@ -648,7 +648,7 @@ class ImportFromStorageProgressHook:
         return msg
 
     def _get_eta_time_duration_in_user_readable_string(self):
-        time_remaining = datetime.fromisoformat(self._import_estimated_completion_time) - get_current_utc_time()
+        time_remaining = dt.datetime.fromisoformat(self._import_estimated_completion_time) - get_current_utc_time()
         msg = " ETA : "
         if time_remaining.total_seconds() < 60:
             return msg + "Few seconds remaining"

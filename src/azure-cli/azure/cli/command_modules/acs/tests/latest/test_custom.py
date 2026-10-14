@@ -14,7 +14,7 @@ import tempfile
 import unittest
 from unittest import mock
 from urllib.error import HTTPError, URLError
-import datetime
+import datetime as dt
 from contextlib import contextmanager
 from dateutil.parser import parse
 
@@ -2140,8 +2140,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.upgrade_settings = None
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
-        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=4)).timestamp())
 
         instance.upgrade_settings = self.models.ClusterUpgradeSettings(
             override_settings = self.models.UpgradeOverrideSettings(
@@ -2150,8 +2150,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         )
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
-        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=4)).timestamp())
 
         # force_upgrade False
         instance.upgrade_settings = None
@@ -2987,7 +2987,7 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
             mock.Mock(
                 orchestrator_version="1.32.1",
                 node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
-                timestamp=datetime.datetime(2026, 5, 1),
+                timestamp=dt.datetime(2026, 5, 1),
             )
         ]
         upgrade_profile = mock.Mock(recently_used_versions=versions)
@@ -3005,12 +3005,12 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         older_version = mock.Mock(
             orchestrator_version="1.31.9",
             node_image_version="AKSUbuntu-2204gen2containerd-202604.10.0",
-            timestamp=datetime.datetime(2026, 4, 1),
+            timestamp=dt.datetime(2026, 4, 1),
         )
         most_recent_version = mock.Mock(
             orchestrator_version="1.32.1",
             node_image_version="AKSUbuntu-2204gen2containerd-202605.12.0",
-            timestamp=datetime.datetime(2026, 5, 1),
+            timestamp=dt.datetime(2026, 5, 1),
         )
         upgrade_profile = mock.Mock(recently_used_versions=[older_version, most_recent_version])
         agentpool = mock.Mock()
@@ -3064,7 +3064,7 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         rollback_version = mock.Mock(
             orchestrator_version="1.34.8",
             node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
-            timestamp=datetime.datetime(2026, 8, 5),
+            timestamp=dt.datetime(2026, 8, 5),
         )
         client = mock.Mock()
         client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])
@@ -3094,7 +3094,7 @@ class AksAgentpoolRollbackTest(unittest.TestCase):
         rollback_version = mock.Mock(
             orchestrator_version="1.34.8",
             node_image_version="AKSUbuntu-2204gen2containerd-202607.20.0",
-            timestamp=datetime.datetime(2026, 8, 5),
+            timestamp=dt.datetime(2026, 8, 5),
         )
         client = mock.Mock()
         client.get_upgrade_profile.return_value = mock.Mock(recently_used_versions=[rollback_version])

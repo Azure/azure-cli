@@ -10,7 +10,7 @@ import sys
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from knack.util import CLIError
-from datetime import UTC, datetime, timedelta
+import datetime as dt
 
 EVENTGRID_TRIGGER_ENDPOINT_URL = "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"
 EVENTGRID_TRIGGER_ENDPOINT_BASE_URL = "https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"
@@ -1480,9 +1480,9 @@ class EventGridTests(ScenarioTest):
         guid3 = uuid.uuid1()
         destination_subscription_id = '5b4b650e-28b9-4790-b3ab-ddbd88d727c4'
         source = self.create_random_name(prefix='cli', length=40)
-        exp_time = datetime.now(UTC) + timedelta(hours=24)
+        exp_time = dt.datetime.now(dt.UTC) + dt.timedelta(hours=24)
         exp_time = exp_time.isoformat()
-        creation_time = datetime.now(UTC).isoformat()
+        creation_time = dt.datetime.now(dt.UTC).isoformat()
 
         long_description = 'This is long description sample'
         customer_service_number1 = '+1 800 123 4567'
@@ -1865,9 +1865,9 @@ class EventGridTests(ScenarioTest):
         destination_endpoint_url = SECURED_WEBBOOK_DESTINATION_ENDPOINT_URL
 
         source = self.create_random_name(prefix='cli', length=40)
-        exp_time = datetime.now(UTC) + timedelta(hours=24)
+        exp_time = dt.datetime.now(dt.UTC) + dt.timedelta(hours=24)
         exp_time = exp_time.isoformat()
-        creation_time = datetime.now(UTC).isoformat()
+        creation_time = dt.datetime.now(dt.UTC).isoformat()
 
         default_maximum_expiration_time_in_days = 5
         updated_default_max_expiration_time_in_days = 15

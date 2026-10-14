@@ -16,7 +16,7 @@ from urllib.request import urlopen
 from binascii import hexlify
 from collections.abc import Mapping
 from os import urandom
-import datetime
+import datetime as dt
 import json
 import ssl
 import sys
@@ -2193,7 +2193,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             storage_connection = str(keyval['value'])
 
     container_name = "function-releases"
-    blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
+    blob_name = "{}-{}.zip".format(dt.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
     BlobServiceClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                 '_blob_service_client#BlobServiceClient')
     blob_service_client = BlobServiceClient.from_connection_string(conn_str=storage_connection)
@@ -2217,9 +2217,9 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         blob_client = container_client.upload_blob(blob_name, zip_content, validate_content=True,
                                                    progress_hook=progress_callback)
 
-    now = datetime.datetime.now(datetime.UTC)
-    blob_start = now - datetime.timedelta(minutes=10)
-    blob_end = now + datetime.timedelta(weeks=520)
+    now = dt.datetime.now(dt.UTC)
+    blob_start = now - dt.timedelta(minutes=10)
+    blob_end = now + dt.timedelta(weeks=520)
     BlobSharedAccessSignature = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                         '_shared_access_signature#BlobSharedAccessSignature')
 
@@ -6482,7 +6482,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     if not backup_name:
-        backup_name = '{0}_{1}'.format(webapp_name, datetime.datetime.now(datetime.UTC).strftime('%Y%m%d%H%M'))
+        backup_name = '{0}_{1}'.format(webapp_name, dt.datetime.now(dt.UTC).strftime('%Y%m%d%H%M'))
 
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
@@ -7369,16 +7369,16 @@ def _runtime_error_is_recent(runtime_error, minutes=_RUNTIME_ERROR_FRESHNESS_MIN
         ts = str(raw).strip()
         if ts.endswith('Z'):
             ts = ts[:-1] + '+00:00'
-        parsed = datetime.datetime.fromisoformat(ts)
+        parsed = dt.datetime.fromisoformat(ts)
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=datetime.timezone.utc)
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
     except (ValueError, TypeError):
         return False
-    delta = datetime.datetime.now(datetime.timezone.utc) - parsed
+    delta = dt.datetime.now(dt.timezone.utc) - parsed
     # Reject future timestamps: a clock-skewed or malformed value would
     # produce a negative delta, which still satisfies `<= 15min` and would
     # incorrectly mark stale errors as recent.
-    return datetime.timedelta(0) <= delta <= datetime.timedelta(minutes=minutes)
+    return dt.timedelta(0) <= delta <= dt.timedelta(minutes=minutes)
 
 
 def _ensure_linux_webapp_for_troubleshoot(cmd, resource_group_name, name, slot=None):
@@ -8804,10 +8804,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if not eol_date_str:
             return 'n/a'
         try:
-            eol_date = datetime.datetime.strptime(eol_date_str, "%Y-%m-%d").replace(
-                tzinfo=datetime.timezone.utc)
-            now = datetime.datetime.now(datetime.timezone.utc)
-            near_threshold = now + datetime.timedelta(days=365)
+            eol_date = dt.datetime.strptime(eol_date_str, "%Y-%m-%d").replace(
+                tzinfo=dt.timezone.utc)
+            now = dt.datetime.now(dt.timezone.utc)
+            near_threshold = now + dt.timedelta(days=365)
             if eol_date <= now:
                 return 'EOL'
             if eol_date <= near_threshold:
@@ -8824,11 +8824,11 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if isinstance(eol_date, str):
             for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"):
                 try:
-                    return datetime.datetime.strptime(eol_date, fmt).strftime("%Y-%m-%d")
+                    return dt.datetime.strptime(eol_date, fmt).strftime("%Y-%m-%d")
                 except ValueError:
                     continue
             return eol_date
-        if isinstance(eol_date, datetime.datetime):
+        if isinstance(eol_date, dt.datetime):
             return eol_date.strftime("%Y-%m-%d")
         return None
 
@@ -9093,20 +9093,20 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             try:
                 if isinstance(end_of_life, str):
                     try:
-                        end_of_life_dt = datetime.datetime.strptime(
+                        end_of_life_dt = dt.datetime.strptime(
                             end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
-                        ).replace(tzinfo=datetime.timezone.utc)
+                        ).replace(tzinfo=dt.timezone.utc)
                     except ValueError:
-                        end_of_life_dt = datetime.datetime.strptime(
+                        end_of_life_dt = dt.datetime.strptime(
                             end_of_life, "%Y-%m-%dT%H:%M:%SZ"
-                        ).replace(tzinfo=datetime.timezone.utc)
+                        ).replace(tzinfo=dt.timezone.utc)
                 else:
                     # If already a datetime, ensure it's timezone-aware
                     if end_of_life.tzinfo is None:
-                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
+                        end_of_life_dt = end_of_life.replace(tzinfo=dt.timezone.utc)
                     else:
                         end_of_life_dt = end_of_life
-                now_utc = datetime.datetime.now(datetime.UTC)
+                now_utc = dt.datetime.now(dt.UTC)
                 if now_utc >= end_of_life_dt:
                     return False
             except (ValueError, AttributeError):
@@ -9633,11 +9633,11 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         if runtime == 'custom':
             return
 
-        today = datetime.datetime.now(datetime.timezone.utc)
+        today = dt.datetime.now(dt.timezone.utc)
         six_months = today + relativedelta(months=+6)
         runtimes = [r for r in self.stacks if r.linux == is_linux and runtime == r.name]
         runtimes.sort(key=lambda r: r.end_of_life_date or
-                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
+                      dt.datetime.min.replace(tzinfo=dt.timezone.utc), reverse=True)
         matched_runtime = next((r for r in runtimes if r.version == version), None)
         if matched_runtime:
             eol = matched_runtime.end_of_life_date
@@ -9716,7 +9716,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
         runtimes = [r for r in self.stacks if r.linux == is_linux and r.name == runtime]
         # sort runtimes by end of life date
         runtimes.sort(key=lambda r: r.end_of_life_date or
-                      datetime.datetime.min.replace(tzinfo=datetime.timezone.utc), reverse=True)
+                      dt.datetime.min.replace(tzinfo=dt.timezone.utc), reverse=True)
         for r in runtimes:
             if functions_version in r.supported_func_versions:
                 return r
@@ -11203,7 +11203,7 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     response_body = None
     logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
                    "async" if is_async else "sync",
-                   datetime.datetime.now(datetime.timezone.utc))
+                   dt.datetime.now(dt.timezone.utc))
     # verify if the app is a linux web app
     if deploy_params is not None:
         # Reuse the Site fetched (or cached) during the publish leg. Saves

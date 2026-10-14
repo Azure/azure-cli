@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-from datetime import UTC, datetime, timedelta
+import datetime as dt
 import unittest
 import time
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
@@ -42,7 +42,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         })
         self.cmd('backup protection enable-for-azurefileshare -g {rg} -v {vault} --storage-account {container} --azure-file-share {item} -p {policy}')
 
-        self.kwargs['retain_date'] = (datetime.now(UTC) + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['retain_date'] = (dt.datetime.now(dt.UTC) + dt.timedelta(days=30)).strftime('%d-%m-%Y')
 
         self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} --retain-until {retain_date} --backup-management-type AzureStorage --query name').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
@@ -384,7 +384,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         rp_list = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type {type}').get_output_in_json()
         rp_count1 = len(rp_list)
 
-        self.kwargs['retain_date'] = (datetime.now(UTC) + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['retain_date'] = (dt.datetime.now(dt.UTC) + dt.timedelta(days=30)).strftime('%d-%m-%Y')
         self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item1} --retain-until {retain_date} --backup-management-type AzureStorage --query name').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 

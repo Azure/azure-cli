@@ -1331,8 +1331,8 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
         self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n storage_account_linked_template.json --account-name {storage_account} --account-key {storage_key}')
 
-        from datetime import UTC, datetime, timedelta
-        self.kwargs['expiry'] = (datetime.now(UTC) + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        self.kwargs['expiry'] = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs['sas_token'] = self.cmd(
             'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions rw --expiry {expiry}  -otsv').output.strip()
@@ -1379,8 +1379,8 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         self.cmd('storage blob upload -c {container_name} -f "{linked_tf1}" -n createKeyVault.json --account-name {storage_account} --account-key {storage_key}')
         self.cmd('storage blob upload -c {container_name} -f "{linked_tf2}" -n createKeyVaultWithSecret.json --account-name {storage_account} --account-key {storage_key}')
 
-        from datetime import UTC, datetime, timedelta
-        self.kwargs['expiry'] = (datetime.now(UTC) + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        self.kwargs['expiry'] = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs['sas_token'] = self.cmd(
             'storage container generate-sas --account-name {storage_account} --name {container_name} --permissions dlrw --expiry {expiry} --https-only -otsv').output.strip()

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import UTC, datetime
+import datetime as dt
 from azure.cli.core.profiles import ResourceType
 
 from ..util import get_datetime_from_string
@@ -45,7 +45,7 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
     sas_kwargs = {}
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.now(UTC),
+            get_datetime_from_string(start) if start else dt.datetime.now(dt.UTC),
             get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
 

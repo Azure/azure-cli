@@ -6,7 +6,7 @@
 import os
 import sys
 import json
-from datetime import UTC, datetime, timedelta
+import datetime as dt
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
 from azure.cli.core._profile import Profile
 from azure.cli.core.style import print_styled_text
@@ -56,7 +56,7 @@ def should_prompt(cli):
         # using their installationId
         installation_id = Profile(cli_ctx=cli).get_installation_id()
         prompt_period = EXPERIENCE_PERIOD_IN_DAYS + (uuid.UUID(installation_id).int & 127)
-        next_prompt_time = datetime.now(UTC) + timedelta(days=prompt_period)
+        next_prompt_time = dt.datetime.now(dt.UTC) + dt.timedelta(days=prompt_period)
         survey_note = {
             'last_prompt_time': '',
             'next_prompt_time': next_prompt_time.strftime('%Y-%m-%dT%H:%M:%S')
@@ -67,8 +67,9 @@ def should_prompt(cli):
 
     with open(GLOBAL_SURVEY_NOTE_PATH, 'r', encoding='utf-8-sig') as f:
         survey_note = json.load(f)
-        next_prompt_time = datetime.strptime(survey_note['next_prompt_time'], '%Y-%m-%dT%H:%M:%S').replace(tzinfo=UTC)
-        if datetime.now(UTC) < next_prompt_time:
+        next_prompt_time = dt.datetime.strptime(
+            survey_note['next_prompt_time'], '%Y-%m-%dT%H:%M:%S').replace(tzinfo=dt.UTC)
+        if dt.datetime.now(dt.UTC) < next_prompt_time:
             return False
 
     return True
@@ -92,9 +93,9 @@ def prompt_survey_message(cli):
     telemetry.set_survey_info(show_survey_message=True)
 
     # log prompt time
-    next_prompt_time = datetime.now(UTC) + timedelta(days=PROMPT_INTERVAL_IN_DAYS)
+    next_prompt_time = dt.datetime.now(dt.UTC) + dt.timedelta(days=PROMPT_INTERVAL_IN_DAYS)
     survey_note = {
-        'last_prompt_time': datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%S'),
+        'last_prompt_time': dt.datetime.now(dt.UTC).strftime('%Y-%m-%dT%H:%M:%S'),
         'next_prompt_time': next_prompt_time.strftime('%Y-%m-%dT%H:%M:%S')
     }
     with open(GLOBAL_SURVEY_NOTE_PATH, 'w') as f:

@@ -6,7 +6,7 @@
 # pylint: disable=too-many-lines
 import collections
 import copy
-import datetime
+import datetime as dt
 import json
 import os
 import signal
@@ -794,7 +794,7 @@ def _get_files_from_bfs(cli_ctx, bfs, path, expiry):
         if b.properties.content_settings.contentMd5 is not None:
             name = os.path.basename(b.name)
             sas = sas_client.generate_blob(bfs.container_name, b.name, permission=BlobSasPermissions(read=True),
-                                           expiry=datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=expiry))
+                                           expiry=dt.datetime.now(dt.UTC) + dt.timedelta(minutes=expiry))
             blob_url = b.url
             if '?' not in blob_url:
                 blob_url += '?' + sas
@@ -843,7 +843,7 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
         if not f.is_directory:
             sas = sas_client.generate_file(share_name, directory_name=effective_path, file_name=f.name,
                                            permission=FileSasPermissions(read=True),
-                                           expiry=datetime.datetime.now(datetime.UTC) + datetime.timedelta(minutes=expiry))
+                                           expiry=dt.datetime.now(dt.UTC) + dt.timedelta(minutes=expiry))
             file_url = share_client.url + '/' + effective_path + '/' + f.name
             if '?' not in file_url:
                 file_url += '?' + sas
