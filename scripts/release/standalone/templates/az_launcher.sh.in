@@ -28,28 +28,30 @@ INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 AZURE_CLI_SITE_PACKAGES="$INSTALL_DIR/libexec/lib/python${PY_VER}/site-packages"
 
-if [[ "$SCRIPT_PATH" == /opt/homebrew/Caskroom/* ]] || \
-    [[ "$SCRIPT_PATH" == /usr/local/Caskroom/* ]] || \
-    [[ "$SCRIPT_PATH" == /home/linuxbrew/.linuxbrew/Caskroom/* ]]; then
+# Use the resolved cask location so symlinked prefixes stay paired with their Python.
+CASK_DIR="${INSTALL_DIR%/*}"
+if [[ "$CASK_DIR" == */Caskroom/azure-cli ]] || \
+    [[ "$CASK_DIR" == */Caskroom/azure-cli-* ]]; then
     INSTALLER="HOMEBREW_CASK"
+    CASKROOM_DIR="${CASK_DIR%/*}"
+    BREW_PREFIX="${CASKROOM_DIR%/Caskroom}"
 else
     INSTALLER="TARBALL"
 fi
 
 if [[ "$INSTALLER" == "HOMEBREW_CASK" ]]; then
-    if [[ -x "/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
-        PYTHON="/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
-    elif [[ -x "/usr/local/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
-        PYTHON="/usr/local/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
-    elif [[ -x "/opt/homebrew/bin/python${PY_VER}" ]]; then
-        PYTHON="/opt/homebrew/bin/python${PY_VER}"
-    elif [[ -x "/usr/local/bin/python${PY_VER}" ]]; then
-        PYTHON="/usr/local/bin/python${PY_VER}"
-    elif [[ -x "/home/linuxbrew/.linuxbrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
-        PYTHON="/home/linuxbrew/.linuxbrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
-    elif [[ -x "/home/linuxbrew/.linuxbrew/bin/python${PY_VER}" ]]; then
-        PYTHON="/home/linuxbrew/.linuxbrew/bin/python${PY_VER}"
-    else
+    PYTHON=""
+    for PYTHON_CANDIDATE in \
+        "$BREW_PREFIX/opt/python@${PY_VER}/libexec/bin/python" \
+        "$BREW_PREFIX/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" \
+        "$BREW_PREFIX/opt/python@${PY_VER}/bin/python${PY_VER}" \
+        "$BREW_PREFIX/bin/python${PY_VER}"; do
+        if [[ -x "$PYTHON_CANDIDATE" ]]; then
+            PYTHON="$PYTHON_CANDIDATE"
+            break
+        fi
+    done
+    if [[ -z "$PYTHON" ]]; then
         echo "Error: Python ${PY_VER} not found." >&2
         echo "Install via Homebrew: brew install python@${PY_VER}" >&2
         exit 1

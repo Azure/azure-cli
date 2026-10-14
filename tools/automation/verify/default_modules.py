@@ -13,7 +13,7 @@ from automation.utilities.path import (get_repo_root, get_command_modules_paths)
 from automation.utilities.display import print_heading
 
 AZURE_CLI_PATH = os.path.join(get_repo_root(), 'src', 'azure-cli')
-AZURE_CLI_SETUP_PY = os.path.join(AZURE_CLI_PATH, 'setup.py')
+AZURE_CLI_PYPROJECT = os.path.join(AZURE_CLI_PATH, 'pyproject.toml')
 
 
 def get_cli_dependencies(build_folder):
@@ -39,13 +39,13 @@ def verify_default_modules(args):
     cli_deps = get_cli_dependencies(args.build_folder)
     all_command_modules = get_command_modules_paths(include_prefix=True)
     if not cli_deps:
-        print('Unable to get the CLI dependencies for {}'.format(AZURE_CLI_SETUP_PY), file=sys.stderr)
+        print('Unable to get the CLI dependencies for {}'.format(AZURE_CLI_PYPROJECT), file=sys.stderr)
         sys.exit(1)
     for modname, _ in all_command_modules:
         if modname not in cli_deps:
-            errors_list.append("{} is not included to be installed by default! Modify {}.".format(modname, AZURE_CLI_SETUP_PY))
+            errors_list.append("{} is not included to be installed by default! Modify {}.".format(modname, AZURE_CLI_PYPROJECT))
     if errors_list:
-        print_heading('Errors whilst verifying default modules list in {}!'.format(AZURE_CLI_SETUP_PY))
+        print_heading('Errors whilst verifying default modules list in {}!'.format(AZURE_CLI_PYPROJECT))
         print('\n'.join(errors_list), file=sys.stderr)
         sys.exit(1)
     else:
