@@ -1329,7 +1329,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': 'Bearer token'})
+                return_value={'Authorization': '******'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
@@ -1772,20 +1772,48 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
     def test_managed_instance_defaults_to_windows(self, mock_location, mock_client_factory):
         """When --is-managed-instance is specified, an omitted --is-linux defaults to false."""
         from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        from azure.mgmt.web.models import AppServicePlan, HostingEnvironmentProfile, SkuDescription
         mock_cmd = mock.MagicMock()
-        mock_app_service_plan_cls = mock.MagicMock()
-        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock_app_service_plan_cls)
+        mock_app_service_plan_cls = mock.MagicMock(wraps=AppServicePlan)
+        mock_cmd.get_models.return_value = (
+            HostingEnvironmentProfile,
+            SkuDescription,
+            mock_app_service_plan_cls,
+        )
         mock_cmd.cli_ctx = mock.MagicMock()
         mock_client_factory.return_value = mock.MagicMock()
 
-        try:
-            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=None, hyper_v=False,
-                                    is_managed_instance=True)
-        except Exception:
-            pass
+        mock_poller = mock.MagicMock()
+        mock_poller.result.return_value = mock.sentinel.created_plan
 
-        mock_app_service_plan_cls.assert_called()
-        self.assertIn('reserved=False', str(mock_app_service_plan_cls.call_args))
+        with mock.patch(
+            'azure.cli.command_modules.appservice.custom.AppServicePlanCreate.__init__',
+            return_value=None,
+        ), mock.patch(
+            'azure.cli.command_modules.appservice.custom.AppServicePlanCreate.__call__',
+            autospec=True,
+            return_value=mock_poller,
+        ) as mock_create, mock.patch(
+            'azure.cli.command_modules.appservice.custom.is_async_response',
+            return_value=False,
+        ):
+            result = create_app_service_plan(
+                mock_cmd, 'rg', 'plan',
+                is_linux=None, hyper_v=False, is_managed_instance=True,
+            )
+
+        mock_app_service_plan_cls.assert_called_once()
+        self.assertIs(mock_app_service_plan_cls.call_args.kwargs['reserved'], False)
+
+        mock_create.assert_called_once()
+        command_args = mock_create.call_args.kwargs['command_args']
+        self.assertIs(command_args['reserved'], False)
+        self.assertIs(command_args['is_custom_mode'], True)
+        self.assertEqual(command_args['name'], 'plan')
+        self.assertEqual(command_args['resource_group'], 'rg')
+
+        mock_poller.result.assert_called_once_with()
+        self.assertIs(result, mock.sentinel.created_plan)
 
     def test_managed_instance_rejects_linux(self):
         """Managed Instance on App Service supports only Windows plans."""
@@ -2797,6 +2825,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
             {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'old error', 'lastErrorAction': 'None',
              'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
         ]})
 
