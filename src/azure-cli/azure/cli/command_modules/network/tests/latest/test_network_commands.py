@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -10138,6 +10138,116 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_mr', location='centraluseuap')
+    def test_ddos_custom_policy_mitigation_rules(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'policy_name2': 'policy2',
+            'tcp_rule': '{name:mrTcp,traffic-scope:Tcp,'
+                        'tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:100000},'
+                        'per-source-connection-rate-limiting:{connections-per-second:1000}},'
+                        'source-policy-overrides:['
+                        '{policy-action:{action-type:Deny},conditions:{ip-prefixes:[198.51.100.0/24],geo-matches:[{country-code:CA}]}},'
+                        '{policy-action:{action-type:Permit},conditions:{ip-prefixes:[203.0.113.0/24],geo-matches:[{continent:NorthAmerica}]}}]}',
+            'udp_rule': '{name:mrUdp,traffic-scope:Udp,udp-default-mitigations:{per-source-rate-limiting:{packets-per-second:50000}}}',
+            'deny_override': '[{"policyAction":{"actionType":"Deny"},"conditions":{"ipPrefixes":["192.0.2.0/24"],'
+                             '"geoMatches":[{"continent":"Europe","countryCode":"FR"}]}}]',
+            'invalid_rule': '[{name:mrBad,traffic-scope:Udp,tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:1000}}}]',
+            'invalid_rate': '[{name:mrBad,traffic-scope:Udp,udp-default-mitigations:{per-source-rate-limiting:{packets-per-second:-1}}}]',
+        })
+        tcp_rule_checks = [
+            self.check('mitigationRules[0].name', 'mrTcp'),
+            self.check('mitigationRules[0].properties.trafficScope', 'Tcp'),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 100000),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceConnectionRateLimiting.connectionsPerSecond', 1000),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].policyAction.actionType', 'Deny'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.ipPrefixes[0]', '198.51.100.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].countryCode', 'CA'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].policyAction.actionType', 'Permit'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].conditions.ipPrefixes[0]', '203.0.113.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].conditions.geoMatches[0].continent', 'NorthAmerica'),
+        ]
+        udp_rule_checks = [
+            self.check('mitigationRules[1].name', 'mrUdp'),
+            self.check('mitigationRules[1].properties.trafficScope', 'Udp'),
+            self.check('mitigationRules[1].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ]
+
+        # detection and mitigation rules together
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name dr1 '
+                 '--detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000 '
+                 '--mitigation-rules [{tcp_rule}]', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 1),
+        ] + tcp_rule_checks)
+
+        # re-running create merges new mitigation rules by name and keeps existing detection/mitigation rules
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('detectionRules[0].name', 'dr1'),
+            self.check('length(mitigationRules)', 2),
+        ] + tcp_rule_checks + udp_rule_checks)
+
+        self.cmd('network ddos-custom-policy show -g {rg} -n {policy_name}', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 2),
+        ] + tcp_rule_checks + udp_rule_checks)
+
+        # replace, then clear, one rule's source policy overrides without touching other rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} '
+                 '--set mitigationRules[0].properties.sourcePolicyOverrides=\'{deny_override}\'', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules[0].properties.sourcePolicyOverrides)', 1),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.ipPrefixes[0]', '192.0.2.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].continent', 'Europe'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].countryCode', 'FR'),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 100000),
+        ] + udp_rule_checks)
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} '
+                 '--remove mitigationRules[0].properties.sourcePolicyOverrides', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules[0].properties.sourcePolicyOverrides || `[]`)', 0),
+        ] + udp_rule_checks)
+
+        # unrelated update keeps all rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --tags env=test', checks=[
+            self.check('tags.env', 'test'),
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 2),
+        ])
+
+        # update --mitigation-rules replaces the whole collection and keeps detection rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('detectionRules[0].name', 'dr1'),
+            self.check('length(mitigationRules)', 1),
+            self.check('mitigationRules[0].name', 'mrUdp'),
+            self.check('mitigationRules[0].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ])
+
+        # mitigation-only policy
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name2} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('length(detectionRules || `[]`)', 0),
+            self.check('length(mitigationRules)', 1),
+            self.check('mitigationRules[0].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ])
+
+        self.cmd('network ddos-custom-policy list -g {rg}', checks=[
+            self.check('length(@)', 2),
+            self.check("length([?name=='{policy_name}'] | [0].mitigationRules)", 1),
+            self.check("[?name=='{policy_name2}'] | [0].mitigationRules[0].name", 'mrUdp'),
+        ])
+        self.cmd('network ddos-custom-policy list', checks=[
+            self.check("[?name=='{policy_name2}' && contains(id, '{rg}')] | [0].mitigationRules[0].name", 'mrUdp'),
+        ])
+
+        # service-side validation errors are surfaced
+        with self.assertRaisesRegex(HttpResponseError, 'DdosCustomPolicyHasInvalidProperties'):
+            self.cmd('network ddos-custom-policy create -g {rg} -n policy3 --mitigation-rules "{invalid_rule}"')
+        with self.assertRaisesRegex(HttpResponseError, 'DdosCustomPolicyHasInvalidProperties'):
+            self.cmd('network ddos-custom-policy create -g {rg} -n policy3 --mitigation-rules "{invalid_rate}"')
+
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name2} -y')
 
     @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_lb', location='eastus')
     def test_ddos_custom_policy_attach_to_lb_fip(self, resource_group):
