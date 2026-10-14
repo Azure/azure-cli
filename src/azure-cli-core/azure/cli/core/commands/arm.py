@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
 import argparse
@@ -75,7 +75,7 @@ class ArmTemplateBuilder:
                    output_type='string', path=None):
 
         if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(
                 provider=provider, type=property_type, property=property_name)
         else:
             value = "[reference('{}')".format(property_name)
@@ -175,8 +175,7 @@ class ResourceId(str):
         return str.__new__(cls, val)
 
 
-def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type,
-                    **_):  # pylint: disable=redefined-builtin
+def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
     ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)

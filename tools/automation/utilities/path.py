@@ -44,9 +44,8 @@ def get_extensions_paths(include_prefix=False):
 
 
 def get_command_modules_paths(include_prefix=False):
-    glob_pattern = os.path.normcase('/src/command_modules/{}*/setup.py'.format(COMMAND_MODULE_PREFIX))
-    for path in glob.glob(get_repo_root() + glob_pattern):
-        folder = os.path.dirname(path)
+    folder_pattern = os.path.join(get_repo_root(), 'src', 'command_modules', COMMAND_MODULE_PREFIX + '*')
+    for folder in _get_package_paths(folder_pattern):
         name = os.path.basename(folder)
         if not include_prefix:
             name = name[len(COMMAND_MODULE_PREFIX):]
@@ -68,8 +67,17 @@ def get_core_modules_paths_with_tests(profile):
 
 
 def get_core_modules_paths():
-    for path in glob.glob(get_repo_root() + os.path.normcase('/src/*/setup.py')):
-        yield os.path.basename(os.path.dirname(path)), os.path.dirname(path)
+    for folder in _get_package_paths(os.path.join(get_repo_root(), 'src', '*')):
+        yield os.path.basename(folder), folder
+
+
+def _get_package_paths(folder_pattern):
+    """Discover modern and legacy packages once, including transitional trees."""
+    folders = set()
+    for filename in ('pyproject.toml', 'setup.py'):
+        folders.update(os.path.dirname(path) for path in glob.glob(os.path.join(folder_pattern, filename))
+                       if os.path.isfile(path))
+    yield from sorted(folders)
 
 
 def get_module_paths_with_tests(modules, profile):

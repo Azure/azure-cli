@@ -842,3 +842,14 @@ class OrchestrationServiceNames(Enum):
 class OrchestrationServiceStateAction(Enum):
     RESUME = 'Resume'
     SUSPEND = 'Suspend'
+
+
+class DiskStorageAlignment(Enum):
+    ALIGNED = 'Aligned'
+    BEST_EFFORT_ALIGNED = 'BestEffortAligned'
+
+
+class FaultDomainAlignment(Enum):
+    ALIGNED = 'Aligned'
+    BEST_EFFORT_ALIGNED = 'BestEffortAligned'
+    UNALIGNED = 'Unaligned'

@@ -12,6 +12,7 @@ from azure.cli.command_modules.acs._completers import (
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
+    CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED,
     CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
     CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
     CONST_GPU_INSTANCE_PROFILE_MIG7_G, CONST_LOAD_BALANCER_SKU_BASIC,
@@ -61,6 +62,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_WEEKINDEX_LAST,
     CONST_MANAGED_CLUSTER_SKU_NAME_BASE,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP,
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
@@ -145,6 +149,12 @@ from azure.cli.command_modules.acs._validators import (
     validate_bootstrap_container_registry_resource_id,
     validate_gateway_prefix_size,
     validate_artifact_streaming,
+    validate_azure_monitor_logs_and_enable_addons,
+    validate_azure_monitor_logs_enable_disable,
+    validate_container_insights_settings_for_create,
+    validate_container_insights_settings_for_update,
+    validate_azure_monitor_and_opentelemetry_for_create,
+    validate_azure_monitor_and_opentelemetry_for_update,
 )
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -196,9 +206,14 @@ node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY]
 node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025]
-node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
+ssh_accesses = [
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
+]
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
@@ -248,6 +263,7 @@ transit_encryption_types = [
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
+kms_infrastructure_encryption_types = [CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED]
 
 gpu_instance_profiles = [
     CONST_GPU_INSTANCE_PROFILE_MIG1_G,
@@ -500,6 +516,7 @@ def load_arguments(self, _):
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
         c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
         c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
+        c.argument('kms_infrastructure_encryption', arg_type=get_enum_type(kms_infrastructure_encryption_types))
         c.argument('enable_image_cleaner', action='store_true')
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
@@ -523,11 +540,44 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('workspace_resource_id')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
         c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_and_enable_addons,
+        )
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_create,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_create,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         c.argument('aci_subnet_name')
         c.argument('appgw_name', arg_group='Application Gateway')
         c.argument('appgw_subnet_cidr', arg_group='Application Gateway')
@@ -650,6 +700,13 @@ def load_arguments(self, _):
         c.argument('enable_cost_analysis', action='store_true')
         c.argument('enable_vtpm', action="store_true")
         c.argument('enable_secure_boot', action="store_true")
+        # in creation scenario, use "localuser" as default
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            default=CONST_SSH_ACCESS_LOCALUSER,
+            help='Configure SSH access for the first system node pool.',
+        )
         # advanced networking
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
@@ -801,6 +858,7 @@ def load_arguments(self, _):
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
         c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
         c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
+        c.argument('kms_infrastructure_encryption', arg_type=get_enum_type(kms_infrastructure_encryption_types))
         c.argument('enable_image_cleaner', action='store_true')
         c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
         c.argument('image_cleaner_interval_hours', type=int)
@@ -878,6 +936,45 @@ def load_arguments(self, _):
         )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('disable_azure_monitor_app_monitoring', action='store_true')
+        # azure monitor logs (container insights on the azure monitor profile)
+        c.argument(
+            'enable_azure_monitor_logs',
+            action='store_true',
+            validator=validate_azure_monitor_logs_enable_disable,
+        )
+        c.argument('disable_azure_monitor_logs', action='store_true')
+        c.argument('workspace_resource_id')
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
+        c.argument('enable_syslog', arg_type=get_three_state_flag())
+        c.argument('data_collection_settings')
+        c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
+        c.argument(
+            'syslog_port',
+            type=int,
+            validator=validate_container_insights_settings_for_update,
+        )
+        c.argument('enable_prometheus_metrics_scraping', action='store_true')
+        c.argument('disable_prometheus_metrics_scraping', action='store_true')
+        # opentelemetry
+        c.argument(
+            'enable_opentelemetry_metrics',
+            action='store_true',
+            validator=validate_azure_monitor_and_opentelemetry_for_update,
+        )
+        c.argument('disable_opentelemetry_metrics', action='store_true')
+        c.argument('opentelemetry_metrics_port_http', type=int)
+        c.argument('opentelemetry_metrics_port_grpc', type=int)
+        c.argument('enable_opentelemetry_logs_traces', action='store_true')
+        c.argument('disable_opentelemetry_logs_traces', action='store_true')
+        c.argument('opentelemetry_logs_traces_port_http', type=int)
+        c.argument('opentelemetry_logs_traces_port_grpc', type=int)
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
@@ -987,6 +1084,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks enable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -1001,7 +1099,14 @@ def load_arguments(self, _):
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
-        c.argument('enable_msi_auth_for_monitoring', arg_type=get_three_state_flag())
+        c.argument(
+            'enable_msi_auth_for_monitoring',
+            arg_type=get_three_state_flag(),
+            deprecate_info=c.deprecate(
+                target='--enable-msi-auth-for-monitoring',
+                redirect='--enable-azure-monitor-logs',
+            ),
+        )
         c.argument('enable_syslog', arg_type=get_three_state_flag())
         c.argument('data_collection_settings')
         c.argument('ampls_resource_id', validator=validate_azuremonitor_privatelinkscope_resourceid)
@@ -1024,6 +1129,13 @@ def load_arguments(self, _):
         c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin. Note: the path should contain the binary filename.')
         c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
         c.argument('gh_token', help='GitHub authentication token used when downloading kubelogin binaries from GitHub releases. Supplying a token helps avoid GitHub API rate limits.')
+
+    with self.argument_context('aks install-desktop') as c:
+        c.argument('version', help='Version of AKS Desktop to install. By default, the latest stable version is installed.')
+        c.argument('gh_token', help='GitHub authentication token used to retrieve AKS Desktop release metadata. '
+                   'Prefer the GH_TOKEN environment variable to avoid exposing credentials in shell history, '
+                   'process listings, or debug logs. This option overrides GH_TOKEN. '
+                   'Supplying a token helps avoid GitHub API rate limits.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -1198,6 +1310,13 @@ def load_arguments(self, _):
         c.argument("message_of_the_day", validator=validate_message_of_the_day)
         c.argument('enable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
+        # in creation scenario, use "localuser" as default
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            default=CONST_SSH_ACCESS_LOCALUSER,
+            help='Configure SSH access for the node pool.',
+        )
         c.argument("if_match")
         c.argument("if_none_match")
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
@@ -1235,6 +1354,15 @@ def load_arguments(self, _):
         c.argument('disable_vtpm', action='store_true')
         c.argument('enable_secure_boot', action='store_true')
         c.argument('disable_secure_boot', action='store_true')
+        # in update scenario, use empty str as default
+        c.argument(
+            'ssh_access',
+            arg_type=get_enum_type(ssh_accesses),
+            help='Update SSH access for the node pool. For Kubernetes versions below 1.37, this change takes '
+                 'effect after the node pool is upgraded. For Kubernetes versions 1.37 and above, this change '
+                 'can trigger node pool reimaging.',
+        )
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')

@@ -43,6 +43,11 @@ def _query_account_key(cli_ctx, account_name):
     return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys_property[0].value  # pylint: disable=no-member
 
 
+def _is_valid_storage_account_name(account_name):
+    import re
+    return bool(account_name and re.fullmatch(r'[a-z0-9]{3,24}', account_name))
+
+
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
     scf = storage_client_factory(cli_ctx)
@@ -127,7 +132,8 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             if hasattr(n, 'account_url') and not n.account_url:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
-                n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+                n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
+                                 get_config_value(cmd, 'storage', 'account_url', None))
             else:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
@@ -163,7 +169,8 @@ def validate_client_parameters(cmd, namespace):
     if not n.account_name:
         if hasattr(n, 'account_url') and not n.account_url:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
-            n.account_url = get_config_value(cmd, 'storage', 'account_url', None)
+            n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
+                             get_config_value(cmd, 'storage', 'account_url', None))
         else:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key and not n.sas_token:
@@ -422,6 +429,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
         '\n\tOR --source-share --source-path [--source-account-name & key]'
 
     ns = vars(namespace)
+    ns['source_is_validated_same_account'] = False
 
     # source as blob
     container = ns.pop('source_container', None)
@@ -486,6 +494,9 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
                 source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
                 raise RequiredArgumentMissingError('Source storage account {} not found.'.format(source_account_name))
+
+    ns['source_is_validated_same_account'] = bool(
+        valid_blob_source and same_account and _is_valid_storage_account_name(source_account_name))
 
     # if oauth, use user delegation key to generate sas
     source_user_delegation_key = None

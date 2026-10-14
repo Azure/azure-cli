@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import unittest
 import time
 import random
+from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
     KeyVaultPreparer, record_only, live_only
@@ -586,6 +587,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.securitySettings.sourceScanConfiguration.state', 'Disabled')
         ])
 
+    # DATA-PLANE: asserts threat info on a source-scanned recovery point. Targets the pre-onboarded
+    # vault swbela-mdc-vault-1 / Sample-VM and RP 1134701036948821, which the Defender-for-Cloud scan
+    # pipeline marked UnHealthy with populated threatInfo (verified live 2026-09-25).
     @record_only()
     def test_backup_source_scan_recovery_points(self):
         self.kwargs.update({
@@ -594,7 +598,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': 'swbela-ransom-rg',
             'vault': 'swbela-mdc-vault-1',
             'vm': 'Sample-VM',
-            'rp': '1141447822743501'
+            'rp': '1134701036948821'
         })
 
         self.cmd('backup vault show --subscription {sub} -g {rg} -n {vault}', checks=[
@@ -2134,6 +2138,76 @@ class BackupJobContainerSubscriptionIdTests(unittest.TestCase):
         self.assertIsNone(set_job_container_subscription_id(None))
         job = self._make_job(with_properties=False)
         self.assertIs(set_job_container_subscription_id(job), job)
+
+
+class BackupRestoreFilesMountRpTests(unittest.TestCase):
+    def _run_mount_rp(self, client_scripts, is_active_session=False):
+        from azure.cli.command_modules.backup import custom
+
+        item = SimpleNamespace(
+            id='/Subscriptions/sub/resourceGroups/rg/providers/Microsoft.RecoveryServices/vaults/vault/'
+               'backupFabrics/Azure/protectionContainers/container/protectedItems/item',
+            properties=SimpleNamespace(virtual_machine_id='vm-id'))
+        recovery_point = SimpleNamespace(
+            properties=SimpleNamespace(is_instant_ilr_session_active=is_active_session))
+        client = mock.MagicMock()
+        client.provision.return_value = 'provision-response'
+        client.list_instant_item_recovery_operation_result.return_value = SimpleNamespace(client_scripts=client_scripts)
+
+        with mock.patch.object(custom, 'show_item', return_value=item), \
+                mock.patch.object(custom.cust_help, 'validate_item'), \
+                mock.patch.object(custom, 'backup_protected_items_cf'), \
+                mock.patch.object(custom, 'recovery_points_cf') as recovery_points_cf_mock, \
+                mock.patch.object(custom.cust_help, 'track_backup_ilr', return_value='provision-operation-id'), \
+                mock.patch.object(custom, '_run_client_script_for_linux') as linux_runner_mock, \
+                mock.patch.object(custom, '_run_client_script_for_windows') as windows_runner_mock:
+            recovery_points_cf_mock.return_value.get.return_value = recovery_point
+
+            custom.restore_files_mount_rp(
+                SimpleNamespace(cli_ctx=SimpleNamespace()), client, 'rg', 'vault', 'container', 'item', 'rp')
+
+        return client, linux_runner_mock, windows_runner_mock, recovery_point
+
+    def test_mount_rp_lists_scripts_after_provision(self):
+        linux_script = SimpleNamespace(os_type='Linux')
+
+        client, linux_runner_mock, windows_runner_mock, _ = self._run_mount_rp([linux_script])
+
+        client.provision.assert_called_once()
+        client.list_instant_item_recovery_operation_result.assert_called_once()
+        list_kwargs = client.list_instant_item_recovery_operation_result.call_args.kwargs
+        self.assertEqual(
+            (list_kwargs['resource_group_name'], list_kwargs['vault_name'], list_kwargs['fabric_name'],
+             list_kwargs['container_name'], list_kwargs['protected_item_name'], list_kwargs['recovery_point_id']),
+            ('rg', 'vault', 'Azure', 'container', 'item', 'rp'))
+        self.assertEqual(list_kwargs['body'].provision_instant_item_recovery_operation_id, 'provision-operation-id')
+        linux_runner_mock.assert_called_once_with([linux_script])
+        windows_runner_mock.assert_not_called()
+
+    def test_mount_rp_list_call_binds_to_installed_sdk_signature(self):
+        # Guards against SDK param reorder/rename: the new list operation uses
+        # resource_group_name before vault_name, unlike the legacy provision/revoke order.
+        import inspect
+        from azure.mgmt.recoveryservicesbackup.operations import ItemLevelRecoveryConnectionsOperations
+
+        linux_script = SimpleNamespace(os_type='Linux')
+        client, _, _, _ = self._run_mount_rp([linux_script])
+        list_kwargs = client.list_instant_item_recovery_operation_result.call_args.kwargs
+
+        signature = inspect.signature(ItemLevelRecoveryConnectionsOperations.list_instant_item_recovery_operation_result)
+        # Binding raises TypeError if any keyword is not a real parameter of the installed SDK method.
+        signature.bind_partial(self=None, **list_kwargs)
+
+    def test_mount_rp_preserves_active_session_renewal(self):
+        windows_scripts = [SimpleNamespace(os_type='Windows'), SimpleNamespace(os_type='Windows')]
+
+        client, linux_runner_mock, windows_runner_mock, recovery_point = self._run_mount_rp(
+            windows_scripts, is_active_session=True)
+
+        self.assertTrue(recovery_point.properties.renew_existing_registration)
+        client.list_instant_item_recovery_operation_result.assert_called_once()
+        windows_runner_mock.assert_called_once_with(windows_scripts)
+        linux_runner_mock.assert_not_called()
 
 
 if __name__ == '__main__':
