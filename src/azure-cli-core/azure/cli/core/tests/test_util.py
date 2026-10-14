@@ -17,7 +17,8 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin)
+    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin,
+     get_safe_executable_path)
 from azure.cli.core.mock import DummyCli
 
 
@@ -741,6 +742,56 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(roughly_parse_command(['az']), 'az')
         self.assertEqual(roughly_parse_command(['--help']), '')  # Starts with flag
         self.assertEqual(roughly_parse_command(['-h']), '')  # Starts with short flag
+
+class TestSafeExecutablePath(unittest.TestCase):
+    EXE = 'planted.exe' if platform.system() == 'Windows' else 'planted'
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.cwd = self._tmp.name
+        os.chdir(self.cwd)
+        self._make_exe(self.cwd)  # decoy in the CWD
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        self._tmp.cleanup()
+
+    def _make_exe(self, directory):
+        path = os.path.join(directory, self.EXE)
+        open(path, 'w').close()
+        os.chmod(path, 0o755)
+        return path
+
+    def _resolve(self, *path_dirs):
+        with mock.patch.dict(os.environ, {'PATH': os.pathsep.join(path_dirs)}):
+            return get_safe_executable_path(self.EXE)
+
+    def test_explicit_path_returned_as_is(self):
+        explicit = os.path.join('some', 'dir', 'tool')
+        self.assertEqual(get_safe_executable_path(explicit), explicit)
+
+    def test_cwd_never_resolved(self):
+        self.assertIsNone(self._resolve(self.cwd))
+        self.assertIsNone(self._resolve('.'))
+        if platform.system() == 'Windows':
+            self.assertIsNone(self._resolve(self.cwd.swapcase()))
+
+    def test_trusted_dir_used_after_cwd(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            target = self._make_exe(path_dir)
+            self.assertEqual(os.path.normcase(self._resolve(self.cwd, path_dir)), os.path.normcase(target))
+
+    def test_unknown_cwd_fails_closed(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            self._make_exe(path_dir)
+            with mock.patch('os.getcwd', side_effect=OSError):
+                self.assertIsNone(self._resolve(path_dir))
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_cmd_exe_resolves_to_system32(self):
+        resolved = get_safe_executable_path('cmd.exe')
+        self.assertTrue(resolved.lower().endswith(os.path.join('system32', 'cmd.exe')))
 
 if __name__ == '__main__':
     unittest.main()
