@@ -115,8 +115,8 @@ def _validate_expiration_date(args):
     if has_value(args.expiration_date):
         import datetime as dt
         import dateutil.parser
-        expiration_date = dateutil.parser.parse(args.expiration_date.to_serialized_data())
-        expiration_date = expiration_date.replace(tzinfo=expiration_date.tzinfo or dt.UTC)
+        parsed_expiration_date = dateutil.parser.parse(args.expiration_date.to_serialized_data())
+        expiration_date = parsed_expiration_date.replace(tzinfo=parsed_expiration_date.tzinfo or dt.UTC)
         if dt.datetime.now(dt.UTC) >= expiration_date:
             raise ArgumentUsageError(
                 "Expiration date '{}' must be in future.".format(args.expiration_date.to_serialized_data()))
