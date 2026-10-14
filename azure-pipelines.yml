@@ -497,6 +497,8 @@ jobs:
         python.version: '3.12'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -539,6 +541,8 @@ jobs:
         python.version: '3.12'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -556,6 +560,8 @@ jobs:
         python.version: '3.11'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -578,6 +584,8 @@ jobs:
         python.version: '3.12'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -598,6 +606,8 @@ jobs:
         python.version: '3.12'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -619,6 +629,8 @@ jobs:
     matrix:
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -1066,6 +1078,8 @@ jobs:
         python.version: '3.12'
       Python314:
         python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
