@@ -691,7 +691,9 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('cognitiveservices account adapter-deployment') as c:
-        c.argument('adapter_deployment_name', help='Adapter deployment name.')
+        c.argument('adapter_deployment_name',
+                   options_list=['--adapter-deployment-name', '--adapter-name'],
+                   help='Adapter deployment name.')
 
     with self.argument_context('cognitiveservices account adapter-deployment create') as c:
         c.argument('source_model_id', options_list=['--source-model-id'],
