@@ -12,6 +12,14 @@ from azure.cli.core import intercept_survey
 
 class TestInterceptSurvey(unittest.TestCase):
     def test_should_prompt_with_existing_utc_note(self):
+        """Preserve scheduling for existing UTC notes stored without an offset.
+
+        Past dates allow a prompt; future dates suppress it. This regression
+        test also passes before the migration. Replacing utcnow() alone would
+        compare a naive saved date with aware now(UTC) and raise TypeError,
+        so the reader must attach UTC to the parsed date.
+        Only the decision is checked, not prompt rendering or note creation.
+        """
         cli = mock.Mock()
         cli.config.getboolean.return_value = True
         for timestamp, expected in [('2000-01-01T00:00:00', True), ('2999-01-01T00:00:00', False)]:
