@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2026-03-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -172,6 +172,9 @@ class Wait(AAZWaitCommand):
             properties.front_end_ip_configuration = AAZListType(
                 serialized_name="frontEndIpConfiguration",
             )
+            properties.mitigation_rules = AAZListType(
+                serialized_name="mitigationRules",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -226,6 +229,114 @@ class Wait(AAZWaitCommand):
             front_end_ip_configuration = cls._schema_on_200.properties.front_end_ip_configuration
             front_end_ip_configuration.Element = AAZObjectType()
             _WaitHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
+
+            mitigation_rules = cls._schema_on_200.properties.mitigation_rules
+            mitigation_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.mitigation_rules.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties.mitigation_rules.Element.properties
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.source_policy_overrides = AAZListType(
+                serialized_name="sourcePolicyOverrides",
+            )
+            properties.tcp_default_mitigations = AAZObjectType(
+                serialized_name="tcpDefaultMitigations",
+            )
+            properties.traffic_scope = AAZStrType(
+                serialized_name="trafficScope",
+                flags={"required": True},
+            )
+            properties.udp_default_mitigations = AAZObjectType(
+                serialized_name="udpDefaultMitigations",
+            )
+
+            source_policy_overrides = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides
+            source_policy_overrides.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element
+            _element.conditions = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.policy_action = AAZObjectType(
+                serialized_name="policyAction",
+                flags={"required": True},
+            )
+
+            conditions = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions
+            conditions.geo_matches = AAZListType(
+                serialized_name="geoMatches",
+            )
+            conditions.ip_prefixes = AAZListType(
+                serialized_name="ipPrefixes",
+            )
+
+            geo_matches = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.geo_matches
+            geo_matches.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.geo_matches.Element
+            _element.continent = AAZStrType()
+            _element.country_code = AAZStrType(
+                serialized_name="countryCode",
+            )
+
+            ip_prefixes = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.ip_prefixes
+            ip_prefixes.Element = AAZStrType()
+
+            policy_action = cls._schema_on_200.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.policy_action
+            policy_action.action_type = AAZStrType(
+                serialized_name="actionType",
+                flags={"required": True},
+            )
+
+            tcp_default_mitigations = cls._schema_on_200.properties.mitigation_rules.Element.properties.tcp_default_mitigations
+            tcp_default_mitigations.per_source_connection_rate_limiting = AAZObjectType(
+                serialized_name="perSourceConnectionRateLimiting",
+            )
+            tcp_default_mitigations.per_source_rate_limiting = AAZObjectType(
+                serialized_name="perSourceRateLimiting",
+            )
+
+            per_source_connection_rate_limiting = cls._schema_on_200.properties.mitigation_rules.Element.properties.tcp_default_mitigations.per_source_connection_rate_limiting
+            per_source_connection_rate_limiting.connections_per_second = AAZIntType(
+                serialized_name="connectionsPerSecond",
+                flags={"required": True},
+            )
+
+            per_source_rate_limiting = cls._schema_on_200.properties.mitigation_rules.Element.properties.tcp_default_mitigations.per_source_rate_limiting
+            per_source_rate_limiting.packets_per_second = AAZIntType(
+                serialized_name="packetsPerSecond",
+                flags={"required": True},
+            )
+
+            udp_default_mitigations = cls._schema_on_200.properties.mitigation_rules.Element.properties.udp_default_mitigations
+            udp_default_mitigations.per_source_rate_limiting = AAZObjectType(
+                serialized_name="perSourceRateLimiting",
+            )
+
+            per_source_rate_limiting = cls._schema_on_200.properties.mitigation_rules.Element.properties.udp_default_mitigations.per_source_rate_limiting
+            per_source_rate_limiting.packets_per_second = AAZIntType(
+                serialized_name="packetsPerSecond",
+                flags={"required": True},
+            )
 
             public_ip_addresses = cls._schema_on_200.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
