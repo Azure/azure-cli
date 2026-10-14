@@ -6,7 +6,7 @@
 import os
 import re
 import unittest
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from knack.util import CLIError
@@ -103,7 +103,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         else:
             self.assertEqual(show_result.get('properties').get('pageRanges'), None)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                'r --https-only', account_info, blob_name, container, expiry).output
         self.assertTrue(sas)
@@ -280,8 +280,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('publicAccess', 'off'))
 
         # test case with access policy set
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         policy = self.create_random_name('policy', 16)
         self.storage_cmd('storage container policy create -c {} -n {} --expiry {} --permissions racwdxyltfmei',
                          account_info, c, policy, expiry)
@@ -336,8 +336,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry {}',
                                                account_info, c, expiry).output)
 
@@ -518,7 +518,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                     'r --https-only --full-uri', account_info, b, c, expiry).output
         self.assertTrue(blob_uri)
@@ -532,7 +532,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '
@@ -572,7 +572,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
         current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
 
@@ -892,8 +892,8 @@ class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', storage_account_info, container, file, blob)
 
         # Test set immutability policy
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         result = self.storage_cmd('storage blob immutability-policy set -n {} -c {} '
                                   '--expiry-time {} --policy-mode Unlocked',
                                   storage_account_info, blob, container, expiry).get_output_in_json()
@@ -1042,7 +1042,7 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('restorePolicy.days', 1),
                                 JMESPathCheckExists('restorePolicy.minRestoreTime'))
 
-        time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
+        time_to_restore = (datetime.now(UTC) + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
 
         # c1/b1 -> c1/b2
         start_range = '/'.join([c1, b1])
@@ -1059,7 +1059,7 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
         if self.is_live:
             time.sleep(300)
 
-        time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
+        time_to_restore = (datetime.now(UTC) + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
         # c1/b2 -> c2/b3
         start_range = '/'.join([c1, b2])
         end_range = '/'.join([c2, b3])

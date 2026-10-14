@@ -15,8 +15,7 @@ import subprocess
 import sys
 import yaml
 from time import sleep
-import datetime as dt
-from datetime import datetime
+from datetime import UTC, datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
@@ -326,7 +325,7 @@ def _map_maintenance_window(day_of_week):
 
 
 def get_current_time():
-    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
+    return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
 def get_id_components(rid):
@@ -616,7 +615,7 @@ def get_firewall_rules_from_paged_response(firewall_rules):
 
 
 def get_current_utc_time():
-    return datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+    return datetime.now(UTC)
 
 
 class ImportFromStorageState(Enum):

@@ -5,7 +5,7 @@
 
 import os
 import requests
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck)
 from ..storage_test_util import StorageScenarioMixin
@@ -19,7 +19,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, LiveScenarioTest):
         share = self.create_share(account_info)
         source_file = self.create_temp_file(128, full_random=False)
         filename = "sample_file.bin"
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.storage_cmd('storage share exists -n {}', account_info, share) \
             .assert_with_checks(JMESPathCheck('exists', True))
@@ -48,7 +48,7 @@ class StorageBlobShareScenarios(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(account_info)
         source_file = self.create_temp_file(128, full_random=False)
         blob = "blob 1"
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.storage_cmd('storage container exists -n {}', account_info, container) \
             .assert_with_checks(JMESPathCheck('exists', True))

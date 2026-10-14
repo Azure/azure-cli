@@ -419,9 +419,9 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
                                       '_shared_access_signature#generate_blob_sas')
         t_blob_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                      '_models#BlobSasPermissions')
-        from datetime import datetime, timedelta
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(days=1)
+        from datetime import UTC, datetime, timedelta
+        start = datetime.now(UTC)
+        expiry = datetime.now(UTC) + timedelta(days=1)
         source_sas = t_generate_blob_sas(account_name=blob_service.account_name, container_name=container,
                                          blob_name=blob_name,
                                          account_key=blob_service.credential.account_key,
@@ -468,9 +468,9 @@ def _create_file_and_directory_from_file(cmd, file_service, source_file_service,
                                        '_shared_access_signature#generate_share_sas')
         t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                      '_models#FileSasPermissions')
-        from datetime import datetime, timedelta
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(days=1)
+        from datetime import UTC, datetime, timedelta
+        start = datetime.now(UTC)
+        expiry = datetime.now(UTC) + timedelta(days=1)
         source_sas = t_generate_share_sas(account_name=source_file_service.account_name, share_name=source_share,
                                           account_key=source_file_service.credential.account_key,
                                           permission=t_file_permissions(read=True),
@@ -554,9 +554,9 @@ def generate_sas_file(cmd, client, share_name=None, directory_name=None, file_na
     account_key = None
     user_delegation_key = None
     if as_user:
-        from datetime import datetime
+        from datetime import UTC, datetime
         user_delegation_key = client.get_user_delegation_key(
-            start=get_datetime_from_string(start) if start else datetime.utcnow(),
+            start=get_datetime_from_string(start) if start else datetime.now(UTC),
             expiry=get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
     else:

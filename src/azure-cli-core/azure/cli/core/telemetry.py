@@ -292,7 +292,7 @@ def _user_agrees_to_telemetry(func):
 def start(mode=None):
     if mode:
         _session.mode = mode
-    _session.start_time = datetime.datetime.utcnow()
+    _session.start_time = datetime.datetime.now(datetime.UTC)
 
 
 @decorators.suppress_all_exceptions()
@@ -307,12 +307,12 @@ def set_invoke_time_elapsed(invoke_time_elapsed):
 
 @decorators.suppress_all_exceptions()
 def poll_start():
-    _session.poll_start_time = datetime.datetime.utcnow()
+    _session.poll_start_time = datetime.datetime.now(datetime.UTC)
 
 
 @decorators.suppress_all_exceptions()
 def poll_end():
-    _session.poll_end_time = datetime.datetime.utcnow()
+    _session.poll_end_time = datetime.datetime.now(datetime.UTC)
 
 
 @_user_agrees_to_telemetry
@@ -322,7 +322,7 @@ def flush():
     from azure.cli.telemetry import save
 
     # flush out current information
-    _session.end_time = datetime.datetime.utcnow()
+    _session.end_time = datetime.datetime.now(datetime.UTC)
     save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
@@ -335,7 +335,7 @@ def conclude():
     from azure.cli.core._environment import get_config_dir
     from azure.cli.telemetry import save
 
-    _session.end_time = datetime.datetime.utcnow()
+    _session.end_time = datetime.datetime.now(datetime.UTC)
     save(get_config_dir(), _session.generate_payload())
 
 

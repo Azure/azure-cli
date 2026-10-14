@@ -11,7 +11,7 @@ import tempfile
 import time
 from unittest import mock
 import unittest
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from dateutil import tz
 from ipaddress import ip_network
 
@@ -975,8 +975,8 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
             'key_name': self.create_random_name('selective-restore-', 24),
             'storage_account': self.create_random_name('clitesthsmsa', 24),
             'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            'sas_start': (datetime.now(UTC) - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (datetime.now(UTC) + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
 
         _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
@@ -1031,8 +1031,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
             'hsm_name': managed_hsm,
             'storage_account': storage_account,
             'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            'sas_start': (datetime.now(UTC) - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (datetime.now(UTC) + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
@@ -2662,8 +2662,8 @@ def _generate_certificate(path, keyfile=None, password=None):
                                     .issuer_name(issuer) \
                                     .public_key(key.public_key()) \
                                     .serial_number(x509.random_serial_number()) \
-                                    .not_valid_before(datetime.utcnow()) \
-                                    .not_valid_after(datetime.utcnow() + timedelta(days=10)) \
+                                    .not_valid_before(datetime.now(UTC)) \
+                                    .not_valid_after(datetime.now(UTC) + timedelta(days=10)) \
                                     .sign(key, hashes.SHA256(), default_backend())
 
     # Write the cert out to disk

@@ -1060,7 +1060,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
             formatter = "eventTimestamp ge {}"
 
-            end_time = datetime.datetime.utcnow()
+            end_time = datetime.datetime.now(datetime.UTC)
             start_time = end_time - datetime.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
             odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 

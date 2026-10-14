@@ -8,8 +8,7 @@
 
 import re
 import math
-from datetime import datetime, timedelta
-from dateutil.tz import tzutc
+from datetime import UTC, datetime, timedelta
 from knack.log import get_logger
 from urllib.request import urlretrieve
 from importlib import import_module
@@ -273,7 +272,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+    time_line = datetime.now(UTC) - timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:

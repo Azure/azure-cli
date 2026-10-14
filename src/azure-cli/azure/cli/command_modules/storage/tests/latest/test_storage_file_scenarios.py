@@ -361,8 +361,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         file_list = self.storage_cmd('storage file list -s {}', account_info, share).get_output_in_json()
         self.assertIsNotNone(file_list[0]['lastAccessTime'])
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         self.storage_cmd('storage file generate-sas -s {} -p {} --permissions r --expiry {}', account_info, share,
                          filename, expiry).assert_with_checks(StringContainCheck('sig='))
 
@@ -691,8 +691,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(1024)
         file_name = os.path.basename(local_file)
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage file generate-sas --account-name {} -p {} -s {} --expiry {} --permissions r --https-only '
@@ -725,8 +725,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
         current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         file_sas = self.cmd('storage file generate-sas --account-name {} -p {} -s {} --expiry {} --permissions crwd '
                             '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid {} '

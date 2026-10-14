@@ -506,9 +506,9 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
         if valid_blob_source:
             client = cf_blob_service(cmd.cli_ctx, client_kwargs)
 
-        from datetime import datetime, timedelta
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(days=1)
+        from datetime import UTC, datetime, timedelta
+        start = datetime.now(UTC)
+        expiry = datetime.now(UTC) + timedelta(days=1)
         source_user_delegation_key = client.get_user_delegation_key(start, expiry)
 
     # Both source account name and either key or sas (or both) are now available
@@ -1559,8 +1559,8 @@ def as_user_validator(namespace):
 
         expiry = get_datetime_type(False)(namespace.expiry)
 
-        from datetime import datetime, timedelta
-        if expiry > datetime.utcnow() + timedelta(days=7):
+        from datetime import UTC, datetime, timedelta
+        if expiry.replace(tzinfo=UTC) > datetime.now(UTC) + timedelta(days=7):
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 

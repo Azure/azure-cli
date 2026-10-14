@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck, live_only
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
@@ -353,8 +353,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         src_container = 'container1'
         self.storage_cmd('storage container create -n {}', src_account_info, src_container)
@@ -443,8 +443,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
     def test_storage_file_batch_copy(self, src_account_info, dst_account_info, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         src_container = 'container1'
         self.storage_cmd('storage container create -n {}', src_account_info, src_container)
@@ -648,12 +648,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageTestFilesPreparer()
     @live_only()
     def test_storage_blob_batch_sas_scenarios(self, test_dir, resource_group, storage_account_info):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
 
         container_name = 'container1'
         self.storage_cmd('storage container create -n {}', storage_account_info, container_name)
         temp_dir = self.create_temp_dir()
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions dwrl --expiry {}',
                                      storage_account_info, container_name, expiry).get_output_in_json()

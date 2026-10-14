@@ -605,8 +605,8 @@ def handle_survey(cmd):
         with open(GLOBAL_SURVEY_NOTE_PATH, 'r') as f:
             survey_note = json.load(f)
         if survey_note['last_prompt_time']:
-            last_prompt_time = datetime.datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
-            use_duration = datetime.datetime.utcnow() - last_prompt_time
+            last_prompt_time = datetime.datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S').replace(tzinfo=datetime.UTC)
+            use_duration = datetime.datetime.now(datetime.UTC) - last_prompt_time
 
     url = _SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
                              version=core_version,

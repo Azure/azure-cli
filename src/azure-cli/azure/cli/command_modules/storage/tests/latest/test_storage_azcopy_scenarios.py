@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import shutil
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
@@ -192,8 +192,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_sync_sas(self, resource_group, storage_account, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_random_name(prefix='container', length=20)
@@ -485,8 +485,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
     def test_storage_azcopy_remove_sas(self, resource_group, storage_account, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info, prefix='container', length=20)
@@ -763,7 +763,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files with source sas token
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         first_sas_token = self.cmd(
             'storage container generate-sas --connection-string {} -n {} --expiry {} --permissions {} -o tsv'.format(
                 first_connection_string, first_container, expiry, 'rwalcd')).output.strip()
@@ -774,7 +774,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob with sas token
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         second_sas_token = self.storage_cmd(
             'storage container generate-sas -n {} --expiry {} --permissions {} -o tsv', second_account_info,
             second_container, expiry, 'acdlrw').output.strip()

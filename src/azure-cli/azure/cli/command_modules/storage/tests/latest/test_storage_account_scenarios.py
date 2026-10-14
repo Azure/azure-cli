@@ -13,7 +13,7 @@ from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
@@ -2004,10 +2004,10 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
     def test_storage_account_revoke_delegation_keys(self, resource_group, storage_account):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
         import time
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         account_info = self.get_account_info(resource_group, storage_account)
         c = self.create_container(account_info)
         b = self.create_random_name('blob', 24)

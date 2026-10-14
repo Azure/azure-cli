@@ -6596,11 +6596,7 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
     @staticmethod
     def _get_now_utc():
         import datetime
-        try:
-            from datetime import timezone
-            return datetime.datetime.now(timezone.utc)
-        except ImportError:
-            return datetime.datetime.utcnow()
+        return datetime.datetime.now(datetime.UTC)
 
     @staticmethod
     def _format_subject_dn(common_name: str):
@@ -7715,7 +7711,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
     @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
     @StorageAccountPreparer(name_prefix='clitestvpncnn')
     def test_network_active_active_vnet_connection(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
         self.kwargs.update({
             'subnet': 'GatewaySubnet',
             'vnet1': 'vnet1',
@@ -7739,7 +7735,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'bgp_peer2': '10.53.255.253',
             'storage_account': storage_account,
             'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
-            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+            'expiry': (datetime.now(UTC) + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
 
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
@@ -7993,7 +7989,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_package_capture', location='westus')
     @StorageAccountPreparer(name_prefix='clitestvpngw')
     def test_network_vpn_gateway_package_capture(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
         self.kwargs.update({
             'vnet1': 'myvnet1',
             'gw1': 'gateway1',
@@ -8001,7 +7997,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'ip1': 'pubip1',
             'storage_account': storage_account,
             'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
-            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+            'expiry': (datetime.now(UTC) + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
 
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
@@ -8037,12 +8033,7 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
             from cryptography.hazmat.backends import default_backend
             import datetime
 
-            # timezone-aware now
-            try:
-                from datetime import timezone
-                now = datetime.datetime.now(timezone.utc)
-            except ImportError:
-                now = datetime.datetime.utcnow()
+            now = datetime.datetime.now(datetime.UTC)
 
             # Root key (private key not exported; we only write public cert)
             root_key = rsa.generate_private_key(

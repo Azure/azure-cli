@@ -5,7 +5,7 @@
 
 import os
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 
 from .scenario_tests import AbstractPreparer, SingleValueReplacer
 from .base import LiveScenarioTest
@@ -85,7 +85,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         module = test_class_path[index_of_module] if index_of_module >= 0 else 'unknown'
         tags = {'product': 'azurecli',
                 'cause': 'automation test',
-                'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'date': datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'test': self.test_class_instance._testMethodName,
                 'module': module}
         if 'ENV_JOB_NAME' in os.environ:
@@ -419,7 +419,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name, }
 
         tags = {'product': 'azurecli', 'cause': 'automation',
-                'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+                'date': datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')}
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value)

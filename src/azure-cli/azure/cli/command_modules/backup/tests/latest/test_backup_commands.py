@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 import unittest
 import time
@@ -107,7 +107,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
 
         # Trigger Backup
-        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['retain_date'] = (datetime.now(UTC) + timedelta(days=30)).strftime('%d-%m-%Y')
         self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --retain-until {retain_date} --query name').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 
@@ -1028,7 +1028,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertEqual(item['properties']['containerSubscriptionId'], self.kwargs['vm_sub'])
 
         # Take an on-demand backup so there is a recovery point to restore from.
-        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['retain_date'] = (datetime.now(UTC) + timedelta(days=30)).strftime('%d-%m-%Y')
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now --backup-management-type AzureIaasVM '
                                              '--workload-type VM -g {rg} -v {vault} -c {vm_name} -i {vm_name} '
                                              '--retain-until {retain_date} --query name').get_output_in_json()
@@ -1510,7 +1510,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', False),
         ])
 
-        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['retain_date'] = (datetime.now(UTC) + timedelta(days=30)).strftime('%d-%m-%Y')
         self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {vault} -c {vm} -i {vm} --backup-management-type AzureIaasVM --workload-type VM --retain-until {retain_date} --query name').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 

@@ -5,7 +5,7 @@
 import unittest
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
                                RoleBasedServicePrincipalPreparer)
@@ -503,14 +503,14 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_file_set_expiry_scenarios(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
         file = self.create_random_name(prefix="file", length=12)
 
         self.storage_cmd('storage fs file create -p {} -f {} --content-type "application/json"',
                          account_info, file, filesystem)
-        expiry = (datetime.utcnow() + timedelta(seconds=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        expiry = (datetime.now(UTC) + timedelta(seconds=5)).strftime('%Y-%m-%dT%H:%M:%SZ')
         self.storage_cmd("storage fs file set-expiry --expiry-options Absolute --expires-on {} -p {} -f {}",
                          account_info, expiry, file, filesystem)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
@@ -565,7 +565,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         f = self.create_file_system(account_info)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         fs_uri = self.storage_cmd('storage fs generate-sas -n {} --expiry {} --permissions '
                                   'r --https-only --full-uri', account_info, f, expiry).output
         self.assertTrue(fs_uri)
@@ -578,7 +578,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         f = self.create_file_system(account_info)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
@@ -606,7 +606,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
         current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         fs_sas = self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
@@ -636,7 +636,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs directory create -n {} -f {}',
                          account_info, directory, filesystem)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         fs_uri = self.storage_cmd('storage fs directory generate-sas -n {} -f {} --expiry {} --permissions '
                                   'r --https-only --full-uri', account_info, directory, filesystem, expiry).output
         self.assertTrue(fs_uri)
@@ -653,7 +653,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions r '
@@ -685,7 +685,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
@@ -719,7 +719,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
         self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions r '
@@ -755,7 +755,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         file_sas = self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
@@ -790,8 +790,8 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage fs create -n {}', account_info, filesystem)
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage container generate-sas -n {} --https-only '
                                '--permissions acdlrw --expiry {} -otsv',
                                account_info, filesystem, expiry).output.strip()
@@ -855,8 +855,8 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive', account_info, filesystem,
                          directory, os.path.join(test_dir, 'apple'))
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage container generate-sas -n {} --https-only '
                                '--permissions lr --expiry {} -otsv',
                                account_info, filesystem, expiry).output.strip()

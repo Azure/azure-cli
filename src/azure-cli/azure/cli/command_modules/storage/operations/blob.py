@@ -5,7 +5,7 @@
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import sdk_no_wait
@@ -888,7 +888,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            get_datetime_from_string(start) if start else datetime.now(UTC), get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
@@ -938,7 +938,7 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            get_datetime_from_string(start) if start else datetime.now(UTC), get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
@@ -974,8 +974,8 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
         # generate sas for oauth copy source
         if not source_sas:
             from ..util import create_short_lived_blob_sas_v2
-            start = datetime.utcnow()
-            expiry = datetime.utcnow() + timedelta(days=1)
+            start = datetime.now(UTC)
+            expiry = datetime.now(UTC) + timedelta(days=1)
             source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
             source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
                                                         source_blob_name,
@@ -1010,8 +1010,8 @@ def _copy_file_to_blob_container(cmd, blob_service, source_file_service, destina
                                        '_shared_access_signature#generate_share_sas')
         t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                      '_models#FileSasPermissions')
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(days=1)
+        start = datetime.now(UTC)
+        expiry = datetime.now(UTC) + timedelta(days=1)
         source_sas = t_generate_share_sas(account_name=t_file_client.account_name, share_name=source_share,
                                           account_key=t_file_client.credential.account_key,
                                           permission=t_file_permissions(read=True),
@@ -1164,7 +1164,7 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
             as_user = True
             if hasattr(blob_service_client.credential, 'account_key'):
                 as_user = False
-            expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+            expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
             source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
                                                blob_name=None, container_name=None, as_user=as_user,
                                                expiry=expiry, permission='r')

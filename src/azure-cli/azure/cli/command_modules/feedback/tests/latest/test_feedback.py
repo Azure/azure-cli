@@ -207,5 +207,21 @@ class TestCommandLogFile(ScenarioTest):
         return result
 
 
+class TestSurvey(unittest.TestCase):
+    def test_existing_utc_note(self):
+        from azure.cli.command_modules.feedback import custom
+
+        note = '{"last_prompt_time": "2000-01-01T00:00:00"}'
+        with mock.patch.object(custom.os.path, 'isfile', return_value=True), \
+                mock.patch('azure.cli.command_modules.feedback.custom.open', mock.mock_open(read_data=note)), \
+                mock.patch('azure.cli.core._profile.Profile') as profile, \
+                mock.patch.object(custom, 'can_launch_browser', return_value=False), \
+                mock.patch('builtins.print') as output:
+            profile.return_value.get_installation_id.return_value = 'test-installation'
+            custom.handle_survey(mock.Mock())
+            self.assertIn('test-installation', output.call_args.args[0])
+            self.assertNotIn('d=-1', output.call_args.args[0])
+
+
 if __name__ == '__main__':
     unittest.main()

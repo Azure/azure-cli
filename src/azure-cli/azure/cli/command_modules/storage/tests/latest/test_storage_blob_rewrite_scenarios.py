@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,\
     JMESPathCheck
 from azure.cli.testsdk.decorators import serial_test
@@ -77,7 +77,7 @@ class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
         ])
 
         # Update blob encryption
-        expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%MZ')
         source_url = self.storage_cmd(
             'storage blob generate-sas -c {} -n {} --https-only --permissions r --expiry {} --full-uri -otsv',
             account_info, container, blob, expiry).output.strip()

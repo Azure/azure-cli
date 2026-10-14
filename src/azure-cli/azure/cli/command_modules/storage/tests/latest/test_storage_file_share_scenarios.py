@@ -13,7 +13,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_file_share_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
 
         account_info = self.get_account_info(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
@@ -47,8 +47,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn(share_name, share_list, 'The newly created share is not listed.')
 
         # Test generate-sas with start, expiry and permissions
-        start = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        expiry = (datetime.utcnow() + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%MZ')
+        start = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage share generate-sas -n {} --permissions r --start {} --expiry {}',
                                account_info, share_name, start, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
@@ -164,8 +164,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         share = self.create_share(account_info)
         local_file = self.create_temp_file(1024)
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
@@ -197,8 +197,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
         current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
                              '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime
+from datetime import UTC, datetime
 import os
 import unittest
 
@@ -126,7 +126,7 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
         tags = {
             "product": "azurecli",
             "cause": "automation",
-            "date": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "date": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
         if "ENV_JOB_NAME" in os.environ:
             tags["job"] = os.environ["ENV_JOB_NAME"]

@@ -491,6 +491,8 @@ jobs:
   displayName: Test Python Wheels
   strategy:
     matrix:
+      Python311:
+        python.version: '3.11'
       Python312:
         python.version: '3.12'
       Python314:
@@ -531,6 +533,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
+      Python311:
+        python.version: '3.11'
       Python312:
         python.version: '3.12'
       Python314:
@@ -548,8 +552,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python310:
-        python.version: '3.10'
+      Python311:
+        python.version: '3.11'
       Python314:
         python.version: '3.14'
   steps:

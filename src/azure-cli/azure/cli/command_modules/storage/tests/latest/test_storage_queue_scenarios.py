@@ -14,7 +14,7 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='queue', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_queue_general_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        from datetime import UTC, datetime, timedelta
 
         account_key = self.get_account_key(resource_group, storage_account)
         connection_string = self.get_connection_string(resource_group, storage_account)
@@ -45,8 +45,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
 
         # Test generate-sas with start, expiry and permissions
-        start = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        expiry = (datetime.utcnow() + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%MZ')
+        start = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.cmd('storage queue generate-sas -n {} --permissions r --start {} --expiry {}'
                        .format(queue, start, expiry)).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
@@ -271,8 +271,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage queue create --account-name {} -n {}'.format(storage_account, queue))
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
@@ -306,8 +306,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
         current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         queue_sas = self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions raup '
                              '--https-only --as-user --user-delegation-oid {} '

@@ -442,6 +442,11 @@ class TestGetSourceClientValidator(unittest.TestCase):
         ns = self._create_namespace(as_user=True, expiry='2019-01-01', token_credential='token')
         as_user_validator(ns)
 
+    def test_as_user_validator_rejects_expiry_beyond_seven_days(self):
+        ns = self._create_namespace(as_user=True, expiry='2999-01-01', token_credential='token')
+        with self.assertRaisesRegex(ArgumentError, 'within 7 days'):
+            as_user_validator(ns)
+
     def _create_namespace(self, **kwargs):
         ns = Namespace(account_key='my_storage_key', account_name='storage_name', connection_string=None, dryrun=False,
                        pattern='*', sas_token=None, source_account_key=None, source_account_name=None,

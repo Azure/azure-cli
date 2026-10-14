@@ -698,7 +698,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment create --assignee {upn} --role reader --scope {rg_id}')
 
                 if self.is_live or self.in_recording:
-                    now = datetime.datetime.utcnow()
+                    now = datetime.datetime.now(datetime.UTC)
                     start = now - datetime.timedelta(minutes=1)
                     end = now + datetime.timedelta(minutes=1)
                     start_time = '{}-{}-{}T{}:{}:{}Z'.format(start.year, start.month, start.day, start.hour,

@@ -10556,8 +10556,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_upgrade_settings(mc_3)
         self.assertEqual(dec_mc_3.upgrade_settings.override_settings.force_upgrade, True)
-        self.assertGreater(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)).timestamp())
+        self.assertLess(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=4)).timestamp())
 
         # Set Until
         dec_4 = AKSManagedClusterUpdateDecorator(

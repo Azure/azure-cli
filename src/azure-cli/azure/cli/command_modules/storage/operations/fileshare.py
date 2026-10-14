@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import math
-from datetime import datetime
+from datetime import UTC, datetime
 
 from knack.log import get_logger
 
@@ -67,7 +67,7 @@ def generate_share_sas(cmd, client, share_name=None, permission=None, expiry=Non
     user_delegation_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            start=get_datetime_from_string(start) if start else datetime.utcnow(),
+            start=get_datetime_from_string(start) if start else datetime.now(UTC),
             expiry=get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
     else:

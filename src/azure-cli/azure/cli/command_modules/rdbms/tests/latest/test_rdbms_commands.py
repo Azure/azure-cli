@@ -4,8 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import time
 
-from datetime import datetime
-from dateutil.tz import tzutc  # pylint: disable=import-error
+from datetime import UTC, datetime
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError
@@ -223,7 +222,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # Before we do restore we will have to check whether the current time is less than earliest restore time
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = datetime.now(UTC).isoformat()
         earliest_restore_time = result['earliestRestoreDate']
         date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
 

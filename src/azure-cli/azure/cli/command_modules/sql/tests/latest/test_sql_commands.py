@@ -33,7 +33,7 @@ from azure.cli.command_modules.sql.custom import (
     ClientType,
     ComputeModelType,
     ResourceIdType)
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 
 # Constants
@@ -2045,12 +2045,12 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
         db = test.cmd('sql db show -g {} -s {} -n {}'
                       .format(resource_group, server, database_name)).get_output_in_json()
 
-    earliest_restore_date = _get_earliest_restore_date(db)
+    earliest_restore_date = _get_earliest_restore_date(db).replace(tzinfo=UTC)
 
-    if datetime.utcnow() <= earliest_restore_date:
+    if datetime.now(UTC) <= earliest_restore_date:
         print('Waiting until earliest restore date', earliest_restore_date)
 
-    while datetime.utcnow() <= earliest_restore_date:
+    while datetime.now(UTC) <= earliest_restore_date:
         time.sleep(10)
 
     return db
@@ -5378,7 +5378,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} '
                  '--edition {} --family {} --capacity {} --backup-storage-redundancy {} --z'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.now(UTC).isoformat(),
                          "Hyperscale", 'Gen5', 2, 'zone'),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -5389,7 +5389,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore zone redundant source vldb with zone redundancy == false
         # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} --z {}'
-                 .format(resource_group, server, source_zr_db_name, restore_source_zr_false_param_db_name, datetime.utcnow().isoformat(), False),
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_false_param_db_name, datetime.now(UTC).isoformat(), False),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_zr_false_param_db_name),
@@ -5400,7 +5400,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore non zone redundant source vldb with no parameters passed in
         # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_no_param_db_name, datetime.now(UTC).isoformat()),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_non_zr_no_param_db_name),
@@ -5410,7 +5410,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore zone redundant source vldb with no parameters passed in
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
-                 .format(resource_group, server, source_zr_db_name, restore_source_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_no_param_db_name, datetime.now(UTC).isoformat()),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_zr_no_param_db_name),
@@ -6582,7 +6582,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         # test sql db restore command
         # db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
         #                .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
-        #                        datetime.utcnow().isoformat()),
+        #                        datetime.now(UTC).isoformat()),
         #                checks=[
         #                    JMESPathCheck('resourceGroup', resource_group_1),
         #                    JMESPathCheck('name', database_name_restored),
@@ -7870,8 +7870,8 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'last_backup_name': 'full.bak'
         })
 
-        from datetime import datetime, timedelta
-        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        self.kwargs['expiry'] = (datetime.now(UTC) + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs['storage_key'] = str(self.cmd(
             'az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)

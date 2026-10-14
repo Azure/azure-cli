@@ -2217,7 +2217,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         blob_client = container_client.upload_blob(blob_name, zip_content, validate_content=True,
                                                    progress_hook=progress_callback)
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
     BlobSharedAccessSignature = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
@@ -6482,7 +6482,7 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     if not backup_name:
-        backup_name = '{0}_{1}'.format(webapp_name, datetime.datetime.utcnow().strftime('%Y%m%d%H%M'))
+        backup_name = '{0}_{1}'.format(webapp_name, datetime.datetime.now(datetime.UTC).strftime('%Y%m%d%H%M'))
 
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
@@ -9106,7 +9106,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
                     else:
                         end_of_life_dt = end_of_life
-                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+                now_utc = datetime.datetime.now(datetime.UTC)
                 if now_utc >= end_of_life_dt:
                     return False
             except (ValueError, AttributeError):

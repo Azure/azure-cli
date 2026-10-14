@@ -1900,11 +1900,7 @@ def cli_cosmosdb_restore(cmd,
     target_restorable_account = None
     restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
 
-    # If restore timestamp is timezone aware, get the utcnow as timezone aware as well
-    from datetime import timezone
-    current_dateTime = datetime.datetime.utcnow()
-    if restore_timestamp_datetime_utc.tzinfo is not None and restore_timestamp_datetime_utc.tzinfo.utcoffset(restore_timestamp_datetime_utc) is not None:
-        current_dateTime = datetime.datetime.now(timezone.utc)
+    current_dateTime = datetime.datetime.now(datetime.UTC)
 
     # Fail if provided restoretimesamp is greater than current timestamp
     if restore_timestamp_datetime_utc > current_dateTime:
@@ -1952,11 +1948,11 @@ def _convert_to_utc_timestamp(timestamp_string):
     import dateutil.parser
     timestamp_datetime = dateutil.parser.parse(timestamp_string)
     timestamp_datetime_utc = None
-    # Convert to utc only if timezone aware
+    # Treat timestamps without an offset as UTC.
     if timestamp_datetime.tzinfo is not None and timestamp_datetime.tzinfo.utcoffset(timestamp_datetime) is not None:
         timestamp_datetime_utc = timestamp_datetime.astimezone(datetime.timezone.utc)
     else:
-        timestamp_datetime_utc = timestamp_datetime
+        timestamp_datetime_utc = timestamp_datetime.replace(tzinfo=datetime.UTC)
     return timestamp_datetime_utc
 
 

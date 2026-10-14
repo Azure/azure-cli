@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from datetime import datetime
+from datetime import UTC, datetime
 from azure.cli.core.util import user_confirmation
 from knack.log import get_logger
 from ..utils.validators import validate_resource_group, validate_backup_name
@@ -20,7 +20,7 @@ def _generate_backup_name(client, resource_group_name, server_name):
 
     on_demand_count = sum(1 for name in existing_names if name.startswith(_BACKUP_NAME_PREFIX))
 
-    date_str = datetime.utcnow().strftime("%m%d%Y")
+    date_str = datetime.now(UTC).strftime("%m%d%Y")
     suffix = on_demand_count + 1
     backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{suffix}"
     while backup_name in existing_names:

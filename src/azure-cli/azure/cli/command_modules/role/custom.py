@@ -489,15 +489,15 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
     if end_time:
         try:
-            end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT)
+            end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT).replace(tzinfo=datetime.UTC)
         except ValueError:
             raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
     else:
-        end_time = datetime.datetime.utcnow()
+        end_time = datetime.datetime.now(datetime.UTC)
 
     if start_time:
         try:
-            start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT)
+            start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT).replace(tzinfo=datetime.UTC)
             if start_time >= end_time:
                 raise CLIError("Start time cannot be later than end time.")
         except ValueError:
@@ -1493,7 +1493,7 @@ def create_service_principal_for_rbac(
 
     if not display_name:
         # No display name is provided, create a new one
-        app_display_name = 'azure-cli-' + datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+        app_display_name = 'azure-cli-' + datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d-%H-%M-%S')
     else:
         app_display_name = display_name
         # patch existing app with the same displayName to make the command idempotent
@@ -1980,7 +1980,7 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
         return []
 
     if not start_date:
-        start_date = datetime.datetime.utcnow()
+        start_date = datetime.datetime.now(datetime.UTC)
     elif isinstance(start_date, str):
         start_date = dateutil.parser.parse(start_date)
 

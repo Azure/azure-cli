@@ -6,7 +6,7 @@
 
 import os
 from azure.cli.core.profiles import ResourceType
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -109,7 +109,7 @@ def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_k
                            resource_type=ResourceType.DATA_STORAGE_BLOB)
 
     t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     if account_key:
         sas = t_sas(account_name, account_key=account_key)
     elif user_delegation_key:
@@ -126,7 +126,7 @@ def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, direct
                            resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
     t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = t_sas(account_name, account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
@@ -136,7 +136,7 @@ def create_short_lived_container_sas_track2(cmd, account_name, account_key, cont
     from datetime import timedelta
     t_generate_container_sas = cmd.get_models('_shared_access_signature#generate_container_sas',
                                               resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_container_sas(account_name, container, account_key, permission='r', expiry=expiry,
                                     protocol='https')
 
@@ -144,7 +144,7 @@ def create_short_lived_container_sas_track2(cmd, account_name, account_key, cont
 def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
     from datetime import timedelta
     t_generate_share_sas = cmd.get_models('#generate_share_sas', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_share_sas(account_name, share, account_key, permission='r', expiry=expiry,
                                 protocol='https')
 
@@ -152,7 +152,7 @@ def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
 def create_short_lived_blob_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
     from datetime import timedelta
     t_generate_blob_service_sas = cmd.get_models('#generate_account_sas', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_blob_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
 
 
@@ -160,7 +160,7 @@ def create_short_lived_file_service_sas_track2(cmd, account_name, account_key, r
     from datetime import timedelta
     t_generate_file_service_sas = cmd.get_models('#generate_account_sas',
                                                  resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (datetime.now(UTC) + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_file_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
 
 

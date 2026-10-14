@@ -6,7 +6,7 @@
 """Custom operations for storage file datalake"""
 # pylint: disable=too-many-locals
 
-from datetime import datetime
+from datetime import UTC, datetime
 from azure.cli.core.profiles import ResourceType
 
 from knack.util import todict
@@ -106,7 +106,7 @@ def generate_sas_directory_uri(client, cmd, file_system_name, directory_name, pe
     sas_kwargs = {}
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(),
+            get_datetime_from_string(start) if start else datetime.now(UTC),
             get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
 

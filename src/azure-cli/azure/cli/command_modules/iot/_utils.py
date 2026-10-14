@@ -31,9 +31,9 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
         .issuer_name(subject_name)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.utcnow())
+        .not_valid_before(datetime.datetime.now(datetime.UTC))
         .not_valid_after(
-            datetime.datetime.utcnow() + datetime.timedelta(days=valid_days)
+            datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=valid_days)
         )
         .sign(key, hashes.SHA256())
     )

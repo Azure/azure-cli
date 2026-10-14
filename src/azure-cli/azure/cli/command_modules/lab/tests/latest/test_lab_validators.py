@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from unittest import mock
 from azure.mgmt.core.tools import is_valid_resource_id
 from azure.cli.core.azclierror import ArgumentUsageError
-from azure.cli.command_modules.lab.validators import _update_artifacts
+from azure.cli.command_modules.lab.validators import _update_artifacts, _validate_expiration_date
 
 
 class ValidatorsCommandTest(unittest.TestCase):
@@ -65,3 +66,13 @@ class ValidatorsCommandTest(unittest.TestCase):
         del invalid_artifact['artifact_id']
         with self.assertRaises(ArgumentUsageError):
             _update_artifacts([invalid_artifact], self.lab_resource_id)
+
+    def test_expiration_date_with_and_without_timezone(self):
+        for suffix in ['', 'Z', '+02:00', '-05:00']:
+            with self.subTest(suffix=suffix):
+                args = mock.Mock()
+                args.expiration_date.to_serialized_data.return_value = '2999-01-01T00:00:00' + suffix
+                _validate_expiration_date(args)
+                args.expiration_date.to_serialized_data.return_value = '2000-01-01T00:00:00' + suffix
+                with self.assertRaises(ArgumentUsageError):
+                    _validate_expiration_date(args)

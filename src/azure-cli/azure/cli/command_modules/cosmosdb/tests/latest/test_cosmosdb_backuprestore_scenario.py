@@ -10,7 +10,7 @@ from unittest import mock
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from dateutil import parser
 
 
@@ -530,6 +530,27 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
 
 
 class CosmosDBRestoreUnitTests(unittest.TestCase):
+    def test_restore_timestamp_is_utc(self):
+        from azure.cli.command_modules.cosmosdb.custom import _convert_to_utc_timestamp
+
+        expected = datetime(2020, 1, 1, tzinfo=UTC)
+        for timestamp in ['2020-01-01T00:00:00', '2020-01-01T00:00:00Z',
+                          '2020-01-01T02:00:00+02:00', '2019-12-31T19:00:00-05:00']:
+            with self.subTest(timestamp=timestamp):
+                self.assertEqual(_convert_to_utc_timestamp(timestamp), expected)
+
+    @mock.patch('azure.cli.command_modules.cosmosdb.custom._create_database_account')
+    @mock.patch('azure.cli.command_modules.cosmosdb._client_factory.cf_restorable_database_accounts')
+    def test_restore_accepts_timestamp_without_offset(self, get_accounts, create_account):
+        from azure.cli.command_modules.cosmosdb.custom import cli_cosmosdb_restore
+
+        account = mock.Mock(account_name='source', deletion_time=None,
+                            creation_time=datetime(2000, 1, 1, tzinfo=UTC))
+        get_accounts.return_value.list.return_value = [account]
+        cli_cosmosdb_restore(mock.Mock(), mock.Mock(), 'rg', 'source', 'target',
+                             '2020-01-01T00:00:00', 'westus')
+        self.assertEqual(create_account.call_args.kwargs['restore_timestamp'], '2020-01-01T00:00:00+00:00')
+
     def setUp(self):
         # Only mock dependencies that cannot actually be imported. Never replace a
         # real, importable package in sys.modules: these unit tests share a

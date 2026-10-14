@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from azure.cli.core.profiles import ResourceType
@@ -145,7 +145,7 @@ class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
                                   account_info, container, csv_blob, query_string).output
         self.assertIsNotNone(result)
         #test blob-url
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                     'rwad --https-only --full-uri -o tsv',
                                     account_info, csv_blob, container, expiry).output.strip()
@@ -193,7 +193,7 @@ class StorageBlobURLScenarioTest(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', account_info,
                          container, local_file1, blob_name1)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
                                     'rwad --https-only --full-uri -o tsv',
                                     account_info, blob_name1, container, expiry).output.strip()

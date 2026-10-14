@@ -10,7 +10,7 @@ import unittest
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from dateutil import parser
 
 class CosmosDBTests(ScenarioTest):
@@ -2934,7 +2934,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3019,7 +3019,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string,
@@ -3125,7 +3125,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3209,7 +3209,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3301,7 +3301,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3381,7 +3381,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3508,7 +3508,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3595,7 +3595,7 @@ class CosmosDBTests(ScenarioTest):
         ]).get_output_in_json()
 
         #restore time
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
         self.kwargs.update({
             'rts': restore_ts_string
         })
@@ -3729,7 +3729,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb table exists -g {rg} -a {acc} -n {table_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = datetime.now(UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string

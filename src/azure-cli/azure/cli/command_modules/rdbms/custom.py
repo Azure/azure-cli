@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from importlib import import_module
 import re
-from dateutil.tz import tzutc   # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import todict
 from urllib.request import urlretrieve
@@ -603,7 +602,7 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+    time_line = datetime.now(UTC) - timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:

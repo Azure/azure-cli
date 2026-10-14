@@ -214,9 +214,9 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n src --overwrite', source_account_info,
                          source_container, source_file)
 
-        from datetime import datetime, timedelta
-        start = datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
-        expiry = (datetime.utcnow() + timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        start = datetime.now(UTC).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage blob generate-sas -c {} -n src --permissions r --start {}'
                                ' --expiry {}', source_account_info, source_container, start,
                                expiry).output.strip()
@@ -260,9 +260,9 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n src', account_info,
                          source_container, source_file)
 
-        from datetime import datetime, timedelta
-        start = datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        from datetime import UTC, datetime, timedelta
+        start = datetime.now(UTC).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (datetime.now(UTC) + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas = self.storage_cmd('storage blob generate-sas -c {} -n src --permissions r --start {}'
                                ' --expiry {}', account_info, source_container, start,
                                expiry).output.strip()

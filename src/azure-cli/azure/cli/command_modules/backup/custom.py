@@ -5,7 +5,7 @@
 
 import time
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 # pylint: disable=too-many-lines
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
@@ -1860,7 +1860,7 @@ def stop_job(client, resource_group_name, vault_name, name, use_secondary_region
 
 def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=None, use_secondary_region=None):
     logger.warning("Waiting for job '%s' ...", name)
-    start_timestamp = datetime.utcnow()
+    start_timestamp = datetime.now(UTC)
     if use_secondary_region:
         vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
         vault_location = vault.location
@@ -1869,7 +1869,7 @@ def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=Non
         job_details = client.get(azure_region, CrrJobRequest(resource_id=vault.id, job_name=name))
         while cust_help.job_in_progress(job_details.properties.status):
             if timeout:
-                elapsed_time = datetime.utcnow() - start_timestamp
+                elapsed_time = datetime.now(UTC) - start_timestamp
                 if elapsed_time.seconds > timeout:
                     logger.warning("Command timed out while waiting for job '%s'", name)
                     break
@@ -1879,7 +1879,7 @@ def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=Non
         job_details = client.get(vault_name, resource_group_name, name)
         while cust_help.job_in_progress(job_details.properties.status):
             if timeout:
-                elapsed_time = datetime.utcnow() - start_timestamp
+                elapsed_time = datetime.now(UTC) - start_timestamp
                 if elapsed_time.seconds > timeout:
                     logger.warning("Command timed out while waiting for job '%s'", name)
                     break

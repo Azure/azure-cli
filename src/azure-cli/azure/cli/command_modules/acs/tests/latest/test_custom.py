@@ -2140,8 +2140,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.upgrade_settings = None
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
-        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=4)).timestamp())
 
         instance.upgrade_settings = self.models.ClusterUpgradeSettings(
             override_settings = self.models.UpgradeOverrideSettings(
@@ -2150,8 +2150,8 @@ class AcsCustomCommandTest(unittest.TestCase):
         )
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until=None)
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
-        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)).timestamp())
+        self.assertLess(instance.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=4)).timestamp())
 
         # force_upgrade False
         instance.upgrade_settings = None
