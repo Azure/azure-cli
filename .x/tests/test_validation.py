@@ -8,6 +8,9 @@ import sys
 import types
 from pathlib import Path
 
+import pytest
+from x_engineering_agent.tools.copilot import validation
+
 
 PACKAGE = Path(__file__).resolve().parents[1]
 TOOLS = PACKAGE / "tools"
@@ -20,6 +23,22 @@ elif str(TOOLS) not in module.__path__:
     module.__path__.append(str(TOOLS))
 
 checks = importlib.import_module("repository_tools.validation.checks")
+REPOSITORY = "Azure/azure-cli"
+
+
+@pytest.fixture(autouse=True)
+def bound(monkeypatch):
+    """Bind this package's hooks the way the pinned job handoff does."""
+    monkeypatch.setattr(validation, "_BINDING", {
+        "repository": REPOSITORY, "settings": {"playback": True}, "live_test": True,
+    })
+    monkeypatch.setattr(validation, "_CHECKS", checks)
+
+
+def test_validation_exports_engine_hooks():
+    assert {"unit_test_scope", "python_roots", "generation_source_checks"} <= set(vars(checks))
+    assert validation._generation_source_hook("Azure/aaz") is checks.generation_source_checks
+    assert validation._generation_source_hook(REPOSITORY) is None
 
 
 def _unit_test(path, class_name):
@@ -41,7 +60,7 @@ def test_azure_cli_validation_selects_changed_and_matching_tests(tmp_path):
     matching = _unit_test(module / "tests/latest/test_custom.py", "CustomTests")
     _unit_test(module / "tests/latest/test_unrelated.py", "UnrelatedTests")
 
-    assert checks.python_unit_files("Azure/azure-cli", tmp_path, [source, matching]) == [matching]
+    assert validation.python_unit_files("Azure/azure-cli", tmp_path, [source, matching]) == [matching]
 
 
 def test_validation_keeps_test_names_bound_to_their_component(tmp_path):
@@ -57,7 +76,7 @@ def test_validation_keeps_test_names_bound_to_their_component(tmp_path):
     validators.write_text("VALUE = 1\n", encoding="utf-8")
     core_test = _unit_test(tmp_path / "src/azure-cli-core/tests/test_validators.py", "CoreValidatorTests")
 
-    selected = checks.python_unit_files("Azure/azure-cli", tmp_path, [custom, validators])
+    selected = validation.python_unit_files("Azure/azure-cli", tmp_path, [custom, validators])
 
     assert set(selected) == {core_test, acs_test}
 
@@ -69,7 +88,7 @@ def test_validation_normalizes_private_module_test_name(tmp_path):
     source.write_text("VALUE = 1\n", encoding="utf-8")
     matching = _unit_test(module / "tests/latest/test_validators.py", "ValidatorTests")
 
-    assert checks.python_unit_files("Azure/azure-cli", tmp_path, [source]) == [matching]
+    assert validation.python_unit_files("Azure/azure-cli", tmp_path, [source]) == [matching]
 
 
 def test_validation_selects_nearest_component_for_duplicate_test_names(tmp_path):
@@ -80,4 +99,4 @@ def test_validation_selects_nearest_component_for_duplicate_test_names(tmp_path)
     matching = _unit_test(core / "tests/test_util.py", "CoreUtilTests")
     _unit_test(core / "auth/tests/test_util.py", "AuthUtilTests")
 
-    assert checks.python_unit_files("Azure/azure-cli", tmp_path, [source]) == [matching]
+    assert validation.python_unit_files("Azure/azure-cli", tmp_path, [source]) == [matching]

@@ -76,3 +76,23 @@ def test_readiness_requires_validation_and_a_matching_title():
 
 def test_definitions_reference_existing_engine_helpers_and_tools():
     assert testing.definition_problems(testing.local(PACKAGE, REPOSITORY)) == []
+
+
+MODULE = "src/azure-cli/azure/cli/command_modules/{}/custom.py"
+
+
+@pytest.mark.parametrize(("files", "expected"), [
+    ([MODULE.format("storage")], ("module", ["storage"])),
+    ([MODULE.format(name) for name in ("storage", "network", "vm", "keyvault")],
+     ("module", ["storage", "network", "vm", "keyvault"])),
+    (["src/azure-cli-core/azure/cli/core/commands/__init__.py"], (None, [])),
+    (["doc/sphinx/index.rst"], (None, [])),
+    ([], (None, [])),
+    ([MODULE.format("storage"),
+      "src/azure-cli/azure/cli/command_modules/storage/tests/latest/test_blob.py"],
+     ("module", ["storage"])),
+], ids=["one-module", "many-modules", "core-only", "docs-only", "no-files", "ignores-tests"])
+def test_source_only_changes_resolve_module_live_test_scope(files, expected):
+    kind, names = hook("live_test_source_targets", files)
+    assert (kind, list(names)) == expected
+    assert not hook("live_test_plan", files[:1])["runnable"]

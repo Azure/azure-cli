@@ -9,6 +9,7 @@
 import os
 import re
 
+from repository_tools.reviewer.azure_cli.failures import _scope_key
 from repository_tools.settings import _MODULE_PATH_PATTERN, _TEST_FILE_PATTERN
 from x_engineering_agent.security.sensitive_data import scan_sensitive_content
 from x_engineering_agent.tools.github.api import github_get
@@ -338,6 +339,18 @@ def _live_test_plan(pr_files):
         "paths": paths,
         "runnable": runnable,
         "skipped_reason": None if runnable else ('PR changes only azure-cli-core unit tests (not runnable by azdev --live)' if paths else 'PR changes no test files (tests/**/test_*.py)'),
-        "comment": None if runnable else ("⏭️ **Skipping the live test for this revision because the only test file(s) changed are `azure-cli-core` unit tests**, which the live-test pipeline (`azdev test --live`) does not run — it covers command-module and extension tests only.\n\nThese `azure-cli-core` tests are exercised by upstream CI's unit-test jobs instead. This is informational; no action is required." if paths else '⏭️ **Skipping the live test for this revision because no changed test file was found** (`tests/**/test_*.py`).\n\nThe live-test pipeline runs only the test files a PR changes, so there is nothing to execute for this commit. A skipped live test is not a passing test result. The Agent review separately checks whether the affected command module includes focused regression tests or updated recordings. If a test file is changed in a later commit, the live test will run automatically.'),
+        "comment": None if runnable else ("**Skipping the live test for this revision because the only test file(s) changed are `azure-cli-core` unit tests**, which the live-test pipeline (`azdev test --live`) does not run — it covers command-module and extension tests only.\n\nThese `azure-cli-core` tests are exercised by upstream CI's unit-test jobs instead. This is informational; no action is required." if paths else '**Skipping the live test for this revision because no changed test file was found** (`tests/**/test_*.py`).\n\nThe live-test pipeline runs only the test files a PR changes, so there is nothing to execute for this commit. A skipped live test is not a passing test result. The Agent review separately checks whether the affected command module includes focused regression tests or updated recordings. If a test file is changed in a later commit, the live test will run automatically.'),
         "legacy_title": 'Live Test (Azure CLI PR)',
     }
+
+
+def _live_test_source_targets(pr_files, kind):
+    """Command module or extension targets of the non-test changed files."""
+    names = []
+    for path in pr_files or []:
+        if _TEST_FILE_PATTERN.search(path) or "/recordings/" in path:
+            continue
+        scope = _scope_key(path)
+        if scope and scope[0] == kind and scope[1] not in names:
+            names.append(scope[1])
+    return (kind if names else None), names

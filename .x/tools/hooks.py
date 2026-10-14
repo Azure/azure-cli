@@ -6,16 +6,17 @@
 
 """Azure CLI implementations of the X Engineering Agent engine hooks."""
 
-from repository_tools.fixer.azure_cli import guidance, routing, targets
+from repository_tools.fixer.azure_cli import guidance, prepublication, routing, targets
 from repository_tools.fixer.formatting import guidance as formatting
 from repository_tools.fixer.title_gate import title_repair
 from repository_tools.reviewer.azure_cli import failures
 from repository_tools.reviewer.policy import analysis
 from repository_tools.settings import EXECUTION_INSTRUCTIONS, _AAZ_OUTPUT_PATTERN
-from repository_tools.tester.azure_cli import live_tests
+from repository_tools.tester.azure_cli import live_tests, swe_replay
 from x_engineering_agent.tools.reviews.inspection import _verified_generation_source_prs
 
 REPOSITORY = "Azure/azure-cli"
+TARGET_KIND = "module"
 
 
 def infer_target(text=None, pr_files=None):
@@ -75,12 +76,20 @@ def live_test_plan(pr_files):
     return live_tests._live_test_plan(pr_files)
 
 
+def live_test_source_targets(pr_files):
+    return live_tests._live_test_source_targets(pr_files, "module")
+
+
 def regression_coverage(owner, repo, pr_number, pr_files=None, pr=None, file_changes=None,
                         issue_evidence=None, review_feedback=None):
     return live_tests.get_pr_regression_coverage_summary(
         owner, repo, pr_number, pr_files=pr_files, pr=pr, file_changes=file_changes,
         issue_evidence=issue_evidence, review_feedback=review_feedback,
     )
+
+
+def swe_replay_environment(case, root, python, options=None):
+    return swe_replay.environment(case, root, python, options)
 
 
 def analyze_review(pr, file_changes, head_repo=None, head_sha=None, generation_source_prs=None):
@@ -90,8 +99,8 @@ def analyze_review(pr, file_changes, head_repo=None, head_sha=None, generation_s
     )
 
 
-def classify_test_failures(failed_tests, pr_files, target=None):
-    return failures.classify_test_failures(failed_tests, pr_files, target)
+def classify_test_failures(failed_tests, pr_files, target=None, base_results=None):
+    return failures.classify_test_failures(failed_tests, pr_files, target, base_results)
 
 
 def extract_failed_tests(text):
@@ -123,3 +132,39 @@ def _ownership_block(pr, file_changes):
         "reason": "codegen ownership preflight failed",
         "findings": [finding["summary"] for finding in findings],
     }
+
+
+def generated_paths(paths):
+    return prepublication.generated_paths(paths)
+
+
+def release_artifact_findings(pr, changes, read_file):
+    return prepublication.release_artifact_findings(REPOSITORY, TARGET_KIND, pr, changes)
+
+
+def generated_ownership_findings(pr, changes):
+    return prepublication.generated_ownership_findings(REPOSITORY, pr, changes)
+
+
+def command_help_findings(changes, base, read_file):
+    return prepublication.command_help_findings(changes, base, read_file)
+
+
+def title_findings(title, component, rest, changed_paths):
+    return prepublication.title_findings(TARGET_KIND, title, component, rest, changed_paths)
+
+
+def checklist_statuses(changed):
+    return prepublication.checklist_statuses(changed)
+
+
+def generated_output_findings(repository, pr, changes, base, head):
+    return prepublication.generated_output_findings(pr, changes, base, head)
+
+
+def prepublication_coverage(pr, changes):
+    owner, repo = REPOSITORY.split("/", 1)
+    return live_tests.get_pr_regression_coverage_summary(
+        owner, repo, None, pr_files=[change["filename"] for change in changes], pr=pr,
+        file_changes=changes, issue_evidence=[], review_feedback=[],
+    )

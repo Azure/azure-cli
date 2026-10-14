@@ -13,10 +13,100 @@ profile:
   triage_handoffs: {}
   triage_labels:
   - bug
-  needs_info_label: agent-assist-needs-info
   title_style: cli
   pr_doc_url: https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests
   generation_source_repository: Azure/aaz
+  needs_info_label: X Engineering Agent Needs Info
+  live_repro: true
+  live_repro_workflow: live-repro.yml
+  coding_norms:
+  - 'No breaking changes to commands, arguments, defaults or output without the Azure CLI breaking-change
+    process: deprecate first (`deprecate_info`) and pre-announce in the module''s `_breaking_change.py`;
+    otherwise keep behaviour backwards compatible.'
+  - 'Never edit HISTORY.rst in Azure/azure-cli: release notes are generated from the PR title and the History
+    Notes section of the PR description (only maintainer hotfix release PRs edit it manually).'
+  - Never hand-edit generated code under `aaz/` directories (aaz-dev output). Change the Azure/aaz command
+    model and regenerate, or put non-modelable behaviour in handwritten code (`custom.py`, registered from
+    `commands.py`).
+  - Keep `_help.py` and `_params.py` consistent with any changed command surface.
+  pr_conventions:
+    template_path: .github/pull_request_template.md
+    heading: bold
+    sections:
+    - name: Related command
+      content: related_command
+    - name: Description
+      content: description
+    - name: Testing Guide
+      content: testing
+    - name: History Notes
+      content: history
+    checklist:
+    - text: The PR title and description has followed the guideline in [Submitting Pull Requests](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests).
+      match: the pr title and description has followed the guideline
+      verified_by:
+      - pr-title
+      - pr-template
+    - text: I adhere to the [Command Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md).
+      match: i adhere to the [command guidelines]
+      verified_by: []
+    - text: I adhere to the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md).
+      match: i adhere to the [error handling guidelines]
+      verified_by: []
+    issue_link: Fixes
+    title_convention: '`[Component] Fix #<issue>: `az <command>`: <Summary>` for customer-facing fixes,
+      `{Component}` when not customer-facing; the title drives HISTORY.rst.'
+    release_notes: History Notes section of the PR description; never HISTORY.rst.
+  contributor_docs:
+  - https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/README.md
+  - https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
+  - https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md
+  generated_path_rules:
+  - pattern: src/azure-cli/azure/cli/command_modules/*/aaz/**
+    kind: aaz
+    description: AAZ generated command output (aaz-dev)
+  generated_code_kinds:
+    aaz:
+      label: Generated AAZ command code (fix the AAZ model and regenerate)
+      path_pattern: (?:^|/)aaz/[^/]+/
+      path_reason: AAZ generated command output (`aaz/<profile>/`)
+      output_dir: aaz
+      codegen_protocol: true
+      fix_route: Change the Azure/aaz command model and regenerate with `aaz-dev cli regenerate`, or override
+        the generated command in handwritten code (`custom.py` subclass registered from `commands.py`, or
+        `_params.py`); never hand-edit `aaz/` output.
+      guidance: 'The trusted analysis places the root cause in generated AAZ command code. Files under `aaz/<profile>/`
+        are aaz-dev output: a hand edit is overwritten by the next regeneration, reviewers reject it and
+        the generated-ownership gate blocks it. Fix it at the source:
+
+        1. **AAZ command model** - command naming, arguments, defaults, help, examples and API-version selection
+        live in the durable `Azure/aaz` model. Change the model and regenerate with `aaz-dev cli regenerate`;
+        the Agent pairs the regenerated output with an `Azure/aaz` source pull request before publication.
+
+        2. **Custom override** - behaviour the model cannot express goes in handwritten code: subclass the
+        generated command (for example override `_build_arguments_schema`, `pre_operations` or `_output`)
+        in `custom.py` and register it from `commands.py`, or adjust the argument in `_params.py`.
+
+        3. **API spec** - if the REST API specification itself is wrong, do not patch: finish with decision
+        `abstain_upstream` and describe the spec defect for an Azure/azure-rest-api-specs issue.'
+  generator_inputs: AAZ model, AutoRest `README.md` directive or `custom/` code
+  release_artifact_gate: true
+  repro_tools:
+  - az
+  swe_replay: true
+  swe_replay_fix_repositories:
+  - Azure/azure-cli-extensions
+  validation:
+    playback: true
+    candidate_imports:
+    - - azure.cli.command_modules
+      - src/azure-cli
+    - - azure.cli.core
+      - src/azure-cli-core
+    candidate_submodules:
+    - - azure.cli.command_modules.
+      - .custom
+      - src/azure-cli
 dependencies:
   python:
     aaz-dev: 4.6.2
@@ -56,5 +146,129 @@ job:
   - setup.cfg
   - requirements*.txt
   execution_slice_seconds: 900
-  checkout_excludes:
+  # Recordings ship read-only, only for the touched command modules.
+  read_only_paths:
   - '**/recordings/*'
+  recording_scopes:
+  - src/azure-cli/azure/cli/command_modules/*
+
+# Scheduled GitHub automation the operator runs for this repository.
+automation:
+  pr_validation:
+    page_size: 10
+    pipelines:
+    - title: AzureCLI-FullTest
+      allow:
+      - Azure.azure-cli Full Test
+      result_path: /test_results/
+      group_by:
+      - TestName
+      - Module
+      - Profile
+      - PythonVersion
+      single_run: true
+    - title: AzureCLI-BreakingChangeTest
+      allow:
+      - Azure.azure-cli Breaking Change Test
+      result_path: /breaking_change_test/
+      group_by:
+      - TestName
+      - Module
+      single_run: true
+      failure_notice: |2-
+
+
+        **Please submit your Breaking Change Pre-announcement ASAP** if you haven't already. Please note:
+
+        - Breaking changes can **only** be merged during the designated breaking change window
+        - A pre-announcement **must** be released at least one month in advance
+
+        > For more details on how to introduce breaking changes, refer to the documentation: [azure-cli/doc/how_to_introduce_breaking_changes.md](https://github.com/Azure/azure-cli/blob/dev/doc/how_to_introduce_breaking_changes.md)
+  new_pull_requests:
+    allowed_branches:
+    - dev
+    milestone_days: 7
+  common_issues:
+    product: Azure CLI
+    label: Auto-Resolve
+    min_confidence: 0.85
+    known_issues:
+    - tag: unofficial_cli
+      description: Azure CLI was installed from an unofficial distribution package (for example the Ubuntu
+        or Debian archive), shown by azure-cli versions 2.0.80, 2.0.81 or 2.18.0 or by Python paths under
+        dist-packages.
+      hints:
+      - azure-cli 2.0.80
+      - azure-cli 2.0.81
+      - azure-cli 2.18.0
+      - dist-packages
+      solution: |
+        Hi @{author},
+
+        This is not the official Azure CLI published by Microsoft.
+
+        How to tell if the installed Azure CLI is unofficial:
+        - https://github.com/Azure/azure-cli/issues/19640#issuecomment-1133875268
+        - https://github.com/Azure/azure-cli/issues/19640#issuecomment-1148202854
+
+        Please follow  https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux to install Microsoft official Azure CLI.
+
+        {reopen_hint}
+    - tag: latest_api_version_not_available
+      description: A command fails with 'No registered resource provider found for location ... and API
+        version ...'.
+      hints:
+      - No registered resource provider found
+      solution: |
+        Hi @{author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/23985#issue-1383263012 to get temporary workaround.
+
+        {reopen_hint}
+    - tag: az_login_fails
+      description: az login fails on Windows with WinError 0, WinError -2146893813, WinError -2146892987
+        or WinError 87.
+      hints:
+      - WinError 0
+      - WinError -2146893813
+      - WinError -2146892987
+      - WinError 87
+      solution: |
+        Hi @{author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/20231#issuecomment-1007176901 to get workaround.
+
+        {reopen_hint}
+    - tag: cloud_shell_fails
+      description: Azure CLI fails with '[Errno 30] Read-only file system', typically in Cloud Shell.
+      hints:
+      - '[Errno 30]'
+      solution: |
+        Hi @{author},
+
+        This is a known issue.
+
+        Please follow https://github.com/Azure/azure-cli/issues/13855#issuecomment-722412068 to get workaround.
+
+        {reopen_hint}
+    outdated_version:
+      tag: not_latest_cli
+      pattern: azure-cli[^0-9a-z\n]*(2\.\d+\.\d+)
+      latest_url: https://raw.githubusercontent.com/Azure/azure-cli/main/src/azure-cli/setup.py
+      latest_pattern: ^VERSION = "(\d+\.\d+\.\d+)"$
+      solution: |
+        Hi @{author},
+
+        {current} is not the latest Azure CLI({latest}).
+
+        If you haven't already attempted to do so, please upgrade to the latest Azure CLI version by following https://learn.microsoft.com/en-us/cli/azure/update-azure-cli.
+  reopen: true
+  pruning_label: Azure CLI Team
+  review_follow_up:
+    product: Azure CLI
+    window_days: 14
+    interval_days: 5
