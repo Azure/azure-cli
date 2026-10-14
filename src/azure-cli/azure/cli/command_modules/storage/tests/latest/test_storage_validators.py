@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime as dt
 import unittest
 from unittest import mock
 from argparse import (Namespace, ArgumentError)
@@ -446,6 +447,20 @@ class TestGetSourceClientValidator(unittest.TestCase):
         ns = self._create_namespace(as_user=True, expiry='2999-01-01', token_credential='token')
         with self.assertRaisesRegex(ArgumentError, 'within 7 days'):
             as_user_validator(ns)
+
+    def test_as_user_validator_enforces_exact_seven_day_limit(self):
+        now = dt.datetime(2026, 10, 14, 12, tzinfo=dt.UTC)
+        with mock.patch('datetime.datetime', wraps=dt.datetime) as mock_datetime:
+            mock_datetime.now.return_value = now
+            for seconds in [-1, 0, 1]:
+                with self.subTest(seconds=seconds):
+                    expiry = (now + dt.timedelta(days=7, seconds=seconds)).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    ns = self._create_namespace(as_user=True, expiry=expiry, token_credential='token')
+                    if seconds > 0:
+                        with self.assertRaisesRegex(ArgumentError, 'within 7 days'):
+                            as_user_validator(ns)
+                    else:
+                        as_user_validator(ns)
 
     def _create_namespace(self, **kwargs):
         ns = Namespace(account_key='my_storage_key', account_name='storage_name', connection_string=None, dryrun=False,

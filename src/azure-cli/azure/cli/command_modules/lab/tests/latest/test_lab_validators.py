@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime as dt
 import unittest
 from unittest import mock
 from azure.mgmt.core.tools import is_valid_resource_id
@@ -76,3 +77,21 @@ class ValidatorsCommandTest(unittest.TestCase):
                 args.expiration_date.to_serialized_data.return_value = '2000-01-01T00:00:00' + suffix
                 with self.assertRaises(ArgumentUsageError):
                     _validate_expiration_date(args)
+
+    def test_expiration_date_respects_offsets_near_current_time(self):
+        now = dt.datetime(2026, 10, 14, 12, tzinfo=dt.UTC)
+        cases = [('2026-10-14T11:30:00-01:00', False),
+                 ('2026-10-14T13:30:00+02:00', True),
+                 ('2026-10-14T12:30:00', False),
+                 ('2026-10-14T12:00:00', True)]
+        with mock.patch('datetime.datetime', wraps=dt.datetime) as mock_datetime:
+            mock_datetime.now.return_value = now
+            for timestamp, expired in cases:
+                with self.subTest(timestamp=timestamp):
+                    args = mock.Mock()
+                    args.expiration_date.to_serialized_data.return_value = timestamp
+                    if expired:
+                        with self.assertRaises(ArgumentUsageError):
+                            _validate_expiration_date(args)
+                    else:
+                        _validate_expiration_date(args)

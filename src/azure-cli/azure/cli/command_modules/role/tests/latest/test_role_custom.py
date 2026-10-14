@@ -35,3 +35,15 @@ class TestRoleCustomCommands(unittest.TestCase):
         _get_assignment_events(mock.Mock(), start_time='2000-01-01T00:00:00Z')
         event_filter = get_client.return_value.activity_logs.list.call_args.kwargs['filter']
         self.assertIn('eventTimestamp ge 2000-01-01T00:00:00Z', event_filter)
+
+    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client')
+    def test_assignment_events_with_explicit_end_time(self, get_client):
+        from azure.cli.command_modules.role.custom import _get_assignment_events
+
+        get_client.return_value.activity_logs.list.return_value = []
+        for start_time in [None, '2000-01-01T00:00:00Z']:
+            with self.subTest(start_time=start_time):
+                _get_assignment_events(mock.Mock(), start_time=start_time, end_time='2000-01-01T01:00:00Z')
+                event_filter = get_client.return_value.activity_logs.list.call_args.kwargs['filter']
+                self.assertIn('eventTimestamp ge 2000-01-01T00:00:00Z and '
+                              'eventTimestamp le 2000-01-01T01:00:00Z', event_filter)

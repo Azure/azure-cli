@@ -800,7 +800,9 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
         for timestamp in ['2020-01-01T00:00:00', '2020-01-01T00:00:00Z',
                           '2020-01-01T02:00:00+02:00', '2019-12-31T19:00:00-05:00']:
             with self.subTest(timestamp=timestamp):
-                self.assertEqual(_convert_to_utc_timestamp(timestamp), expected)
+                result = _convert_to_utc_timestamp(timestamp)
+                self.assertEqual(result, expected)
+                self.assertEqual(result.utcoffset(), dt.timedelta(0))
 
     @mock.patch('azure.cli.command_modules.cosmosdb.custom._create_database_account')
     @mock.patch('azure.cli.command_modules.cosmosdb._client_factory.cf_restorable_database_accounts')
