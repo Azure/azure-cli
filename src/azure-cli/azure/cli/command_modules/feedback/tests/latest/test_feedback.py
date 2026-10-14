@@ -208,7 +208,7 @@ class TestCommandLogFile(ScenarioTest):
 
 
 class TestSurvey(unittest.TestCase):
-    def test_existing_utc_note(self):
+    def test_handle_survey_accepts_saved_timestamp_without_offset(self):
         from azure.cli.command_modules.feedback import custom
 
         note = '{"last_prompt_time": "2000-01-01T00:00:00"}'
