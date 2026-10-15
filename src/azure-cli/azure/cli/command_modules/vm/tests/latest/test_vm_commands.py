@@ -2819,6 +2819,104 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
         ])
 
 
+class VMFlexProfileScenarioTests(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='westus2')
+    def test_vm_flex_profile_create_and_update(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('flowvm', 15),
+            'loc': resource_group_location,
+            'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
+            'preferred_size': 'Standard_D2s_v3',
+            'updated_preferred_size': 'Standard_D4s_v3',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} --image {image} '
+            '--preferred-size {preferred_size} --admin-username clitest --ssh-key-values "{ssh_key}" '
+            '--security-type Standard --nsg-rule NONE --public-ip-address ""')
+        vm = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('flexProfile.preferredVMSize', '{preferred_size}'),
+        ]).get_output_in_json()
+        self.assertTrue(vm['hardwareProfile']['vmSize'])
+        self.kwargs['deployed_size'] = vm['hardwareProfile']['vmSize']
+
+        self.cmd('vm update -g {rg} -n {vm} --set tags.flow=preserved')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('flexProfile.preferredVMSize', '{preferred_size}'),
+            self.check('hardwareProfile.vmSize', '{deployed_size}'),
+            self.check('tags.flow', 'preserved'),
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --preferred-size {updated_preferred_size}')
+        vm = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('flexProfile.preferredVMSize', '{updated_preferred_size}'),
+            self.check('tags.flow', 'preserved'),
+        ]).get_output_in_json()
+        self.assertTrue(vm['hardwareProfile']['vmSize'])
+        self.kwargs['deployed_size'] = vm['hardwareProfile']['vmSize']
+        self.cmd('vm list -g {rg}', checks=[
+            self.check("[?name=='{vm}'].flexProfile.preferredVMSize | [0]", '{updated_preferred_size}'),
+            self.check("[?name=='{vm}'].hardwareProfile.vmSize | [0]", '{deployed_size}'),
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='westus2')
+    def test_vm_flex_profile_opt_in_opt_out(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('fixedvm', 15),
+            'loc': resource_group_location,
+            'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
+            'preferred_size': 'Standard_D2s_v3',
+            'ssh_key': TEST_SSH_KEY_PUB,
+        })
+
+        self.cmd(
+            'vm create -g {rg} -n {vm} --location {loc} --image {image} '
+            '--size Standard_D2s_v3 --admin-username clitest --ssh-key-values "{ssh_key}" '
+            '--security-type Standard --nsg-rule NONE --public-ip-address ""')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('flexProfile', None),
+            self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --preferred-size {preferred_size}')
+        vm = self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('flexProfile.preferredVMSize', '{preferred_size}'),
+        ]).get_output_in_json()
+        self.assertTrue(vm['hardwareProfile']['vmSize'])
+        deployed_size = vm['hardwareProfile']['vmSize']
+        self.kwargs.update({
+            'deployed_size': deployed_size,
+            'different_size': 'Standard_D4s_v3' if deployed_size != 'Standard_D4s_v3' else 'Standard_D2s_v3',
+        })
+
+        self.cmd('vm update -g {rg} -n {vm} --size {deployed_size}')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('flexProfile.preferredVMSize', '{preferred_size}'),
+            self.check('hardwareProfile.vmSize', '{deployed_size}'),
+        ])
+        for command in (
+                'vm update -g {rg} -n {vm} --size {different_size}',
+                'vm resize -g {rg} -n {vm} --size {different_size}'):
+            with self.assertRaisesRegex(HttpResponseError, 'InvalidParameter'):
+                self.cmd(command)
+            self.cmd('vm show -g {rg} -n {vm}', checks=[
+                self.check('flexProfile.preferredVMSize', '{preferred_size}'),
+                self.check('hardwareProfile.vmSize', '{deployed_size}'),
+            ])
+
+        self.cmd('vm update -g {rg} -n {vm} --size {deployed_size} --remove flexProfile')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('flexProfile', None),
+            self.check('hardwareProfile.vmSize', '{deployed_size}'),
+        ])
+
+
 class VMUpdateTests(ScenarioTest):
 
     @AllowLargeResponse()
