@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 from azure.cli.core.style import Style, print_styled_text
 
 
+_MAX_ORPHAN_STARTUPS = 5
+
+
 def _emit_header(instances, orphan_startups, app_name, emit):
     """Emit the top-of-report header. Returns False when there's nothing to render
     (empty instances AND no orphan startups) so the caller can bail out early."""
@@ -99,7 +102,7 @@ def _emit_orphan_startup(orphan, emit):
     container's logs, but ARM has already replaced the worker-slot ID."""
     scm_id = orphan.get('InstanceId') or '<unknown>'
     emit((Style.HIGHLIGHT, 'Instance {} Startup Summary'.format(scm_id)))
-    emit([(Style.HIGHLIGHT, '─' * 76)])
+    emit([(Style.HIGHLIGHT, '-' * 76)])
     emit((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
     _print_startup_block(orphan.get('Startup'), emit)
     emit()
@@ -115,7 +118,7 @@ def _emit_hint_footer(instances, app_name, resource_group, emit):
     if not has_error:
         return
     rg = resource_group or '<resource-group>'
-    emit((Style.WARNING, '▶ Hint:'))
+    emit((Style.WARNING, 'Hint:'))
     emit('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
     emit('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
 
@@ -127,6 +130,7 @@ def render_report(payload):
     orphan_startups = payload.get('orphanStartups') or []
     app_name = payload.get('name') or '<webapp>'
     resource_group = payload.get('resourceGroup')
+    startup_summary_url = payload.get('startupSummaryUrl')
 
     def emit(*objs):
         print_styled_text(*objs, file=sys.stdout)
@@ -140,7 +144,15 @@ def render_report(payload):
     for inst in instances:
         _emit_instance_section(inst, emit)
 
-    for orphan in orphan_startups:
+    if orphan_startups:
+        emit((Style.HIGHLIGHT,
+              'Below startup records are from instances that no longer host the application '
+              'but occurred within the last 24 hours. Limited to 5 instances.'))
+        if startup_summary_url:
+            emit((Style.HIGHLIGHT, 'To review the full 24-hour history, visit {}.'.format(startup_summary_url)))
+        emit()
+
+    for orphan in orphan_startups[:_MAX_ORPHAN_STARTUPS]:
         _emit_orphan_startup(orphan, emit)
 
     _emit_hint_footer(instances, app_name, resource_group, emit)
