@@ -846,7 +846,7 @@ def delete_containerapp(cmd, name, resource_group_name, no_wait=False):
 def create_managed_environment(cmd,
                                name,
                                resource_group_name,
-                               logs_destination="log-analytics",
+                               logs_destination="azure-monitor",
                                storage_account=None,
                                logs_customer_id=None,
                                logs_key=None,
