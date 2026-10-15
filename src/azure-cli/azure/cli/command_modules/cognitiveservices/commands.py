@@ -238,4 +238,4 @@ def load_command_table(self, _):
         g.custom_command('delete', 'compute_delete', supports_no_wait=True)
         g.custom_show_command('show', 'compute_show')
         g.custom_command('list', 'compute_list')
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'compute_show')
