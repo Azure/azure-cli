@@ -183,7 +183,11 @@ class Profile:
             else:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 
-        # We have finished login. Let's find all subscriptions.
+        # We have finished login. Warn once here if credentials fell back to plaintext.
+        from .auth.persistence import warn_if_encryption_unavailable
+        warn_if_encryption_unavailable()
+
+        # Let's find all subscriptions.
         if show_progress:
             message = ('Retrieving subscriptions for the selection...' if tenant else
                        'Retrieving tenants and subscriptions for the selection...')
