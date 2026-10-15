@@ -28,7 +28,7 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
 
     def test_cwd_executable_is_not_probed_or_reused(self):
         with tempfile.TemporaryDirectory() as cwd:
-            managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
+            managed_executable = os.path.realpath(os.path.join(cwd, "managed", "azcopy.exe"))
             cwd_executable = os.path.join(cwd, "azcopy.exe")
 
             with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
@@ -189,7 +189,7 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
             cwd_link = os.path.join(root, "work-link")
             self._make_directory_link(cwd, cwd_link)
 
-            managed_executable = os.path.join(root, "managed", "azcopy.exe")
+            managed_executable = os.path.realpath(os.path.join(root, "managed", "azcopy.exe"))
             discovered_executable = os.path.join(cwd_link, "azcopy.exe")
 
             with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
@@ -205,7 +205,7 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
 
     def test_system_probe_failure_falls_back_to_managed_executable(self):
         with tempfile.TemporaryDirectory() as cwd, tempfile.TemporaryDirectory() as system_dir:
-            managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
+            managed_executable = os.path.realpath(os.path.join(cwd, "managed", "azcopy.exe"))
             system_executable = os.path.join(system_dir, "azcopy.exe")
 
             with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
@@ -226,7 +226,7 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as cwd, tempfile.TemporaryDirectory() as system_dir:
-            managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
+            managed_executable = os.path.realpath(os.path.join(cwd, "managed", "azcopy.exe"))
             system_executable = os.path.join(system_dir, "azcopy.exe")
 
             for output in unusable_outputs:
