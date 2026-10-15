@@ -6,7 +6,7 @@
 
 import os
 from azure.cli.core.profiles import ResourceType
-from datetime import datetime
+import datetime as dt
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -103,13 +103,12 @@ def glob_files_remotely_track2(client, share_name, pattern, snapshot=None, is_sh
 
 
 def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_key=None, user_delegation_key=None):
-    from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
                            resource_type=ResourceType.DATA_STORAGE_BLOB)
 
     t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     if account_key:
         sas = t_sas(account_name, account_key=account_key)
     elif user_delegation_key:
@@ -120,47 +119,42 @@ def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_k
 
 
 def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, directory_name, file_name):
-    from datetime import timedelta
 
     t_sas = cmd.get_models('_shared_access_signature#FileSharedAccessSignature',
                            resource_type=ResourceType.DATA_STORAGE_FILESHARE)
 
     t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = t_sas(account_name, account_key)
     return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
 def create_short_lived_container_sas_track2(cmd, account_name, account_key, container):
-    from datetime import timedelta
     t_generate_container_sas = cmd.get_models('_shared_access_signature#generate_container_sas',
                                               resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_container_sas(account_name, container, account_key, permission='r', expiry=expiry,
                                     protocol='https')
 
 
 def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
-    from datetime import timedelta
     t_generate_share_sas = cmd.get_models('#generate_share_sas', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_share_sas(account_name, share, account_key, permission='r', expiry=expiry,
                                 protocol='https')
 
 
 def create_short_lived_blob_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
-    from datetime import timedelta
     t_generate_blob_service_sas = cmd.get_models('#generate_account_sas', resource_type=ResourceType.DATA_STORAGE_BLOB)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_blob_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
 
 
 def create_short_lived_file_service_sas_track2(cmd, account_name, account_key, resource_types, permission='r'):
-    from datetime import timedelta
     t_generate_file_service_sas = cmd.get_models('#generate_account_sas',
                                                  resource_type=ResourceType.DATA_STORAGE_FILESHARE)
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     return t_generate_file_service_sas(account_name, account_key, resource_types, permission=permission, expiry=expiry)
 
 
@@ -258,7 +252,7 @@ def get_datetime_from_string(dt_str):
                              '%Y-%m-%dT%HZ', '%Y-%m-%d']
     for form in accepted_date_formats:
         try:
-            return datetime.strptime(dt_str, form)
+            return dt.datetime.strptime(dt_str, form)
         except ValueError:
             continue
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))

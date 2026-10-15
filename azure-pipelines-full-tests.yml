@@ -16,8 +16,8 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 
 jobs:
-- job: AutomationFullTestPython312ProfileLatest
-  displayName: Automation Full Test Python312 Profile Latest
+- job: AutomationFullTestPython311ProfileLatest
+  displayName: Automation Full Test Python311 Profile Latest
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -43,15 +43,15 @@ jobs:
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
-      pythonVersion: '3.12'
+      pythonVersion: '3.11'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
       fullTest: true
       jobName: 'FullTest'
 
-- job: AutomationFullTestPython314ProfileLatest
-  displayName: Automation Full Test Python314 Profile Latest
+- job: AutomationFullTestPython315ProfileLatest
+  displayName: Automation Full Test Python315 Profile Latest
   timeoutInMinutes: 9999
   strategy:
     maxParallel: 8
@@ -77,7 +77,7 @@ jobs:
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
-      pythonVersion: '3.14'
+      pythonVersion: '3.15'
       profile: 'latest'
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'

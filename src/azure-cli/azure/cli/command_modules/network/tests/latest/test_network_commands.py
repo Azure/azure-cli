@@ -6595,12 +6595,8 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
 
     @staticmethod
     def _get_now_utc():
-        import datetime
-        try:
-            from datetime import timezone
-            return datetime.datetime.now(timezone.utc)
-        except ImportError:
-            return datetime.datetime.utcnow()
+        import datetime as dt
+        return dt.datetime.now(dt.UTC)
 
     @staticmethod
     def _format_subject_dn(common_name: str):
@@ -6619,7 +6615,7 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             from cryptography.hazmat.primitives import hashes, serialization
             from cryptography.hazmat.primitives.asymmetric import rsa
             from cryptography.hazmat.backends import default_backend
-            import datetime
+            import datetime as dt
 
             now = VpnConnectionAuthenticationScenarioTest._get_now_utc()
 
@@ -6651,9 +6647,9 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             ).serial_number(
                 x509.random_serial_number()
             ).not_valid_before(
-                now - datetime.timedelta(minutes=5)
+                now - dt.timedelta(minutes=5)
             ).not_valid_after(
-                now + datetime.timedelta(days=3650)
+                now + dt.timedelta(days=3650)
             ).add_extension(
                 x509.BasicConstraints(ca=True, path_length=1),
                 critical=True,
@@ -6706,9 +6702,9 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             ).serial_number(
                 x509.random_serial_number()
             ).not_valid_before(
-                now - datetime.timedelta(minutes=5)
+                now - dt.timedelta(minutes=5)
             ).not_valid_after(
-                now + datetime.timedelta(days=1825)
+                now + dt.timedelta(days=1825)
             ).add_extension(
                 x509.BasicConstraints(ca=True, path_length=0),
                 critical=True,
@@ -6754,7 +6750,7 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             from cryptography.hazmat.primitives import hashes
             from cryptography.hazmat.primitives.asymmetric import rsa
             from cryptography.hazmat.backends import default_backend
-            import datetime
+            import datetime as dt
 
             now = VpnConnectionAuthenticationScenarioTest._get_now_utc()
 
@@ -6786,9 +6782,9 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             ).serial_number(
                 x509.random_serial_number()
             ).not_valid_before(
-                now - datetime.timedelta(minutes=5)
+                now - dt.timedelta(minutes=5)
             ).not_valid_after(
-                now + datetime.timedelta(days=days)
+                now + dt.timedelta(days=days)
             )
 
             # Leaf cert constraints
@@ -7715,7 +7711,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
     @ResourceGroupPreparer(name_prefix='cli_test_active_active_vnet_vnet_connection')
     @StorageAccountPreparer(name_prefix='clitestvpncnn')
     def test_network_active_active_vnet_connection(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        import datetime as dt
         self.kwargs.update({
             'subnet': 'GatewaySubnet',
             'vnet1': 'vnet1',
@@ -7739,7 +7735,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
             'bgp_peer2': '10.53.255.253',
             'storage_account': storage_account,
             'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
-            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+            'expiry': (dt.datetime.now(dt.UTC) + dt.timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
 
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
@@ -7993,7 +7989,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway_package_capture', location='westus')
     @StorageAccountPreparer(name_prefix='clitestvpngw')
     def test_network_vpn_gateway_package_capture(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
+        import datetime as dt
         self.kwargs.update({
             'vnet1': 'myvnet1',
             'gw1': 'gateway1',
@@ -8001,7 +7997,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'ip1': 'pubip1',
             'storage_account': storage_account,
             'ctn': self.create_random_name(prefix='clitestvpngw', length=24),
-            'expiry': (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
+            'expiry': (dt.datetime.now(dt.UTC) + dt.timedelta(hours=3)).strftime('%Y-%m-%dT%H:%MZ')
         })
 
         self.cmd('storage container create --account-name {storage_account} --name {ctn}')
@@ -8035,14 +8031,9 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
             from cryptography.hazmat.primitives import hashes, serialization
             from cryptography.hazmat.primitives.asymmetric import rsa
             from cryptography.hazmat.backends import default_backend
-            import datetime
+            import datetime as dt
 
-            # timezone-aware now
-            try:
-                from datetime import timezone
-                now = datetime.datetime.now(timezone.utc)
-            except ImportError:
-                now = datetime.datetime.utcnow()
+            now = dt.datetime.now(dt.UTC)
 
             # Root key (private key not exported; we only write public cert)
             root_key = rsa.generate_private_key(
@@ -8069,9 +8060,9 @@ class NetworkVpnClientPackageScenarioTest(ScenarioTest):
             ).serial_number(
                 x509.random_serial_number()
             ).not_valid_before(
-                now - datetime.timedelta(minutes=5)
+                now - dt.timedelta(minutes=5)
             ).not_valid_after(
-                now + datetime.timedelta(days=3650)
+                now + dt.timedelta(days=3650)
             ).add_extension(
                 x509.BasicConstraints(ca=True, path_length=1),
                 critical=True,

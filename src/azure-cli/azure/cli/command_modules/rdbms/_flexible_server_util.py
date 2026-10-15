@@ -5,7 +5,6 @@
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
-from datetime import datetime
 import os
 import random
 import subprocess
@@ -246,7 +245,7 @@ def _map_maintenance_window(day_of_week):
 
 
 def get_current_time():
-    return datetime.utcnow().replace(tzinfo=dt.timezone.utc, microsecond=0).isoformat()
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat()
 
 
 def get_id_components(rid):

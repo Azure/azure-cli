@@ -8,13 +8,13 @@ from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPrep
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, live_only)
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
-from datetime import datetime, timedelta
+import datetime as dt
 
 class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(allow_blob_public_access=True)
     def test_storage_container_access_policy_scenario(self, resource_group, storage_account):
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_random_name(prefix='cont', length=24)
@@ -40,8 +40,8 @@ class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
                          container,
                          local_file, sas)
 
-        new_start = (datetime.utcnow() - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        new_expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        new_start = (dt.datetime.now(dt.UTC) - dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        new_expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         self.storage_cmd('storage container policy update -c {} -n {} --permissions rwdxl --start {} --expiry {}',
                          account_info, container,
                          policy, new_start, new_expiry)

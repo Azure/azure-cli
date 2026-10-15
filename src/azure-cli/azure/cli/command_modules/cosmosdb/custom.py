@@ -5,7 +5,7 @@
 
 # pylint: disable=too-many-lines
 
-import datetime
+import datetime as dt
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
@@ -1900,11 +1900,7 @@ def cli_cosmosdb_restore(cmd,
     target_restorable_account = None
     restore_timestamp_datetime_utc = _convert_to_utc_timestamp(restore_timestamp)
 
-    # If restore timestamp is timezone aware, get the utcnow as timezone aware as well
-    from datetime import timezone
-    current_dateTime = datetime.datetime.utcnow()
-    if restore_timestamp_datetime_utc.tzinfo is not None and restore_timestamp_datetime_utc.tzinfo.utcoffset(restore_timestamp_datetime_utc) is not None:
-        current_dateTime = datetime.datetime.now(timezone.utc)
+    current_dateTime = dt.datetime.now(dt.UTC)
 
     # Fail if provided restoretimesamp is greater than current timestamp
     if restore_timestamp_datetime_utc > current_dateTime:
@@ -1952,11 +1948,11 @@ def _convert_to_utc_timestamp(timestamp_string):
     import dateutil.parser
     timestamp_datetime = dateutil.parser.parse(timestamp_string)
     timestamp_datetime_utc = None
-    # Convert to utc only if timezone aware
+    # Treat timestamps without an offset as UTC.
     if timestamp_datetime.tzinfo is not None and timestamp_datetime.tzinfo.utcoffset(timestamp_datetime) is not None:
-        timestamp_datetime_utc = timestamp_datetime.astimezone(datetime.timezone.utc)
+        timestamp_datetime_utc = timestamp_datetime.astimezone(dt.timezone.utc)
     else:
-        timestamp_datetime_utc = timestamp_datetime
+        timestamp_datetime_utc = timestamp_datetime.replace(tzinfo=dt.UTC)
     return timestamp_datetime_utc
 
 
@@ -2812,15 +2808,15 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
 
 def process_restorable_databases(restorable_databases, database_name):
 
-    latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)
-    latest_database_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+    latest_database_delete_time = dt.datetime.utcfromtimestamp(0)
+    latest_database_create_or_recreate_time = dt.datetime.utcfromtimestamp(0)
     database_rid = None
 
     for restorable_database in restorable_databases:
         resource = restorable_database.resource
         if resource.owner_id == database_name:
             database_rid = resource.owner_resource_id
-            event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            event_timestamp = dt.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
             if resource.operation_type == "Delete" and latest_database_delete_time < event_timestamp:
                 latest_database_delete_time = event_timestamp
 
@@ -2831,7 +2827,7 @@ def process_restorable_databases(restorable_databases, database_name):
         raise CLIError("No restorable database found with name: {}".format(database_name))
 
     # Database never deleted then reset it to max time
-    latest_database_delete_time = datetime.datetime.max if latest_database_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_database_delete_time
+    latest_database_delete_time = dt.datetime.max if latest_database_delete_time == dt.datetime.utcfromtimestamp(0) else latest_database_delete_time
 
     logger.debug('process_restorable_databases: latest_database_delete_time {} latest_database_create_or_recreate_time {} database_name {}'.format(latest_database_delete_time, latest_database_create_or_recreate_time, database_name))  # pylint: disable=logging-format-interpolation
 
@@ -2839,15 +2835,15 @@ def process_restorable_databases(restorable_databases, database_name):
 
 
 def process_restorable_collections(restorable_collections, collection_name, database_name):
-    latest_collection_delete_time = datetime.datetime.utcfromtimestamp(0)
-    latest_collection_create_or_recreate_time = datetime.datetime.utcfromtimestamp(0)
+    latest_collection_delete_time = dt.datetime.utcfromtimestamp(0)
+    latest_collection_create_or_recreate_time = dt.datetime.utcfromtimestamp(0)
     collection_rid = None
 
     for restorable_collection in restorable_collections:
         resource = restorable_collection.resource
         if resource.owner_id == collection_name:
             collection_rid = resource.owner_resource_id
-            event_timestamp = datetime.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
+            event_timestamp = dt.datetime.strptime(resource.event_timestamp, "%Y-%m-%dT%H:%M:%SZ")
             if resource.operation_type == "Delete" and latest_collection_delete_time < event_timestamp:
                 latest_collection_delete_time = event_timestamp
 
@@ -2858,7 +2854,7 @@ def process_restorable_collections(restorable_collections, collection_name, data
         raise CLIError("No restorable collection with name: {} found in the database with name: {}".format(collection_name, database_name))
 
     # Collection never deleted then reset it to max time
-    latest_collection_delete_time = datetime.datetime.max if latest_collection_delete_time == datetime.datetime.utcfromtimestamp(0) else latest_collection_delete_time
+    latest_collection_delete_time = dt.datetime.max if latest_collection_delete_time == dt.datetime.utcfromtimestamp(0) else latest_collection_delete_time
 
     logger.debug('process_restorable_databases: latest_collection_delete_time {} latest_collection_create_or_recreate_time {} database_name {} collection_name {}'.format(latest_collection_delete_time, latest_collection_create_or_recreate_time, database_name, collection_name))  # pylint: disable=logging-format-interpolation
 
@@ -2916,13 +2912,13 @@ def cli_cosmosdb_sql_database_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-variable
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
+            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == dt.datetime.max
 
             if database_alive:
                 raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_database_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3004,7 +3000,7 @@ def cli_cosmosdb_sql_container_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_delete_time == datetime.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
+            database_alive = latest_database_delete_time == dt.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
 
             if not database_alive:
                 raise CLIError("No active database with name {} found that contains the collection {}".format(database_name, container_name))
@@ -3019,13 +3015,13 @@ def cli_cosmosdb_sql_container_restore(cmd,
             latest_container_delete_time, latest_container_create_or_recreate_time = process_restorable_collections(restorable_containers, container_name, database_name)
 
             # Container is alive if create or recreate timestamp is later than latest delete timestamp
-            container_alive = latest_container_create_or_recreate_time > latest_container_delete_time or latest_container_delete_time == datetime.datetime.max
+            container_alive = latest_container_create_or_recreate_time > latest_container_delete_time or latest_container_delete_time == dt.datetime.max
 
             if container_alive:
                 raise CLIError("The collection {} is currently online. Please delete the collection and provide a restore timestamp for restoring different instance of the collection.".format(container_name))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_container_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_container_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3108,13 +3104,13 @@ def cli_cosmosdb_mongodb_database_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-variable
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
+            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == dt.datetime.max
 
             if database_alive:
                 raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_database_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3195,7 +3191,7 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_delete_time == datetime.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
+            database_alive = latest_database_delete_time == dt.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
 
             if not database_alive:
                 raise CLIError("Cannot find a database account with name {} that is online when latest collection instance was deleted".format(account_name))
@@ -3210,13 +3206,13 @@ def cli_cosmosdb_mongodb_collection_restore(cmd,
             latest_collection_delete_time, latest_collection_create_or_recreate_time = process_restorable_collections(restorable_collections, collection_name, database_name)
 
             # Collection is alive if create or recreate timestamp is later than latest delete timestamp
-            collection_alive = latest_collection_create_or_recreate_time > latest_collection_delete_time or latest_collection_delete_time == datetime.datetime.max
+            collection_alive = latest_collection_create_or_recreate_time > latest_collection_delete_time or latest_collection_delete_time == dt.datetime.max
 
             if collection_alive:
                 raise CLIError("The collection {} is currently online. Please delete the collection and provide a restore timestamp for restoring different instance of the collection.".format(collection_name))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_collection_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_collection_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3298,13 +3294,13 @@ def cli_cosmosdb_gremlin_database_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)  # pylint: disable=unused-variable
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == datetime.datetime.max
+            database_alive = latest_database_create_or_recreate_time > latest_database_delete_time or latest_database_delete_time == dt.datetime.max
 
             if database_alive:
                 raise CLIError("Database with name {} already exists in this account with name {} in location {}".format(database_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_database_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_database_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a Gremlin database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3386,7 +3382,7 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
             latest_database_delete_time, latest_database_create_or_recreate_time, database_rid = process_restorable_databases(restorable_databases, database_name)
 
             # Database is alive if create or recreate timestamp is later than latest delete timestamp
-            database_alive = latest_database_delete_time == datetime.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
+            database_alive = latest_database_delete_time == dt.datetime.max or latest_database_create_or_recreate_time > latest_database_delete_time
 
             if not database_alive:
                 raise CLIError("No active database with name {} found that contains the graph {}".format(database_name, graph_name))
@@ -3401,13 +3397,13 @@ def cli_cosmosdb_gremlin_graph_restore(cmd,
             latest_graph_delete_time, latest_graph_create_or_recreate_time = process_restorable_collections(restorable_graphs, graph_name, database_name)
 
             # Graph is alive if create or recreate timestamp is later than latest delete timestamp
-            graph_alive = latest_graph_create_or_recreate_time > latest_graph_delete_time or latest_graph_delete_time == datetime.datetime.max
+            graph_alive = latest_graph_create_or_recreate_time > latest_graph_delete_time or latest_graph_delete_time == dt.datetime.max
 
             if graph_alive:
                 raise CLIError("The graph {} is currently online. Please delete the graph and provide a restore timestamp for restoring different instance of the graph.".format(graph_name))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_graph_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_graph_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a database account with name {} that is online in location {}".format(account_name, restorable_database_account.location))
@@ -3490,13 +3486,13 @@ def cli_cosmosdb_table_restore(cmd,
             latest_table_delete_time, latest_table_create_or_recreate_time, table_rid = process_restorable_databases(restorable_tables, table_name)  # pylint: disable=unused-variable
 
             # Table is alive if create or recreate timestamp is later than latest delete timestamp
-            table_alive = latest_table_create_or_recreate_time > latest_table_delete_time or latest_table_delete_time == datetime.datetime.max
+            table_alive = latest_table_create_or_recreate_time > latest_table_delete_time or latest_table_delete_time == dt.datetime.max
 
             if table_alive:
                 raise CLIError("Table with name {} already exists in this account with name {} in location {}".format(table_name, account_name, restorable_database_account.location))
 
             # """Subtracting -1 second from the deleted timestamp to restore till end of logchain"""
-            restore_time = latest_table_delete_time + datetime.timedelta(seconds=-1)
+            restore_time = latest_table_delete_time + dt.timedelta(seconds=-1)
             restore_timestamp = restore_time.strftime("%Y-%m-%dT%H:%M:%S%Z")
         except ResourceNotFoundError:
             raise CLIError("Cannot find a table account with name {} that is online in location {}".format(account_name, restorable_database_account.location))

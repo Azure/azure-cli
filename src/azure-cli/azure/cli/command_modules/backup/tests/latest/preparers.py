@@ -5,7 +5,7 @@
 
 import json
 import os
-from datetime import datetime, timedelta
+import datetime as dt
 
 from azure.cli.testsdk import CliTestError
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, KeyVaultPreparer
@@ -395,7 +395,7 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             vm = self._get_vm(**kwargs)
 
-            retain_date = datetime.utcnow() + timedelta(days=30)
+            retain_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=30)
             command_string = 'az backup protection backup-now --backup-management-type AzureIaasVM --workload-type VM -g {} -v {} -c {} -i {} --retain-until {} --query name'
             command_string = command_string.format(self.resource_group, vault, vm, vm,
                                                    retain_date.strftime('%d-%m-%Y'))
@@ -817,7 +817,7 @@ class AFSRPPreparer(AbstractPreparer, SingleValueReplacer):
             vault = self._get_vault(**kwargs)
             afs = self._get_file_share(**kwargs)
 
-            retain_date = datetime.utcnow() + timedelta(days=30)
+            retain_date = dt.datetime.now(dt.UTC) + dt.timedelta(days=30)
             retain_date = retain_date.strftime('%d-%m-%Y')
             command_string = 'az backup protection backup-now'
             command_string += ' -g {} -v {} -i {} -c {} --backup-management-type AzureStorage --retain-until {} --query name'
